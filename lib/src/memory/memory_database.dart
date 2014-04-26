@@ -64,14 +64,13 @@ class _MemoryDatabase extends Database with WithCurrentTransaction {
           upgrading = true;
           _MemoryVersionChangeEvent event = new _MemoryVersionChangeEvent(this, dataVersion, newVersion);
           versionChangeTransaction = event.transaction;
-
           versionChangeTransaction._active.then((_) {
-            versionChangeTransaction._enqueueFuture(new Future.sync(() {
+            return versionChangeTransaction._enqueue(() {
               onUpgradeNeeded(event);
               // nulliyfy when done
               versionChangeTransaction = null;
 
-            }));
+            });
           }).then((_) {
             event.transaction.completed.then((_) {
               version = newVersion;

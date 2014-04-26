@@ -40,7 +40,8 @@ class _MemoryTransaction extends Transaction {
   /*
      * Wait for the transaction to be the current one
      */
-  Future get _active {
+  Future<_MemoryTransaction> get _active {
+    Completer completer = new Completer.sync();
     //print("active $hashCode $this");
     WithCurrentTransaction database = memoryDatabase;
     Transaction currentTransaction = database.currentTransaction;
@@ -49,13 +50,13 @@ class _MemoryTransaction extends Transaction {
     _beginOperation();
     if (currentTransaction == null) {
       database.currentTransaction = this;
-      // print("added cause null $this");
+      //print("added cause null $this");
+      completer.complete(this);
       _endOperation();
-      return new Future.value();
     } else if (currentTransaction == this) {
       // print("already added $this");
       _endOperation();
-      return new Future.value();
+      completer.complete(this);
     } else {
       // wait our turn
       return currentTransaction.completed.then((_) {
@@ -69,18 +70,19 @@ class _MemoryTransaction extends Transaction {
         return new Future(() => _active).then((_) {
           // complete asynchronously
           // so that we can breath between 2 requests
-          
+
         }).whenComplete(() {
           _endOperation();
         });
         //return active;
       });
     }
+    return completer.future;
   }
 
 
   void complete() {
-    // print("complete $hashCode $this");
+    //print("complete $hashCode $this");
     // It can be null for empty transaction
     if ((memoryDatabase.currentTransaction != this) && (memoryDatabase.currentTransaction != null)) {
       print("error $hashCode $this");
@@ -104,15 +106,18 @@ class _MemoryTransaction extends Transaction {
     * must be used in pair
     */
   void _beginOperation() {
-    //print("begin $_operationCount");
+    //print("begin $this");
     _operationCount++;
   }
 
   void _endOperation() {
-    //print("end $_operationCount");
-    --_operationCount;
-    // Make it breath
-    _asyncCompleteIfDone();
+    //print("end $this");
+    // This is needed so that the transaction does not get stopped right away
+    new Future.value().then((_) {
+      --_operationCount;
+      // Make it breath
+      _asyncCompleteIfDone();
+    });
   }
 
   /**
@@ -137,7 +142,7 @@ class _MemoryTransaction extends Transaction {
       _endOperation();
       return new Future.error(e);
     }
-    
+
     _endOperation();
     return new Future.value(result);
   }
@@ -171,13 +176,22 @@ class _MemoryTransaction extends Transaction {
   }
 
   void _asyncCompleteIfDone() {
+    //print("asyncCompleteIfDone $this");
     if (_operationCount == 0) {
-      new Future(_completeIfDone);
+      // Bouh ugly but needed for dart to js...
+      //new Future.value().then((_) {
+        if (_operationCount == 0) {
+          new Future.value().then((_) {
+            _completeIfDone();
+          });
+        }
+      //});
     }
   }
 
 
   void _completeIfDone() {
+    //print("_completeIfDone $this");
     if (_operationCount == 0) {
       complete();
     }

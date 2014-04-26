@@ -29,3 +29,22 @@ All other existing code remains unchanged (well at least that it is the goal)
 ### Author
  * [Alexandre Roux Tekartik](https://github.com/alextekartik) ([+Alexandre Roux Tekartik](https://plus.google.com/+AlexandreRouxTekartik/about))
  
+### Known limitations/issues
+
+* For autoincrement, key cannot be set as a different type than int
+* Native exception type have no match in the dart so a custom string or error is sometimes created
+* Nextunique and prevunique not support (for now)
+* No support for Cursor.source
+* Next with key (on Cursor) not supported
+* No support for blocked. It is always possible to upgrade the database, however other tabs will get blocked in their future calls
+* Blocked and onVersionChange event support, this is actually tricky for websql, actually the new db won't be blocked but the old one will!
+  so the proper common implementation is to register for onVersionChange event and when receiving simply reload the page. Sample code to come
+* Type of data
+ * Only stuff that can be JSON serialized/deserialized
+ * DateTime is not supported, it should be converted to string using toIso8601String
+ * Cyclic dependecy are not supported (per JSON serialization)
+ * Large float are not converted to int (native indexeddb implementation does this)
+* Index.get: only by key is supported (no range yet)
+* WebSql implementation issue SqlResultSet.rows.first is not working in dart2js (bug?)
+* When adding an index, existing data is not indexed yet
+

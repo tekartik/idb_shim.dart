@@ -13,5 +13,8 @@ packages/
 out.js
 out.precompiled.js
 
+# markdown eclipse plugin
+.*.md.html
+
 # Include when developing application packages.
 pubspec.lock

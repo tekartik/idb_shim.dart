@@ -146,11 +146,6 @@ class _MemoryIndex extends Index {
 
     return ctlr.stream;
   }
-
-  // Checking the index means loading from
-  Future _checkIndex() {
-    return store._checkStoreOld();
-  }
 }
 
 class MemoryPrimaryIndex extends _MemoryIndex {

@@ -11,31 +11,31 @@ void testMain(IdbFactory idbFactory) {
     setUp(() {
       return idbFactory.deleteDatabase(DB_NAME);
     });
-    
+
     test('put & completed', () {
-          Database db;
-          void _initializeDatabase(VersionChangeEvent e) {
-            db = e.database;
-            ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
-          }
-          return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
-            Transaction transaction = database.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-            ObjectStore objectStore = transaction.objectStore(STORE_NAME);
-            bool putDone = false;
-            objectStore.put(1).then((_) {
-              putDone = true;
-            });
-            return transaction.completed.then((Database db) {
-              expect(putDone, isTrue);
-            });
-          }).then((_) {
-            db.close();
-          });
-
-
-          
-
+      Database db;
+      void _initializeDatabase(VersionChangeEvent e) {
+        db = e.database;
+        ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
+      }
+      return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
+        Transaction transaction = database.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+        ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+        bool putDone = false;
+        objectStore.put(1).then((_) {
+          putDone = true;
         });
+        return transaction.completed.then((Database db) {
+          expect(putDone, isTrue);
+        });
+      }).then((_) {
+        db.close();
+      });
+
+
+
+
+    });
 
     test('empty transaction', () {
       Database db;
@@ -51,7 +51,7 @@ void testMain(IdbFactory idbFactory) {
       });
 
 
-      
+
 
     });
     skip_test('multiple transaction', () {
@@ -81,7 +81,29 @@ void testMain(IdbFactory idbFactory) {
       });
 
     });
-//temp
+
+    test('chain 2 transactions', () {
+      Database db;
+      void _initializeDatabase(VersionChangeEvent e) {
+        db = e.database;
+        ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
+      }
+      return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
+        Transaction transaction = database.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+        ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+        objectStore.put({}).then((_) {
+          Transaction transaction = database.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+          ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+          objectStore.openCursor(autoAdvance: true).listen((cursor) {
+            print(cursor);
+          }, onDone: () {
+            database.close();
+          });
+        });
+      });
+
+    });
+    //temp
     test('transactionList', () {
       void _initializeDatabase(VersionChangeEvent e) {
         Database db = e.database;

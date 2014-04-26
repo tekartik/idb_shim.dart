@@ -67,24 +67,6 @@ class MemoryObjectStore extends ObjectStore {
   String get keyPath => data.primaryIndex.keyPath;
   bool get autoIncrement => data.primaryIndex is AutoIncrementMemoryPrimaryIndex;
 
-  Future _checkStoreOld() {
-    if (database.version < database.dataVersion) {
-      transaction.memoryDatabase._error = new _MemoryError(_MemoryError.DATABASE_UPGRADED_ERROR_CODE, "database upgraded from ${database.version} to ${database.dataVersion}");
-      if (database.onVersionChangeCtlr != null) {
-        database.onVersionChangeCtlr.add(new _MemoryVersionChangeEvent(database, database.version, database.dataVersion));
-      }
-    }
-    _MemoryError error = transaction.memoryDatabase._error;
-    if (error != null) {
-      return new Future.error(error);
-
-    }
-    //    if (keyPath == null && !autoIncrement) {
-    //      throw new ArgumentError("neither keyPath nor autoIncrement set");
-    //    }
-    return new Future.value();
-  }
-
   Future _checkStore(computation()) {
     if (database.version < database.dataVersion) {
       transaction.memoryDatabase._error = new _MemoryError(_MemoryError.DATABASE_UPGRADED_ERROR_CODE, "database upgraded from ${database.version} to ${database.dataVersion}");
