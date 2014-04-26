@@ -1,0 +1,6 @@
+name: idb_shim
+description: Database abstraction library
+dev_dependencies:
+  browser: any
+  logging: any
+  unittest: any
