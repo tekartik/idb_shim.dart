@@ -9,5 +9,9 @@ packages/
 *.js.deps
 *.js.map
 
+# out files
+out.js
+out.precompiled.js
+
 # Include when developing application packages.
 pubspec.lock
