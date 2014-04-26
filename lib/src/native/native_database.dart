@@ -1,4 +1,4 @@
-part of idb_browser;
+part of idb_native;
 
 class _NativeVersionChangeEvent extends VersionChangeEvent {
   idb.VersionChangeEvent idbVersionChangeEvent;
@@ -18,7 +18,7 @@ class _NativeVersionChangeEvent extends VersionChangeEvent {
     } else if (currentTarget is idb.Request) {
       database = new _NativeDatabase(currentTarget.result);
       _NativeTransaction transaction = new _NativeTransaction(database, currentTarget.transaction);
-      request = new Request(database, transaction);
+      request = new OpenDBRequest(database, transaction);
     }
   }
 }

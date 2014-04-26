@@ -1,4 +1,4 @@
-part of idb_browser;
+part of idb_native;
 
 class _NativeIndex extends Index {
   idb.Index idbIndex;

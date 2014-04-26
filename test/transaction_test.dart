@@ -1,7 +1,7 @@
 library transaction_test_common;
 
 import 'package:unittest/unittest.dart';
-import 'package:tekartik_idb/idb_client.dart';
+import 'package:idb_shim/idb_client.dart';
 import 'idb_test_common.dart';
 
 void testMain(IdbFactory idbFactory) {
@@ -19,7 +19,7 @@ void testMain(IdbFactory idbFactory) {
             ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
           }
           return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
-            Transaction transaction = database.transaction(STORE_NAME, MODE_READ_WRITE);
+            Transaction transaction = database.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
             ObjectStore objectStore = transaction.objectStore(STORE_NAME);
             bool putDone = false;
             objectStore.put(1).then((_) {
@@ -44,7 +44,7 @@ void testMain(IdbFactory idbFactory) {
         ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
       }
       return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
-        Transaction transaction = database.transaction(STORE_NAME, MODE_READ_WRITE);
+        Transaction transaction = database.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
         return transaction.completed;
       }).then((Database db) {
         db.close();
@@ -61,8 +61,8 @@ void testMain(IdbFactory idbFactory) {
         ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
       }
       return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
-        Transaction transaction1 = database.transaction(STORE_NAME, MODE_READ_WRITE);
-        Transaction transaction2 = database.transaction(STORE_NAME, MODE_READ_WRITE);
+        Transaction transaction1 = database.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+        Transaction transaction2 = database.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
         bool transaction1Completed = false;
         ObjectStore objectStore1 = transaction1.objectStore(STORE_NAME);
         objectStore1.clear().then((_) {
@@ -89,7 +89,7 @@ void testMain(IdbFactory idbFactory) {
         db.createObjectStore(STORE_NAME_2, autoIncrement: true);
       }
       return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
-        Transaction transaction = database.transactionList([STORE_NAME, STORE_NAME_2], MODE_READ_WRITE);
+        Transaction transaction = database.transactionList([STORE_NAME, STORE_NAME_2], IDB_MODE_READ_WRITE);
         //database.close();
         return transaction.completed.then((_) {
           database.close();

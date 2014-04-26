@@ -2,7 +2,7 @@ library index_cursor_test;
 
 import 'dart:async';
 import 'package:unittest/unittest.dart';
-import 'package:tekartik_idb/idb_client.dart';
+import 'package:idb_shim/idb_client.dart';
 import 'idb_test_common.dart';
 
 class TestIdNameRow {
@@ -63,7 +63,7 @@ void testMain(IdbFactory idbFactory) {
           }
           return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
             db = database;
-            transaction = db.transaction(STORE_NAME, MODE_READ_WRITE);
+            transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
             objectStore = transaction.objectStore(STORE_NAME);
             index = objectStore.index(NAME_INDEX);
             return db;

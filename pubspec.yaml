@@ -1,4 +1,6 @@
 name: idb_shim
+version: 0.1.0
+author: Alexandre Roux Tekartik
 description: Database abstraction library
 dev_dependencies:
   browser: any

@@ -30,6 +30,6 @@ class IdbVMConfiguration extends cfg.VMConfiguration with IdbDebugConfiguration 
   }
 
 }
-//import 'package:tekartik_idb/idb_client.dart';
+//import 'package:idb_shim/idb_client.dart';
 
 //IdbFactory idbFactory;

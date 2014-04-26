@@ -1,7 +1,7 @@
-library idb_browser;
+library idb_native;
 
 import 'dart:async';
-import 'package:tekartik_idb/idb_client.dart';
+import 'package:idb_shim/idb_client.dart';
 import 'dart:indexed_db' as idb;
 import 'dart:html' as html;
 
@@ -17,6 +17,8 @@ class IdbNativeFactory extends IdbFactory {
   static IdbNativeFactory _instance;
   IdbNativeFactory._();
 
+  String get name => IDB_FACTORY_NATIVE;
+  
   factory IdbNativeFactory() {
     if (_instance == null) {
       _instance = new IdbNativeFactory._();

@@ -1,4 +1,4 @@
-part of idb_browser;
+part of idb_native;
 
 
 idb.KeyRange _nativeKeyRange(KeyRange common) {

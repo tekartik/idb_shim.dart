@@ -6,7 +6,7 @@ import 'package:unittest/unittest.dart';
 import 'dart:async';
 //TEKARTIK_IDB_REMOVED import 'dart:html' as html;
 //TEKARTIK_IDB_REMOVED import 'dart:indexed_db' as idb;
-import 'package:tekartik_idb/idb_client.dart' as idb;
+import 'package:idb_shim/idb_client.dart' as idb;
 
 const String STORE_NAME = 'TEST';
 const int VERSION = 1;

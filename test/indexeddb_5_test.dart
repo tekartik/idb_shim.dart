@@ -1,7 +1,7 @@
 library IndexedDB5Test;
 import 'package:unittest/unittest.dart';
-import 'dart:async';
-import 'package:tekartik_idb/idb_client.dart';
+//import 'dart:async';
+import 'package:idb_shim/idb_client.dart';
 
 testMain(IdbFactory idbFactory_) {
   group('indexeddb_5', () {

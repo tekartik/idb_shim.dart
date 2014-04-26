@@ -1,13 +1,24 @@
 library idb_client;
 
-import 'src/common/common_key_range.dart';
+import 'package:idb_shim/src/common/common_key_range.dart';
 import 'dart:async';
 
-const String MODE_READ_WRITE = "readwrite";
-const String MODE_READ_ONLY = "readonly";
+const String IDB_MODE_READ_WRITE = "readwrite";
+const String IDB_MODE_READ_ONLY = "readonly";
 
-const String DIRECTION_NEXT = "next";
-const String DIRECTION_PREV = "prev";
+const String IDB_DIRECTION_NEXT = "next";
+const String IDB_DIRECTION_PREV = "prev";
+
+// shim using native indexeddb implementation
+const IDB_FACTORY_NATIVE = "native";
+// shim using WebSql implementation
+const IDB_FACTORY_WEBSQL = "websql";
+// shim using Memory implementation
+const IDB_FACTORY_MEMORY = "memory";
+// pseudo - best persistent shim (indexeddb or if not available websql)
+const IDB_FACTORY_PERSISTENT = "persistent";
+// pseudo - best browser shim (persistent of it not available memory)
+const IDB_FACTORY_BROWSER = "browser";
 
 abstract class Cursor {
   Object get key;
@@ -76,10 +87,14 @@ abstract class Index {
   Stream<Cursor> openKeyCursor({key, KeyRange range, String direction, bool autoAdvance});
 }
 
-class Request {
+abstract class Request {
   Database result;
   Transaction transaction;
   Request(this.result, this.transaction);
+}
+
+class OpenDBRequest extends Request {
+  OpenDBRequest(Database database, Transaction transaction) : super(database, transaction);
 }
 
 abstract class VersionChangeEvent {
@@ -149,6 +164,11 @@ abstract class IdbFactory {
   Future<IdbFactory> deleteDatabase(String name, {void onBlocked(Event)});
   bool get supportsDatabaseNames;
   Future<List<String>> getDatabaseNames();
-
   static bool supported = false; // Changed to true when a factory is created
+  
+  /**
+   * idb_shim specific
+   */
+  String get name;
 }
+

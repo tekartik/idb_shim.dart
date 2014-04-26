@@ -97,7 +97,7 @@ abstract class _WebSqlCursorBaseController<T extends Cursor> {
 
   _WebSqlCursorBaseController(this.direction, this.autoAdvance) {
     if (direction == null) {
-      direction = DIRECTION_NEXT;
+      direction = IDB_DIRECTION_NEXT;
     }
     if (autoAdvance == null) {
       autoAdvance = true;
@@ -224,10 +224,10 @@ abstract class _WebSqlCursorCommonController {
     //    }
 
     switch (direction) {
-      case DIRECTION_NEXT:
+      case IDB_DIRECTION_NEXT:
         ORDER = "ASC";
         break;
-      case DIRECTION_PREV:
+      case IDB_DIRECTION_PREV:
         ORDER = "DESC";
         break;
       default:

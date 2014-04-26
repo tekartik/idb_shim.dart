@@ -3,8 +3,8 @@
 // replace IndexedDB1Test with IndexedDB2Test
 library IndexedDB2Test;
 import 'package:unittest/unittest.dart';
-import 'dart:async';
-import 'package:tekartik_idb/idb_client.dart' as idb;
+//import 'dart:async';
+import 'package:idb_shim/idb_client.dart' as idb;
 
 
 import 'dart:collection';
@@ -25,18 +25,18 @@ testReadWrite(idb.IdbFactory idbFactory, key, value, check, [dbName = DB_NAME, s
 
   var db;
   // Delete any existing DBs.
-  return idbFactory.deleteDatabase(dbName).then(expectAsync1((_) {
+  return idbFactory.deleteDatabase(dbName).then(expectAsync((_) {
     return idbFactory.open(dbName, version: version, onUpgradeNeeded: createObjectStore);
-  })).then(expectAsync1((result) {
+  })).then(expectAsync((result) {
     db = result;
     var transaction = db.transactionList([storeName], 'readwrite');
     transaction.objectStore(storeName).put(value, key);
 
     return transaction.completed;
-  })).then(expectAsync1((db) {
+  })).then(expectAsync((db) {
     var transaction = db.transaction(storeName, 'readonly');
     return transaction.objectStore(storeName).getObject(key);
-  })).then(expectAsync1((object) {
+  })).then(expectAsync((object) {
     db.close();
     check(value, object);
   })).catchError((e) {

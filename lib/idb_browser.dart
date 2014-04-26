@@ -1,19 +1,48 @@
-library idb_browser_new;
+library idb_browser;
 
-import 'package:tekartik_idb/idb_client_native.dart';
-import 'package:tekartik_idb/idb_client_websql.dart';
-import 'package:tekartik_idb/idb_client_memory.dart';
-import 'package:tekartik_idb/idb_client.dart';
+import 'package:idb_shim/idb_client_native.dart';
+import 'package:idb_shim/idb_client_websql.dart';
+import 'package:idb_shim/idb_client_memory.dart';
+import 'package:idb_shim/idb_client.dart';
+
+IdbFactory getIdbFactory([String name]) {
+  if (name == null) {
+    name = IDB_FACTORY_BROWSER;
+  }
+  switch (name) {
+    case IDB_FACTORY_BROWSER:
+      return idbBrowserFactory;
+    case IDB_FACTORY_PERSISTENT:
+        return idbPersistentFactory;
+    case IDB_FACTORY_NATIVE:
+      return idbNativeFactory;
+    case IDB_FACTORY_WEBSQL:
+      return idbWebSqlFactory;
+    case IDB_FACTORY_MEMORY:
+      return idbMemoryFactory;
+    default:
+      throw new UnsupportedError("Factory '$name' not supported");
+  }
+}
 
 IdbFactory get idbWebSqlFactory {
-  return new IdbWebSqlFactory();
+  if (IdbWebSqlFactory.supported) {
+      return new IdbWebSqlFactory();
+    } else {
+      return null;
+    }
 }
 
 IdbFactory get idbNativeFactory {
-  return new IdbNativeFactory();
+  if (IdbNativeFactory.supported) {
+    return new IdbNativeFactory();
+  } else {
+    return null;
+  }
 }
 
 IdbFactory get idbMemoryFactory {
+  // always supported
   return new IdbMemoryFactory();
 }
 

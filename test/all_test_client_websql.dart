@@ -5,7 +5,7 @@ import 'package:unittest/unittest.dart';
 import 'all_test_common.dart' as all_common;
 import 'websql_wrapper_test.dart' as websql_wrapper_test;
 import 'websql_client_test.dart' as websql_client_test;
-import 'package:tekartik_idb/idb_client_websql.dart';
+import 'package:idb_shim/idb_client_websql.dart';
 import 'dart:web_sql';
 import 'dart:html';
 import 'dart:async';

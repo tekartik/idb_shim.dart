@@ -1,9 +1,9 @@
 library idb_memory;
 
 import 'dart:async';
-import 'package:tekartik_idb/idb_client.dart';
-import 'src/common/common_key_range.dart';
-import 'src/common/common_value.dart';
+import 'package:idb_shim/idb_client.dart';
+import 'package:idb_shim/src/common/common_key_range.dart';
+import 'package:idb_shim/src/common/common_value.dart';
 
 part 'src/memory/memory_cursor.dart';
 part 'src/memory/memory_item.dart';
@@ -20,6 +20,8 @@ class IdbMemoryFactory extends IdbFactory {
   static IdbMemoryFactory _instance;
   IdbMemoryFactory._();
 
+  String get name => IDB_FACTORY_MEMORY;
+  
   factory IdbMemoryFactory() {
     if (_instance == null) {
       _instance = new IdbMemoryFactory._();

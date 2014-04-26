@@ -1,8 +1,8 @@
 library IndexedDB4Test;
 import 'package:unittest/unittest.dart';
 import 'dart:async';
-import 'package:tekartik_idb/idb_client.dart';
-import 'package:tekartik_idb/src/common/common_key_range.dart';
+import 'package:idb_shim/idb_client.dart';
+import 'package:idb_shim/src/common/common_key_range.dart';
 
 // Test for KeyRange and Cursor.
 

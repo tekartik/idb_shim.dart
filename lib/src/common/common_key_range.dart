@@ -1,6 +1,6 @@
 library common_key_range;
 
-import 'package:tekartik_idb/idb_client.dart';
+import 'package:idb_shim/idb_client.dart';
 
 /**
  * Common for Memory and WebSql implementation

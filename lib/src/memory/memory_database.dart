@@ -16,7 +16,7 @@ class _MemoryVersionChangeEvent extends VersionChangeEvent {
 
     // special transaction
     _MemoryTransaction versionChangeTransaction = new _MemoryTransaction(database);
-    request = new Request(database, versionChangeTransaction);
+    request = new OpenDBRequest(database, versionChangeTransaction);
   }
 }
 

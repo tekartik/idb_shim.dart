@@ -1,7 +1,7 @@
 library IndexedDB3Test;
 import 'package:unittest/unittest.dart';
 import 'dart:async';
-import 'package:tekartik_idb/idb_client.dart';
+import 'package:idb_shim/idb_client.dart';
 
 // Read with cursor.
 

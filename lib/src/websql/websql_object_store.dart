@@ -262,8 +262,6 @@ class _WebSqlObjectStore extends ObjectStore {
   }
 
   Future _put(dynamic value, [dynamic key]) {
-
-    print('#PUT1');
     if (!checkKeyValue(keyPath, key, value)) {
       return new Future.error(new ArgumentError("both key $key and inline keyPath ${value[keyPath]}"));
     }
@@ -282,7 +280,6 @@ class _WebSqlObjectStore extends ObjectStore {
     args.add(encodeKey(key));
 
     var sqlUpdate = "UPDATE $sqlTableName SET $sets WHERE $keyColumn = ?";
-    print('#PUT3');
     return execute(sqlUpdate, args).then((SqlResultSet rs) {
       // If not updated try to add it instead
       if (rs.rowsAffected == 0) {

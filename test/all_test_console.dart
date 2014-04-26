@@ -4,8 +4,8 @@ library all_test_console;
 import 'all_test_common.dart';
 import 'idb_test_console.dart';
 import 'common_value_test.dart' as common_value_test;
-import 'package:tekartik_idb/idb_console.dart';
-import 'package:tekartik_idb/idb_client.dart';
+import 'package:idb_shim/idb_console.dart';
+import 'package:idb_shim/idb_client.dart';
 
 void main() {
   useVMConfiguration();

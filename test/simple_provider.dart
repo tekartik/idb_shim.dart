@@ -1,7 +1,7 @@
 library simple_provider;
 
 import 'dart:async';
-import 'package:tekartik_idb/idb_client.dart';
+import 'package:idb_shim/idb_client.dart';
 
 
 const String DB_NAME = 'com.tekartik.simple_provider';
@@ -38,7 +38,7 @@ class SimpleProvider {
   }
   
   Future add(String name) {
-    var trans = db.transaction(STORE, MODE_READ_WRITE);
+    var trans = db.transaction(STORE, IDB_MODE_READ_WRITE);
     var store = trans.objectStore(STORE);
     
     var obj = {

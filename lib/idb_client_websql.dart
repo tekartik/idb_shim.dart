@@ -1,14 +1,14 @@
 library idb_websql;
 
 import 'idb_client.dart';
-import 'src/common/common_key_range.dart';
+import 'package:idb_shim/src/common/common_key_range.dart';
 import 'dart:async';
 import 'dart:convert';
 
 // import 'dart:web_sql' as wql;
-import 'package:tekartik_idb/src/websql/websql_wrapper.dart';
-import 'package:tekartik_idb/src/websql/websql_client_constants.dart';
-import 'package:tekartik_idb/src/common/common_value.dart';
+import 'package:idb_shim/src/websql/websql_wrapper.dart';
+import 'package:idb_shim/src/websql/websql_client_constants.dart';
+import 'package:idb_shim/src/common/common_value.dart';
 
 part 'src/websql/websql_database.dart';
 part 'src/websql/websql_transaction.dart';
@@ -27,6 +27,8 @@ class IdbWebSqlFactory extends IdbFactory {
   static IdbWebSqlFactory _instance;
   IdbWebSqlFactory._();
 
+  String get name => IDB_FACTORY_WEBSQL;
+  
   factory IdbWebSqlFactory() {
     if (_instance == null) {
       _instance = new IdbWebSqlFactory._();

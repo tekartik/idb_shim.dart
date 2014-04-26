@@ -16,7 +16,7 @@ class _WebSqlVersionChangeEvent extends VersionChangeEvent {
 
     // special transaction
     //WebSqlTransaction versionChangeTransaction = new WebSqlTransaction(database, tx, null, MODE_READ_WRITE);
-    request = new Request(database, transaction);
+    request = new OpenDBRequest(database, transaction);
   }
 }
 
@@ -120,7 +120,7 @@ class _WebSqlDatabase extends Database {
 
     Future _checkVersion(SqlTransaction tx, int oldVersion) {
       bool upgrading = false;
-      _WebSqlTransaction transaction = new _WebSqlTransaction(this, tx, null, MODE_READ_WRITE);
+      _WebSqlTransaction transaction = new _WebSqlTransaction(this, tx, null, IDB_MODE_READ_WRITE);
       //print("$oldVersion vs $newVersion");
       if (oldVersion != newVersion) {
         if (oldVersion > newVersion) {
@@ -176,7 +176,7 @@ class _WebSqlDatabase extends Database {
           return _loadStores(transaction)//})
           .then((_) {
             if (onUpgradeNeeded != null) {
-              _WebSqlTransaction transaction = new _WebSqlTransaction(this, tx, null, MODE_READ_WRITE);
+              _WebSqlTransaction transaction = new _WebSqlTransaction(this, tx, null, IDB_MODE_READ_WRITE);
               _WebSqlVersionChangeEvent event = new _WebSqlVersionChangeEvent(this, oldVersion, newVersion, transaction);
               versionChangeTransaction = event.transaction;
 

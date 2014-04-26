@@ -1,7 +1,7 @@
 library factory_test_common;
 
 import 'package:unittest/unittest.dart';
-import 'package:tekartik_idb/idb_client.dart';
+import 'package:idb_shim/idb_client.dart';
 import 'idb_test_common.dart';
 import 'dart:async';
 //import 'idb_test_factory.dart';

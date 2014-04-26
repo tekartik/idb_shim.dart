@@ -1,7 +1,7 @@
 library store_test_common;
 
 import 'package:unittest/unittest.dart';
-import 'package:tekartik_idb/idb_client.dart';
+import 'package:idb_shim/idb_client.dart';
 //import 'idb_test_common.dart';
 import 'simple_provider.dart';
 import 'dart:async';
@@ -25,7 +25,7 @@ void testMain(IdbFactory idbFactory) {
         test('simple cursor auto advance', () {
           
             // Check ordered by id
-            ObjectStore store = provider.db.transaction(STORE, MODE_READ_ONLY).objectStore(STORE);
+            ObjectStore store = provider.db.transaction(STORE, IDB_MODE_READ_ONLY).objectStore(STORE);
             Stream<CursorWithValue> stream = store.openCursor(autoAdvance: true);
             return provider.cursorToList(stream).then((List<SimpleRow> list) {
               expect(list[0].name, equals('test2'));
@@ -35,7 +35,7 @@ void testMain(IdbFactory idbFactory) {
               expect(list[2].id, equals(3));
             }).then((_) {
               // Check ordered by name
-              ObjectStore store = provider.db.transaction(STORE, MODE_READ_ONLY).objectStore(STORE);
+              ObjectStore store = provider.db.transaction(STORE, IDB_MODE_READ_ONLY).objectStore(STORE);
               Index index = store.index(NAME_INDEX);
               Stream<CursorWithValue> stream = index.openCursor(autoAdvance: true);
               return provider.cursorToList(stream).then((List<SimpleRow> list) {
@@ -52,7 +52,7 @@ void testMain(IdbFactory idbFactory) {
 
         test('simple cursor no auto advance', () {
                       // Check ordered by id
-            ObjectStore store = provider.db.transaction(STORE, MODE_READ_ONLY).objectStore(STORE);
+            ObjectStore store = provider.db.transaction(STORE, IDB_MODE_READ_ONLY).objectStore(STORE);
             Stream<CursorWithValue> stream = store.openCursor();
             Completer completer = new Completer();
             List<SimpleRow> list = new List();
@@ -74,9 +74,9 @@ void testMain(IdbFactory idbFactory) {
 
         test('simple cursor reverse', () {
           // Check ordered by name reverse
-            ObjectStore store = provider.db.transaction(STORE, MODE_READ_ONLY).objectStore(STORE);
+            ObjectStore store = provider.db.transaction(STORE, IDB_MODE_READ_ONLY).objectStore(STORE);
             Index index = store.index(NAME_INDEX);
-            Stream<CursorWithValue> stream = index.openCursor(direction: DIRECTION_PREV, autoAdvance: true);
+            Stream<CursorWithValue> stream = index.openCursor(direction: IDB_DIRECTION_PREV, autoAdvance: true);
             return provider.cursorToList(stream).then((List<SimpleRow> list) {
               expect(list[0].name, equals('test3'));
               expect(list[1].name, equals('test2'));
@@ -95,7 +95,7 @@ void testMain(IdbFactory idbFactory) {
       //Function done = expectDone();
       SimpleProvider provider = new SimpleProvider(idbFactory);
       return provider.openEmpty().then((_) {
-        Transaction transaction = provider.db.transaction(STORE, MODE_READ_WRITE);
+        Transaction transaction = provider.db.transaction(STORE, IDB_MODE_READ_WRITE);
         ObjectStore objectStore = transaction.objectStore(STORE);
         Map object = {
           NAME_FIELD: "test"

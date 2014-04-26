@@ -1,4 +1,4 @@
-part of idb_browser;
+part of idb_native;
 
 class _NativeTransaction extends Transaction {
   idb.Transaction idbTransaction;

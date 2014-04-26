@@ -112,7 +112,7 @@ class _MemoryIndex extends Index {
 
   Stream<CursorWithValue> openCursor({key, KeyRange range, String direction, bool autoAdvance}) {
     if (direction == null) {
-      direction = DIRECTION_NEXT;
+      direction = IDB_DIRECTION_NEXT;
     }
     if (autoAdvance == null) {
       autoAdvance = true;
@@ -131,7 +131,7 @@ class _MemoryIndex extends Index {
 
   Stream<Cursor> openKeyCursor({key, KeyRange range, String direction, bool autoAdvance}) {
     if (direction == null) {
-      direction = DIRECTION_NEXT;
+      direction = IDB_DIRECTION_NEXT;
     }
     if (autoAdvance == null) {
       autoAdvance = true;

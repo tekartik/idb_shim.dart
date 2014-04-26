@@ -28,8 +28,8 @@ SqlDatabaseFactory get sqlDatabaseFactory {
 }
 
 class SqlDatabase {
-  //static bool DEBUG = false; // to change
-  static bool DEBUG = true; // to change
+  static bool DEBUG = false; // to change
+  //static bool DEBUG = true; // to change
   static int _DEBUG_ID = 0;
 
   static bool get supported {
@@ -141,7 +141,7 @@ class SqlTransaction {
   Future dropTablesIfExists(List<String> names) {
     int i = 0;
     Completer completer = new Completer.sync();
-    Future dropNextTable() {
+    dropNextTable() {
       if (i < names.length) {
         String name = names[i++];
         return dropTableIfExists(name).then((_) {

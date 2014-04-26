@@ -1,10 +1,10 @@
 library websql_client_test;
 
 import 'package:unittest/unittest.dart';
-import 'package:tekartik_idb/src/websql/websql_wrapper.dart';
-import 'package:tekartik_idb/src/websql/websql_client_constants.dart';
-import 'package:tekartik_idb/idb_client_websql.dart';
-import 'package:tekartik_idb/idb_client.dart';
+import 'package:idb_shim/src/websql/websql_wrapper.dart';
+import 'package:idb_shim/src/websql/websql_client_constants.dart';
+import 'package:idb_shim/idb_client_websql.dart';
+import 'package:idb_shim/idb_client.dart';
 import 'idb_test_common.dart';
 import 'dart:async';
 
@@ -61,16 +61,6 @@ List<SqliteMasterRow> sqliteMasterRowsFromResultSet(SqlResultSet rs) {
 
 Future<SqlResultSet> getSqliteMasterRows(SqlTransaction tx, [String where = ""]) {
   return tx.execute("SELECT type, name FROM sqlite_master" + where);
-}
-
-Future<List<String>> getTableNamesBadJs(SqlTransaction tx) {
-  List<String> names = [];
-  return getSqliteMasterRows(tx, " WHERE type = 'table'").then((rows) {
-    rows.forEach((row) {
-      names.add(row.name);
-    });
-    return names;
-  });
 }
 
 List<String> tableNamesFromResultSet(SqlResultSet rs) {

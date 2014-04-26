@@ -1,7 +1,7 @@
 library websql_wrapper_test;
 
 import 'package:unittest/unittest.dart';
-import 'package:tekartik_idb/src/websql/websql_wrapper.dart';
+import 'package:idb_shim/src/websql/websql_wrapper.dart';
 
 testMain() {
   group('wrapper', () {

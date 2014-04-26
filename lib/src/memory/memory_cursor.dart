@@ -64,7 +64,7 @@ abstract class MemoryCursorBaseController<T extends Cursor> {
 
   MemoryCursorBaseController(this.index, key, CommonKeyRange range, this.direction, this.autoAdvance) {
     if (direction == null) {
-      direction = DIRECTION_NEXT;
+      direction = IDB_DIRECTION_NEXT;
     }
     if (autoAdvance == null) {
       autoAdvance = true;
@@ -102,10 +102,10 @@ abstract class MemoryCursorBaseController<T extends Cursor> {
         // Handle direction
         int realKeyIndex;
         switch (direction) {
-          case DIRECTION_NEXT:
+          case IDB_DIRECTION_NEXT:
             realKeyIndex = currentKeyIndex;
             break;
-          case DIRECTION_PREV:
+          case IDB_DIRECTION_PREV:
             realKeyIndex = _keys.length - (currentKeyIndex + 1);
             break;
           default:

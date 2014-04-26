@@ -2,7 +2,7 @@ library common_value_test;
 
 import 'package:unittest/unittest.dart';
 
-import 'package:tekartik_idb/src/common/common_value.dart';
+import 'package:idb_shim/src/common/common_value.dart';
 
 void main() {
 

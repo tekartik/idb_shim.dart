@@ -1,7 +1,7 @@
 library database_test;
 
 import 'package:unittest/unittest.dart';
-import 'package:tekartik_idb/idb_client.dart';
+import 'package:idb_shim/idb_client.dart';
 import 'idb_test_common.dart';
 //import 'idb_test_factory.dart';
 
@@ -125,7 +125,7 @@ void testMain(IdbFactory idbFactory) {
         }).then((_) {
           // at this point native db should be close already
           if (!db1Closed) {
-            Transaction transaction = firstDb.transaction(STORE_NAME, MODE_READ_ONLY);
+            Transaction transaction = firstDb.transaction(STORE_NAME, IDB_MODE_READ_ONLY);
             ObjectStore store = transaction.objectStore(STORE_NAME);
             return store.clear().then((_) {
               fail("should not succeed");
