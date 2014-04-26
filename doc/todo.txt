@@ -1,0 +1,10 @@
+websql
+- cache meta data between 2 transaction, version will change anyway (i.e. prevent calling 3 SELECT key_path, auto_increment, indecies FROM stores WHERE name = test_store )
+- check version on transaction begin
+
+test
+- test cursor and key value null
+- cursor and int value in index
+- cursor and string value in index
+- key access for cursor/count/get in index/store
+- database name null
