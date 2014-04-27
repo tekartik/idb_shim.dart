@@ -396,7 +396,7 @@ class _WebSqlObjectStore extends ObjectStore {
 
     // Future
     _checkStore(() {
-      return ctlr.execute(key, range as CommonKeyRange);
+      return ctlr.execute(key, range);
     });
     return ctlr.stream;
   }
@@ -404,7 +404,7 @@ class _WebSqlObjectStore extends ObjectStore {
   @override
   Future<int> count([key_OR_range]) {
     return _checkStore(() {
-      if (key_OR_range is CommonKeyRange) {
+      if (key_OR_range is KeyRange) {
         // return new Future.value(filterKeysByRange(key_OR_range).length);
         return new Future.error(new ArgumentError("not supported"));
       } else if (key_OR_range == null) {

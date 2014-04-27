@@ -214,7 +214,7 @@ abstract class _WebSqlCursorCommonController {
   String get sqlTableName => store.sqlTableName;
   String get keyColumn;
 
-  Future execute(key, CommonKeyRange keyRange) {
+  Future execute(key, KeyRange keyRange) {
     String ORDER;
     //    if (key != null) {
     //      return new Future.error(new UnimplementedError("cursor by key not supported"));

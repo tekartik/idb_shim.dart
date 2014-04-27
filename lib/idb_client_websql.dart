@@ -1,7 +1,6 @@
 library idb_websql;
 
 import 'idb_client.dart';
-import 'package:idb_shim/src/common/common_key_range.dart';
 import 'dart:async';
 import 'dart:convert';
 

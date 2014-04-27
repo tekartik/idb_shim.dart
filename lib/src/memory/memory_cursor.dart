@@ -62,7 +62,7 @@ abstract class MemoryCursorBaseController<T extends Cursor> {
 
   T newCursor(_MemoryItem item);
 
-  MemoryCursorBaseController(this.index, key, CommonKeyRange range, this.direction, this.autoAdvance) {
+  MemoryCursorBaseController(this.index, key, KeyRange range, this.direction, this.autoAdvance) {
     if (direction == null) {
       direction = IDB_DIRECTION_NEXT;
     }
@@ -134,7 +134,7 @@ class _MemoryCursorWithValueController extends MemoryCursorBaseController<Cursor
     return new _MemoryCursorWithValue(this, item);
   }
 
-  _MemoryCursorWithValueController(_MemoryIndex index, key, CommonKeyRange range, String direction, bool autoAdvance): super(index, key, range, direction, autoAdvance) {
+  _MemoryCursorWithValueController(_MemoryIndex index, key, KeyRange range, String direction, bool autoAdvance): super(index, key, range, direction, autoAdvance) {
 
 
 
@@ -149,7 +149,7 @@ class MemoryCursorController extends MemoryCursorBaseController<Cursor> {
   Cursor newCursor(_MemoryItem item) {
     return new _MemoryCursor(this, item);
   }
-  MemoryCursorController(_MemoryIndex index, key, CommonKeyRange range, String direction, bool autoAdvance): super(index, key, range, direction, autoAdvance) {
+  MemoryCursorController(_MemoryIndex index, key, KeyRange range, String direction, bool autoAdvance): super(index, key, range, direction, autoAdvance) {
   }
 
 

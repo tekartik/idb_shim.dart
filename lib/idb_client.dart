@@ -1,6 +1,5 @@
 library idb_client;
 
-import 'package:idb_shim/src/common/common_key_range.dart';
 import 'dart:async';
 
 const String IDB_MODE_READ_WRITE = "readwrite";
@@ -117,40 +116,89 @@ typedef void OnUpgradeNeededFunction(VersionChangeEvent event);
 typedef void OnBlockedFunction(Event event);
 
 /**
- * Global KeyRange factory 
+ * Key Range 
  */
-KeyRangeFactory __keyRangeFactory;
-KeyRangeFactory get _keyRangeFactory {
-  if (__keyRangeFactory == null) {
-    __keyRangeFactory = new CommonKeyRangeFactory();
-  }
-  return __keyRangeFactory;
-}
-
-abstract class KeyRange {
+class KeyRange {
 
   KeyRange();
-  factory KeyRange.only(/*Key*/ value) {
-    return _keyRangeFactory.createOnly(value);
+  KeyRange.only(/*Key*/ value) : this.bound(value, value);
+  KeyRange.lowerBound(this._lowerBound, [bool open = false]) {
+    _lowerBoundOpen = open;
   }
-  factory KeyRange.lowerBound(/*Key*/ bound, [bool open = false]) {
-    return _keyRangeFactory.createLowerBound(bound, open);
+  KeyRange.upperBound(this._upperBound, [bool open = false]) {
+    _upperBoundOpen = open;
   }
-  factory KeyRange.upperBound(/*Key*/ bound, [bool open = false]) {
-    return _keyRangeFactory.createUpperBound(bound, open);
+  KeyRange.bound(this._lowerBound, this._upperBound, [bool lowerOpen = false, bool upperOpen = false]) {
+    _lowerBoundOpen = lowerOpen;
+    _upperBoundOpen = upperOpen;
   }
-  factory KeyRange.bound(/*Key*/ lower,  /*Key*/ upper, [bool lowerOpen = false, bool upperOpen = false]) => _keyRangeFactory.createBound(lower, upper, lowerOpen, upperOpen);
-  Object get lower;
-  bool get lowerOpen;
-  Object get upper;
-  bool get upperOpen;
-}
+  
+  var _lowerBound;
+  bool _lowerBoundOpen = true;
+  var _upperBound;
+  bool _upperBoundOpen = true;
 
-abstract class KeyRangeFactory {
-  KeyRange createOnly(/*Key*/ value);
-  KeyRange createLowerBound(/*Key*/ bound, [bool open = false]);
-  KeyRange createUpperBound(/*Key*/ bound, [bool open = false]);
-  KeyRange createBound(/*Key*/ lower,  /*Key*/ upper, [bool lowerOpen = false, bool upperOpen = false]);
+  Object get lower => _lowerBound;
+  bool get lowerOpen => _lowerBoundOpen;
+  Object get upper => _upperBound;
+  bool get upperOpen => _upperBoundOpen;
+
+  /**
+   * Added method for memory implementation
+   */
+  bool _checkLowerBound(key) {
+    if (_lowerBound != null) {
+      if (_lowerBoundOpen != null && _lowerBoundOpen) {
+        if (key is num) {
+          return (key > _lowerBound);
+        } else if (key is String) {
+          return key.compareTo(_lowerBound) > 0;
+        } else {
+          throw new UnsupportedError("key '$key' of type ${key.runtimeType} not supported");
+        }
+      } else {
+        if (key is num) {
+          return (key >= _lowerBound);
+        } else if (key is String) {
+          return key.compareTo(_lowerBound) >= 0;
+        } else {
+          throw new UnsupportedError("key '$key' of type ${key.runtimeType} not supported");
+        }
+      }
+    }
+    return true;
+  }
+
+  bool _checkUpperBound(key) {
+    if (_upperBound != null) {
+      if (_upperBoundOpen != null && _upperBoundOpen) {
+        if (key is num) {
+          return (key < _upperBound);
+        } else if (key is String) {
+          return key.compareTo(_upperBound) < 0;
+        } else {
+          throw new UnsupportedError("key '$key' of type ${key.runtimeType} not supported");
+        }
+      } else {
+        if (key is num) {
+          return (key <= _upperBound);
+        } else if (key is String) {
+          return key.compareTo(_upperBound) <= 0;
+        } else {
+          throw new UnsupportedError("key '$key' of type ${key.runtimeType} not supported");
+        }
+      }
+    }
+    return true;
+  }
+
+  bool contains(key) {
+    if (!_checkLowerBound(key)) {
+      return false;
+    } else {
+      return _checkUpperBound(key);
+    }
+  }
 }
 
 abstract class IdbFactory {

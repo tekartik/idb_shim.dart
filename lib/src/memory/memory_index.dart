@@ -19,7 +19,7 @@ class _MemoryIndex extends Index {
     // TODO
   }
 
-  List filterKeysByRange(CommonKeyRange range) {
+  List filterKeysByRange(KeyRange range) {
     if (range == null) {
       return keys;
     } else {
@@ -69,7 +69,7 @@ class _MemoryIndex extends Index {
   }
 
   Future<int> count([key_OR_range]) {
-    if (key_OR_range is CommonKeyRange) {
+    if (key_OR_range is KeyRange) {
       return new Future.value(filterKeysByRange(key_OR_range).length);
     } else if (key_OR_range == null) {
       return new Future.value(keys.length);
@@ -118,7 +118,7 @@ class _MemoryIndex extends Index {
       autoAdvance = true;
     }
 
-    _MemoryCursorWithValueController ctlr = new _MemoryCursorWithValueController(this, key, range as CommonKeyRange, direction, autoAdvance);
+    _MemoryCursorWithValueController ctlr = new _MemoryCursorWithValueController(this, key, range as KeyRange, direction, autoAdvance);
 
     // future
     inTransaction(() {
@@ -137,7 +137,7 @@ class _MemoryIndex extends Index {
       autoAdvance = true;
     }
     MemoryCursorController ctlr = new MemoryCursorController(this, //
-    key, range as CommonKeyRange, direction, autoAdvance);
+    key, range, direction, autoAdvance);
 
     // future
     inTransaction(() {

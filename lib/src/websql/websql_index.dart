@@ -133,7 +133,7 @@ class _WebSqlIndex extends Index {
 
   Future<int> count([key_OR_range]) {
     return _checkIndex(() {
-      if (key_OR_range is CommonKeyRange) {
+      if (key_OR_range is KeyRange) {
         // return new Future.value(filterKeysByRange(key_OR_range).length);
         return new Future.error(new ArgumentError("not supported"));
       } else if (key_OR_range == null) {
@@ -157,7 +157,7 @@ class _WebSqlIndex extends Index {
 
     // Future
     _checkIndex(() {
-      return ctlr.execute(key, range as CommonKeyRange);
+      return ctlr.execute(key, range);
     });
     return ctlr.stream;
   }
@@ -176,7 +176,7 @@ class _WebSqlIndex extends Index {
 
     // Future
     _checkIndex(() {
-      return ctlr.execute(key, range as CommonKeyRange);
+      return ctlr.execute(key, range);
     });
     return ctlr.stream;
   }
