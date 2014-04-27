@@ -88,10 +88,8 @@ class MemoryObjectStore extends ObjectStore {
 
   Future inTransaction(computation()) {
     return _checkStore(() {
-      return transaction._active.then((_) {
-        return transaction._enqueue(() {
-          return computation();
-        });
+      return transaction._active(() {
+        return transaction._enqueue(computation);
       });
     });
   }
