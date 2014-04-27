@@ -118,7 +118,7 @@ class _MemoryIndex extends Index {
       autoAdvance = true;
     }
 
-    _MemoryCursorWithValueController ctlr = new _MemoryCursorWithValueController(this, key, range as KeyRange, direction, autoAdvance);
+    _MemoryCursorWithValueController ctlr = new _MemoryCursorWithValueController(this, key, range, direction, autoAdvance);
 
     // future
     inTransaction(() {
