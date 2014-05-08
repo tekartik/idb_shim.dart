@@ -342,10 +342,11 @@ void testMain(IdbFactory idbFactory) {
         });
       });
 
-      test('count', () {
+      solo_test('count', () {
         Map value = {};
         return objectStore.add(value).then((_) {
           return objectStore.count().then((int count) {
+            print(count);
             expect(count, 1);
           });
         });
