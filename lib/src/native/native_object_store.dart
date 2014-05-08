@@ -41,8 +41,32 @@ class _NativeObjectStore extends ObjectStore {
 
   @override
   Stream<CursorWithValue> openCursor({key, KeyRange range, String direction, bool autoAdvance}) {
-    _NativeCursorWithValueController ctlr = new _NativeCursorWithValueController(idbObjectStore.openCursor(key: key, range: _nativeKeyRange(range), direction: direction, autoAdvance: autoAdvance));
-
+    idb.KeyRange idbKeyRange = _nativeKeyRange(range);
+    //idbDevWarning;
+    //idbDevPrint("kr1 $range native $idbKeyRange");
+    
+    Stream<idb.CursorWithValue> stream;
+    
+    // IE workaround!!!
+    if (idbKeyRange == null) {
+      stream = idbObjectStore.openCursor( //
+              key: key, //
+              // Weird on ie, uncommenting this line
+              // although null makes it crash
+              // range: idbKeyRange
+              direction: direction, //
+              autoAdvance: autoAdvance);
+    } else {
+    stream = idbObjectStore.openCursor( //
+        key: key, //
+        range: idbKeyRange,
+        direction: direction, //
+        autoAdvance: autoAdvance);
+    }
+    
+    _NativeCursorWithValueController ctlr = new _NativeCursorWithValueController(//
+        stream);
+    //idbDevPrint("kr2 $range native $idbKeyRange");
     return ctlr.stream;
 
   }

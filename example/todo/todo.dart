@@ -22,7 +22,7 @@ class TodoList {
   int _version = 2;
   InputElement _input;
   Element _todoItems;
-
+  
   TodoList() {
     _todoItems = querySelector('#todo-items');
     _input = querySelector('#todo');

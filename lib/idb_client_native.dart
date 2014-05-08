@@ -5,6 +5,7 @@ import 'package:idb_shim/idb_client.dart';
 import 'dart:indexed_db' as idb;
 import 'dart:html' as html;
 
+part 'src/native/native_event.dart';
 part 'src/native/native_transaction.dart';
 part 'src/native/native_database.dart';
 part 'src/native/native_object_store.dart';
@@ -35,7 +36,7 @@ class IdbNativeFactory extends IdbFactory {
 
     void _onBlocked(html.Event e) {
       if (onBlocked != null) {
-        Event event = new Event();
+        Event event = new _NativeEvent(e);
         onBlocked(event);
       } else {
         print("blocked opening $dbName v $version");
@@ -55,7 +56,7 @@ class IdbNativeFactory extends IdbFactory {
   Future<IdbFactory> deleteDatabase(String dbName, {void onBlocked(Event)}) {
     void _onBlocked(html.Event e) {
       print("blocked deleting $dbName");
-      Event event = new Event();
+      Event event = new _NativeEvent(e);
       onBlocked(event);
     }
     return html.window.indexedDB.deleteDatabase(dbName, onBlocked: onBlocked == null ? null : _onBlocked).then((_) {

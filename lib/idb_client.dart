@@ -2,6 +2,8 @@ library idb_client;
 
 import 'dart:async';
 
+part 'src/client/client.dart';
+
 const String IDB_MODE_READ_WRITE = "readwrite";
 const String IDB_MODE_READ_ONLY = "readonly";
 
@@ -109,7 +111,7 @@ abstract class VersionChangeEvent {
   Database get database;
 }
 
-class Event {
+abstract class Event {
 }
 
 typedef void OnUpgradeNeededFunction(VersionChangeEvent event);
@@ -199,6 +201,33 @@ class KeyRange {
       return _checkUpperBound(key);
     }
   }
+  
+  @override
+  String toString() {
+    StringBuffer sb = new StringBuffer('kr');
+    if (lower == null) {
+      sb.write('...');
+    } else {
+      if (lowerOpen) {
+        sb.write(']');
+      } else {
+        sb.write('[');
+      }
+      sb.write(lower);
+    }
+    sb.write('-');
+    if (upper == null) {
+      sb.write('...');
+    } else {
+      sb.write(upper);
+      if (upperOpen) {
+        sb.write('[');
+      } else {
+        sb.write(']');
+      }
+    }
+    return sb.toString();
+  }
 }
 
 abstract class IdbFactory {
@@ -220,3 +249,5 @@ abstract class IdbFactory {
   String get name;
 }
 
+@deprecated
+  warn() {}
