@@ -11,7 +11,16 @@ class _NativeIndex extends Index {
 
   @override
   Future<int> count([key_OR_range]) {
-    return idbIndex.count(key_OR_range);
+    Future<int> countFuture;
+    if (key_OR_range == null) {
+      countFuture = idbIndex.count();
+    } else if (key_OR_range is KeyRange) {
+      idb.KeyRange idbKeyRange = _nativeKeyRange(key_OR_range);
+      countFuture = idbIndex.count(idbKeyRange);
+    } else {
+      countFuture = idbIndex.count(key_OR_range);
+    }
+    return countFuture;
   }
 
   @override

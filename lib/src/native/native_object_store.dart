@@ -41,15 +41,48 @@ class _NativeObjectStore extends ObjectStore {
 
   @override
   Stream<CursorWithValue> openCursor({key, KeyRange range, String direction, bool autoAdvance}) {
-    _NativeCursorWithValueController ctlr = new _NativeCursorWithValueController(idbObjectStore.openCursor(key: key, range: _nativeKeyRange(range), direction: direction, autoAdvance: autoAdvance));
-
+    idb.KeyRange idbKeyRange = _nativeKeyRange(range);
+    //idbDevWarning;
+    //idbDevPrint("kr1 $range native $idbKeyRange");
+    
+    Stream<idb.CursorWithValue> stream;
+    
+    // IE workaround!!!
+    if (idbKeyRange == null) {
+      stream = idbObjectStore.openCursor( //
+              key: key, //
+              // Weird on ie, uncommenting this line
+              // although null makes it crash
+              // range: idbKeyRange
+              direction: direction, //
+              autoAdvance: autoAdvance);
+    } else {
+    stream = idbObjectStore.openCursor( //
+        key: key, //
+        range: idbKeyRange,
+        direction: direction, //
+        autoAdvance: autoAdvance);
+    }
+    
+    _NativeCursorWithValueController ctlr = new _NativeCursorWithValueController(//
+        stream);
+    //idbDevPrint("kr2 $range native $idbKeyRange");
     return ctlr.stream;
 
   }
 
   @override
   Future<int> count([dynamic key_OR_range]) {
-    return idbObjectStore.count(key_OR_range);
+    Future<int> countFuture;
+    if (key_OR_range == null) {
+      countFuture = idbObjectStore.count();
+    } else if (key_OR_range is KeyRange) {
+      idb.KeyRange idbKeyRange = _nativeKeyRange(key_OR_range);
+      countFuture = idbObjectStore.count(idbKeyRange);
+    } else {
+      countFuture = idbObjectStore.count(key_OR_range);
+    }
+    return countFuture;
   }
 }
 
