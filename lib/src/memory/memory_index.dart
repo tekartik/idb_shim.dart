@@ -19,6 +19,28 @@ class _MemoryIndex extends Index {
     // TODO
   }
 
+  List filterKeysByKeyOrRange(key_OR_range) {
+    if (key_OR_range == null) {
+      return keys;
+    } else if (key_OR_range is KeyRange) {
+      return filterKeysByRange(key_OR_range);
+    } else {
+      return filterKeysByKey(key_OR_range);
+    }
+  }
+
+  List filterKeys(key, KeyRange range) {
+    List _keys;
+    if (range != null) {
+      _keys = filterKeysByRange(range);
+    } else if (key != null) {
+      _keys = filterKeysByKey(key);
+    } else {
+      _keys = keys;
+    }
+    return _keys;
+  }
+
   List filterKeysByRange(KeyRange range) {
     if (range == null) {
       return keys;
@@ -68,13 +90,12 @@ class _MemoryIndex extends Index {
     return item[keyPath];
   }
 
+  @override
   Future<int> count([key_OR_range]) {
-    if (key_OR_range is KeyRange) {
-      return new Future.value(filterKeysByRange(key_OR_range).length);
-    } else if (key_OR_range == null) {
-      return new Future.value(keys.length);
-    }
-    throw new ArgumentError("not supported");
+    return inTransaction(() {
+      List _keys = filterKeysByKeyOrRange(key_OR_range);
+      return _keys.length;
+    });
   }
 
   void updateIndex(_MemoryItem item, [_MemoryItem oldItem]) {

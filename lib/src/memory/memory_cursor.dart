@@ -70,14 +70,7 @@ abstract class MemoryCursorBaseController<T extends Cursor> {
       autoAdvance = true;
     }
 
-
-    if (range != null) {
-      _keys = index.filterKeysByRange(range);
-    } else if (key != null) {
-      _keys = index.filterKeysByKey(key);
-    } else {
-      _keys = index.keys;
-    }
+    _keys = index.filterKeys(key, range);
   }
 
   Future autoNext() {

@@ -29,7 +29,7 @@ void testMain(IdbFactory idbFactory) {
         });
       });
 
-      
+
     });
 
     group('non auto', () {
@@ -347,6 +347,35 @@ void testMain(IdbFactory idbFactory) {
         return objectStore.add(value).then((_) {
           return objectStore.count().then((int count) {
             expect(count, 1);
+          });
+        });
+      });
+
+      test('count by key', () {
+        Map value = {};
+        return objectStore.add(value).then((key1) {
+          return objectStore.add(value).then((key2) {
+            return objectStore.count(key1).then((int count) {
+              expect(count, 1);
+              return objectStore.count(key2).then((int count) {
+                expect(count, 1);
+              });
+            });
+          });
+        });
+      });
+
+      
+      test('count by range', () {
+        Map value = {};
+        return objectStore.add(value).then((key1) {
+          return objectStore.add(value).then((key2) {
+            return objectStore.count(new KeyRange.lowerBound(key1, true)).then((int count) {
+              expect(count, 1);
+              return objectStore.count(new KeyRange.lowerBound(key1)).then((int count) {
+                expect(count, 2);
+              });
+            });
           });
         });
       });

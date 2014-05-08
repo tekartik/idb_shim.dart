@@ -28,8 +28,11 @@ SqlDatabaseFactory get sqlDatabaseFactory {
 }
 
 class SqlDatabase {
-  static bool DEBUG = false; // to change
-  //static bool DEBUG = true; // to change
+  
+  @deprecated
+  static set debug(bool debug) => DEBUG = debug;
+  
+  static bool DEBUG = false;
   static int _DEBUG_ID = 0;
 
   static bool get supported {
@@ -41,6 +44,7 @@ class SqlDatabase {
 
   wql.SqlDatabase _sqlDatabase;
   SqlDatabase(this._sqlDatabase, String _name, String _version, String _displayName, int _estimatedSize) {
+    debug = true; // to remove
     if (DEBUG) {
       _debugId = ++_DEBUG_ID;
       debugLog("openDatabase $_debugId $_displayName(${_name}, $_version, $_estimatedSize)");

@@ -87,6 +87,59 @@ void testMain(IdbFactory idbFactory) {
         });
       });
 
+      solo_test('count by key', () {
+        Map value1 = {
+          NAME_FIELD: "test1"
+        };
+        Map value2 = {
+          NAME_FIELD: "test2"
+        };
+        Index index = objectStore.index(NAME_INDEX);
+        return objectStore.add(value1).then((_) {
+          return objectStore.add(value2).then((_) {
+            return index.count("test1").then((int count) {
+              expect(count, 1);
+              return index.count("test2").then((int count) {
+                expect(count, 1);
+              });
+            });
+          });
+        });
+      });
+
+      solo_test('count by range', () {
+        Map value1 = {
+          NAME_FIELD: "test1"
+        };
+        Map value2 = {
+          NAME_FIELD: "test2"
+        };
+        Index index = objectStore.index(NAME_INDEX);
+        return objectStore.add(value1).then((_) {
+          return objectStore.add(value2).then((_) {
+            return index.count(new KeyRange.lowerBound("test1", true)).then((int count) {
+              expect(count, 1);
+              return index.count(new KeyRange.lowerBound("test1")).then((int count) {
+                expect(count, 2);
+              });
+            });
+          });
+        });
+      });
+
+      skip_test('count by range', () {
+        Map value = {};
+        return objectStore.add(value).then((key1) {
+          return objectStore.add(value).then((key2) {
+            return objectStore.count(new KeyRange.lowerBound(key1, true)).then((int count) {
+              expect(count, 1);
+              return objectStore.count(new KeyRange.lowerBound(key1)).then((int count) {
+                expect(count, 2);
+              });
+            });
+          });
+        });
+      });
 
       test('add/get map', () {
         Map value = {

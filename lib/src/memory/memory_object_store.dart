@@ -204,8 +204,8 @@ class MemoryObjectStore extends ObjectStore {
     return data.primaryIndex.openCursor(key: key, range: range, direction: direction, autoAdvance: autoAdvance);
   }
 
+  @override
   Future<int> count([key_OR_range]) {
-    // TODO handle key or range
-    return new Future.value(data.primaryIndex.keys.length);
+    return data.primaryIndex.count(key_OR_range);
   }
 }
