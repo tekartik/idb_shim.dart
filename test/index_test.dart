@@ -127,7 +127,7 @@ void testMain(IdbFactory idbFactory) {
         });
       });
 
-      test('WEIRD count by range', () {
+      skip_test('WEIRD count by range', () {
         Map value = {};
         return objectStore.add(value).then((key1) {
           return objectStore.add(value).then((key2) {

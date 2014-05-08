@@ -44,7 +44,7 @@ class SqlDatabase {
 
   wql.SqlDatabase _sqlDatabase;
   SqlDatabase(this._sqlDatabase, String _name, String _version, String _displayName, int _estimatedSize) {
-    debug = true; // to remove
+    //debug = true; // to remove
     if (DEBUG) {
       _debugId = ++_DEBUG_ID;
       debugLog("openDatabase $_debugId $_displayName(${_name}, $_version, $_estimatedSize)");
