@@ -404,20 +404,8 @@ class _WebSqlObjectStore extends ObjectStore {
   @override
   Future<int> count([key_OR_range]) {
     return _checkStore(() {
-      if (key_OR_range is KeyRange) {
-        // return new Future.value(filterKeysByRange(key_OR_range).length);
-        return new Future.error(new ArgumentError("not supported"));
-      } else if (key_OR_range == null) {
-        var sqlSelect = "SELECT COUNT(*) AS _COUNT FROM ${sqlTableName}";
-        return execute(sqlSelect).then((SqlResultSet rs) {
-          if (rs.rows.length == 0) {
-            return null;
-          }
-          return (rs.rows[0]['_COUNT']);
-
-        });
-      }
-      return new Future.error(new ArgumentError("not supported"));
+      _CountQuery query = new _CountQuery(sqlTableName, keyColumn, key_OR_range);
+      return query.count(transaction);
     });
   }
 }

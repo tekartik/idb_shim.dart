@@ -17,6 +17,7 @@ class _WebSqlIndex extends Index {
   bool get multiEntry => data.multiEntry;
 
 
+  String get sqlTableName => store.sqlTableName;
   String get keyColumn => store.sqlColumnName(keyPath);
   // Ordered keys
   List keys = new List();
@@ -133,22 +134,9 @@ class _WebSqlIndex extends Index {
 
   Future<int> count([key_OR_range]) {
     return _checkIndex(() {
-      if (key_OR_range is KeyRange) {
-        // return new Future.value(filterKeysByRange(key_OR_range).length);
-        return new Future.error(new ArgumentError("not supported"));
-      } else if (key_OR_range == null) {
-        var sqlSelect = "SELECT COUNT(*) AS _COUNT FROM ${store.sqlTableName}";
-        return execute(sqlSelect).then((SqlResultSet rs) {
-          if (rs.rows.length == 0) {
-            return null;
-          }
-          return (rs.rows[0]['_COUNT']);
-
-        });
-      }
-      return new Future.error(new ArgumentError("not supported"));
+      _CountQuery query = new _CountQuery(sqlTableName, keyColumn, key_OR_range);
+      return query.count(transaction);
     });
-
   }
 
   Stream<Cursor> openKeyCursor({key, KeyRange range, String direction, bool autoAdvance}) {

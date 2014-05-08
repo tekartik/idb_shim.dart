@@ -4,21 +4,6 @@ class _WebSqlTransaction extends Transaction { // extends CommonTransaction {
 
   int _operationCount = 0;
 
-  //  /**
-  //     * must be used in pair
-  //     */
-  //  void _beginOperation() {
-  //    _operationCount++;
-  //  }
-  //
-  //  void _endOperation() {
-  //    --_operationCount;
-  //    // Make it breath
-  //    _asyncCompleteIfDone();
-  //  }
-  //
-  //  Completer<Database> _completer = new Completer();
-
   // readonly or readwrite
   String _mode;
 
@@ -36,19 +21,6 @@ class _WebSqlTransaction extends Transaction { // extends CommonTransaction {
     }
     return _lazySqlTransaction;
   }
-
-  /**
-   * Add additonal initialization
-   */
-  //  @override
-  //  Future get active {
-  //    return super.active.then((result) {
-  //      return sqlTransaction.then((_) {
-  //        return result;
-  //      });
-  //
-  //    });
-  //  }
 
   _WebSqlTransaction(Database database, this._sqlTransaction, this.storeNames, this._mode): super(database);
 
@@ -69,40 +41,7 @@ class _WebSqlTransaction extends Transaction { // extends CommonTransaction {
         return tx.execute(statement, args);
       });
     }
-    //    return addOperation(sqlTransaction.then((tx) {
-    //      return tx.execute(statement, args);
-    //    }));
-
   }
-
-
-
-  //  void complete() {
-  //    if (_sqlTransaction != null) {
-  //      _sqlTransaction.commit();
-  //    }
-  //    if (!_completer.isCompleted) {
-  //      _completer.complete(database);
-  //    }
-
-
-
-  //  @override
-  //  Future<Database> get completed {
-  //    return idbTransaction.completed.then((_) {
-  //      return database;
-  //    });
-  //  }
-
-
-
-  //  @override
-  //  Future<Database> get completed {
-  //    // This take care of empty transaction
-  //    _asyncCompleteIfDone();
-  //
-  //    return _completer.future;
-  //  }
 
   Future<Database> get OLDcompleted {
     if (_sqlTransaction == null) {
@@ -117,28 +56,16 @@ class _WebSqlTransaction extends Transaction { // extends CommonTransaction {
       });
     }
   }
-  
+
   Future<Database> get completed {
-      if (_lazySqlTransaction == null) {
-        return new Future.value(database);
-      } else {
-        return sqlTransaction.then((tx) {
-          return tx.completed.then((_) {
-            return database;  
-          });
+    if (_lazySqlTransaction == null) {
+      return new Future.value(database);
+    } else {
+      return sqlTransaction.then((tx) {
+        return tx.completed.then((_) {
+          return database;
         });
-      }
+      });
     }
-  
-  //
-  //  void _completeIfDone() {
-  //    if (_operationCount == 0) {
-  //
-  //      complete();
-  //    }
-  //  }
-  //
-  //  void _asyncCompleteIfDone() {
-  //    new Future(_completeIfDone);
-  //  }
+  }
 }

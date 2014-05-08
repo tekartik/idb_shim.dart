@@ -215,62 +215,16 @@ abstract class _WebSqlCursorCommonController {
   String get keyColumn;
 
   Future execute(key, KeyRange keyRange) {
-    String ORDER;
-    //    if (key != null) {
-    //      return new Future.error(new UnimplementedError("cursor by key not supported"));
-    //    }
-    //    if (keyRange != null) {
-    //      return new Future.error(new UnimplementedError("cursor by range not supported"));
-    //    }
-
-    switch (direction) {
-      case IDB_DIRECTION_NEXT:
-        ORDER = "ASC";
-        break;
-      case IDB_DIRECTION_PREV:
-        ORDER = "DESC";
-        break;
-      default:
-        throw new ArgumentError("direction '$direction' not supported");
-    }
-    List args = [];
-    var sqlSelect = "SELECT $selectedColumns FROM $sqlTableName";
-    if (keyRange != null) {
-      sqlSelect += " WHERE 1=1";
-      if (keyRange.lower != null) {
-        if (keyRange.lowerOpen == true) {
-          sqlSelect += " AND $keyColumn > ?";
-        } else {
-          sqlSelect += " AND $keyColumn >= ?";
-        }
-        args.add(keyRange.lower);
-      }
-      if (keyRange.upper != null) {
-        if (keyRange.upperOpen == true) {
-          sqlSelect += " AND $keyColumn < ?";
-        } else {
-          sqlSelect += " AND $keyColumn <= ?";
-        }
-        args.add(keyRange.upper);
-      }
-    }
+    var key_OR_range = null;
     if (key != null) {
-      if (keyRange == null) {
-        sqlSelect += " WHERE ";
-      } else {
-        sqlSelect += " AND ";
-      }
-      sqlSelect += "$keyColumn = ?";
-
-      args.add(key);
+      key_OR_range = key;
+    } else if (keyRange != null) {
+      key_OR_range = keyRange;
     }
-    sqlSelect += " ORDER BY $keyColumn " + ORDER;
-    //var sqlArgs = [encodeKey(key)];
-    return transaction.execute(sqlSelect, args).then((SqlResultSet rs) {
+    _SelectQuery query = new _SelectQuery(selectedColumns, sqlTableName, keyColumn, key_OR_range, direction);
+    return query.execute(transaction).then((SqlResultSet rs) {
       sqlResultSet = rs;
-      // return ctlr.
     });
-
   }
 }
 abstract class _WebSqlIndexCursorCommonController {

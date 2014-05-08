@@ -16,7 +16,7 @@ part 'src/websql/websql_global_store.dart';
 part 'src/websql/websql_utils.dart';
 part 'src/websql/websql_index.dart';
 part 'src/websql/websql_cursor.dart';
-
+part 'src/websql/websql_query.dart';
 
 class IdbWebSqlFactory extends IdbFactory {
 

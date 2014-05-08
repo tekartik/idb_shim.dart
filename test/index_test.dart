@@ -87,7 +87,7 @@ void testMain(IdbFactory idbFactory) {
         });
       });
 
-      solo_test('count by key', () {
+      test('count by key', () {
         Map value1 = {
           NAME_FIELD: "test1"
         };
@@ -107,7 +107,7 @@ void testMain(IdbFactory idbFactory) {
         });
       });
 
-      solo_test('count by range', () {
+      test('count by range', () {
         Map value1 = {
           NAME_FIELD: "test1"
         };
@@ -127,7 +127,7 @@ void testMain(IdbFactory idbFactory) {
         });
       });
 
-      skip_test('count by range', () {
+      test('WEIRD count by range', () {
         Map value = {};
         return objectStore.add(value).then((key1) {
           return objectStore.add(value).then((key2) {
