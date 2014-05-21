@@ -112,7 +112,7 @@ abstract class MemoryCursorBaseController<T extends Cursor> {
     });
   }
 
-  Stream<CursorWithValue> get stream => ctlr.stream;
+  Stream<T> get stream => ctlr.stream;
 
   Future execute() {
 
