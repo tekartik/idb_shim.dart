@@ -91,13 +91,15 @@ void testMain(IdbFactory idbFactory) {
       return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
         Transaction transaction = database.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
         ObjectStore objectStore = transaction.objectStore(STORE_NAME);
-        objectStore.put({}).then((_) {
+        return objectStore.put({}).then((_) {
           Transaction transaction = database.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
           ObjectStore objectStore = transaction.objectStore(STORE_NAME);
-          objectStore.openCursor(autoAdvance: true).listen((cursor) {
+          return objectStore.openCursor(autoAdvance: true).listen((cursor) {
             print(cursor);
-          }, onDone: () {
-            database.close();
+          }).asFuture().then((_) {
+            return transaction.completed.then((_) {
+              database.close();
+            });
           });
         });
       });
