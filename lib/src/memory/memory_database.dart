@@ -15,7 +15,7 @@ class _MemoryVersionChangeEvent extends VersionChangeEvent {
   _MemoryVersionChangeEvent(_MemoryDatabase database, this.oldVersion, this.newVersion) {
 
     // special transaction
-    _MemoryTransaction versionChangeTransaction = new _MemoryTransaction(database);
+    _MemoryTransaction versionChangeTransaction = new _MemoryTransaction(database, IDB_MODE_READ_WRITE);
     request = new OpenDBRequest(database, versionChangeTransaction);
   }
 }
@@ -106,14 +106,30 @@ class _MemoryDatabase extends Database with WithCurrentTransaction {
     return new MemoryObjectStore(versionChangeTransaction, data);
   }
 
+  bool _containsStore(String storeName) {
+    return stores.keys.contains(storeName);
+  }
+  
   @override
   Transaction transaction(storeName_OR_storeNames, String mode) {
-    return new _MemoryTransaction(this);
+    // Check store(s) exist
+    if (storeName_OR_storeNames is String) {
+      if (!_containsStore(storeName_OR_storeNames)) {
+        throw new DatabaseStoreNotFoundError();
+      }
+    } else {
+      for (String storeName in storeName_OR_storeNames) {
+        if (!_containsStore(storeName)) {
+          throw new DatabaseStoreNotFoundError();
+        }
+      }
+    }
+    return new _MemoryTransaction(this, mode);
   }
 
   @override
   Transaction transactionList(List<String> storeNames, String mode) {
-    _MemoryTransaction transaction = new _MemoryTransaction(this);
+    _MemoryTransaction transaction = new _MemoryTransaction(this, mode);
     return transaction;
   }
 

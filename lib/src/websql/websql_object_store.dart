@@ -88,6 +88,13 @@ class _WebSqlObjectStore extends ObjectStore {
 
   }
 
+  Future _checkWritableStore(Future computation()) {
+    if (transaction._mode != IDB_MODE_READ_WRITE) {
+      return new Future.error(new DatabaseReadOnlyError());
+    }
+    return _checkStore(computation);
+  }
+
   Future _checkStore(Future computation()) {
 
     // this is also an indicator
@@ -147,7 +154,7 @@ class _WebSqlObjectStore extends ObjectStore {
         return _lazyPrepare;
       } else {
         return _lazyPrepare.then((_) {
-          return computation();          
+          return computation();
         });
       }
     }
@@ -245,8 +252,7 @@ class _WebSqlObjectStore extends ObjectStore {
   @override
   Future add(dynamic value, [dynamic key]) {
 
-
-    return _checkStore(() {
+    return _checkWritableStore(() {
       if (key == null) {
         if (keyPath != null) {
           key = value[keyPath];
@@ -287,8 +293,6 @@ class _WebSqlObjectStore extends ObjectStore {
       }
       return key;
     });
-
-
   }
 
   @override
@@ -297,7 +301,7 @@ class _WebSqlObjectStore extends ObjectStore {
       return add(value);
     }
 
-    return _checkStore(() {
+    return _checkWritableStore(() {
       return _put(value, key);
     });
   }
@@ -318,8 +322,6 @@ class _WebSqlObjectStore extends ObjectStore {
       }
       return value;
     });
-
-
   }
 
   @override
@@ -333,7 +335,7 @@ class _WebSqlObjectStore extends ObjectStore {
 
   @override
   Future clear() {
-    return _checkStore(() {
+    return _checkWritableStore(() {
       var sqlClear = "DELETE FROM $sqlTableName";
       return execute(sqlClear, []).then((SqlResultSet rs) {
       });
@@ -342,7 +344,7 @@ class _WebSqlObjectStore extends ObjectStore {
 
   @override
   Future delete(key) {
-    return _checkStore(() {
+    return _checkWritableStore(() {
       return _delete(key);
     });
   }

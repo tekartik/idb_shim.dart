@@ -1,4 +1,4 @@
-library factory_test_common;
+library factory_test;
 
 import 'package:unittest/unittest.dart';
 import 'package:idb_shim/idb_client.dart';

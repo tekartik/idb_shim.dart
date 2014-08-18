@@ -94,10 +94,19 @@ class MemoryObjectStore extends ObjectStore {
     });
   }
 
+  Future inWritableTransaction(computation()) {
+    return inTransaction(() {
+      if (transaction._mode != IDB_MODE_READ_WRITE) {
+        return new Future.error(new DatabaseReadOnlyError());
+      }
+      return computation();
+    });
+  }
+
   @override
   Future add(dynamic value, [dynamic key]) {
 
-    return inTransaction(() {
+    return inWritableTransaction(() {
       if (key == null) {
         if (keyPath != null) {
           key = value[keyPath];
@@ -142,7 +151,7 @@ class MemoryObjectStore extends ObjectStore {
 
   @override
   Future clear() {
-    return inTransaction(() {
+    return inWritableTransaction(() {
       List keys = new List.from(data.primaryIndex.keys);
       List<Future> futures = new List();
       keys.forEach((key) {
@@ -159,7 +168,7 @@ class MemoryObjectStore extends ObjectStore {
     if (key == null) {
       return add(value, key);
     }
-    return inTransaction(() {
+    return inWritableTransaction(() {
       // find key if any
       if (key == null) {
         key = value[data.primaryIndex.keyPath];
@@ -183,7 +192,7 @@ class MemoryObjectStore extends ObjectStore {
 
   @override
   Future delete(key) {
-    return inTransaction(() {
+    return inWritableTransaction(() {
       _MemoryItem item = getSync(key);
       if (item != null) {
         removeAllIndecies(item);

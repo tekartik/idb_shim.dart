@@ -120,5 +120,55 @@ void testMain(IdbFactory idbFactory) {
         });
       });
     });
+
+    test('bad_mode', () {
+
+      void _initializeDatabase(VersionChangeEvent e) {
+        Database db = e.database;
+        db.createObjectStore(STORE_NAME, autoIncrement: true);
+      }
+      return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
+        Transaction transaction = database.transaction(STORE_NAME, IDB_MODE_READ_ONLY);
+
+        ObjectStore store = transaction.objectStore(STORE_NAME);
+
+        store.put({}).catchError((e) {
+          // There must be an error!
+          //print(e);
+          //print(e.runtimeType);
+          return e;
+        }).then((e) {
+          // there must be an error
+          expect(isTransactionReadOnlyError(e), isTrue);
+        }).then((_) {
+
+        });
+        //database.close();
+        return transaction.completed.then((_) {
+          database.close();
+        });
+      });
+    });
+
+    test('bad_store', () {
+
+      void _initializeDatabase(VersionChangeEvent e) {
+        Database db = e.database;
+        db.createObjectStore(STORE_NAME, autoIncrement: true);
+      }
+      return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
+        try {
+          Transaction transaction = database.transaction(STORE_NAME_2, IDB_MODE_READ_WRITE);
+          fail("exception expected");
+        } catch (e) {
+          //print(e);
+          //print(e.runtimeType);
+          expect(isStoreNotFoundError(e), isTrue);
+        }
+
+        database.close();
+
+      });
+    });
   });
 }

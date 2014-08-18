@@ -366,7 +366,7 @@ void testMain(IdbFactory idbFactory) {
         });
       });
 
-      
+
       test('count by range', () {
         Map value = {};
         return objectStore.add(value).then((key1) {
@@ -478,6 +478,73 @@ void testMain(IdbFactory idbFactory) {
           expect(clearResult, null);
         });
       });
+    });
+
+    group('readonly', () {
+
+      Database db;
+      Transaction transaction;
+      ObjectStore objectStore;
+
+      setUp(() {
+        return idbFactory.deleteDatabase(DB_NAME).then((_) {
+          void _initializeDatabase(VersionChangeEvent e) {
+            Database db = e.database;
+            ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
+          }
+          return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
+            db = database;
+            transaction = db.transaction(STORE_NAME, IDB_MODE_READ_ONLY);
+            objectStore = transaction.objectStore(STORE_NAME);
+            return db;
+
+          });
+        });
+      });
+
+      tearDown(() {
+        return transaction.completed.then((_) {
+          db.close();
+        });
+      });
+
+      test('add', () {
+        return objectStore.add({}, 1).catchError((e) {
+          // There must be an error!
+          return e;
+        }).then((e) {
+          expect(isTransactionReadOnlyError(e), isTrue);
+        });
+      });
+
+      test('put', () {
+        return objectStore.put({}, 1).catchError((e) {
+          // There must be an error!
+          return e;
+        }).then((e) {
+          expect(isTransactionReadOnlyError(e), isTrue);
+        });
+      });
+
+      test('clear', () {
+        return objectStore.clear().catchError((e) {
+          // There must be an error!
+          return e;
+        }).then((e) {
+          expect(isTransactionReadOnlyError(e), isTrue);
+        });
+      });
+
+      test('delete', () {
+        return objectStore.delete(1).catchError((e) {
+          // There must be an error!
+          return e;
+        }).then((e) {
+          expect(isTransactionReadOnlyError(e), isTrue);
+        });
+      });
+
+
     });
 
     group('key path auto', () {

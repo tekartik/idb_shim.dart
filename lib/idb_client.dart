@@ -3,6 +3,7 @@ library idb_client;
 import 'dart:async';
 
 part 'src/client/client.dart';
+part 'src/client/error.dart';
 
 const String IDB_MODE_READ_WRITE = "readwrite";
 const String IDB_MODE_READ_ONLY = "readonly";
@@ -249,5 +250,3 @@ abstract class IdbFactory {
   String get name;
 }
 
-@deprecated
-  warn() {}

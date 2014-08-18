@@ -63,7 +63,7 @@ class _WebSqlDatabase extends Database {
     List<String> tableNamesFromResultSet(SqlResultSet rs) {
       List<String> names = [];
       rs.rows.forEach((row) {
-        names.add(_WebSqlObjectStore.getSqlTableName( row['name']));
+        names.add(_WebSqlObjectStore.getSqlTableName(row['name']));
       });
       return names;
     }
@@ -317,13 +317,31 @@ class _WebSqlDatabase extends Database {
     });
 
   }
+
+  bool _containsStore(String storeName) {
+    return stores.keys.contains(storeName);
+  }
+
   @override
   Transaction transaction(storeName_OR_storeNames, String mode) {
     List<String> storeNames;
     if (storeName_OR_storeNames is List) {
       storeNames = storeName_OR_storeNames;
+
+      // check stores exist
+      for (String storeName in storeNames) {
+        if (!_containsStore(storeName)) {
+          throw new DatabaseStoreNotFoundError();
+        }
+      }
     } else {
-      storeNames = [storeName_OR_storeNames];
+      String storeName = storeName_OR_storeNames;
+      storeNames = [storeName];
+
+      // check store exist
+      if (!_containsStore(storeName)) {
+        throw new DatabaseStoreNotFoundError();
+      }
     }
     return new _WebSqlTransaction(this, null, storeNames, mode);
   }

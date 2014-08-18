@@ -6,10 +6,13 @@ abstract class WithCurrentTransaction {
 
 class _MemoryTransaction extends Transaction {
   static bool DEBUG = false;
+  
+  // Transaction mode (readonly/readwrite)
+  String _mode;
 
   List<String> _stores;
 
-  _MemoryTransaction(Database database): super(database) {
+  _MemoryTransaction(Database database, this._mode): super(database) {
     // Auto complete for empty transaction
     _asyncCompleteIfDone();
   }

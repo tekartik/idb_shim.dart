@@ -77,7 +77,9 @@ void testMain(IdbFactory idbFactory) {
       });
 
       tearDown(() {
-        db.close();
+        return transaction.completed.then((_) {
+          db.close();
+        });
       });
 
       test('primary', () {
@@ -149,7 +151,7 @@ void testMain(IdbFactory idbFactory) {
         return objectStore.add(value).then((key) {
           return index.get("test1").then((Map readValue) {
             expect(readValue, value);
-            return transaction.completed;
+            //return transaction.completed;
           });
         });
 
@@ -180,7 +182,6 @@ void testMain(IdbFactory idbFactory) {
           });
         });
       });
-
     });
   });
 }

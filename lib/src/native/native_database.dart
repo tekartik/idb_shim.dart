@@ -36,8 +36,13 @@ class _NativeDatabase extends Database {
 
   @override
   Transaction transaction(storeName_OR_storeNames, String mode) {
-    idb.Transaction idbTransaction = idbDatabase.transaction(storeName_OR_storeNames, mode);
-    return new _NativeTransaction(this, idbTransaction);
+    try {
+      idb.Transaction idbTransaction = idbDatabase.transaction(storeName_OR_storeNames, mode);
+      return new _NativeTransaction(this, idbTransaction);
+    } catch (e) {
+      throw new DatabaseError(e.toString());
+    }
+
   }
 
   @override

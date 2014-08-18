@@ -11,7 +11,9 @@ class _NativeObjectStore extends ObjectStore {
 
   @override
   Future add(dynamic value, [dynamic key]) {
-    return idbObjectStore.add(value, key);
+    return idbObjectStore.add(value, key).catchError((e) {
+      throw new DatabaseError(e.toString());
+    });
   }
 
   @override
@@ -21,17 +23,23 @@ class _NativeObjectStore extends ObjectStore {
 
   @override
   Future clear() {
-    return idbObjectStore.clear();
+    return idbObjectStore.clear().catchError((e) {
+      throw new DatabaseError(e.toString());
+    });
   }
 
   @override
   Future put(dynamic value, [dynamic key]) {
-    return idbObjectStore.put(value, key);
+    return idbObjectStore.put(value, key).catchError((e) {
+      throw new DatabaseError(e.toString());
+    });
   }
 
   @override
   Future delete(key) {
-    return idbObjectStore.delete(key);
+    return idbObjectStore.delete(key).catchError((e) {
+      throw new DatabaseError(e.toString());
+    });
   }
 
   @override
@@ -44,28 +52,27 @@ class _NativeObjectStore extends ObjectStore {
     idb.KeyRange idbKeyRange = _nativeKeyRange(range);
     //idbDevWarning;
     //idbDevPrint("kr1 $range native $idbKeyRange");
-    
+
     Stream<idb.CursorWithValue> stream;
-    
+
     // IE workaround!!!
     if (idbKeyRange == null) {
       stream = idbObjectStore.openCursor( //
-              key: key, //
-              // Weird on ie, uncommenting this line
-              // although null makes it crash
-              // range: idbKeyRange
-              direction: direction, //
-              autoAdvance: autoAdvance);
+      key: key, //
+      // Weird on ie, uncommenting this line
+      // although null makes it crash
+      // range: idbKeyRange
+      direction: direction, //
+      autoAdvance: autoAdvance);
     } else {
-    stream = idbObjectStore.openCursor( //
-        key: key, //
-        range: idbKeyRange,
-        direction: direction, //
-        autoAdvance: autoAdvance);
+      stream = idbObjectStore.openCursor( //
+      key: key, //
+      range: idbKeyRange, direction: direction, //
+      autoAdvance: autoAdvance);
     }
-    
+
     _NativeCursorWithValueController ctlr = new _NativeCursorWithValueController(//
-        stream);
+    stream);
     //idbDevPrint("kr2 $range native $idbKeyRange");
     return ctlr.stream;
 
@@ -85,4 +92,3 @@ class _NativeObjectStore extends ObjectStore {
     return countFuture;
   }
 }
-

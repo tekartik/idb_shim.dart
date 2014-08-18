@@ -8,3 +8,8 @@ test
 - cursor and string value in index
 - key access for cursor/count/get in index/store
 - database name null
+
+
+Publishing note:
+alex.tekartik.pub@gmail.com
+pub publish -n
