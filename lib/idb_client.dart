@@ -85,6 +85,7 @@ abstract class Database {
 abstract class Index {
   Future<int> count([key_OR_range]);
   Future get(dynamic key);
+  Future getKey(dynamic key);
   Stream<CursorWithValue> openCursor({key, KeyRange range, String direction, bool autoAdvance});
   Stream<Cursor> openKeyCursor({key, KeyRange range, String direction, bool autoAdvance});
 }

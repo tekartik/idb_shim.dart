@@ -151,7 +151,19 @@ void testMain(IdbFactory idbFactory) {
         return objectStore.add(value).then((key) {
           return index.get("test1").then((Map readValue) {
             expect(readValue, value);
-            //return transaction.completed;
+          });
+        });
+
+      });
+
+      test('add/get key', () {
+        Map value = {
+          NAME_FIELD: "test1"
+        };
+        Index index = objectStore.index(NAME_INDEX);
+        return objectStore.add(value).then((int key) {
+          return index.getKey("test1").then((int readKey) {
+            expect(readKey, key);
           });
         });
 

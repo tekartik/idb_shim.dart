@@ -10,6 +10,11 @@ class _NativeIndex extends Index {
   }
 
   @override
+  Future getKey(dynamic key) {
+    return idbIndex.getKey(key);
+  }
+
+  @override
   Future<int> count([key_OR_range]) {
     Future<int> countFuture;
     if (key_OR_range == null) {
@@ -39,4 +44,3 @@ class _NativeIndex extends Index {
     return ctlr.stream;
   }
 }
-

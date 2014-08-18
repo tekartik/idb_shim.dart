@@ -83,6 +83,12 @@ class _MemoryIndex extends Index {
     });
   }
 
+  Future getKey(key) {
+    return inTransaction(() {
+      return getSync(key).key;
+    });
+  }
+
   dynamic getItemKey(_MemoryItem item) {
     if (keyPath == null) {
       return item.key;
@@ -173,14 +179,14 @@ class MemoryPrimaryIndex extends _MemoryIndex {
   dynamic getKey(key) {
     return key;
   }
-  MemoryPrimaryIndex(_MemoryObjectStoreData data, String keyPath): super(data, null, keyPath, true, false) {
+  MemoryPrimaryIndex(_MemoryObjectStoreData data, String keyPath) : super(data, null, keyPath, true, false) {
 
   }
 }
 
 class AutoIncrementMemoryPrimaryIndex extends MemoryPrimaryIndex {
   int autoIncrementIndex = 0;
-  AutoIncrementMemoryPrimaryIndex(_MemoryObjectStoreData data, String keyPath): super(data, keyPath) {
+  AutoIncrementMemoryPrimaryIndex(_MemoryObjectStoreData data, String keyPath) : super(data, keyPath) {
   }
 
   @override

@@ -159,6 +159,13 @@ class _WebSqlIndex extends Index {
   }
 
   @override
+  Future getKey(key) {
+    return _checkIndex(() {
+      return store._getKey(key, keyPath);
+    });
+  }
+
+  @override
   Stream<CursorWithValue> openCursor({key, KeyRange range, String direction, bool autoAdvance}) {
     _WebSqlIndexCursorWithValueController ctlr = new _WebSqlIndexCursorWithValueController(this, direction, autoAdvance);
 

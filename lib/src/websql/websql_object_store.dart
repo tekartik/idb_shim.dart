@@ -314,13 +314,25 @@ class _WebSqlObjectStore extends ObjectStore {
       if (rs.rows.length == 0) {
         return null;
       }
-      var value = decodeValue(rs.rows[0]['value']);
+      var value = decodeValue(rs.rows[0][VALUE_COLUMN_NAME]);
 
       // Add key?
       if (keyPath != null) {
         value[keyPath] = key;
       }
       return value;
+    });
+  }
+
+  Future _getKey(dynamic key, [String keyPath]) {
+    var sqlSelect = "SELECT $keyColumn FROM $sqlTableName WHERE ${sqlColumnName(keyPath)} = ? LIMIT 1";
+    var sqlArgs = [encodeKey(key)];
+    return execute(sqlSelect, sqlArgs).then((SqlResultSet rs) {
+      if (rs.rows.length == 0) {
+        return null;
+      }
+      var primaryKey = decodeKey(rs.rows[0][keyColumn]);
+      return primaryKey;
     });
   }
 
