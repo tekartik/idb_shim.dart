@@ -142,7 +142,7 @@ class _MemoryIndex extends Index {
       direction = IDB_DIRECTION_NEXT;
     }
     if (autoAdvance == null) {
-      autoAdvance = true;
+      autoAdvance = false;
     }
 
     _MemoryCursorWithValueController ctlr = new _MemoryCursorWithValueController(this, key, range, direction, autoAdvance);

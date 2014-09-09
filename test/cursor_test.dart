@@ -1,8 +1,8 @@
 library cursor_test;
 
 import 'dart:async';
-import 'package:unittest/unittest.dart';
 import 'package:idb_shim/idb_client.dart';
+import 'package:idb_shim/idb_client_memory.dart';
 import 'idb_test_common.dart';
 
 class TestIdNameRow {
@@ -15,6 +15,9 @@ class TestIdNameRow {
   String name;
 }
 
+void main() {
+  testMain(new IdbMemoryFactory());
+}
 void testMain(IdbFactory idbFactory) {
 
   group('cursor', () {
@@ -38,7 +41,7 @@ void testMain(IdbFactory idbFactory) {
       });
     }
 
-    Future<List<TestIdNameRow>> cursorToList(Stream<CursorWithValue> stream) {
+    Future<List<TestIdNameRow>> _cursorToList(Stream<CursorWithValue> stream) {
       Completer completer = new Completer.sync();
       List<TestIdNameRow> list = new List();
       stream.listen((CursorWithValue cwv) {
@@ -47,6 +50,22 @@ void testMain(IdbFactory idbFactory) {
         completer.complete(list);
       });
       return completer.future;
+    }
+
+    Future<List<TestIdNameRow>> cursorToList(Stream<CursorWithValue> stream) {
+      List<TestIdNameRow> list = new List();
+      return stream.listen((CursorWithValue cwv) {
+        list.add(new TestIdNameRow(cwv));
+      }).asFuture(list);
+    }
+
+    Future<List<TestIdNameRow>> manualCursorToList(Stream<CursorWithValue> stream) {
+      List<TestIdNameRow> list = new List();
+      return stream.listen((CursorWithValue cwv) {
+        list.add(new TestIdNameRow(cwv));
+        cwv.next();
+
+      }).asFuture(list);
     }
 
     group('auto', () {
@@ -80,13 +99,9 @@ void testMain(IdbFactory idbFactory) {
 
         Stream<CursorWithValue> stream = objectStore.openCursor(autoAdvance: true);
         int count = 0;
-        Completer completer = new Completer();
-        stream.listen((CursorWithValue cwv) {
+        return stream.listen((CursorWithValue cwv) {
           count++;
-        }).onDone(() {
-          completer.complete();
-        });
-        return completer.future.then((_) {
+        }).asFuture().then((_) {
           expect(count, 0);
         });
 
@@ -110,6 +125,40 @@ void testMain(IdbFactory idbFactory) {
         });
       });
 
+      test('openCursor no auto advance timeout', () {
+        return fill3SampleRows().then((_) {
+          return objectStore.openCursor(autoAdvance: false).listen((CursorWithValue cwv) {
+
+          }).asFuture().then((_) {
+            fail('should not complete');
+          }).timeout(new Duration(milliseconds: 500), onTimeout: () {
+          });
+        });
+      });
+
+      test('openCursor null auto advance timeout', () {
+        return fill3SampleRows().then((_) {
+          return objectStore.openCursor(autoAdvance: null).listen((CursorWithValue cwv) {
+
+          }).asFuture().then((_) {
+            fail('should not complete');
+          }).timeout(new Duration(milliseconds: 500), onTimeout: () {
+          });
+        });
+      });
+      test('3 item cursor no auto advance', () {
+        return fill3SampleRows().then((_) {
+          return manualCursorToList(objectStore.openCursor(autoAdvance: false)).then((list) {
+            expect(list[0].name, equals('test2'));
+            expect(list[0].id, equals(1));
+            expect(list[1].name, equals('test1'));
+            expect(list[2].name, equals('test3'));
+            expect(list[2].id, equals(3));
+            expect(list.length, 3);
+
+          });
+        });
+      });
       test('3 item cursor', () {
         return fill3SampleRows().then((_) {
           return cursorToList(objectStore.openCursor(autoAdvance: true)).then((list) {
@@ -148,7 +197,7 @@ void testMain(IdbFactory idbFactory) {
                       expect(list.length, 1);
                       expect(list[0].name, equals('test1'));
                       expect(list[0].id, equals(2));
-                      
+
                       return transaction.completed;
                     });
                   });

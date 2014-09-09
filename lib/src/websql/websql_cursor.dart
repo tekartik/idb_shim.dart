@@ -100,7 +100,7 @@ abstract class _WebSqlCursorBaseController<T extends Cursor> {
       direction = IDB_DIRECTION_NEXT;
     }
     if (autoAdvance == null) {
-      autoAdvance = true;
+      autoAdvance = false;
     }
 
   }

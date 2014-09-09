@@ -4,6 +4,8 @@ import 'package:logging/logging.dart';
 import 'package:unittest/unittest.dart';
 import 'package:idb_shim/idb_client.dart';
 
+export 'package:idb_shim/src/utils/test_utils.dart';
+
 // only for test - INFO - basic output, FINE - show test name before/after - FINEST - samething for console test also
 const Level DEBUG_LEVEL = Level.FINE;
 const String DB_NAME = 'test.db';
