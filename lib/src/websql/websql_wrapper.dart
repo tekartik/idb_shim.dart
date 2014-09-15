@@ -30,9 +30,10 @@ SqlDatabaseFactory get sqlDatabaseFactory {
 class SqlDatabase {
   
   @deprecated
-  static set debug(bool debug) => DEBUG = debug;
+  static set debug(bool debug) => _DEBUG = debug;
   
-  static bool DEBUG = false;
+  static bool get DEBUG => _DEBUG;
+  static bool _DEBUG = false;
   static int _DEBUG_ID = 0;
 
   static bool get supported {
@@ -45,7 +46,7 @@ class SqlDatabase {
   wql.SqlDatabase _sqlDatabase;
   SqlDatabase(this._sqlDatabase, String _name, String _version, String _displayName, int _estimatedSize) {
     //debug = true; // to remove
-    if (DEBUG) {
+    if (_DEBUG) {
       _debugId = ++_DEBUG_ID;
       debugLog("openDatabase $_debugId $_displayName(${_name}, $_version, $_estimatedSize)");
     }
@@ -59,7 +60,7 @@ class SqlDatabase {
   Future<SqlTransaction> transaction() {
     Completer completer = new Completer.sync();
     _sqlDatabase.transaction((txn) {
-      if (DEBUG) {
+      if (_DEBUG) {
         debugLog("BEGIN TRANSACTION");
       }
       completer.complete(new SqlTransaction(this, txn));
@@ -93,11 +94,11 @@ class SqlTransaction {
       arguments = EMPTY_ARGS;
     }
 
-    if (SqlDatabase.DEBUG) {
+    if (SqlDatabase._DEBUG) {
       _database.debugLog(getStatementToString());
     }
     _sqlTxn.executeSql(sqlStatement, arguments, (txn, SqlResultSet rs) {
-      if (SqlDatabase.DEBUG) {
+      if (SqlDatabase._DEBUG) {
         //_database.debugLog(getStatementToString());
         String upperCaseStatement = sqlStatement.toUpperCase();
         if (upperCaseStatement.startsWith("INSERT")) {
@@ -129,7 +130,7 @@ class SqlTransaction {
       _endOperation();
       completer.complete(rs);
     }, (txn, SqlError error) {
-      if (SqlDatabase.DEBUG) {
+      if (SqlDatabase._DEBUG) {
         _database.debugLog(error.message + "(${error.code}) executing " + getStatementToString());
       }
       _endOperation();
@@ -169,7 +170,7 @@ class SqlTransaction {
 
   }
   void commit() {
-    if (SqlDatabase.DEBUG) {
+    if (SqlDatabase._DEBUG) {
       _database.debugLog("COMMIT");
     }
   }

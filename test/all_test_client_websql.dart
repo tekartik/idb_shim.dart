@@ -1,6 +1,7 @@
 library all_test_client_websql;
 
 import 'idb_test_browser.dart';
+import 'idb_test_websql.dart' as idb_wql;
 import 'package:unittest/unittest.dart';
 import 'all_test_common.dart' as all_common;
 import 'websql_wrapper_test.dart' as websql_wrapper_test;
@@ -65,6 +66,7 @@ webSqlTest(IdbWebSqlFactory idbFactory) {
 testMain() {
   group('websql', () {
     if (IdbWebSqlFactory.supported) {
+      idb_wql.SqlDatabase.debug = true;
       IdbWebSqlFactory idbFactory = new IdbWebSqlFactory();
       all_common.testMain(idbFactory);
       websql_wrapper_test.testMain();

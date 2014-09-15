@@ -1,5 +1,37 @@
 part of idb_memory;
 
+class _MemoryItems {
+  Map<dynamic, _MemoryItem> _items = new Map(); // map by primary key
+  List<dynamic> keys = new List(); // ordered
+  void add(_MemoryItem item) {
+    _items[item.key] = item;
+    keys.add(item.key);
+    keys.sort();
+  }
+  void remove(_MemoryItem item) {
+    _items.remove(item.key);
+    keys.remove(item.key);
+  }
+  _MemoryItem get first {
+    // give a random one for now
+    return _items[keys.first];
+  }
+
+  int get length => _items.length;
+
+  bool get isEmpty => _items.isEmpty;
+
+  toString() => _items.toString();
+
+  _MemoryItem getAtIndex(int i) {
+    return getByKey(keys[i]);
+  }
+  // By primary key
+  _MemoryItem getByKey(key) {
+    return _items[key];
+  }
+}
+
 class _MemoryIndex extends Index {
   _MemoryObjectStoreData data;
   MemoryObjectStore get store => data.store;
@@ -13,7 +45,7 @@ class _MemoryIndex extends Index {
   // Ordered keys
   List keys = new List();
 
-  Map<dynamic, _MemoryItem> itemsByKey = new Map();
+  Map<dynamic, _MemoryItems> itemsByKey = new Map();
   _MemoryIndex(this.data, this.name, this.keyPath, this.unique, this.multiEntry) {
     // Build the index based on the existing
     // TODO
@@ -64,13 +96,29 @@ class _MemoryIndex extends Index {
     return keys;
   }
 
-  _MemoryItem getSync(key) {
-    var item = itemsByKey[key];
-    return item;
+  _MemoryItems getItemsSync(key) {
+    return itemsByKey[key];
   }
 
+  _MemoryItem getSync(key) {
+    _MemoryItems items = getItemsSync(key);
+    if (items == null) {
+      return null;
+    }
+    return items.first;
+  }
+
+  _MemoryItems getOrAdd(key, _MemoryItem item) {
+    _MemoryItems items = itemsByKey[key];
+    if (items == null) {
+      items = new _MemoryItems();
+      itemsByKey[key] = items;
+    }
+    items.add(item);
+    return items;
+  }
   void setSync(key, _MemoryItem item) {
-    itemsByKey[key] = item;
+    getOrAdd(key, item);
   }
 
   Future inTransaction(computation()) {
@@ -100,10 +148,56 @@ class _MemoryIndex extends Index {
   Future<int> count([key_OR_range]) {
     return inTransaction(() {
       List _keys = filterKeysByKeyOrRange(key_OR_range);
-      return _keys.length;
+
+      int count = 0;
+      for (var key in _keys) {
+        _MemoryItems items = getItemsSync(key);
+        if (items != null) {
+          count += items.length;
+        }
+      }
+      return count;
     });
   }
 
+//  _void checkUnique(var key, _MemoryItem item, _MemoryItem oldItem) {
+//
+//  }
+//  void updateIndex(_MemoryItem item, [_MemoryItem oldItem, check]) {
+//    var key = getItemKey(item);
+//        var oldKey;
+//
+//        if (oldItem != null) {
+//          oldKey = getItemKey(oldItem);
+//        } else {
+//          oldItem = get
+//        }
+//
+//        if (oldKey != null) {
+//          if (oldKey != key) {
+//            removeIndex(oldItem);
+//          } else {
+//            // check here
+//            itemsByKey[key] = item;
+//            return;
+//          }
+//        } else {
+//          if (unique) {
+//          if (keys.contains(key)) {
+//
+//          }
+//          }
+//          // Add and sort
+//          keys.add(key);
+//          keys.sort();
+//
+//          // check here
+//          if (unique) {
+//
+//          }
+//          itemsByKey[key] = item;
+//        }
+//  }
   void updateIndex(_MemoryItem item, [_MemoryItem oldItem]) {
 
     var key = getItemKey(item);
@@ -116,23 +210,47 @@ class _MemoryIndex extends Index {
     if (oldKey != null) {
       if (oldKey != key) {
         removeIndex(oldItem);
-      } else {
-        itemsByKey[key] = item;
-        return;
       }
-    } else {
-      // Add and sort
+    }
+
+    // Existing
+    _MemoryItems items = getItemsSync(key);
+    if (items != null) {
+      // if (isP)
+      if (unique) {
+        if (items.first.key != item.key) {
+          throw new _MemoryError(_MemoryError.KEY_ALREADY_EXISTS, "key already exists in ${this}");
+        }
+      }
+//        if (items.getByKey())
+    }
+
+
+    // Add and sort
+    if (!keys.contains(key)) {
       keys.add(key);
       keys.sort();
-
-      itemsByKey[key] = item;
     }
+
+
+    getOrAdd(key, item);
+    //itemsByKey[key] = item;
+
   }
 
   void removeIndex(_MemoryItem item) {
     var key = getItemKey(item);
 
-    keys.remove(key);
+    _MemoryItems items = itemsByKey[key];
+    if (items == null) {
+
+    } else {
+      items.remove(item);
+      if (items.isEmpty) {
+        keys.remove(key);
+      }
+    }
+
     itemsByKey.remove(key);
   }
 

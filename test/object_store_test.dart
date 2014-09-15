@@ -184,8 +184,8 @@ void testMain(IdbFactory idbFactory) {
         });
       });
 
-      // not working in js
-      skip_test('add_twice_same_key', () {
+      // not working in js firefox
+      test('add_twice_same_key', () {
         Map value = {};
         return objectStore.add(value, 123).then((key) {
           expect(key, 123);

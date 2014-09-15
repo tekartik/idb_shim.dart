@@ -17,6 +17,7 @@ class _WebSqlIndex extends Index {
   bool get multiEntry => data.multiEntry;
 
 
+  String get sqlIndexName => store.getSqlIndexName(keyPath);
   String get sqlTableName => store.sqlTableName;
   String get keyColumn => store.sqlColumnName(keyPath);
   // Ordered keys
@@ -107,11 +108,34 @@ class _WebSqlIndex extends Index {
 
 
   Future create() {
-    String alterSql = "ALTER TABLE ${store.sqlTableName} ADD ${keyColumn} BLOB";
+    String sqlTableName = this.sqlTableName;
+    String sqlIndexName = this.sqlIndexName;
+    String alterSql = "ALTER TABLE ${sqlTableName} ADD ${keyColumn} BLOB";
     String updateSql = "UPDATE stores SET indecies = ? WHERE name = ?";
+
     List updateArgs = [indeciesToString(store.indecies), store.name];
     return transaction.execute(alterSql).then((_) {
       return transaction.execute(updateSql, updateArgs);
+    }).then((_) {
+      // Drop the index if needed
+
+
+      String dropIndexSql = "DROP INDEX IF EXISTS $sqlIndexName";
+      return transaction.execute(dropIndexSql).then((_) {
+
+        // create the index
+        StringBuffer sb = new StringBuffer();
+        sb.write("CREATE ");
+        if (unique) {
+          sb.write("UNIQUE ");
+        }
+        sb.write("INDEX $sqlIndexName ON $sqlTableName ($keyColumn)");
+        String createIndexSql = sb.toString();
+
+        return transaction.execute(createIndexSql);
+
+      });
+
     });
     //       String createSql = "CREATE TABLE $_tableName (${keyColumn} " + (autoIncrement ? "INTEGER PRIMARY KEY AUTOINCREMENT" : "BLOB PRIMARY KEY") + ", $VALUE_COLUMN_NAME BLOB)";
     //       String insertStore = "INSERT INTO stores (name, key_path, auto_increment) VALUES (?, ?, ?)";

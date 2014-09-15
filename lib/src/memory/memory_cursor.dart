@@ -23,7 +23,7 @@ abstract class _MemoryCommonCursor<T extends Cursor> {
   Object get key => _item[_index.keyPath];
   Object get primaryKey => _item.key;
   String get direction => _ctlr.direction;
-  Future update(value) => _store.put(value);
+  Future update(value) => _store.put(value, primaryKey);
   Future delete() => _store.delete(primaryKey);
 
   String toString() {
@@ -52,7 +52,10 @@ abstract class MemoryCursorBaseController<T extends Cursor> {
   StreamController<T> ctlr = new StreamController(sync: true);
   String direction;
   bool autoAdvance;
+  //int currentIndex = -1;
   int currentKeyIndex = -1;
+  int currentItemIndex = null; // in the _MemoryItems
+  int currentItemCount = null;
   _MemoryTransaction get transaction => store.transaction;
   _MemoryIndex index;
   MemoryObjectStore get store => index.data.store;
@@ -85,30 +88,53 @@ abstract class MemoryCursorBaseController<T extends Cursor> {
 
   Future advance(int count) {
     return transaction._enqueue(() {
-      currentKeyIndex += count;
-      if (currentKeyIndex >= _keys.length) {
-        // Prevent auto advance
-        autoAdvance = false;
-        return ctlr.close();
-
-      } else {
-        // Handle direction
-        int realKeyIndex;
-        switch (direction) {
-          case IDB_DIRECTION_NEXT:
-            realKeyIndex = currentKeyIndex;
-            break;
-          case IDB_DIRECTION_PREV:
-            realKeyIndex = _keys.length - (currentKeyIndex + 1);
-            break;
-          default:
-            throw new ArgumentError("direction '$direction' not supported");
+      if (currentItemIndex != null) {
+        if (++currentItemIndex >= currentItemCount) {
+          currentItemIndex = null;
         }
-        //var key =
-        _MemoryItem item = index.itemsByKey[_keys[realKeyIndex]];
-        ctlr.add(newCursor(item));
+      }
+
+      if (currentItemIndex == null) {
+        currentKeyIndex += count;
+        currentItemIndex = 0;
+        if (currentKeyIndex >= _keys.length) {
+          // Prevent auto advance
+          autoAdvance = false;
+          return ctlr.close();
+
+        }
+      }
+      // Handle direction
+      int realKeyIndex;
+      switch (direction) {
+        case IDB_DIRECTION_NEXT:
+          realKeyIndex = currentKeyIndex;
+          break;
+        case IDB_DIRECTION_PREV:
+          realKeyIndex = _keys.length - (currentKeyIndex + 1);
+          break;
+        default:
+          throw new ArgumentError("direction '$direction' not supported");
+      }
+      _MemoryItems items = index.itemsByKey[_keys[realKeyIndex]];
+      currentItemCount = items.length;
+
+
+      int realItemIndex;
+      switch (direction) {
+        case IDB_DIRECTION_NEXT:
+          realItemIndex = currentItemIndex;
+          break;
+        case IDB_DIRECTION_PREV:
+          realItemIndex = currentItemCount - (currentItemIndex + 1);
+          break;
 
       }
+      //var key =
+      ctlr.add(newCursor(items.getAtIndex(realItemIndex)));
+
+
+
     });
   }
 
@@ -127,7 +153,7 @@ class _MemoryCursorWithValueController extends MemoryCursorBaseController<Cursor
     return new _MemoryCursorWithValue(this, item);
   }
 
-  _MemoryCursorWithValueController(_MemoryIndex index, key, KeyRange range, String direction, bool autoAdvance): super(index, key, range, direction, autoAdvance) {
+  _MemoryCursorWithValueController(_MemoryIndex index, key, KeyRange range, String direction, bool autoAdvance) : super(index, key, range, direction, autoAdvance) {
 
 
 
@@ -142,7 +168,7 @@ class MemoryCursorController extends MemoryCursorBaseController<Cursor> {
   Cursor newCursor(_MemoryItem item) {
     return new _MemoryCursor(this, item);
   }
-  MemoryCursorController(_MemoryIndex index, key, KeyRange range, String direction, bool autoAdvance): super(index, key, range, direction, autoAdvance) {
+  MemoryCursorController(_MemoryIndex index, key, KeyRange range, String direction, bool autoAdvance) : super(index, key, range, direction, autoAdvance) {
   }
 
 

@@ -41,9 +41,17 @@ class _WebSqlObjectStore extends ObjectStore {
     return getSqlTableName(name);
   }
 
+  String getSqlIndexName(String keyPath) {
+    return "_index_${name}_${keyPath}";
+  }
+
   static String getSqlTableName(String storeName) {
     return "_store_$storeName";
   }
+
+//  static String getSqlIndexName(String storeName) {
+//      return "_index_$storeName";
+//    }
 
   String sqlColumnName(String keyPath) {
     if (keyPath == null) {

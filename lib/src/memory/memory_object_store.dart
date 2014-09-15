@@ -50,6 +50,12 @@ class MemoryObjectStore extends ObjectStore {
       index.updateIndex(item, oldItem);
     });
   }
+  
+  checkAndUpdateAllIndecies(_MemoryItem item, [_MemoryItem oldItem]) {
+      data.indecies.forEach((_MemoryIndex index) {
+        index.updateIndex(item, oldItem);
+      });
+    }
 
   removeAllIndecies(_MemoryItem item) {
     data.indecies.forEach((_MemoryIndex index) {
@@ -130,6 +136,7 @@ class MemoryObjectStore extends ObjectStore {
       }
       data.primaryIndex.setSync(newKey, item);
       // Add each indecies
+      //checkAndUpdateAllIndecies(item);
       updateAllIndecies(item);
       return newKey;
     });

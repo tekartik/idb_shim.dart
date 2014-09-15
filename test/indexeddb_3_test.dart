@@ -1,5 +1,5 @@
 library IndexedDB3Test;
-import 'package:unittest/unittest.dart';
+import 'idb_test_common.dart';
 import 'dart:async';
 import 'package:idb_shim/idb_client.dart';
 
@@ -113,27 +113,27 @@ testMain(IdbFactory idbFactory_) {
   if (IdbFactory.supported) {
     var db;
     //var oldTimeout;
-    
-    group('', () {
-    setUp(() {
-      //oldTimeout = unittestConfiguration.timeout;
-      //unittestConfiguration.timeout = new Duration(seconds: 30);
-      return setupDb(idbFactory).then((result) {
-        db = result;
-      });
-    });
-    
-    tearDown(() {
-      db.close();
-    });
-   
-    test('readAll1', () {
-      return readAllViaCursor(db);
-    });
 
-    test('readAll2', () {
-      return readAllReversedViaCursor(db);
-    });
+    group('', () {
+      setUp(() {
+        //oldTimeout = unittestConfiguration.timeout;
+        //unittestConfiguration.timeout = new Duration(seconds: 30);
+        return setupDb(idbFactory).then((result) {
+          db = result;
+        });
+      });
+
+      tearDown(() {
+        db.close();
+      });
+
+      test('readAll1', () {
+        return readAllViaCursor(db);
+      });
+
+      test('readAll2', () {
+        return readAllReversedViaCursor(db);
+      });
     });
 
   }
