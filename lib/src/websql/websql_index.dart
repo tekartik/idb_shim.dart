@@ -2,9 +2,10 @@ part of idb_websql;
 
 class _WebSqlIndexData {
   String keyPath;
-  bool unique;
+  bool _unique;
+  bool get unique => _unique == true;
   bool multiEntry;
-  _WebSqlIndexData(this.keyPath, this.unique, this.multiEntry);
+  _WebSqlIndexData(this.keyPath, this._unique, this.multiEntry);
 }
 
 class _WebSqlIndex extends Index {
