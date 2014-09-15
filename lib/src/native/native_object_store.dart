@@ -12,7 +12,7 @@ class _NativeObjectStore extends ObjectStore {
   @override
   Future add(dynamic value, [dynamic key]) {
     return idbObjectStore.add(value, key).catchError((e) {
-      throw new DatabaseError(e.toString());
+      throw new _NativeDatabaseError(e);
     });
   }
 

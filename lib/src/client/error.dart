@@ -2,8 +2,9 @@ part of idb_client;
 
 // added definition
 class DatabaseError extends Error {
-  String message;
-  DatabaseError(this.message);
+  String get message => _message;
+  String _message;
+  DatabaseError(this._message);
   
   String toString() => message;
 }

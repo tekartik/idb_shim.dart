@@ -35,10 +35,16 @@ class _WebSqlTransaction extends Transaction { // extends CommonTransaction {
       args = [];
     }
     if (_sqlTransaction != null) {
-      return _sqlTransaction.execute(statement, args);
+      return _sqlTransaction.execute(statement, args).catchError((e) {
+        // convert to error that we understand
+        throw new _WebSqlDatabaseError(e);
+      });
     } else {
       return sqlTransaction.then((tx) {
-        return tx.execute(statement, args);
+        return tx.execute(statement, args).catchError((e) {
+          // convert to error that we understand
+          throw new _WebSqlDatabaseError(e);
+        });
       });
     }
   }

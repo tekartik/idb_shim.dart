@@ -1,7 +1,6 @@
 library index_cursor_test;
 
 import 'dart:async';
-import 'package:unittest/unittest.dart';
 import 'package:idb_shim/idb_client.dart';
 import 'idb_test_common.dart';
 
@@ -15,6 +14,10 @@ class TestIdNameRow {
   String name;
 }
 
+// so that this can be run directly
+void main() {
+  testMain(new IdbMemoryFactory());
+}
 void testMain(IdbFactory idbFactory) {
 
   group('index cursor', () {
@@ -51,8 +54,6 @@ void testMain(IdbFactory idbFactory) {
     }
 
     group('auto', () {
-
-
 
       setUp(() {
         return idbFactory.deleteDatabase(DB_NAME).then((_) {
@@ -171,7 +172,7 @@ void testMain(IdbFactory idbFactory) {
                 expect(list[0].name, equals('test1'));
                 expect(list[0].id, equals(2));
 
-                return transaction.completed;
+                //return transaction.completed;
               });
             });
           });

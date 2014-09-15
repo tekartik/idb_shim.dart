@@ -1,9 +1,13 @@
 library index_test;
 
-import 'package:unittest/unittest.dart';
 import 'package:idb_shim/idb_client.dart';
 import 'idb_test_common.dart';
 //import 'idb_test_factory.dart';
+
+// so that this can be run directly
+void main() {
+  testMain(new IdbMemoryFactory());
+}
 
 void testMain(IdbFactory idbFactory) {
 
@@ -60,6 +64,11 @@ void testMain(IdbFactory idbFactory) {
       Transaction transaction;
       ObjectStore objectStore;
 
+      _createTransaction() {
+        transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+        objectStore = transaction.objectStore(STORE_NAME);
+      }
+      
       setUp(() {
         return idbFactory.deleteDatabase(DB_NAME).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
@@ -69,17 +78,20 @@ void testMain(IdbFactory idbFactory) {
           }
           return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
             db = database;
-            transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-            objectStore = transaction.objectStore(STORE_NAME);
+            _createTransaction();
 
           });
         });
       });
 
       tearDown(() {
-        return transaction.completed.then((_) {
+        if (transaction != null) {
+          return transaction.completed.then((_) {
+            db.close();
+          });
+        } else {
           db.close();
-        });
+        }
       });
 
       test('primary', () {
@@ -167,6 +179,27 @@ void testMain(IdbFactory idbFactory) {
           });
         });
 
+      });
+
+      skip_test('add_twice_same_key', () {
+        Map value1 = {
+          NAME_FIELD: "test1"
+        };
+
+        Index index = objectStore.index(NAME_INDEX);
+        return objectStore.add(value1).then((_) {
+          return objectStore.add(value1).catchError((DatabaseError e) {
+            //devPrint(e);
+          }).then((_) {
+//            // create new transaction;
+            _createTransaction();
+            index = objectStore.index(NAME_INDEX);
+            return index.count(new KeyRange.only("test1")).then((int count) {
+              expect(count, 0);
+            });
+            // });
+          });
+        });
       });
 
       test('add/get 2', () {

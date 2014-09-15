@@ -1,10 +1,14 @@
 library object_store_test;
 
-import 'package:unittest/unittest.dart';
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/common/common_value.dart';
 import 'idb_test_common.dart';
 //import 'idb_test_factory.dart';
+
+// so that this can be run directly
+void main() {
+  testMain(new IdbMemoryFactory());
+}
 
 void testMain(IdbFactory idbFactory) {
 
@@ -38,6 +42,11 @@ void testMain(IdbFactory idbFactory) {
       Transaction transaction;
       ObjectStore objectStore;
 
+      _createTransaction() {
+        transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+        objectStore = transaction.objectStore(STORE_NAME);
+      }
+
       setUp(() {
         return idbFactory.deleteDatabase(DB_NAME).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
@@ -46,8 +55,7 @@ void testMain(IdbFactory idbFactory) {
           }
           return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
             db = database;
-            transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-            objectStore = transaction.objectStore(STORE_NAME);
+            _createTransaction();
             return db;
 
           });
@@ -55,12 +63,19 @@ void testMain(IdbFactory idbFactory) {
       });
 
       tearDown(() {
-        db.close();
+        runZoned(() {});
+        if (db != null) {
+          if (transaction != null) {
+            return transaction.completed.then((_) {
+              db.close();
+            });
+          } else {
+            db.close();
+          }
+        }
+
       });
 
-
-      test('nothing', () {
-      });
 
       // Good first test
       //          test('add', () {
@@ -167,6 +182,24 @@ void testMain(IdbFactory idbFactory) {
             expect(readValue, value);
           });
         });
+      });
+
+      // not working in js
+      skip_test('add_twice_same_key', () {
+        Map value = {};
+        return objectStore.add(value, 123).then((key) {
+          expect(key, 123);
+          return transaction.completed.then((_) {
+            _createTransaction();
+            return objectStore.add(value, 123).then((_) {}, onError: (DatabaseError e) {
+              transaction = null;
+            }).then((_) {
+              expect(transaction, null);
+            });
+          });
+
+        });
+
       });
 
       test('add/get string', () {

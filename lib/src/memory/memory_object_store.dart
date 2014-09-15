@@ -124,6 +124,10 @@ class MemoryObjectStore extends ObjectStore {
 
       // when keyPath is specified in the index, add it to the value
       _MemoryItem item = new _MemoryItem(newKey, value, keyPath);
+      
+      if (data.primaryIndex.getSync(newKey) != null) {
+        throw new _MemoryError(_MemoryError.KEY_ALREADY_EXISTS, 'Key already exists in the object store');
+      }
       data.primaryIndex.setSync(newKey, item);
       // Add each indecies
       updateAllIndecies(item);

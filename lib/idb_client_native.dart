@@ -12,6 +12,7 @@ part 'src/native/native_object_store.dart';
 part 'src/native/native_cursor.dart';
 part 'src/native/native_index.dart';
 part 'src/native/native_key_range.dart';
+part 'src/native/native_error.dart';
 
 class IdbNativeFactory extends IdbFactory {
 
