@@ -20,7 +20,7 @@ void main() {
 }
 void testMain(IdbFactory idbFactory) {
 
-  solo_group('index cursor', () {
+  group('index cursor', () {
 
     Database db;
     Transaction transaction;
