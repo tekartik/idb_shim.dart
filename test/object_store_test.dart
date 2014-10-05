@@ -243,7 +243,7 @@ void testMain(IdbFactory idbFactory) {
       });
 
 
-      solo_test('properties', () {
+      test('properties', () {
         expect(objectStore.keyPath, null);
         expect(objectStore.autoIncrement, true);
       });
@@ -614,7 +614,7 @@ void testMain(IdbFactory idbFactory) {
         });
       });
 
-      solo_test('properties', () {
+      test('properties', () {
         expect(objectStore.keyPath, keyPath);
         expect(objectStore.autoIncrement, true);
       });

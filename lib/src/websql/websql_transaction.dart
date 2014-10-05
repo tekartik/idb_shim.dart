@@ -26,7 +26,9 @@ class _WebSqlTransaction extends Transaction { // extends CommonTransaction {
 
   @override
   ObjectStore objectStore(String name) {
-    _WebSqlObjectStore store = new _WebSqlObjectStore(name, this, null, null);
+    
+    _WebSqlObjectStore _onCreateStore = (database as _WebSqlDatabase).stores[name];
+    _WebSqlObjectStore store = new _WebSqlObjectStore(name, this, _onCreateStore.keyPath, _onCreateStore.autoIncrement);
     return store;
   }
 
@@ -73,5 +75,9 @@ class _WebSqlTransaction extends Transaction { // extends CommonTransaction {
         });
       });
     }
+  }
+  
+  toString() {
+    return _mode;
   }
 }

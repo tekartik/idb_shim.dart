@@ -28,6 +28,8 @@ class _WebSqlObjectStore extends ObjectStore {
   */
 
   _WebSqlObjectStore(this.name, this.transaction, this.keyPath, this.autoIncrement) {
+    autoIncrement = (autoIncrement == true);
+    //devPrint(keyPath);
 
   }
 
