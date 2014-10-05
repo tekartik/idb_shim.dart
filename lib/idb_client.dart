@@ -62,6 +62,9 @@ abstract class ObjectStore {
   Stream<CursorWithValue> openCursor({key, KeyRange range, String direction, bool autoAdvance});
 
   Future<int> count([dynamic key_OR_range]);
+  
+  dynamic get keyPath;
+  bool get autoIncrement;
 }
 
 abstract class Database {

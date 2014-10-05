@@ -252,7 +252,7 @@ class _WebSqlDatabase extends Database {
 
 
   @override
-  ObjectStore createObjectStore(String name, {String keyPath, bool autoIncrement}) {
+  ObjectStore createObjectStore(String name, {String keyPath, bool autoIncrement: false}) {
     if (versionChangeTransaction == null) {
       throw new StateError("cannot create objectStore outside of a versionChangedEvent");
     }

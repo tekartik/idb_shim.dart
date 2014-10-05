@@ -91,4 +91,10 @@ class _NativeObjectStore extends ObjectStore {
     }
     return countFuture;
   }
+  
+  @override
+  get keyPath => idbObjectStore.keyPath;
+  
+  @override
+  get autoIncrement => idbObjectStore.autoIncrement;
 }

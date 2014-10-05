@@ -173,6 +173,10 @@ void testMain(IdbFactory idbFactory) {
       //              });
       //            });
       //          });
+      test('properties', () {
+        expect(objectStore.keyPath, null);
+        expect(objectStore.autoIncrement, false);
+      });
 
       test('add/get map', () {
         Map value = {};
@@ -239,7 +243,9 @@ void testMain(IdbFactory idbFactory) {
       });
 
 
-      test('nothing', () {
+      solo_test('properties', () {
+        expect(objectStore.keyPath, null);
+        expect(objectStore.autoIncrement, true);
       });
 
       // Good first test
@@ -608,7 +614,9 @@ void testMain(IdbFactory idbFactory) {
         });
       });
 
-      test('nothing', () {
+      solo_test('properties', () {
+        expect(objectStore.keyPath, keyPath);
+        expect(objectStore.autoIncrement, true);
       });
 
       test('simple get', () {

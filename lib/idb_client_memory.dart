@@ -27,6 +27,8 @@ class IdbMemoryFactory extends IdbFactory {
     }
     return _instance;
   }
+  
+  
 
   @override
   Future<Database> open(String dbName, {int version, OnUpgradeNeededFunction onUpgradeNeeded, OnBlockedFunction onBlocked}) {

@@ -70,7 +70,9 @@ class MemoryObjectStore extends ObjectStore {
     return index;
   }
 
+  @override
   String get keyPath => data.primaryIndex.keyPath;
+  
   bool get autoIncrement => data.primaryIndex is AutoIncrementMemoryPrimaryIndex;
 
   Future _checkStore(computation()) {
