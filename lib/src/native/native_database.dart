@@ -25,7 +25,7 @@ class _NativeVersionChangeEvent extends VersionChangeEvent {
 
 class _NativeDatabase extends Database {
   idb.Database idbDatabase;
-  _NativeDatabase(this.idbDatabase);
+  _NativeDatabase(this.idbDatabase) : super(idbNativeFactory);
 
   int get version => idbDatabase.version;
 
@@ -65,6 +65,9 @@ class _NativeDatabase extends Database {
   Iterable<String> get objectStoreNames {
     return idbDatabase.objectStoreNames;
   }
+  
+  @override
+  String get name => idbDatabase.name;
 
   @override
   Stream<VersionChangeEvent> get onVersionChange {

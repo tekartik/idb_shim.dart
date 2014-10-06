@@ -38,9 +38,9 @@ class _MemoryDatabase extends Database with WithCurrentTransaction {
   int get dataVersion => _data.version;
 
   bool opened = true;
-  IdbMemoryFactory factory;
+  //IdbMemoryFactory factory;
   String name;
-  _MemoryDatabase(this.factory, this.name, this._data) {
+  _MemoryDatabase(this.name, this._data) : super(idbMemoryFactory) {
     if (_data == null) {
       _data = new _MemoryDatabaseData();
     }

@@ -1,9 +1,13 @@
 library database_test;
 
-import 'package:unittest/unittest.dart';
 import 'package:idb_shim/idb_client.dart';
+import 'package:idb_shim/idb_client_memory.dart';
 import 'idb_test_common.dart';
 //import 'idb_test_factory.dart';
+
+main() {
+  testMain(idbMemoryFactory);
+}
 
 void testMain(IdbFactory idbFactory) {
 
@@ -53,7 +57,10 @@ void testMain(IdbFactory idbFactory) {
 
     test('empty', () {
       return _open().then((_) {
+        expect(db.factory, idbFactory);
         expect(db.objectStoreNames.isEmpty, true);
+        expect(db.name, DB_NAME);
+        expect(db.version, 1);
       });
     });
 

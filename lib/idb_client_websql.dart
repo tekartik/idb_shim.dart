@@ -21,6 +21,8 @@ part 'src/websql/websql_cursor.dart';
 part 'src/websql/websql_query.dart';
 part 'src/websql/websql_error.dart';
 
+IdbWebSqlFactory get idbWebSqlFactory => new IdbWebSqlFactory();
+
 class IdbWebSqlFactory extends IdbFactory {
 
   // global store
@@ -58,7 +60,7 @@ class IdbWebSqlFactory extends IdbFactory {
 
     // add the db name and remove it if it fails
     return _globalStore.addDatabaseName(dbName).then((_) {
-      _WebSqlDatabase database = new _WebSqlDatabase(this, dbName);
+      _WebSqlDatabase database = new _WebSqlDatabase(dbName);
       return database.open(version, onUpgradeNeeded).then((_) {
         return database;
       }, onError: (e) {
@@ -76,7 +78,7 @@ class IdbWebSqlFactory extends IdbFactory {
     }
     // remove the db name and add it back if it fails
     return _globalStore.deleteDatabaseName(dbName).then((_) {
-      _WebSqlDatabase database = new _WebSqlDatabase(this, dbName);
+      _WebSqlDatabase database = new _WebSqlDatabase(dbName);
       return database._delete().then((_) {
         return this;
       }, onError: (e) {

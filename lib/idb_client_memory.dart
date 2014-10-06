@@ -13,6 +13,8 @@ part 'src/memory/memory_transaction.dart';
 part 'src/memory/memory_database.dart';
 part 'src/memory/memory_error.dart';
 
+IdbMemoryFactory get idbMemoryFactory => new IdbMemoryFactory();
+
 class IdbMemoryFactory extends IdbFactory {
 
   Map<String, _MemoryDatabaseData> dbMap = new Map();
@@ -50,7 +52,7 @@ class IdbMemoryFactory extends IdbFactory {
     }
 
     _MemoryDatabaseData foundData = dbMap[dbName];
-    _MemoryDatabase db = new _MemoryDatabase(this, dbName, foundData);
+    _MemoryDatabase db = new _MemoryDatabase(dbName, foundData);
     if (foundData == null) {
       dbMap[dbName] = db._data;
     }

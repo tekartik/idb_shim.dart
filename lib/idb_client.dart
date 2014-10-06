@@ -92,12 +92,30 @@ abstract class ObjectStore {
 }
 
 abstract class Database {
+  Database(this._factory);
   ObjectStore createObjectStore(String name, {String keyPath, bool autoIncrement});
   Transaction transaction(storeName_OR_storeNames, String mode);
   Transaction transactionList(List<String> storeNames, String mode);
+  
+  /**
+   * list of the names of the object stores currently in the connected database
+   */
   Iterable<String> get objectStoreNames;
   void deleteObjectStore(String name);
+
+  /**
+   * returns immediately and closes the connection in a separate thread.
+   * The connection is not actually closed until all transactions created using this
+   * connection are complete. No new transactions can be created for this connection
+   * once this method is called. Methods that create transactions throw an exception 
+   * if a closing operation is pending.
+   */
   void close();
+
+  /**
+   * A 64-bit integer that contains the version of the connected database. 
+   * When a database is first created, this attribute is an empty string.
+   */
   int get version;
 
   /**
@@ -107,6 +125,20 @@ abstract class Database {
    * in a new version
    */
   Stream<VersionChangeEvent> get onVersionChange;
+
+  /**
+   * The IDBDatabase interface of the IndexedDB API provides a connection to a database; 
+   * you can use an IDBDatabase object to open a transaction on your database then create, 
+   * manipulate, and delete objects (data) in that database. The interface provides 
+   * the only way to get and manage versions of the database.
+   */
+  String get name;
+
+  /**
+   * factory for this type of database
+   */
+  IdbFactory get factory => _factory;
+  final IdbFactory _factory;
 }
 
 

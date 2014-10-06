@@ -14,6 +14,8 @@ part 'src/native/native_index.dart';
 part 'src/native/native_key_range.dart';
 part 'src/native/native_error.dart';
 
+IdbNativeFactory get idbNativeFactory => new IdbNativeFactory();
+
 class IdbNativeFactory extends IdbFactory {
 
   static IdbNativeFactory _instance;

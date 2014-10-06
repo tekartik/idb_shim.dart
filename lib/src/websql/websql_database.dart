@@ -33,9 +33,9 @@ class _WebSqlDatabase extends Database {
 
   //int version = 0;
   //bool opened = true;
-  IdbWebSqlFactory factory;
+  
   String name;
-  _WebSqlDatabase(this.factory, this.name);
+  _WebSqlDatabase(this.name): super(idbWebSqlFactory);
   _WebSqlTransaction versionChangeTransaction;
   SqlDatabase sqlDb;
 
