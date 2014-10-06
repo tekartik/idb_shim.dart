@@ -20,7 +20,7 @@ void main() {
 }
 void testMain(IdbFactory idbFactory) {
 
-  group('index cursor', () {
+  group('index_cursor', () {
 
     Database db;
     Transaction transaction;

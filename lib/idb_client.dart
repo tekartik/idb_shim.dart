@@ -86,6 +86,9 @@ abstract class ObjectStore {
    * list of the names of indexes on objects in this object store.
    */
   List<String> get indexNames;
+  
+  @override
+  String toString() => "${name} (key ${keyPath} auto ${autoIncrement})";
 }
 
 abstract class Database {

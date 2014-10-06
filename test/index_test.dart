@@ -296,6 +296,70 @@ void testMain(IdbFactory idbFactory) {
         expect(index.multiEntry, true);
         expect(index.unique, false);
       });
+
+      test('add_one', () {
+        Map value = {
+          NAME_FIELD: "test1"
+        };
+
+        Index index = objectStore.index(NAME_INDEX);
+        return objectStore.add(value).then((key) {
+          return index.get("test1").then((Map readValue) {
+            expect(readValue, value);
+          });
+        });
+
+      });
+
+      test('add_twice_same_key', () {
+        Map value = {
+          NAME_FIELD: "test1"
+        };
+
+        Index index = objectStore.index(NAME_INDEX);
+        return objectStore.add(value).then((key) {
+          return objectStore.add(value).then((key) {
+            return index.get("test1").then((Map readValue) {
+              expect(readValue, value);
+            });
+          });
+        });
+
+      });
+
+      test('add_null', () {
+        Map value = {
+          "dummy": "value"
+        };
+
+        // There was a bug in memory implementation when a key was null
+        Index index = objectStore.index(NAME_INDEX);
+        return objectStore.add(value).then((key) {
+
+          // get(null) does not work
+          return index.count().then((int count) {
+            expect(count, 0);
+          });
+        });
+
+      });
+
+      test('add_null_first', () {
+        Map value = {
+          NAME_FIELD: "test1"
+        };
+
+        // There was a bug in memory implementation when a key was null
+        Index index = objectStore.index(NAME_INDEX);
+        return objectStore.add({}).then((key) {
+          return objectStore.add(value).then((key) {
+            return index.get("test1").then((Map readValue) {
+              expect(readValue, value);
+            });
+          });
+        });
+
+      });
     });
 
     group('two_indecies', () {

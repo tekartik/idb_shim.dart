@@ -65,6 +65,8 @@ class _SelectQuery extends _Query {
       var key = _key_OR_range;
       sqlSelect += " WHERE $_keyColumn = ?";
       args.add(key);
+    } else {
+      sqlSelect += " WHERE $_keyColumn NOT NULL";
     }
 
     // order not needed for COUNT(*)

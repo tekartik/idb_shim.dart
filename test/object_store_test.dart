@@ -12,7 +12,7 @@ void main() {
 
 void testMain(IdbFactory idbFactory) {
 
-  group('object store', () {
+  group('object_store', () {
     group('failure', () {
 
       setUp(() {
@@ -586,7 +586,7 @@ void testMain(IdbFactory idbFactory) {
 
     });
 
-    group('key path auto', () {
+    group('key_path_auto', () {
 
       const String keyPath = "my_key";
       Database db;
@@ -690,6 +690,195 @@ void testMain(IdbFactory idbFactory) {
           //print(e);
         });
       });
+    });
+
+    group('key path non auto', () {
+
+      const String keyPath = "my_key";
+      Database db;
+      Transaction transaction;
+      ObjectStore objectStore;
+
+      setUp(() {
+        return idbFactory.deleteDatabase(DB_NAME).then((_) {
+          void _initializeDatabase(VersionChangeEvent e) {
+            Database db = e.database;
+            ObjectStore objectStore = db.createObjectStore(STORE_NAME, keyPath: keyPath);
+          }
+          return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
+            db = database;
+            transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+            objectStore = transaction.objectStore(STORE_NAME);
+
+          });
+        });
+      });
+
+      tearDown(() {
+        if (transaction != null) {
+          return transaction.completed.then((_) {
+            db.close();
+          });
+        } else {
+          db.close();
+        }
+      });
+
+      test('properties', () {
+        expect(objectStore.keyPath, keyPath);
+        expect(objectStore.autoIncrement, false);
+      });
+
+      test('simple add_get', () {
+        Map value = {
+          keyPath: 'test_value'
+        };
+        return objectStore.add(value).then((key) {
+          expect(key, 'test_value');
+          return objectStore.getObject(key).then((Map valueRead) {
+//               Map expectedValue = cloneValue(value);
+//               expectedValue[keyPath] = 1;
+            expect(valueRead, value);
+          });
+        });
+      });
+
+      test('simple put_get', () {
+        Map value = {
+          keyPath: 'test_value'
+        };
+        return objectStore.put(value).then((key) {
+          expect(key, 'test_value');
+          return objectStore.getObject(key).then((Map valueRead) {
+//               Map expectedValue = cloneValue(value);
+//               expectedValue[keyPath] = 1;
+            expect(valueRead, value);
+          });
+        });
+      });
+
+      test('add_null', () {
+        Map value = {
+          "dummy": 'test_value'
+        };
+        return objectStore.add(value).catchError((DatabaseError e) {
+          // There must be an error!
+          return e;
+        }).then((e) {
+          //expect(isTransactionReadOnlyError(e), isTrue);
+          //devPrint(e);
+          expect(e is DatabaseError, isTrue);
+        });
+      });
+
+      test('put_null', () {
+        Map value = {
+          "dummy": 'test_value'
+        };
+        return objectStore.put(value).catchError((DatabaseError e) {
+          // There must be an error!
+          return e;
+        }).then((e) {
+          //expect(isTransactionReadOnlyError(e), isTrue);
+          //devPrint(e);
+          expect(e is DatabaseError, isTrue);
+        });
+      });
+
+      test('add_twice', () {
+        Map value = {
+          keyPath: 'test_value'
+        };
+        return objectStore.add(value).then((key) {
+          expect(key, 'test_value');
+          return objectStore.add(value).catchError((DatabaseError e) {
+            // There must be an error!
+            return e;
+          }).then((e) {
+            //expect(isTransactionReadOnlyError(e), isTrue);
+            //devPrint(e);
+            expect(e is DatabaseError, isTrue);
+
+            // in native completed will never succeed so remove it
+            transaction = null;
+          });
+        });
+      });
+
+      // put twice should be fine
+      test('put_twice', () {
+        Map value = {
+          keyPath: 'test_value'
+        };
+        return objectStore.put(value).then((key) {
+          expect(key, 'test_value');
+          return objectStore.put(value).then((key) {
+            // There must be only one item
+            //return e;
+            return objectStore.count().then((count) {
+              expect(count, 1);
+            });
+          });
+        });
+      });
+
+//      solo_test('simple add with keyPath and next', () {
+//        Map value = {
+//          'test': 'test_value',
+//          keyPath: 123
+//        };
+//        return objectStore.add(value).then((key) {
+//          expect(key, 123);
+//          return objectStore.getObject(key).then((Map valueRead) {
+//            expect(value, valueRead);
+//          });
+//        }).then((_) {
+//          Map value = {
+//            'test': 'test_value',
+//          };
+//          return objectStore.add(value).then((key) {
+//            expect(key, 124);
+//          });
+//
+//        });
+//      });
+//
+//      test('put with keyPath', () {
+//        Map value = {
+//          'test': 'test_value',
+//          keyPath: 123
+//        };
+//        return objectStore.put(value).then((key) {
+//          expect(key, 123);
+//          return objectStore.getObject(key).then((Map valueRead) {
+//            expect(value, valueRead);
+//          });
+//        });
+//      });
+//
+//      test('add key and keyPath', () {
+//        Map value = {
+//          'test': 'test_value',
+//          keyPath: 123
+//        };
+//        return objectStore.add(value, 123).then((_) {
+//          fail("should fail");
+//        }, onError: (e) {
+//
+//        });
+//      });
+//
+//      test('put key and keyPath', () {
+//        Map value = {
+//          'test': 'test_value',
+//          keyPath: 123
+//        };
+//        return objectStore.put(value, 123).then((_) {
+//          fail("should fail");
+//        }, onError: (e) {
+//          //print(e);
+//        });
+//      });
     });
   });
 }

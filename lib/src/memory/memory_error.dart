@@ -8,11 +8,12 @@ class _MemoryError extends DatabaseError {
   
   static final int DATABASE_UPGRADED_ERROR_CODE = 1;
   static final int KEY_ALREADY_EXISTS = 2;
+  static final int MISSING_KEY = 3;
   
   _MemoryError(this.errorCode, String message) : super(message);
   
   String toString() {
-    String text = "IdbMemoryError";
+    String text = "IdbMemoryError(${errorCode})";
     if (message != null) {
       text += ": $message";
     }

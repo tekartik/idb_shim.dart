@@ -215,28 +215,31 @@ class _MemoryIndex extends Index {
       }
     }
 
-    // Existing
-    _MemoryItems items = getItemsSync(key);
-    if (items != null) {
-      // if (isP)
-      if (unique) {
-        if (items.first.key != item.key) {
-          throw new _MemoryError(_MemoryError.KEY_ALREADY_EXISTS, "key already exists in ${this}");
+    // key must not be null
+    if (key != null) {
+      // Existing
+      _MemoryItems items = getItemsSync(key);
+      if (items != null) {
+        // if (isP)
+        if (unique) {
+          if (items.first.key != item.key) {
+            throw new _MemoryError(_MemoryError.KEY_ALREADY_EXISTS, "key already exists in ${this}");
+          }
         }
-      }
 //        if (items.getByKey())
+      }
+
+
+      // Add and sort
+      if (!keys.contains(key)) {
+        keys.add(key);
+        keys.sort();
+      }
+
+
+      getOrAdd(key, item);
+      //itemsByKey[key] = item;
     }
-
-
-    // Add and sort
-    if (!keys.contains(key)) {
-      keys.add(key);
-      keys.sort();
-    }
-
-
-    getOrAdd(key, item);
-    //itemsByKey[key] = item;
 
   }
 

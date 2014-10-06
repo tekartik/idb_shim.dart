@@ -3,6 +3,7 @@ library idb_memory;
 import 'dart:async';
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/common/common_value.dart';
+import "src/utils/core_imports.dart";
 
 part 'src/memory/memory_cursor.dart';
 part 'src/memory/memory_item.dart';

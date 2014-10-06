@@ -13,7 +13,7 @@ class _WebSqlObjectStoreMeta {
   Map<String, _WebSqlIndexMeta> indecies = new Map();
 
   Iterable<String> get indexNames => indecies.keys;
-  
+
   _WebSqlObjectStoreMeta(this.name, this.keyPath, this.autoIncrement) {
     autoIncrement = (autoIncrement == true);
   }
@@ -300,6 +300,8 @@ class _WebSqlObjectStore extends ObjectStore {
   Future add(dynamic value, [dynamic key]) {
 
     return _checkWritableStore(() {
+
+
       if (key == null) {
         if (keyPath != null) {
           key = value[keyPath];
@@ -309,6 +311,10 @@ class _WebSqlObjectStore extends ObjectStore {
           return new Future.error(new ArgumentError("both key $key and inline keyPath ${value[keyPath]}"));
         }
       }
+      if ((key == null) && (!autoIncrement)) {
+        throw new _IdbWebSqlError(_IdbWebSqlError.MISSING_KEY, "neither keyPath nor autoIncrement set and trying to add object without key");
+      }
+
 
       return _add(value, key);
     });
@@ -317,6 +323,16 @@ class _WebSqlObjectStore extends ObjectStore {
   Future _put(dynamic value, [dynamic key]) {
     if (!checkKeyValue(keyPath, key, value)) {
       return new Future.error(new ArgumentError("both key $key and inline keyPath ${value[keyPath]}"));
+    }
+
+    if (key == null) {
+      if (keyPath != null) {
+        key = value[keyPath];
+      }
+    }
+
+    if ((key == null) && (!autoIncrement)) {
+      throw new _IdbWebSqlError(_IdbWebSqlError.MISSING_KEY, "neither keyPath nor autoIncrement set and trying to add object without key");
     }
 
     String sets = "$VALUE_COLUMN_NAME = ?";
@@ -344,9 +360,9 @@ class _WebSqlObjectStore extends ObjectStore {
 
   @override
   Future put(dynamic value, [dynamic key]) {
-    if (key == null) {
-      return add(value);
-    }
+//    if (key == null) {
+//      return add(value);
+//    }
 
     return _checkWritableStore(() {
       return _put(value, key);
@@ -491,7 +507,4 @@ class _WebSqlObjectStore extends ObjectStore {
 
   @override
   List<String> get indexNames => _meta.indexNames.toList();
-  
-  @override
-  String toString() => "${name} (key ${keyPath} auto ${autoIncrement})";
 }

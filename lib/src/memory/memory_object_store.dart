@@ -106,13 +106,22 @@ class MemoryObjectStore extends ObjectStore {
 
   Future inWritableTransaction(computation()) {
     return inTransaction(() {
-      if (transaction._mode != IDB_MODE_READ_WRITE) {
-        return new Future.error(new DatabaseReadOnlyError());
+      try {
+        if (transaction._mode != IDB_MODE_READ_WRITE) {
+          return new Future.error(new DatabaseReadOnlyError());
+        }
+        return computation();
+      } catch (e, st) {
+        //devPrint(e);
+        //devPrint(st);
+        throw e;
       }
-      return computation();
     });
   }
 
+  _add(dynamic value, dynamic key) {
+    
+  }
   @override
   Future add(dynamic value, [dynamic key]) {
 
@@ -120,11 +129,11 @@ class MemoryObjectStore extends ObjectStore {
       if (key == null) {
         if (keyPath != null) {
           key = value[keyPath];
-        } else {
-          if (!autoIncrement) {
-            throw new ArgumentError("neither keyPath nor autoIncrement set and trying to add object without key");
-          }
         }
+        if ((key == null) && (!autoIncrement)) {
+          throw new _MemoryError(_MemoryError.MISSING_KEY, "neither keyPath nor autoIncrement set and trying to add object without key");
+        }
+
       } else {
         if (!checkKeyValue(keyPath, key, value)) {
           throw new ArgumentError("both key $key and inline keyPath ${value[keyPath]}");
@@ -180,21 +189,37 @@ class MemoryObjectStore extends ObjectStore {
 
   @override
   Future put(value, [key]) {
-    if (key == null) {
-      return add(value, key);
-    }
+
     return inWritableTransaction(() {
+
       // find key if any
       if (key == null) {
-        key = value[_meta.primaryIndex.keyPath];
+        if (value is Map) {
+          key = value[keyPath];
+        }
+      } else {
+        if (!checkKeyValue(keyPath, key, value)) {
+          throw new ArgumentError("both key $key and inline keyPath ${value[keyPath]}");
+        }
       }
 
-      _MemoryItem oldItem = _get(key);
+      _MemoryItem oldItem;
+      if (key == null) {
+        if (!autoIncrement) {
+          throw new _MemoryError(_MemoryError.MISSING_KEY, "neither keyPath nor autoIncrement set and trying to put object without key");
+        } else {
+          // perform the auto increment
+          key = _meta.primaryIndex.getKey(key);
+        }
+      } else {
+        oldItem = _get(key);
+      }
+
+      _MemoryItem item = new _MemoryItem(key, value, keyPath);
       if (oldItem == null) {
-        return add(value, key);
+        _meta.primaryIndex.setSync(key, item);
       }
 
-      _MemoryItem item = new _MemoryItem(key, value, _meta.primaryIndex.keyPath);
       updateAllIndecies(item, oldItem);
 
       return key;
