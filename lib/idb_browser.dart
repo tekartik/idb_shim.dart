@@ -13,7 +13,7 @@ IdbFactory getIdbFactory([String name]) {
     case IDB_FACTORY_BROWSER:
       return idbBrowserFactory;
     case IDB_FACTORY_PERSISTENT:
-        return idbPersistentFactory;
+      return idbPersistentFactory;
     case IDB_FACTORY_NATIVE:
       return idbNativeFactory;
     case IDB_FACTORY_WEBSQL:
@@ -27,10 +27,10 @@ IdbFactory getIdbFactory([String name]) {
 
 IdbFactory get idbWebSqlFactory {
   if (IdbWebSqlFactory.supported) {
-      return new IdbWebSqlFactory();
-    } else {
-      return null;
-    }
+    return new IdbWebSqlFactory();
+  } else {
+    return null;
+  }
 }
 
 IdbFactory get idbNativeFactory {
@@ -66,8 +66,8 @@ IdbFactory get idbPersistentFactory {
  */
 IdbFactory get idbBrowserFactory {
   IdbFactory idbFactory = idbPersistentFactory;
-    if (idbFactory == null) {
-      idbFactory = idbMemoryFactory;
-    }
-    return idbFactory;
+  if (idbFactory == null) {
+    idbFactory = idbMemoryFactory;
+  }
+  return idbFactory;
 }

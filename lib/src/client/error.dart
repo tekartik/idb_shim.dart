@@ -5,7 +5,7 @@ class DatabaseError extends Error {
   String get message => _message;
   String _message;
   DatabaseError(this._message);
-  
+
   String toString() => message;
 }
 

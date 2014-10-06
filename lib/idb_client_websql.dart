@@ -30,7 +30,7 @@ class IdbWebSqlFactory extends IdbFactory {
   IdbWebSqlFactory._();
 
   String get name => IDB_FACTORY_WEBSQL;
-  
+
   factory IdbWebSqlFactory() {
     if (_instance == null) {
       _instance = new IdbWebSqlFactory._();

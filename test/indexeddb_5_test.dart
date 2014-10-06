@@ -170,7 +170,7 @@ testMain(IdbFactory idbFactory_) {
       'name_index': 'three',
       'value': 'updated_value'
     };
-    
+
     test('cursor', () {
       //var done = expectAsync0(() {});
       var done = () {};
@@ -211,7 +211,7 @@ testMain(IdbFactory idbFactory_) {
         expect(readValue['value'], 'updated_value');
         return transaction.completed;
       }).then((_) {
-        
+
         transaction = db.transaction(storeName, 'readonly');
         var index = transaction.objectStore(storeName).index(indexName);
         return index.get('two');

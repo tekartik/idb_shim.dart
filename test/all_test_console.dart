@@ -11,7 +11,7 @@ import 'package:idb_shim/idb_client.dart';
 void main() {
   useVMConfiguration();
   //useCompactVMConfiguration();
-  
+
   IdbFactory idbFactory = idbMemoryFactory;
   testMain(idbFactory);
   common_value_test.main();

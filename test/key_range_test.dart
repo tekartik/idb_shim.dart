@@ -7,11 +7,11 @@ import 'package:idb_shim/idb_client_memory.dart';
 void testMain(IdbFactory idbFactory) {
 
   group('KeyRange', () {
-    
+
     setUp(() {
-      
+
     });
-    
+
     test('only', () {
       KeyRange keyRange = new KeyRange.only(1);
       expect(keyRange.lower, equals(1));
@@ -26,7 +26,7 @@ void testMain(IdbFactory idbFactory) {
 
       }
     });
-    
+
     test('lowerOpen', () {
       KeyRange keyRange = new KeyRange.lowerBound(1, true);
       expect(keyRange.lower, equals(1));
@@ -41,7 +41,7 @@ void testMain(IdbFactory idbFactory) {
 
       }
     });
-    
+
     test('lowerClose', () {
       KeyRange keyRange = new KeyRange.lowerBound(1, false);
       if (idbFactory is IdbMemoryFactory) {
@@ -52,7 +52,7 @@ void testMain(IdbFactory idbFactory) {
 
       }
     });
-    
+
     test('upperOpen', () {
       KeyRange keyRange = new KeyRange.upperBound(3, true);
       if (idbFactory is IdbMemoryFactory) {
@@ -63,7 +63,7 @@ void testMain(IdbFactory idbFactory) {
 
       }
     });
-    
+
     test('upper', () {
       KeyRange keyRange = new KeyRange.upperBound(3);
       //TODO expect(keyRange.lower, isNull);
@@ -78,7 +78,7 @@ void testMain(IdbFactory idbFactory) {
 
       }
     });
-    
+
     test('lower/upper', () {
       KeyRange keyRange = new KeyRange.bound(1, 3);
       if (idbFactory is IdbMemoryFactory) {

@@ -11,18 +11,18 @@ void useHtmlConfiguration() {
 }
 
 class IdbHtmlConfiguration extends cfg.HtmlConfiguration with IdbDebugConfiguration {
-  
+
   IdbHtmlConfiguration() : super(false) {
     debugOnCreate(this);
   }
-  
+
   @override
   void onTestStart(TestCase testCase) {
     debugOnTestStart(testCase);
     super.onTestStart(testCase);
-    
+
   }
-  
+
   @override
   void onTestResult(TestCase testCase) {
     debugOnTestResult(testCase);

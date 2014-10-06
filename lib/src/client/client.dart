@@ -5,7 +5,7 @@ part of idb_client;
  * something todo later
  * idbDevWarning;
  */
-@deprecated 
+@deprecated
 get idbDevWarning => null;
 
 @deprecated

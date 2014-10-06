@@ -11,7 +11,7 @@ void main() {
       expect(encodeValue({}), "{}");
 
     });
-    
+
     test('String', () {
       expect(encodeValue("test"), '"test"');
 

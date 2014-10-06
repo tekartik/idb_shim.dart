@@ -20,7 +20,7 @@ class IdbNativeFactory extends IdbFactory {
   IdbNativeFactory._();
 
   String get name => IDB_FACTORY_NATIVE;
-  
+
   factory IdbNativeFactory() {
     if (_instance == null) {
       _instance = new IdbNativeFactory._();
@@ -42,8 +42,8 @@ class IdbNativeFactory extends IdbFactory {
       } else {
         print("blocked opening $dbName v $version");
       }
-      
-      
+
+
     }
 
     return html.window.indexedDB.open(dbName, version: version, onUpgradeNeeded: onUpgradeNeeded == null ? null : _onUpgradeNeeded, onBlocked: onBlocked == null && _onUpgradeNeeded == null ? null : _onBlocked).then((idb.Database database) {

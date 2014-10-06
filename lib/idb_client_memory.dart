@@ -21,15 +21,15 @@ class IdbMemoryFactory extends IdbFactory {
   IdbMemoryFactory._();
 
   String get name => IDB_FACTORY_MEMORY;
-  
+
   factory IdbMemoryFactory() {
     if (_instance == null) {
       _instance = new IdbMemoryFactory._();
     }
     return _instance;
   }
-  
-  
+
+
 
   @override
   Future<Database> open(String dbName, {int version, OnUpgradeNeededFunction onUpgradeNeeded, OnBlockedFunction onBlocked}) {

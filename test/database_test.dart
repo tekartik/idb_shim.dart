@@ -30,14 +30,13 @@ void testMain(IdbFactory idbFactory) {
     _onBlocked(Event event) {
       //idbDevPrint("# onBlocked: $event");
     }
-    
+
     _openWith1OtherStore() {
       void _initializeDatabase(VersionChangeEvent e) {
         Database db = e.database;
         ObjectStore objectStore = db.createObjectStore(STORE_NAME + "_2");
       }
-      return idbFactory.open(DB_NAME, version: 2, onUpgradeNeeded: _initializeDatabase
-          ,onBlocked: _onBlocked).then((Database database) {
+      return idbFactory.open(DB_NAME, version: 2, onUpgradeNeeded: _initializeDatabase, onBlocked: _onBlocked).then((Database database) {
         db = database;
       });
     }

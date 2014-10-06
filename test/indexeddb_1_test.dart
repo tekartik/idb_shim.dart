@@ -25,26 +25,22 @@ Future testUpgrade(idb.IdbFactory idbFactory) {
   return idbFactory.deleteDatabase(dbName).then((_) {
 
     //TEKARTIK_IDB_REMOVED return _idbFactory.open(dbName, version: 1,
-    return idbFactory.open(dbName, version: 1,
-          onUpgradeNeeded: (e) {});
-    }).then((db) {
-      db.close();
-    }).then((_) {
-      //TEKARTIK_IDB_REMOVED return _idbFactory.open(dbName, version: 2,
-      return idbFactory.open(dbName, version: 2,
-          onUpgradeNeeded: (e) {
-            expect(e.oldVersion, 1);
-            expect(e.newVersion, 2);
-            upgraded = true;
-          });
-    }).then((_) {
-      expect(upgraded, isTrue);
+    return idbFactory.open(dbName, version: 1, onUpgradeNeeded: (e) {});
+  }).then((db) {
+    db.close();
+  }).then((_) {
+    //TEKARTIK_IDB_REMOVED return _idbFactory.open(dbName, version: 2,
+    return idbFactory.open(dbName, version: 2, onUpgradeNeeded: (e) {
+      expect(e.oldVersion, 1);
+      expect(e.newVersion, 2);
+      upgraded = true;
     });
+  }).then((_) {
+    expect(upgraded, isTrue);
+  });
 }
 
-testReadWrite(idb.IdbFactory idbFactory, key, value, matcher,
-    [dbName, storeName = STORE_NAME, version = VERSION,
-    stringifyResult = false]) => () {
+testReadWrite(idb.IdbFactory idbFactory, key, value, matcher, [dbName, storeName = STORE_NAME, version = VERSION, stringifyResult = false]) => () {
   if (dbName == null) {
     dbName = nextDatabaseName();
   }
@@ -56,37 +52,34 @@ testReadWrite(idb.IdbFactory idbFactory, key, value, matcher,
   var db;
   //TEKARTIK_IDB_REMOVED return _idbFactory.deleteDatabase(dbName).then((_) {
   return idbFactory.deleteDatabase(dbName).then((_) {
-      //TEKARTIK_IDB_REMOVED return _idbFactory.open(dbName, version: version,
-      return idbFactory.open(dbName, version: version,
-          onUpgradeNeeded: createObjectStore);
-    }).then((result) {
-      db = result;
-      var transaction = db.transactionList([storeName], 'readwrite');
-      transaction.objectStore(storeName).put(value, key);
-      return transaction.completed;
-    }).then((_) {
-      var transaction = db.transaction(storeName, 'readonly');
-      return transaction.objectStore(storeName).getObject(key);
-    }).then((object) {
+    //TEKARTIK_IDB_REMOVED return _idbFactory.open(dbName, version: version,
+    return idbFactory.open(dbName, version: version, onUpgradeNeeded: createObjectStore);
+  }).then((result) {
+    db = result;
+    var transaction = db.transactionList([storeName], 'readwrite');
+    transaction.objectStore(storeName).put(value, key);
+    return transaction.completed;
+  }).then((_) {
+    var transaction = db.transaction(storeName, 'readonly');
+    return transaction.objectStore(storeName).getObject(key);
+  }).then((object) {
+    db.close();
+    if (stringifyResult) {
+      // Stringify the numbers to verify that we're correctly returning ints
+      // as ints vs doubles.
+      expect(object.toString(), matcher);
+    } else {
+      expect(object, matcher);
+    }
+  }).whenComplete(() {
+    if (db != null) {
       db.close();
-      if (stringifyResult) {
-        // Stringify the numbers to verify that we're correctly returning ints
-        // as ints vs doubles.
-        expect(object.toString(), matcher);
-      } else {
-        expect(object, matcher);
-      }
-    }).whenComplete(() {
-      if (db != null) {
-        db.close();
-      }
-      return idbFactory.deleteDatabase(dbName);
-    });
+    }
+    return idbFactory.deleteDatabase(dbName);
+  });
 };
 
-testReadWriteTyped(idb.IdbFactory idbFactory, key, value, matcher,
-    [dbName, storeName = STORE_NAME, version = VERSION,
-    stringifyResult = false]) => () {
+testReadWriteTyped(idb.IdbFactory idbFactory, key, value, matcher, [dbName, storeName = STORE_NAME, version = VERSION, stringifyResult = false]) => () {
   if (dbName == null) {
     dbName = nextDatabaseName();
   }
@@ -98,32 +91,31 @@ testReadWriteTyped(idb.IdbFactory idbFactory, key, value, matcher,
   idb.Database db;
   // Delete any existing DBs.
   return idbFactory.deleteDatabase(dbName).then((_) {
-      return idbFactory.open(dbName, version: version,
-        onUpgradeNeeded: createObjectStore);
-    }).then((idb.Database result) {
-      db = result;
-      idb.Transaction transaction = db.transactionList([storeName], 'readwrite');
-      transaction.objectStore(storeName).put(value, key);
+    return idbFactory.open(dbName, version: version, onUpgradeNeeded: createObjectStore);
+  }).then((idb.Database result) {
+    db = result;
+    idb.Transaction transaction = db.transactionList([storeName], 'readwrite');
+    transaction.objectStore(storeName).put(value, key);
 
-      return transaction.completed;
-    }).then((idb.Database result) {
-      idb.Transaction transaction = db.transaction(storeName, 'readonly');
-      return transaction.objectStore(storeName).getObject(key);
-    }).then((object) {
+    return transaction.completed;
+  }).then((idb.Database result) {
+    idb.Transaction transaction = db.transaction(storeName, 'readonly');
+    return transaction.objectStore(storeName).getObject(key);
+  }).then((object) {
+    db.close();
+    if (stringifyResult) {
+      // Stringify the numbers to verify that we're correctly returning ints
+      // as ints vs doubles.
+      expect(object.toString(), matcher);
+    } else {
+      expect(object, matcher);
+    }
+  }).whenComplete(() {
+    if (db != null) {
       db.close();
-      if (stringifyResult) {
-        // Stringify the numbers to verify that we're correctly returning ints
-        // as ints vs doubles.
-        expect(object.toString(), matcher);
-      } else {
-        expect(object, matcher);
-      }
-    }).whenComplete(() {
-      if (db != null) {
-        db.close();
-      }
-      return idbFactory.deleteDatabase(dbName);
-    });
+    }
+    return idbFactory.deleteDatabase(dbName);
+  });
 };
 
 void testTypes(testFunction, idb.IdbFactory idbFactory) {
@@ -132,18 +124,15 @@ void testTypes(testFunction, idb.IdbFactory idbFactory) {
   test('List', testFunction(idbFactory, 123, [1, 2, 3], equals([1, 2, 3])));
   test('List 2', testFunction(idbFactory, 123, [2, 3, 4], equals([2, 3, 4])));
   test('bool', testFunction(idbFactory, 123, [true, false], equals([true, false])));
-  test('largeInt', testFunction(idbFactory, 123, 1371854424211,
-      equals("1371854424211"), null, STORE_NAME, VERSION, true));
-  //TEKARTIK_IDB_REMOVED 
-  skip_test('largeDoubleConvertedToInt', testFunction(idbFactory, 123, 1371854424211.0,
-      equals("1371854424211"), null, STORE_NAME, VERSION, true));
-  test('largeIntInMap', testFunction(idbFactory, 123, {'time': 4503599627370492},
-      equals("{time: 4503599627370492}"), null, STORE_NAME, VERSION, true));
+  test('largeInt', testFunction(idbFactory, 123, 1371854424211, equals("1371854424211"), null, STORE_NAME, VERSION, true));
+  //TEKARTIK_IDB_REMOVED
+  skip_test('largeDoubleConvertedToInt', testFunction(idbFactory, 123, 1371854424211.0, equals("1371854424211"), null, STORE_NAME, VERSION, true));
+  test('largeIntInMap', testFunction(idbFactory, 123, {
+    'time': 4503599627370492
+  }, equals("{time: 4503599627370492}"), null, STORE_NAME, VERSION, true));
   var now = new DateTime.now();
   //TEKARTIK_IDB_REMOVED
-  skip_test('DateTime', testFunction(idbFactory, 123, now,
-    predicate((date) =>
-      date.millisecondsSinceEpoch == now.millisecondsSinceEpoch)));
+  skip_test('DateTime', testFunction(idbFactory, 123, now, predicate((date) => date.millisecondsSinceEpoch == now.millisecondsSinceEpoch)));
 }
 
 //TEKARTIK_IDB_REMOVED main() {
