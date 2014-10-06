@@ -62,24 +62,30 @@ abstract class ObjectStore {
   Stream<CursorWithValue> openCursor({key, KeyRange range, String direction, bool autoAdvance});
 
   Future<int> count([dynamic key_OR_range]);
-  
+
   /**
    * The keyPath property of the IDBObjectStore interface returns the
    * key path of this object store.
    * If this property is null, the application must provide a key for each modification operation.
    */
   dynamic get keyPath;
-  
+
   /**
    * The autoIncrement property of the IDBObjectStore interface returns the 
    * value of the auto increment flag for this object store.
    */
   bool get autoIncrement;
-  
+
   /**
    * The name property of the IDBObjectStore interface returns the name of this object store.
    */
   String get name;
+
+  /**
+   * The indexNames property of the IDBObjectStore interface returns a 
+   * list of the names of indexes on objects in this object store.
+   */
+  List<String> get indexNames;
 }
 
 abstract class Database {
@@ -90,7 +96,7 @@ abstract class Database {
   void deleteObjectStore(String name);
   void close();
   int get version;
-  
+
   /**
    * listen for onVersionChange event
    * best behavior would be to simply close the database and eventually
@@ -107,13 +113,13 @@ abstract class Index {
   Future getKey(dynamic key);
   Stream<CursorWithValue> openCursor({key, KeyRange range, String direction, bool autoAdvance});
   Stream<Cursor> openKeyCursor({key, KeyRange range, String direction, bool autoAdvance});
-  
+
   /**
    * The keyPath property of the IDBIndex interface returns the key path of the
    * current index. If null, this index is not auto-populated.
    */
   dynamic get keyPath;
-  
+
   /**
    * The unique property returns a boolean that states whether the index 
    * allows duplicate keys or not.
@@ -123,7 +129,7 @@ abstract class Index {
    * not be able to accept duplicate entries.
    */
   bool get unique;
-  
+
   /**
    * The multiEntry property of the IDBIndex interface returns a boolean 
    * value that affects how the index behaves when the result of evaluating 
@@ -134,7 +140,7 @@ abstract class Index {
    * parameter, multientry, which is set to true/false.
    */
   bool get multiEntry;
-  
+
   /**
    * The name property of the IDBIndex interface returns the name of 
    * the current index.
@@ -158,7 +164,7 @@ abstract class VersionChangeEvent {
   Transaction get transaction;
   Object get target;
   Object get currentTarget => target;
-  
+
   /**
    * added for convenience
    */
@@ -188,7 +194,7 @@ class KeyRange {
     _lowerBoundOpen = lowerOpen;
     _upperBoundOpen = upperOpen;
   }
-  
+
   var _lowerBound;
   bool _lowerBoundOpen = true;
   var _upperBound;
@@ -255,7 +261,7 @@ class KeyRange {
       return _checkUpperBound(key);
     }
   }
-  
+
   @override
   String toString() {
     StringBuffer sb = new StringBuffer('kr');
@@ -296,10 +302,9 @@ abstract class IdbFactory {
   bool get supportsDatabaseNames;
   Future<List<String>> getDatabaseNames();
   static bool supported = false; // Changed to true when a factory is created
-  
+
   /**
    * idb_shim specific
    */
   String get name;
 }
-

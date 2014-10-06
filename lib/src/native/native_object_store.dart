@@ -100,4 +100,7 @@ class _NativeObjectStore extends ObjectStore {
 
   @override
   get name => idbObjectStore.name;
+  
+  @override
+  List<String> get indexNames => idbObjectStore.indexNames;
 }

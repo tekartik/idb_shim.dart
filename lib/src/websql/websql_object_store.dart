@@ -12,6 +12,8 @@ class _WebSqlObjectStoreMeta {
 
   Map<String, _WebSqlIndexMeta> indecies = new Map();
 
+  Iterable<String> get indexNames => indecies.keys;
+  
   _WebSqlObjectStoreMeta(this.name, this.keyPath, this.autoIncrement) {
     autoIncrement = (autoIncrement == true);
   }
@@ -487,6 +489,9 @@ class _WebSqlObjectStore extends ObjectStore {
   @override
   get name => _meta.name;
 
+  @override
+  List<String> get indexNames => _meta.indexNames.toList();
+  
   @override
   String toString() => "${name} (key ${keyPath} auto ${autoIncrement})";
 }

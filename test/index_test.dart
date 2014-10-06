@@ -39,6 +39,10 @@ void testMain(IdbFactory idbFactory) {
         });
       });
 
+      test('store_properties', () {
+        expect(objectStore.indexNames, isEmpty);
+      });
+
       test('primary', () {
         try {
           objectStore.index(null);
@@ -93,6 +97,10 @@ void testMain(IdbFactory idbFactory) {
         } else {
           db.close();
         }
+      });
+
+      test('store_properties', () {
+        expect(objectStore.indexNames, [NAME_INDEX]);
       });
 
       test('properties', () {
@@ -277,12 +285,73 @@ void testMain(IdbFactory idbFactory) {
         }
       });
 
+      test('store_properties', () {
+        expect(objectStore.indexNames, [NAME_INDEX]);
+      });
+
       test('properties', () {
         Index index = objectStore.index(NAME_INDEX);
         expect(index.name, NAME_INDEX);
         expect(index.keyPath, NAME_FIELD);
         expect(index.multiEntry, true);
         expect(index.unique, false);
+      });
+    });
+
+    group('two_indecies', () {
+
+      Database db;
+      Transaction transaction;
+      ObjectStore objectStore;
+
+      _createTransaction() {
+        transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+        objectStore = transaction.objectStore(STORE_NAME);
+      }
+
+      setUp(() {
+        return idbFactory.deleteDatabase(DB_NAME).then((_) {
+          void _initializeDatabase(VersionChangeEvent e) {
+            Database db = e.database;
+            ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
+            Index index = objectStore.createIndex(NAME_INDEX, NAME_FIELD, multiEntry: true);
+            Index index2 = objectStore.createIndex(NAME_INDEX_2, NAME_FIELD_2, unique: true);
+
+          }
+          return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
+            db = database;
+            _createTransaction();
+
+          });
+        });
+      });
+
+      tearDown(() {
+        if (transaction != null) {
+          return transaction.completed.then((_) {
+            db.close();
+          });
+        } else {
+          db.close();
+        }
+      });
+
+      test('store_properties', () {
+        expect(objectStore.indexNames, [NAME_INDEX, NAME_INDEX_2]);
+      });
+
+      test('properties', () {
+        Index index = objectStore.index(NAME_INDEX);
+        expect(index.name, NAME_INDEX);
+        expect(index.keyPath, NAME_FIELD);
+        expect(index.multiEntry, true);
+        expect(index.unique, false);
+
+        index = objectStore.index(NAME_INDEX_2);
+        expect(index.name, NAME_INDEX_2);
+        expect(index.keyPath, NAME_FIELD_2);
+        expect(index.multiEntry, false);
+        expect(index.unique, true);
       });
     });
   });

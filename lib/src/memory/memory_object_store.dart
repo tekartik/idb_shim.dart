@@ -11,6 +11,8 @@ class _MemoryObjectStoreMeta {
   //Map<dynamic, MemoryItem> itemsByKey = new Map();
 
   Map<String, _MemoryIndex> indeciesByName = new Map();
+
+  Iterable<String> get indexNames => indeciesByName.keys;
   List<_MemoryIndex> indecies = new List();
 
   void addIndex(_MemoryIndex index) {
@@ -50,12 +52,12 @@ class MemoryObjectStore extends ObjectStore {
       index.updateIndex(item, oldItem);
     });
   }
-  
+
   checkAndUpdateAllIndecies(_MemoryItem item, [_MemoryItem oldItem]) {
-      _meta.indecies.forEach((_MemoryIndex index) {
-        index.updateIndex(item, oldItem);
-      });
-    }
+    _meta.indecies.forEach((_MemoryIndex index) {
+      index.updateIndex(item, oldItem);
+    });
+  }
 
   removeAllIndecies(_MemoryItem item) {
     _meta.indecies.forEach((_MemoryIndex index) {
@@ -72,7 +74,7 @@ class MemoryObjectStore extends ObjectStore {
 
   @override
   String get keyPath => _meta.primaryIndex.keyPath;
-  
+
   bool get autoIncrement => _meta.primaryIndex is AutoIncrementMemoryPrimaryIndex;
 
   Future _checkStore(computation()) {
@@ -132,7 +134,7 @@ class MemoryObjectStore extends ObjectStore {
 
       // when keyPath is specified in the index, add it to the value
       _MemoryItem item = new _MemoryItem(newKey, value, keyPath);
-      
+
       if (_meta.primaryIndex.getSync(newKey) != null) {
         throw new _MemoryError(_MemoryError.KEY_ALREADY_EXISTS, 'Key already exists in the object store');
       }
@@ -230,7 +232,10 @@ class MemoryObjectStore extends ObjectStore {
   Future<int> count([key_OR_range]) {
     return _meta.primaryIndex.count(key_OR_range);
   }
-  
+
   @override
   String get name => _meta.name;
+
+  @override
+  List<String> get indexNames => _meta.indexNames.toList();
 }
