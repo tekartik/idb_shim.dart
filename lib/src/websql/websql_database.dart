@@ -43,7 +43,7 @@ class _WebSqlDatabase extends Database {
   List<_WebSqlIndex> onVersionChangeCreatedIndexes;
 
   // Cache
-  Map<String, _WebSqlObjectStore> stores = new Map();
+  Map<String, _WebSqlObjectStoreMeta> stores = new Map();
 
   int version;
 
@@ -256,10 +256,11 @@ class _WebSqlDatabase extends Database {
     if (versionChangeTransaction == null) {
       throw new StateError("cannot create objectStore outside of a versionChangedEvent");
     }
-    _WebSqlObjectStore store = new _WebSqlObjectStore(name, versionChangeTransaction, keyPath, autoIncrement);
+    _WebSqlObjectStoreMeta storeMeta = new _WebSqlObjectStoreMeta(name, keyPath, autoIncrement);
+    _WebSqlObjectStore store = new _WebSqlObjectStore(versionChangeTransaction, storeMeta);
 
     // Put in the map
-    stores[name] = store;
+    stores[name] = storeMeta;
 
     // Add for later creation
     onVersionChangeCreatedObjectStores.add(store);
@@ -282,16 +283,17 @@ class _WebSqlDatabase extends Database {
     String keyPath = row['key_path'];
     bool autoIncrement = row['auto_increment'] > 0;
 
-    _WebSqlObjectStore store = new _WebSqlObjectStore(name, transaction, null, null);
+    _WebSqlObjectStoreMeta storeMeta = new _WebSqlObjectStoreMeta(name, keyPath, autoIncrement);
+    _WebSqlObjectStore store = new _WebSqlObjectStore(transaction, storeMeta);
     store._initOptions(keyPath, autoIncrement);
 
     String indeciesText = row['indecies'];
 
     // merge lazy loaded data
-    Map indeciesData = _WebSqlIndex.indeciesDataFromString(indeciesText);
-    indeciesData.forEach((name, data) {
-      _WebSqlIndex index = new _WebSqlIndex(store, name, data);
-      store.indecies[name] = index;
+    Map indeciesData = storeMeta.indeciesDataFromString(indeciesText);
+    indeciesData.forEach((name, _WebSqlIndexMeta indexMeta) {
+      _WebSqlIndex index = new _WebSqlIndex(store, indexMeta);
+      store._meta.indecies[name] = indexMeta;
 
       // save store in cache
 
@@ -301,7 +303,7 @@ class _WebSqlDatabase extends Database {
       //               throw new ArgumentError("neither keyPath nor autoIncrement set");
       //             }
     });
-    stores[name] = store;
+    stores[name] = storeMeta;
   }
   /**
    * keyPath might not be valid before
@@ -367,6 +369,14 @@ class _WebSqlDatabase extends Database {
     //factory.dbMap[name];
     //stores = null; // so that it crashes
   }
+  
+  _WebSqlObjectStore _getStore(Transaction transaction, String name) {
+    _WebSqlObjectStoreMeta storeMeta = stores[name];
+    if (storeMeta != null) {
+      return new _WebSqlObjectStore(transaction, storeMeta);
+    }
+    return null;
+  }
 
   @override
   void deleteObjectStore(String name) {
@@ -374,11 +384,11 @@ class _WebSqlDatabase extends Database {
       throw new StateError("cannot call deleteObjectStore outside of a versionChangedEvent");
     }
 
-    _WebSqlObjectStore store = stores[name];
+    _WebSqlObjectStore store = _getStore(versionChangeTransaction, name);
 
     if (store != null) {
       // delete the table
-      stores[name] = null;
+      stores.remove(name);
 
       initBlock(() {
         return store._deleteTable(versionChangeTransaction).then((_) {

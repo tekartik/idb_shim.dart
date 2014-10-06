@@ -43,4 +43,28 @@ class _NativeIndex extends Index {
 
     return ctlr.stream;
   }
+
+  @override
+  dynamic get keyPath => idbIndex.keyPath;
+
+  @override
+  bool get unique => idbIndex.unique;
+
+  @override
+  bool get multiEntry => idbIndex.multiEntry;
+
+  @override
+  int get hashCode => idbIndex.hashCode;
+
+  @override
+  String get name => idbIndex.name;
+
+  @override
+  bool operator ==(other) {
+    if (other is _NativeIndex) {
+      return idbIndex == other.idbIndex;
+    }
+    return false;
+  }
+
 }

@@ -13,8 +13,7 @@ class _WebSqlTransaction extends Transaction { // extends CommonTransaction {
   Future<SqlTransaction> _lazySqlTransaction;
   Future<SqlTransaction> get sqlTransaction {
     if (_lazySqlTransaction == null) {
-      _WebSqlDatabase database = (this.database) as _WebSqlDatabase;
-      _lazySqlTransaction = database.sqlDb.transaction().then((tx) {
+      _lazySqlTransaction = idbWqlDatabase.sqlDb.transaction().then((tx) {
         _sqlTransaction = tx;
         return tx;
       });
@@ -22,13 +21,14 @@ class _WebSqlTransaction extends Transaction { // extends CommonTransaction {
     return _lazySqlTransaction;
   }
 
+  _WebSqlDatabase get idbWqlDatabase => (database as _WebSqlDatabase);
+  
   _WebSqlTransaction(Database database, this._sqlTransaction, this.storeNames, this._mode): super(database);
 
   @override
   ObjectStore objectStore(String name) {
     
-    _WebSqlObjectStore _onCreateStore = (database as _WebSqlDatabase).stores[name];
-    _WebSqlObjectStore store = new _WebSqlObjectStore(name, this, _onCreateStore.keyPath, _onCreateStore.autoIncrement);
+    _WebSqlObjectStore store = idbWqlDatabase._getStore(this, name);
     return store;
   }
 

@@ -63,8 +63,23 @@ abstract class ObjectStore {
 
   Future<int> count([dynamic key_OR_range]);
   
+  /**
+   * The keyPath property of the IDBObjectStore interface returns the
+   * key path of this object store.
+   * If this property is null, the application must provide a key for each modification operation.
+   */
   dynamic get keyPath;
+  
+  /**
+   * The autoIncrement property of the IDBObjectStore interface returns the 
+   * value of the auto increment flag for this object store.
+   */
   bool get autoIncrement;
+  
+  /**
+   * The name property of the IDBObjectStore interface returns the name of this object store.
+   */
+  String get name;
 }
 
 abstract class Database {
@@ -85,12 +100,46 @@ abstract class Database {
   Stream<VersionChangeEvent> get onVersionChange;
 }
 
+
 abstract class Index {
   Future<int> count([key_OR_range]);
   Future get(dynamic key);
   Future getKey(dynamic key);
   Stream<CursorWithValue> openCursor({key, KeyRange range, String direction, bool autoAdvance});
   Stream<Cursor> openKeyCursor({key, KeyRange range, String direction, bool autoAdvance});
+  
+  /**
+   * The keyPath property of the IDBIndex interface returns the key path of the
+   * current index. If null, this index is not auto-populated.
+   */
+  dynamic get keyPath;
+  
+  /**
+   * The unique property returns a boolean that states whether the index 
+   * allows duplicate keys or not.
+   * This is decided when the index is created, using the 
+   * IDBObjectStore.createIndex method. This method takes an optional 
+   * parameter, unique, which if set to true means that the index will 
+   * not be able to accept duplicate entries.
+   */
+  bool get unique;
+  
+  /**
+   * The multiEntry property of the IDBIndex interface returns a boolean 
+   * value that affects how the index behaves when the result of evaluating 
+   * the index's key path yields an array.
+   * 
+   * This is decided when the index is created, using the
+   * IDBObjectStore.createIndex method. This method takes an optional
+   * parameter, multientry, which is set to true/false.
+   */
+  bool get multiEntry;
+  
+  /**
+   * The name property of the IDBIndex interface returns the name of 
+   * the current index.
+   */
+  String get name;
 }
 
 abstract class Request {

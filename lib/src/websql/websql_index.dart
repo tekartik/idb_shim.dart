@@ -1,61 +1,64 @@
 part of idb_websql;
 
-class _WebSqlIndexData {
+class _WebSqlIndexMeta {
+  _WebSqlObjectStoreMeta storeMeta;
+  String name;
   String keyPath;
-  bool _unique;
-  bool get unique => _unique == true;
+  bool unique;
   bool multiEntry;
-  _WebSqlIndexData(this.keyPath, this._unique, this.multiEntry);
+  _WebSqlIndexMeta(this.storeMeta, this.name, this.keyPath, this.unique, this.multiEntry) {
+    multiEntry = (multiEntry == true);
+    unique = (unique == true);
+  }
+
+  @override
+  String toString() {
+    return "index $name on $keyPath unique ${unique} multi ${multiEntry}";
+  }
+  
+  String get keyColumn => storeMeta.sqlColumnName(keyPath);
 }
 
 class _WebSqlIndex extends Index {
-  _WebSqlIndexData data;
+  _WebSqlIndexMeta _meta;
+  _WebSqlIndexMeta get meta => _meta;
   _WebSqlObjectStore store;
-  String name;
+  
+  @override
+  String get name => _meta.name;
 
-  String get keyPath => data.keyPath;
-  bool get unique => data.unique;
-  bool get multiEntry => data.multiEntry;
+  @override
+  String get keyPath => _meta.keyPath;
+  
+  @override
+  bool get unique => _meta.unique;
+  
+  @override
+  bool get multiEntry => _meta.multiEntry;
 
 
+  String get keyColumn => _meta.keyColumn;
   String get sqlIndexName => store.getSqlIndexName(keyPath);
   String get sqlTableName => store.sqlTableName;
-  String get keyColumn => store.sqlColumnName(keyPath);
+  
   // Ordered keys
   List keys = new List();
 
   _WebSqlTransaction get transaction => store.transaction;
 
-  /**
-   * indecies <=> String
-   */
-  static Map<String, _WebSqlIndexData> indeciesDataFromString(String indeciesText) {
-    Map indeciesData = new Map();
+  
 
-    if (indeciesText != null) {
-      List indexList = JSON.decode(indeciesText);
-      indexList.forEach((Map indexDef) {
-        String name = indexDef['name'];
-        String keyPath = indexDef['key_path'];
-        bool multiEntry = indexDef['multi_entry'];
-        bool unique = indexDef['unique'];
-        indeciesData[name] = new _WebSqlIndexData(keyPath, unique, multiEntry);
-      });
-    }
-    return indeciesData;
-  }
-
-  static String indeciesToString(Map<String, _WebSqlIndex> indecies) {
+  static String indeciesToString(Map<String, _WebSqlIndexMeta> indecies) {
     if (indecies.isEmpty) {
       return null;
     }
     List list = new List();
-    indecies.values.forEach((_WebSqlIndex index) {
+    indecies.values.forEach((_WebSqlIndexMeta indexMeta) {
       Map indexDef = new Map();
-      indexDef['name'] = index.name;
-      indexDef['key_path'] = index.keyPath;
-      indexDef['multi_entry'] = index.multiEntry;
-      indexDef['unique'] = index.unique;
+      indexDef['name'] = indexMeta.name;
+      indexDef['key_path'] = indexMeta.keyPath;
+      indexDef['multi_entry'] = indexMeta.multiEntry;
+      indexDef['unique'] = indexMeta.unique;
       list.add(indexDef);
     });
     return JSON.encode(list);
@@ -64,57 +67,19 @@ class _WebSqlIndex extends Index {
   /**
    * data can null, it will be lazy loaded
    */
-  _WebSqlIndex(this.store, this.name, this.data) {
+  _WebSqlIndex(this.store, this._meta) {
     // Build the index based on the existing
     // TODO
+    //devPrint("${store} ${_meta}");
   }
-  //                 var columnName = indexName;
-  //                 idxList[indexName] = {
-  //                     "columnName": columnName,
-  //                     "keyPath": keyPath,
-  //                     "optionalParams": optionalParameters
-  //                 };
-  //                 // For this index, first create a column
-  //                 me.__idbObjectStore.__storeProps.indexList = JSON.stringify(idxList);
-  //                 var sql = ["ALTER TABLE", idbModules.util.quote(me.__idbObjectStore.name), "ADD", columnName, "BLOB"].join(" ");
-  //                 idbModules.DEBUG && console.log(sql);
-  //                 tx.executeSql(sql, [], function(tx, data){
-  //                     // Once a column is created, put existing records into the index
-  //                     tx.executeSql("SELECT * FROM " + idbModules.util.quote(me.__idbObjectStore.name), [], function(tx, data){
-  //                         (function initIndexForRow(i){
-  //                             if (i < data.rows.length) {
-  //                                 try {
-  //                                     var value = idbModules.Sca.decode(data.rows.item(i).value);
-  //                                     var indexKey = eval("value['" + keyPath + "']");
-  //                                     tx.executeSql("UPDATE " + idbModules.util.quote(me.__idbObjectStore.name) + " set " + columnName + " = ? where key = ?", [idbModules.Key.encode(indexKey), data.rows.item(i).key], function(tx, data){
-  //                                         initIndexForRow(i + 1);
-  //                                     }, error);
-  //                                 }
-  //                                 catch (e) {
-  //                                     // Not a valid value to insert into index, so just continue
-  //                                     initIndexForRow(i + 1);
-  //                                 }
-  //                             }
-  //                             else {
-  //                                 idbModules.DEBUG && console.log("Updating the indexes in table", me.__idbObjectStore.__storeProps);
-  //                                 tx.executeSql("UPDATE __sys__ set indexList = ? where name = ?", [me.__idbObjectStore.__storeProps.indexList, me.__idbObjectStore.name], function(){
-  //                                     me.__idbObjectStore.__setReadyState("createIndex", true);
-  //                                     success(me);
-  //                                 }, error);
-  //                             }
-  //                         }(0));
-  //                     }, error);
-  //                 }, error);
-  //             }, "createObjectStore");
-
-
+ 
   Future create() {
     String sqlTableName = this.sqlTableName;
     String sqlIndexName = this.sqlIndexName;
     String alterSql = "ALTER TABLE ${sqlTableName} ADD ${keyColumn} BLOB";
     String updateSql = "UPDATE stores SET indecies = ? WHERE name = ?";
 
-    List updateArgs = [indeciesToString(store.indecies), store.name];
+    List updateArgs = [indeciesToString(store._meta.indecies), store.name];
     return transaction.execute(alterSql).then((_) {
       return transaction.execute(updateSql, updateArgs);
     }).then((_) {
@@ -138,15 +103,6 @@ class _WebSqlIndex extends Index {
       });
 
     });
-    //       String createSql = "CREATE TABLE $_tableName (${keyColumn} " + (autoIncrement ? "INTEGER PRIMARY KEY AUTOINCREMENT" : "BLOB PRIMARY KEY") + ", $VALUE_COLUMN_NAME BLOB)";
-    //       String insertStore = "INSERT INTO stores (name, key_path, auto_increment) VALUES (?, ?, ?)";
-    //       List insertStoreArgs = [name, keyPath, booleanArg(autoIncrement)];
-    //
-    //       return transaction.execute(dropSql).then((_) {
-    //         return transaction.execute(createSql);
-    //       }).then((_) {
-    //         return transaction.execute(insertStore, insertStoreArgs);
-    //       });
   }
 
   Future _checkIndex(computation()) {

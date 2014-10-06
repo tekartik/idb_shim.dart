@@ -23,7 +23,7 @@ class _MemoryVersionChangeEvent extends VersionChangeEvent {
 class _MemoryDatabaseData {
   int version = 0;
 
-  Map<String, _MemoryObjectStoreData> stores = new Map();
+  Map<String, _MemoryObjectStoreMeta> stores = new Map();
 }
 class _MemoryDatabase extends Database with WithCurrentTransaction {
 
@@ -47,7 +47,7 @@ class _MemoryDatabase extends Database with WithCurrentTransaction {
   }
   _MemoryDatabaseData _data;
 
-  Map<String, _MemoryObjectStoreData> get stores => _data.stores;
+  Map<String, _MemoryObjectStoreMeta> get stores => _data.stores;
 
   // Set when the database is upgraded elsewhere
   _MemoryError _error;
@@ -101,7 +101,7 @@ class _MemoryDatabase extends Database with WithCurrentTransaction {
 
   @override
   ObjectStore createObjectStore(String name, {String keyPath, bool autoIncrement}) {
-    _MemoryObjectStoreData data = new _MemoryObjectStoreData(name, keyPath, autoIncrement);
+    _MemoryObjectStoreMeta data = new _MemoryObjectStoreMeta(name, keyPath, autoIncrement);
     stores[name] = data;
     return new MemoryObjectStore(versionChangeTransaction, data);
   }

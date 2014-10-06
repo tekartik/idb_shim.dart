@@ -33,7 +33,7 @@ class _MemoryItems {
 }
 
 class _MemoryIndex extends Index {
-  _MemoryObjectStoreData data;
+  _MemoryObjectStoreMeta data;
   MemoryObjectStore get store => data.store;
   String name;
   String keyPath;
@@ -49,6 +49,8 @@ class _MemoryIndex extends Index {
   _MemoryIndex(this.data, this.name, this.keyPath, this.unique, this.multiEntry) {
     // Build the index based on the existing
     // TODO
+    multiEntry = multiEntry == true;
+    unique = unique == true;
   }
 
   List filterKeysByKeyOrRange(key_OR_range) {
@@ -297,14 +299,14 @@ class MemoryPrimaryIndex extends _MemoryIndex {
   dynamic getKey(key) {
     return key;
   }
-  MemoryPrimaryIndex(_MemoryObjectStoreData data, String keyPath) : super(data, null, keyPath, true, false) {
+  MemoryPrimaryIndex(_MemoryObjectStoreMeta data, String keyPath) : super(data, null, keyPath, true, false) {
 
   }
 }
 
 class AutoIncrementMemoryPrimaryIndex extends MemoryPrimaryIndex {
   int autoIncrementIndex = 0;
-  AutoIncrementMemoryPrimaryIndex(_MemoryObjectStoreData data, String keyPath) : super(data, keyPath) {
+  AutoIncrementMemoryPrimaryIndex(_MemoryObjectStoreMeta data, String keyPath) : super(data, keyPath) {
   }
 
   @override
