@@ -126,6 +126,7 @@ class MemoryObjectStore extends ObjectStore {
   Future add(dynamic value, [dynamic key]) {
 
     return inWritableTransaction(() {
+      String keyPath = this.keyPath;
       if (key == null) {
         if (keyPath != null) {
           key = value[keyPath];
@@ -136,6 +137,7 @@ class MemoryObjectStore extends ObjectStore {
 
       } else {
         if (!checkKeyValue(keyPath, key, value)) {
+          // keep this
           throw new ArgumentError("both key $key and inline keyPath ${value[keyPath]}");
         }
       }
