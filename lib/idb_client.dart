@@ -101,6 +101,16 @@ abstract class Database {
    * list of the names of the object stores currently in the connected database
    */
   Iterable<String> get objectStoreNames;
+  
+  /**
+   * destroys the object store with the given name in the connected database, 
+   * along with any indexes that reference it.
+   * 
+   * As with createObjectStore, this method can be called only within a versionchange
+   * transaction.
+   * 
+   * raise exception if not found
+   */
   void deleteObjectStore(String name);
 
   /**
