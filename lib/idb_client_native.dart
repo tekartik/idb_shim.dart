@@ -18,6 +18,9 @@ IdbNativeFactory get idbNativeFactory => new IdbNativeFactory();
 
 class IdbNativeFactory extends IdbFactory {
 
+  @override
+  bool get persistent => true;
+
   static IdbNativeFactory _instance;
   IdbNativeFactory._();
 

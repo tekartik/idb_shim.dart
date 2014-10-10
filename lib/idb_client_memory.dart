@@ -18,6 +18,9 @@ class IdbMemoryFactory extends IdbFactory {
 
   Map<String, _MemoryDatabaseData> dbMap = new Map();
 
+  @override
+  bool get persistent => false;
+  
   static IdbMemoryFactory _instance;
   IdbMemoryFactory._();
 

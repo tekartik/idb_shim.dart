@@ -25,6 +25,9 @@ IdbWebSqlFactory get idbWebSqlFactory => new IdbWebSqlFactory();
 
 class IdbWebSqlFactory extends IdbFactory {
 
+  @override
+  bool get persistent => true;
+
   // global store
   _WebSqlGlobalStore _globalStore = new _WebSqlGlobalStore();
 

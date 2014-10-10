@@ -10,6 +10,11 @@ testMain() {
   group('native', () {
     if (IdbNativeFactory.supported) {
       IdbFactory idbFactory = new IdbNativeFactory();
+
+      test('properties', () {
+        expect(idbFactory.persistent, isTrue);
+      });
+
       all_common.testMain(idbFactory);
     } else {
       fail("idb native not supported");

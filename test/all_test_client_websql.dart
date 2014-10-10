@@ -14,6 +14,10 @@ import 'dart:async';
 
 webSqlTest(IdbWebSqlFactory idbFactory) {
 
+  test('properties', () {
+    expect(idbFactory.persistent, isTrue);
+  });
+
   group('native', () {
 
     test('openDatabase', () {

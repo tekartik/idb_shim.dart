@@ -352,4 +352,5 @@ abstract class IdbFactory {
    * idb_shim specific
    */
   String get name;
+  bool get persistent;
 }
