@@ -1,4 +1,4 @@
-library tekartik_test_utils;
+library idb_shim_test_utils;
 
 import 'package:unittest/unittest.dart' as unittest;
 export 'package:unittest/unittest.dart' hide solo_test, solo_group;
