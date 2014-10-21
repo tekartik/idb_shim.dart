@@ -1,4 +1,4 @@
-library websql_wrapper;
+library idb_shim_websql_wrapper;
 
 import 'dart:web_sql' as wql;
 import 'dart:web_sql' show SqlResultSet, SqlError;

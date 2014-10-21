@@ -1,4 +1,4 @@
-library idb_client;
+library idb_shim_client;
 
 import 'dart:async';
 

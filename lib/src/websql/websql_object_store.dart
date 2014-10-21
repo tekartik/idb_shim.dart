@@ -1,4 +1,4 @@
-part of idb_websql;
+part of idb_shim_websql;
 
 // meta data is loaded only once
 class _WebSqlObjectStoreMeta {

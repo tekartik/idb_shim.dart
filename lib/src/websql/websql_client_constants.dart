@@ -1,4 +1,4 @@
-library websql_client_constants;
+library idb_shim_websql_client_constants;
 
 final String GLOBAL_STORE_DB_NAME = "com.tekartik.idb.global_store";
 final String GLOBAL_STORE_DB_VERSION = "";

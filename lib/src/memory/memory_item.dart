@@ -1,4 +1,4 @@
-part of idb_memory;
+part of idb_shim_memory;
 
 /**
  * A memory item is composed of a map and a primary key

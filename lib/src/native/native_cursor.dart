@@ -1,4 +1,4 @@
-part of idb_native;
+part of idb_shim_native;
 
 class _NativeCursor extends Cursor {
   idb.Cursor _cursor;

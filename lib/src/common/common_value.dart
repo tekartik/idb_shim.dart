@@ -1,4 +1,4 @@
-library common_value;
+library idb_shim_common_value;
 
 import 'dart:convert';
 

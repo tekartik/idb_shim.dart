@@ -1,7 +1,7 @@
 /**
  * Development helpers to generate warning in code
  */
-library tekartik_dev_utils;
+library idb_dev_utils;
 
 void _devPrint(Object object) {
   if (_devPrintEnabled) {

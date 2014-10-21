@@ -1,4 +1,4 @@
-library idb_browser;
+library idb_shim_browser;
 
 import 'package:idb_shim/idb_client_native.dart';
 import 'package:idb_shim/idb_client_websql.dart';

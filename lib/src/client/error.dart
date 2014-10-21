@@ -1,4 +1,4 @@
-part of idb_client;
+part of idb_shim_client;
 
 // added definition
 class DatabaseError extends Error {

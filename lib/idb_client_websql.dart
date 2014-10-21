@@ -1,4 +1,4 @@
-library idb_websql;
+library idb_shim_websql;
 
 import 'idb_client.dart';
 import 'dart:async';

@@ -1,4 +1,4 @@
-library idb_native;
+library idb_shim_native;
 
 import 'dart:async';
 import 'package:idb_shim/idb_client.dart';

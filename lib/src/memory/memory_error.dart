@@ -1,4 +1,4 @@
-part of idb_memory;
+part of idb_shim_memory;
 
 /**
  * Error thrown when a function is passed an unacceptable argument.

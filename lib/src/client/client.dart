@@ -1,4 +1,4 @@
-part of idb_client;
+part of idb_shim_client;
 
 /**
  * to simply add a warning in a code for

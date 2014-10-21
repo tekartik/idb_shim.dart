@@ -1,4 +1,4 @@
-part of idb_native;
+part of idb_shim_native;
 
 class _NativeDatabaseError extends DatabaseError {
   dynamic _nativeError;

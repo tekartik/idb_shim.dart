@@ -1,4 +1,4 @@
-part of idb_websql;
+part of idb_shim_websql;
 
 abstract class _WebSqlCommonCursor<T extends Cursor> {
   Map _map;

@@ -1,4 +1,4 @@
-part of idb_native;
+part of idb_shim_native;
 
 class _NativeObjectStore extends ObjectStore {
   idb.ObjectStore idbObjectStore;

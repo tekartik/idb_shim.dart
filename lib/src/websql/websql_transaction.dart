@@ -1,4 +1,4 @@
-part of idb_websql;
+part of idb_shim_websql;
 
 class _WebSqlTransaction extends Transaction { // extends CommonTransaction {
 

@@ -1,4 +1,4 @@
-library idb_memory;
+library idb_shim_memory;
 
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/common/common_value.dart';

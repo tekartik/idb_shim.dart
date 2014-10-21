@@ -1,4 +1,4 @@
-part of idb_memory;
+part of idb_shim_memory;
 
 class _MemoryItems {
   Map<dynamic, _MemoryItem> _items = new Map(); // map by primary key

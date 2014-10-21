@@ -1,4 +1,4 @@
-part of idb_memory;
+part of idb_shim_memory;
 
 abstract class _MemoryCommonCursor<T extends Cursor> {
   _MemoryItem _item;

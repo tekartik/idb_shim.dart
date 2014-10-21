@@ -1,4 +1,4 @@
-part of idb_websql;
+part of idb_shim_websql;
 
 String _booleanArg(bool value) {
   return value == null ? null : (value ? "1" : "0");
