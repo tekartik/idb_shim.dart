@@ -95,9 +95,41 @@ void testMain(IdbFactory idbFactory) {
 
       });
 
+      test('empty key cursor by key', () {
+
+        Stream<Cursor> stream = index.openKeyCursor(key: 1, autoAdvance: true);
+        int count = 0;
+        Completer completer = new Completer();
+        stream.listen((Cursor cwv) {
+          count++;
+        }).onDone(() {
+          completer.complete();
+        });
+        return completer.future.then((_) {
+          expect(count, 0);
+        });
+
+      });
+
       test('empty cursor', () {
 
         Stream<CursorWithValue> stream = index.openCursor(autoAdvance: true);
+        int count = 0;
+        Completer completer = new Completer();
+        stream.listen((CursorWithValue cwv) {
+          count++;
+        }).onDone(() {
+          completer.complete();
+        });
+        return completer.future.then((_) {
+          expect(count, 0);
+        });
+
+      });
+
+      test('empty cursor by key', () {
+
+        Stream<CursorWithValue> stream = index.openCursor(key: 1, autoAdvance: true);
         int count = 0;
         Completer completer = new Completer();
         stream.listen((CursorWithValue cwv) {

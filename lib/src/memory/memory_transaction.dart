@@ -155,7 +155,8 @@ class _MemoryTransaction extends Transaction {
       result = computation();
     } catch (e) {
       _endOperation();
-      return new Future.error(e);
+      rethrow;
+      //return new Future.error(e);
     }
 
     _endOperation();

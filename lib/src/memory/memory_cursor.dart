@@ -117,7 +117,13 @@ abstract class MemoryCursorBaseController<T extends Cursor> {
           throw new ArgumentError("direction '$direction' not supported");
       }
       _MemoryItems items = index.itemsByKey[_keys[realKeyIndex]];
-      currentItemCount = items.length;
+      currentItemCount = items == null ? 0 : items.length;
+
+      if (currentItemCount == 0) {
+// Prevent auto advance
+        autoAdvance = false;
+        return ctlr.close();
+      }
 
 
       int realItemIndex;

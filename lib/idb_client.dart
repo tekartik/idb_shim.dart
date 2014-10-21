@@ -155,6 +155,15 @@ abstract class Database {
 abstract class Index {
   Future<int> count([key_OR_range]);
   Future get(dynamic key);
+  
+  /**
+   * The getKey() method of the IDBIndex interface returns an IDBRequest object, 
+   * and, in a separate thread, finds either the given key or the primary key,
+   * if key is set to an IDBKeyRange.
+   * If a key is successfully found it is set as the result of the request object: 
+   * this returns the primary key of the record the key is associated with, not 
+   * the whole record as IDBIndex.get does.
+   */
   Future getKey(dynamic key);
   Stream<CursorWithValue> openCursor({key, KeyRange range, String direction, bool autoAdvance});
   Stream<Cursor> openKeyCursor({key, KeyRange range, String direction, bool autoAdvance});
