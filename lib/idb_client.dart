@@ -200,6 +200,11 @@ abstract class Index {
    * the current index.
    */
   String get name;
+  
+  @override
+  String toString() {
+    return 'name:${name} keyPath:${keyPath} unique:${unique} multiEntry:${multiEntry}';
+  }
 }
 
 abstract class Request {
