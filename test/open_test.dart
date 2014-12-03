@@ -1,6 +1,5 @@
 library open_test_common;
 
-import 'package:unittest/unittest.dart';
 import 'package:idb_shim/idb_client.dart';
 import 'idb_test_common.dart';
 //import 'idb_test_factory.dart';
