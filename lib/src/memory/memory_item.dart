@@ -23,6 +23,13 @@ class _MemoryItem {
     return item.value;
   }
   
+  static dynamic safeKey(_MemoryItem item) {
+      if (item == null) {
+        return null;
+      }
+      return item.key;
+    }
+  
   @override
   String toString() {
     return '[$_key] $_encodedValue';

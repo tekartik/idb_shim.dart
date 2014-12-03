@@ -135,7 +135,7 @@ class _MemoryIndex extends Index {
 
   Future getKey(key) {
     return inTransaction(() {
-      return getSync(key).key;
+      return _MemoryItem.safeKey(getSync(key));
     });
   }
 

@@ -185,6 +185,14 @@ void testMain(IdbFactory idbFactory) {
 
       });
 
+      test('get key none', () {
+        Index index = objectStore.index(NAME_INDEX);
+        return index.getKey("test1").then((int readKey) {
+          expect(readKey, isNull);
+        });
+
+      });
+
       test('add/get key', () {
         Map value = {
           NAME_FIELD: "test1"
