@@ -6,6 +6,9 @@ homepage: http://alextekartik.github.io/idb_shim.dart/
 environment:
   sdk: '>=1.0.0 <2.0.0'
 dev_dependencies:
-  browser: '>=0.10.0 <0.11.0'
-  logging: '>=0.9.1 <0.10.0'
-  unittest: '>=0.9.0 <0.12.0'
+  browser: any
+  logging: any
+  unittest: any
+  tekartik_test:
+    git: git://github.com/alextekartik/tekartik_test.dart
+  

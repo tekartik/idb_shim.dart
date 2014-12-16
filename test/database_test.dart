@@ -116,7 +116,7 @@ void testMain(IdbFactory idbFactory) {
     });
 
     // does not work in IE...
-    skip_test('one keep open then one', () {
+    tk_skip_test('one keep open then one', () {
       return _openWith1Store().then((_) {
         Database firstDb = db;
 

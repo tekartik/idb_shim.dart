@@ -5,10 +5,11 @@ import 'package:idb_shim/src/common/common_value.dart';
 import 'idb_test_common.dart';
 //import 'idb_test_factory.dart';
 
+
 // so that this can be run directly
-void main() {
-  testMain(new IdbMemoryFactory());
-}
+//void main() {
+//  testMain(new IdbMemoryFactory());
+//}
 
 void testMain(IdbFactory idbFactory) {
 
@@ -279,7 +280,7 @@ void testMain(IdbFactory idbFactory) {
       });
 
       // limitation, this crashes everywhere
-      skip_test('add with same key', () {
+      tk_skip_test('add with same key', () {
         Map value = {};
         return objectStore.add(value, 1234).then((key) {
           expect(key, 1234);
@@ -309,7 +310,7 @@ void testMain(IdbFactory idbFactory) {
 
 
       // limitation
-      skip_test('add with text number key and next', () {
+      tk_skip_test('add with text number key and next', () {
         Map value = {};
         return objectStore.add(value, "2").then((key) {
           expect(key, "2");
@@ -321,7 +322,7 @@ void testMain(IdbFactory idbFactory) {
       });
 
       // limitation
-      skip_test('add with text key and next', () {
+      tk_skip_test('add with text key and next', () {
         Map value1 = {
           'test': 1
         };
@@ -675,7 +676,8 @@ void testMain(IdbFactory idbFactory) {
         return objectStore.add(value, 123).then((_) {
           fail("should fail");
         }, onError: (e) {
-
+          // "both key 123 and inline keyPath 123 are specified
+          //devPrint(e);
         });
       });
 
@@ -767,6 +769,7 @@ void testMain(IdbFactory idbFactory) {
         }).then((e) {
           //expect(isTransactionReadOnlyError(e), isTrue);
           //devPrint(e);
+          // IdbMemoryError(3): neither keyPath nor autoIncrement set and trying to add object without key
           expect(e is DatabaseError, isTrue);
         });
       });
@@ -879,6 +882,34 @@ void testMain(IdbFactory idbFactory) {
 //          //print(e);
 //        });
 //      });
+    });
+
+    group('various', () {
+      Database db;
+      Transaction transaction;
+      ObjectStore objectStore;
+      setUp(() {
+        return setUpSimpleStore(idbFactory).then((Database database) {
+          db = database;
+          transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+          objectStore = transaction.objectStore(STORE_NAME);
+        });
+      });
+
+      tearDown(() {
+        return transaction.completed.then((_) {
+          db.close();
+        });
+      });
+
+      test('delete', () {
+        return objectStore.add("test").then((key) {
+          return objectStore.delete(key).then((result) {
+            expect(result, isNull);
+          });
+        });
+
+      });
     });
   });
 }

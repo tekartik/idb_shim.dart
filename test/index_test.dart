@@ -4,12 +4,12 @@ import 'package:idb_shim/idb_client.dart';
 import 'idb_test_common.dart';
 //import 'idb_test_factory.dart';
 
-// so that this can be run directly
-void main() {
-  testMain(new IdbMemoryFactory());
-}
+//// so that this can be run directly
+//void main() {
+//  testMain(new IdbMemoryFactory());
+//}
 
-void testMain(IdbFactory idbFactory) {
+void defineTests(IdbFactory idbFactory) {
 
   group('index', () {
     group('no', () {
@@ -60,6 +60,82 @@ void testMain(IdbFactory idbFactory) {
           // print(e);
         }
       });
+    });
+
+    group('one not unique', () {
+
+      Database db;
+      Transaction transaction;
+      ObjectStore objectStore;
+
+      _createTransaction() {
+        transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+        objectStore = transaction.objectStore(STORE_NAME);
+      }
+
+      setUp(() {
+        return idbFactory.deleteDatabase(DB_NAME).then((_) {
+          void _initializeDatabase(VersionChangeEvent e) {
+            Database db = e.database;
+            ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
+            Index index = objectStore.createIndex(NAME_INDEX, NAME_FIELD, unique: false);
+
+          }
+          return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
+            db = database;
+            _createTransaction();
+
+          });
+        });
+      });
+
+      tearDown(() {
+        if (transaction != null) {
+          return transaction.completed.then((_) {
+            db.close();
+          });
+        } else {
+          db.close();
+        }
+      });
+
+      test('add_twice_same_key', () {
+        Map value1 = {
+          NAME_FIELD: "test1"
+        };
+
+        Index index = objectStore.index(NAME_INDEX);
+        return objectStore.add(value1).then((_) {
+          return objectStore.add(value1).then((_) {
+//            // create new transaction;
+            index = objectStore.index(NAME_INDEX);
+            return index.count(new KeyRange.only("test1")).then((int count) {
+              expect(count == 2, isTrue);
+            });
+            // });
+          });
+        });
+      });
+//
+//      solo_test('add_twice_same_key', () {
+//        Map value1 = {
+//          NAME_FIELD: "test1"
+//        };
+//
+//        Index index = objectStore.index(NAME_INDEX);
+//        objectStore.add(value1);
+//        objectStore.add(value1);
+//        return transaction.completed.then((_) {
+////            // create new transaction;
+//          _createTransaction();
+//          index = objectStore.index(NAME_INDEX);
+//          return index.count(new KeyRange.only("test1")).then((int count) {
+//            expect(count == 2, isTrue);
+//          });
+//          // });
+//        });
+//      });
+
     });
 
     group('one unique', () {
@@ -158,7 +234,7 @@ void testMain(IdbFactory idbFactory) {
         });
       });
 
-      skip_test('WEIRD count by range', () {
+      tk_skip_test('WEIRD count by range', () {
         Map value = {};
         return objectStore.add(value).then((key1) {
           return objectStore.add(value).then((key2) {

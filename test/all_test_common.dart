@@ -28,8 +28,8 @@ testMain(IdbFactory idbFactory) {
   object_store_test.testMain(idbFactory);
   key_range_test.testMain(idbFactory);
   factory_test.testMain(idbFactory);
-  index_test.testMain(idbFactory);
-  index_cursor_test.testMain(idbFactory);
+  index_test.defineTests(idbFactory);
+  index_cursor_test.defineTests(idbFactory);
   simple_provider_test.testMain(idbFactory);
 
   group('indexeddb_1', () {

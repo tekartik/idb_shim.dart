@@ -14,11 +14,11 @@ class TestIdNameRow {
   String name;
 }
 
-// so that this can be run directly
-void main() {
-  testMain(new IdbMemoryFactory());
-}
-void testMain(IdbFactory idbFactory) {
+//// so that this can be run directly
+//void main() {
+//  testMain(new IdbMemoryFactory());
+//}
+void defineTests(IdbFactory idbFactory) {
 
   group('index_cursor', () {
 
@@ -182,6 +182,74 @@ void testMain(IdbFactory idbFactory) {
         });
       });
 
+      test('index get 1', () {
+        return add("test1").then((key) {
+          return index.get("test1").then((value) {
+            expect(value[NAME_FIELD], "test1");
+          });
+        });
+      });
+
+      test('cursor non-auto', () {
+        return add("test1").then((key) {
+
+          int count = 0;
+          // non auto to control advance
+          return index.openCursor(autoAdvance: false).listen((CursorWithValue cwv) {
+            expect(cwv.value, {NAME_FIELD: "test1"});
+            expect(cwv.key, "test1");
+            expect(cwv.primaryKey, key);
+            count++;
+            cwv.next();
+          });
+        });
+      });
+
+      test('cursor none auto delete 1', () {
+        return add("test1").then((key) {
+
+          // non auto to control advance
+          return index.openCursor(autoAdvance: false).listen((CursorWithValue cwv) {
+            cwv.delete().then((_) {
+              cwv.next();
+            });
+          }).asFuture().then((_) {
+            return transaction.completed.then((_) {
+              transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+              objectStore = transaction.objectStore(STORE_NAME);
+              index = objectStore.index(NAME_INDEX);
+              return index.get(key).then((value) {
+                expect(value, isNull);
+              });
+            });
+
+          });
+        });
+      });
+
+      test('cursor none auto update 1', () {
+        return add("test1").then((key) {
+          Map map;
+          // non auto to control advance
+          return index.openCursor(autoAdvance: false).listen((CursorWithValue cwv) {
+            map = new Map.from(cwv.value);
+            map["other"] = "too";
+            cwv.update(map).then((_) {
+              cwv.next();
+            });
+          }).asFuture().then((_) {
+            return transaction.completed.then((_) {
+              transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+              objectStore = transaction.objectStore(STORE_NAME);
+              index = objectStore.index(NAME_INDEX);
+              return index.get("test1").then((value) {
+                expect(value, map);
+              });
+            });
+
+          });
+        });
+      });
       test('3 item cursor', () {
         return fill3SampleRows().then((_) {
           return cursorToList(index.openCursor(autoAdvance: true)).then((list) {

@@ -13,7 +13,7 @@ import 'package:idb_shim/idb_client.dart';
 
 testMain(IdbFactory idbFactory) {
   simple_provider_test.testMain(idbFactory);
-  index_test.testMain(idbFactory);
+  index_test.defineTests(idbFactory);
   transaction_test.testMain(idbFactory);
 }
 
