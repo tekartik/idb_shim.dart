@@ -1,3 +1,4 @@
+@deprecated
 library idb_shim_test_utils;
 
 import 'package:unittest/unittest.dart' as unittest;

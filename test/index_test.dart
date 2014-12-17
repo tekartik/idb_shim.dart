@@ -502,5 +502,41 @@ void defineTests(IdbFactory idbFactory) {
         expect(index.unique, true);
       });
     });
+
+    group('create index and re-open', () {
+      setUp(() {
+        return idbFactory.deleteDatabase(DB_NAME);
+      });
+
+      Future testIndex(IdbIndexMeta indexMeta) {
+        IdbObjectStoreMeta storeMeta = idbSimpleObjectStoreMeta.clone();
+        storeMeta.addIndex(indexMeta);
+        return setUpSimpleStore(idbFactory, meta: storeMeta).then((Database db) {
+          db.close();
+        }).then((_) {
+          return idbFactory.open(DB_NAME).then((Database db) {
+            Transaction transaction = db.transaction(storeMeta.name, IDB_MODE_READ_ONLY);
+            ObjectStore objectStore = transaction.objectStore(storeMeta.name);
+            Index index = objectStore.index(indexMeta.name);
+            IdbIndexMeta readMeta = new IdbIndexMeta.fromIndex(index);
+            expect(readMeta, indexMeta);
+            db.close();
+          });
+        });
+      }
+
+      test('all', () {
+        Iterator<IdbIndexMeta> iterator = idbIndexMetas.iterator;
+        _next() {
+          if (iterator.moveNext()) {
+            return testIndex(iterator.current).then((_) {
+              return _next();
+            });
+          }
+        }
+        return _next();
+
+      });
+    });
   });
 }

@@ -2,7 +2,9 @@ library object_store_test;
 
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/common/common_value.dart';
+import 'package:idb_shim/src/common/common_meta.dart';
 import 'idb_test_common.dart';
+import 'common_meta_test.dart';
 //import 'idb_test_factory.dart';
 
 
@@ -884,6 +886,38 @@ void testMain(IdbFactory idbFactory) {
 //      });
     });
 
+    group('create store and re-open', () {
+      setUp(() {
+        return idbFactory.deleteDatabase(DB_NAME);
+      });
+
+      Future testStore(IdbObjectStoreMeta storeMeta) {
+        return setUpSimpleStore(idbFactory, meta: storeMeta).then((Database db) {
+          db.close();
+        }).then((_) {
+          return idbFactory.open(DB_NAME).then((Database db) {
+            Transaction transaction = db.transaction(storeMeta.name, IDB_MODE_READ_ONLY);
+            ObjectStore objectStore = transaction.objectStore(storeMeta.name);
+            IdbObjectStoreMeta readMeta = new IdbObjectStoreMeta.fromObjectStore(objectStore);
+            expect(readMeta, storeMeta);
+            db.close();
+          });
+        });
+      }
+      
+      test('all', () {
+        Iterator<IdbObjectStoreMeta> iterator = idbObjectStoreMetas.iterator;
+        _next() {
+          if (iterator.moveNext()) {
+            return testStore(iterator.current).then((_) {
+              return _next();
+            });
+          }
+        }
+        return _next();
+       
+      });
+    });
     group('various', () {
       Database db;
       Transaction transaction;

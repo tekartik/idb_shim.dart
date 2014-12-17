@@ -4,11 +4,16 @@ import 'package:tekartik_test/test_config.dart';
 import 'package:logging/logging.dart';
 //import 'package:unittest/unittest.dart';
 import 'package:idb_shim/idb_client.dart';
+import 'package:idb_shim/src/common/common_meta.dart';
 import 'package:idb_shim/src/utils/test_utils.dart';
 export 'package:idb_shim/idb_client_memory.dart';
 import 'dart:async';
-export 'dart:async';
+
+import 'common_meta_test.dart';
+export 'common_meta_test.dart' hide main;
+export 'package:idb_shim/src/common/common_meta.dart';
 export 'package:tekartik_test/test_utils.dart';
+export 'dart:async';
 
 // only for test - INFO - basic output, FINE - show test name before/after - FINEST - samething for console test also
 const Level DEBUG_LEVEL = Level.FINE;
@@ -22,16 +27,25 @@ const String NAME_INDEX_2 = 'name_index_2';
 const String NAME_FIELD_2 = 'name_2';
 
 
-Future<Database> setUpSimpleStore(IdbFactory idbFactory) {
-  return idbFactory.deleteDatabase(DB_NAME).then((_) {
+
+Future<Database> setUpSimpleStore(IdbFactory idbFactory, //
+    {String dbName:DB_NAME, IdbObjectStoreMeta meta}) {
+  if (meta == null) {
+    meta = idbSimpleObjectStoreMeta;
+  }
+  return idbFactory.deleteDatabase(dbName).then((_) {
     void _initializeDatabase(VersionChangeEvent e) {
       Database db = e.database;
-      ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
+      ObjectStore objectStore = db.createObjectStore(meta.name, keyPath: meta.keyPath, autoIncrement: meta.autoIncrement);
+      for (IdbIndexMeta indexMeta in meta.indecies) {
+        objectStore.createIndex(indexMeta.name, indexMeta.keyPath, unique: indexMeta.unique, multiEntry: indexMeta.multiEntry);
+      }
     }
-    return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase);
+    return idbFactory.open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
   });
 }
 
+@deprecated
 abstract class IdbDebugConfiguration {
 
   void debugOnCreate(Configuration configuration) {
