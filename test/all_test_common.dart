@@ -12,6 +12,7 @@ import 'index_test.dart' as index_test;
 import 'index_cursor_test.dart' as index_cursor_test;
 import 'simple_provider_test.dart' as simple_provider_test;
 import 'factory_test.dart' as factory_test;
+import 'quick_standalone_test.dart' as quick_standalone_test;
 import 'indexeddb_1_test.dart' as indexeddb_1_test;
 import 'indexeddb_2_test.dart' as indexeddb_2_test;
 import 'indexeddb_3_test.dart' as indexeddb_3_test;
@@ -31,6 +32,7 @@ testMain(IdbFactory idbFactory) {
   index_test.defineTests(idbFactory);
   index_cursor_test.defineTests(idbFactory);
   simple_provider_test.testMain(idbFactory);
+  quick_standalone_test.defineTests(idbFactory);
 
   group('indexeddb_1', () {
     indexeddb_1_test.testMain(idbFactory);
