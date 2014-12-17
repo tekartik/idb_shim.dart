@@ -82,7 +82,7 @@ Future<List<String>> getTableNames(SqlTransaction tx) {
   });
 }
 
-testMain() {
+defineTests() {
 
   IdbWebSqlFactory idbFactory = new IdbWebSqlFactory();
 

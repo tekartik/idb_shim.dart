@@ -1,14 +1,15 @@
 name: idb_shim
-version: 0.6.2
+version: 0.7.0
 author: Alexandre Roux Tekartik <alex.tekartik.pub@gmail.com>
 description: indexed_db dart polyfill over native, websql or memory implementation
 homepage: http://alextekartik.github.io/idb_shim.dart/
 environment:
   sdk: '>=1.0.0 <2.0.0'
+dependencies:
+  sembast: any
 dev_dependencies:
   browser: any
   logging: any
-  unittest: any
   tekartik_test:
     git: git://github.com/alextekartik/tekartik_test.dart
-  
+  unittest: any

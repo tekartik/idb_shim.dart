@@ -6,10 +6,10 @@ import 'idb_test_common.dart';
 //import 'idb_test_factory.dart';
 
 main() {
-  testMain(idbMemoryFactory);
+  defineTests(idbMemoryFactory);
 }
 
-void testMain(IdbFactory idbFactory) {
+void defineTests(IdbFactory idbFactory) {
 
   group('database', () {
 

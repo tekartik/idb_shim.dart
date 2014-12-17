@@ -4,7 +4,7 @@ import 'package:idb_shim/idb_client.dart';
 import 'idb_test_common.dart';
 //import 'idb_test_factory.dart';
 
-void testMain(IdbFactory idbFactory) {
+void defineTests(IdbFactory idbFactory) {
 
   group('delete', () {
 

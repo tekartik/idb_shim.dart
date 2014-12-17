@@ -1,9 +1,7 @@
 library all_test_client_websql;
 
-import 'idb_test_browser.dart';
-//import 'idb_test_websql.dart' as idb_wql;
-import 'package:unittest/unittest.dart';
-import 'all_test_common.dart' as all_common;
+import 'package:tekartik_test/test_config_browser.dart';
+import 'test_runner.dart' as test_runner;
 import 'websql_wrapper_test.dart' as websql_wrapper_test;
 import 'websql_client_test.dart' as websql_client_test;
 import 'package:idb_shim/idb_client_websql.dart';
@@ -74,9 +72,9 @@ testMain() {
     if (IdbWebSqlFactory.supported) {
       //idb_wql.SqlDatabase.debug = true;
       IdbWebSqlFactory idbFactory = new IdbWebSqlFactory();
-      all_common.testMain(idbFactory);
-      websql_wrapper_test.testMain();
-      websql_client_test.testMain();
+      test_runner.defineTests(idbFactory);
+      websql_wrapper_test.defineTests();
+      websql_client_test.defineTests();
       webSqlTest(idbFactory);
     } else {
       /**

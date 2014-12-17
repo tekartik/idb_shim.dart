@@ -1,8 +1,6 @@
 library all_test_browser;
 
-import 'dart:async';
-import 'idb_test_browser.dart';
-import 'package:unittest/unittest.dart';
+import 'package:tekartik_test/test_config_browser.dart';
 import 'simple_provider_test.dart' as simple_provider_test;
 import 'transaction_test.dart' as transaction_test;
 import 'index_test.dart' as index_test;
@@ -10,11 +8,12 @@ import 'package:idb_shim/idb_client_native.dart';
 import 'package:idb_shim/idb_client_websql.dart';
 import 'package:idb_shim/idb_client_memory.dart';
 import 'package:idb_shim/idb_client.dart';
+import 'dart:async';
 
 testMain(IdbFactory idbFactory) {
   simple_provider_test.testMain(idbFactory);
   index_test.defineTests(idbFactory);
-  transaction_test.testMain(idbFactory);
+  transaction_test.defineTests(idbFactory);
 }
 
 main() {

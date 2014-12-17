@@ -17,6 +17,10 @@ const IDB_FACTORY_NATIVE = "native";
 const IDB_FACTORY_WEBSQL = "websql";
 // shim using Memory implementation
 const IDB_FACTORY_MEMORY = "memory";
+// shim using Sembast implementation
+const IDB_FACTORY_SEMBAST_IO = "sembast_io";
+// shim using Sembast memory implementation
+const IDB_FACTORY_SEMBAST_MEMORY = "sembast_memory";
 // pseudo - best persistent shim (indexeddb or if not available websql)
 const IDB_FACTORY_PERSISTENT = "persistent";
 // pseudo - best browser shim (persistent of it not available memory)

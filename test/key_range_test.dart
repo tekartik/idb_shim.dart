@@ -1,10 +1,10 @@
 library key_range_test;
 
-import 'package:unittest/unittest.dart';
+import 'idb_test_common.dart';
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/idb_client_memory.dart';
 
-void testMain(IdbFactory idbFactory) {
+void defineTests(IdbFactory idbFactory) {
 
   group('KeyRange', () {
 

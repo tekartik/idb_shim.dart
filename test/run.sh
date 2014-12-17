@@ -2,4 +2,4 @@
 
 _DIR=$(dirname $BASH_SOURCE)
 
-dart ${_DIR}/all_test_console.dart
+dart ${_DIR}/test_runner_io.dart

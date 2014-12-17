@@ -1,8 +1,5 @@
-library idb_shim_console;
+// use idb_io.dart now
+@deprecated
+library idb_shim.console;
 
-import 'package:idb_shim/idb_client_memory.dart';
-import 'package:idb_shim/idb_client.dart';
-
-IdbFactory get idbMemoryFactory {
-  return new IdbMemoryFactory();
-}
+export 'idb_io.dart';

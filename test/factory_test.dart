@@ -5,7 +5,7 @@ import 'idb_test_common.dart';
 import 'dart:async';
 //import 'idb_test_factory.dart';
 
-void testMain(IdbFactory idbFactory) {
+void defineTests(IdbFactory idbFactory) {
 
   group('factory', () {
 

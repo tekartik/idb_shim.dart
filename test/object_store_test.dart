@@ -13,7 +13,7 @@ import 'common_meta_test.dart';
 //  testMain(new IdbMemoryFactory());
 //}
 
-void testMain(IdbFactory idbFactory) {
+void defineTests(IdbFactory idbFactory) {
 
   group('object_store', () {
     group('failure', () {

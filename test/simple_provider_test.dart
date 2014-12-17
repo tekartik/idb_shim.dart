@@ -1,8 +1,7 @@
 library store_test_common;
 
-import 'package:unittest/unittest.dart';
 import 'package:idb_shim/idb_client.dart';
-//import 'idb_test_common.dart';
+import 'package:tekartik_test/test_utils.dart';
 import 'simple_provider.dart';
 import 'dart:async';
 

@@ -65,7 +65,7 @@ void defineTests() {
       IdbObjectStoreMeta newMeta = new IdbObjectStoreMeta.fromMap(map);
       expect(newMeta, meta);
     }
-    
+
     test('store to/from map', () {
       IdbObjectStoreMeta meta1 = idbSimpleObjectStoreMeta.clone();
       meta1.addIndex(idbIndexMeta1);

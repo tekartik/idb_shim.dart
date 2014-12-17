@@ -1,7 +1,6 @@
 library idb_browser_test;
 
-import 'idb_test_browser.dart';
-import 'package:unittest/unittest.dart';
+import 'package:tekartik_test/test_config_browser.dart';
 import 'package:idb_shim/idb_browser.dart';
 import 'package:idb_shim/idb_client.dart';
 

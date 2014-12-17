@@ -5,7 +5,6 @@ import 'package:logging/logging.dart';
 //import 'package:unittest/unittest.dart';
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
-import 'package:idb_shim/src/utils/test_utils.dart';
 export 'package:idb_shim/idb_client_memory.dart';
 import 'dart:async';
 
@@ -43,32 +42,6 @@ Future<Database> setUpSimpleStore(IdbFactory idbFactory, //
     }
     return idbFactory.open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
   });
-}
-
-@deprecated
-abstract class IdbDebugConfiguration {
-
-  void debugOnCreate(Configuration configuration) {
-    configuration.timeout = new Duration(seconds: 10); // consider 30 sometimes
-  }
-
-  void debugOnTestStart(TestCase testCase) {
-    if (DEBUG_LEVEL <= Level.FINE) {
-      print(testCase.description + " - started");
-    }
-  }
-
-  void debugOnTestResult(TestCase testCase) {
-    if (DEBUG_LEVEL <= Level.FINE) {
-      if (!testCase.message.isEmpty) {
-        print(testCase.description + " - " + testCase.message);
-      } else {
-        if (DEBUG_LEVEL <= Level.FINE) {
-          print(testCase.description + " - ok");
-        }
-      }
-    }
-  }
 }
 
 bool isTransactionReadOnlyError(e) {

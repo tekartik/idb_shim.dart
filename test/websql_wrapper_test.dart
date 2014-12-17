@@ -3,7 +3,7 @@ library websql_wrapper_test;
 import 'package:unittest/unittest.dart';
 import 'package:idb_shim/src/websql/websql_wrapper.dart';
 
-testMain() {
+defineTests() {
   group('wrapper', () {
     //wrapped.sqlDatabaseFactory.o
     test('open', () {

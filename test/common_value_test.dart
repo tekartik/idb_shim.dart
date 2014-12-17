@@ -1,10 +1,11 @@
 library common_value_test;
 
-import 'package:unittest/unittest.dart';
-
 import 'package:idb_shim/src/common/common_value.dart';
+import 'idb_test_common.dart';
 
-void main() {
+void main() => defineTests();
+
+void defineTests() {
 
   group('value', () {
     test('Map', () {
