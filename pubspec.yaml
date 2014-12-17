@@ -5,8 +5,6 @@ description: indexed_db dart polyfill over native, websql or memory implementati
 homepage: http://alextekartik.github.io/idb_shim.dart/
 environment:
   sdk: '>=1.0.0 <2.0.0'
-dependencies:
-  collection: any
 dev_dependencies:
   browser: any
   logging: any
