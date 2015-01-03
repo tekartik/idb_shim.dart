@@ -13,3 +13,6 @@ dev_dependencies:
   tekartik_test:
     git: git://github.com/alextekartik/tekartik_test.dart
   unittest: any
+dependency_overrides:
+#  sembast:
+#    path: ../sembast.dart
