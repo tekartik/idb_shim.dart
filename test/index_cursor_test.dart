@@ -196,7 +196,9 @@ void defineTests(IdbFactory idbFactory) {
           int count = 0;
           // non auto to control advance
           return index.openCursor(autoAdvance: false).listen((CursorWithValue cwv) {
-            expect(cwv.value, {NAME_FIELD: "test1"});
+            expect(cwv.value, {
+              NAME_FIELD: "test1"
+            });
             expect(cwv.key, "test1");
             expect(cwv.primaryKey, key);
             count++;
@@ -278,6 +280,80 @@ void defineTests(IdbFactory idbFactory) {
           });
 
 
+
+        });
+      });
+    });
+
+    group('multiple', () {
+
+      Index nameIndex;
+      Index valueIndex;
+      setUp(() {
+        return idbFactory.deleteDatabase(DB_NAME).then((_) {
+          void _initializeDatabase(VersionChangeEvent e) {
+            Database db = e.database;
+            ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
+            Index index = objectStore.createIndex(NAME_INDEX, NAME_FIELD);
+            Index index2 = objectStore.createIndex(VALUE_INDEX, VALUE_FIELD);
+          }
+          return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
+            db = database;
+            transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+            objectStore = transaction.objectStore(STORE_NAME);
+            nameIndex = objectStore.index(NAME_INDEX);
+            valueIndex = objectStore.index(VALUE_INDEX);
+            return db;
+
+          });
+        });
+      });
+
+      tearDown(() {
+        return transaction.completed.then((_) {
+          db.close();
+        });
+      });
+
+      test('add and read', () {
+
+        Future<List<int>> getKeys(Stream<Cursor> stream) {
+          List<int> keys = [];
+          return stream.listen((Cursor cursor) {
+            keys.add(cursor.primaryKey);
+          }).asFuture().then((_) {
+            return keys;
+          });
+        }
+        Future add(String name, int value) {
+          var obj = {
+            NAME_FIELD: name,
+            VALUE_FIELD: value
+          };
+          return objectStore.put(obj);
+        }
+
+        int key1, key2, key3;
+        // order should be key1, key3, key2 for name
+        // order should be key2, key1, key3 for value
+        return add("a", 2).then((key) {
+          key1 = key;
+          return add("c", 1);
+        }).then((key) {
+          key2 = key;
+          return add("b", 3);
+        }).then((key) {
+          key3 = key;
+          Stream<Cursor> stream = nameIndex.openKeyCursor(autoAdvance: true);
+          return getKeys(stream).then((result) {
+            expect(result, [key1, key3, key2]);
+          });
+
+        }).then((_) {
+          Stream<Cursor> stream = valueIndex.openKeyCursor(autoAdvance: true);
+          return getKeys(stream).then((result) {
+            expect(result, [key2, key1, key3]);
+          });
 
         });
       });

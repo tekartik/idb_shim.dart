@@ -22,6 +22,9 @@ const String STORE_NAME_2 = 'test_store_2';
 
 const String NAME_INDEX = 'name_index';
 const String NAME_FIELD = 'name';
+const String VALUE_INDEX = 'value_index';
+const String VALUE_FIELD = 'value';
+
 const String NAME_INDEX_2 = 'name_index_2';
 const String NAME_FIELD_2 = 'name_2';
 
