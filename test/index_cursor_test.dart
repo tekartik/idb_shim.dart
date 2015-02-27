@@ -355,6 +355,16 @@ void defineTests(IdbFactory idbFactory) {
             expect(result, [key2, key1, key3]);
           });
 
+        }).then((_) {
+          Stream<Cursor> stream = valueIndex.openKeyCursor(range: new KeyRange.lowerBound(2), autoAdvance: true);
+          return getKeys(stream).then((result) {
+            expect(result, [key1, key3]);
+          });
+        }).then((_) {
+          Stream<Cursor> stream = valueIndex.openKeyCursor(range: new KeyRange.upperBound(2, true), autoAdvance: true);
+          return getKeys(stream).then((result) {
+            expect(result, [key2]);
+          });
         });
       });
     });
