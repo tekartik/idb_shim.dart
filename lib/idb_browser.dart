@@ -45,10 +45,7 @@ IdbFactory get idbNativeFactory {
   }
 }
 
-IdbFactory get idbMemoryFactory {
-  // always supported
-  return new IdbMemoryFactory();
-}
+IdbFactory get idbMemoryFactory => idbSembastMemoryFactory;
 
 IdbFactory _idbSembastMemoryFactory;
 IdbFactory get idbSembastMemoryFactory {

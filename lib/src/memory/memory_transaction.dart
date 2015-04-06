@@ -5,7 +5,11 @@ abstract class WithCurrentTransaction {
 }
 
 class _MemoryTransaction extends Transaction {
+  @deprecated("dev only")
+  static bool _DEBUG_ON = true;
+  
   static bool DEBUG = false;
+  // static bool DEBUG = _DEBUG_ON;
   
   // Transaction mode (readonly/readwrite)
   String _mode;
@@ -96,7 +100,7 @@ class _MemoryTransaction extends Transaction {
     }
     // It can be null for empty transaction
     if ((memoryDatabase.currentTransaction != this) && (memoryDatabase.currentTransaction != null)) {
-      print("error $hashCode $this");
+      print("error $hashCode $this / ${memoryDatabase.currentTransaction}");
       throw new StateError("internal error - complete - not the current transaction");
     }
 

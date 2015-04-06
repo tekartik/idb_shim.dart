@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 //import 'package:unittest/unittest.dart';
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
+import 'package:idb_shim/idb_client_memory.dart';
 export 'package:idb_shim/idb_client_memory.dart';
 import 'dart:async';
 
@@ -29,6 +30,10 @@ const String NAME_INDEX_2 = 'name_index_2';
 const String NAME_FIELD_2 = 'name_2';
 
 
+// without warnings
+IdbFactory get idbTestMemoryFactory {
+  return new IdbMemoryFactory();
+}
 
 Future<Database> setUpSimpleStore(IdbFactory idbFactory, //
     {String dbName:DB_NAME, IdbObjectStoreMeta meta}) {

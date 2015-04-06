@@ -12,6 +12,7 @@ void main() {
   //useCompactVMConfiguration();
 
   defineTests(idbMemoryFactory);
+  defineTests(idbMemoryOldFactory);
   defineTests(idbSembastMemoryFactory);
   defineTests(getIdbSembastIoFactory("tmp"));
   common_value_test.main();

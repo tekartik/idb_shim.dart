@@ -6,7 +6,10 @@ import 'package:idb_shim/idb_client_sembast.dart';
 import 'package:sembast/sembast_io.dart';
 import 'package:sembast/sembast_memory.dart';
 
-IdbFactory get idbMemoryFactory {
+IdbFactory get idbMemoryFactory => idbSembastMemoryFactory;
+
+@deprecated
+IdbFactory get idbMemoryOldFactory {
   return new IdbMemoryFactory();
 }
 
