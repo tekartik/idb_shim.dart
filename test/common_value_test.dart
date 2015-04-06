@@ -23,8 +23,13 @@ void defineTests() {
     });
 
     // not supported
-    skip_test('DateTime', () {
-      expect(encodeValue(new DateTime.now()), "xxxx");
+   test('DateTime', () {
+      try {
+        expect(encodeValue(new DateTime.now()), "xxxx");
+        fail("should fail");
+      } catch (e) {
+        //devPrint(e);
+      }
     });
 
   });

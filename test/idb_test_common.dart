@@ -31,7 +31,7 @@ const String NAME_FIELD_2 = 'name_2';
 
 
 // without warnings
-IdbFactory get idbTestMemoryFactory {
+IdbFactory get idbTestMemoryOldFactory {
   return new IdbMemoryFactory();
 }
 
