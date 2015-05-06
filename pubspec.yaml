@@ -17,5 +17,5 @@ dev_dependencies:
 dependency_overrides:
 #  sembast:
 #    path: ../sembast.dart
-  tekartik_test:
-    path: ../tekartik_test.dart
+#  tekartik_test:
+#    path: ../tekartik_test.dart
