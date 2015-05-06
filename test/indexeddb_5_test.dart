@@ -1,9 +1,12 @@
 library IndexedDB5Test;
-import 'package:unittest/unittest.dart';
 //import 'dart:async';
 import 'package:idb_shim/idb_client.dart';
 
-testMain(IdbFactory idbFactory_) {
+// so that this can be run directly
+import 'idb_test_common.dart';
+void main() => defineTests(idbTestMemoryFactory);
+
+defineTests(IdbFactory idbFactory_) {
   group('indexeddb_5', () {
     IdbFactory idbFactory = idbFactory_;
     //useHtmlConfiguration();
@@ -22,7 +25,7 @@ testMain(IdbFactory idbFactory_) {
         return idbFactory.open(dbName, version: 1, onUpgradeNeeded: (e) {
           var db = e.target.result;
           var objectStore = db.createObjectStore(storeName, autoIncrement: true);
-          var index = objectStore.createIndex(indexName, 'name_index', unique: false);
+          objectStore.createIndex(indexName, 'name_index', unique: false);
         });
       }).then((database) {
         db = database;
@@ -36,8 +39,8 @@ testMain(IdbFactory idbFactory_) {
     if (idbFactory.supportsDatabaseNames) {
       test('getDatabaseNames', () {
         return idbFactory.getDatabaseNames().then((names) {
-          print(names);
-          print(dbName);
+          //print(names);
+          //print(dbName);
           bool found = false;
           for (String name in names) {
             if (name == dbName) {
@@ -115,7 +118,7 @@ testMain(IdbFactory idbFactory_) {
       //var done = expectAsync0(() {});
       var done = () {};
       var transaction = db.transaction(storeName, 'readwrite');
-      var index = transaction.objectStore(storeName).index(indexName);
+      //transaction.objectStore(storeName).index(indexName);
       transaction.objectStore(storeName).add(value);
       transaction.objectStore(storeName).add(value);
       transaction.objectStore(storeName).add(value);

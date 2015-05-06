@@ -2,7 +2,6 @@ library cursor_test;
 
 import 'dart:async';
 import 'package:idb_shim/idb_client.dart';
-import 'package:idb_shim/idb_client_memory.dart';
 import 'idb_test_common.dart';
 
 class TestIdNameRow {
@@ -15,9 +14,9 @@ class TestIdNameRow {
   String name;
 }
 
-void main() {
-  defineTests(new IdbMemoryFactory());
-}
+// so that this can be run directly
+void main() => defineTests(idbTestMemoryFactory);
+
 void defineTests(IdbFactory idbFactory) {
 
   group('cursor', () {
@@ -41,16 +40,16 @@ void defineTests(IdbFactory idbFactory) {
       });
     }
 
-    Future<List<TestIdNameRow>> _cursorToList(Stream<CursorWithValue> stream) {
-      Completer completer = new Completer.sync();
-      List<TestIdNameRow> list = new List();
-      stream.listen((CursorWithValue cwv) {
-        list.add(new TestIdNameRow(cwv));
-      }).onDone(() {
-        completer.complete(list);
-      });
-      return completer.future;
-    }
+//    Future<List<TestIdNameRow>> _cursorToList(Stream<CursorWithValue> stream) {
+//      Completer completer = new Completer.sync();
+//      List<TestIdNameRow> list = new List();
+//      stream.listen((CursorWithValue cwv) {
+//        list.add(new TestIdNameRow(cwv));
+//      }).onDone(() {
+//        completer.complete(list);
+//      });
+//      return completer.future;
+//    }
 
     Future<List<TestIdNameRow>> cursorToList(Stream<CursorWithValue> stream) {
       List<TestIdNameRow> list = new List();
@@ -76,7 +75,8 @@ void defineTests(IdbFactory idbFactory) {
         return idbFactory.deleteDatabase(DB_NAME).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
-            ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
+            //ObjectStore objectStore = 
+            db.createObjectStore(STORE_NAME, autoIncrement: true);
           }
           return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
             db = database;

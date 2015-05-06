@@ -1,6 +1,6 @@
 library idb_shim.test_runner;
 
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 
 import 'open_test.dart' as open_test;
 import 'database_test.dart' as database_test;
@@ -31,23 +31,22 @@ defineTests(IdbFactory idbFactory) {
   factory_test.defineTests(idbFactory);
   index_test.defineTests(idbFactory);
   index_cursor_test.defineTests(idbFactory);
-  simple_provider_test.testMain(idbFactory);
+  simple_provider_test.defineTests(idbFactory);
   quick_standalone_test.defineTests(idbFactory);
 
   group('indexeddb_1', () {
-    indexeddb_1_test.testMain(idbFactory);
+    indexeddb_1_test.defineTests(idbFactory);
   });
   group('indexeddb_2', () {
-    indexeddb_2_test.testMain(idbFactory);
+    indexeddb_2_test.defineTests(idbFactory);
   });
   group('indexeddb_3', () {
-    indexeddb_3_test.testMain(idbFactory);
+    indexeddb_3_test.defineTests(idbFactory);
   });
   group('indexeddb_4', () {
-    indexeddb_4_test.testMain(idbFactory);
+    indexeddb_4_test.defineTests(idbFactory);
   });
   group('indexeddb_5', () {
-    indexeddb_5_test.testMain(idbFactory);
+    indexeddb_5_test.defineTests(idbFactory);
   });
-
 }

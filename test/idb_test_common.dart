@@ -1,11 +1,11 @@
 library idb_test_common;
 
-import 'package:tekartik_test/test_config.dart';
 import 'package:logging/logging.dart';
 //import 'package:unittest/unittest.dart';
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
 import 'package:idb_shim/idb_client_memory.dart';
+
 export 'package:idb_shim/idb_client_memory.dart';
 import 'dart:async';
 
@@ -13,6 +13,7 @@ import 'common_meta_test.dart';
 export 'common_meta_test.dart' hide main;
 export 'package:idb_shim/src/common/common_meta.dart';
 export 'package:tekartik_test/test_utils.dart';
+export 'package:test/test.dart';
 export 'dart:async';
 
 // only for test - INFO - basic output, FINE - show test name before/after - FINEST - samething for console test also
@@ -30,10 +31,7 @@ const String NAME_INDEX_2 = 'name_index_2';
 const String NAME_FIELD_2 = 'name_2';
 
 
-// without warnings
-IdbFactory get idbTestMemoryOldFactory {
-  return new IdbMemoryFactory();
-}
+IdbFactory idbTestMemoryFactory = idbMemoryFactory;
 
 Future<Database> setUpSimpleStore(IdbFactory idbFactory, //
     {String dbName:DB_NAME, IdbObjectStoreMeta meta}) {

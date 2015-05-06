@@ -62,7 +62,7 @@ class _WebSqlCursorWithValue extends CursorWithValue with _WebSqlCommonCursor<Cu
 }
 
 abstract class _WebSqlCursorBaseController<T extends Cursor> {
-  SqlResultSet _sqlResultSet;
+  //SqlResultSet _sqlResultSet;
 
   String direction;
   bool autoAdvance;
@@ -79,7 +79,7 @@ abstract class _WebSqlCursorBaseController<T extends Cursor> {
   T get newCursor;
 
   // should be one or 0
-  int _operationCount = 0;
+  //int _operationCount = 0;
   //
   //  void beginOperation() {
   //    _operationCount++;
@@ -118,7 +118,7 @@ abstract class _WebSqlCursorBaseController<T extends Cursor> {
    * false if it faield
    */
   bool advance(int count) {
-    int length = rows.length;
+    //int length = rows.length;
     currentIndex += count;
     if (!currentIndexValid) {
       // Prevent auto advance

@@ -24,7 +24,8 @@ void defineTests(IdbFactory idbFactory) {
     _openWith1Store() {
       void _initializeDatabase(VersionChangeEvent e) {
         Database db = e.database;
-        ObjectStore objectStore = db.createObjectStore(STORE_NAME);
+        //ObjectStore objectStore = 
+        db.createObjectStore(STORE_NAME);
       }
       return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
         db = database;
@@ -38,7 +39,8 @@ void defineTests(IdbFactory idbFactory) {
     _openWith1OtherStore() {
       void _initializeDatabase(VersionChangeEvent e) {
         Database db = e.database;
-        ObjectStore objectStore = db.createObjectStore(STORE_NAME + "_2");
+        // ObjectStore objectStore = 
+        db.createObjectStore(STORE_NAME + "_2");
       }
       return idbFactory.open(DB_NAME, version: 2, onUpgradeNeeded: _initializeDatabase, onBlocked: _onBlocked).then((Database database) {
         db = database;

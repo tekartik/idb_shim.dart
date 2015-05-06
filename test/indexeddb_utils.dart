@@ -2,7 +2,7 @@
 library TestUtils;
 
 import 'dart:typed_data';
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 
 /**
  * Verifies that [actual] has the same graph structure as [expected].

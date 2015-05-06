@@ -3,23 +3,27 @@ library factory_test;
 import 'package:idb_shim/idb_client.dart';
 import 'idb_test_common.dart';
 import 'dart:async';
-//import 'idb_test_factory.dart';
+
+// so that this can be run directly
+void main() => defineTests(idbTestMemoryFactory);
 
 void defineTests(IdbFactory idbFactory) {
-
   group('factory', () {
-
     test('delete database', () {
       return idbFactory.deleteDatabase(DB_NAME);
     });
 
-    test('delete null', () {
+    test('delete null failing', () {
       return idbFactory.deleteDatabase(null).then((_) {
         fail("should fail");
       }, onError: (e) {
         //print(e);
       });
-    });
+    }, testOn: "!js");
+
+    test('delete null not failing', () {
+      return idbFactory.deleteDatabase(null).then((_) {});
+    }, testOn: "js");
 
     if (idbFactory.supportsDatabaseNames) {
       test('supportsDatabaseNames', () {
@@ -32,7 +36,6 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       group('databases', () {
-
         setUp(() {
           return idbFactory.getDatabaseNames().then((List<String> names) {
             List<Future> futures = new List();
@@ -100,9 +103,7 @@ void defineTests(IdbFactory idbFactory) {
         });
       });
     } else {
-      test('database names not supported', () {
-      });
+      test('database names not supported', () {});
     }
   });
-
 }

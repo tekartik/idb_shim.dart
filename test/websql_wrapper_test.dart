@@ -1,13 +1,16 @@
+@TestOn("browser")
+
 library websql_wrapper_test;
 
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 import 'package:idb_shim/src/websql/websql_wrapper.dart';
 
-defineTests() {
+main() {
   group('wrapper', () {
     //wrapped.sqlDatabaseFactory.o
     test('open', () {
       SqlDatabase db = sqlDatabaseFactory.openDatabase("com.tekartik.test", "1", "com.tekartik.test", 1024 * 1024);
+      expect(db, isNotNull);
       //wrapped.SqlTransaction transaction = db.transaction();
     });
 

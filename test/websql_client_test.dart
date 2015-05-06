@@ -1,6 +1,7 @@
+@TestOn("browser")
 library websql_client_test;
 
-import 'package:unittest/unittest.dart';
+import 'package:test/test.dart';
 import 'package:idb_shim/src/websql/websql_wrapper.dart';
 import 'package:idb_shim/src/websql/websql_client_constants.dart';
 import 'package:idb_shim/idb_client_websql.dart';
@@ -24,7 +25,8 @@ bool _isSystemTable(String name) {
   return false;
 }
 
-Future<List<SqliteMasterRow>> getSqliteMasterRowsBadJs(SqlTransaction tx, [String where = ""]) {
+Future<List<SqliteMasterRow>> getSqliteMasterRowsBadJs(SqlTransaction tx,
+    [String where = ""]) {
   List<SqliteMasterRow> list = [];
   return tx.execute("SELECT type, name FROM sqlite_master" + where).then((rs) {
     rs.rows.forEach((Map row) {
@@ -34,7 +36,6 @@ Future<List<SqliteMasterRow>> getSqliteMasterRowsBadJs(SqlTransaction tx, [Strin
         if (_isSystemTable(name)) {
           return;
         }
-
       }
       list.add(new SqliteMasterRow(type, name));
     });
@@ -51,7 +52,6 @@ List<SqliteMasterRow> sqliteMasterRowsFromResultSet(SqlResultSet rs) {
       if (_isSystemTable(name)) {
         return;
       }
-
     }
     list.add(new SqliteMasterRow(type, name));
   });
@@ -59,7 +59,8 @@ List<SqliteMasterRow> sqliteMasterRowsFromResultSet(SqlResultSet rs) {
   return list;
 }
 
-Future<SqlResultSet> getSqliteMasterRows(SqlTransaction tx, [String where = ""]) {
+Future<SqlResultSet> getSqliteMasterRows(SqlTransaction tx,
+    [String where = ""]) {
   return tx.execute("SELECT type, name FROM sqlite_master" + where);
 }
 
@@ -82,20 +83,21 @@ Future<List<String>> getTableNames(SqlTransaction tx) {
   });
 }
 
-defineTests() {
-
+main() {
   IdbWebSqlFactory idbFactory = new IdbWebSqlFactory();
 
   SqlDatabase openGlobalStoreDatabase() {
-    SqlDatabase db = sqlDatabaseFactory.openDatabase(GLOBAL_STORE_DB_NAME, GLOBAL_STORE_DB_VERSION, GLOBAL_STORE_DB_NAME, GLOBAL_STORE_DB_ESTIMATED_SIZE);
+    SqlDatabase db = sqlDatabaseFactory.openDatabase(GLOBAL_STORE_DB_NAME,
+        GLOBAL_STORE_DB_VERSION, GLOBAL_STORE_DB_NAME,
+        GLOBAL_STORE_DB_ESTIMATED_SIZE);
     return db;
   }
 
   SqlDatabase openDatabase(String name) {
-    SqlDatabase db = sqlDatabaseFactory.openDatabase(name, DATABASE_DB_VERSION, name, GLOBAL_STORE_DB_ESTIMATED_SIZE);
+    SqlDatabase db = sqlDatabaseFactory.openDatabase(
+        name, DATABASE_DB_VERSION, name, GLOBAL_STORE_DB_ESTIMATED_SIZE);
     return db;
   }
-
 
   Future clearTables(SqlTransaction tx) {
     return getTableNamesRs(tx).then((SqlResultSet rs) {
@@ -108,44 +110,31 @@ defineTests() {
       //      //});
       //      return completer.future;
     });
-
   }
 
   group('tools', () {
-
     test('get table names rs', () {
       SqlDatabase db = openDatabase(DB_NAME);
       return db.transaction().then((tx) {
-
-        return getTableNamesRs(tx).then((rs) {
-        }).then((_) {
-          return getTableNamesRs(tx).then((rs) {
-          });
+        return getTableNamesRs(tx).then((rs) {}).then((_) {
+          return getTableNamesRs(tx).then((rs) {});
         });
-
       });
     });
 
     test('get table names', () {
       SqlDatabase db = openDatabase(DB_NAME);
       return db.transaction().then((tx) {
-
-        return getTableNames(tx).then((_) {
-        }).then((_) {
-          return getTableNames(tx).then((_) {
-          });
+        return getTableNames(tx).then((_) {}).then((_) {
+          return getTableNames(tx).then((_) {});
         });
-
       });
     });
-
-
 
     test('clear tables', () {
       SqlDatabase db = openDatabase(DB_NAME);
       return db.transaction().then((tx) {
         return clearTables(tx).then((rs) {
-
           return getTableNamesRs(tx).then((list) {
             //expect(list, isEmpty);
           });
@@ -157,7 +146,7 @@ defineTests() {
   group('idb global store', () {
     //wrapped.sqlDatabaseFactory.o
     test('open', () {
-      SqlDatabase db = openGlobalStoreDatabase();
+      openGlobalStoreDatabase();
     });
 
     test('clear global store tables', () {
@@ -260,7 +249,7 @@ defineTests() {
   group('idb database', () {
     //wrapped.sqlDatabaseFactory.o
     test('open', () {
-      SqlDatabase db = openDatabase(DB_NAME);
+      openDatabase(DB_NAME);
     });
 
     test('clear database tables', () {
@@ -285,7 +274,6 @@ defineTests() {
           });
         });
       });
-
     });
 
     test('clear one store database tables ', () {
@@ -301,10 +289,12 @@ defineTests() {
         // make sure we can open it though
         void _initializeDatabase(VersionChangeEvent e) {
           Database db = e.database;
-          ObjectStore objectStore = db.createObjectStore(STORE_NAME);
+          db.createObjectStore(STORE_NAME);
         }
 
-        return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((idb) {
+        return idbFactory
+            .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+            .then((idb) {
           expect(idb.objectStoreNames, [STORE_NAME]);
 
           // check the tables created
@@ -323,11 +313,8 @@ defineTests() {
               });
             });
           });
-
-
         });
       });
-
     });
   });
 }

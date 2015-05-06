@@ -108,7 +108,7 @@ class _WebSqlDatabase extends Database {
   // very ugly
   // basically some init function are not async, this is a hack to group action here...
   Future initBlock(Future computation()) {
-    var saved = initialization;
+    //var saved = initialization;
     initialization = initialization.then((_) {
       return computation();
     });
@@ -292,7 +292,7 @@ class _WebSqlDatabase extends Database {
     // merge lazy loaded data
     Map indeciesData = storeMeta.indeciesDataFromString(indeciesText);
     indeciesData.forEach((name, _WebSqlIndexMeta indexMeta) {
-      _WebSqlIndex index = new _WebSqlIndex(store, indexMeta);
+      //_WebSqlIndex index = new _WebSqlIndex(store, indexMeta);
       store._meta.indecies[name] = indexMeta;
 
       // save store in cache

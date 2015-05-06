@@ -4,6 +4,9 @@ build/
 packages/
 packages
 tmp/
+.idea/workspace.xml
+.idea/tasks.xml
+.pub/
 
 # Or the files created by dart2js.
 *.dart.js

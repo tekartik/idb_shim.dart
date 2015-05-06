@@ -2,12 +2,9 @@ library index_test;
 
 import 'package:idb_shim/idb_client.dart';
 import 'idb_test_common.dart';
-//import 'idb_test_factory.dart';
 
-//// so that this can be run directly
-//void main() {
-//  testMain(new IdbMemoryFactory());
-//}
+// so that this can be run directly
+void main() => defineTests(idbTestMemoryFactory);
 
 void defineTests(IdbFactory idbFactory) {
 
@@ -22,7 +19,7 @@ void defineTests(IdbFactory idbFactory) {
         return idbFactory.deleteDatabase(DB_NAME).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
-            ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
+            db.createObjectStore(STORE_NAME, autoIncrement: true);
           }
           return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
             db = database;
@@ -78,7 +75,7 @@ void defineTests(IdbFactory idbFactory) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
             ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
-            Index index = objectStore.createIndex(NAME_INDEX, NAME_FIELD, unique: false);
+            objectStore.createIndex(NAME_INDEX, NAME_FIELD, unique: false);
 
           }
           return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
@@ -154,7 +151,7 @@ void defineTests(IdbFactory idbFactory) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
             ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
-            Index index = objectStore.createIndex(NAME_INDEX, NAME_FIELD, unique: true);
+            objectStore.createIndex(NAME_INDEX, NAME_FIELD, unique: true);
 
           }
           return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
@@ -348,7 +345,7 @@ void defineTests(IdbFactory idbFactory) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
             ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
-            Index index = objectStore.createIndex(NAME_INDEX, NAME_FIELD, multiEntry: true);
+            objectStore.createIndex(NAME_INDEX, NAME_FIELD, multiEntry: true);
 
           }
           return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
@@ -462,8 +459,8 @@ void defineTests(IdbFactory idbFactory) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
             ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
-            Index index = objectStore.createIndex(NAME_INDEX, NAME_FIELD, multiEntry: true);
-            Index index2 = objectStore.createIndex(NAME_INDEX_2, NAME_FIELD_2, unique: true);
+            objectStore.createIndex(NAME_INDEX, NAME_FIELD, multiEntry: true);
+            objectStore.createIndex(NAME_INDEX_2, NAME_FIELD_2, unique: true);
 
           }
           return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {

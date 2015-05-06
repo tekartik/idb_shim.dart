@@ -4,9 +4,7 @@ import 'package:idb_shim/idb_client.dart';
 import 'idb_test_common.dart';
 
 // so that this can be run directly
-//void _main() {
-//  testMain(new IdbMemoryFactory());
-//}
+void main() => defineTests(idbTestMemoryFactory);
 
 void defineTests(IdbFactory idbFactory) {
   group('transaction', () {
@@ -19,8 +17,7 @@ void defineTests(IdbFactory idbFactory) {
         Database db;
         void _initializeDatabase(VersionChangeEvent e) {
           db = e.database;
-          ObjectStore objectStore =
-              db.createObjectStore(STORE_NAME, autoIncrement: true);
+          db.createObjectStore(STORE_NAME, autoIncrement: true);
         }
         return idbFactory
             .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
@@ -44,8 +41,7 @@ void defineTests(IdbFactory idbFactory) {
         Database db;
         void _initializeDatabase(VersionChangeEvent e) {
           db = e.database;
-          ObjectStore objectStore =
-              db.createObjectStore(STORE_NAME, autoIncrement: true);
+          db.createObjectStore(STORE_NAME, autoIncrement: true);
         }
         return idbFactory
             .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
@@ -61,8 +57,7 @@ void defineTests(IdbFactory idbFactory) {
         Database db;
         void _initializeDatabase(VersionChangeEvent e) {
           db = e.database;
-          ObjectStore objectStore =
-              db.createObjectStore(STORE_NAME, autoIncrement: true);
+          db.createObjectStore(STORE_NAME, autoIncrement: true);
         }
         return idbFactory
             .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
@@ -92,8 +87,7 @@ void defineTests(IdbFactory idbFactory) {
         Database db;
         void _initializeDatabase(VersionChangeEvent e) {
           db = e.database;
-          ObjectStore objectStore =
-              db.createObjectStore(STORE_NAME, autoIncrement: true);
+          db.createObjectStore(STORE_NAME, autoIncrement: true);
         }
         return idbFactory
             .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
@@ -106,7 +100,7 @@ void defineTests(IdbFactory idbFactory) {
                 database.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
             ObjectStore objectStore = transaction.objectStore(STORE_NAME);
             return objectStore.openCursor(autoAdvance: true).listen((cursor) {
-              print(cursor);
+              //print(cursor);
             }).asFuture().then((_) {
               return transaction.completed.then((_) {
                 database.close();
@@ -172,8 +166,7 @@ void defineTests(IdbFactory idbFactory) {
             .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
             .then((Database database) {
           try {
-            Transaction transaction =
-                database.transaction(STORE_NAME_2, IDB_MODE_READ_WRITE);
+            database.transaction(STORE_NAME_2, IDB_MODE_READ_WRITE);
             fail("exception expected");
           } catch (e) {
             //print(e);
@@ -190,21 +183,20 @@ void defineTests(IdbFactory idbFactory) {
       group('transaction auto', () {
         Database db;
         Transaction transaction;
-        ObjectStore objectStore;
+        //ObjectStore objectStore;
 
         setUp(() {
           return idbFactory.deleteDatabase(DB_NAME).then((_) {
             void _initializeDatabase(VersionChangeEvent e) {
               Database db = e.database;
-              ObjectStore objectStore =
-                  db.createObjectStore(STORE_NAME, autoIncrement: true);
+              db.createObjectStore(STORE_NAME, autoIncrement: true);
             }
             return idbFactory
                 .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
                 .then((Database database) {
               db = database;
               transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-              objectStore = transaction.objectStore(STORE_NAME);
+              transaction.objectStore(STORE_NAME);
               return db;
             });
           });
@@ -215,7 +207,7 @@ void defineTests(IdbFactory idbFactory) {
         });
 
         test('immediate completed', () {
-          bool done = false;
+          //bool done = false;
           Transaction transaction =
               db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
           return transaction.completed;
@@ -224,8 +216,7 @@ void defineTests(IdbFactory idbFactory) {
         test('add immediate completed', () {
           // not working in memory
           // devPrint("***** ${idbFactory.name}");
-          if ((idbFactory.name != IDB_FACTORY_MEMORY_OLD) && //
-              (idbFactory.name != IDB_FACTORY_WEBSQL)) {
+          if (idbFactory.name != IDB_FACTORY_WEBSQL) {
             bool done = false;
             Transaction transaction =
                 db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
@@ -234,7 +225,6 @@ void defineTests(IdbFactory idbFactory) {
               done = true;
             });
             return transaction.completed.then((_) {
-              print('completed');
               expect(done, isTrue);
               //db.close();
               // done();
@@ -246,15 +236,13 @@ void defineTests(IdbFactory idbFactory) {
         test('immediate completed then add', () {
 // not working in memory
           // devPrint("***** ${idbFactory.name}");
-          if ((idbFactory.name != IDB_FACTORY_MEMORY_OLD) && //
-              (idbFactory.name != IDB_FACTORY_WEBSQL)) {
+          if (idbFactory.name != IDB_FACTORY_WEBSQL) {
             bool done = false;
             Transaction transaction =
                 db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
             ObjectStore objectStore = transaction.objectStore(STORE_NAME);
 
             var completed = transaction.completed.then((_) {
-              print('completed');
               expect(done, isTrue);
               //db.close();
               // done();
@@ -282,7 +270,6 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       test('immediate completed', () {
-        bool done = false;
         Transaction transaction =
             db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
         return transaction.completed;
@@ -297,7 +284,6 @@ void defineTests(IdbFactory idbFactory) {
           done = true;
         });
         return transaction.completed.then((_) {
-          print('completed');
           expect(done, isTrue);
           //db.close();
           // done();
@@ -315,7 +301,6 @@ void defineTests(IdbFactory idbFactory) {
           });
         });
         return transaction.completed.then((_) {
-          print('completed');
           expect(done, isTrue);
           //db.close();
           // done();
@@ -335,7 +320,6 @@ void defineTests(IdbFactory idbFactory) {
           });
         });
         return transaction.completed.then((_) {
-          print('completed');
           expect(done, isTrue);
           //db.close();
           // done();
@@ -359,7 +343,6 @@ void defineTests(IdbFactory idbFactory) {
           });
         });
         return transaction.completed.then((_) {
-          print('completed');
           expect(done, isTrue);
           //db.close();
           // done();
@@ -374,7 +357,6 @@ void defineTests(IdbFactory idbFactory) {
           ObjectStore objectStore = transaction.objectStore(STORE_NAME);
 
           var completed = transaction.completed.then((_) {
-            print('completed');
             expect(done, isTrue);
             //db.close();
             // done();
@@ -401,7 +383,6 @@ void defineTests(IdbFactory idbFactory) {
           done2 = true;
         });
         return transaction.completed.then((_) {
-          print('completed');
           expect(done1 && done2, isTrue);
           //db.close();
           // done();
@@ -420,7 +401,6 @@ void defineTests(IdbFactory idbFactory) {
             });
           });
           return transaction.completed.then((_) {
-            print('completed');
             expect(done, isTrue);
             //db.close();
             // done();
@@ -449,7 +429,6 @@ void defineTests(IdbFactory idbFactory) {
           });
         });
         return transaction.completed.then((_) {
-          print('completed');
           expect(done, isTrue);
           //db.close();
           // done();
@@ -457,7 +436,6 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       test('2 embedded transaction empty', () {
-        bool done = false;
         Transaction transaction1 =
             db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
         Transaction transaction2 =
@@ -466,7 +444,6 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       test('2 embedded transaction 2 put', () {
-        bool done = false;
         Transaction transaction1 =
             db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
         Transaction transaction2 =

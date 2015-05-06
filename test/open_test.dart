@@ -2,21 +2,18 @@ library open_test_common;
 
 import 'package:idb_shim/idb_client.dart';
 import 'idb_test_common.dart';
-//import 'idb_test_factory.dart';
+
+// so that this can be run directly
+void main() => defineTests(idbTestMemoryFactory);
 
 void defineTests(IdbFactory idbFactory) {
-
   group('delete', () {
-
-
-
     test('delete database', () {
       return idbFactory.deleteDatabase(DB_NAME);
     });
   });
 
   group('open', () {
-
     setUp(() {
       return idbFactory.deleteDatabase(DB_NAME);
     });
@@ -40,27 +37,32 @@ void defineTests(IdbFactory idbFactory) {
     test('no name', () {
       return idbFactory.open(null).then((Database database) {
         fail("should fail");
-      }, onError: (e) {
-      });
-    });
+      }, onError: (e) {});
+    }, testOn: "!js");
 
+    test('no name', () {
+      return idbFactory.open(null).then((Database database) {
+        database.close();
+      });
+    }, testOn: "js");
 
     test('bad param with onUpgradeNeeded', () {
-      void _emptyInitializeDatabase(VersionChangeEvent e) {
-      }
+      void _emptyInitializeDatabase(VersionChangeEvent e) {}
 
-      return idbFactory.open(DB_NAME, onUpgradeNeeded: _emptyInitializeDatabase).then((_) {
+      return idbFactory
+          .open(DB_NAME, onUpgradeNeeded: _emptyInitializeDatabase)
+          .then((_) {
         fail("shoud not open");
       }).catchError((e) {
-        expect(e.message, "version and onUpgradeNeeded must be specified together");
+        expect(e.message,
+            "version and onUpgradeNeeded must be specified together");
       }, test: (e) => e is ArgumentError);
     });
 
     test('bad param with version', () {
-      return idbFactory.open(DB_NAME, version: 1).then((_) {
-
-      }).catchError((e) {
-        expect(e.message, "version and onUpgradeNeeded must be specified together");
+      return idbFactory.open(DB_NAME, version: 1).then((_) {}).catchError((e) {
+        expect(e.message,
+            "version and onUpgradeNeeded must be specified together");
       }, test: (e) => e is ArgumentError);
     });
 
@@ -70,10 +72,13 @@ void defineTests(IdbFactory idbFactory) {
         // should be called
         initCalled = true;
       }
-      return idbFactory.open(DB_NAME, version: 0, onUpgradeNeeded: _initializeDatabase).then((Database database) {
+      return idbFactory
+          .open(DB_NAME, version: 0, onUpgradeNeeded: _initializeDatabase)
+          .then((Database database) {
         fail("should not open");
       }, onError: (e) {
         // cannot check type here...
+        expect(initCalled, isFalse);
       });
     });
 
@@ -87,7 +92,9 @@ void defineTests(IdbFactory idbFactory) {
           // should not be called
           initCalled = true;
         }
-        return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
+        return idbFactory
+            .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+            .then((Database database) {
           expect(initCalled, false);
           database.close();
         });
@@ -102,7 +109,9 @@ void defineTests(IdbFactory idbFactory) {
         expect(e.newVersion, 1);
         initCalled = true;
       }
-      return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
+      return idbFactory
+          .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+          .then((Database database) {
         expect(initCalled, true);
         database.close();
       });
@@ -116,7 +125,9 @@ void defineTests(IdbFactory idbFactory) {
         expect(e.newVersion, 1);
         initCalled = true;
       }
-      return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
+      return idbFactory
+          .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+          .then((Database database) {
         expect(initCalled, true);
         database.close();
 
@@ -127,14 +138,14 @@ void defineTests(IdbFactory idbFactory) {
           expect(e.newVersion, 2);
           upgradeCalled = true;
         }
-        return idbFactory.open(DB_NAME, version: 2, onUpgradeNeeded: _upgradeDatabase).then((Database database) {
+        return idbFactory
+            .open(DB_NAME, version: 2, onUpgradeNeeded: _upgradeDatabase)
+            .then((Database database) {
           expect(upgradeCalled, true);
           database.close();
         });
       });
     });
-
-
 
     test('version 2 then downgrade', () {
       bool initCalled = false;
@@ -142,7 +153,9 @@ void defineTests(IdbFactory idbFactory) {
         // should not be called
         initCalled = true;
       }
-      return idbFactory.open(DB_NAME, version: 2, onUpgradeNeeded: _initializeDatabase).then((Database database) {
+      return idbFactory
+          .open(DB_NAME, version: 2, onUpgradeNeeded: _initializeDatabase)
+          .then((Database database) {
         expect(initCalled, true);
         database.close();
 
@@ -151,7 +164,9 @@ void defineTests(IdbFactory idbFactory) {
           // should not be be called
           downgradeCalled = true;
         }
-        return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _downgradeDatabase).then((Database database) {
+        return idbFactory
+            .open(DB_NAME, version: 1, onUpgradeNeeded: _downgradeDatabase)
+            .then((Database database) {
           fail("should fail");
         }, onError: (err, st) {
           // this should fail
@@ -159,8 +174,6 @@ void defineTests(IdbFactory idbFactory) {
         });
       });
     });
-
-
 
     //    const String MILESTONE_STORE = 'milestoneStore';
     //    const String NAME_INDEX = 'name_index';

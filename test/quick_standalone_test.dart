@@ -1,12 +1,16 @@
 library idb_shim.quick_standalone;
 
 import 'package:idb_shim/idb_client.dart';
-import 'package:tekartik_test/test_utils.dart';
+import 'idb_test_common.dart';
 
 const STORE_NAME = "quick_store";
 const DB_NAME = "quick_db";
 const NAME_INDEX = "quick_index";
 const NAME_FIELD = "quick_field";
+
+
+// so that this can be run directly
+void main() => defineTests(idbTestMemoryFactory);
 
 void defineTests(IdbFactory idbFactory) {
 
@@ -26,8 +30,7 @@ void defineTests(IdbFactory idbFactory) {
         void _initializeDatabase(VersionChangeEvent e) {
           Database db = e.database;
           ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
-          Index index = objectStore.createIndex(NAME_INDEX, NAME_FIELD, unique: true);
-
+          objectStore.createIndex(NAME_INDEX, NAME_FIELD, unique: true);
         }
         return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
           db = database;

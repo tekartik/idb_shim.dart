@@ -15,14 +15,12 @@ const String IDB_DIRECTION_PREV = "prev";
 const IDB_FACTORY_NATIVE = "native";
 // shim using WebSql implementation
 const IDB_FACTORY_WEBSQL = "websql";
-// shim using Memory implementation
-const IDB_FACTORY_MEMORY = "memory";
-// shim using Memory Old implementation (deprecated)
-const IDB_FACTORY_MEMORY_OLD = "memory";
 // shim using Sembast implementation
 const IDB_FACTORY_SEMBAST_IO = "sembast_io";
 // shim using Sembast memory implementation
 const IDB_FACTORY_SEMBAST_MEMORY = "sembast_memory";
+// shim using Memory implementation
+const IDB_FACTORY_MEMORY = IDB_FACTORY_SEMBAST_MEMORY;
 // pseudo - best persistent shim (indexeddb or if not available websql)
 const IDB_FACTORY_PERSISTENT = "persistent";
 // pseudo - best browser shim (persistent of it not available memory)

@@ -1,11 +1,14 @@
 library store_test_common;
 
 import 'package:idb_shim/idb_client.dart';
-import 'package:tekartik_test/test_utils.dart';
 import 'simple_provider.dart';
 import 'dart:async';
+import 'idb_test_common.dart' hide NAME_INDEX, NAME_FIELD;
 
-void testMain(IdbFactory idbFactory) {
+// so that this can be run directly
+void main() => defineTests(idbTestMemoryFactory);
+
+void defineTests(IdbFactory idbFactory) {
 
   group('simple provider', () {
 
@@ -102,16 +105,16 @@ void testMain(IdbFactory idbFactory) {
         objectStore.add(object).then((r) {
           int key = r;
           expect(key, equals(1));
-          print('added $r');
+          //print('added $r');
           objectStore.getObject(r).then((Map newObject) {
-            print(newObject);
+            //print(newObject);
             expect(newObject.length, equals(1));
             expect(newObject[NAME_FIELD], equals('test'));
 
             objectStore.put(newObject, r).then((newR) {
               int key = newR;
               expect(key, equals(1));
-              print(newObject);
+              //print(newObject);
               expect(newObject.length, equals(1));
               expect(newObject[NAME_FIELD], equals('test'));
 
@@ -123,7 +126,6 @@ void testMain(IdbFactory idbFactory) {
         });
         return transaction.completed.then((_) {
 
-          print('completed');
           provider.close();
           // done();
         });

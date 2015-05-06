@@ -1,7 +1,10 @@
 library IndexedDB4Test;
-import 'package:unittest/unittest.dart';
 import 'dart:async';
 import 'package:idb_shim/idb_client.dart';
+
+// so that this can be run directly
+import 'idb_test_common.dart';
+void main() => defineTests(idbTestMemoryFactory);
 
 // Test for KeyRange and Cursor.
 
@@ -93,7 +96,7 @@ testRange(db, range, expectedFirst, expectedLast) {
   });
 }
 
-testMain(IdbFactory idbFactory_) {
+defineTests(IdbFactory idbFactory_) {
   IdbFactory idbFactory = idbFactory_;
   //useHtmlConfiguration();
 
@@ -130,6 +133,7 @@ testMain(IdbFactory idbFactory_) {
 
     test('bound2', () => testRange(db, new KeyRange.bound(-100, 200), 0, 99));
 
+    /*
     bound3() => // OPTIONALS testRange(db, new KeyRange.bound(20, 30, upperOpen: true),
     testRange(db, new KeyRange.bound(20, 30, false, true), 20, 29);
 
@@ -138,5 +142,7 @@ testMain(IdbFactory idbFactory_) {
 
     bound5() => // OPTIONALS testRange(db, new KeyRange.bound(20, 30, lowerOpen: true, upperOpen: true),
     testRange(db, new KeyRange.bound(20, 30, true, true), 21, 29);
+   
+     */
   }
 }

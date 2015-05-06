@@ -1,12 +1,15 @@
 // https://dart.googlecode.com/svn/branches/bleeding_edge/dart/tests/html/indexeddb_1_test.dart
 // replace _idbFactory with _idbFactory
 library IndexedDB1Test;
-import 'package:unittest/unittest.dart';
 //TEKARTIK_IDB_REMOVED import 'package:unittest/html_individual_config.dart';
 import 'dart:async';
 //TEKARTIK_IDB_REMOVED import 'dart:html' as html;
 //TEKARTIK_IDB_REMOVED import 'dart:indexed_db' as idb;
 import 'package:idb_shim/idb_client.dart' as idb;
+
+// so that this can be run directly
+import 'idb_test_common.dart';
+void main() => defineTests(idbTestMemoryFactory);
 
 const String STORE_NAME = 'TEST';
 const int VERSION = 1;
@@ -126,30 +129,30 @@ void testTypes(testFunction, idb.IdbFactory idbFactory) {
   test('bool', testFunction(idbFactory, 123, [true, false], equals([true, false])));
   test('largeInt', testFunction(idbFactory, 123, 1371854424211, equals("1371854424211"), null, STORE_NAME, VERSION, true));
   //TEKARTIK_IDB_REMOVED
-  skip_test('largeDoubleConvertedToInt', testFunction(idbFactory, 123, 1371854424211.0, equals("1371854424211"), null, STORE_NAME, VERSION, true));
+  tk_skip_test('largeDoubleConvertedToInt', testFunction(idbFactory, 123, 1371854424211.0, equals("1371854424211"), null, STORE_NAME, VERSION, true));
   test('largeIntInMap', testFunction(idbFactory, 123, {
     'time': 4503599627370492
   }, equals("{time: 4503599627370492}"), null, STORE_NAME, VERSION, true));
   var now = new DateTime.now();
   //TEKARTIK_IDB_REMOVED
-  skip_test('DateTime', testFunction(idbFactory, 123, now, predicate((date) => date.millisecondsSinceEpoch == now.millisecondsSinceEpoch)));
+  tk_skip_test('DateTime', testFunction(idbFactory, 123, now, predicate((date) => date.millisecondsSinceEpoch == now.millisecondsSinceEpoch)));
 }
 
 //TEKARTIK_IDB_REMOVED main() {
-testMain(idb.IdbFactory idbFactory_) {
+defineTests(idb.IdbFactory idbFactory_) {
   idb.IdbFactory idbFactory = idbFactory_;
   //TEKARTIK_IDB_REMOVED useHtmlIndividualConfiguration();
 
   // Test that indexed_db is properly flagged as supported or not.
   // Note that the rest of the indexed_db tests assume that this has been
   // checked.
-  skip_group('supported', () {
+  tk_skip_group('supported', () {
     test('supported', () {
       expect(idb.IdbFactory.supported, true);
     });
   });
 
-  skip_group('supportsDatabaseNames', () {
+  tk_skip_group('supportsDatabaseNames', () {
     test('supported', () {
       expect(idbFactory.supportsDatabaseNames, isTrue);
     });
@@ -169,7 +172,7 @@ testMain(idb.IdbFactory idbFactory_) {
     if (idb.IdbFactory.supported) {
       test('upgrade', () => testUpgrade(idbFactory));
       // temp skip
-      skip_group('dynamic', () {
+      tk_skip_group('dynamic', () {
         testTypes(testReadWrite, idbFactory);
       });
 

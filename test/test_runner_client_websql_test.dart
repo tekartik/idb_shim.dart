@@ -1,6 +1,8 @@
+@TestOn("browser")
+
 library all_test_client_websql;
 
-import 'package:tekartik_test/test_config_browser.dart';
+import 'package:test/test.dart';
 import 'test_runner.dart' as test_runner;
 import 'websql_wrapper_test.dart' as websql_wrapper_test;
 import 'websql_client_test.dart' as websql_client_test;
@@ -73,8 +75,8 @@ testMain() {
       //idb_wql.SqlDatabase.debug = true;
       IdbWebSqlFactory idbFactory = new IdbWebSqlFactory();
       test_runner.defineTests(idbFactory);
-      websql_wrapper_test.defineTests();
-      websql_client_test.defineTests();
+      websql_wrapper_test.main();
+      websql_client_test.main();
       webSqlTest(idbFactory);
     } else {
       /**
@@ -87,6 +89,6 @@ testMain() {
   });
 }
 main() {
-  useHtmlConfiguration();
+  //useHtmlConfiguration();
   testMain();
 }

@@ -2,13 +2,15 @@
 // replace html.window.indexedDB with idbFactory
 // replace IndexedDB1Test with IndexedDB2Test
 library IndexedDB2Test;
-import 'package:unittest/unittest.dart';
-//import 'dart:async';
 import 'package:idb_shim/idb_client.dart' as idb;
 
 
 import 'dart:collection';
 import 'indexeddb_utils.dart';
+
+// so that this can be run directly
+import 'idb_test_common.dart';
+void main() => defineTests(idbTestMemoryFactory);
 
 // Write and re-read Maps: simple Maps; Maps with DAGs; Maps with cycles.
 
@@ -56,7 +58,7 @@ List<String> get nonNativeListData {
   return list;
 }
 
-testMain(idb.IdbFactory idbFactory_) {
+defineTests(idb.IdbFactory idbFactory_) {
 
 
   idb.IdbFactory idbFactory = idbFactory_;

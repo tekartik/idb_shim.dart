@@ -1,6 +1,8 @@
+@TestOn("browser")
+
 library idb_browser_test;
 
-import 'package:tekartik_test/test_config_browser.dart';
+import 'package:test/test.dart';
 import 'package:idb_shim/idb_browser.dart';
 import 'package:idb_shim/idb_client.dart';
 
@@ -29,7 +31,7 @@ testMain() {
 
     test('memory', () {
       IdbFactory websql = idbMemoryFactory;
-      expect(websql.runtimeType.toString(), "IdbMemoryFactory");
+      expect(websql.runtimeType.toString(), "IdbSembastFactory");
 
     });
 
@@ -47,6 +49,6 @@ testMain() {
 }
 
 main() {
-  useHtmlConfiguration();
+  //useHtmlConfiguration();
   testMain();
 }

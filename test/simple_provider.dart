@@ -32,7 +32,7 @@ class SimpleProvider {
     Database db = (e.target as Request).result;
 
     var objectStore = db.createObjectStore(STORE, autoIncrement: true);
-    Index index = objectStore.createIndex(NAME_INDEX, NAME_FIELD, unique: true);
+    objectStore.createIndex(NAME_INDEX, NAME_FIELD, unique: true);
   }
 
   Future add(String name) {

@@ -1,4 +1,4 @@
-library idb_shim.sembast;
+library idb_shim_sembast;
 
 //import 'package:tekartik_core/dev_utils.dart';
 import 'package:logging/logging.dart';

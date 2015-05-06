@@ -336,7 +336,7 @@ class _WebSqlObjectStore extends ObjectStore {
     }
 
     String sets = "$VALUE_COLUMN_NAME = ?";
-    String values = '?';
+    //String values = '?';
     List args = [encodeValue(value)];
 
     // Add the index value for each index

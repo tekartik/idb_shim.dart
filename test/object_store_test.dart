@@ -5,13 +5,9 @@ import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
 import 'idb_test_common.dart';
 import 'common_meta_test.dart';
-//import 'idb_test_factory.dart';
-
 
 // so that this can be run directly
-//void main() {
-//  testMain(new IdbMemoryFactory());
-//}
+void main() => defineTests(idbTestMemoryFactory);
 
 void defineTests(IdbFactory idbFactory) {
 
@@ -26,7 +22,7 @@ void defineTests(IdbFactory idbFactory) {
 
         return idbFactory.open(DB_NAME).then((Database database) {
           try {
-            ObjectStore objectStore = database.createObjectStore(STORE_NAME, autoIncrement: true);
+            database.createObjectStore(STORE_NAME, autoIncrement: true);
           } catch (e) {
             //print(e.runtimeType);
             database.close();
@@ -54,7 +50,7 @@ void defineTests(IdbFactory idbFactory) {
         return idbFactory.deleteDatabase(DB_NAME).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
-            ObjectStore objectStore = db.createObjectStore(STORE_NAME);
+            db.createObjectStore(STORE_NAME);
           }
           return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
             db = database;
@@ -229,7 +225,7 @@ void defineTests(IdbFactory idbFactory) {
         return idbFactory.deleteDatabase(DB_NAME).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
-            ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
+            db.createObjectStore(STORE_NAME, autoIncrement: true);
           }
           return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
             db = database;
@@ -290,7 +286,7 @@ void defineTests(IdbFactory idbFactory) {
           return objectStore.add(value, 1234).then((key) {
             fail("should fail");
           }, onError: (e) {
-            print(e.message);
+            //print(e.message);
           });
         });
       });
@@ -377,8 +373,8 @@ void defineTests(IdbFactory idbFactory) {
         });
       });
 
-      test('get empty', () {
-        Map value = {};
+      test('get none', () {
+        //Map value = {};
         return objectStore.getObject(1234).then((value) {
           expect(value, null);
         });
@@ -388,7 +384,6 @@ void defineTests(IdbFactory idbFactory) {
         Map value = {};
         return objectStore.add(value).then((_) {
           return objectStore.count().then((int count) {
-            print(count);
             expect(count, 1);
           });
         });
@@ -532,7 +527,7 @@ void defineTests(IdbFactory idbFactory) {
         return idbFactory.deleteDatabase(DB_NAME).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
-            ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
+            db.createObjectStore(STORE_NAME, autoIncrement: true);
           }
           return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
             db = database;
@@ -600,7 +595,7 @@ void defineTests(IdbFactory idbFactory) {
         return idbFactory.deleteDatabase(DB_NAME).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
-            ObjectStore objectStore = db.createObjectStore(STORE_NAME, keyPath: keyPath, autoIncrement: true);
+            db.createObjectStore(STORE_NAME, keyPath: keyPath, autoIncrement: true);
           }
           return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
             db = database;
@@ -611,10 +606,11 @@ void defineTests(IdbFactory idbFactory) {
         });
       });
 
-      tearDown(() {
-        return transaction.completed.then((_) {
-          db.close();
-        });
+      tearDown(() async {
+        if (transaction != null) {
+          await transaction.completed;
+        }
+        db.close();
       });
 
       test('properties', () {
@@ -677,9 +673,11 @@ void defineTests(IdbFactory idbFactory) {
         };
         return objectStore.add(value, 123).then((_) {
           fail("should fail");
-        }, onError: (e) {
+        }, onError: (e, st) {
           // "both key 123 and inline keyPath 123 are specified
           //devPrint(e);
+          // mark transaction as null
+          transaction = null;
         });
       });
 
@@ -692,6 +690,7 @@ void defineTests(IdbFactory idbFactory) {
           fail("should fail");
         }, onError: (e) {
           //print(e);
+          transaction = null;
         });
       });
     });
@@ -707,7 +706,7 @@ void defineTests(IdbFactory idbFactory) {
         return idbFactory.deleteDatabase(DB_NAME).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
-            ObjectStore objectStore = db.createObjectStore(STORE_NAME, keyPath: keyPath);
+            db.createObjectStore(STORE_NAME, keyPath: keyPath);
           }
           return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
             db = database;
@@ -718,14 +717,12 @@ void defineTests(IdbFactory idbFactory) {
         });
       });
 
-      tearDown(() {
+      tearDown(() async {
         if (transaction != null) {
-          return transaction.completed.then((_) {
-            db.close();
-          });
-        } else {
-          db.close();
+          await transaction.completed;
         }
+        db.close();
+
       });
 
       test('properties', () {
@@ -773,6 +770,7 @@ void defineTests(IdbFactory idbFactory) {
           //devPrint(e);
           // IdbMemoryError(3): neither keyPath nor autoIncrement set and trying to add object without key
           expect(e is DatabaseError, isTrue);
+          transaction = null;
         });
       });
 
@@ -787,6 +785,7 @@ void defineTests(IdbFactory idbFactory) {
           //expect(isTransactionReadOnlyError(e), isTrue);
           //devPrint(e);
           expect(e is DatabaseError, isTrue);
+          transaction = null;
         });
       });
 

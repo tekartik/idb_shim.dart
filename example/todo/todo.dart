@@ -88,7 +88,7 @@ class TodoList {
     var store = trans.objectStore(_TODOS_STORE);
 
     // Get everything in the store.
-    var request = store.openCursor(autoAdvance:true).listen((cursor) {
+    store.openCursor(autoAdvance:true).listen((cursor) {
       _renderTodo(cursor.value);
     }, onError: _onError);
   }

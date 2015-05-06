@@ -4,6 +4,9 @@ import 'dart:async';
 import 'package:idb_shim/idb_client.dart';
 import 'idb_test_common.dart';
 
+// so that this can be run directly
+void main() => defineTests(idbTestMemoryFactory);
+
 class TestIdNameRow {
   TestIdNameRow(CursorWithValue cwv) {
     Object value = cwv.value;
@@ -60,7 +63,7 @@ void defineTests(IdbFactory idbFactory) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
             ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
-            Index index = objectStore.createIndex(NAME_INDEX, NAME_FIELD);
+            objectStore.createIndex(NAME_INDEX, NAME_FIELD);
           }
           return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
             db = database;
@@ -74,9 +77,9 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       tearDown(() {
-        //return transaction.completed.then((_) {
-        db.close();
-        //});
+        return transaction.completed.then((_) {
+          db.close();
+        });
       });
 
       test('empty key cursor', () {
@@ -193,7 +196,7 @@ void defineTests(IdbFactory idbFactory) {
       test('cursor non-auto', () {
         return add("test1").then((key) {
 
-          int count = 0;
+         int count = 0;
           // non auto to control advance
           return index.openCursor(autoAdvance: false).listen((CursorWithValue cwv) {
             expect(cwv.value, {
@@ -203,6 +206,8 @@ void defineTests(IdbFactory idbFactory) {
             expect(cwv.primaryKey, key);
             count++;
             cwv.next();
+          }).asFuture().then((_) {
+            expect(count, 1);
           });
         });
       });
@@ -294,8 +299,8 @@ void defineTests(IdbFactory idbFactory) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
             ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
-            Index index = objectStore.createIndex(NAME_INDEX, NAME_FIELD);
-            Index index2 = objectStore.createIndex(VALUE_INDEX, VALUE_FIELD);
+            objectStore.createIndex(NAME_INDEX, NAME_FIELD);
+            objectStore.createIndex(VALUE_INDEX, VALUE_FIELD);
           }
           return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
             db = database;
