@@ -6,7 +6,8 @@ class _NativeObjectStore extends ObjectStore {
 
   @override
   Index createIndex(String name, keyPath, {bool unique, bool multiEntry}) {
-    return new _NativeIndex(idbObjectStore.createIndex(name, keyPath, unique: unique, multiEntry: multiEntry));
+    return new _NativeIndex(idbObjectStore.createIndex(name, keyPath,
+        unique: unique, multiEntry: multiEntry));
   }
 
   @override
@@ -48,7 +49,8 @@ class _NativeObjectStore extends ObjectStore {
   }
 
   @override
-  Stream<CursorWithValue> openCursor({key, KeyRange range, String direction, bool autoAdvance}) {
+  Stream<CursorWithValue> openCursor(
+      {key, KeyRange range, String direction, bool autoAdvance}) {
     idb.KeyRange idbKeyRange = _nativeKeyRange(range);
     //idbDevWarning;
     //idbDevPrint("kr1 $range native $idbKeyRange");
@@ -57,25 +59,28 @@ class _NativeObjectStore extends ObjectStore {
 
     // IE workaround!!!
     if (idbKeyRange == null) {
-      stream = idbObjectStore.openCursor( //
-      key: key, //
-      // Weird on ie, uncommenting this line
-      // although null makes it crash
-      // range: idbKeyRange
-      direction: direction, //
-      autoAdvance: autoAdvance);
+      stream = idbObjectStore.openCursor(
+          //
+          key: key, //
+          // Weird on ie, uncommenting this line
+          // although null makes it crash
+          // range: idbKeyRange
+          direction: direction, //
+          autoAdvance: autoAdvance);
     } else {
-      stream = idbObjectStore.openCursor( //
-      key: key, //
-      range: idbKeyRange, direction: direction, //
-      autoAdvance: autoAdvance);
+      stream = idbObjectStore.openCursor(
+          //
+          key: key, //
+          range: idbKeyRange,
+          direction: direction, //
+          autoAdvance: autoAdvance);
     }
 
-    _NativeCursorWithValueController ctlr = new _NativeCursorWithValueController(//
-    stream);
+    _NativeCursorWithValueController ctlr =
+        new _NativeCursorWithValueController(//
+            stream);
     //idbDevPrint("kr2 $range native $idbKeyRange");
     return ctlr.stream;
-
   }
 
   @override
@@ -100,7 +105,7 @@ class _NativeObjectStore extends ObjectStore {
 
   @override
   get name => idbObjectStore.name;
-  
+
   @override
   List<String> get indexNames => idbObjectStore.indexNames;
 }

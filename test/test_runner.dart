@@ -22,7 +22,6 @@ import 'indexeddb_5_test.dart' as indexeddb_5_test;
 import 'package:idb_shim/idb_client.dart';
 
 defineTests(IdbFactory idbFactory) {
-
   transaction_test.defineTests(idbFactory);
   cursor_test.defineTests(idbFactory);
   open_test.defineTests(idbFactory);

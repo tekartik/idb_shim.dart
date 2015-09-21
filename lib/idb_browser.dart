@@ -49,7 +49,8 @@ IdbFactory get idbMemoryFactory => idbSembastMemoryFactory;
 IdbFactory _idbSembastMemoryFactory;
 IdbFactory get idbSembastMemoryFactory {
   if (_idbSembastMemoryFactory == null) {
-    _idbSembastMemoryFactory = new IdbSembastFactory(sembast.memoryDatabaseFactory, null);
+    _idbSembastMemoryFactory =
+        new IdbSembastFactory(sembast.memoryDatabaseFactory, null);
   }
   return _idbSembastMemoryFactory;
 }

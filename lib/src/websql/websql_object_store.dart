@@ -2,7 +2,6 @@ part of idb_shim_websql;
 
 // meta data is loaded only once
 class _WebSqlObjectStoreMeta {
-
   static const String VALUE_COLUMN_NAME = 'value';
   static const String KEY_DEFAULT_COLUMN_NAME = 'key';
 
@@ -24,7 +23,6 @@ class _WebSqlObjectStoreMeta {
     } else {
       return "_col_$keyPath";
     }
-
   }
 
   /**
@@ -40,16 +38,19 @@ class _WebSqlObjectStoreMeta {
         String keyPath = indexDef['key_path'];
         bool multiEntry = indexDef['multi_entry'];
         bool unique = indexDef['unique'];
-        indeciesData[name] = new _WebSqlIndexMeta(this, name, keyPath, unique, multiEntry);
+        indeciesData[name] =
+            new _WebSqlIndexMeta(this, name, keyPath, unique, multiEntry);
       });
     }
     return indeciesData;
   }
 }
-class _WebSqlObjectStore extends ObjectStore {
 
-  static const String VALUE_COLUMN_NAME = _WebSqlObjectStoreMeta.VALUE_COLUMN_NAME;
-  static const String KEY_DEFAULT_COLUMN_NAME = _WebSqlObjectStoreMeta.KEY_DEFAULT_COLUMN_NAME;
+class _WebSqlObjectStore extends ObjectStore {
+  static const String VALUE_COLUMN_NAME =
+      _WebSqlObjectStoreMeta.VALUE_COLUMN_NAME;
+  static const String KEY_DEFAULT_COLUMN_NAME =
+      _WebSqlObjectStoreMeta.KEY_DEFAULT_COLUMN_NAME;
 
   _WebSqlTransaction transaction;
 
@@ -60,13 +61,9 @@ class _WebSqlObjectStore extends ObjectStore {
   bool get ready => keyColumn != null;
   Future _lazyPrepare;
 
-  _WebSqlObjectStore(this.transaction, this._meta) {
-
-  }
-
+  _WebSqlObjectStore(this.transaction, this._meta) {}
 
   String sqlColumnName(String keyPath) => _meta.sqlColumnName(keyPath);
-
 
   // If null this means we need to load from database
   String keyColumn;
@@ -87,13 +84,11 @@ class _WebSqlObjectStore extends ObjectStore {
 //      return "_index_$storeName";
 //    }
 
-
   Future<SqlResultSet> execute(String statement, [List args]) {
     return transaction.execute(statement, args);
   }
 
   void _initOptions(String keyPath, bool autoIncrement) {
-
     _meta.autoIncrement = (autoIncrement != null && autoIncrement);
     _meta.keyPath = keyPath;
 
@@ -104,14 +99,19 @@ class _WebSqlObjectStore extends ObjectStore {
     String dropSql = "DROP TABLE IF EXISTS $sqlTableName";
     return transaction.execute(dropSql);
   }
-  Future create() {
 
+  Future create() {
     _initOptions(keyPath, autoIncrement);
 
     // Here don't call _addRequest as we don't want to load from db
 
-    String createSql = "CREATE TABLE $sqlTableName (${keyColumn} " + (autoIncrement ? "INTEGER PRIMARY KEY AUTOINCREMENT" : "BLOB PRIMARY KEY") + ", $VALUE_COLUMN_NAME BLOB)";
-    String insertStore = "INSERT INTO stores (name, key_path, auto_increment) VALUES (?, ?, ?)";
+    String createSql = "CREATE TABLE $sqlTableName (${keyColumn} " +
+        (autoIncrement
+            ? "INTEGER PRIMARY KEY AUTOINCREMENT"
+            : "BLOB PRIMARY KEY") +
+        ", $VALUE_COLUMN_NAME BLOB)";
+    String insertStore =
+        "INSERT INTO stores (name, key_path, auto_increment) VALUES (?, ?, ?)";
     List insertStoreArgs = [name, keyPath, _booleanArg(autoIncrement)];
 
     return _deleteTable(transaction).then((_) {
@@ -119,7 +119,6 @@ class _WebSqlObjectStore extends ObjectStore {
     }).then((_) {
       return transaction.execute(insertStore, insertStoreArgs);
     });
-
   }
 
   Future _checkWritableStore(Future computation()) {
@@ -137,10 +136,7 @@ class _WebSqlObjectStore extends ObjectStore {
     return null;
   }
 
-
-
   Future _checkStore(Future computation()) {
-
     // this is also an indicator
     if (!ready) {
       if (_lazyPrepare == null) {
@@ -155,12 +151,14 @@ class _WebSqlObjectStore extends ObjectStore {
             Map map = rs.rows[0];
             int newVersion = map['value'];
             if (database.onVersionChangeCtlr != null) {
-
-              database.onVersionChangeCtlr.add(new _WebSqlVersionChangeEvent(database, database.version, newVersion, transaction));
+              database.onVersionChangeCtlr.add(new _WebSqlVersionChangeEvent(
+                  database, database.version, newVersion, transaction));
             }
-            return new Future.error(new StateError("database upgraded from ${database.version} to $newVersion"));
+            return new Future.error(new StateError(
+                "database upgraded from ${database.version} to $newVersion"));
           }
-          var sqlSelect = "SELECT key_path, auto_increment, indecies FROM stores WHERE name = ?";
+          var sqlSelect =
+              "SELECT key_path, auto_increment, indecies FROM stores WHERE name = ?";
           var sqlArgs = [name];
           return execute(sqlSelect, sqlArgs).then((SqlResultSet rs) {
             if (rs.rows.length == 0) {
@@ -195,7 +193,6 @@ class _WebSqlObjectStore extends ObjectStore {
             //          if (keyPath == null && !autoIncrement) {
             //            throw new ArgumentError("neither keyPath nor autoIncrement set");
             //          }
-
           });
         });
         return _lazyPrepare;
@@ -296,25 +293,24 @@ class _WebSqlObjectStore extends ObjectStore {
       return rs.insertId;
     });
   }
+
   @override
   Future add(dynamic value, [dynamic key]) {
-
     return _checkWritableStore(() {
-
-
       if (key == null) {
         if (keyPath != null) {
           key = value[keyPath];
         }
       } else {
         if (!checkKeyValue(keyPath, key, value)) {
-          return new Future.error(new ArgumentError("both key $key and inline keyPath ${value[keyPath]}"));
+          return new Future.error(new ArgumentError(
+              "both key $key and inline keyPath ${value[keyPath]}"));
         }
       }
       if ((key == null) && (!autoIncrement)) {
-        throw new _IdbWebSqlError(_IdbWebSqlError.MISSING_KEY, "neither keyPath nor autoIncrement set and trying to add object without key");
+        throw new _IdbWebSqlError(_IdbWebSqlError.MISSING_KEY,
+            "neither keyPath nor autoIncrement set and trying to add object without key");
       }
-
 
       return _add(value, key);
     });
@@ -322,7 +318,8 @@ class _WebSqlObjectStore extends ObjectStore {
 
   Future _put(dynamic value, [dynamic key]) {
     if (!checkKeyValue(keyPath, key, value)) {
-      return new Future.error(new ArgumentError("both key $key and inline keyPath ${value[keyPath]}"));
+      return new Future.error(new ArgumentError(
+          "both key $key and inline keyPath ${value[keyPath]}"));
     }
 
     if (key == null) {
@@ -332,7 +329,8 @@ class _WebSqlObjectStore extends ObjectStore {
     }
 
     if ((key == null) && (!autoIncrement)) {
-      throw new _IdbWebSqlError(_IdbWebSqlError.MISSING_KEY, "neither keyPath nor autoIncrement set and trying to add object without key");
+      throw new _IdbWebSqlError(_IdbWebSqlError.MISSING_KEY,
+          "neither keyPath nor autoIncrement set and trying to add object without key");
     }
 
     String sets = "$VALUE_COLUMN_NAME = ?";
@@ -370,8 +368,8 @@ class _WebSqlObjectStore extends ObjectStore {
   }
 
   Future _get(dynamic key, [String keyPath]) {
-
-    var sqlSelect = "SELECT $VALUE_COLUMN_NAME FROM $sqlTableName WHERE ${sqlColumnName(keyPath)} = ? LIMIT 1";
+    var sqlSelect =
+        "SELECT $VALUE_COLUMN_NAME FROM $sqlTableName WHERE ${sqlColumnName(keyPath)} = ? LIMIT 1";
     var sqlArgs = [encodeKey(key)];
     return execute(sqlSelect, sqlArgs).then((SqlResultSet rs) {
       if (rs.rows.length == 0) {
@@ -388,7 +386,8 @@ class _WebSqlObjectStore extends ObjectStore {
   }
 
   Future _getKey(dynamic key, [String keyPath]) {
-    var sqlSelect = "SELECT $keyColumn FROM $sqlTableName WHERE ${sqlColumnName(keyPath)} = ? LIMIT 1";
+    var sqlSelect =
+        "SELECT $keyColumn FROM $sqlTableName WHERE ${sqlColumnName(keyPath)} = ? LIMIT 1";
     var sqlArgs = [encodeKey(key)];
     return execute(sqlSelect, sqlArgs).then((SqlResultSet rs) {
       if (rs.rows.length == 0) {
@@ -401,7 +400,6 @@ class _WebSqlObjectStore extends ObjectStore {
 
   @override
   Future getObject(dynamic key) {
-
     //return _checkStore().then((_) {
     return _checkStore(() {
       return _get(key, keyPath);
@@ -412,8 +410,7 @@ class _WebSqlObjectStore extends ObjectStore {
   Future clear() {
     return _checkWritableStore(() {
       var sqlClear = "DELETE FROM $sqlTableName";
-      return execute(sqlClear, []).then((SqlResultSet rs) {
-      });
+      return execute(sqlClear, []).then((SqlResultSet rs) {});
     });
   }
 
@@ -466,7 +463,8 @@ class _WebSqlObjectStore extends ObjectStore {
 
   @override
   Index createIndex(String name, keyPath, {bool unique, bool multiEntry}) {
-    _WebSqlIndexMeta indexMeta = new _WebSqlIndexMeta(_meta, name, keyPath, unique, multiEntry);
+    _WebSqlIndexMeta indexMeta =
+        new _WebSqlIndexMeta(_meta, name, keyPath, unique, multiEntry);
     _WebSqlIndex index = new _WebSqlIndex(this, indexMeta);
     _meta.indecies[name] = indexMeta;
 
@@ -477,9 +475,10 @@ class _WebSqlObjectStore extends ObjectStore {
   }
 
   @override
-  Stream<CursorWithValue> openCursor({key, KeyRange range, String direction, bool autoAdvance}) {
-
-    _WebSqlCursorWithValueController ctlr = new _WebSqlCursorWithValueController(this, direction, autoAdvance);
+  Stream<CursorWithValue> openCursor(
+      {key, KeyRange range, String direction, bool autoAdvance}) {
+    _WebSqlCursorWithValueController ctlr =
+        new _WebSqlCursorWithValueController(this, direction, autoAdvance);
 
     // Future
     _checkStore(() {
@@ -491,7 +490,8 @@ class _WebSqlObjectStore extends ObjectStore {
   @override
   Future<int> count([key_OR_range]) {
     return _checkStore(() {
-      _CountQuery query = new _CountQuery(sqlTableName, keyColumn, key_OR_range);
+      _CountQuery query =
+          new _CountQuery(sqlTableName, keyColumn, key_OR_range);
       return query.count(transaction);
     });
   }

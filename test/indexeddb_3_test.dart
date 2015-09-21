@@ -1,4 +1,5 @@
 library IndexedDB3Test;
+
 import 'idb_test_common.dart';
 import 'dart:async';
 import 'package:idb_shim/idb_client.dart';
@@ -9,7 +10,6 @@ void main() => defineTests(idbTestMemoryFactory);
 const String DB_NAME = 'Test3';
 const String STORE_NAME = 'TEST';
 const int VERSION = 1;
-
 
 Future<Database> createAndOpenDb(IdbFactory idbFactory) {
   return idbFactory.deleteDatabase(DB_NAME).then((_) {
@@ -136,6 +136,5 @@ defineTests(IdbFactory idbFactory_) {
         return readAllReversedViaCursor(db);
       });
     });
-
   }
 }

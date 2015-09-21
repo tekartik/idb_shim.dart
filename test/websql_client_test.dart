@@ -87,8 +87,10 @@ main() {
   IdbWebSqlFactory idbFactory = new IdbWebSqlFactory();
 
   SqlDatabase openGlobalStoreDatabase() {
-    SqlDatabase db = sqlDatabaseFactory.openDatabase(GLOBAL_STORE_DB_NAME,
-        GLOBAL_STORE_DB_VERSION, GLOBAL_STORE_DB_NAME,
+    SqlDatabase db = sqlDatabaseFactory.openDatabase(
+        GLOBAL_STORE_DB_NAME,
+        GLOBAL_STORE_DB_VERSION,
+        GLOBAL_STORE_DB_NAME,
         GLOBAL_STORE_DB_ESTIMATED_SIZE);
     return db;
   }
@@ -261,7 +263,6 @@ main() {
           });
         });
       }).then((_) {
-
         // make sure we can open it though
         return idbFactory.open(DB_NAME).then((idb) {
           expect(idb.objectStoreNames, isEmpty);
@@ -285,7 +286,6 @@ main() {
           });
         });
       }).then((_) {
-
         // make sure we can open it though
         void _initializeDatabase(VersionChangeEvent e) {
           Database db = e.database;

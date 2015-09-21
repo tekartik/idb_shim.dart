@@ -19,7 +19,6 @@ abstract class _WebSqlCommonCursor<T extends Cursor> {
     _ctlr.store.transaction._sqlTransaction.ping().then((_) {
       _ctlr.advance(count);
     });
-
   }
 
   void next([Object key]) {
@@ -50,15 +49,16 @@ class _WebSqlCursor extends Cursor with _WebSqlCommonCursor<Cursor> {
 /**
  * 
  */
-class _WebSqlCursorWithValue extends CursorWithValue with _WebSqlCommonCursor<CursorWithValue> {
-
+class _WebSqlCursorWithValue extends CursorWithValue
+    with _WebSqlCommonCursor<CursorWithValue> {
   _WebSqlCursorWithValue(_WebSqlCursorWithValueBaseController ctlr, Map map) {
     this._map = map;
     this._ctlr = ctlr;
   }
 
   @override
-  Object get value => decodeValue(_map[_WebSqlObjectStoreMeta.VALUE_COLUMN_NAME]);
+  Object get value =>
+      decodeValue(_map[_WebSqlObjectStoreMeta.VALUE_COLUMN_NAME]);
 }
 
 abstract class _WebSqlCursorBaseController<T extends Cursor> {
@@ -102,7 +102,6 @@ abstract class _WebSqlCursorBaseController<T extends Cursor> {
     if (autoAdvance == null) {
       autoAdvance = false;
     }
-
   }
 
   // Sync must be true
@@ -132,7 +131,6 @@ abstract class _WebSqlCursorBaseController<T extends Cursor> {
       _ctlr.add(newCursor);
       // return new Future.value();
       return true;
-
     }
   }
 
@@ -164,36 +162,41 @@ abstract class _WebSqlCursorBaseController<T extends Cursor> {
   }
 }
 
-abstract class _WebSqlKeyCursorBaseController extends _WebSqlCursorBaseController<Cursor> {
-  _WebSqlKeyCursorBaseController(String direction, bool autoAdvance): super(direction, autoAdvance);
+abstract class _WebSqlKeyCursorBaseController
+    extends _WebSqlCursorBaseController<Cursor> {
+  _WebSqlKeyCursorBaseController(String direction, bool autoAdvance)
+      : super(direction, autoAdvance);
 
   Cursor get newCursor => new _WebSqlCursor(this, rows[currentIndex]);
 }
 
-abstract class _WebSqlCursorWithValueBaseController extends _WebSqlCursorBaseController<CursorWithValue> {
-  _WebSqlCursorWithValueBaseController(String direction, bool autoAdvance): super(direction, autoAdvance);
+abstract class _WebSqlCursorWithValueBaseController
+    extends _WebSqlCursorBaseController<CursorWithValue> {
+  _WebSqlCursorWithValueBaseController(String direction, bool autoAdvance)
+      : super(direction, autoAdvance);
 
   Cursor get newCursor => new _WebSqlCursorWithValue(this, rows[currentIndex]);
 }
 
-class _WebSqlCursorWithValueController extends _WebSqlCursorWithValueBaseController with _WebSqlCursorCommonController, _WebSqlCursorWithValueCommonController {
-
+class _WebSqlCursorWithValueController
+    extends _WebSqlCursorWithValueBaseController
+    with _WebSqlCursorCommonController, _WebSqlCursorWithValueCommonController {
   _WebSqlObjectStore store;
   String get keyColumn => primaryKeyColumn;
 
-  _WebSqlCursorWithValueController(this.store, String direction, bool autoAdvance) //
-      : super(direction, autoAdvance) {
-  }
+  _WebSqlCursorWithValueController(
+      this.store, String direction, bool autoAdvance) //
+      : super(direction, autoAdvance) {}
 }
 
 abstract class _WebSqlCursorWithValueCommonController {
-
   String get baseSelectedColumns;
 
   String get selectedColumns {
     return "$baseSelectedColumns, ${_WebSqlObjectStoreMeta.VALUE_COLUMN_NAME}";
   }
 }
+
 abstract class _WebSqlCursorCommonController {
   String get direction;
   _WebSqlTransaction get transaction;
@@ -210,6 +213,7 @@ abstract class _WebSqlCursorCommonController {
     }
     return selected;
   }
+
   _WebSqlObjectStore get store;
   String get sqlTableName => store.sqlTableName;
   String get keyColumn;
@@ -221,12 +225,14 @@ abstract class _WebSqlCursorCommonController {
     } else if (keyRange != null) {
       key_OR_range = keyRange;
     }
-    _SelectQuery query = new _SelectQuery(selectedColumns, sqlTableName, keyColumn, key_OR_range, direction);
+    _SelectQuery query = new _SelectQuery(
+        selectedColumns, sqlTableName, keyColumn, key_OR_range, direction);
     return query.execute(transaction).then((SqlResultSet rs) {
       sqlResultSet = rs;
     });
   }
 }
+
 abstract class _WebSqlIndexCursorCommonController {
   _WebSqlIndex index;
 
@@ -235,15 +241,23 @@ abstract class _WebSqlIndexCursorCommonController {
   String get keyColumn => index.keyColumn;
 }
 
-class _WebSqlKeyIndexCursorController extends _WebSqlKeyCursorBaseController with _WebSqlIndexCursorCommonController, _WebSqlCursorCommonController {
-  _WebSqlKeyIndexCursorController(_WebSqlIndex index, String direction, bool autoAdvance) //
+class _WebSqlKeyIndexCursorController extends _WebSqlKeyCursorBaseController
+    with _WebSqlIndexCursorCommonController, _WebSqlCursorCommonController {
+  _WebSqlKeyIndexCursorController(
+      _WebSqlIndex index, String direction, bool autoAdvance) //
       : super(direction, autoAdvance) {
     this.index = index;
   }
 }
 
-class _WebSqlIndexCursorWithValueController extends _WebSqlCursorWithValueBaseController with _WebSqlIndexCursorCommonController, _WebSqlCursorCommonController, _WebSqlCursorWithValueCommonController {
-  _WebSqlIndexCursorWithValueController(_WebSqlIndex index, String direction, bool autoAdvance) //
+class _WebSqlIndexCursorWithValueController
+    extends _WebSqlCursorWithValueBaseController
+    with
+        _WebSqlIndexCursorCommonController,
+        _WebSqlCursorCommonController,
+        _WebSqlCursorWithValueCommonController {
+  _WebSqlIndexCursorWithValueController(
+      _WebSqlIndex index, String direction, bool autoAdvance) //
       : super(direction, autoAdvance) {
     this.index = index;
   }

@@ -1,9 +1,11 @@
 library IndexedDB5Test;
+
 //import 'dart:async';
 import 'package:idb_shim/idb_client.dart';
 
 // so that this can be run directly
 import 'idb_test_common.dart';
+
 void main() => defineTests(idbTestMemoryFactory);
 
 defineTests(IdbFactory idbFactory_) {
@@ -24,7 +26,8 @@ defineTests(IdbFactory idbFactory_) {
       return idbFactory.deleteDatabase(dbName).then((_) {
         return idbFactory.open(dbName, version: 1, onUpgradeNeeded: (e) {
           var db = e.target.result;
-          var objectStore = db.createObjectStore(storeName, autoIncrement: true);
+          var objectStore =
+              db.createObjectStore(storeName, autoIncrement: true);
           objectStore.createIndex(indexName, 'name_index', unique: false);
         });
       }).then((database) {
@@ -53,10 +56,7 @@ defineTests(IdbFactory idbFactory_) {
       });
     }
 
-    var value = {
-      'name_index': 'one',
-      'value': 'add_value'
-    };
+    var value = {'name_index': 'one', 'value': 'add_value'};
     test('add/delete', () {
       //var done = expectAsync0(() {});
       var done = () {};
@@ -161,18 +161,9 @@ defineTests(IdbFactory idbFactory_) {
       });
     });
 
-    var deleteValue = {
-      'name_index': 'two',
-      'value': 'delete_value'
-    };
-    var updateValue = {
-      'name_index': 'three',
-      'value': 'update_value'
-    };
-    var updatedValue = {
-      'name_index': 'three',
-      'value': 'updated_value'
-    };
+    var deleteValue = {'name_index': 'two', 'value': 'delete_value'};
+    var updateValue = {'name_index': 'three', 'value': 'update_value'};
+    var updatedValue = {'name_index': 'three', 'value': 'updated_value'};
 
     test('cursor', () {
       //var done = expectAsync0(() {});
@@ -203,7 +194,6 @@ defineTests(IdbFactory idbFactory_) {
           }
         });
         return cursors.last;
-
       }).then((_) {
         return transaction.completed;
       }).then((_) {
@@ -214,7 +204,6 @@ defineTests(IdbFactory idbFactory_) {
         expect(readValue['value'], 'updated_value');
         return transaction.completed;
       }).then((_) {
-
         transaction = db.transaction(storeName, 'readonly');
         var index = transaction.objectStore(storeName).index(indexName);
         return index.get('two');

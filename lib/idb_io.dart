@@ -10,7 +10,8 @@ IdbFactory get idbMemoryFactory => idbSembastMemoryFactory;
 IdbFactory _idbSembastMemoryFactory;
 IdbFactory get idbSembastMemoryFactory {
   if (_idbSembastMemoryFactory == null) {
-    _idbSembastMemoryFactory = new IdbSembastFactory(memoryDatabaseFactory, null);
+    _idbSembastMemoryFactory =
+        new IdbSembastFactory(memoryDatabaseFactory, null);
   }
   return _idbSembastMemoryFactory;
 }

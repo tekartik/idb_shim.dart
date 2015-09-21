@@ -4,7 +4,6 @@ part of idb_shim_websql;
  * 
  */
 class _WebSqlGlobalStore {
-
   // To allow for proper schema migration if needed
   static const int INTERNAL_VERSION = 1;
 
@@ -16,43 +15,39 @@ class _WebSqlGlobalStore {
 
   SqlDatabase db;
 
-  
-
-
   Future<List<String>> getDatabaseNames() {
     return _checkOpenTransaction().then((tx) {
-      return tx.execute("SELECT $NAME_COLUMN_NAME FROM $DATABASES_TABLE_NAME").then((SqlResultSet resultSet) {
+      return tx
+          .execute("SELECT $NAME_COLUMN_NAME FROM $DATABASES_TABLE_NAME")
+          .then((SqlResultSet resultSet) {
         List<String> names = [];
         resultSet.rows.forEach((Map<String, String> row) {
           //print(row);
           names.add(row[NAME_COLUMN_NAME]);
         });
         return names;
-
-
       });
     }).catchError((e) {
       // Ok to fail
       return new List<String>();
     });
-
-
   }
 
   Future createDatabasesTable(SqlTransaction tx) {
     return tx.execute("DROP TABLE IF EXISTS $DATABASES_TABLE_NAME").then((_) {
-      return tx.execute("CREATE TABLE $DATABASES_TABLE_NAME ($NAME_COLUMN_NAME TEXT UNIQUE NOT NULL)");
+      return tx.execute(
+          "CREATE TABLE $DATABASES_TABLE_NAME ($NAME_COLUMN_NAME TEXT UNIQUE NOT NULL)");
     });
   }
-  
-  Future addDatabaseName(String name) {
 
+  Future addDatabaseName(String name) {
     Future<SqlResultSet> insert(SqlTransaction tx) {
-      String insertSqlStatement = "INSERT INTO $DATABASES_TABLE_NAME ($NAME_COLUMN_NAME) VALUES(?)";
+      String insertSqlStatement =
+          "INSERT INTO $DATABASES_TABLE_NAME ($NAME_COLUMN_NAME) VALUES(?)";
       List<String> insertSqlArguments = [name];
       return tx.execute(insertSqlStatement, insertSqlArguments);
     }
-    
+
     Future<bool> checkExists(SqlTransaction tx) {
       return tx.selectCount("databases WHERE name = ?", [name]).then((count) {
         return count == 1;
@@ -65,14 +60,12 @@ class _WebSqlGlobalStore {
         }
       });
     });
-
   }
 
   Future deleteDatabaseName(String name) {
-
     return _checkOpenTransaction().then((tx) {
-
-      String deleteSqlStatement = "DELETE FROM $DATABASES_TABLE_NAME WHERE $NAME_COLUMN_NAME ";
+      String deleteSqlStatement =
+          "DELETE FROM $DATABASES_TABLE_NAME WHERE $NAME_COLUMN_NAME ";
       List<String> deleteSqlArguments;
       if (name == null) {
         deleteSqlStatement += "IS NULL";
@@ -82,19 +75,16 @@ class _WebSqlGlobalStore {
         deleteSqlArguments = [name];
       }
 
-
-      return tx.execute(deleteSqlStatement, deleteSqlArguments).then((SqlResultSet resultSet) {
+      return tx
+          .execute(deleteSqlStatement, deleteSqlArguments)
+          .then((SqlResultSet resultSet) {
         //print(resultSet.rowsAffected);
-
       });
     }).catchError((e) {
       // Ok to fail
       return null;
     });
-
   }
-
-
 
   /**
    * There is valid transaction right aways
@@ -107,44 +97,44 @@ class _WebSqlGlobalStore {
       return tx;
     });
   }
-  
 
-     
- Future<SqlTransaction> _checkOpen() {
-   Completer completer = new Completer.sync();
-   _checkOpenNew((SqlTransaction tx) {
-     completer.complete(tx);
-   });
-   return completer.future;
-  
- }
+  Future<SqlTransaction> _checkOpen() {
+    Completer completer = new Completer.sync();
+    _checkOpenNew((SqlTransaction tx) {
+      completer.complete(tx);
+    });
+    return completer.future;
+  }
 
   void _checkOpenNew(void action(SqlTransaction tx)) {
-      if (db == null) {
-        db = sqlDatabaseFactory.openDatabase(DB_NAME, DB_VERSION, DB_NAME, DB_ESTIMATED_SIZE);
-      }
+    if (db == null) {
+      db = sqlDatabaseFactory.openDatabase(
+          DB_NAME, DB_VERSION, DB_NAME, DB_ESTIMATED_SIZE);
+    }
 
     Future<SqlTransaction> _cleanup(SqlTransaction tx) {
-
-      return tx.dropTableIfExists("version") //
-      .then((_) {
-        return tx.execute("CREATE TABLE version (internal_version INT, signature TEXT)");
+      return tx
+          .dropTableIfExists("version") //
+          .then((_) {
+        return tx.execute(
+            "CREATE TABLE version (internal_version INT, signature TEXT)");
       }).then((_) {
-        return tx.execute("INSERT INTO version (internal_version, signature)" //
-        " VALUES (?, ?)", [INTERNAL_VERSION, INTERNAL_SIGNATURE]);
+        return tx.execute(
+            "INSERT INTO version (internal_version, signature)" //
+            " VALUES (?, ?)",
+            [INTERNAL_VERSION, INTERNAL_SIGNATURE]);
       }).then((_) {
         return createDatabasesTable(tx).then((_) {
           return tx;
         });
       });
-
-
     }
 
     Future<SqlTransaction> _setup() {
       return db.transaction().then((tx) {
-        return tx.execute("SELECT internal_version, signature FROM version") //
-        .then((SqlResultSet rs) {
+        return tx
+            .execute("SELECT internal_version, signature FROM version") //
+            .then((SqlResultSet rs) {
           if (rs.rows.length != 1) {
             return _cleanup(tx);
           }

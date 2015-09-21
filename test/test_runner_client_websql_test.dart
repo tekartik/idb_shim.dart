@@ -1,5 +1,4 @@
 @TestOn("browser")
-
 library all_test_client_websql;
 
 import 'package:test/test.dart';
@@ -13,40 +12,38 @@ import 'dart:html';
 import 'dart:async';
 
 webSqlTest(IdbWebSqlFactory idbFactory) {
-
   test('properties', () {
     expect(idbFactory.persistent, isTrue);
   });
 
   group('native', () {
-
     test('openDatabase', () {
       Completer completer = new Completer();
-      SqlDatabase db = window.openDatabase("com.tekartik.test", "1", "com.tekartik.test", 1024 * 1024);
+      SqlDatabase db = window.openDatabase(
+          "com.tekartik.test", "1", "com.tekartik.test", 1024 * 1024);
       db.transaction((txn) {
         completer.complete();
       });
       return completer.future;
-
     });
 
     test('transaction', () {
       Completer completer = new Completer();
-      SqlDatabase db = window.openDatabase("com.tekartik.test", "1", "com.tekartik.test", 1024 * 1024);
+      SqlDatabase db = window.openDatabase(
+          "com.tekartik.test", "1", "com.tekartik.test", 1024 * 1024);
       db.transaction((txn) {
         txn.executeSql("DROP TABLE IF EXISTS test", [], (txn, rs) {
           completer.complete();
         });
-
       });
       return completer.future;
-
     });
 
     test('transaction in future', () {
       Completer completer = new Completer();
       Completer syncCompleter = new Completer.sync();
-      SqlDatabase db = window.openDatabase("com.tekartik.test", "1", "com.tekartik.test", 1024 * 1024);
+      SqlDatabase db = window.openDatabase(
+          "com.tekartik.test", "1", "com.tekartik.test", 1024 * 1024);
       db.transaction((txn) {
         txn.executeSql("DROP TABLE IF EXISTS test", []);
         syncCompleter.complete(txn);
@@ -60,11 +57,7 @@ webSqlTest(IdbWebSqlFactory idbFactory) {
           // in js this will fail
         }
       });
-
     });
-
-
-
   });
 }
 
@@ -82,12 +75,11 @@ testMain() {
       /**
        * to display something
        */
-      test("not supported", () {
-
-      });
+      test("not supported", () {});
     }
   });
 }
+
 main() {
   //useHtmlConfiguration();
   testMain();

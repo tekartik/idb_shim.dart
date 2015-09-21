@@ -7,9 +7,11 @@ import 'dart:html' as html;
 import 'dart:async';
 
 class SqlDatabaseFactory {
-
-  SqlDatabase openDatabase(String name, String version, String displayName, int estimatedSize, [html.DatabaseCallback creationCallback]) {
-    wql.SqlDatabase database = html.window.openDatabase(name, version, displayName, estimatedSize, creationCallback);
+  SqlDatabase openDatabase(
+      String name, String version, String displayName, int estimatedSize,
+      [html.DatabaseCallback creationCallback]) {
+    wql.SqlDatabase database = html.window.openDatabase(
+        name, version, displayName, estimatedSize, creationCallback);
     if (database == null) {
       return null;
     }
@@ -24,14 +26,12 @@ SqlDatabaseFactory get sqlDatabaseFactory {
     _sqlDatabaseFactory = new SqlDatabaseFactory();
   }
   return _sqlDatabaseFactory;
-
 }
 
 class SqlDatabase {
-  
   @deprecated
   static set debug(bool debug) => _DEBUG = debug;
-  
+
   static bool get DEBUG => _DEBUG;
   static bool _DEBUG = false;
   static int _DEBUG_ID = 0;
@@ -40,15 +40,16 @@ class SqlDatabase {
     return wql.SqlDatabase.supported;
   }
 
-
   int _debugId;
 
   wql.SqlDatabase _sqlDatabase;
-  SqlDatabase(this._sqlDatabase, String _name, String _version, String _displayName, int _estimatedSize) {
+  SqlDatabase(this._sqlDatabase, String _name, String _version,
+      String _displayName, int _estimatedSize) {
     //debug = true; // to remove
     if (_DEBUG) {
       _debugId = ++_DEBUG_ID;
-      debugLog("openDatabase $_debugId $_displayName(${_name}, $_version, $_estimatedSize)");
+      debugLog(
+          "openDatabase $_debugId $_displayName(${_name}, $_version, $_estimatedSize)");
     }
   }
 
@@ -70,14 +71,12 @@ class SqlDatabase {
 }
 
 class SqlTransaction {
-
   SqlDatabase _database;
   var _sqlTxn;
   //wql.SqlTransaction _sqlTxn;
   static List<Object> EMPTY_ARGS = [];
   SqlTransaction(this._database, this._sqlTxn);
   Future<SqlResultSet> execute(String sqlStatement, [List<Object> arguments]) {
-
     _beginOperation();
     String getStatementToString() {
       String text = sqlStatement;
@@ -119,7 +118,6 @@ class SqlTransaction {
         //          print("  updated ${rs.rowsAffected}");
         //        }
 
-
         // if (upperCaseStatement.startsWith("CREATE TABLE")) {
         // nothing interesting: rowsAffected 0, insertId 0
 
@@ -131,7 +129,9 @@ class SqlTransaction {
       completer.complete(rs);
     }, (txn, SqlError error) {
       if (SqlDatabase._DEBUG) {
-        _database.debugLog(error.message + "(${error.code}) executing " + getStatementToString());
+        _database.debugLog(error.message +
+            "(${error.code}) executing " +
+            getStatementToString());
       }
       _endOperation();
       completer.completeError(error);
@@ -157,18 +157,18 @@ class SqlTransaction {
     }
     dropNextTable();
     return completer.future;
-
   }
   /**
    * selectCount("table WHERE value > 2");
    */
 
   Future<int> selectCount(String from, [List<Object> arguments]) {
-    return execute("SELECT COUNT(*) as _count FROM " + from, arguments).then((rs) {
+    return execute("SELECT COUNT(*) as _count FROM " + from, arguments)
+        .then((rs) {
       return rs.rows[0]['_count'];
     });
-
   }
+
   void commit() {
     if (SqlDatabase._DEBUG) {
       _database.debugLog("COMMIT");
@@ -195,7 +195,6 @@ class SqlTransaction {
 
   void _completeIfDone() {
     if (_operationCount == 0) {
-
       complete();
     }
   }
@@ -210,7 +209,6 @@ class SqlTransaction {
     if (!_completer.isCompleted) {
       _completer.complete(this);
     }
-
   }
 
   Future<SqlTransaction> get completed {
@@ -233,5 +231,4 @@ class SqlTransaction {
     // Make it breath
     _asyncCompleteIfDone();
   }
-
 }

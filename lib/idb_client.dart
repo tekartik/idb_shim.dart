@@ -50,7 +50,6 @@ abstract class Transaction {
 }
 
 abstract class ObjectStore {
-
   Index createIndex(String name, keyPath, {bool unique, bool multiEntry});
 
   /**
@@ -63,7 +62,8 @@ abstract class ObjectStore {
   Future clear();
   Index index(String name);
 
-  Stream<CursorWithValue> openCursor({key, KeyRange range, String direction, bool autoAdvance});
+  Stream<CursorWithValue> openCursor(
+      {key, KeyRange range, String direction, bool autoAdvance});
 
   Future<int> count([dynamic key_OR_range]);
 
@@ -97,15 +97,16 @@ abstract class ObjectStore {
 
 abstract class Database {
   Database(this._factory);
-  ObjectStore createObjectStore(String name, {String keyPath, bool autoIncrement});
+  ObjectStore createObjectStore(String name,
+      {String keyPath, bool autoIncrement});
   Transaction transaction(storeName_OR_storeNames, String mode);
   Transaction transactionList(List<String> storeNames, String mode);
-  
+
   /**
    * list of the names of the object stores currently in the connected database
    */
   Iterable<String> get objectStoreNames;
-  
+
   /**
    * destroys the object store with the given name in the connected database, 
    * along with any indexes that reference it.
@@ -155,11 +156,10 @@ abstract class Database {
   final IdbFactory _factory;
 }
 
-
 abstract class Index {
   Future<int> count([key_OR_range]);
   Future get(dynamic key);
-  
+
   /**
    * The getKey() method of the IDBIndex interface returns an IDBRequest object, 
    * and, in a separate thread, finds either the given key or the primary key,
@@ -169,8 +169,10 @@ abstract class Index {
    * the whole record as IDBIndex.get does.
    */
   Future getKey(dynamic key);
-  Stream<CursorWithValue> openCursor({key, KeyRange range, String direction, bool autoAdvance});
-  Stream<Cursor> openKeyCursor({key, KeyRange range, String direction, bool autoAdvance});
+  Stream<CursorWithValue> openCursor(
+      {key, KeyRange range, String direction, bool autoAdvance});
+  Stream<Cursor> openKeyCursor(
+      {key, KeyRange range, String direction, bool autoAdvance});
 
   /**
    * The keyPath property of the IDBIndex interface returns the key path of the
@@ -204,7 +206,7 @@ abstract class Index {
    * the current index.
    */
   String get name;
-  
+
   @override
   String toString() {
     return 'name:${name} keyPath:${keyPath} unique:${unique} multiEntry:${multiEntry}';
@@ -218,7 +220,8 @@ abstract class Request {
 }
 
 class OpenDBRequest extends Request {
-  OpenDBRequest(Database database, Transaction transaction) : super(database, transaction);
+  OpenDBRequest(Database database, Transaction transaction)
+      : super(database, transaction);
 }
 
 abstract class VersionChangeEvent {
@@ -234,8 +237,7 @@ abstract class VersionChangeEvent {
   Database get database;
 }
 
-abstract class Event {
-}
+abstract class Event {}
 
 typedef void OnUpgradeNeededFunction(VersionChangeEvent event);
 typedef void OnBlockedFunction(Event event);
@@ -244,7 +246,6 @@ typedef void OnBlockedFunction(Event event);
  * Key Range 
  */
 class KeyRange {
-
   KeyRange();
   KeyRange.only(/*Key*/ value) : this.bound(value, value);
   KeyRange.lowerBound(this._lowerBound, [bool open = false]) {
@@ -253,7 +254,8 @@ class KeyRange {
   KeyRange.upperBound(this._upperBound, [bool open = false]) {
     _upperBoundOpen = open;
   }
-  KeyRange.bound(this._lowerBound, this._upperBound, [bool lowerOpen = false, bool upperOpen = false]) {
+  KeyRange.bound(this._lowerBound, this._upperBound,
+      [bool lowerOpen = false, bool upperOpen = false]) {
     _lowerBoundOpen = lowerOpen;
     _upperBoundOpen = upperOpen;
   }
@@ -279,7 +281,8 @@ class KeyRange {
         } else if (key is String) {
           return key.compareTo(_lowerBound) > 0;
         } else {
-          throw new UnsupportedError("key '$key' of type ${key.runtimeType} not supported");
+          throw new UnsupportedError(
+              "key '$key' of type ${key.runtimeType} not supported");
         }
       } else {
         if (key is num) {
@@ -287,7 +290,8 @@ class KeyRange {
         } else if (key is String) {
           return key.compareTo(_lowerBound) >= 0;
         } else {
-          throw new UnsupportedError("key '$key' of type ${key.runtimeType} not supported");
+          throw new UnsupportedError(
+              "key '$key' of type ${key.runtimeType} not supported");
         }
       }
     }
@@ -302,7 +306,8 @@ class KeyRange {
         } else if (key is String) {
           return key.compareTo(_upperBound) < 0;
         } else {
-          throw new UnsupportedError("key '$key' of type ${key.runtimeType} not supported");
+          throw new UnsupportedError(
+              "key '$key' of type ${key.runtimeType} not supported");
         }
       } else {
         if (key is num) {
@@ -310,7 +315,8 @@ class KeyRange {
         } else if (key is String) {
           return key.compareTo(_upperBound) <= 0;
         } else {
-          throw new UnsupportedError("key '$key' of type ${key.runtimeType} not supported");
+          throw new UnsupportedError(
+              "key '$key' of type ${key.runtimeType} not supported");
         }
       }
     }
@@ -360,7 +366,10 @@ abstract class IdbFactory {
   IdbFactory() {
     IdbFactory.supported = true;
   }
-  Future<Database> open(String dbName, {int version, OnUpgradeNeededFunction onUpgradeNeeded, OnBlockedFunction onBlocked});
+  Future<Database> open(String dbName,
+      {int version,
+      OnUpgradeNeededFunction onUpgradeNeeded,
+      OnBlockedFunction onBlocked});
   Future<IdbFactory> deleteDatabase(String name, {void onBlocked(Event)});
   bool get supportsDatabaseNames;
   Future<List<String>> getDatabaseNames();

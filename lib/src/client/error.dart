@@ -9,7 +9,6 @@ class DatabaseError extends Error {
   String toString() => message;
 }
 
-
 // native exception won't be of this type
 // the text here has been copied to match the DomException message
 class DatabaseReadOnlyError extends DatabaseError {
@@ -18,6 +17,7 @@ class DatabaseReadOnlyError extends DatabaseError {
 }
 
 class DatabaseStoreNotFoundError extends DatabaseError {
-  static String _MESSAGE = "NotFoundError: One of the specified object stores was not found.";
+  static String _MESSAGE =
+      "NotFoundError: One of the specified object stores was not found.";
   DatabaseStoreNotFoundError() : super(_MESSAGE);
 }

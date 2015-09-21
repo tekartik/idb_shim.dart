@@ -6,7 +6,8 @@ class _WebSqlIndexMeta {
   String keyPath;
   bool unique;
   bool multiEntry;
-  _WebSqlIndexMeta(this.storeMeta, this.name, this.keyPath, this.unique, this.multiEntry) {
+  _WebSqlIndexMeta(
+      this.storeMeta, this.name, this.keyPath, this.unique, this.multiEntry) {
     multiEntry = (multiEntry == true);
     unique = (unique == true);
   }
@@ -15,7 +16,7 @@ class _WebSqlIndexMeta {
   String toString() {
     return "index $name on $keyPath unique ${unique} multi ${multiEntry}";
   }
-  
+
   String get keyColumn => storeMeta.sqlColumnName(keyPath);
 }
 
@@ -23,30 +24,27 @@ class _WebSqlIndex extends Index {
   _WebSqlIndexMeta _meta;
   _WebSqlIndexMeta get meta => _meta;
   _WebSqlObjectStore store;
-  
+
   @override
   String get name => _meta.name;
 
   @override
   String get keyPath => _meta.keyPath;
-  
+
   @override
   bool get unique => _meta.unique;
-  
+
   @override
   bool get multiEntry => _meta.multiEntry;
-
 
   String get keyColumn => _meta.keyColumn;
   String get sqlIndexName => store.getSqlIndexName(keyPath);
   String get sqlTableName => store.sqlTableName;
-  
+
   // Ordered keys
   List keys = new List();
 
   _WebSqlTransaction get transaction => store.transaction;
-
-  
 
   static String indeciesToString(Map<String, _WebSqlIndexMeta> indecies) {
     if (indecies.isEmpty) {
@@ -72,7 +70,7 @@ class _WebSqlIndex extends Index {
     // TODO
     //devPrint("${store} ${_meta}");
   }
- 
+
   Future create() {
     String sqlTableName = this.sqlTableName;
     String sqlIndexName = this.sqlIndexName;
@@ -85,10 +83,8 @@ class _WebSqlIndex extends Index {
     }).then((_) {
       // Drop the index if needed
 
-
       String dropIndexSql = "DROP INDEX IF EXISTS $sqlIndexName";
       return transaction.execute(dropIndexSql).then((_) {
-
         // create the index
         StringBuffer sb = new StringBuffer();
         sb.write("CREATE ");
@@ -99,9 +95,7 @@ class _WebSqlIndex extends Index {
         String createIndexSql = sb.toString();
 
         return transaction.execute(createIndexSql);
-
       });
-
     });
   }
 
@@ -115,14 +109,16 @@ class _WebSqlIndex extends Index {
 
   Future<int> count([key_OR_range]) {
     return _checkIndex(() {
-      _CountQuery query = new _CountQuery(sqlTableName, keyColumn, key_OR_range);
+      _CountQuery query =
+          new _CountQuery(sqlTableName, keyColumn, key_OR_range);
       return query.count(transaction);
     });
   }
 
-  Stream<Cursor> openKeyCursor({key, KeyRange range, String direction, bool autoAdvance}) {
-
-    _WebSqlKeyIndexCursorController ctlr = new _WebSqlKeyIndexCursorController(this, direction, autoAdvance);
+  Stream<Cursor> openKeyCursor(
+      {key, KeyRange range, String direction, bool autoAdvance}) {
+    _WebSqlKeyIndexCursorController ctlr =
+        new _WebSqlKeyIndexCursorController(this, direction, autoAdvance);
 
     // Future
     _checkIndex(() {
@@ -130,7 +126,6 @@ class _WebSqlIndex extends Index {
     });
     return ctlr.stream;
   }
-
 
   @override
   Future get(key) {
@@ -147,8 +142,10 @@ class _WebSqlIndex extends Index {
   }
 
   @override
-  Stream<CursorWithValue> openCursor({key, KeyRange range, String direction, bool autoAdvance}) {
-    _WebSqlIndexCursorWithValueController ctlr = new _WebSqlIndexCursorWithValueController(this, direction, autoAdvance);
+  Stream<CursorWithValue> openCursor(
+      {key, KeyRange range, String direction, bool autoAdvance}) {
+    _WebSqlIndexCursorWithValueController ctlr =
+        new _WebSqlIndexCursorWithValueController(this, direction, autoAdvance);
 
     // Future
     _checkIndex(() {

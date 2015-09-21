@@ -24,7 +24,6 @@ part 'src/websql/websql_error.dart';
 IdbWebSqlFactory get idbWebSqlFactory => new IdbWebSqlFactory();
 
 class IdbWebSqlFactory extends IdbFactory {
-
   @override
   bool get persistent => true;
 
@@ -41,15 +40,17 @@ class IdbWebSqlFactory extends IdbFactory {
       _instance = new IdbWebSqlFactory._();
     }
     return _instance;
-
   }
 
   @override
-  Future<Database> open(String dbName, {int version, OnUpgradeNeededFunction onUpgradeNeeded, OnBlockedFunction onBlocked}) {
-
+  Future<Database> open(String dbName,
+      {int version,
+      OnUpgradeNeededFunction onUpgradeNeeded,
+      OnBlockedFunction onBlocked}) {
     // check params
     if ((version == null) != (onUpgradeNeeded == null)) {
-      return new Future.error(new ArgumentError('version and onUpgradeNeeded must be specified together'));
+      return new Future.error(new ArgumentError(
+          'version and onUpgradeNeeded must be specified together'));
     }
     if (version == 0) {
       return new Future.error(new ArgumentError('version cannot be 0'));
@@ -73,9 +74,9 @@ class IdbWebSqlFactory extends IdbFactory {
     });
   }
 
-
   @override
-  Future<IdbFactory> deleteDatabase(String dbName, {OnBlockedFunction onBlocked}) {
+  Future<IdbFactory> deleteDatabase(String dbName,
+      {OnBlockedFunction onBlocked}) {
     if (dbName == null) {
       return new Future.error(new ArgumentError('dbName cannot be null'));
     }

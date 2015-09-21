@@ -1,6 +1,7 @@
 part of idb_shim_websql;
 
-class _WebSqlTransaction extends Transaction { // extends CommonTransaction {
+class _WebSqlTransaction extends Transaction {
+  // extends CommonTransaction {
 
   //int _operationCount = 0;
 
@@ -22,12 +23,13 @@ class _WebSqlTransaction extends Transaction { // extends CommonTransaction {
   }
 
   _WebSqlDatabase get idbWqlDatabase => (database as _WebSqlDatabase);
-  
-  _WebSqlTransaction(Database database, this._sqlTransaction, this.storeNames, this._mode): super(database);
+
+  _WebSqlTransaction(
+      Database database, this._sqlTransaction, this.storeNames, this._mode)
+      : super(database);
 
   @override
   ObjectStore objectStore(String name) {
-    
     _WebSqlObjectStore store = idbWqlDatabase._getStore(this, name);
     return store;
   }
@@ -76,7 +78,7 @@ class _WebSqlTransaction extends Transaction { // extends CommonTransaction {
       });
     }
   }
-  
+
   toString() {
     return _mode;
   }

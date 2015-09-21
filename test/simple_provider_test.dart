@@ -9,9 +9,7 @@ import 'idb_test_common.dart' hide NAME_INDEX, NAME_FIELD;
 void main() => defineTests(idbTestMemoryFactory);
 
 void defineTests(IdbFactory idbFactory) {
-
   group('simple provider', () {
-
     group('with data', () {
       SimpleProvider provider;
 
@@ -25,9 +23,10 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       test('simple cursor auto advance', () {
-
         // Check ordered by id
-        ObjectStore store = provider.db.transaction(STORE, IDB_MODE_READ_ONLY).objectStore(STORE);
+        ObjectStore store = provider.db
+            .transaction(STORE, IDB_MODE_READ_ONLY)
+            .objectStore(STORE);
         Stream<CursorWithValue> stream = store.openCursor(autoAdvance: true);
         return provider.cursorToList(stream).then((List<SimpleRow> list) {
           expect(list[0].name, equals('test2'));
@@ -37,7 +36,9 @@ void defineTests(IdbFactory idbFactory) {
           expect(list[2].id, equals(3));
         }).then((_) {
           // Check ordered by name
-          ObjectStore store = provider.db.transaction(STORE, IDB_MODE_READ_ONLY).objectStore(STORE);
+          ObjectStore store = provider.db
+              .transaction(STORE, IDB_MODE_READ_ONLY)
+              .objectStore(STORE);
           Index index = store.index(NAME_INDEX);
           Stream<CursorWithValue> stream = index.openCursor(autoAdvance: true);
           return provider.cursorToList(stream).then((List<SimpleRow> list) {
@@ -48,13 +49,13 @@ void defineTests(IdbFactory idbFactory) {
             expect(list[2].id, equals(3));
           });
         });
-
-
       });
 
       test('simple cursor no auto advance', () {
         // Check ordered by id
-        ObjectStore store = provider.db.transaction(STORE, IDB_MODE_READ_ONLY).objectStore(STORE);
+        ObjectStore store = provider.db
+            .transaction(STORE, IDB_MODE_READ_ONLY)
+            .objectStore(STORE);
         Stream<CursorWithValue> stream = store.openCursor();
         Completer completer = new Completer();
         List<SimpleRow> list = new List();
@@ -76,32 +77,30 @@ void defineTests(IdbFactory idbFactory) {
 
       test('simple cursor reverse', () {
         // Check ordered by name reverse
-        ObjectStore store = provider.db.transaction(STORE, IDB_MODE_READ_ONLY).objectStore(STORE);
+        ObjectStore store = provider.db
+            .transaction(STORE, IDB_MODE_READ_ONLY)
+            .objectStore(STORE);
         Index index = store.index(NAME_INDEX);
-        Stream<CursorWithValue> stream = index.openCursor(direction: IDB_DIRECTION_PREV, autoAdvance: true);
+        Stream<CursorWithValue> stream =
+            index.openCursor(direction: IDB_DIRECTION_PREV, autoAdvance: true);
         return provider.cursorToList(stream).then((List<SimpleRow> list) {
           expect(list[0].name, equals('test3'));
           expect(list[1].name, equals('test2'));
           expect(list[2].name, equals('test1'));
         });
-
-
       });
     });
 
-    setUp(() {
-
-    });
+    setUp(() {});
 
     test('add/get/put/delete', () {
       //Function done = expectDone();
       SimpleProvider provider = new SimpleProvider(idbFactory);
       return provider.openEmpty().then((_) {
-        Transaction transaction = provider.db.transaction(STORE, IDB_MODE_READ_WRITE);
+        Transaction transaction =
+            provider.db.transaction(STORE, IDB_MODE_READ_WRITE);
         ObjectStore objectStore = transaction.objectStore(STORE);
-        Map object = {
-          NAME_FIELD: "test"
-        };
+        Map object = {NAME_FIELD: "test"};
         objectStore.add(object).then((r) {
           int key = r;
           expect(key, equals(1));
@@ -125,15 +124,10 @@ void defineTests(IdbFactory idbFactory) {
           });
         });
         return transaction.completed.then((_) {
-
           provider.close();
           // done();
         });
-
       });
     });
   });
-
-
-
 }

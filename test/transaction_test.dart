@@ -311,7 +311,7 @@ void defineTests(IdbFactory idbFactory) {
 
       test('get_get', () async {
         Transaction transaction =
-        db.transaction(STORE_NAME, IDB_MODE_READ_ONLY);
+            db.transaction(STORE_NAME, IDB_MODE_READ_ONLY);
         ObjectStore objectStore = transaction.objectStore(STORE_NAME);
         await objectStore.getObject(0);
         await objectStore.getObject(0);
@@ -320,7 +320,7 @@ void defineTests(IdbFactory idbFactory) {
 
       test('get_wait_get', () async {
         Transaction transaction =
-        db.transaction(STORE_NAME, IDB_MODE_READ_ONLY);
+            db.transaction(STORE_NAME, IDB_MODE_READ_ONLY);
         ObjectStore objectStore = transaction.objectStore(STORE_NAME);
         await objectStore.getObject(0);
         await new Future.value();
@@ -330,7 +330,7 @@ void defineTests(IdbFactory idbFactory) {
 
       test('get_wait_wait_get', () async {
         Transaction transaction =
-        db.transaction(STORE_NAME, IDB_MODE_READ_ONLY);
+            db.transaction(STORE_NAME, IDB_MODE_READ_ONLY);
         ObjectStore objectStore = transaction.objectStore(STORE_NAME);
         await objectStore.getObject(0);
         await new Future.value();
@@ -341,7 +341,7 @@ void defineTests(IdbFactory idbFactory) {
 
       test('put_wait_wait_put', () async {
         Transaction transaction =
-        db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+            db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
         ObjectStore objectStore = transaction.objectStore(STORE_NAME);
         await objectStore.put({});
         await new Future.value();

@@ -6,16 +6,13 @@ import 'idb_test_common.dart';
 void main() => defineTests();
 
 void defineTests() {
-
   group('value', () {
     test('Map', () {
       expect(encodeValue({}), "{}");
-
     });
 
     test('String', () {
       expect(encodeValue("test"), '"test"');
-
     });
 
     test('int', () {
@@ -23,7 +20,7 @@ void defineTests() {
     });
 
     // not supported
-   test('DateTime', () {
+    test('DateTime', () {
       try {
         expect(encodeValue(new DateTime.now()), "xxxx");
         fail("should fail");
@@ -31,6 +28,5 @@ void defineTests() {
         //devPrint(e);
       }
     });
-
   });
 }

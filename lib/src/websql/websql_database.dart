@@ -1,7 +1,6 @@
 part of idb_shim_websql;
 
 class _WebSqlVersionChangeEvent extends VersionChangeEvent {
-
   int oldVersion;
   int newVersion;
   Request request;
@@ -12,8 +11,8 @@ class _WebSqlVersionChangeEvent extends VersionChangeEvent {
      */
   Transaction get transaction => request.transaction;
 
-  _WebSqlVersionChangeEvent(_WebSqlDatabase database, this.oldVersion, this.newVersion, Transaction transaction) {
-
+  _WebSqlVersionChangeEvent(_WebSqlDatabase database, this.oldVersion,
+      this.newVersion, Transaction transaction) {
     // special transaction
     //WebSqlTransaction versionChangeTransaction = new WebSqlTransaction(database, tx, null, MODE_READ_WRITE);
     request = new OpenDBRequest(database, transaction);
@@ -21,7 +20,6 @@ class _WebSqlVersionChangeEvent extends VersionChangeEvent {
 }
 
 class _WebSqlDatabase extends Database {
-
   // To allow for proper schema migration if needed
 
   // V1 include the following schema
@@ -33,9 +31,9 @@ class _WebSqlDatabase extends Database {
 
   //int version = 0;
   //bool opened = true;
-  
+
   String name;
-  _WebSqlDatabase(this.name): super(idbWebSqlFactory);
+  _WebSqlDatabase(this.name) : super(idbWebSqlFactory);
   _WebSqlTransaction versionChangeTransaction;
   SqlDatabase sqlDb;
 
@@ -55,11 +53,11 @@ class _WebSqlDatabase extends Database {
   }
 
   SqlDatabase _openSqlDb(String name) {
-    return sqlDatabaseFactory.openDatabase(name, DATABASE_DB_VERSION, name, DATABASE_DB_ESTIMATED_SIZE);
+    return sqlDatabaseFactory.openDatabase(
+        name, DATABASE_DB_VERSION, name, DATABASE_DB_ESTIMATED_SIZE);
   }
 
   Future _delete() {
-
     List<String> tableNamesFromResultSet(SqlResultSet rs) {
       List<String> names = [];
       rs.rows.forEach((row) {
@@ -80,11 +78,13 @@ class _WebSqlDatabase extends Database {
     // delete all tables
     SqlDatabase sqlDb = _openSqlDb(name);
     return sqlDb.transaction().then((tx) {
-      return tx.execute("SELECT internal_version, signature FROM version").then((rs) {
+      return tx.execute("SELECT internal_version, signature FROM version").then(
+          (rs) {
         String signature = _getSignatureFromResultSet(rs);
         int internalVersion = _getInternalVersionFromResultSet(rs);
         // Stores table is valid since the first version
-        if ((signature == INTERNAL_SIGNATURE) && (internalVersion >= INTERNAL_VERSION_1)) {
+        if ((signature == INTERNAL_SIGNATURE) &&
+            (internalVersion >= INTERNAL_VERSION_1)) {
           // delete all the object store table
           return deleteStores(tx).then((_) {
             // then the system tables
@@ -99,7 +99,6 @@ class _WebSqlDatabase extends Database {
         // don't create anyting
       });
     });
-
   }
 
   // This is set on object store create and index create
@@ -113,30 +112,31 @@ class _WebSqlDatabase extends Database {
       return computation();
     });
     return initialization;
-
   }
 
   Future open(int newVersion, void onUpgradeNeeded(VersionChangeEvent event)) {
-
     Future _checkVersion(SqlTransaction tx, int oldVersion) {
       bool upgrading = false;
-      _WebSqlTransaction transaction = new _WebSqlTransaction(this, tx, null, IDB_MODE_READ_WRITE);
+      _WebSqlTransaction transaction =
+          new _WebSqlTransaction(this, tx, null, IDB_MODE_READ_WRITE);
       //print("$oldVersion vs $newVersion");
       if (oldVersion != newVersion) {
         if (oldVersion > newVersion) {
           // cannot downgrade
-          return new Future.error(new StateError("cannot downgrade from ${oldVersion} to $newVersion"));
+          return new Future.error(new StateError(
+              "cannot downgrade from ${oldVersion} to $newVersion"));
         } else {
           upgrading = true;
 
           Future stepUpdateVersion() {
             // Wrap in init block so that last one win
             // return initBlock(() {
-            return transaction.execute("UPDATE version SET value = ?", [newVersion]) //
-            .then((_) {
+            return transaction
+                .execute("UPDATE version SET value = ?", [newVersion]) //
+                .then((_) {
               this.version = newVersion;
-            })//})
-            .then((_) {
+            }) //})
+                .then((_) {
               // Only mark as open when the first transaction complete
               return transaction.completed;
             });
@@ -161,7 +161,9 @@ class _WebSqlDatabase extends Database {
               if (index >= onVersionChangeCreatedObjectStores.length) {
                 return stepCreateIndexes();
               }
-              return onVersionChangeCreatedObjectStores[index++].create().then((_) {
+              return onVersionChangeCreatedObjectStores[index++]
+                  .create()
+                  .then((_) {
                 return createNextObjectStore();
               });
             }
@@ -173,11 +175,13 @@ class _WebSqlDatabase extends Database {
           }
 
           //return initBlock(() {
-          return _loadStores(transaction)//})
-          .then((_) {
+          return _loadStores(transaction) //})
+              .then((_) {
             if (onUpgradeNeeded != null) {
-              _WebSqlTransaction transaction = new _WebSqlTransaction(this, tx, null, IDB_MODE_READ_WRITE);
-              _WebSqlVersionChangeEvent event = new _WebSqlVersionChangeEvent(this, oldVersion, newVersion, transaction);
+              _WebSqlTransaction transaction =
+                  new _WebSqlTransaction(this, tx, null, IDB_MODE_READ_WRITE);
+              _WebSqlVersionChangeEvent event = new _WebSqlVersionChangeEvent(
+                  this, oldVersion, newVersion, transaction);
               versionChangeTransaction = event.transaction;
 
               onVersionChangeCreatedObjectStores = [];
@@ -191,10 +195,7 @@ class _WebSqlDatabase extends Database {
             } else {
               return stepUpdateVersion();
             }
-
           });
-
-
         }
       }
       if (!upgrading) {
@@ -207,17 +208,21 @@ class _WebSqlDatabase extends Database {
     sqlDb = _openSqlDb(name);
 
     Future _cleanup(SqlTransaction tx) {
-      return tx.execute("DROP TABLE IF EXISTS version") //
-      .then((_) {
-        return tx.execute("CREATE TABLE version (internal_version INT, value INT, signature TEXT)");
+      return tx
+          .execute("DROP TABLE IF EXISTS version") //
+          .then((_) {
+        return tx.execute(
+            "CREATE TABLE version (internal_version INT, value INT, signature TEXT)");
       }).then((_) {
-        return tx.execute("INSERT INTO version (internal_version, value, signature)" //
-        " VALUES (?, ?, ?)", [INTERNAL_VERSION, 0, INTERNAL_SIGNATURE]);
+        return tx.execute(
+            "INSERT INTO version (internal_version, value, signature)" //
+            " VALUES (?, ?, ?)",
+            [INTERNAL_VERSION, 0, INTERNAL_SIGNATURE]);
       }).then((_) {
         return tx.execute("DROP TABLE IF EXISTS stores");
       }).then((_) {
         return tx.execute("CREATE TABLE stores " //
-        "(name TEXT UNIQUE, key_path TEXT, auto_increment BOOLEAN, indecies TEXT)");
+            "(name TEXT UNIQUE, key_path TEXT, auto_increment BOOLEAN, indecies TEXT)");
         // indecies json text
       }).then((_) {
         return _checkVersion(tx, 0);
@@ -226,8 +231,10 @@ class _WebSqlDatabase extends Database {
 
     Future _setup() {
       return sqlDb.transaction().then((tx) {
-        return tx.execute("SELECT internal_version, value, signature FROM version") //
-        .then((SqlResultSet rs) {
+        return tx
+            .execute(
+                "SELECT internal_version, value, signature FROM version") //
+            .then((SqlResultSet rs) {
           int internalVersion = _getInternalVersionFromResultSet(rs);
           String signature = _getSignatureFromResultSet(rs);
           if (signature != INTERNAL_SIGNATURE) {
@@ -246,18 +253,19 @@ class _WebSqlDatabase extends Database {
     }
 
     return _setup();
-
   }
 
-
-
   @override
-  ObjectStore createObjectStore(String name, {String keyPath, bool autoIncrement: false}) {
+  ObjectStore createObjectStore(String name,
+      {String keyPath, bool autoIncrement: false}) {
     if (versionChangeTransaction == null) {
-      throw new StateError("cannot create objectStore outside of a versionChangedEvent");
+      throw new StateError(
+          "cannot create objectStore outside of a versionChangedEvent");
     }
-    _WebSqlObjectStoreMeta storeMeta = new _WebSqlObjectStoreMeta(name, keyPath, autoIncrement);
-    _WebSqlObjectStore store = new _WebSqlObjectStore(versionChangeTransaction, storeMeta);
+    _WebSqlObjectStoreMeta storeMeta =
+        new _WebSqlObjectStoreMeta(name, keyPath, autoIncrement);
+    _WebSqlObjectStore store =
+        new _WebSqlObjectStore(versionChangeTransaction, storeMeta);
 
     // Put in the map
     stores[name] = storeMeta;
@@ -283,7 +291,8 @@ class _WebSqlDatabase extends Database {
     String keyPath = row['key_path'];
     bool autoIncrement = row['auto_increment'] > 0;
 
-    _WebSqlObjectStoreMeta storeMeta = new _WebSqlObjectStoreMeta(name, keyPath, autoIncrement);
+    _WebSqlObjectStoreMeta storeMeta =
+        new _WebSqlObjectStoreMeta(name, keyPath, autoIncrement);
     _WebSqlObjectStore store = new _WebSqlObjectStore(transaction, storeMeta);
     store._initOptions(keyPath, autoIncrement);
 
@@ -297,27 +306,26 @@ class _WebSqlDatabase extends Database {
 
       // save store in cache
 
-
-
       //             if (keyPath == null && !autoIncrement) {
       //               throw new ArgumentError("neither keyPath nor autoIncrement set");
       //             }
     });
     stores[name] = storeMeta;
   }
+
   /**
    * keyPath might not be valid before
    */
   Future _loadStores(_WebSqlTransaction transaction) {
     // this is also an indicator
-    var sqlSelect = "SELECT name, key_path, auto_increment, indecies FROM stores"; // WHERE name = ?";
+    var sqlSelect =
+        "SELECT name, key_path, auto_increment, indecies FROM stores"; // WHERE name = ?";
     var sqlArgs = null; //[name];
     return transaction.execute(sqlSelect, sqlArgs).then((SqlResultSet rs) {
       rs.rows.forEach((Map row) {
         _initStoreFromRow(transaction, row);
       });
     });
-
   }
 
   bool _containsStore(String storeName) {
@@ -369,7 +377,7 @@ class _WebSqlDatabase extends Database {
     //factory.dbMap[name];
     //stores = null; // so that it crashes
   }
-  
+
   _WebSqlObjectStore _getStore(Transaction transaction, String name) {
     _WebSqlObjectStoreMeta storeMeta = stores[name];
     if (storeMeta != null) {
@@ -381,7 +389,8 @@ class _WebSqlDatabase extends Database {
   @override
   void deleteObjectStore(String name) {
     if (versionChangeTransaction == null) {
-      throw new StateError("cannot call deleteObjectStore outside of a versionChangedEvent");
+      throw new StateError(
+          "cannot call deleteObjectStore outside of a versionChangedEvent");
     }
 
     _WebSqlObjectStore store = _getStore(versionChangeTransaction, name);

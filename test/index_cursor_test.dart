@@ -22,18 +22,14 @@ class TestIdNameRow {
 //  testMain(new IdbMemoryFactory());
 //}
 void defineTests(IdbFactory idbFactory) {
-
   group('index_cursor', () {
-
     Database db;
     Transaction transaction;
     ObjectStore objectStore;
     Index index;
 
     Future add(String name) {
-      var obj = {
-        NAME_FIELD: name
-      };
+      var obj = {NAME_FIELD: name};
       return objectStore.put(obj);
     }
 
@@ -57,21 +53,22 @@ void defineTests(IdbFactory idbFactory) {
     }
 
     group('auto', () {
-
       setUp(() {
         return idbFactory.deleteDatabase(DB_NAME).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
-            ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
+            ObjectStore objectStore =
+                db.createObjectStore(STORE_NAME, autoIncrement: true);
             objectStore.createIndex(NAME_INDEX, NAME_FIELD);
           }
-          return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
+          return idbFactory
+              .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+              .then((Database database) {
             db = database;
             transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
             objectStore = transaction.objectStore(STORE_NAME);
             index = objectStore.index(NAME_INDEX);
             return db;
-
           });
         });
       });
@@ -83,7 +80,6 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       test('empty key cursor', () {
-
         Stream<Cursor> stream = index.openKeyCursor(autoAdvance: true);
         int count = 0;
         Completer completer = new Completer();
@@ -95,11 +91,9 @@ void defineTests(IdbFactory idbFactory) {
         return completer.future.then((_) {
           expect(count, 0);
         });
-
       });
 
       test('empty key cursor by key', () {
-
         Stream<Cursor> stream = index.openKeyCursor(key: 1, autoAdvance: true);
         int count = 0;
         Completer completer = new Completer();
@@ -111,11 +105,9 @@ void defineTests(IdbFactory idbFactory) {
         return completer.future.then((_) {
           expect(count, 0);
         });
-
       });
 
       test('empty cursor', () {
-
         Stream<CursorWithValue> stream = index.openCursor(autoAdvance: true);
         int count = 0;
         Completer completer = new Completer();
@@ -127,12 +119,11 @@ void defineTests(IdbFactory idbFactory) {
         return completer.future.then((_) {
           expect(count, 0);
         });
-
       });
 
       test('empty cursor by key', () {
-
-        Stream<CursorWithValue> stream = index.openCursor(key: 1, autoAdvance: true);
+        Stream<CursorWithValue> stream =
+            index.openCursor(key: 1, autoAdvance: true);
         int count = 0;
         Completer completer = new Completer();
         stream.listen((CursorWithValue cwv) {
@@ -143,7 +134,6 @@ void defineTests(IdbFactory idbFactory) {
         return completer.future.then((_) {
           expect(count, 0);
         });
-
       });
 
       test('one item key cursor', () {
@@ -162,7 +152,6 @@ void defineTests(IdbFactory idbFactory) {
           return completer.future.then((_) {
             expect(count, 1);
           });
-
         });
       });
 
@@ -181,7 +170,6 @@ void defineTests(IdbFactory idbFactory) {
           return completer.future.then((_) {
             expect(count, 1);
           });
-
         });
       });
 
@@ -195,13 +183,12 @@ void defineTests(IdbFactory idbFactory) {
 
       test('cursor non-auto', () {
         return add("test1").then((key) {
-
-         int count = 0;
+          int count = 0;
           // non auto to control advance
-          return index.openCursor(autoAdvance: false).listen((CursorWithValue cwv) {
-            expect(cwv.value, {
-              NAME_FIELD: "test1"
-            });
+          return index
+              .openCursor(autoAdvance: false)
+              .listen((CursorWithValue cwv) {
+            expect(cwv.value, {NAME_FIELD: "test1"});
             expect(cwv.key, "test1");
             expect(cwv.primaryKey, key);
             count++;
@@ -214,9 +201,10 @@ void defineTests(IdbFactory idbFactory) {
 
       test('cursor none auto delete 1', () {
         return add("test1").then((key) {
-
           // non auto to control advance
-          return index.openCursor(autoAdvance: false).listen((CursorWithValue cwv) {
+          return index
+              .openCursor(autoAdvance: false)
+              .listen((CursorWithValue cwv) {
             cwv.delete().then((_) {
               cwv.next();
             });
@@ -229,7 +217,6 @@ void defineTests(IdbFactory idbFactory) {
                 expect(value, isNull);
               });
             });
-
           });
         });
       });
@@ -238,7 +225,9 @@ void defineTests(IdbFactory idbFactory) {
         return add("test1").then((key) {
           Map map;
           // non auto to control advance
-          return index.openCursor(autoAdvance: false).listen((CursorWithValue cwv) {
+          return index
+              .openCursor(autoAdvance: false)
+              .listen((CursorWithValue cwv) {
             map = new Map.from(cwv.value);
             map["other"] = "too";
             cwv.update(map).then((_) {
@@ -253,7 +242,6 @@ void defineTests(IdbFactory idbFactory) {
                 expect(value, map);
               });
             });
-
           });
         });
       });
@@ -267,14 +255,18 @@ void defineTests(IdbFactory idbFactory) {
             expect(list[2].id, equals(3));
             expect(list.length, 3);
 
-            return cursorToList(index.openCursor(range: new KeyRange.bound('test2', 'test3'), autoAdvance: true)).then((list) {
+            return cursorToList(index.openCursor(
+                range: new KeyRange.bound('test2', 'test3'),
+                autoAdvance: true)).then((list) {
               expect(list.length, 2);
               expect(list[0].name, equals('test2'));
               expect(list[0].id, equals(1));
               expect(list[1].name, equals('test3'));
               expect(list[1].id, equals(3));
 
-              return cursorToList(index.openCursor(key: 'test1', autoAdvance: true)).then((list) {
+              return cursorToList(
+                      index.openCursor(key: 'test1', autoAdvance: true))
+                  .then((list) {
                 expect(list.length, 1);
                 expect(list[0].name, equals('test1'));
                 expect(list[0].id, equals(2));
@@ -283,33 +275,31 @@ void defineTests(IdbFactory idbFactory) {
               });
             });
           });
-
-
-
         });
       });
     });
 
     group('multiple', () {
-
       Index nameIndex;
       Index valueIndex;
       setUp(() {
         return idbFactory.deleteDatabase(DB_NAME).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
-            ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
+            ObjectStore objectStore =
+                db.createObjectStore(STORE_NAME, autoIncrement: true);
             objectStore.createIndex(NAME_INDEX, NAME_FIELD);
             objectStore.createIndex(VALUE_INDEX, VALUE_FIELD);
           }
-          return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
+          return idbFactory
+              .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+              .then((Database database) {
             db = database;
             transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
             objectStore = transaction.objectStore(STORE_NAME);
             nameIndex = objectStore.index(NAME_INDEX);
             valueIndex = objectStore.index(VALUE_INDEX);
             return db;
-
           });
         });
       });
@@ -321,7 +311,6 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       test('add and read', () {
-
         Future<List<int>> getKeys(Stream<Cursor> stream) {
           List<int> keys = [];
           return stream.listen((Cursor cursor) {
@@ -331,10 +320,7 @@ void defineTests(IdbFactory idbFactory) {
           });
         }
         Future add(String name, int value) {
-          var obj = {
-            NAME_FIELD: name,
-            VALUE_FIELD: value
-          };
+          var obj = {NAME_FIELD: name, VALUE_FIELD: value};
           return objectStore.put(obj);
         }
 
@@ -353,20 +339,20 @@ void defineTests(IdbFactory idbFactory) {
           return getKeys(stream).then((result) {
             expect(result, [key1, key3, key2]);
           });
-
         }).then((_) {
           Stream<Cursor> stream = valueIndex.openKeyCursor(autoAdvance: true);
           return getKeys(stream).then((result) {
             expect(result, [key2, key1, key3]);
           });
-
         }).then((_) {
-          Stream<Cursor> stream = valueIndex.openKeyCursor(range: new KeyRange.lowerBound(2), autoAdvance: true);
+          Stream<Cursor> stream = valueIndex.openKeyCursor(
+              range: new KeyRange.lowerBound(2), autoAdvance: true);
           return getKeys(stream).then((result) {
             expect(result, [key1, key3]);
           });
         }).then((_) {
-          Stream<Cursor> stream = valueIndex.openKeyCursor(range: new KeyRange.upperBound(2, true), autoAdvance: true);
+          Stream<Cursor> stream = valueIndex.openKeyCursor(
+              range: new KeyRange.upperBound(2, true), autoAdvance: true);
           return getKeys(stream).then((result) {
             expect(result, [key2]);
           });

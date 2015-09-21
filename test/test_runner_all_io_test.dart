@@ -1,5 +1,4 @@
 @TestOn("vm")
-
 library all_test_console;
 
 import 'package:test/test.dart';
@@ -10,7 +9,6 @@ import 'idb_test_common_test.dart' as idb_test_common_test;
 import 'package:idb_shim/idb_io.dart';
 
 void main() {
-
   defineTests(idbSembastMemoryFactory);
   defineTests(getIdbSembastIoFactory("tmp"));
   common_value_test.main();

@@ -15,8 +15,12 @@ class _SelectQuery extends _Query {
   String _direction;
   String _keyColumn;
 
-  _SelectQuery(this._selectedColumns, this._sqlTableName, this._keyColumn,  //
-  this._key_OR_range, this._direction);
+  _SelectQuery(
+      this._selectedColumns,
+      this._sqlTableName,
+      this._keyColumn, //
+      this._key_OR_range,
+      this._direction);
 
   Future<SqlResultSet> execute(_WebSqlTransaction transaction) {
     String order;
@@ -88,7 +92,6 @@ class _CountQuery extends _SelectQuery {
         return null;
       }
       return (rs.rows[0][_SQL_COUNT_COLUMN]);
-
     });
   }
 }

@@ -17,7 +17,8 @@ class _NativeVersionChangeEvent extends VersionChangeEvent {
       database = new _NativeDatabase(currentTarget);
     } else if (currentTarget is idb.Request) {
       database = new _NativeDatabase(currentTarget.result);
-      _NativeTransaction transaction = new _NativeTransaction(database, currentTarget.transaction);
+      _NativeTransaction transaction =
+          new _NativeTransaction(database, currentTarget.transaction);
       request = new OpenDBRequest(database, transaction);
     }
   }
@@ -30,24 +31,27 @@ class _NativeDatabase extends Database {
   int get version => idbDatabase.version;
 
   @override
-  ObjectStore createObjectStore(String name, {String keyPath, bool autoIncrement}) {
-    return new _NativeObjectStore(idbDatabase.createObjectStore(name, keyPath: keyPath, autoIncrement: autoIncrement));
+  ObjectStore createObjectStore(String name,
+      {String keyPath, bool autoIncrement}) {
+    return new _NativeObjectStore(idbDatabase.createObjectStore(name,
+        keyPath: keyPath, autoIncrement: autoIncrement));
   }
 
   @override
   Transaction transaction(storeName_OR_storeNames, String mode) {
     try {
-      idb.Transaction idbTransaction = idbDatabase.transaction(storeName_OR_storeNames, mode);
+      idb.Transaction idbTransaction =
+          idbDatabase.transaction(storeName_OR_storeNames, mode);
       return new _NativeTransaction(this, idbTransaction);
     } catch (e) {
       throw new DatabaseError(e.toString());
     }
-
   }
 
   @override
   Transaction transactionList(List<String> storeNames, String mode) {
-    idb.Transaction idbTransaction = idbDatabase.transactionList(storeNames, mode);
+    idb.Transaction idbTransaction =
+        idbDatabase.transactionList(storeNames, mode);
     return new _NativeTransaction(this, idbTransaction);
   }
 
@@ -65,16 +69,16 @@ class _NativeDatabase extends Database {
   Iterable<String> get objectStoreNames {
     return idbDatabase.objectStoreNames;
   }
-  
+
   @override
   String get name => idbDatabase.name;
 
   @override
   Stream<VersionChangeEvent> get onVersionChange {
     StreamController<VersionChangeEvent> ctlr = new StreamController();
-    idbDatabase.onVersionChange.listen((idb.VersionChangeEvent idbVersionChangeEvent) {
+    idbDatabase.onVersionChange.listen(
+        (idb.VersionChangeEvent idbVersionChangeEvent) {
       ctlr.add(new _NativeVersionChangeEvent(idbVersionChangeEvent));
-
     }, onDone: () {
       ctlr.close();
     }, onError: (error) {

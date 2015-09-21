@@ -76,9 +76,6 @@ class _NativeCursorWithValue extends CursorWithValue {
   Future delete() {
     return _cwv.delete();
   }
-
-
-
 }
 
 class _NativeCursorWithValueController {

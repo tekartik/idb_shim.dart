@@ -29,8 +29,14 @@ class _NativeIndex extends Index {
   }
 
   @override
-  Stream<Cursor> openKeyCursor({key, KeyRange range, String direction, bool autoAdvance}) {
-    _NativeCursorController ctlr = new _NativeCursorController(idbIndex.openKeyCursor(key: key, range: range == null ? null : _nativeKeyRange(range), direction: direction, autoAdvance: autoAdvance));
+  Stream<Cursor> openKeyCursor(
+      {key, KeyRange range, String direction, bool autoAdvance}) {
+    _NativeCursorController ctlr = new _NativeCursorController(
+        idbIndex.openKeyCursor(
+            key: key,
+            range: range == null ? null : _nativeKeyRange(range),
+            direction: direction,
+            autoAdvance: autoAdvance));
     return ctlr.stream;
   }
 
@@ -38,8 +44,14 @@ class _NativeIndex extends Index {
    * Same implementation than for the Store
    */
   @override
-  Stream<CursorWithValue> openCursor({key, KeyRange range, String direction, bool autoAdvance}) {
-    _NativeCursorWithValueController ctlr = new _NativeCursorWithValueController(idbIndex.openCursor(key: key, range: range == null ? null : _nativeKeyRange(range), direction: direction, autoAdvance: autoAdvance));
+  Stream<CursorWithValue> openCursor(
+      {key, KeyRange range, String direction, bool autoAdvance}) {
+    _NativeCursorWithValueController ctlr =
+        new _NativeCursorWithValueController(idbIndex.openCursor(
+            key: key,
+            range: range == null ? null : _nativeKeyRange(range),
+            direction: direction,
+            autoAdvance: autoAdvance));
 
     return ctlr.stream;
   }
@@ -66,5 +78,4 @@ class _NativeIndex extends Index {
     }
     return false;
   }
-
 }

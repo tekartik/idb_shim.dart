@@ -2,14 +2,15 @@
 // replace html.window.indexedDB with idbFactory
 // replace IndexedDB1Test with IndexedDB2Test
 library IndexedDB2Test;
-import 'package:idb_shim/idb_client.dart' as idb;
 
+import 'package:idb_shim/idb_client.dart' as idb;
 
 import 'dart:collection';
 import 'indexeddb_utils.dart';
 
 // so that this can be run directly
 import 'idb_test_common.dart';
+
 void main() => defineTests(idbTestMemoryFactory);
 
 // Write and re-read Maps: simple Maps; Maps with DAGs; Maps with cycles.
@@ -18,8 +19,8 @@ const String DB_NAME = 'Test2';
 const String STORE_NAME = 'TEST';
 const int VERSION = 1;
 
-testReadWrite(idb.IdbFactory idbFactory, key, value, check, [dbName = DB_NAME, storeName = STORE_NAME, version = VERSION]) {
-
+testReadWrite(idb.IdbFactory idbFactory, key, value, check,
+    [dbName = DB_NAME, storeName = STORE_NAME, version = VERSION]) {
   createObjectStore(e) {
     var store = e.target.result.createObjectStore(storeName);
     expect(store, isNotNull);
@@ -28,7 +29,8 @@ testReadWrite(idb.IdbFactory idbFactory, key, value, check, [dbName = DB_NAME, s
   var db;
   // Delete any existing DBs.
   return idbFactory.deleteDatabase(dbName).then(expectAsync((_) {
-    return idbFactory.open(dbName, version: version, onUpgradeNeeded: createObjectStore);
+    return idbFactory.open(dbName,
+        version: version, onUpgradeNeeded: createObjectStore);
   })).then(expectAsync((result) {
     db = result;
     var transaction = db.transactionList([storeName], 'readwrite');
@@ -59,19 +61,11 @@ List<String> get nonNativeListData {
 }
 
 defineTests(idb.IdbFactory idbFactory_) {
-
-
   idb.IdbFactory idbFactory = idbFactory_;
   //useHtmlConfiguration();
 
-  var obj1 = {
-    'a': 100,
-    'b': 's'
-  };
-  var obj2 = {
-    'x': obj1,
-    'y': obj1
-  }; // DAG.
+  var obj1 = {'a': 100, 'b': 's'};
+  var obj2 = {'x': obj1, 'y': obj1}; // DAG.
 
   var obj3 = {};
   obj3['a'] = 100;
@@ -85,7 +79,8 @@ defineTests(idb.IdbFactory idbFactory_) {
   cyclic_list[1] = cyclic_list;
 
   skip_go(name, data) => null;
-  go(name, data) => test(name, () => testReadWrite(idbFactory, 123, data, verifyGraph));
+  go(name, data) =>
+      test(name, () => testReadWrite(idbFactory, 123, data, verifyGraph));
 
   test('test_verifyGraph', () {
     // Nice to know verifyGraph is working before we rely on it.
@@ -94,9 +89,17 @@ defineTests(idb.IdbFactory idbFactory_) {
     verifyGraph(obj4, new Map.from(obj4));
 
     var l1 = [1, 2, 3];
-    var l2 = [const [1, 2, 3], const [1, 2, 3]];
+    var l2 = [
+      const [1, 2, 3],
+      const [1, 2, 3]
+    ];
     verifyGraph([l1, l1], l2);
-    expect(() => verifyGraph([[1, 2, 3], [1, 2, 3]], l2), throws);
+    expect(
+        () => verifyGraph([
+              [1, 2, 3],
+              [1, 2, 3]
+            ], l2),
+        throws);
 
     verifyGraph(cyclic_list, cyclic_list);
   });
@@ -108,10 +111,22 @@ defineTests(idb.IdbFactory idbFactory_) {
     skip_go('test_DAG', obj2);
     skip_go('test_cycle', obj3);
     go('test_simple_splay', obj4);
-    go('const_array_1', const [const [1], const [2]]);
-    skip_go('const_array_dag', const [const [1], const [1]]);
+    go('const_array_1', const [
+      const [1],
+      const [2]
+    ]);
+    skip_go('const_array_dag', const [
+      const [1],
+      const [1]
+    ]);
     skip_go('array_deferred_copy', [1, 2, 3, obj3, obj3, 6]);
-    skip_go('array_deferred_copy_2', [1, 2, 3, [4, 5, obj3], [obj3, 6]]);
+    skip_go('array_deferred_copy_2', [
+      1,
+      2,
+      3,
+      [4, 5, obj3],
+      [obj3, 6]
+    ]);
     skip_go('cyclic_list', cyclic_list);
     go('non-native lists', nonNativeListData);
   }

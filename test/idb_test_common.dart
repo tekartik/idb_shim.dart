@@ -30,23 +30,26 @@ const String VALUE_FIELD = 'value';
 const String NAME_INDEX_2 = 'name_index_2';
 const String NAME_FIELD_2 = 'name_2';
 
-
 IdbFactory idbTestMemoryFactory = idbMemoryFactory;
 
 Future<Database> setUpSimpleStore(IdbFactory idbFactory, //
-    {String dbName:DB_NAME, IdbObjectStoreMeta meta}) {
+    {String dbName: DB_NAME,
+    IdbObjectStoreMeta meta}) {
   if (meta == null) {
     meta = idbSimpleObjectStoreMeta;
   }
   return idbFactory.deleteDatabase(dbName).then((_) {
     void _initializeDatabase(VersionChangeEvent e) {
       Database db = e.database;
-      ObjectStore objectStore = db.createObjectStore(meta.name, keyPath: meta.keyPath, autoIncrement: meta.autoIncrement);
+      ObjectStore objectStore = db.createObjectStore(meta.name,
+          keyPath: meta.keyPath, autoIncrement: meta.autoIncrement);
       for (IdbIndexMeta indexMeta in meta.indecies) {
-        objectStore.createIndex(indexMeta.name, indexMeta.keyPath, unique: indexMeta.unique, multiEntry: indexMeta.multiEntry);
+        objectStore.createIndex(indexMeta.name, indexMeta.keyPath,
+            unique: indexMeta.unique, multiEntry: indexMeta.multiEntry);
       }
     }
-    return idbFactory.open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+    return idbFactory.open(dbName,
+        version: 1, onUpgradeNeeded: _initializeDatabase);
   });
 }
 

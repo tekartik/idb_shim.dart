@@ -1,5 +1,4 @@
 @TestOn("browser")
-
 library idb_browser_test;
 
 import 'package:test/test.dart';
@@ -32,7 +31,6 @@ testMain() {
     test('memory', () {
       IdbFactory websql = idbMemoryFactory;
       expect(websql.runtimeType.toString(), "IdbSembastFactory");
-
     });
 
     test('persistent', () {

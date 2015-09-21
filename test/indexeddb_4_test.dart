@@ -1,9 +1,11 @@
 library IndexedDB4Test;
+
 import 'dart:async';
 import 'package:idb_shim/idb_client.dart';
 
 // so that this can be run directly
 import 'idb_test_common.dart';
+
 void main() => defineTests(idbTestMemoryFactory);
 
 // Test for KeyRange and Cursor.
@@ -43,9 +45,9 @@ Future<Database> writeItems(Database db) {
   var transaction = db.transaction(STORE_NAME, 'readwrite');
 
   Future<Object> write(index) {
-    return transaction.objectStore(STORE_NAME).put({
-      'content': 'Item $index'
-    }, index);
+    return transaction
+        .objectStore(STORE_NAME)
+        .put({'content': 'Item $index'}, index);
   }
 
   var future = write(0);
@@ -66,7 +68,9 @@ testRange(db, range, expectedFirst, expectedLast) {
 
   Transaction txn = db.transaction(STORE_NAME, 'readonly');
   ObjectStore objectStore = txn.objectStore(STORE_NAME);
-  var cursors = objectStore.openCursor(range: range, autoAdvance: true).asBroadcastStream();
+  var cursors = objectStore
+      .openCursor(range: range, autoAdvance: true)
+      .asBroadcastStream();
 
   int lastKey;
   cursors.listen((cursor) {
@@ -108,7 +112,6 @@ defineTests(IdbFactory idbFactory_) {
       return setupDb(idbFactory).then((result) {
         db = result;
       });
-
     });
     tearDown(() {
       db.close();
@@ -119,15 +122,19 @@ defineTests(IdbFactory idbFactory_) {
 
     test('lower1', () => testRange(db, new KeyRange.lowerBound(40), 40, 99));
     // OPTIONALS lower2() => testRange(db, new KeyRange.lowerBound(40, open: true), 41, 99);
-    test('lower2', () => testRange(db, new KeyRange.lowerBound(40, true), 41, 99));
+    test('lower2',
+        () => testRange(db, new KeyRange.lowerBound(40, true), 41, 99));
     // OPTIONALS lower3() => testRange(db, new KeyRange.lowerBound(40, open: false), 40, 99);
-    test('lower3', () => testRange(db, new KeyRange.lowerBound(40, false), 40, 99));
+    test('lower3',
+        () => testRange(db, new KeyRange.lowerBound(40, false), 40, 99));
 
     test('upper1', () => testRange(db, new KeyRange.upperBound(40), 0, 40));
     // OPTIONALS upper2() => testRange(db, new KeyRange.upperBound(40, open: true), 0, 39);
-    test('upper2', () => testRange(db, new KeyRange.upperBound(40, true), 0, 39));
+    test('upper2',
+        () => testRange(db, new KeyRange.upperBound(40, true), 0, 39));
     // upper3() => testRange(db, new KeyRange.upperBound(40, open: false), 0, 40);
-    test('upper3', () => testRange(db, new KeyRange.upperBound(40, false), 0, 40));
+    test('upper3',
+        () => testRange(db, new KeyRange.upperBound(40, false), 0, 40));
 
     test('bound1', () => testRange(db, new KeyRange.bound(20, 30), 20, 30));
 

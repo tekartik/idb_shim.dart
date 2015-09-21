@@ -25,17 +25,19 @@ class IdbDatabaseMeta {
   IdbTransactionMeta get versionChangeTransaction => _versionChangeTransaction;
 
   onUpgradeNeeded(action()) {
-
     versionChangeStores = new Set();
-    _versionChangeTransaction = new IdbTransactionMeta(null, IDB_MODE_READ_WRITE);
+    _versionChangeTransaction =
+        new IdbTransactionMeta(null, IDB_MODE_READ_WRITE);
     var result = action();
     _versionChangeTransaction = null;
     versionChangeStores = null;
     return result;
   }
+
   createObjectStore(IdbObjectStoreMeta store) {
     if (versionChangeTransaction == null) {
-      throw new StateError("cannot create objectStore outside of a versionChangedEvent");
+      throw new StateError(
+          "cannot create objectStore outside of a versionChangedEvent");
     }
     versionChangeStores.add(store);
     addObjectStore(store);
@@ -63,7 +65,6 @@ class IdbDatabaseMeta {
       // assume null - it will complain otherwise
       return new IdbTransactionMeta(storeName_OR_storeNames, mode);
     }
-
   }
 
   addObjectStore(IdbObjectStoreMeta store) {
@@ -77,10 +78,7 @@ class IdbDatabaseMeta {
   }
 
   Map<String, Object> toDebugMap() {
-    Map map = {
-      "stores": _stores,
-      "version": version
-    };
+    Map map = {"stores": _stores, "version": version};
     return map;
   }
 
@@ -103,7 +101,6 @@ class IdbDatabaseMeta {
 
 // meta data is loaded only once
 class IdbObjectStoreMeta {
-
   //final IdbDatabaseMeta databaseMeta;
   final String name;
   final String keyPath;
@@ -125,7 +122,8 @@ class IdbObjectStoreMeta {
 
   createIndex(IdbDatabaseMeta databaseMeta, IdbIndexMeta index) {
     if (databaseMeta.versionChangeTransaction == null) {
-      throw new StateError("cannot create index outside of a versionChangedEvent");
+      throw new StateError(
+          "cannot create index outside of a versionChangedEvent");
     }
     databaseMeta.versionChangeStores.add(this);
     addIndex(index);
@@ -134,7 +132,9 @@ class IdbObjectStoreMeta {
   IdbObjectStoreMeta.fromObjectStore(ObjectStore objectStore)
       : this(objectStore.name, objectStore.keyPath, objectStore.autoIncrement);
 
-  IdbObjectStoreMeta(this.name, this.keyPath, bool autoIncrement, [List<IdbIndexMeta> indecies]) : autoIncrement = (autoIncrement == true) {
+  IdbObjectStoreMeta(this.name, this.keyPath, bool autoIncrement,
+      [List<IdbIndexMeta> indecies])
+      : autoIncrement = (autoIncrement == true) {
     if (indecies != null) {
       indecies.forEach((IdbIndexMeta indexMeta) {
         addIndex(indexMeta);
@@ -143,16 +143,17 @@ class IdbObjectStoreMeta {
   }
 
   IdbObjectStoreMeta.fromMap(Map<String, Object> map) //
-      : this(//
-      map["name"], //
-      map["keyPath"], //
-      map["autoIncrement"], IdbIndexMeta.fromMapList(map["indecies"]));
+      : this(
+            //
+            map["name"], //
+            map["keyPath"], //
+            map["autoIncrement"],
+            IdbIndexMeta.fromMapList(map["indecies"]));
 
-  
   IdbObjectStoreMeta clone() {
     return new IdbObjectStoreMeta(name, keyPath, autoIncrement);
   }
-  
+
   addIndex(IdbIndexMeta index) {
     _indecies[index.name] = index;
   }
@@ -162,9 +163,7 @@ class IdbObjectStoreMeta {
   }
 
   Map<String, Object> toMap() {
-    Map map = {
-      "name": name
-    };
+    Map map = {"name": name};
     if (keyPath != null) {
       map["keyPath"] = keyPath;
     }
@@ -196,7 +195,6 @@ class IdbObjectStoreMeta {
     }
     return false;
   }
-
 }
 
 class IdbCursorMeta {
@@ -209,7 +207,8 @@ class IdbCursorMeta {
 
   String get direction => _ascending ? IDB_DIRECTION_NEXT : IDB_DIRECTION_PREV;
 
-  IdbCursorMeta(this.key, this.range, String direction, bool autoAdvance) : autoAdvance = autoAdvance == true {
+  IdbCursorMeta(this.key, this.range, String direction, bool autoAdvance)
+      : autoAdvance = autoAdvance == true {
     if (direction == null) {
       direction = IDB_DIRECTION_NEXT;
     }
@@ -225,15 +224,13 @@ class IdbCursorMeta {
         throw new ArgumentError("direction '$direction' not supported");
     }
     if (key != null && range != null) {
-      throw new ArgumentError("both key '${key}' and range '${range}' are specified");
+      throw new ArgumentError(
+          "both key '${key}' and range '${range}' are specified");
     }
   }
 
   Map toDebugMap() {
-
-    Map map = {
-      "direction": direction
-    };
+    Map map = {"direction": direction};
     if (key != null) {
       map["key"] = key;
     }
@@ -261,7 +258,6 @@ class IdbIndexMeta {
       : multiEntry = (multiEntry == true),
         unique = (unique == true);
 
-
   static List<IdbIndexMeta> fromMapList(List<Map> list) {
     if (list == null) {
       return null;
@@ -272,23 +268,23 @@ class IdbIndexMeta {
     });
     return metas;
   }
-  
-  IdbIndexMeta.fromMap(Map<String, Object> map) //
-      : this(map["name"], //
-      map["keyPath"], //
-      map["unique"], //
-      map["multiEntry"]);
 
-  IdbIndexMeta.fromIndex(Index index) : this(index.name, index.keyPath, index.unique, index.multiEntry);
+  IdbIndexMeta.fromMap(Map<String, Object> map) //
+      : this(
+            map["name"], //
+            map["keyPath"], //
+            map["unique"], //
+            map["multiEntry"]);
+
+  IdbIndexMeta.fromIndex(Index index)
+      : this(index.name, index.keyPath, index.unique, index.multiEntry);
 
   Map toDebugMap() {
     return toMap();
   }
+
   Map<String, Object> toMap() {
-    Map map = {
-      "name": name,
-      "keyPath": keyPath
-    };
+    Map map = {"name": name, "keyPath": keyPath};
     if (unique) {
       map["unique"] = unique;
     }

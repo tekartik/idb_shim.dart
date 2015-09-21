@@ -10,9 +10,7 @@ main() {
 }
 
 void defineTests(IdbFactory idbFactory) {
-
   group('database', () {
-
     Database db;
 
     _open() {
@@ -24,10 +22,12 @@ void defineTests(IdbFactory idbFactory) {
     _openWith1Store() {
       void _initializeDatabase(VersionChangeEvent e) {
         Database db = e.database;
-        //ObjectStore objectStore = 
+        //ObjectStore objectStore =
         db.createObjectStore(STORE_NAME);
       }
-      return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
+      return idbFactory
+          .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+          .then((Database database) {
         db = database;
       });
     }
@@ -39,10 +39,15 @@ void defineTests(IdbFactory idbFactory) {
     _openWith1OtherStore() {
       void _initializeDatabase(VersionChangeEvent e) {
         Database db = e.database;
-        // ObjectStore objectStore = 
+        // ObjectStore objectStore =
         db.createObjectStore(STORE_NAME + "_2");
       }
-      return idbFactory.open(DB_NAME, version: 2, onUpgradeNeeded: _initializeDatabase, onBlocked: _onBlocked).then((Database database) {
+      return idbFactory
+          .open(DB_NAME,
+              version: 2,
+              onUpgradeNeeded: _initializeDatabase,
+              onBlocked: _onBlocked)
+          .then((Database database) {
         db = database;
       });
     }
@@ -131,15 +136,14 @@ void defineTests(IdbFactory idbFactory) {
         });
 
         // re-open
-        return _openWith1OtherStore().then((_) {
-
-        }).then((_) {
+        return _openWith1OtherStore().then((_) {}).then((_) {
           List<String> storeNames = new List.from(db.objectStoreNames);
           expect(storeNames, [STORE_NAME, STORE_NAME + "_2"]);
         }).then((_) {
           // at this point native db should be close already
           if (!db1Closed) {
-            Transaction transaction = firstDb.transaction(STORE_NAME, IDB_MODE_READ_ONLY);
+            Transaction transaction =
+                firstDb.transaction(STORE_NAME, IDB_MODE_READ_ONLY);
             ObjectStore store = transaction.objectStore(STORE_NAME);
             return store.clear().then((_) {
               fail("should not succeed");
@@ -151,8 +155,5 @@ void defineTests(IdbFactory idbFactory) {
         });
       });
     });
-
-
-
   });
 }

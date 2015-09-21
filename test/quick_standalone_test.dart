@@ -8,14 +8,11 @@ const DB_NAME = "quick_db";
 const NAME_INDEX = "quick_index";
 const NAME_FIELD = "quick_field";
 
-
 // so that this can be run directly
 void main() => defineTests(idbTestMemoryFactory);
 
 void defineTests(IdbFactory idbFactory) {
-
   group('quick_standalone', () {
-
     Database db;
     Transaction transaction;
     ObjectStore objectStore;
@@ -29,13 +26,15 @@ void defineTests(IdbFactory idbFactory) {
       return idbFactory.deleteDatabase(DB_NAME).then((_) {
         void _initializeDatabase(VersionChangeEvent e) {
           Database db = e.database;
-          ObjectStore objectStore = db.createObjectStore(STORE_NAME, autoIncrement: true);
+          ObjectStore objectStore =
+              db.createObjectStore(STORE_NAME, autoIncrement: true);
           objectStore.createIndex(NAME_INDEX, NAME_FIELD, unique: true);
         }
-        return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database database) {
+        return idbFactory
+            .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+            .then((Database database) {
           db = database;
           _createTransaction();
-
         });
       });
     });
@@ -51,17 +50,13 @@ void defineTests(IdbFactory idbFactory) {
     });
 
     test('add/get map', () {
-      Map value = {
-        NAME_FIELD: "test1"
-      };
+      Map value = {NAME_FIELD: "test1"};
       Index index = objectStore.index(NAME_INDEX);
       return objectStore.add(value).then((key) {
         return index.get("test1").then((Map readValue) {
           expect(readValue, value);
         });
       });
-
     });
-
   });
 }

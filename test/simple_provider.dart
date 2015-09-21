@@ -3,14 +3,12 @@ library simple_provider;
 import 'dart:async';
 import 'package:idb_shim/idb_client.dart';
 
-
 const String DB_NAME = 'com.tekartik.simple_provider';
 const String STORE_NAME = 'test_store';
 
 const String STORE = 'test_store';
 const String NAME_INDEX = 'name_index';
 const String NAME_FIELD = 'name';
-
 
 class SimpleRow {
   SimpleRow(CursorWithValue cwv) {
@@ -39,9 +37,7 @@ class SimpleProvider {
     var trans = db.transaction(STORE, IDB_MODE_READ_WRITE);
     var store = trans.objectStore(STORE);
 
-    var obj = {
-      NAME_FIELD: name
-    };
+    var obj = {NAME_FIELD: name};
     store.put(obj);
     //store.openCursor(key: NAME_FIELD).then((_) {
     return trans.completed;
@@ -70,7 +66,9 @@ class SimpleProvider {
   Future openEmpty() {
     return idbFactory.deleteDatabase(DB_NAME).then((_) {
       //done();
-      return idbFactory.open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase).then((Database db) {
+      return idbFactory
+          .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+          .then((Database db) {
         this.db = db;
       });
     });

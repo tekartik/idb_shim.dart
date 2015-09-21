@@ -10,10 +10,10 @@ int _getInternalVersionFromResultSet(SqlResultSet resultSet) {
   }
   return 0;
 }
+
 String _getSignatureFromResultSet(SqlResultSet resultSet) {
   if (resultSet.rows.length > 0) {
     return resultSet.rows[0]['signature'];
   }
   return null;
 }
-
