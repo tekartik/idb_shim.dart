@@ -307,6 +307,49 @@ void defineTests(IdbFactory idbFactory) {
         });
       });
 
+      // The following tests when there are extra await in the transaction
+
+      test('get_get', () async {
+        Transaction transaction =
+        db.transaction(STORE_NAME, IDB_MODE_READ_ONLY);
+        ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+        await objectStore.getObject(0);
+        await objectStore.getObject(0);
+        await transaction.completed;
+      });
+
+      test('get_wait_get', () async {
+        Transaction transaction =
+        db.transaction(STORE_NAME, IDB_MODE_READ_ONLY);
+        ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+        await objectStore.getObject(0);
+        await new Future.value();
+        await objectStore.getObject(0);
+        await transaction.completed;
+      });
+
+      test('get_wait_wait_get', () async {
+        Transaction transaction =
+        db.transaction(STORE_NAME, IDB_MODE_READ_ONLY);
+        ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+        await objectStore.getObject(0);
+        await new Future.value();
+        await new Future.value();
+        await objectStore.getObject(0);
+        await transaction.completed;
+      });
+
+      test('put_wait_wait_put', () async {
+        Transaction transaction =
+        db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+        ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+        await objectStore.put({});
+        await new Future.value();
+        await new Future.value();
+        await objectStore.put({});
+        await transaction.completed;
+      });
+
       test('add 1 then 1 then 1 immediate completed', () {
         bool done = false;
         Transaction transaction =

@@ -74,7 +74,12 @@ class _SdbTransaction extends Transaction {
       });
     } else {
       // check next cycle too
-      return new Future.value().then((_) {
+      // Make sure we run after all task and micro task
+      // this allows having multiple await between calls
+      // however any delayed action will be out of the transaction
+      // This fixes sample get/await/get
+      return new Future.delayed(new Duration(), () {
+      // return new Future.value().then((_) {
         if (index < actions.length) {
           return _next();
         }
@@ -99,6 +104,7 @@ class _SdbTransaction extends Transaction {
     if (lazyExecution == null) {
       // don't return the result here
       lazyExecution = new Future.microtask(() {
+      //lazyExecution = new Future.delayed(new Duration(), () {
         assert(sdbDatabase.transaction == null);
 
         // No return value here
