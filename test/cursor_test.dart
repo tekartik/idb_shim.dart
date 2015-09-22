@@ -120,6 +120,22 @@ void defineTests(IdbFactory idbFactory) {
         });
       });
 
+      test('openCursor_read_2_row', () async {
+        await fill3SampleRows();
+
+        int count = 0;
+        int limit = 2;
+        objectStore
+            .openCursor(autoAdvance: false)
+            .listen((CursorWithValue cwv) {
+          if (++count < limit) {
+            cwv.next();
+          }
+        });
+        await transaction.completed;
+        expect(count, limit);
+      });
+
       test('openCursor no auto advance timeout', () {
         return fill3SampleRows().then((_) {
           return objectStore
