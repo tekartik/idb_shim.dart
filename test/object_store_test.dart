@@ -41,7 +41,7 @@ void defineTests(IdbFactory idbFactory) {
           db.createObjectStore(STORE_NAME);
         }
         Database db = await idbFactory.open(DB_NAME,
-        version: 1, onUpgradeNeeded: _createStore);
+            version: 1, onUpgradeNeeded: _createStore);
         Transaction txn = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
         ObjectStore store = txn.objectStore(STORE_NAME);
         await store.put("value", "key");
@@ -56,7 +56,7 @@ void defineTests(IdbFactory idbFactory) {
           db.createObjectStore(STORE_NAME);
         }
         db = await idbFactory.open(DB_NAME,
-        version: 2, onUpgradeNeeded: _deleteAndCreateStore);
+            version: 2, onUpgradeNeeded: _deleteAndCreateStore);
         txn = db.transaction(STORE_NAME, IDB_MODE_READ_ONLY);
         store = txn.objectStore(STORE_NAME);
         expect(await store.getObject("key"), null);

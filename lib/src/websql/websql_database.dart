@@ -175,9 +175,10 @@ class _WebSqlDatabase extends Database {
             return stepCreateObjectStores();
           }
 
-          Future stepRemoveDeletedObjectStores(_WebSqlTransaction transaction) async {
-
-            for (_WebSqlObjectStore store in onVersionChangeDeletedObjectStores) {
+          Future stepRemoveDeletedObjectStores(
+              _WebSqlTransaction transaction) async {
+            for (_WebSqlObjectStore store
+                in onVersionChangeDeletedObjectStores) {
               await store._deleteTable(transaction);
               var sqlDelete = "DELETE FROM stores WHERE name = ?";
               var sqlArgs = [store.name];
@@ -415,7 +416,6 @@ class _WebSqlDatabase extends Database {
       stores.remove(name);
 
       onVersionChangeDeletedObjectStores.add(store);
-
     }
   }
 

@@ -905,7 +905,8 @@ class _SdbDatabase extends Database {
     });
   }
 
-  Future<sdb.Database> open(int newVersion, void onUpgradeNeeded(VersionChangeEvent event)) {
+  Future<sdb.Database> open(
+      int newVersion, void onUpgradeNeeded(VersionChangeEvent event)) {
     int previousVersion;
     _open() {
       return sdbFactory
