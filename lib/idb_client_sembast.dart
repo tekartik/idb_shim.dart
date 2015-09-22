@@ -905,7 +905,7 @@ class _SdbDatabase extends Database {
     });
   }
 
-  Future open(int newVersion, void onUpgradeNeeded(VersionChangeEvent event)) {
+  Future<sdb.Database> open(int newVersion, void onUpgradeNeeded(VersionChangeEvent event)) {
     int previousVersion;
     _open() {
       return sdbFactory
@@ -934,9 +934,10 @@ class _SdbDatabase extends Database {
       });
     }
 
-    return _open().then((db) {
+    return _open().then((sdb.Database db) {
       if (newVersion != previousVersion) {
         Set<IdbObjectStoreMeta> changedStores;
+        Set<IdbObjectStoreMeta> deletedStores;
 
         meta.onUpgradeNeeded(() {
           versionChangeTransaction =
@@ -947,23 +948,29 @@ class _SdbDatabase extends Database {
                 new _SdbVersionChangeEvent(this, previousVersion, newVersion));
           }
           changedStores = meta.versionChangeStores;
+          deletedStores = meta.versionChangeDeletedStores;
         });
 
-        return db.inTransaction(() {
-          return db.put(newVersion, "version").then((_) {
-            if (changedStores.isNotEmpty) {
-              return db.put(new List.from(objectStoreNames), "stores");
-            }
-          }).then((_) {
+        return db.inTransaction(() async {
+          await db.put(newVersion, "version");
+
+          // First delete everything from deleted stores
+          for (IdbObjectStoreMeta storeMeta in deletedStores) {
+            await db.deleteStore(storeMeta.name);
+          }
+
+          if (changedStores.isNotEmpty) {
+            return db.put(new List.from(objectStoreNames), "stores");
+          }
+        }).then((_) {
 // write changes
-            List<Future> futures = [];
+          List<Future> futures = [];
 
-            changedStores.forEach((IdbObjectStoreMeta storeMeta) {
-              futures.add(db.put(storeMeta.toMap(), "store_${storeMeta.name}"));
-            });
-
-            return Future.wait(futures);
+          changedStores.forEach((IdbObjectStoreMeta storeMeta) {
+            futures.add(db.put(storeMeta.toMap(), "store_${storeMeta.name}"));
           });
+
+          return Future.wait(futures);
         }).then((_) {
           // considered as opened
           meta.version = newVersion;
@@ -988,7 +995,7 @@ class _SdbDatabase extends Database {
 
   @override
   void deleteObjectStore(String name) {
-    throw 'not implemented yet';
+    meta.deleteObjectStore(name);
   }
 
   @override

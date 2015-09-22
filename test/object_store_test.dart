@@ -12,8 +12,8 @@ void main() => defineTests(idbTestMemoryFactory);
 void defineTests(IdbFactory idbFactory) {
   group('object_store', () {
     group('failure', () {
-      setUp(() {
-        return idbFactory.deleteDatabase(DB_NAME);
+      setUp(() async {
+        await idbFactory.deleteDatabase(DB_NAME);
       });
 
       test('create object store not in initialize', () {
@@ -27,6 +27,41 @@ void defineTests(IdbFactory idbFactory) {
           }
           fail("should fail");
         });
+      });
+    });
+
+    group('init', () {
+      setUp(() async {
+        await idbFactory.deleteDatabase(DB_NAME);
+      });
+
+      test('delete', () async {
+        void _createStore(VersionChangeEvent e) {
+          Database db = e.database;
+          db.createObjectStore(STORE_NAME);
+        }
+        Database db = await idbFactory.open(DB_NAME,
+        version: 1, onUpgradeNeeded: _createStore);
+        Transaction txn = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+        ObjectStore store = txn.objectStore(STORE_NAME);
+        await store.put("value", "key");
+        expect(await store.getObject("key"), "value");
+        await txn.completed;
+
+        db.close();
+
+        void _deleteAndCreateStore(VersionChangeEvent e) {
+          Database db = e.database;
+          db.deleteObjectStore(STORE_NAME);
+          db.createObjectStore(STORE_NAME);
+        }
+        db = await idbFactory.open(DB_NAME,
+        version: 2, onUpgradeNeeded: _deleteAndCreateStore);
+        txn = db.transaction(STORE_NAME, IDB_MODE_READ_ONLY);
+        store = txn.objectStore(STORE_NAME);
+        expect(await store.getObject("key"), null);
+        await txn.completed;
+        db.close();
       });
     });
 

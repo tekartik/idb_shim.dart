@@ -37,6 +37,7 @@ class _WebSqlDatabase extends Database {
   _WebSqlTransaction versionChangeTransaction;
   SqlDatabase sqlDb;
 
+  List<_WebSqlObjectStore> onVersionChangeDeletedObjectStores;
   List<_WebSqlObjectStore> onVersionChangeCreatedObjectStores;
   List<_WebSqlIndex> onVersionChangeCreatedIndexes;
 
@@ -174,9 +175,19 @@ class _WebSqlDatabase extends Database {
             return stepCreateObjectStores();
           }
 
+          Future stepRemoveDeletedObjectStores(_WebSqlTransaction transaction) async {
+
+            for (_WebSqlObjectStore store in onVersionChangeDeletedObjectStores) {
+              await store._deleteTable(transaction);
+              var sqlDelete = "DELETE FROM stores WHERE name = ?";
+              var sqlArgs = [store.name];
+              await transaction.execute(sqlDelete, sqlArgs);
+            }
+          }
+
           //return initBlock(() {
           return _loadStores(transaction) //})
-              .then((_) {
+              .then((_) async {
             if (onUpgradeNeeded != null) {
               _WebSqlTransaction transaction =
                   new _WebSqlTransaction(this, tx, null, IDB_MODE_READ_WRITE);
@@ -184,12 +195,16 @@ class _WebSqlDatabase extends Database {
                   this, oldVersion, newVersion, transaction);
               versionChangeTransaction = event.transaction;
 
+              onVersionChangeDeletedObjectStores = [];
               onVersionChangeCreatedObjectStores = [];
               onVersionChangeCreatedIndexes = [];
 
               onUpgradeNeeded(event);
               // nulliy when done
               versionChangeTransaction = null;
+
+              // Delete store that have been deleted
+              await stepRemoveDeletedObjectStores(transaction);
 
               return createNewObjects();
             } else {
@@ -399,13 +414,8 @@ class _WebSqlDatabase extends Database {
       // delete the table
       stores.remove(name);
 
-      initBlock(() {
-        return store._deleteTable(versionChangeTransaction).then((_) {
-          var sqlDelete = "DELETE FROM stores WHERE name = ?";
-          var sqlArgs = [name];
-          return versionChangeTransaction.execute(sqlDelete, sqlArgs);
-        });
-      });
+      onVersionChangeDeletedObjectStores.add(store);
+
     }
   }
 

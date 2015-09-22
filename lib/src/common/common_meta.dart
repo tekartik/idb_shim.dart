@@ -19,6 +19,7 @@ class IdbDatabaseMeta {
   IdbDatabaseMeta([this.version]);
 
   IdbTransactionMeta _versionChangeTransaction;
+  Set<IdbObjectStoreMeta> versionChangeDeletedStores; // store deleted during onUpgradeNeeded
   Set<IdbObjectStoreMeta> versionChangeStores; // store modified during onUpgradeNeeded
   Map<String, IdbObjectStoreMeta> _stores = new Map();
 
@@ -26,11 +27,13 @@ class IdbDatabaseMeta {
 
   onUpgradeNeeded(action()) {
     versionChangeStores = new Set();
+    versionChangeDeletedStores = new Set();
     _versionChangeTransaction =
         new IdbTransactionMeta(null, IDB_MODE_READ_WRITE);
     var result = action();
     _versionChangeTransaction = null;
     versionChangeStores = null;
+    versionChangeDeletedStores = null;
     return result;
   }
 
@@ -41,6 +44,20 @@ class IdbDatabaseMeta {
     }
     versionChangeStores.add(store);
     addObjectStore(store);
+  }
+
+  deleteObjectStore(String storeName) {
+    if (versionChangeTransaction == null) {
+      throw new StateError(
+          "cannot delete objectStore outside of a versionChangedEvent");
+    }
+    // Get the store and add it to the change list so that
+    // we store object store on quit
+    IdbObjectStoreMeta storeMeta = _stores[storeName];
+    if (storeMeta != null) {
+      versionChangeDeletedStores.add(storeMeta);
+      _stores.remove(storeName);
+    }
   }
 
   bool _containsStore(String storeName) {
