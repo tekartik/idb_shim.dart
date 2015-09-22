@@ -13,6 +13,7 @@ void defineTests(IdbFactory idbFactory) {
       return idbFactory.deleteDatabase(testDbName);
     });
 
+    /*
     test('delete null failing', () {
       return idbFactory.deleteDatabase(null).then((_) {
         fail("should fail");
@@ -24,6 +25,7 @@ void defineTests(IdbFactory idbFactory) {
     test('delete null not failing', () {
       return idbFactory.deleteDatabase(null).then((_) {});
     }, testOn: "js");
+    */
 
     if (idbFactory.supportsDatabaseNames) {
       test('supportsDatabaseNames', () {

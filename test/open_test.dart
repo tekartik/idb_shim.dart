@@ -34,6 +34,7 @@ void defineTests(IdbFactory idbFactory) {
       });
     });
 
+    /*
     test('no name', () {
       return idbFactory.open(null).then((Database database) {
         fail("should fail");
@@ -45,6 +46,7 @@ void defineTests(IdbFactory idbFactory) {
         database.close();
       });
     }, testOn: "js");
+    */
 
     test('bad param with onUpgradeNeeded', () {
       void _emptyInitializeDatabase(VersionChangeEvent e) {}
