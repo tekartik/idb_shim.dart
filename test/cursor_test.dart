@@ -7,7 +7,7 @@ import 'idb_test_common.dart';
 class TestIdNameRow {
   TestIdNameRow(CursorWithValue cwv) {
     Object value = cwv.value;
-    name = (value as Map)[NAME_FIELD];
+    name = (value as Map)[testNameField];
     id = cwv.primaryKey;
   }
   int id;
@@ -24,7 +24,7 @@ void defineTests(IdbFactory idbFactory) {
     ObjectStore objectStore;
 
     Future add(String name) {
-      var obj = {NAME_FIELD: name};
+      var obj = {testNameField: name};
       return objectStore.put(obj);
     }
 
@@ -65,18 +65,19 @@ void defineTests(IdbFactory idbFactory) {
 
     group('auto', () {
       setUp(() {
-        return idbFactory.deleteDatabase(DB_NAME).then((_) {
+        return idbFactory.deleteDatabase(testDbName).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
             //ObjectStore objectStore =
-            db.createObjectStore(STORE_NAME, autoIncrement: true);
+            db.createObjectStore(testStoreName, autoIncrement: true);
           }
           return idbFactory
-              .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+              .open(testDbName,
+                  version: 1, onUpgradeNeeded: _initializeDatabase)
               .then((Database database) {
             db = database;
-            transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-            objectStore = transaction.objectStore(STORE_NAME);
+            transaction = db.transaction(testStoreName, idbModeReadWrite);
+            objectStore = transaction.objectStore(testStoreName);
             // must return something not null...
             return db;
           });
@@ -108,7 +109,7 @@ void defineTests(IdbFactory idbFactory) {
           int count = 0;
           Completer completer = new Completer();
           stream.listen((CursorWithValue cwv) {
-            expect((cwv.value as Map)[NAME_FIELD], "test1");
+            expect((cwv.value as Map)[testNameField], "test1");
             count++;
           }).onDone(() {
             completer.complete();

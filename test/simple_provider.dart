@@ -34,7 +34,7 @@ class SimpleProvider {
   }
 
   Future add(String name) {
-    var trans = db.transaction(STORE, IDB_MODE_READ_WRITE);
+    var trans = db.transaction(STORE, idbModeReadWrite);
     var store = trans.objectStore(STORE);
 
     var obj = {NAME_FIELD: name};

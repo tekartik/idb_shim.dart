@@ -116,7 +116,7 @@ main() {
 
   group('tools', () {
     test('get table names rs', () {
-      SqlDatabase db = openDatabase(DB_NAME);
+      SqlDatabase db = openDatabase(testDbName);
       return db.transaction().then((tx) {
         return getTableNamesRs(tx).then((rs) {}).then((_) {
           return getTableNamesRs(tx).then((rs) {});
@@ -125,7 +125,7 @@ main() {
     });
 
     test('get table names', () {
-      SqlDatabase db = openDatabase(DB_NAME);
+      SqlDatabase db = openDatabase(testDbName);
       return db.transaction().then((tx) {
         return getTableNames(tx).then((_) {}).then((_) {
           return getTableNames(tx).then((_) {});
@@ -134,7 +134,7 @@ main() {
     });
 
     test('clear tables', () {
-      SqlDatabase db = openDatabase(DB_NAME);
+      SqlDatabase db = openDatabase(testDbName);
       return db.transaction().then((tx) {
         return clearTables(tx).then((rs) {
           return getTableNamesRs(tx).then((list) {
@@ -251,11 +251,11 @@ main() {
   group('idb database', () {
     //wrapped.sqlDatabaseFactory.o
     test('open', () {
-      openDatabase(DB_NAME);
+      openDatabase(testDbName);
     });
 
     test('clear database tables', () {
-      SqlDatabase db = openDatabase(DB_NAME);
+      SqlDatabase db = openDatabase(testDbName);
       return db.transaction().then((tx) {
         return clearTables(tx).then((_) {
           return getTableNames(tx).then((list) {
@@ -264,7 +264,7 @@ main() {
         });
       }).then((_) {
         // make sure we can open it though
-        return idbFactory.open(DB_NAME).then((idb) {
+        return idbFactory.open(testDbName).then((idb) {
           expect(idb.objectStoreNames, isEmpty);
 
           // check the tables created
@@ -278,7 +278,7 @@ main() {
     });
 
     test('clear one store database tables ', () {
-      SqlDatabase db = openDatabase(DB_NAME);
+      SqlDatabase db = openDatabase(testDbName);
       return db.transaction().then((tx) {
         return clearTables(tx).then((_) {
           return getTableNames(tx).then((list) {
@@ -289,13 +289,13 @@ main() {
         // make sure we can open it though
         void _initializeDatabase(VersionChangeEvent e) {
           Database db = e.database;
-          db.createObjectStore(STORE_NAME);
+          db.createObjectStore(testStoreName);
         }
 
         return idbFactory
-            .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+            .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
             .then((idb) {
-          expect(idb.objectStoreNames, [STORE_NAME]);
+          expect(idb.objectStoreNames, [testStoreName]);
 
           // check the tables created
           return db.transaction().then((tx) {
@@ -304,7 +304,7 @@ main() {
 
               // delete the db make sure all the tables are removed
               idb.close();
-              return idbFactory.deleteDatabase(DB_NAME).then((_) {
+              return idbFactory.deleteDatabase(testDbName).then((_) {
                 return db.transaction().then((tx) {
                   return getTableNames(tx).then((list) {
                     expect(list, isEmpty);

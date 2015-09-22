@@ -13,13 +13,13 @@ void defineTests(IdbFactory idbFactory) {
   group('object_store', () {
     group('failure', () {
       setUp(() async {
-        await idbFactory.deleteDatabase(DB_NAME);
+        await idbFactory.deleteDatabase(testDbName);
       });
 
       test('create object store not in initialize', () {
-        return idbFactory.open(DB_NAME).then((Database database) {
+        return idbFactory.open(testDbName).then((Database database) {
           try {
-            database.createObjectStore(STORE_NAME, autoIncrement: true);
+            database.createObjectStore(testStoreName, autoIncrement: true);
           } catch (e) {
             //print(e.runtimeType);
             database.close();
@@ -32,18 +32,18 @@ void defineTests(IdbFactory idbFactory) {
 
     group('init', () {
       setUp(() async {
-        await idbFactory.deleteDatabase(DB_NAME);
+        await idbFactory.deleteDatabase(testDbName);
       });
 
       test('delete', () async {
         void _createStore(VersionChangeEvent e) {
           Database db = e.database;
-          db.createObjectStore(STORE_NAME);
+          db.createObjectStore(testStoreName);
         }
-        Database db = await idbFactory.open(DB_NAME,
+        Database db = await idbFactory.open(testDbName,
             version: 1, onUpgradeNeeded: _createStore);
-        Transaction txn = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-        ObjectStore store = txn.objectStore(STORE_NAME);
+        Transaction txn = db.transaction(testStoreName, idbModeReadWrite);
+        ObjectStore store = txn.objectStore(testStoreName);
         await store.put("value", "key");
         expect(await store.getObject("key"), "value");
         await txn.completed;
@@ -52,13 +52,13 @@ void defineTests(IdbFactory idbFactory) {
 
         void _deleteAndCreateStore(VersionChangeEvent e) {
           Database db = e.database;
-          db.deleteObjectStore(STORE_NAME);
-          db.createObjectStore(STORE_NAME);
+          db.deleteObjectStore(testStoreName);
+          db.createObjectStore(testStoreName);
         }
-        db = await idbFactory.open(DB_NAME,
+        db = await idbFactory.open(testDbName,
             version: 2, onUpgradeNeeded: _deleteAndCreateStore);
-        txn = db.transaction(STORE_NAME, IDB_MODE_READ_ONLY);
-        store = txn.objectStore(STORE_NAME);
+        txn = db.transaction(testStoreName, idbModeReadOnly);
+        store = txn.objectStore(testStoreName);
         expect(await store.getObject("key"), null);
         await txn.completed;
         db.close();
@@ -71,18 +71,19 @@ void defineTests(IdbFactory idbFactory) {
       ObjectStore objectStore;
 
       _createTransaction() {
-        transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-        objectStore = transaction.objectStore(STORE_NAME);
+        transaction = db.transaction(testStoreName, idbModeReadWrite);
+        objectStore = transaction.objectStore(testStoreName);
       }
 
       setUp(() {
-        return idbFactory.deleteDatabase(DB_NAME).then((_) {
+        return idbFactory.deleteDatabase(testDbName).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
-            db.createObjectStore(STORE_NAME);
+            db.createObjectStore(testStoreName);
           }
           return idbFactory
-              .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+              .open(testDbName,
+                  version: 1, onUpgradeNeeded: _initializeDatabase)
               .then((Database database) {
             db = database;
             _createTransaction();
@@ -248,17 +249,18 @@ void defineTests(IdbFactory idbFactory) {
       ObjectStore objectStore;
 
       setUp(() {
-        return idbFactory.deleteDatabase(DB_NAME).then((_) {
+        return idbFactory.deleteDatabase(testDbName).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
-            db.createObjectStore(STORE_NAME, autoIncrement: true);
+            db.createObjectStore(testStoreName, autoIncrement: true);
           }
           return idbFactory
-              .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+              .open(testDbName,
+                  version: 1, onUpgradeNeeded: _initializeDatabase)
               .then((Database database) {
             db = database;
-            transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-            objectStore = transaction.objectStore(STORE_NAME);
+            transaction = db.transaction(testStoreName, idbModeReadWrite);
+            objectStore = transaction.objectStore(testStoreName);
             return db;
           });
         });
@@ -539,17 +541,18 @@ void defineTests(IdbFactory idbFactory) {
       ObjectStore objectStore;
 
       setUp(() {
-        return idbFactory.deleteDatabase(DB_NAME).then((_) {
+        return idbFactory.deleteDatabase(testDbName).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
-            db.createObjectStore(STORE_NAME, autoIncrement: true);
+            db.createObjectStore(testStoreName, autoIncrement: true);
           }
           return idbFactory
-              .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+              .open(testDbName,
+                  version: 1, onUpgradeNeeded: _initializeDatabase)
               .then((Database database) {
             db = database;
-            transaction = db.transaction(STORE_NAME, IDB_MODE_READ_ONLY);
-            objectStore = transaction.objectStore(STORE_NAME);
+            transaction = db.transaction(testStoreName, idbModeReadOnly);
+            objectStore = transaction.objectStore(testStoreName);
             return db;
           });
         });
@@ -605,18 +608,19 @@ void defineTests(IdbFactory idbFactory) {
       ObjectStore objectStore;
 
       setUp(() {
-        return idbFactory.deleteDatabase(DB_NAME).then((_) {
+        return idbFactory.deleteDatabase(testDbName).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
-            db.createObjectStore(STORE_NAME,
+            db.createObjectStore(testStoreName,
                 keyPath: keyPath, autoIncrement: true);
           }
           return idbFactory
-              .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+              .open(testDbName,
+                  version: 1, onUpgradeNeeded: _initializeDatabase)
               .then((Database database) {
             db = database;
-            transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-            objectStore = transaction.objectStore(STORE_NAME);
+            transaction = db.transaction(testStoreName, idbModeReadWrite);
+            objectStore = transaction.objectStore(testStoreName);
           });
         });
       });
@@ -700,17 +704,18 @@ void defineTests(IdbFactory idbFactory) {
       ObjectStore objectStore;
 
       setUp(() {
-        return idbFactory.deleteDatabase(DB_NAME).then((_) {
+        return idbFactory.deleteDatabase(testDbName).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
-            db.createObjectStore(STORE_NAME, keyPath: keyPath);
+            db.createObjectStore(testStoreName, keyPath: keyPath);
           }
           return idbFactory
-              .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+              .open(testDbName,
+                  version: 1, onUpgradeNeeded: _initializeDatabase)
               .then((Database database) {
             db = database;
-            transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-            objectStore = transaction.objectStore(STORE_NAME);
+            transaction = db.transaction(testStoreName, idbModeReadWrite);
+            objectStore = transaction.objectStore(testStoreName);
           });
         });
       });
@@ -872,7 +877,7 @@ void defineTests(IdbFactory idbFactory) {
 
     group('create store and re-open', () {
       setUp(() {
-        return idbFactory.deleteDatabase(DB_NAME);
+        return idbFactory.deleteDatabase(testDbName);
       });
 
       Future testStore(IdbObjectStoreMeta storeMeta) {
@@ -880,9 +885,9 @@ void defineTests(IdbFactory idbFactory) {
             .then((Database db) {
           db.close();
         }).then((_) {
-          return idbFactory.open(DB_NAME).then((Database db) {
+          return idbFactory.open(testDbName).then((Database db) {
             Transaction transaction =
-                db.transaction(storeMeta.name, IDB_MODE_READ_ONLY);
+                db.transaction(storeMeta.name, idbModeReadOnly);
             ObjectStore objectStore = transaction.objectStore(storeMeta.name);
             IdbObjectStoreMeta readMeta =
                 new IdbObjectStoreMeta.fromObjectStore(objectStore);
@@ -911,8 +916,8 @@ void defineTests(IdbFactory idbFactory) {
       setUp(() {
         return setUpSimpleStore(idbFactory).then((Database database) {
           db = database;
-          transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-          objectStore = transaction.objectStore(STORE_NAME);
+          transaction = db.transaction(testStoreName, idbModeReadWrite);
+          objectStore = transaction.objectStore(testStoreName);
         });
       });
 

@@ -8,20 +8,20 @@ import 'package:idb_shim/idb_client.dart';
 
 IdbFactory getIdbFactory([String name]) {
   if (name == null) {
-    name = IDB_FACTORY_BROWSER;
+    name = idbFactoryBrowser;
   }
   switch (name) {
-    case IDB_FACTORY_BROWSER:
+    case idbFactoryBrowser:
       return idbBrowserFactory;
-    case IDB_FACTORY_PERSISTENT:
+    case idbFactoryPersistent:
       return idbPersistentFactory;
-    case IDB_FACTORY_NATIVE:
+    case idbFactoryNative:
       return idbNativeFactory;
-    case IDB_FACTORY_WEBSQL:
+    case idbFactoryWebSql:
       return idbWebSqlFactory;
-    case IDB_FACTORY_MEMORY:
+    case idbFactoryMemory:
       return idbMemoryFactory;
-    case IDB_FACTORY_SEMBAST_MEMORY:
+    case idbFactorySembastMemory:
       return idbSembastMemoryFactory;
     default:
       throw new UnsupportedError("Factory '$name' not supported");

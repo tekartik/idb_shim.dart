@@ -10,7 +10,7 @@ void main() => defineTests(idbTestMemoryFactory);
 class TestIdNameRow {
   TestIdNameRow(CursorWithValue cwv) {
     Object value = cwv.value;
-    name = (value as Map)[NAME_FIELD];
+    name = (value as Map)[testNameField];
     id = cwv.primaryKey;
   }
   int id;
@@ -29,7 +29,7 @@ void defineTests(IdbFactory idbFactory) {
     Index index;
 
     Future add(String name) {
-      var obj = {NAME_FIELD: name};
+      var obj = {testNameField: name};
       return objectStore.put(obj);
     }
 
@@ -54,20 +54,21 @@ void defineTests(IdbFactory idbFactory) {
 
     group('auto', () {
       setUp(() {
-        return idbFactory.deleteDatabase(DB_NAME).then((_) {
+        return idbFactory.deleteDatabase(testDbName).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
             ObjectStore objectStore =
-                db.createObjectStore(STORE_NAME, autoIncrement: true);
-            objectStore.createIndex(NAME_INDEX, NAME_FIELD);
+                db.createObjectStore(testStoreName, autoIncrement: true);
+            objectStore.createIndex(testNameIndex, testNameField);
           }
           return idbFactory
-              .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+              .open(testDbName,
+                  version: 1, onUpgradeNeeded: _initializeDatabase)
               .then((Database database) {
             db = database;
-            transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-            objectStore = transaction.objectStore(STORE_NAME);
-            index = objectStore.index(NAME_INDEX);
+            transaction = db.transaction(testStoreName, idbModeReadWrite);
+            objectStore = transaction.objectStore(testStoreName);
+            index = objectStore.index(testNameIndex);
             return db;
           });
         });
@@ -161,7 +162,7 @@ void defineTests(IdbFactory idbFactory) {
           int count = 0;
           Completer completer = new Completer();
           stream.listen((CursorWithValue cwv) {
-            expect((cwv.value as Map)[NAME_FIELD], "test1");
+            expect((cwv.value as Map)[testNameField], "test1");
             expect(cwv.key, "test1");
             count++;
           }).onDone(() {
@@ -176,7 +177,7 @@ void defineTests(IdbFactory idbFactory) {
       test('index get 1', () {
         return add("test1").then((key) {
           return index.get("test1").then((value) {
-            expect(value[NAME_FIELD], "test1");
+            expect(value[testNameField], "test1");
           });
         });
       });
@@ -188,7 +189,7 @@ void defineTests(IdbFactory idbFactory) {
           return index
               .openCursor(autoAdvance: false)
               .listen((CursorWithValue cwv) {
-            expect(cwv.value, {NAME_FIELD: "test1"});
+            expect(cwv.value, {testNameField: "test1"});
             expect(cwv.key, "test1");
             expect(cwv.primaryKey, key);
             count++;
@@ -210,9 +211,9 @@ void defineTests(IdbFactory idbFactory) {
             });
           }).asFuture().then((_) {
             return transaction.completed.then((_) {
-              transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-              objectStore = transaction.objectStore(STORE_NAME);
-              index = objectStore.index(NAME_INDEX);
+              transaction = db.transaction(testStoreName, idbModeReadWrite);
+              objectStore = transaction.objectStore(testStoreName);
+              index = objectStore.index(testNameIndex);
               return index.get(key).then((value) {
                 expect(value, isNull);
               });
@@ -235,9 +236,9 @@ void defineTests(IdbFactory idbFactory) {
             });
           }).asFuture().then((_) {
             return transaction.completed.then((_) {
-              transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-              objectStore = transaction.objectStore(STORE_NAME);
-              index = objectStore.index(NAME_INDEX);
+              transaction = db.transaction(testStoreName, idbModeReadWrite);
+              objectStore = transaction.objectStore(testStoreName);
+              index = objectStore.index(testNameIndex);
               return index.get("test1").then((value) {
                 expect(value, map);
               });
@@ -283,22 +284,23 @@ void defineTests(IdbFactory idbFactory) {
       Index nameIndex;
       Index valueIndex;
       setUp(() {
-        return idbFactory.deleteDatabase(DB_NAME).then((_) {
+        return idbFactory.deleteDatabase(testDbName).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
             ObjectStore objectStore =
-                db.createObjectStore(STORE_NAME, autoIncrement: true);
-            objectStore.createIndex(NAME_INDEX, NAME_FIELD);
-            objectStore.createIndex(VALUE_INDEX, VALUE_FIELD);
+                db.createObjectStore(testStoreName, autoIncrement: true);
+            objectStore.createIndex(testNameIndex, testNameField);
+            objectStore.createIndex(testValueIndex, testValueField);
           }
           return idbFactory
-              .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+              .open(testDbName,
+                  version: 1, onUpgradeNeeded: _initializeDatabase)
               .then((Database database) {
             db = database;
-            transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-            objectStore = transaction.objectStore(STORE_NAME);
-            nameIndex = objectStore.index(NAME_INDEX);
-            valueIndex = objectStore.index(VALUE_INDEX);
+            transaction = db.transaction(testStoreName, idbModeReadWrite);
+            objectStore = transaction.objectStore(testStoreName);
+            nameIndex = objectStore.index(testNameIndex);
+            valueIndex = objectStore.index(testValueIndex);
             return db;
           });
         });
@@ -320,7 +322,7 @@ void defineTests(IdbFactory idbFactory) {
           });
         }
         Future add(String name, int value) {
-          var obj = {NAME_FIELD: name, VALUE_FIELD: value};
+          var obj = {testNameField: name, testValueField: value};
           return objectStore.put(obj);
         }
 

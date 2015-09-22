@@ -14,7 +14,7 @@ void defineTests(IdbFactory idbFactory) {
     Database db;
 
     _open() {
-      return idbFactory.open(DB_NAME).then((Database database) {
+      return idbFactory.open(testDbName).then((Database database) {
         db = database;
       });
     }
@@ -23,10 +23,10 @@ void defineTests(IdbFactory idbFactory) {
       void _initializeDatabase(VersionChangeEvent e) {
         Database db = e.database;
         //ObjectStore objectStore =
-        db.createObjectStore(STORE_NAME);
+        db.createObjectStore(testStoreName);
       }
       return idbFactory
-          .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+          .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
           .then((Database database) {
         db = database;
       });
@@ -40,10 +40,10 @@ void defineTests(IdbFactory idbFactory) {
       void _initializeDatabase(VersionChangeEvent e) {
         Database db = e.database;
         // ObjectStore objectStore =
-        db.createObjectStore(STORE_NAME + "_2");
+        db.createObjectStore(testStoreName + "_2");
       }
       return idbFactory
-          .open(DB_NAME,
+          .open(testDbName,
               version: 2,
               onUpgradeNeeded: _initializeDatabase,
               onBlocked: _onBlocked)
@@ -53,7 +53,7 @@ void defineTests(IdbFactory idbFactory) {
     }
 
     setUp(() {
-      return idbFactory.deleteDatabase(DB_NAME);
+      return idbFactory.deleteDatabase(testDbName);
     });
 
     tearDown(() {
@@ -66,7 +66,7 @@ void defineTests(IdbFactory idbFactory) {
       return _open().then((_) {
         expect(db.factory, idbFactory);
         expect(db.objectStoreNames.isEmpty, true);
-        expect(db.name, DB_NAME);
+        expect(db.name, testDbName);
         expect(db.version, 1);
       });
     });
@@ -75,14 +75,14 @@ void defineTests(IdbFactory idbFactory) {
       return _openWith1Store().then((_) {
         List<String> storeNames = new List.from(db.objectStoreNames);
         expect(storeNames.length, 1);
-        expect(storeNames[0], STORE_NAME);
+        expect(storeNames[0], testStoreName);
 
         db.close();
         // re-open
         return _open().then((_) {
           storeNames = new List.from(db.objectStoreNames);
           expect(storeNames.length, 1);
-          expect(storeNames, [STORE_NAME]);
+          expect(storeNames, [testStoreName]);
         });
       });
     });
@@ -91,14 +91,14 @@ void defineTests(IdbFactory idbFactory) {
       return _openWith1Store().then((_) {
         List<String> storeNames = new List.from(db.objectStoreNames);
         expect(storeNames.length, 1);
-        expect(storeNames[0], STORE_NAME);
+        expect(storeNames[0], testStoreName);
 
         db.close();
         // re-open
         return _openWith1OtherStore().then((_) {
           storeNames = new List.from(db.objectStoreNames);
           expect(storeNames.length, 2);
-          expect(storeNames, [STORE_NAME, STORE_NAME + "_2"]);
+          expect(storeNames, [testStoreName, testStoreName + "_2"]);
         });
       });
     });
@@ -107,7 +107,7 @@ void defineTests(IdbFactory idbFactory) {
       return _openWith1Store().then((_) {
         List<String> storeNames = new List.from(db.objectStoreNames);
         expect(storeNames.length, 1);
-        expect(storeNames[0], STORE_NAME);
+        expect(storeNames[0], testStoreName);
 
         Database db1 = db;
         // db.close();
@@ -115,7 +115,7 @@ void defineTests(IdbFactory idbFactory) {
         return _openWith1Store().then((_) {
           storeNames = new List.from(db.objectStoreNames);
           expect(storeNames.length, 1);
-          expect(storeNames[0], STORE_NAME);
+          expect(storeNames[0], testStoreName);
 
           db1.close();
         });
@@ -138,13 +138,13 @@ void defineTests(IdbFactory idbFactory) {
         // re-open
         return _openWith1OtherStore().then((_) {}).then((_) {
           List<String> storeNames = new List.from(db.objectStoreNames);
-          expect(storeNames, [STORE_NAME, STORE_NAME + "_2"]);
+          expect(storeNames, [testStoreName, testStoreName + "_2"]);
         }).then((_) {
           // at this point native db should be close already
           if (!db1Closed) {
             Transaction transaction =
-                firstDb.transaction(STORE_NAME, IDB_MODE_READ_ONLY);
-            ObjectStore store = transaction.objectStore(STORE_NAME);
+                firstDb.transaction(testStoreName, idbModeReadOnly);
+            ObjectStore store = transaction.objectStore(testStoreName);
             return store.clear().then((_) {
               fail("should not succeed");
             }, onError: (e) {

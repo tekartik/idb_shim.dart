@@ -10,7 +10,7 @@ void main() => defineTests(idbTestMemoryFactory);
 void defineTests(IdbFactory idbFactory) {
   group('factory', () {
     test('delete database', () {
-      return idbFactory.deleteDatabase(DB_NAME);
+      return idbFactory.deleteDatabase(testDbName);
     });
 
     test('delete null failing', () {

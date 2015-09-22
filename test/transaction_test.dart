@@ -10,21 +10,21 @@ void defineTests(IdbFactory idbFactory) {
   group('transaction', () {
     group('scratch', () {
       setUp(() {
-        return idbFactory.deleteDatabase(DB_NAME);
+        return idbFactory.deleteDatabase(testDbName);
       });
 
       test('put & completed', () {
         Database db;
         void _initializeDatabase(VersionChangeEvent e) {
           db = e.database;
-          db.createObjectStore(STORE_NAME, autoIncrement: true);
+          db.createObjectStore(testStoreName, autoIncrement: true);
         }
         return idbFactory
-            .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+            .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
             .then((Database database) {
           Transaction transaction =
-              database.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-          ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+              database.transaction(testStoreName, idbModeReadWrite);
+          ObjectStore objectStore = transaction.objectStore(testStoreName);
           bool putDone = false;
           objectStore.put(1).then((_) {
             putDone = true;
@@ -41,13 +41,13 @@ void defineTests(IdbFactory idbFactory) {
         Database db;
         void _initializeDatabase(VersionChangeEvent e) {
           db = e.database;
-          db.createObjectStore(STORE_NAME, autoIncrement: true);
+          db.createObjectStore(testStoreName, autoIncrement: true);
         }
         return idbFactory
-            .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+            .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
             .then((Database database) {
           Transaction transaction =
-              database.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+              database.transaction(testStoreName, idbModeReadWrite);
           return transaction.completed;
         }).then((Database db) {
           db.close();
@@ -57,23 +57,23 @@ void defineTests(IdbFactory idbFactory) {
         Database db;
         void _initializeDatabase(VersionChangeEvent e) {
           db = e.database;
-          db.createObjectStore(STORE_NAME, autoIncrement: true);
+          db.createObjectStore(testStoreName, autoIncrement: true);
         }
         return idbFactory
-            .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+            .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
             .then((Database database) {
           Transaction transaction1 =
-              database.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+              database.transaction(testStoreName, idbModeReadWrite);
           Transaction transaction2 =
-              database.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+              database.transaction(testStoreName, idbModeReadWrite);
           bool transaction1Completed = false;
-          ObjectStore objectStore1 = transaction1.objectStore(STORE_NAME);
+          ObjectStore objectStore1 = transaction1.objectStore(testStoreName);
           objectStore1.clear().then((_) {
             objectStore1.clear().then((_) {
               transaction1Completed = true;
             });
           });
-          ObjectStore objectStore2 = transaction2.objectStore(STORE_NAME);
+          ObjectStore objectStore2 = transaction2.objectStore(testStoreName);
           return objectStore2.clear().then((_) {
             expect(transaction1Completed, isTrue);
             return transaction2.completed.then((_) {
@@ -87,18 +87,18 @@ void defineTests(IdbFactory idbFactory) {
         Database db;
         void _initializeDatabase(VersionChangeEvent e) {
           db = e.database;
-          db.createObjectStore(STORE_NAME, autoIncrement: true);
+          db.createObjectStore(testStoreName, autoIncrement: true);
         }
         return idbFactory
-            .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+            .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
             .then((Database database) {
           Transaction transaction =
-              database.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-          ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+              database.transaction(testStoreName, idbModeReadWrite);
+          ObjectStore objectStore = transaction.objectStore(testStoreName);
           return objectStore.put({}).then((_) {
             Transaction transaction =
-                database.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-            ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+                database.transaction(testStoreName, idbModeReadWrite);
+            ObjectStore objectStore = transaction.objectStore(testStoreName);
             return objectStore.openCursor(autoAdvance: true).listen((cursor) {
               //print(cursor);
             }).asFuture().then((_) {
@@ -113,14 +113,14 @@ void defineTests(IdbFactory idbFactory) {
       test('transactionList', () {
         void _initializeDatabase(VersionChangeEvent e) {
           Database db = e.database;
-          db.createObjectStore(STORE_NAME, autoIncrement: true);
-          db.createObjectStore(STORE_NAME_2, autoIncrement: true);
+          db.createObjectStore(testStoreName, autoIncrement: true);
+          db.createObjectStore(testStoreName2, autoIncrement: true);
         }
         return idbFactory
-            .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+            .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
             .then((Database database) {
           Transaction transaction = database.transactionList(
-              [STORE_NAME, STORE_NAME_2], IDB_MODE_READ_WRITE);
+              [testStoreName, testStoreName2], idbModeReadWrite);
           //database.close();
           return transaction.completed.then((_) {
             database.close();
@@ -131,15 +131,15 @@ void defineTests(IdbFactory idbFactory) {
       test('bad_mode', () {
         void _initializeDatabase(VersionChangeEvent e) {
           Database db = e.database;
-          db.createObjectStore(STORE_NAME, autoIncrement: true);
+          db.createObjectStore(testStoreName, autoIncrement: true);
         }
         return idbFactory
-            .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+            .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
             .then((Database database) {
           Transaction transaction =
-              database.transaction(STORE_NAME, IDB_MODE_READ_ONLY);
+              database.transaction(testStoreName, idbModeReadOnly);
 
-          ObjectStore store = transaction.objectStore(STORE_NAME);
+          ObjectStore store = transaction.objectStore(testStoreName);
 
           store.put({}).catchError((e) {
             // There must be an error!
@@ -160,13 +160,13 @@ void defineTests(IdbFactory idbFactory) {
       test('bad_store', () {
         void _initializeDatabase(VersionChangeEvent e) {
           Database db = e.database;
-          db.createObjectStore(STORE_NAME, autoIncrement: true);
+          db.createObjectStore(testStoreName, autoIncrement: true);
         }
         return idbFactory
-            .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+            .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
             .then((Database database) {
           try {
-            database.transaction(STORE_NAME_2, IDB_MODE_READ_WRITE);
+            database.transaction(testStoreName2, idbModeReadWrite);
             fail("exception expected");
           } catch (e) {
             //print(e);
@@ -186,17 +186,18 @@ void defineTests(IdbFactory idbFactory) {
         //ObjectStore objectStore;
 
         setUp(() {
-          return idbFactory.deleteDatabase(DB_NAME).then((_) {
+          return idbFactory.deleteDatabase(testDbName).then((_) {
             void _initializeDatabase(VersionChangeEvent e) {
               Database db = e.database;
-              db.createObjectStore(STORE_NAME, autoIncrement: true);
+              db.createObjectStore(testStoreName, autoIncrement: true);
             }
             return idbFactory
-                .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+                .open(testDbName,
+                    version: 1, onUpgradeNeeded: _initializeDatabase)
                 .then((Database database) {
               db = database;
-              transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-              transaction.objectStore(STORE_NAME);
+              transaction = db.transaction(testStoreName, idbModeReadWrite);
+              transaction.objectStore(testStoreName);
               return db;
             });
           });
@@ -209,18 +210,18 @@ void defineTests(IdbFactory idbFactory) {
         test('immediate completed', () {
           //bool done = false;
           Transaction transaction =
-              db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+              db.transaction(testStoreName, idbModeReadWrite);
           return transaction.completed;
         });
 
         test('add immediate completed', () {
           // not working in memory
           // devPrint("***** ${idbFactory.name}");
-          if (idbFactory.name != IDB_FACTORY_WEBSQL) {
+          if (idbFactory.name != idbFactoryWebSql) {
             bool done = false;
             Transaction transaction =
-                db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-            ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+                db.transaction(testStoreName, idbModeReadWrite);
+            ObjectStore objectStore = transaction.objectStore(testStoreName);
             objectStore.add("value1").then((key1) {
               done = true;
             });
@@ -236,11 +237,11 @@ void defineTests(IdbFactory idbFactory) {
         test('immediate completed then add', () {
 // not working in memory
           // devPrint("***** ${idbFactory.name}");
-          if (idbFactory.name != IDB_FACTORY_WEBSQL) {
+          if (idbFactory.name != idbFactoryWebSql) {
             bool done = false;
             Transaction transaction =
-                db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-            ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+                db.transaction(testStoreName, idbModeReadWrite);
+            ObjectStore objectStore = transaction.objectStore(testStoreName);
 
             var completed = transaction.completed.then((_) {
               expect(done, isTrue);
@@ -271,15 +272,15 @@ void defineTests(IdbFactory idbFactory) {
 
       test('immediate completed', () {
         Transaction transaction =
-            db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+            db.transaction(testStoreName, idbModeReadWrite);
         return transaction.completed;
       });
 
       test('add immediate completed', () {
         bool done = false;
         Transaction transaction =
-            db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-        ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+            db.transaction(testStoreName, idbModeReadWrite);
+        ObjectStore objectStore = transaction.objectStore(testStoreName);
         objectStore.add("value1").then((key1) {
           done = true;
         });
@@ -293,8 +294,8 @@ void defineTests(IdbFactory idbFactory) {
       test('add 1 then 1 immediate completed', () {
         bool done = false;
         Transaction transaction =
-            db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-        ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+            db.transaction(testStoreName, idbModeReadWrite);
+        ObjectStore objectStore = transaction.objectStore(testStoreName);
         objectStore.add("value1").then((key1) {
           objectStore.add("value1").then((key1) {
             done = true;
@@ -311,8 +312,8 @@ void defineTests(IdbFactory idbFactory) {
 
       test('get_get', () async {
         Transaction transaction =
-            db.transaction(STORE_NAME, IDB_MODE_READ_ONLY);
-        ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+            db.transaction(testStoreName, idbModeReadOnly);
+        ObjectStore objectStore = transaction.objectStore(testStoreName);
         await objectStore.getObject(0);
         await objectStore.getObject(0);
         await transaction.completed;
@@ -320,8 +321,8 @@ void defineTests(IdbFactory idbFactory) {
 
       test('get_wait_get', () async {
         Transaction transaction =
-            db.transaction(STORE_NAME, IDB_MODE_READ_ONLY);
-        ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+            db.transaction(testStoreName, idbModeReadOnly);
+        ObjectStore objectStore = transaction.objectStore(testStoreName);
         await objectStore.getObject(0);
         await new Future.value();
         await objectStore.getObject(0);
@@ -330,8 +331,8 @@ void defineTests(IdbFactory idbFactory) {
 
       test('get_wait_wait_get', () async {
         Transaction transaction =
-            db.transaction(STORE_NAME, IDB_MODE_READ_ONLY);
-        ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+            db.transaction(testStoreName, idbModeReadOnly);
+        ObjectStore objectStore = transaction.objectStore(testStoreName);
         await objectStore.getObject(0);
         await new Future.value();
         await new Future.value();
@@ -341,8 +342,8 @@ void defineTests(IdbFactory idbFactory) {
 
       test('put_wait_wait_put', () async {
         Transaction transaction =
-            db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-        ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+            db.transaction(testStoreName, idbModeReadWrite);
+        ObjectStore objectStore = transaction.objectStore(testStoreName);
         await objectStore.put({});
         await new Future.value();
         await new Future.value();
@@ -353,8 +354,8 @@ void defineTests(IdbFactory idbFactory) {
       test('add 1 then 1 then 1 immediate completed', () {
         bool done = false;
         Transaction transaction =
-            db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-        ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+            db.transaction(testStoreName, idbModeReadWrite);
+        ObjectStore objectStore = transaction.objectStore(testStoreName);
         objectStore.add("value1").then((key1) {
           objectStore.add("value1").then((key1) {
             objectStore.add("value1").then((key1) {
@@ -372,8 +373,8 @@ void defineTests(IdbFactory idbFactory) {
       test('add 1 level 5 deep immediate completed', () {
         bool done = false;
         Transaction transaction =
-            db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-        ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+            db.transaction(testStoreName, idbModeReadWrite);
+        ObjectStore objectStore = transaction.objectStore(testStoreName);
         objectStore.add("value1").then((key1) {
           objectStore.add("value1").then((key1) {
             objectStore.add("value1").then((key1) {
@@ -393,11 +394,11 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       test('immediate completed then add', () {
-        if ((idbFactory.name != IDB_FACTORY_WEBSQL)) {
+        if ((idbFactory.name != idbFactoryWebSql)) {
           bool done = false;
           Transaction transaction =
-              db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-          ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+              db.transaction(testStoreName, idbModeReadWrite);
+          ObjectStore objectStore = transaction.objectStore(testStoreName);
 
           var completed = transaction.completed.then((_) {
             expect(done, isTrue);
@@ -415,8 +416,8 @@ void defineTests(IdbFactory idbFactory) {
         bool done1 = false;
         bool done2 = false;
         Transaction transaction =
-            db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-        ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+            db.transaction(testStoreName, idbModeReadWrite);
+        ObjectStore objectStore = transaction.objectStore(testStoreName);
         objectStore.add("value1").then((key1) {
           expect(done1, isFalse);
           done1 = true;
@@ -433,11 +434,11 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       test('add/put immediate completed', () {
-        if ((idbFactory.name != IDB_FACTORY_WEBSQL)) {
+        if ((idbFactory.name != idbFactoryWebSql)) {
           bool done = false;
           Transaction transaction =
-              db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-          ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+              db.transaction(testStoreName, idbModeReadWrite);
+          ObjectStore objectStore = transaction.objectStore(testStoreName);
           objectStore.add("value1").then((key1) {
             objectStore.put("value1", key1).then((key2) {
               done = true;
@@ -454,8 +455,8 @@ void defineTests(IdbFactory idbFactory) {
       test('add/put/get/delete', () {
         bool done = false;
         Transaction transaction =
-            db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-        ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+            db.transaction(testStoreName, idbModeReadWrite);
+        ObjectStore objectStore = transaction.objectStore(testStoreName);
         objectStore.add("value1").then((key1) {
           expect(key1, equals(1));
 
@@ -480,21 +481,21 @@ void defineTests(IdbFactory idbFactory) {
 
       test('2 embedded transaction empty', () {
         Transaction transaction1 =
-            db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+            db.transaction(testStoreName, idbModeReadWrite);
         Transaction transaction2 =
-            db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+            db.transaction(testStoreName, idbModeReadWrite);
         return Future.wait([transaction1.completed, transaction2.completed]);
       });
 
       test('2 embedded transaction 2 put', () {
         Transaction transaction1 =
-            db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+            db.transaction(testStoreName, idbModeReadWrite);
         Transaction transaction2 =
-            db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-        transaction1.objectStore(STORE_NAME).put("test").then((key) {
+            db.transaction(testStoreName, idbModeReadWrite);
+        transaction1.objectStore(testStoreName).put("test").then((key) {
           expect(key, 1);
         });
-        transaction2.objectStore(STORE_NAME).put("test").then((key) {
+        transaction2.objectStore(testStoreName).put("test").then((key) {
           expect(key, 2);
         });
         return Future.wait([transaction1.completed, transaction2.completed]);

@@ -33,10 +33,10 @@ class _SelectQuery extends _Query {
 
     if (_direction != null) {
       switch (_direction) {
-        case IDB_DIRECTION_NEXT:
+        case idbDirectionNext:
           order = "ASC";
           break;
-        case IDB_DIRECTION_PREV:
+        case idbDirectionPrev:
           order = "DESC";
           break;
 

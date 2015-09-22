@@ -17,23 +17,23 @@ export 'package:test/test.dart';
 export 'dart:async';
 
 // only for test - INFO - basic output, FINE - show test name before/after - FINEST - samething for console test also
-const Level DEBUG_LEVEL = Level.FINE;
-const String DB_NAME = 'test.db';
-const String STORE_NAME = 'test_store';
-const String STORE_NAME_2 = 'test_store_2';
+const Level debugLevel = Level.FINE;
+const String testDbName = 'test.db';
+const String testStoreName = 'test_store';
+const String testStoreName2 = 'test_store_2';
 
-const String NAME_INDEX = 'name_index';
-const String NAME_FIELD = 'name';
-const String VALUE_INDEX = 'value_index';
-const String VALUE_FIELD = 'value';
+const String testNameIndex = 'name_index';
+const String testNameField = 'name';
+const String testValueIndex = 'value_index';
+const String testValueField = 'value';
 
-const String NAME_INDEX_2 = 'name_index_2';
-const String NAME_FIELD_2 = 'name_2';
+const String testNameIndex2 = 'name_index_2';
+const String testNameField2 = 'name_2';
 
 IdbFactory idbTestMemoryFactory = idbMemoryFactory;
 
 Future<Database> setUpSimpleStore(IdbFactory idbFactory, //
-    {String dbName: DB_NAME,
+    {String dbName: testDbName,
     IdbObjectStoreMeta meta}) {
   if (meta == null) {
     meta = idbSimpleObjectStoreMeta;

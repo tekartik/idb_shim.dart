@@ -9,26 +9,26 @@ void main() => defineTests(idbTestMemoryFactory);
 void defineTests(IdbFactory idbFactory) {
   group('delete', () {
     test('delete database', () {
-      return idbFactory.deleteDatabase(DB_NAME);
+      return idbFactory.deleteDatabase(testDbName);
     });
   });
 
   group('open', () {
     setUp(() {
-      return idbFactory.deleteDatabase(DB_NAME);
+      return idbFactory.deleteDatabase(testDbName);
     });
 
     test('no param', () {
-      return idbFactory.open(DB_NAME).then((Database database) {
+      return idbFactory.open(testDbName).then((Database database) {
         expect(database.version, 1);
         database.close();
       });
     });
 
     test('close then re-open', () {
-      return idbFactory.open(DB_NAME).then((Database database) {
+      return idbFactory.open(testDbName).then((Database database) {
         database.close();
-        return idbFactory.open(DB_NAME).then((Database database) {
+        return idbFactory.open(testDbName).then((Database database) {
           database.close();
         });
       });
@@ -50,7 +50,7 @@ void defineTests(IdbFactory idbFactory) {
       void _emptyInitializeDatabase(VersionChangeEvent e) {}
 
       return idbFactory
-          .open(DB_NAME, onUpgradeNeeded: _emptyInitializeDatabase)
+          .open(testDbName, onUpgradeNeeded: _emptyInitializeDatabase)
           .then((_) {
         fail("shoud not open");
       }).catchError((e) {
@@ -60,7 +60,8 @@ void defineTests(IdbFactory idbFactory) {
     });
 
     test('bad param with version', () {
-      return idbFactory.open(DB_NAME, version: 1).then((_) {}).catchError((e) {
+      return idbFactory.open(testDbName, version: 1).then((_) {}).catchError(
+          (e) {
         expect(e.message,
             "version and onUpgradeNeeded must be specified together");
       }, test: (e) => e is ArgumentError);
@@ -73,7 +74,7 @@ void defineTests(IdbFactory idbFactory) {
         initCalled = true;
       }
       return idbFactory
-          .open(DB_NAME, version: 0, onUpgradeNeeded: _initializeDatabase)
+          .open(testDbName, version: 0, onUpgradeNeeded: _initializeDatabase)
           .then((Database database) {
         fail("should not open");
       }, onError: (e) {
@@ -83,7 +84,7 @@ void defineTests(IdbFactory idbFactory) {
     });
 
     test('default then version 1', () {
-      return idbFactory.open(DB_NAME).then((Database database) {
+      return idbFactory.open(testDbName).then((Database database) {
         expect(database.version, 1);
         database.close();
 
@@ -93,7 +94,7 @@ void defineTests(IdbFactory idbFactory) {
           initCalled = true;
         }
         return idbFactory
-            .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+            .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
             .then((Database database) {
           expect(initCalled, false);
           database.close();
@@ -110,7 +111,7 @@ void defineTests(IdbFactory idbFactory) {
         initCalled = true;
       }
       return idbFactory
-          .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+          .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
           .then((Database database) {
         expect(initCalled, true);
         database.close();
@@ -126,7 +127,7 @@ void defineTests(IdbFactory idbFactory) {
         initCalled = true;
       }
       return idbFactory
-          .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+          .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
           .then((Database database) {
         expect(initCalled, true);
         database.close();
@@ -139,7 +140,7 @@ void defineTests(IdbFactory idbFactory) {
           upgradeCalled = true;
         }
         return idbFactory
-            .open(DB_NAME, version: 2, onUpgradeNeeded: _upgradeDatabase)
+            .open(testDbName, version: 2, onUpgradeNeeded: _upgradeDatabase)
             .then((Database database) {
           expect(upgradeCalled, true);
           database.close();
@@ -154,7 +155,7 @@ void defineTests(IdbFactory idbFactory) {
         initCalled = true;
       }
       return idbFactory
-          .open(DB_NAME, version: 2, onUpgradeNeeded: _initializeDatabase)
+          .open(testDbName, version: 2, onUpgradeNeeded: _initializeDatabase)
           .then((Database database) {
         expect(initCalled, true);
         database.close();
@@ -165,7 +166,7 @@ void defineTests(IdbFactory idbFactory) {
           downgradeCalled = true;
         }
         return idbFactory
-            .open(DB_NAME, version: 1, onUpgradeNeeded: _downgradeDatabase)
+            .open(testDbName, version: 1, onUpgradeNeeded: _downgradeDatabase)
             .then((Database database) {
           fail("should fail");
         }, onError: (err, st) {

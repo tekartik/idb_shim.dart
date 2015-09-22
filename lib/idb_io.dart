@@ -26,16 +26,16 @@ IdbFactory getIdbSembastIoFactory(String path) {
 
 IdbFactory getIdbFactory([String name, String path]) {
   if (name == null) {
-    name = IDB_FACTORY_BROWSER;
+    name = idbFactoryBrowser;
   }
   switch (name) {
-    case IDB_FACTORY_SEMBAST_MEMORY:
+    case idbFactorySembastMemory:
       return idbSembastMemoryFactory;
-    case IDB_FACTORY_SEMBAST_IO:
+    case idbFactorySembastIo:
       return getIdbSembastIoFactory(path);
-    case IDB_FACTORY_PERSISTENT:
+    case idbFactoryPersistent:
       return getIdbPersistentFactory(path);
-    case IDB_FACTORY_MEMORY:
+    case idbFactoryMemory:
       return idbMemoryFactory;
     default:
       throw new UnsupportedError("Factory '$name' not supported");

@@ -13,12 +13,12 @@ void defineTests(IdbFactory idbFactory) {
   group('bug_put_delete', () {
     Database db;
     setUp(() async {
-      await idbFactory.deleteDatabase(DB_NAME);
+      await idbFactory.deleteDatabase(testDbName);
       void _initializeDatabase(VersionChangeEvent e) {
         db = e.database;
-        db.createObjectStore(STORE_NAME, autoIncrement: true);
+        db.createObjectStore(testStoreName, autoIncrement: true);
       }
-      db = await idbFactory.open(DB_NAME,
+      db = await idbFactory.open(testDbName,
           version: 1, onUpgradeNeeded: _initializeDatabase);
     });
 
@@ -27,22 +27,22 @@ void defineTests(IdbFactory idbFactory) {
     });
 
     test('put_delete', () async {
-      Transaction transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-      ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+      Transaction transaction = db.transaction(testStoreName, idbModeReadWrite);
+      ObjectStore objectStore = transaction.objectStore(testStoreName);
       var key = await objectStore.put({});
       await objectStore.delete(key);
       await transaction.completed;
     });
 
     test('get_delete', () async {
-      Transaction transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-      ObjectStore objectStore = transaction.objectStore(STORE_NAME);
+      Transaction transaction = db.transaction(testStoreName, idbModeReadWrite);
+      ObjectStore objectStore = transaction.objectStore(testStoreName);
       var key = await objectStore
           .put({"name": "name", "delete": true, "dirty": false});
       await transaction.completed;
 
-      transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-      objectStore = transaction.objectStore(STORE_NAME);
+      transaction = db.transaction(testStoreName, idbModeReadWrite);
+      objectStore = transaction.objectStore(testStoreName);
       _get() async {
         Map row = await objectStore.getObject(key);
         return row;

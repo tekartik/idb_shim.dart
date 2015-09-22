@@ -5,7 +5,7 @@ import 'idb_test_common.dart';
 
 // auto-increment, no key path
 final IdbObjectStoreMeta idbSimpleObjectStoreMeta =
-    new IdbObjectStoreMeta(STORE_NAME, null, true);
+    new IdbObjectStoreMeta(testStoreName, null, true);
 
 final IdbObjectStoreMeta idbObjectStoreMeta1 =
     new IdbObjectStoreMeta("name", "my_key", true);

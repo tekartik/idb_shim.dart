@@ -23,7 +23,7 @@ class IdbNativeFactory extends IdbFactory {
   static IdbNativeFactory _instance;
   IdbNativeFactory._();
 
-  String get name => IDB_FACTORY_NATIVE;
+  String get name => idbFactoryNative;
 
   factory IdbNativeFactory() {
     if (_instance == null) {

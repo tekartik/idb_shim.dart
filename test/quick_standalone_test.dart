@@ -18,7 +18,7 @@ void defineTests(IdbFactory idbFactory) {
     ObjectStore objectStore;
 
     _createTransaction() {
-      transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
+      transaction = db.transaction(STORE_NAME, idbModeReadWrite);
       objectStore = transaction.objectStore(STORE_NAME);
     }
 

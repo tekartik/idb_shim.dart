@@ -5,26 +5,26 @@ import 'dart:async';
 part 'src/client/client.dart';
 part 'src/client/error.dart';
 
-const String IDB_MODE_READ_WRITE = "readwrite";
-const String IDB_MODE_READ_ONLY = "readonly";
+const String idbModeReadWrite = "readwrite";
+const String idbModeReadOnly = "readonly";
 
-const String IDB_DIRECTION_NEXT = "next";
-const String IDB_DIRECTION_PREV = "prev";
+const String idbDirectionNext = "next";
+const String idbDirectionPrev = "prev";
 
 // shim using native indexeddb implementation
-const IDB_FACTORY_NATIVE = "native";
+const idbFactoryNative = "native";
 // shim using WebSql implementation
-const IDB_FACTORY_WEBSQL = "websql";
+const idbFactoryWebSql = "websql";
 // shim using Sembast implementation
-const IDB_FACTORY_SEMBAST_IO = "sembast_io";
+const idbFactorySembastIo = "sembast_io";
 // shim using Sembast memory implementation
-const IDB_FACTORY_SEMBAST_MEMORY = "sembast_memory";
+const idbFactorySembastMemory = "sembast_memory";
 // shim using Memory implementation
-const IDB_FACTORY_MEMORY = IDB_FACTORY_SEMBAST_MEMORY;
+const idbFactoryMemory = idbFactorySembastMemory;
 // pseudo - best persistent shim (indexeddb or if not available websql)
-const IDB_FACTORY_PERSISTENT = "persistent";
+const idbFactoryPersistent = "persistent";
 // pseudo - best browser shim (persistent of it not available memory)
-const IDB_FACTORY_BROWSER = "browser";
+const idbFactoryBrowser = "browser";
 
 abstract class Cursor {
   Object get key;
@@ -381,3 +381,16 @@ abstract class IdbFactory {
   String get name;
   bool get persistent;
 }
+
+// Pre 1.0 definition - for Compatibility
+const String IDB_MODE_READ_WRITE = idbModeReadWrite;
+const String IDB_MODE_READ_ONLY = idbModeReadOnly;
+const String IDB_DIRECTION_NEXT = idbDirectionNext;
+const String IDB_DIRECTION_PREV = idbDirectionPrev;
+const IDB_FACTORY_NATIVE = idbFactoryNative;
+const IDB_FACTORY_WEBSQL = idbFactoryWebSql;
+const IDB_FACTORY_SEMBAST_IO = idbFactorySembastIo;
+const IDB_FACTORY_SEMBAST_MEMORY = idbFactorySembastMemory;
+const IDB_FACTORY_MEMORY = idbFactoryMemory;
+const IDB_FACTORY_PERSISTENT = idbFactoryPersistent;
+const IDB_FACTORY_BROWSER = idbFactoryBrowser;

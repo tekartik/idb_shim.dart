@@ -33,7 +33,7 @@ class IdbWebSqlFactory extends IdbFactory {
   static IdbWebSqlFactory _instance;
   IdbWebSqlFactory._();
 
-  String get name => IDB_FACTORY_WEBSQL;
+  String get name => idbFactoryWebSql;
 
   factory IdbWebSqlFactory() {
     if (_instance == null) {

@@ -119,7 +119,7 @@ class _WebSqlDatabase extends Database {
     Future _checkVersion(SqlTransaction tx, int oldVersion) {
       bool upgrading = false;
       _WebSqlTransaction transaction =
-          new _WebSqlTransaction(this, tx, null, IDB_MODE_READ_WRITE);
+          new _WebSqlTransaction(this, tx, null, idbModeReadWrite);
       //print("$oldVersion vs $newVersion");
       if (oldVersion != newVersion) {
         if (oldVersion > newVersion) {
@@ -191,7 +191,7 @@ class _WebSqlDatabase extends Database {
               .then((_) async {
             if (onUpgradeNeeded != null) {
               _WebSqlTransaction transaction =
-                  new _WebSqlTransaction(this, tx, null, IDB_MODE_READ_WRITE);
+                  new _WebSqlTransaction(this, tx, null, idbModeReadWrite);
               _WebSqlVersionChangeEvent event = new _WebSqlVersionChangeEvent(
                   this, oldVersion, newVersion, transaction);
               versionChangeTransaction = event.transaction;

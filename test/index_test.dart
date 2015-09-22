@@ -14,17 +14,18 @@ void defineTests(IdbFactory idbFactory) {
       ObjectStore objectStore;
 
       setUp(() {
-        return idbFactory.deleteDatabase(DB_NAME).then((_) {
+        return idbFactory.deleteDatabase(testDbName).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
-            db.createObjectStore(STORE_NAME, autoIncrement: true);
+            db.createObjectStore(testStoreName, autoIncrement: true);
           }
           return idbFactory
-              .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+              .open(testDbName,
+                  version: 1, onUpgradeNeeded: _initializeDatabase)
               .then((Database database) {
             db = database;
-            transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-            objectStore = transaction.objectStore(STORE_NAME);
+            transaction = db.transaction(testStoreName, idbModeReadWrite);
+            objectStore = transaction.objectStore(testStoreName);
           });
         });
       });
@@ -64,20 +65,22 @@ void defineTests(IdbFactory idbFactory) {
       ObjectStore objectStore;
 
       _createTransaction() {
-        transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-        objectStore = transaction.objectStore(STORE_NAME);
+        transaction = db.transaction(testStoreName, idbModeReadWrite);
+        objectStore = transaction.objectStore(testStoreName);
       }
 
       setUp(() {
-        return idbFactory.deleteDatabase(DB_NAME).then((_) {
+        return idbFactory.deleteDatabase(testDbName).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
             ObjectStore objectStore =
-                db.createObjectStore(STORE_NAME, autoIncrement: true);
-            objectStore.createIndex(NAME_INDEX, NAME_FIELD, unique: false);
+                db.createObjectStore(testStoreName, autoIncrement: true);
+            objectStore.createIndex(testNameIndex, testNameField,
+                unique: false);
           }
           return idbFactory
-              .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+              .open(testDbName,
+                  version: 1, onUpgradeNeeded: _initializeDatabase)
               .then((Database database) {
             db = database;
             _createTransaction();
@@ -96,13 +99,13 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       test('add_twice_same_key', () {
-        Map value1 = {NAME_FIELD: "test1"};
+        Map value1 = {testNameField: "test1"};
 
-        Index index = objectStore.index(NAME_INDEX);
+        Index index = objectStore.index(testNameIndex);
         return objectStore.add(value1).then((_) {
           return objectStore.add(value1).then((_) {
 //            // create new transaction;
-            index = objectStore.index(NAME_INDEX);
+            index = objectStore.index(testNameIndex);
             return index.count(new KeyRange.only("test1")).then((int count) {
               expect(count == 2, isTrue);
             });
@@ -137,20 +140,21 @@ void defineTests(IdbFactory idbFactory) {
       ObjectStore objectStore;
 
       _createTransaction() {
-        transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-        objectStore = transaction.objectStore(STORE_NAME);
+        transaction = db.transaction(testStoreName, idbModeReadWrite);
+        objectStore = transaction.objectStore(testStoreName);
       }
 
       setUp(() {
-        return idbFactory.deleteDatabase(DB_NAME).then((_) {
+        return idbFactory.deleteDatabase(testDbName).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
             ObjectStore objectStore =
-                db.createObjectStore(STORE_NAME, autoIncrement: true);
-            objectStore.createIndex(NAME_INDEX, NAME_FIELD, unique: true);
+                db.createObjectStore(testStoreName, autoIncrement: true);
+            objectStore.createIndex(testNameIndex, testNameField, unique: true);
           }
           return idbFactory
-              .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+              .open(testDbName,
+                  version: 1, onUpgradeNeeded: _initializeDatabase)
               .then((Database database) {
             db = database;
             _createTransaction();
@@ -169,28 +173,28 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       test('store_properties', () {
-        expect(objectStore.indexNames, [NAME_INDEX]);
+        expect(objectStore.indexNames, [testNameIndex]);
       });
 
       test('properties', () {
-        Index index = objectStore.index(NAME_INDEX);
-        expect(index.name, NAME_INDEX);
-        expect(index.keyPath, NAME_FIELD);
+        Index index = objectStore.index(testNameIndex);
+        expect(index.name, testNameIndex);
+        expect(index.keyPath, testNameField);
         expect(index.multiEntry, false);
         expect(index.unique, true);
       });
 
       test('primary', () {
-        Index index = objectStore.index(NAME_INDEX);
+        Index index = objectStore.index(testNameIndex);
         return index.count().then((result) {
           expect(result, 0);
         });
       });
 
       test('count by key', () {
-        Map value1 = {NAME_FIELD: "test1"};
-        Map value2 = {NAME_FIELD: "test2"};
-        Index index = objectStore.index(NAME_INDEX);
+        Map value1 = {testNameField: "test1"};
+        Map value2 = {testNameField: "test2"};
+        Index index = objectStore.index(testNameIndex);
         return objectStore.add(value1).then((_) {
           return objectStore.add(value2).then((_) {
             return index.count("test1").then((int count) {
@@ -204,9 +208,9 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       test('count by range', () {
-        Map value1 = {NAME_FIELD: "test1"};
-        Map value2 = {NAME_FIELD: "test2"};
-        Index index = objectStore.index(NAME_INDEX);
+        Map value1 = {testNameField: "test1"};
+        Map value2 = {testNameField: "test2"};
+        Index index = objectStore.index(testNameIndex);
         return objectStore.add(value1).then((_) {
           return objectStore.add(value2).then((_) {
             return index
@@ -242,8 +246,8 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       test('add/get map', () {
-        Map value = {NAME_FIELD: "test1"};
-        Index index = objectStore.index(NAME_INDEX);
+        Map value = {testNameField: "test1"};
+        Index index = objectStore.index(testNameIndex);
         return objectStore.add(value).then((key) {
           return index.get("test1").then((Map readValue) {
             expect(readValue, value);
@@ -252,15 +256,15 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       test('get key none', () {
-        Index index = objectStore.index(NAME_INDEX);
+        Index index = objectStore.index(testNameIndex);
         return index.getKey("test1").then((int readKey) {
           expect(readKey, isNull);
         });
       });
 
       test('add/get key', () {
-        Map value = {NAME_FIELD: "test1"};
-        Index index = objectStore.index(NAME_INDEX);
+        Map value = {testNameField: "test1"};
+        Index index = objectStore.index(testNameIndex);
         return objectStore.add(value).then((int key) {
           return index.getKey("test1").then((int readKey) {
             expect(readKey, key);
@@ -269,16 +273,16 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       test('add_twice_same_key', () {
-        Map value1 = {NAME_FIELD: "test1"};
+        Map value1 = {testNameField: "test1"};
 
-        Index index = objectStore.index(NAME_INDEX);
+        Index index = objectStore.index(testNameIndex);
         return objectStore.add(value1).then((_) {
           return objectStore.add(value1).catchError((DatabaseError e) {
             //devPrint(e);
           }).then((_) {
 //            // create new transaction;
             _createTransaction();
-            index = objectStore.index(NAME_INDEX);
+            index = objectStore.index(testNameIndex);
             return index.count(new KeyRange.only("test1")).then((int count) {
               // 1 for websql sorry...
               // devPrint(count);
@@ -290,13 +294,13 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       test('add/get 2', () {
-        Map value1 = {NAME_FIELD: "test1"};
-        Map value2 = {NAME_FIELD: "test2"};
+        Map value1 = {testNameField: "test1"};
+        Map value2 = {testNameField: "test2"};
         return objectStore.add(value1).then((key) {
           expect(key, 1);
           return objectStore.add(value2).then((key) {
             expect(key, 2);
-            Index index = objectStore.index(NAME_INDEX);
+            Index index = objectStore.index(testNameIndex);
             return index.get("test1").then((Map readValue) {
               expect(readValue, value1);
               return index.get("test2").then((Map readValue) {
@@ -317,20 +321,22 @@ void defineTests(IdbFactory idbFactory) {
       ObjectStore objectStore;
 
       _createTransaction() {
-        transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-        objectStore = transaction.objectStore(STORE_NAME);
+        transaction = db.transaction(testStoreName, idbModeReadWrite);
+        objectStore = transaction.objectStore(testStoreName);
       }
 
       setUp(() {
-        return idbFactory.deleteDatabase(DB_NAME).then((_) {
+        return idbFactory.deleteDatabase(testDbName).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
             ObjectStore objectStore =
-                db.createObjectStore(STORE_NAME, autoIncrement: true);
-            objectStore.createIndex(NAME_INDEX, NAME_FIELD, multiEntry: true);
+                db.createObjectStore(testStoreName, autoIncrement: true);
+            objectStore.createIndex(testNameIndex, testNameField,
+                multiEntry: true);
           }
           return idbFactory
-              .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+              .open(testDbName,
+                  version: 1, onUpgradeNeeded: _initializeDatabase)
               .then((Database database) {
             db = database;
             _createTransaction();
@@ -349,21 +355,21 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       test('store_properties', () {
-        expect(objectStore.indexNames, [NAME_INDEX]);
+        expect(objectStore.indexNames, [testNameIndex]);
       });
 
       test('properties', () {
-        Index index = objectStore.index(NAME_INDEX);
-        expect(index.name, NAME_INDEX);
-        expect(index.keyPath, NAME_FIELD);
+        Index index = objectStore.index(testNameIndex);
+        expect(index.name, testNameIndex);
+        expect(index.keyPath, testNameField);
         expect(index.multiEntry, true);
         expect(index.unique, false);
       });
 
       test('add_one', () {
-        Map value = {NAME_FIELD: "test1"};
+        Map value = {testNameField: "test1"};
 
-        Index index = objectStore.index(NAME_INDEX);
+        Index index = objectStore.index(testNameIndex);
         return objectStore.add(value).then((key) {
           return index.get("test1").then((Map readValue) {
             expect(readValue, value);
@@ -372,9 +378,9 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       test('add_twice_same_key', () {
-        Map value = {NAME_FIELD: "test1"};
+        Map value = {testNameField: "test1"};
 
-        Index index = objectStore.index(NAME_INDEX);
+        Index index = objectStore.index(testNameIndex);
         return objectStore.add(value).then((key) {
           return objectStore.add(value).then((key) {
             return index.get("test1").then((Map readValue) {
@@ -388,7 +394,7 @@ void defineTests(IdbFactory idbFactory) {
         Map value = {"dummy": "value"};
 
         // There was a bug in memory implementation when a key was null
-        Index index = objectStore.index(NAME_INDEX);
+        Index index = objectStore.index(testNameIndex);
         return objectStore.add(value).then((key) {
           // get(null) does not work
           return index.count().then((int count) {
@@ -398,10 +404,10 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       test('add_null_first', () {
-        Map value = {NAME_FIELD: "test1"};
+        Map value = {testNameField: "test1"};
 
         // There was a bug in memory implementation when a key was null
-        Index index = objectStore.index(NAME_INDEX);
+        Index index = objectStore.index(testNameIndex);
         return objectStore.add({}).then((key) {
           return objectStore.add(value).then((key) {
             return index.get("test1").then((Map readValue) {
@@ -418,21 +424,24 @@ void defineTests(IdbFactory idbFactory) {
       ObjectStore objectStore;
 
       _createTransaction() {
-        transaction = db.transaction(STORE_NAME, IDB_MODE_READ_WRITE);
-        objectStore = transaction.objectStore(STORE_NAME);
+        transaction = db.transaction(testStoreName, idbModeReadWrite);
+        objectStore = transaction.objectStore(testStoreName);
       }
 
       setUp(() {
-        return idbFactory.deleteDatabase(DB_NAME).then((_) {
+        return idbFactory.deleteDatabase(testDbName).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
             Database db = e.database;
             ObjectStore objectStore =
-                db.createObjectStore(STORE_NAME, autoIncrement: true);
-            objectStore.createIndex(NAME_INDEX, NAME_FIELD, multiEntry: true);
-            objectStore.createIndex(NAME_INDEX_2, NAME_FIELD_2, unique: true);
+                db.createObjectStore(testStoreName, autoIncrement: true);
+            objectStore.createIndex(testNameIndex, testNameField,
+                multiEntry: true);
+            objectStore.createIndex(testNameIndex2, testNameField2,
+                unique: true);
           }
           return idbFactory
-              .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+              .open(testDbName,
+                  version: 1, onUpgradeNeeded: _initializeDatabase)
               .then((Database database) {
             db = database;
             _createTransaction();
@@ -451,19 +460,19 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       test('store_properties', () {
-        expect(objectStore.indexNames, [NAME_INDEX, NAME_INDEX_2]);
+        expect(objectStore.indexNames, [testNameIndex, testNameIndex2]);
       });
 
       test('properties', () {
-        Index index = objectStore.index(NAME_INDEX);
-        expect(index.name, NAME_INDEX);
-        expect(index.keyPath, NAME_FIELD);
+        Index index = objectStore.index(testNameIndex);
+        expect(index.name, testNameIndex);
+        expect(index.keyPath, testNameField);
         expect(index.multiEntry, true);
         expect(index.unique, false);
 
-        index = objectStore.index(NAME_INDEX_2);
-        expect(index.name, NAME_INDEX_2);
-        expect(index.keyPath, NAME_FIELD_2);
+        index = objectStore.index(testNameIndex2);
+        expect(index.name, testNameIndex2);
+        expect(index.keyPath, testNameField2);
         expect(index.multiEntry, false);
         expect(index.unique, true);
       });
@@ -471,7 +480,7 @@ void defineTests(IdbFactory idbFactory) {
 
     group('create index and re-open', () {
       setUp(() {
-        return idbFactory.deleteDatabase(DB_NAME);
+        return idbFactory.deleteDatabase(testDbName);
       });
 
       Future testIndex(IdbIndexMeta indexMeta) {
@@ -481,9 +490,9 @@ void defineTests(IdbFactory idbFactory) {
             .then((Database db) {
           db.close();
         }).then((_) {
-          return idbFactory.open(DB_NAME).then((Database db) {
+          return idbFactory.open(testDbName).then((Database db) {
             Transaction transaction =
-                db.transaction(storeMeta.name, IDB_MODE_READ_ONLY);
+                db.transaction(storeMeta.name, idbModeReadOnly);
             ObjectStore objectStore = transaction.objectStore(storeMeta.name);
             Index index = objectStore.index(indexMeta.name);
             IdbIndexMeta readMeta = new IdbIndexMeta.fromIndex(index);

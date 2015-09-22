@@ -122,7 +122,7 @@ class _WebSqlObjectStore extends ObjectStore {
   }
 
   Future _checkWritableStore(Future computation()) {
-    if (transaction._mode != IDB_MODE_READ_WRITE) {
+    if (transaction._mode != idbModeReadWrite) {
       return new Future.error(new DatabaseReadOnlyError());
     }
     return _checkStore(computation);

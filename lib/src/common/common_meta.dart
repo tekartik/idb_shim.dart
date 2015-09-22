@@ -28,8 +28,7 @@ class IdbDatabaseMeta {
   onUpgradeNeeded(action()) {
     versionChangeStores = new Set();
     versionChangeDeletedStores = new Set();
-    _versionChangeTransaction =
-        new IdbTransactionMeta(null, IDB_MODE_READ_WRITE);
+    _versionChangeTransaction = new IdbTransactionMeta(null, idbModeReadWrite);
     var result = action();
     _versionChangeTransaction = null;
     versionChangeStores = null;
@@ -222,19 +221,19 @@ class IdbCursorMeta {
   KeyRange range;
   bool _ascending;
 
-  String get direction => _ascending ? IDB_DIRECTION_NEXT : IDB_DIRECTION_PREV;
+  String get direction => _ascending ? idbDirectionNext : idbDirectionPrev;
 
   IdbCursorMeta(this.key, this.range, String direction, bool autoAdvance)
       : autoAdvance = autoAdvance == true {
     if (direction == null) {
-      direction = IDB_DIRECTION_NEXT;
+      direction = idbDirectionNext;
     }
 
     switch (direction) {
-      case IDB_DIRECTION_PREV:
+      case idbDirectionPrev:
         _ascending = false;
         break;
-      case IDB_DIRECTION_NEXT:
+      case idbDirectionNext:
         _ascending = true;
         break;
       default:

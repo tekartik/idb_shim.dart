@@ -301,7 +301,6 @@ class _SdbIndex extends Index {
 }
 
 sdb.Filter _keyCursorFilter(String keyField, key, KeyRange range) {
-  sdb.Filter filter;
   if (range != null) {
     return _keyRangeFilter(keyField, range);
   } else {
@@ -434,6 +433,7 @@ class _SdbIndexKeyCursor extends Object
   Object get key => record.value[indexCtlr.index.keyPath];
 }
 
+/*
 class _SdbStoreKeyCursor extends Object
     with _SdbKeyCursorMixin
     implements Cursor {
@@ -442,6 +442,7 @@ class _SdbStoreKeyCursor extends Object
     this.recordIndex = index;
   }
 }
+*/
 
 class _SdbIndexCursorWithValue extends Object
     with _SdbKeyCursorMixin, _SdbCursorWithValueMixin {
@@ -466,6 +467,7 @@ class _SdbStoreCursorWithValue extends Object
   }
 }
 
+/*
 class _SdbCursorWithValue extends Object
     with _SdbKeyCursorMixin, _SdbCursorWithValueMixin {
   _SdbCursorWithValue(_SdbBaseCursorControllerMixin ctlr, int index) {
@@ -473,6 +475,7 @@ class _SdbCursorWithValue extends Object
     this.recordIndex = index;
   }
 }
+*/
 
 abstract class _ISdbCursor {
   sdb.Filter get filter;
@@ -565,6 +568,7 @@ abstract class _SdbCursorWithValueControllerMixin {
   Stream<CursorWithValue> get stream => ctlr.stream;
 }
 
+/*
 class _SdbStoreKeyCursorController extends Object
     with
         _SdbKeyCursorControllerMixin,
@@ -581,6 +585,7 @@ class _SdbStoreKeyCursorController extends Object
     return cursor;
   }
 }
+*/
 
 class _SdbIndexKeyCursorController extends Object
     with
@@ -648,7 +653,7 @@ class _SdbObjectStore extends ObjectStore {
   }
 
   Future inWritableTransaction(Future computation()) {
-    if (transaction.meta.mode != IDB_MODE_READ_WRITE) {
+    if (transaction.meta.mode != idbModeReadWrite) {
       return new Future.error(new DatabaseReadOnlyError());
     }
     return inTransaction(computation);
@@ -827,7 +832,6 @@ class _SdbObjectStore extends ObjectStore {
   }
 
   sdb.Filter cursorFilter(key, KeyRange range) {
-    sdb.Filter filter;
     if (range != null) {
       return _keyRangeFilter(keyField, range);
     } else {
