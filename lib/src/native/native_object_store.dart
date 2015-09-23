@@ -12,8 +12,8 @@ class _NativeObjectStore extends ObjectStore {
 
   @override
   Future add(dynamic value, [dynamic key]) {
-    return idbObjectStore.add(value, key).catchError((e) {
-      throw new _NativeDatabaseError(e);
+    return _catchAsyncNativeError(() {
+      return idbObjectStore.add(value, key);
     });
   }
 
@@ -26,22 +26,22 @@ class _NativeObjectStore extends ObjectStore {
 
   @override
   Future clear() {
-    return idbObjectStore.clear().catchError((e) {
-      throw new DatabaseError(e.toString());
+    return _catchAsyncNativeError(() {
+      return idbObjectStore.clear();
     });
   }
 
   @override
   Future put(dynamic value, [dynamic key]) {
-    return idbObjectStore.put(value, key).catchError((e) {
-      throw new DatabaseError(e.toString());
+    return _catchAsyncNativeError(() {
+      return idbObjectStore.put(value, key);
     });
   }
 
   @override
   Future delete(key) {
-    return idbObjectStore.delete(key).catchError((e) {
-      throw new DatabaseError(e.toString());
+    return _catchAsyncNativeError(() {
+      return idbObjectStore.delete(key);
     });
   }
 
