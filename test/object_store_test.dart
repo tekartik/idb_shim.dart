@@ -247,7 +247,9 @@ void defineTests(IdbFactory idbFactory) {
         try {
           await objectStore.getObject(null);
           fail("error");
-        } on DatabaseError catch (e) {}
+        } on DatabaseError catch (e) {
+          expect(e, isNotNull);
+        }
       });
     });
     group('auto', () {

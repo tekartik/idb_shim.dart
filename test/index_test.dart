@@ -119,7 +119,9 @@ void defineTests(IdbFactory idbFactory) {
         try {
           await index.get(null);
           fail("error");
-        } on DatabaseError catch (e) {}
+        } on DatabaseError catch (e) {
+          expect(e, isNotNull);
+        }
       });
 //
 //      solo_test('add_twice_same_key', () {
