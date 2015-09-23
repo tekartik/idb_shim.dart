@@ -21,3 +21,9 @@ class DatabaseStoreNotFoundError extends DatabaseError {
       "NotFoundError: One of the specified object stores was not found.";
   DatabaseStoreNotFoundError() : super(_MESSAGE);
 }
+
+class DatabaseNoKeyError extends DatabaseError {
+  static String _MESSAGE =
+      "DataError: The data provided does not meet requirements. No key or key range specified.";
+  DatabaseNoKeyError() : super(_MESSAGE);
+}

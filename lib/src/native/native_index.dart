@@ -6,12 +6,16 @@ class _NativeIndex extends Index {
 
   @override
   Future get(dynamic key) {
-    return idbIndex.get(key);
+    return _catchAsyncNativeError(() {
+      return idbIndex.get(key);
+    });
   }
 
   @override
   Future getKey(dynamic key) {
-    return idbIndex.getKey(key);
+    return _catchAsyncNativeError(() {
+      return idbIndex.getKey(key);
+    });
   }
 
   @override

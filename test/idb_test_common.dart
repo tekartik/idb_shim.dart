@@ -53,6 +53,10 @@ Future<Database> setUpSimpleStore(IdbFactory idbFactory, //
   });
 }
 
+bool isDatabaseError(e) {
+  return (e is DatabaseError);
+}
+
 bool isTransactionReadOnlyError(e) {
   if (e is DatabaseError) {
     String message = e.toString().toLowerCase();

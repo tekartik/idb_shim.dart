@@ -400,7 +400,7 @@ class _WebSqlObjectStore extends ObjectStore {
 
   @override
   Future getObject(dynamic key) {
-    //return _checkStore().then((_) {
+    checkKeyParam(key);
     return _checkStore(() {
       return _get(key, keyPath);
     });

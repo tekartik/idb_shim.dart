@@ -1,5 +1,6 @@
 part of idb_shim_native;
 
+/*
 class _NativeDatabaseError extends DatabaseError {
   dynamic _nativeError;
   _NativeDatabaseError(this._nativeError) : super(null) {}
@@ -12,5 +13,14 @@ class _NativeDatabaseError extends DatabaseError {
       }
     }
     return _nativeError.toString();
+  }
+}
+*/
+
+_catchAsyncNativeError(Future action()) async {
+  try {
+    return await action();
+  } catch (e) {
+    throw new DatabaseError(e.toString());
   }
 }

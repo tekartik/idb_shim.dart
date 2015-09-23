@@ -113,6 +113,14 @@ void defineTests(IdbFactory idbFactory) {
           });
         });
       });
+
+      test('get_null', () async {
+        Index index = objectStore.index(testNameIndex);
+        try {
+          await index.get(null);
+          fail("error");
+        } on DatabaseError catch (e) {}
+      });
 //
 //      solo_test('add_twice_same_key', () {
 //        Map value1 = {

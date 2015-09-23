@@ -65,7 +65,7 @@ void defineTests(IdbFactory idbFactory) {
       });
     });
 
-    group('non auto', () {
+    group('non_auto', () {
       Database db;
       Transaction transaction;
       ObjectStore objectStore;
@@ -241,6 +241,13 @@ void defineTests(IdbFactory idbFactory) {
             expect(readValue, value);
           });
         });
+      });
+
+      test('getObject_null', () async {
+        try {
+          await objectStore.getObject(null);
+          fail("error");
+        } on DatabaseError catch (e) {}
       });
     });
     group('auto', () {

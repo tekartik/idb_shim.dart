@@ -1,5 +1,7 @@
 library idb_shim_sembast;
 
+import 'src/common/common_validation.dart';
+
 //import 'package:tekartik_core/dev_utils.dart';
 import 'package:logging/logging.dart';
 import 'package:idb_shim/idb_client.dart';
@@ -221,6 +223,7 @@ class _SdbIndex extends Index {
 
   @override
   Future get(key) {
+    checkKeyParam(key);
     return inTransaction(() {
       sdb.Finder finder =
           new sdb.Finder(filter: _indexKeyOrRangeFilter(key), limit: 1);
@@ -807,6 +810,7 @@ class _SdbObjectStore extends ObjectStore {
 
   @override
   Future getObject(key) {
+    checkKeyParam(key);
     return inTransaction(() {
       return sdbStore.getRecord(key).then((sdb.Record record) {
         return _recordToValue(record);

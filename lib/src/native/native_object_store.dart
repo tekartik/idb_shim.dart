@@ -18,8 +18,10 @@ class _NativeObjectStore extends ObjectStore {
   }
 
   @override
-  Future getObject(dynamic key) {
-    return idbObjectStore.getObject(key);
+  Future getObject(dynamic key) async {
+    return _catchAsyncNativeError(() {
+      return idbObjectStore.getObject(key);
+    });
   }
 
   @override
