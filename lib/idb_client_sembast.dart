@@ -1045,7 +1045,7 @@ class _SdbDatabase extends Database {
     }
 
     if (db != null) {
-      map["db"] = db.toDebugMap();
+      map["db"] = db.toJson();
     }
     return map;
   }
@@ -1063,7 +1063,7 @@ class IdbSembastFactory extends IdbFactory {
       _path == null ? dbName : join(_path, dbName);
 
   @override
-  bool get persistent => _databaseFactory.persistent;
+  bool get persistent => _databaseFactory.hasStorage;
 
   IdbSembastFactory(this._databaseFactory, [this._path]);
 
