@@ -6,4 +6,19 @@ checkKeyParam(var key) {
   if (key == null) {
     throw new DatabaseNoKeyError();
   }
+  if (!(key is String || key is int)) {
+    throw new DatabaseInvalidKeyError(key);
+  }
+}
+
+bool checkKeyValueParam(String keyPath, dynamic key, dynamic value) {
+  if (key != null) {
+    checkKeyParam(key);
+    if (keyPath != null) {
+      if (value[keyPath] != null) {
+        return false;
+      }
+    }
+  }
+  return true;
 }

@@ -123,6 +123,35 @@ void defineTests(IdbFactory idbFactory) {
           expect(e, isNotNull);
         }
       });
+
+      test('get_boolean', () async {
+        Index index = objectStore.index(testNameIndex);
+        try {
+          await index.get(null);
+          fail("error");
+        } on DatabaseError catch (e) {
+          expect(e, isNotNull);
+        }
+      });
+      test('getKey_null', () async {
+        Index index = objectStore.index(testNameIndex);
+        try {
+          await index.getKey(null);
+          fail("error");
+        } on DatabaseError catch (e) {
+          expect(e, isNotNull);
+        }
+      });
+
+      test('getKey_boolean', () async {
+        Index index = objectStore.index(testNameIndex);
+        try {
+          await index.getKey(true);
+          fail("error");
+        } on DatabaseError catch (e) {
+          expect(e, isNotNull);
+        }
+      });
 //
 //      solo_test('add_twice_same_key', () {
 //        Map value1 = {

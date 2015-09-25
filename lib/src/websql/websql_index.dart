@@ -137,6 +137,7 @@ class _WebSqlIndex extends Index {
 
   @override
   Future getKey(key) {
+    checkKeyParam(key);
     return _checkIndex(() {
       return store._getKey(key, keyPath);
     });

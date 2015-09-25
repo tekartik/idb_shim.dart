@@ -27,3 +27,9 @@ class DatabaseNoKeyError extends DatabaseError {
       "DataError: The data provided does not meet requirements. No key or key range specified.";
   DatabaseNoKeyError() : super(_MESSAGE);
 }
+
+class DatabaseInvalidKeyError extends DatabaseError {
+  DatabaseInvalidKeyError(key)
+      : super(
+            "DataError: The data provided does not meet requirements. The parameter '${key}' is not a valid key.");
+}

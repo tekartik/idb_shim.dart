@@ -69,14 +69,3 @@ dynamic cloneValue(dynamic value, [String keyPath, dynamic key]) {
   }
   return clone;
 }
-
-bool checkKeyValue(String keyPath, dynamic key, dynamic value) {
-  if (key != null) {
-    if (keyPath != null) {
-      if (value[keyPath] != null) {
-        return false;
-      }
-    }
-  }
-  return true;
-}

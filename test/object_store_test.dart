@@ -251,6 +251,15 @@ void defineTests(IdbFactory idbFactory) {
           expect(e, isNotNull);
         }
       });
+
+      test('getObject_boolean', () async {
+        try {
+          await objectStore.getObject(true);
+          fail("error");
+        } on DatabaseError catch (e) {
+          expect(e, isNotNull);
+        }
+      });
     });
     group('auto', () {
       Database db;

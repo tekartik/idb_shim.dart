@@ -302,7 +302,7 @@ class _WebSqlObjectStore extends ObjectStore {
           key = value[keyPath];
         }
       } else {
-        if (!checkKeyValue(keyPath, key, value)) {
+        if (!checkKeyValueParam(keyPath, key, value)) {
           return new Future.error(new ArgumentError(
               "both key $key and inline keyPath ${value[keyPath]}"));
         }
@@ -317,7 +317,7 @@ class _WebSqlObjectStore extends ObjectStore {
   }
 
   Future _put(dynamic value, [dynamic key]) {
-    if (!checkKeyValue(keyPath, key, value)) {
+    if (!checkKeyValueParam(keyPath, key, value)) {
       return new Future.error(new ArgumentError(
           "both key $key and inline keyPath ${value[keyPath]}"));
     }

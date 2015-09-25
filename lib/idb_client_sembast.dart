@@ -239,6 +239,7 @@ class _SdbIndex extends Index {
 
   @override
   Future getKey(key) {
+    checkKeyParam(key);
     return inTransaction(() {
       sdb.Finder finder =
           new sdb.Finder(filter: _indexKeyOrRangeFilter(key), limit: 1);
