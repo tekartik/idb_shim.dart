@@ -1,5 +1,5 @@
 @TestOn("browser")
-library all_test_client_native;
+library idb_shim.test_runner_client_native_test;
 
 import 'package:test/test.dart';
 import 'test_runner.dart' as test_runner;

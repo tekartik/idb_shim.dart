@@ -26,7 +26,32 @@ IdbFactory idbFactory = getIdbFactory();
 idbFactory.open(dbName, version: xxx, onUpgradeNeeded: yyy);
 ```
 
-All other existing code remains unchanged (well at least that it is the goal)
+All other existing code remains unchanged. Simple example below:
+
+```dart
+// define the store name
+const String storeName = "records";
+
+// open the database
+Database db = await idbFactory.open("my_records.db", version: 1,
+    onUpgradeNeeded: (VersionChangeEvent event) {
+  Database db = event.database;
+  // create the store
+  db.createObjectStore(storeName, autoIncrement: true);
+});
+
+// put some data
+var txn = db.transaction(storeName, "readwrite");
+var store = txn.objectStore(storeName);
+var key = await store.put({"some": "data"});
+await txn.completed;
+
+// read some data
+txn = db.transaction(storeName, "readonly");
+store = txn.objectStore(storeName);
+Map value = await store.getObject(key);
+await txn.completed;
+```
 
 ### Author
  * [Alexandre Roux Tekartik](https://github.com/alextekartik) ([+Alexandre Roux Tekartik](https://plus.google.com/+AlexandreRouxTekartik/about))
@@ -34,19 +59,21 @@ All other existing code remains unchanged (well at least that it is the goal)
 ### Known limitations/issues
 
 * For autoincrement, key cannot be set as a different type than int
-* Native exception type have no match in the dart so a custom string or error is sometimes created
+* Native exception type have no match in dart so a custom DatabaseError object is created to wrap the exception
 * Nextunique and prevunique not support (for now)
 * No support for Cursor.source
-* Next with key (on Cursor) not supported
-* No support for blocked. It is always possible to upgrade the database, however other tabs will get blocked in their future calls
+* No generic support for blocked. It is always possible to upgrade the database, however other tabs will get blocked in their future calls
 * Blocked and onVersionChange event support, this is actually tricky for websql, actually the new db won't be blocked but the old one will!
   so the proper common implementation is to register for onVersionChange event and when receiving simply reload the page. Sample code to come
 * Type of data
-    * Only stuff that can be JSON serialized/deserialized
-    * DateTime is not supported, it should be converted to string using toIso8601String
-    * Cyclic dependecy are not supported (per JSON serialization)
-    * Large float are not converted to int (native indexeddb implementation does this)
+  * Only stuff that can be JSON serialized/deserialized
+  * DateTime is not supported, it should be converted to string using toIso8601String
+  * Cyclic dependecy are not supported (per JSON serialization)
+  * Large float are not converted to int (native indexeddb implementation does this)
+* Type of key
+  * String and num (double and int) are supported
+  * DateTime is not supported
 * Index.get: only by key is supported (no range yet)
 * WebSql implementation issue SqlResultSet.rows.first is not working in dart2js (bug?)
-* When adding an index, existing data is not indexed yet
+
 

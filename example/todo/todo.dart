@@ -15,11 +15,6 @@ import 'dart:async';
 idb.IdbFactory idbFactory;
 
 class TodoList {
-  static final String _TODOS_DB = "com.tekartik.idb.todo";
-  static final String _TODOS_STORE = "todos";
-
-  idb.Database _db;
-  int _version = 2;
   InputElement _input;
   Element _todoItems;
 
@@ -29,10 +24,16 @@ class TodoList {
     querySelector('input#submit').onClick.listen((e) => _onAddTodo());
   }
 
-  Future open() {
+  static final String _todosDb = "com.tekartik.idb.todo";
+  static final String _todosStore = "todos";
+
+  idb.Database _db;
+  int _version = 2;
+
+  Future open() async {
     //return window.indexedDB.open(_TODOS_DB, version: _version,
     return idbFactory
-        .open(_TODOS_DB, version: _version, onUpgradeNeeded: _onUpgradeNeeded)
+        .open(_todosDb, version: _version, onUpgradeNeeded: _onUpgradeNeeded)
         .then(_onDbOpened)
         .catchError(_onError);
   }
@@ -51,8 +52,8 @@ class TodoList {
 
   void _onUpgradeNeeded(idb.VersionChangeEvent e) {
     idb.Database db = (e.target as idb.OpenDBRequest).result;
-    if (!db.objectStoreNames.contains(_TODOS_STORE)) {
-      db.createObjectStore(_TODOS_STORE, keyPath: 'timeStamp');
+    if (!db.objectStoreNames.contains(_todosStore)) {
+      db.createObjectStore(_todosStore, keyPath: 'timeStamp');
     }
   }
 
@@ -65,8 +66,8 @@ class TodoList {
   }
 
   Future _addTodo(String text) {
-    var trans = _db.transaction(_TODOS_STORE, 'readwrite');
-    var store = trans.objectStore(_TODOS_STORE);
+    var trans = _db.transaction(_todosStore, 'readwrite');
+    var store = trans.objectStore(_todosStore);
     return store.put({
       'text': text,
       'timeStamp': new DateTime.now().millisecondsSinceEpoch.toString()
@@ -74,8 +75,8 @@ class TodoList {
   }
 
   void _deleteTodo(String id) {
-    var trans = _db.transaction(_TODOS_STORE, 'readwrite');
-    var store = trans.objectStore(_TODOS_STORE);
+    var trans = _db.transaction(_todosStore, 'readwrite');
+    var store = trans.objectStore(_todosStore);
     var request = store.delete(id);
     request.then((e) => _getAllTodoItems(), onError: _onError);
   }
@@ -83,8 +84,8 @@ class TodoList {
   void _getAllTodoItems() {
     _todoItems.nodes.clear();
 
-    var trans = _db.transaction(_TODOS_STORE, 'readwrite');
-    var store = trans.objectStore(_TODOS_STORE);
+    var trans = _db.transaction(_todosStore, 'readwrite');
+    var store = trans.objectStore(_todosStore);
 
     // Get everything in the store.
     store.openCursor(autoAdvance: true).listen((cursor) {
@@ -131,7 +132,7 @@ Map<String, String> getArguments(String search) {
   return params;
 }
 
-void main() {
+void main() async {
   var urlArgs = getArguments(window.location.search);
   String idbFactoryName = urlArgs['idb_factory'];
   // init factory from url
@@ -141,6 +142,6 @@ void main() {
         "No idbFactory of type '$idbFactoryName' supported on this browser");
   } else {
     querySelector("#idb span").innerHtml = "Using '${idbFactory.name}'";
-    new TodoList().open();
+    Database db = await new TodoList().open();
   }
 }

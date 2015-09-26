@@ -260,6 +260,15 @@ void defineTests(IdbFactory idbFactory) {
           expect(e, isNotNull);
         }
       });
+
+      test('put/get_key_double', () async {
+        String value = "test";
+        expect(await objectStore.getObject(1.2), isNull);
+        double key = 0.001;
+        double keyAdded = await objectStore.add(value, key);
+        expect(keyAdded, key);
+        expect(await objectStore.getObject(key), value);
+      });
     });
     group('auto', () {
       Database db;
@@ -324,17 +333,16 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       // limitation, this crashes everywhere
-      tk_skip_test('add with same key', () {
+      test('add_with_same_key', () async {
         Map value = {};
-        return objectStore.add(value, 1234).then((key) {
-          expect(key, 1234);
-        }).then((_) {
-          return objectStore.add(value, 1234).then((key) {
-            fail("should fail");
-          }, onError: (e) {
-            //print(e.message);
-          });
-        });
+        int key = await objectStore.add(value, 1234);
+        expect(key, 1234);
+        try {
+          await objectStore.add(value, 1234);
+          fail("should fail");
+        } on DatabaseError catch (_) {
+          //print(e.message);
+        }
       });
 
       test('add with key then back', () {
@@ -353,37 +361,29 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       // limitation
-      tk_skip_test('add with text number key and next', () {
+      // websql make it 3 while idb and sembast make it one...
+      test('add_with_text_number_key_and_next', () async {
         Map value = {};
-        return objectStore.add(value, "2").then((key) {
-          expect(key, "2");
-        }).then((_) {
-          return objectStore.add(value).then((key) {
-            expect(key, 1);
-          });
-        });
+        String key2 = await objectStore.add(value, "2");
+        expect(key2, "2");
+        int key1 = await objectStore.add(value);
+        expect(key1 == 1 || key1 == 3, isTrue);
       });
 
       // limitation
-      tk_skip_test('add with text key and next', () {
+      // Sql does not support text and auto increment
+      test('add_with_text_key_and_next', () async {
         Map value1 = {'test': 1};
         Map value2 = {'test': 2};
-        return objectStore.add(value1, "test").then((key) {
-          expect(key, "test");
-        }).then((_) {
-          return objectStore.add(value2).then((key) {
-            expect(key, 1);
-          });
-        }).then((_) {
-          return objectStore.getObject(1).then((valueRead) {
-            expect(valueRead, value2);
-          });
-        }).then((_) {
-          return objectStore.getObject('test').then((valueRead) {
-            expect(valueRead, value1);
-          });
-        });
-      });
+        String keyTest = await objectStore.add(value1, "test");
+        expect(keyTest, "test");
+        int key1 = await objectStore.add(value2);
+        expect(key1, 1);
+
+        Map valueRead = await objectStore.getObject(1);
+        valueRead = await objectStore.getObject('test');
+        expect(valueRead, value1);
+      }, skip: true);
 
       test('get', () {
         Map value = {};

@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 import 'package:idb_shim/idb_browser.dart';
 import 'package:idb_shim/idb_client.dart';
 
-testMain() {
+main() {
   group('idb_browser', () {
     test('native', () {
       IdbFactory native = idbNativeFactory;
@@ -44,9 +44,4 @@ testMain() {
       expect(idbBrowserFactory, isNot(isNull));
     });
   });
-}
-
-main() {
-  //useHtmlConfiguration();
-  testMain();
 }

@@ -6,7 +6,7 @@ checkKeyParam(var key) {
   if (key == null) {
     throw new DatabaseNoKeyError();
   }
-  if (!(key is String || key is int)) {
+  if (!(key is String || key is num)) {
     throw new DatabaseInvalidKeyError(key);
   }
 }

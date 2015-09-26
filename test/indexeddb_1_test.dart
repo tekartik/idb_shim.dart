@@ -147,24 +147,26 @@ void testTypes(testFunction, idb.IdbFactory idbFactory) {
       testFunction(idbFactory, 123, 1371854424211, equals("1371854424211"),
           null, STORE_NAME, VERSION, true));
   //TEKARTIK_IDB_REMOVED
-  tk_skip_test(
+  test(
       'largeDoubleConvertedToInt',
       testFunction(idbFactory, 123, 1371854424211.0, equals("1371854424211"),
-          null, STORE_NAME, VERSION, true));
+          null, STORE_NAME, VERSION, true),
+      skip: true);
   test(
       'largeIntInMap',
       testFunction(idbFactory, 123, {'time': 4503599627370492},
           equals("{time: 4503599627370492}"), null, STORE_NAME, VERSION, true));
   var now = new DateTime.now();
   //TEKARTIK_IDB_REMOVED
-  tk_skip_test(
+  test(
       'DateTime',
       testFunction(
           idbFactory,
           123,
           now,
           predicate((date) =>
-              date.millisecondsSinceEpoch == now.millisecondsSinceEpoch)));
+              date.millisecondsSinceEpoch == now.millisecondsSinceEpoch)),
+      skip: true);
 }
 
 //TEKARTIK_IDB_REMOVED main() {
@@ -175,17 +177,17 @@ defineTests(idb.IdbFactory idbFactory_) {
   // Test that indexed_db is properly flagged as supported or not.
   // Note that the rest of the indexed_db tests assume that this has been
   // checked.
-  tk_skip_group('supported', () {
+  group('supported', () {
     test('supported', () {
       expect(idb.IdbFactory.supported, true);
     });
-  });
+  }, skip: true);
 
-  tk_skip_group('supportsDatabaseNames', () {
+  group('supportsDatabaseNames', () {
     test('supported', () {
       expect(idbFactory.supportsDatabaseNames, isTrue);
     });
-  });
+  }, skip: true);
 
   group('functional', () {
     test('throws when unsupported', () {
@@ -201,9 +203,9 @@ defineTests(idb.IdbFactory idbFactory_) {
     if (idb.IdbFactory.supported) {
       test('upgrade', () => testUpgrade(idbFactory));
       // temp skip
-      tk_skip_group('dynamic', () {
+      group('dynamic', () {
         testTypes(testReadWrite, idbFactory);
-      });
+      }, skip: true);
 
       group('typed', () {
         testTypes(testReadWriteTyped, idbFactory);

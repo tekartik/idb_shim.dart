@@ -1,4 +1,4 @@
-library idb_shim.test_runner_sembast_io;
+library idb_shim.test_runner_client_sembast_io_test;
 
 import 'test_runner.dart' as test_runner;
 

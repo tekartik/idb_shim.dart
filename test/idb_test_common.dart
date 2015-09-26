@@ -12,7 +12,7 @@ import 'dart:async';
 import 'common_meta_test.dart';
 export 'common_meta_test.dart' hide main;
 export 'package:idb_shim/src/common/common_meta.dart';
-export 'package:tekartik_test/test_utils.dart';
+//export 'package:tekartik_test/test_utils.dart';
 export 'package:test/test.dart';
 export 'dart:async';
 

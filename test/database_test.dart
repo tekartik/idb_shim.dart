@@ -123,7 +123,7 @@ void defineTests(IdbFactory idbFactory) {
     });
 
     // does not work in IE...
-    tk_skip_test('one keep open then one', () {
+    test('one keep open then one', () {
       return _openWith1Store().then((_) {
         Database firstDb = db;
 
@@ -154,6 +154,6 @@ void defineTests(IdbFactory idbFactory) {
           }
         });
       });
-    });
+    }, skip: true);
   });
 }

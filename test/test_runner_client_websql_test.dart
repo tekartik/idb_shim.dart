@@ -1,5 +1,5 @@
 @TestOn("browser")
-library all_test_client_websql;
+library idb_shim.test_runner_client_websql;
 
 import 'package:test/test.dart';
 import 'test_runner.dart' as test_runner;
@@ -61,7 +61,7 @@ webSqlTest(IdbWebSqlFactory idbFactory) {
   });
 }
 
-testMain() {
+main() {
   group('websql', () {
     //wrapper.SqlDatabase.debug = true;
     if (IdbWebSqlFactory.supported) {
@@ -78,9 +78,4 @@ testMain() {
       test("not supported", () {});
     }
   });
-}
-
-main() {
-  //useHtmlConfiguration();
-  testMain();
 }

@@ -266,7 +266,7 @@ void defineTests(IdbFactory idbFactory) {
         });
       });
 
-      tk_skip_test('WEIRD count by range', () {
+      test('WEIRD count by range', () {
         Map value = {};
         return objectStore.add(value).then((key1) {
           return objectStore.add(value).then((key2) {
@@ -282,7 +282,7 @@ void defineTests(IdbFactory idbFactory) {
             });
           });
         });
-      });
+      }, skip: true);
 
       test('add/get map', () {
         Map value = {testNameField: "test1"};
