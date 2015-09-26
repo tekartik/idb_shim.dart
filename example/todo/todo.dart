@@ -132,7 +132,7 @@ Map<String, String> getArguments(String search) {
   return params;
 }
 
-void main() async {
+main() async {
   var urlArgs = getArguments(window.location.search);
   String idbFactoryName = urlArgs['idb_factory'];
   // init factory from url
@@ -142,6 +142,6 @@ void main() async {
         "No idbFactory of type '$idbFactoryName' supported on this browser");
   } else {
     querySelector("#idb span").innerHtml = "Using '${idbFactory.name}'";
-    Database db = await new TodoList().open();
+    await new TodoList().open();
   }
 }

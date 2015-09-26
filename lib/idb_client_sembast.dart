@@ -10,7 +10,7 @@ import 'dart:async';
 import 'package:path/path.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
 
-const IDB_FACTORY_SEMBAST = "sembast";
+const idbFactoryNameSembast = "sembast";
 
 class _SdbVersionChangeEvent extends VersionChangeEvent {
   final int oldVersion;
@@ -1068,7 +1068,7 @@ class IdbSembastFactory extends IdbFactory {
 
   IdbSembastFactory(this._databaseFactory, [this._path]);
 
-  String get name => IDB_FACTORY_SEMBAST;
+  String get name => "${idbFactoryNameSembast}";
 
   @override
   Future<Database> open(String dbName,

@@ -30,8 +30,10 @@ IdbFactory getIdbFactory([String name, String path]) {
   }
   switch (name) {
     case idbFactorySembastMemory:
+    case idbFactoryMemory:
       return idbSembastMemoryFactory;
     case idbFactorySembastIo:
+    case idbFactoryIo:
       return getIdbSembastIoFactory(path);
     case idbFactoryPersistent:
       return getIdbPersistentFactory(path);

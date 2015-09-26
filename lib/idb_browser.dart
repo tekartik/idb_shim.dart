@@ -22,6 +22,7 @@ IdbFactory getIdbFactory([String name]) {
     case idbFactoryMemory:
       return idbMemoryFactory;
     case idbFactorySembastMemory:
+    case idbFactoryMemory:
       return idbSembastMemoryFactory;
     default:
       throw new UnsupportedError("Factory '$name' not supported");
