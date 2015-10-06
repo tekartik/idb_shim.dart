@@ -1,32 +1,46 @@
 library database_test;
 
 import 'package:idb_shim/idb_client.dart';
-import 'package:idb_shim/idb_client_memory.dart';
 import 'idb_test_common.dart';
 //import 'idb_test_factory.dart';
 
 main() {
-  defineTests(idbMemoryFactory);
+  defineTests_(idbMemoryContext);
 }
 
 void defineTests(IdbFactory idbFactory) {
+  TestContext ctx = new TestContext()..factory = idbFactory;
+  defineTests_(ctx);
+}
+
+void defineTests_(TestContext ctx) {
+  IdbFactory idbFactory = ctx.factory;
+
   group('database', () {
     Database db;
 
-    _open() {
-      return idbFactory.open(testDbName).then((Database database) {
-        db = database;
-      });
+    // new
+    String _dbName;
+    String _getTestDbName() {
+      return ctx.dbName;
+    }
+    // prepare for test
+    Future _deleteDb() async {
+      _dbName = _getTestDbName();
+      await idbFactory.deleteDatabase(_dbName);
+    }
+    Future _openDb() async {
+      db = await idbFactory.open(_dbName);
     }
 
-    _openWith1Store() {
+    _openWith1Store([String dbName = testDbName]) {
       void _initializeDatabase(VersionChangeEvent e) {
         Database db = e.database;
         //ObjectStore objectStore =
         db.createObjectStore(testStoreName);
       }
       return idbFactory
-          .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
+          .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
           .then((Database database) {
         db = database;
       });
@@ -53,6 +67,8 @@ void defineTests(IdbFactory idbFactory) {
     }
 
     setUp(() {
+      // new test - make sure _deleteDb is called
+      _dbName = null;
       return idbFactory.deleteDatabase(testDbName);
     });
 
@@ -62,24 +78,25 @@ void defineTests(IdbFactory idbFactory) {
       }
     });
 
-    test('empty', () {
-      return _open().then((_) {
-        expect(db.factory, idbFactory);
-        expect(db.objectStoreNames.isEmpty, true);
-        expect(db.name, testDbName);
-        expect(db.version, 1);
-      });
+    test('empty', () async {
+      await _deleteDb();
+      await _openDb();
+      expect(db.factory, idbFactory);
+      expect(db.objectStoreNames.isEmpty, true);
+      expect(db.name, _dbName);
+      expect(db.version, 1);
     });
 
-    test('one', () {
-      return _openWith1Store().then((_) {
+    test('one', () async {
+      await _deleteDb();
+      return _openWith1Store(_dbName).then((_) {
         List<String> storeNames = new List.from(db.objectStoreNames);
         expect(storeNames.length, 1);
         expect(storeNames[0], testStoreName);
 
         db.close();
         // re-open
-        return _open().then((_) {
+        return _openDb().then((_) {
           storeNames = new List.from(db.objectStoreNames);
           expect(storeNames.length, 1);
           expect(storeNames, [testStoreName]);

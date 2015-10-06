@@ -1,7 +1,6 @@
 @TestOn("browser")
 library websql_client_test;
 
-import 'package:test/test.dart';
 import 'package:idb_shim/src/websql/websql_wrapper.dart';
 import 'package:idb_shim/src/websql/websql_client_constants.dart';
 import 'package:idb_shim/idb_client_websql.dart';

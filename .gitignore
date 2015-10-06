@@ -1,7 +1,6 @@
 syntax: glob
 # Don’t commit the following directories created by pub.
 build/
-packages/
 packages
 .packages
 tmp/
@@ -24,3 +23,6 @@ out.precompiled.js
 
 # Include when developing application packages.
 pubspec.lock
+
+# Test generated file
+test/out/

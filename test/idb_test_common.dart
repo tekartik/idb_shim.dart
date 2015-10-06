@@ -1,20 +1,23 @@
-library idb_test_common;
+library idb_shim.idb_test_common;
 
 import 'package:logging/logging.dart';
 //import 'package:unittest/unittest.dart';
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
+import 'package:idb_shim/idb_client_sembast.dart';
 import 'package:idb_shim/idb_client_memory.dart';
-
+import 'package:sembast/sembast.dart' as sdb;
 export 'package:idb_shim/idb_client_memory.dart';
 import 'dart:async';
 
 import 'common_meta_test.dart';
-export 'common_meta_test.dart' hide main;
+//export 'common_meta_test.dart' hide main;
 export 'package:idb_shim/src/common/common_meta.dart';
 //export 'package:tekartik_test/test_utils.dart';
-export 'package:test/test.dart';
+import 'package:dev_test/test.dart';
+export 'package:dev_test/test.dart';
 export 'dart:async';
+import 'package:path/path.dart';
 
 // only for test - INFO - basic output, FINE - show test name before/after - FINEST - samething for console test also
 const Level debugLevel = Level.FINE;
@@ -29,6 +32,20 @@ const String testValueField = 'value';
 
 const String testNameIndex2 = 'name_index_2';
 const String testNameField2 = 'name_2';
+
+class TestContext {
+  IdbFactory factory;
+  String get dbName => testDescriptions.join('-') + ".db";
+}
+
+class SembastTestContext extends TestContext {
+  sdb.DatabaseFactory sdbFactory;
+  IdbSembastFactory get factory => super.factory;
+  String get dbName => join(joinAll(testDescriptions), "test.db");
+}
+
+TestContext idbMemoryContext = new SembastTestContext()
+  ..factory = idbMemoryFactory;
 
 IdbFactory idbTestMemoryFactory = idbMemoryFactory;
 

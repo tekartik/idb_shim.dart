@@ -1,6 +1,6 @@
 library idb_shim.test_runner;
 
-import 'package:test/test.dart';
+import 'idb_test_common.dart';
 
 import 'open_test.dart' as open_test;
 import 'database_test.dart' as database_test;
@@ -20,6 +20,10 @@ import 'indexeddb_3_test.dart' as indexeddb_3_test;
 import 'indexeddb_4_test.dart' as indexeddb_4_test;
 import 'indexeddb_5_test.dart' as indexeddb_5_test;
 import 'package:idb_shim/idb_client.dart';
+
+defineTests_(TestContext ctx) {
+  database_test.defineTests_(ctx);
+}
 
 defineTests(IdbFactory idbFactory) {
   transaction_test.defineTests(idbFactory);
