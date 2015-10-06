@@ -1,7 +1,7 @@
 @TestOn("browser")
 library idb_shim.test_runner_client_websql;
 
-import 'package:test/test.dart';
+import 'idb_test_common.dart';
 import 'test_runner.dart' as test_runner;
 import 'websql_wrapper_test.dart' as websql_wrapper_test;
 import 'websql_client_test.dart' as websql_client_test;
@@ -67,7 +67,8 @@ main() {
     if (IdbWebSqlFactory.supported) {
       //idb_wql.SqlDatabase.debug = true;
       IdbWebSqlFactory idbFactory = new IdbWebSqlFactory();
-      test_runner.defineTests(idbFactory);
+      TestContext ctx = new TestContext()..factory = idbFactory;
+      test_runner.defineTests_(ctx);
       websql_wrapper_test.main();
       websql_client_test.main();
       webSqlTest(idbFactory);

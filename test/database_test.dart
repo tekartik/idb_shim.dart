@@ -8,11 +8,6 @@ main() {
   defineTests_(idbMemoryContext);
 }
 
-void defineTests(IdbFactory idbFactory) {
-  TestContext ctx = new TestContext()..factory = idbFactory;
-  defineTests_(ctx);
-}
-
 void defineTests_(TestContext ctx) {
   IdbFactory idbFactory = ctx.factory;
 
@@ -21,26 +16,23 @@ void defineTests_(TestContext ctx) {
 
     // new
     String _dbName;
-    String _getTestDbName() {
-      return ctx.dbName;
-    }
     // prepare for test
-    Future _deleteDb() async {
-      _dbName = _getTestDbName();
+    Future _setupDeleteDb() async {
+      _dbName = ctx.dbName;
       await idbFactory.deleteDatabase(_dbName);
     }
     Future _openDb() async {
       db = await idbFactory.open(_dbName);
     }
 
-    _openWith1Store([String dbName = testDbName]) {
+    _openWith1Store() {
       void _initializeDatabase(VersionChangeEvent e) {
         Database db = e.database;
         //ObjectStore objectStore =
         db.createObjectStore(testStoreName);
       }
       return idbFactory
-          .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
+          .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
           .then((Database database) {
         db = database;
       });
@@ -50,26 +42,21 @@ void defineTests_(TestContext ctx) {
       //idbDevPrint("# onBlocked: $event");
     }
 
-    _openWith1OtherStore() {
+    _openWith1OtherStore() async {
       void _initializeDatabase(VersionChangeEvent e) {
         Database db = e.database;
         // ObjectStore objectStore =
         db.createObjectStore(testStoreName + "_2");
       }
-      return idbFactory
-          .open(testDbName,
-              version: 2,
-              onUpgradeNeeded: _initializeDatabase,
-              onBlocked: _onBlocked)
-          .then((Database database) {
-        db = database;
-      });
+      db = await idbFactory.open(_dbName,
+          version: 2,
+          onUpgradeNeeded: _initializeDatabase,
+          onBlocked: _onBlocked);
     }
 
     setUp(() {
       // new test - make sure _deleteDb is called
       _dbName = null;
-      return idbFactory.deleteDatabase(testDbName);
     });
 
     tearDown(() {
@@ -79,7 +66,7 @@ void defineTests_(TestContext ctx) {
     });
 
     test('empty', () async {
-      await _deleteDb();
+      await _setupDeleteDb();
       await _openDb();
       expect(db.factory, idbFactory);
       expect(db.objectStoreNames.isEmpty, true);
@@ -88,89 +75,84 @@ void defineTests_(TestContext ctx) {
     });
 
     test('one', () async {
-      await _deleteDb();
-      return _openWith1Store(_dbName).then((_) {
-        List<String> storeNames = new List.from(db.objectStoreNames);
-        expect(storeNames.length, 1);
-        expect(storeNames[0], testStoreName);
+      await _setupDeleteDb();
+      await _openWith1Store();
+      List<String> storeNames = new List.from(db.objectStoreNames);
+      expect(storeNames.length, 1);
+      expect(storeNames[0], testStoreName);
 
-        db.close();
-        // re-open
-        return _openDb().then((_) {
-          storeNames = new List.from(db.objectStoreNames);
-          expect(storeNames.length, 1);
-          expect(storeNames, [testStoreName]);
-        });
-      });
+      db.close();
+      // re-open
+      await _openDb();
+      storeNames = new List.from(db.objectStoreNames);
+      expect(storeNames.length, 1);
+      expect(storeNames, [testStoreName]);
     });
 
-    test('one then one', () {
-      return _openWith1Store().then((_) {
-        List<String> storeNames = new List.from(db.objectStoreNames);
-        expect(storeNames.length, 1);
-        expect(storeNames[0], testStoreName);
+    test('one_then_one', () async {
+      await _setupDeleteDb();
+      await _openWith1Store();
+      List<String> storeNames = new List.from(db.objectStoreNames);
+      expect(storeNames.length, 1);
+      expect(storeNames[0], testStoreName);
 
-        db.close();
-        // re-open
-        return _openWith1OtherStore().then((_) {
-          storeNames = new List.from(db.objectStoreNames);
-          expect(storeNames.length, 2);
-          expect(storeNames, [testStoreName, testStoreName + "_2"]);
-        });
-      });
+      db.close();
+      // re-open
+      await _openWith1OtherStore();
+      storeNames = new List.from(db.objectStoreNames);
+      expect(storeNames.length, 2);
+      expect(storeNames, [testStoreName, testStoreName + "_2"]);
     });
 
-    test('twice', () {
-      return _openWith1Store().then((_) {
-        List<String> storeNames = new List.from(db.objectStoreNames);
-        expect(storeNames.length, 1);
-        expect(storeNames[0], testStoreName);
+    test('twice', () async {
+      await _setupDeleteDb();
+      await _openWith1Store();
+      List<String> storeNames = new List.from(db.objectStoreNames);
+      expect(storeNames.length, 1);
+      expect(storeNames[0], testStoreName);
 
-        Database db1 = db;
-        // db.close();
-        // re-open
-        return _openWith1Store().then((_) {
-          storeNames = new List.from(db.objectStoreNames);
-          expect(storeNames.length, 1);
-          expect(storeNames[0], testStoreName);
+      Database db1 = db;
+      // db.close();
+      // re-open
+      await _openWith1Store();
+      storeNames = new List.from(db.objectStoreNames);
+      expect(storeNames.length, 1);
+      expect(storeNames[0], testStoreName);
 
-          db1.close();
-        });
-      });
+      db1.close();
     });
 
     // does not work in IE...
-    test('one keep open then one', () {
-      return _openWith1Store().then((_) {
-        Database firstDb = db;
+    test('one keep open then one', () async {
+      await _setupDeleteDb();
+      await _openWith1Store();
+      Database firstDb = db;
 
-        bool db1Closed = false;
+      bool db1Closed = false;
 
-        db.onVersionChange.listen((VersionChangeEvent e) {
-          //idbDevPrint("# onVersionChange");
-          db.close();
-          db1Closed = true;
-        });
-
-        // re-open
-        return _openWith1OtherStore().then((_) {}).then((_) {
-          List<String> storeNames = new List.from(db.objectStoreNames);
-          expect(storeNames, [testStoreName, testStoreName + "_2"]);
-        }).then((_) {
-          // at this point native db should be close already
-          if (!db1Closed) {
-            Transaction transaction =
-                firstDb.transaction(testStoreName, idbModeReadOnly);
-            ObjectStore store = transaction.objectStore(testStoreName);
-            return store.clear().then((_) {
-              fail("should not succeed");
-            }, onError: (e) {
-              // ok
-              expect(db1Closed, isTrue);
-            });
-          }
-        });
+      db.onVersionChange.listen((VersionChangeEvent e) {
+        //idbDevPrint("# onVersionChange");
+        db.close();
+        db1Closed = true;
       });
+
+      // re-open
+      await _openWith1OtherStore();
+      List<String> storeNames = new List.from(db.objectStoreNames);
+      expect(storeNames, [testStoreName, testStoreName + "_2"]);
+
+      // at this point native db should be close already
+      if (!db1Closed) {
+        Transaction transaction =
+            firstDb.transaction(testStoreName, idbModeReadOnly);
+        ObjectStore store = transaction.objectStore(testStoreName);
+        return store.clear().then((_) {
+          fail("should not succeed");
+        }, onError: (e) {
+          // ok
+          expect(db1Closed, isTrue);
+        });
+      }
     }, skip: true);
   });
 }

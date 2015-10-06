@@ -21,6 +21,7 @@ import 'package:path/path.dart';
 
 // only for test - INFO - basic output, FINE - show test name before/after - FINEST - samething for console test also
 const Level debugLevel = Level.FINE;
+@deprecated
 const String testDbName = 'test.db';
 const String testStoreName = 'test_store';
 const String testStoreName2 = 'test_store_2';

@@ -23,13 +23,14 @@ import 'package:idb_shim/idb_client.dart';
 
 defineTests_(TestContext ctx) {
   database_test.defineTests_(ctx);
+  defineTests(ctx.factory);
 }
 
+@deprecated
 defineTests(IdbFactory idbFactory) {
   transaction_test.defineTests(idbFactory);
   cursor_test.defineTests(idbFactory);
   open_test.defineTests(idbFactory);
-  database_test.defineTests(idbFactory);
   object_store_test.defineTests(idbFactory);
   key_range_test.defineTests(idbFactory);
   factory_test.defineTests(idbFactory);
