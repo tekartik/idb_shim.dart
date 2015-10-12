@@ -7,7 +7,7 @@ Safari and any browser on iOS (that do not support the indexed_db api) with very
 * Project [source code](https://github.com/alextekartik/idb_shim.dart)
 * [Samples](https://alextekartik.github.io/idb_shim_samples.dart) (code and live demo)
 
-[![Build Status](https://drone.io/github.com/alextekartik/idb_shim.dart/status.png)](https://drone.io/github.com/alextekartik/idb_shim.dart/latest)
+[![Build Status](https://travis-ci.org/alextekartik/idb_shim.dart.svg?branch=master)](https://travis-ci.org/alextekartik/idb_shim.dart)
 
 ### Usage
 
