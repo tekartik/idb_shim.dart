@@ -23,6 +23,7 @@ import 'package:idb_shim/idb_client.dart';
 
 defineTests_(TestContext ctx) {
   database_test.defineTests_(ctx);
+  index_cursor_test.defineTests(ctx);
   defineTests(ctx.factory);
 }
 
@@ -35,7 +36,6 @@ defineTests(IdbFactory idbFactory) {
   key_range_test.defineTests(idbFactory);
   factory_test.defineTests(idbFactory);
   index_test.defineTests(idbFactory);
-  index_cursor_test.defineTests(idbFactory);
   simple_provider_test.defineTests(idbFactory);
   quick_standalone_test.defineTests(idbFactory);
   scenario_test.defineTests(idbFactory);

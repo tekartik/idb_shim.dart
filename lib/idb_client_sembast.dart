@@ -337,7 +337,8 @@ sdb.Filter _keyRangeFilter(String keyPath, KeyRange range) {
 
 sdb.Filter _keyFilter(String keyPath, var key) {
   if (key == null) {
-    return null;
+    // key must not be nulled
+    return new sdb.Filter.notEqual(keyPath, null);
   }
   return new sdb.Filter.equal(keyPath, key);
 }

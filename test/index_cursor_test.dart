@@ -4,9 +4,6 @@ import 'dart:async';
 import 'package:idb_shim/idb_client.dart';
 import 'idb_test_common.dart';
 
-// so that this can be run directly
-void main() => defineTests(idbTestMemoryFactory);
-
 class TestIdNameRow {
   TestIdNameRow(CursorWithValue cwv) {
     Object value = cwv.value;
@@ -17,11 +14,12 @@ class TestIdNameRow {
   String name;
 }
 
-//// so that this can be run directly
-//void main() {
-//  testMain(new IdbMemoryFactory());
-//}
-void defineTests(IdbFactory idbFactory) {
+main() {
+  defineTests(idbMemoryContext);
+}
+
+void defineTests(TestContext ctx) {
+  IdbFactory idbFactory = ctx.factory;
   group('index_cursor', () {
     Database db;
     Transaction transaction;
@@ -41,6 +39,18 @@ void defineTests(IdbFactory idbFactory) {
       });
     }
 
+    // generic tearDown
+    _tearDown() async {
+      if (transaction != null) {
+        await transaction.completed;
+        transaction = null;
+      }
+      if (db != null) {
+        db.close();
+        db = null;
+      }
+    }
+
     Future<List<TestIdNameRow>> cursorToList(Stream<CursorWithValue> stream) {
       Completer completer = new Completer.sync();
       List<TestIdNameRow> list = new List();
@@ -52,6 +62,64 @@ void defineTests(IdbFactory idbFactory) {
       return completer.future;
     }
 
+    solo_group('with_null_key', () {
+      Future _openDb() async {
+        String _dbName = ctx.dbName;
+        await idbFactory.deleteDatabase(_dbName);
+        void _initializeDatabase(VersionChangeEvent e) {
+          Database db = e.database;
+          ObjectStore objectStore =
+              db.createObjectStore(testStoreName, autoIncrement: true);
+          objectStore.createIndex(testNameIndex, testNameField);
+        }
+        db = await idbFactory.open(_dbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+        transaction = db.transaction(testStoreName, idbModeReadWrite);
+        objectStore = transaction.objectStore(testStoreName);
+        index = objectStore.index(testNameIndex);
+      }
+
+      Future<List<Map>> getIndexRecords() async {
+        List<Map> list = [];
+        Stream<CursorWithValue> stream = index.openCursor(autoAdvance: true);
+        await stream.listen((CursorWithValue cwv) {
+          list.add(cwv.value);
+        }).asFuture();
+        return list;
+      }
+
+      Future<List<String>> getIndexKeys() async {
+        List<String> list = [];
+        Stream<Cursor> stream = index.openKeyCursor(autoAdvance: true);
+        await stream.listen((Cursor c) {
+          list.add(c.key);
+        }).asFuture();
+        return list;
+      }
+
+      test('one_record', () async {
+        await _openDb();
+        await objectStore.put({"dummy": 1});
+        // must be empy as the key is not specified
+        expect(await getIndexRecords(), []);
+        expect(await getIndexKeys(), []);
+      });
+
+      test('two_record', () async {
+        await _openDb();
+        await objectStore.put({"dummy": 1});
+        await objectStore.put({"dummy": 2, testNameField: "ok"});
+        // must be empy as the key is not specified
+        expect(await getIndexRecords(), [
+          {"dummy": 2, testNameField: "ok"}
+        ]);
+        expect(await getIndexKeys(), [
+          "ok"
+        ]);
+      });
+
+      tearDown(_tearDown);
+    });
     group('auto', () {
       setUp(() {
         return idbFactory.deleteDatabase(testDbName).then((_) {
@@ -74,11 +142,7 @@ void defineTests(IdbFactory idbFactory) {
         });
       });
 
-      tearDown(() {
-        return transaction.completed.then((_) {
-          db.close();
-        });
-      });
+      tearDown(_tearDown);
 
       test('empty key cursor', () {
         Stream<Cursor> stream = index.openKeyCursor(autoAdvance: true);
@@ -306,11 +370,7 @@ void defineTests(IdbFactory idbFactory) {
         });
       });
 
-      tearDown(() {
-        return transaction.completed.then((_) {
-          db.close();
-        });
-      });
+      tearDown(_tearDown);
 
       test('add and read', () {
         Future<List<int>> getKeys(Stream<Cursor> stream) {
