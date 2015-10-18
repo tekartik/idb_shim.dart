@@ -62,7 +62,7 @@ void defineTests(TestContext ctx) {
       return completer.future;
     }
 
-    solo_group('with_null_key', () {
+    group('with_null_key', () {
       Future _openDb() async {
         String _dbName = ctx.dbName;
         await idbFactory.deleteDatabase(_dbName);
