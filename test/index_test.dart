@@ -9,7 +9,7 @@ void main() => defineTests(idbTestMemoryFactory);
 
 void defineTests(IdbFactory idbFactory) {
   group('index', () {
-    group('no', () {
+    solo_group('no', () {
       Database db;
       Transaction transaction;
       ObjectStore objectStore;
