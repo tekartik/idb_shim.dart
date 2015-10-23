@@ -7,7 +7,7 @@ import 'test_runner_client_sembast_memory_test.dart' as sembast_memory;
 import 'idb_browser_test.dart' as browser;
 import 'common_value_test.dart' as common_value_test;
 import 'idb_test_common_test.dart' as idb_test_common_test;
-import 'package:test/test.dart';
+import 'package:dev_test/test.dart';
 
 main() {
   native.main();

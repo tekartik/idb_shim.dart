@@ -1,7 +1,7 @@
 @TestOn("vm")
 library all_test_console;
 
-import 'package:test/test.dart';
+import 'package:dev_test/test.dart';
 import 'test_runner_client_sembast_memory_test.dart' as sembast_memory;
 import 'test_runner_client_sembast_io_test.dart' as sembast_io;
 import 'common_value_test.dart' as common_value_test;

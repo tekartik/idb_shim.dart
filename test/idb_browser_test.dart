@@ -1,7 +1,7 @@
 @TestOn("browser")
 library idb_browser_test;
 
-import 'package:test/test.dart';
+import 'package:dev_test/test.dart';
 import 'package:idb_shim/idb_browser.dart';
 import 'package:idb_shim/idb_client.dart';
 
@@ -26,7 +26,7 @@ main() {
       } else {
         fail("WebSql not supported");
       }
-    });
+    }, skip: idbWebSqlFactory == null ? "WebSql not supported" : false);
 
     test('memory', () {
       IdbFactory websql = idbMemoryFactory;
