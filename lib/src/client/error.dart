@@ -17,9 +17,11 @@ class DatabaseReadOnlyError extends DatabaseError {
 }
 
 class DatabaseStoreNotFoundError extends DatabaseError {
-  static String _MESSAGE =
+  static const String _MESSAGE =
       "NotFoundError: One of the specified object stores was not found.";
-  DatabaseStoreNotFoundError() : super(_MESSAGE);
+  static String storeMessage(var store_OR_stores) =>
+  "NotFoundError: One of the specified object stores '${store_OR_stores}' was not found.";
+  DatabaseStoreNotFoundError([String message = _MESSAGE]) : super(message);
 }
 
 class DatabaseTransactionStoreNotFoundError extends DatabaseError {
