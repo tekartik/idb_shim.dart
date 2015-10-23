@@ -9,7 +9,6 @@ main() {
 }
 
 void defineTests(TestContext ctx) {
-  IdbFactory idbFactory = ctx.factory;
   group('KeyRange', () {
     setUp(() {});
 

@@ -5,7 +5,6 @@ import 'transaction_test.dart' as transaction_test;
 import 'index_test.dart' as index_test;
 import 'package:idb_shim/idb_client_native.dart';
 import 'package:idb_shim/idb_client_websql.dart';
-import 'package:idb_shim/idb_client_memory.dart';
 import 'package:idb_shim/idb_client.dart';
 import 'dart:async';
 import 'idb_test_common.dart';
