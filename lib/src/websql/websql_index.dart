@@ -39,33 +39,32 @@ class _WebSqlIndex extends Index with IndexWithMetaMixin {
     //devPrint("${store} ${_meta}");
   }
 
-  Future create() {
+  Future create() async {
     String sqlTableName = this.sqlTableName;
     String sqlIndexName = this.sqlIndexName;
     String alterSql = "ALTER TABLE ${sqlTableName} ADD ${keyColumn} BLOB";
     String updateSql = "UPDATE stores SET meta = ? WHERE name = ?";
 
-    String metaText = JSON.encode(meta.toMap());
-    List updateArgs = [metaText, store.name];
-    return transaction.execute(alterSql).then((_) {
-      return transaction.execute(updateSql, updateArgs);
-    }).then((_) {
-      // Drop the index if needed
+    // update meta in store
+    await store.update();
 
-      String dropIndexSql = "DROP INDEX IF EXISTS $sqlIndexName";
-      return transaction.execute(dropIndexSql).then((_) {
-        // create the index
-        StringBuffer sb = new StringBuffer();
-        sb.write("CREATE ");
-        if (unique) {
-          sb.write("UNIQUE ");
-        }
-        sb.write("INDEX $sqlIndexName ON $sqlTableName ($keyColumn)");
-        String createIndexSql = sb.toString();
+    // add column
+    await transaction.execute(alterSql);
 
-        return transaction.execute(createIndexSql);
-      });
-    });
+    // Drop the index if needed
+
+    String dropIndexSql = "DROP INDEX IF EXISTS $sqlIndexName";
+    await transaction.execute(dropIndexSql);
+    // create the index
+    StringBuffer sb = new StringBuffer();
+    sb.write("CREATE ");
+    if (unique) {
+      sb.write("UNIQUE ");
+    }
+    sb.write("INDEX $sqlIndexName ON $sqlTableName ($keyColumn)");
+    String createIndexSql = sb.toString();
+
+    await transaction.execute(createIndexSql);
   }
 
   Future _checkIndex(computation()) {

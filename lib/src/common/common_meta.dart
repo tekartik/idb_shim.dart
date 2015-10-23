@@ -121,13 +121,15 @@ class IdbDatabaseMeta {
     // Check store(s) exist
     if (storeName_OR_storeNames is String) {
       if (!_containsStore(storeName_OR_storeNames)) {
-        throw new DatabaseStoreNotFoundError(DatabaseStoreNotFoundError.storeMessage(storeName_OR_storeNames));
+        throw new DatabaseStoreNotFoundError(
+            DatabaseStoreNotFoundError.storeMessage(storeName_OR_storeNames));
       }
       return new IdbTransactionMeta([storeName_OR_storeNames], mode);
     } else if (storeName_OR_storeNames is List) {
       for (String storeName in storeName_OR_storeNames) {
         if (!_containsStore(storeName)) {
-          throw new DatabaseStoreNotFoundError(DatabaseStoreNotFoundError.storeMessage(storeName_OR_storeNames));
+          throw new DatabaseStoreNotFoundError(
+              DatabaseStoreNotFoundError.storeMessage(storeName_OR_storeNames));
         }
       }
       return new IdbTransactionMeta(storeName_OR_storeNames, mode);

@@ -8,7 +8,7 @@ import 'common_meta_test.dart';
 void main() => defineTests(idbTestMemoryFactory);
 
 void defineTests(IdbFactory idbFactory) {
-  group('index', () {
+  solo_group('index', () {
     group('no', () {
       Database db;
       Transaction transaction;
@@ -542,7 +542,7 @@ void defineTests(IdbFactory idbFactory) {
         });
       }
 
-      solo_test('all', () {
+      test('all', () {
         Iterator<IdbIndexMeta> iterator = idbIndexMetas.iterator;
         _next() {
           if (iterator.moveNext()) {

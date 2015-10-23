@@ -20,7 +20,7 @@ class DatabaseStoreNotFoundError extends DatabaseError {
   static const String _MESSAGE =
       "NotFoundError: One of the specified object stores was not found.";
   static String storeMessage(var store_OR_stores) =>
-  "NotFoundError: One of the specified object stores '${store_OR_stores}' was not found.";
+      "NotFoundError: One of the specified object stores '${store_OR_stores}' was not found.";
   DatabaseStoreNotFoundError([String message = _MESSAGE]) : super(message);
 }
 

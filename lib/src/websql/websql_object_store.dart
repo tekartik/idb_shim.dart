@@ -109,6 +109,16 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
     return transaction.execute(dropSql);
   }
 
+  // update meta information in sql
+  Future update() async {
+    String updateSql = "UPDATE stores SET meta = ? WHERE name = ?";
+
+    String metaText = JSON.encode(meta.toMap());
+    List updateArgs = [metaText, name];
+    await transaction.execute(updateSql, updateArgs);
+  }
+
+  // create
   Future create() {
     //_initOptions(keyPath, autoIncrement);
 
