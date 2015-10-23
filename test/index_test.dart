@@ -8,7 +8,7 @@ import 'common_meta_test.dart';
 void main() => defineTests(idbTestMemoryFactory);
 
 void defineTests(IdbFactory idbFactory) {
-  solo_group('index', () {
+  group('index', () {
     group('no', () {
       Database db;
       Transaction transaction;

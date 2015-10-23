@@ -63,7 +63,7 @@ webSqlTest(IdbWebSqlFactory idbFactory) {
 
 main() {
   group('websql', () {
-    wrapper.SqlDatabase.debug = true;
+    //wrapper.SqlDatabase.debug = true;
     if (IdbWebSqlFactory.supported) {
       //idb_wql.SqlDatabase.debug = true;
       IdbWebSqlFactory idbFactory = new IdbWebSqlFactory();

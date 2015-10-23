@@ -193,8 +193,6 @@ void defineTests(IdbFactory idbFactory) {
             fail("exception expected");
           } catch (e) {
             // NotFoundError: An attempt was made to reference a Node in a context where it does not exist. The specified object store was not found.
-            print(e);
-            print(e.runtimeType);
             expect(isStoreNotFoundError(e), isTrue);
           }
 

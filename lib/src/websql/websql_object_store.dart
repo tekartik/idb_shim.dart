@@ -155,28 +155,29 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
     return null;
   }
 
-  Future _checkStore(Future computation()) async {
+  // Don't make it async as it must run before completed is called
+  Future _checkStore(Future computation()) {
     // this is also an indicator
-    if (!ready) {
-      if (_lazyPrepare == null) {
-        // Make sure the db was not upgrade
-        // TODO do this at the beginning of each transaction
-        var sqlSelect = "SELECT value FROM version WHERE value > ?";
-        var sqlArgs = [database.version];
-        _lazyPrepare = execute(sqlSelect, sqlArgs).then((SqlResultSet rs) {
-          if (rs.rows.length > 0) {
-            // Send an onVersionChange event
-            //Map map = rs.rows.first; - BUG dart, first is null:
-            Map map = rs.rows[0];
-            int newVersion = map['value'];
-            if (database.onVersionChangeCtlr != null) {
-              database.onVersionChangeCtlr.add(new _WebSqlVersionChangeEvent(
-                  database, database.version, newVersion, transaction));
-            }
-            return new Future.error(new StateError(
-                "database upgraded from ${database.version} to $newVersion"));
+    //if (!ready) {
+    if (_lazyPrepare == null) {
+      // Make sure the db was not upgrade
+      // TODO do this at the beginning of each transaction
+      var sqlSelect = "SELECT value FROM version WHERE value > ?";
+      var sqlArgs = [database.version];
+      _lazyPrepare = execute(sqlSelect, sqlArgs).then((SqlResultSet rs) {
+        if (rs.rows.length > 0) {
+          // Send an onVersionChange event
+          //Map map = rs.rows.first; - BUG dart, first is null:
+          Map map = rs.rows[0];
+          int newVersion = map['value'];
+          if (database.onVersionChangeCtlr != null) {
+            database.onVersionChangeCtlr.add(new _WebSqlVersionChangeEvent(
+                database, database.version, newVersion, transaction));
           }
-          /*
+          return new Future.error(new StateError(
+              "database upgraded from ${database.version} to $newVersion"));
+        }
+        /*
           var sqlSelect =
               "SELECT key_path, auto_increment, indecies FROM stores WHERE name = ?";
           var sqlArgs = [name];
@@ -217,10 +218,12 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
             //          }
           });
           */
-        });
-      }
-      await _lazyPrepare;
+      });
     }
+    return _lazyPrepare.then((_) {
+      return computation();
+    });
+    //}
     return computation();
   }
 
