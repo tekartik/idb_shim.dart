@@ -8,6 +8,8 @@ import 'package:idb_shim/idb_client.dart';
 import 'idb_test_common.dart';
 import 'dart:async';
 
+String testGlobalStoreDbName = GLOBAL_STORE_DB_NAME + "_test";
+
 class SqliteMasterRow {
   String type;
   String name;
@@ -84,12 +86,13 @@ Future<List<String>> getTableNames(SqlTransaction tx) {
 
 main() {
   IdbWebSqlFactory idbFactory = new IdbWebSqlFactory();
+  idbFactory.globalStoreDbName = testGlobalStoreDbName;
 
   SqlDatabase openGlobalStoreDatabase() {
     SqlDatabase db = sqlDatabaseFactory.openDatabase(
-        GLOBAL_STORE_DB_NAME,
+        testGlobalStoreDbName,
         GLOBAL_STORE_DB_VERSION,
-        GLOBAL_STORE_DB_NAME,
+        testGlobalStoreDbName,
         GLOBAL_STORE_DB_ESTIMATED_SIZE);
     return db;
   }
@@ -144,13 +147,13 @@ main() {
     });
   });
 
-  group('idb global store', () {
+  group('idb_global_store', () {
     //wrapped.sqlDatabaseFactory.o
     test('open', () {
       openGlobalStoreDatabase();
     });
 
-    test('clear global store tables', () {
+    test('clear_global_store_tables', () {
       SqlDatabase db = openGlobalStoreDatabase();
       return db.transaction().then((tx) {
         return clearTables(tx).then((_) {

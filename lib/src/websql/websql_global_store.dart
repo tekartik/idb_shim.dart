@@ -7,7 +7,9 @@ class _WebSqlGlobalStore {
   // To allow for proper schema migration if needed
   static const int INTERNAL_VERSION = 1;
 
-  static String DB_NAME = GLOBAL_STORE_DB_NAME;
+  // can be changed for testing
+  String dbName = _DB_NAME;
+  static String _DB_NAME = GLOBAL_STORE_DB_NAME;
   static String DB_VERSION = GLOBAL_STORE_DB_VERSION;
   static int DB_ESTIMATED_SIZE = GLOBAL_STORE_DB_ESTIMATED_SIZE;
   static String NAME_COLUMN_NAME = "name";
@@ -109,7 +111,7 @@ class _WebSqlGlobalStore {
   void _checkOpenNew(void action(SqlTransaction tx)) {
     if (db == null) {
       db = sqlDatabaseFactory.openDatabase(
-          DB_NAME, DB_VERSION, DB_NAME, DB_ESTIMATED_SIZE);
+          dbName, DB_VERSION, dbName, DB_ESTIMATED_SIZE);
     }
 
     Future<SqlTransaction> _cleanup(SqlTransaction tx) {

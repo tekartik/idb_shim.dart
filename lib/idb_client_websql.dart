@@ -44,6 +44,10 @@ class IdbWebSqlFactory extends IdbFactory {
     return _instance;
   }
 
+  set globalStoreDbName(String dbName) {
+    _globalStore.dbName = dbName;
+  }
+
   @override
   Future<Database> open(String dbName,
       {int version,
