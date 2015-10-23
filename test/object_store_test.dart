@@ -93,7 +93,7 @@ void defineTests(IdbFactory idbFactory) {
       });
 
       tearDown(() {
-        runZoned(() {});
+        //runZoned(() {});
         if (db != null) {
           if (transaction != null) {
             return transaction.completed.then((_) {
@@ -204,6 +204,8 @@ void defineTests(IdbFactory idbFactory) {
       test('properties', () {
         expect(objectStore.keyPath, null);
         expect(objectStore.autoIncrement, false);
+        expect(objectStore.name, testStoreName);
+        expect(objectStore.indexNames, []);
       });
 
       test('add/get map', () {
@@ -715,7 +717,7 @@ void defineTests(IdbFactory idbFactory) {
       });
     });
 
-    group('key path non auto', () {
+    group('key_path_non_auto', () {
       const String keyPath = "my_key";
       Database db;
       Transaction transaction;

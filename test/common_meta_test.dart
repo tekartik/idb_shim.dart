@@ -66,12 +66,12 @@ void defineTests() {
 
     test('store with index', () {
       IdbObjectStoreMeta meta1 = idbSimpleObjectStoreMeta.clone();
-      meta1.addIndex(idbIndexMeta1);
+      meta1.putIndex(idbIndexMeta1);
       IdbObjectStoreMeta meta2 = idbSimpleObjectStoreMeta.clone();
-      meta2.addIndex(idbIndexMeta1);
+      meta2.putIndex(idbIndexMeta1);
       expect(meta1, meta2);
       IdbObjectStoreMeta meta3 = idbSimpleObjectStoreMeta.clone();
-      meta2.addIndex(idbIndexMeta2);
+      meta2.putIndex(idbIndexMeta2);
       expect(meta1, isNot(meta3));
     });
 
@@ -83,7 +83,7 @@ void defineTests() {
 
     test('store to/from map', () {
       IdbObjectStoreMeta meta1 = idbSimpleObjectStoreMeta.clone();
-      meta1.addIndex(idbIndexMeta1);
+      meta1.putIndex(idbIndexMeta1);
       testStoreRoundTrip(meta1);
     });
   });

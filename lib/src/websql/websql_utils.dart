@@ -1,8 +1,10 @@
 part of idb_shim_websql;
 
+/*
 String _booleanArg(bool value) {
   return value == null ? null : (value ? "1" : "0");
 }
+*/
 
 int _getInternalVersionFromResultSet(SqlResultSet resultSet) {
   if (resultSet.rows.length > 0) {

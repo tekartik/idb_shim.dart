@@ -1,19 +1,12 @@
 part of idb_shim_websql;
 
 // meta data is loaded only once
-class _WebSqlObjectStoreMeta {
+
+class OBSOLETE_WebSqlObjectStoreMeta extends IdbObjectStoreMeta {
   static const String VALUE_COLUMN_NAME = 'value';
   static const String KEY_DEFAULT_COLUMN_NAME = 'key';
 
-  String name;
-  String keyPath;
-  bool autoIncrement;
-
-  Map<String, _WebSqlIndexMeta> indecies = new Map();
-
-  Iterable<String> get indexNames => indecies.keys;
-
-  _WebSqlObjectStoreMeta(this.name, this.keyPath, this.autoIncrement) {
+  OBSOLETE_WebSqlObjectStoreMeta(String name, String keyPath, bool autoIncrement) : super(name, keyPath, autoIncrement){
     autoIncrement = (autoIncrement == true);
   }
 
@@ -28,7 +21,8 @@ class _WebSqlObjectStoreMeta {
   /**
    * indecies <=> String
    */
-  Map<String, _WebSqlIndexMeta> indeciesDataFromString(String indeciesText) {
+  /*
+  Map<String, IdbIndexMeta> indeciesDataFromString(String indeciesText) {
     Map indeciesData = new Map();
 
     if (indeciesText != null) {
@@ -39,34 +33,47 @@ class _WebSqlObjectStoreMeta {
         bool multiEntry = indexDef['multi_entry'];
         bool unique = indexDef['unique'];
         indeciesData[name] =
-            new _WebSqlIndexMeta(this, name, keyPath, unique, multiEntry);
+            new IdbIndexMeta(name, keyPath, unique, multiEntry);
       });
     }
     return indeciesData;
   }
+  */
 }
 
-class _WebSqlObjectStore extends ObjectStore {
+class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
   static const String VALUE_COLUMN_NAME =
-      _WebSqlObjectStoreMeta.VALUE_COLUMN_NAME;
+  'value';
   static const String KEY_DEFAULT_COLUMN_NAME =
-      _WebSqlObjectStoreMeta.KEY_DEFAULT_COLUMN_NAME;
+      'key';
 
   _WebSqlTransaction transaction;
 
-  _WebSqlObjectStoreMeta _meta;
+  final IdbObjectStoreMeta meta;
 
   _WebSqlDatabase get database => transaction.database;
 
   bool get ready => keyColumn != null;
   Future _lazyPrepare;
 
-  _WebSqlObjectStore(this.transaction, this._meta) {}
+  _WebSqlObjectStore(this.transaction, this.meta) {}
 
-  String sqlColumnName(String keyPath) => _meta.sqlColumnName(keyPath);
+  String sqlColumnName(String keyPath) {
+    if (keyPath == null) {
+      return KEY_DEFAULT_COLUMN_NAME;
+    } else {
+      return "_col_$keyPath";
+    }
+  }
 
   // If null this means we need to load from database
-  String keyColumn;
+  String _keyColumn;
+  String get keyColumn {
+    if (_keyColumn == null) {
+      _keyColumn = sqlColumnName(keyPath);
+    }
+    return _keyColumn;
+  }
 
   String get sqlTableName {
     return getSqlTableName(name);
@@ -88,12 +95,14 @@ class _WebSqlObjectStore extends ObjectStore {
     return transaction.execute(statement, args);
   }
 
+  /*
   void _initOptions(String keyPath, bool autoIncrement) {
-    _meta.autoIncrement = (autoIncrement != null && autoIncrement);
-    _meta.keyPath = keyPath;
+    meta.autoIncrement = (autoIncrement != null && autoIncrement);
+    meta.keyPath = keyPath;
 
-    this.keyColumn = _meta.sqlColumnName(keyPath);
+    this.keyColumn = meta.sqlColumnName(keyPath);
   }
+  */
 
   Future _deleteTable(_WebSqlTransaction transaction) {
     String dropSql = "DROP TABLE IF EXISTS $sqlTableName";
@@ -101,7 +110,7 @@ class _WebSqlObjectStore extends ObjectStore {
   }
 
   Future create() {
-    _initOptions(keyPath, autoIncrement);
+    //_initOptions(keyPath, autoIncrement);
 
     // Here don't call _addRequest as we don't want to load from db
 
@@ -111,8 +120,9 @@ class _WebSqlObjectStore extends ObjectStore {
             : "BLOB PRIMARY KEY") +
         ", $VALUE_COLUMN_NAME BLOB)";
     String insertStore =
-        "INSERT INTO stores (name, key_path, auto_increment) VALUES (?, ?, ?)";
-    List insertStoreArgs = [name, keyPath, _booleanArg(autoIncrement)];
+        "INSERT INTO stores (name, meta) VALUES (?, ?)";
+    String metaText = JSON.encode(meta.toMap());
+    List insertStoreArgs = [name, metaText];
 
     return _deleteTable(transaction).then((_) {
       return transaction.execute(createSql);
@@ -122,21 +132,21 @@ class _WebSqlObjectStore extends ObjectStore {
   }
 
   Future _checkWritableStore(Future computation()) {
-    if (transaction._mode != idbModeReadWrite) {
+    if (transaction._meta.mode != idbModeReadWrite) {
       return new Future.error(new DatabaseReadOnlyError());
     }
     return _checkStore(computation);
   }
 
   _WebSqlIndex _getIndex(String name) {
-    _WebSqlIndexMeta indexMeta = _meta.indecies[name];
+    IdbIndexMeta indexMeta = meta.index(name);
     if (indexMeta != null) {
       return new _WebSqlIndex(this, indexMeta);
     }
     return null;
   }
 
-  Future _checkStore(Future computation()) {
+  Future _checkStore(Future computation()) async {
     // this is also an indicator
     if (!ready) {
       if (_lazyPrepare == null) {
@@ -157,9 +167,12 @@ class _WebSqlObjectStore extends ObjectStore {
             return new Future.error(new StateError(
                 "database upgraded from ${database.version} to $newVersion"));
           }
+          /*
           var sqlSelect =
               "SELECT key_path, auto_increment, indecies FROM stores WHERE name = ?";
           var sqlArgs = [name];
+
+          // No DO not do this anymore
           return execute(sqlSelect, sqlArgs).then((SqlResultSet rs) {
             if (rs.rows.length == 0) {
               return new Future.error("store $name not found");
@@ -173,10 +186,10 @@ class _WebSqlObjectStore extends ObjectStore {
             String indeciesText = row['indecies'];
 
             // merge lazy loaded data
-            Map indeciesData = _meta.indeciesDataFromString(indeciesText);
+            Map indeciesData = meta.indeciesDataFromString(indeciesText);
             indeciesData.forEach((name, _WebSqlIndexMeta indexMeta) {
               // always replace the existing
-              _meta.indecies[name] = indexMeta;
+              meta.setIndex(indexMeta);
 //              // existing
 //              _WebSqlIndexMeta indexMeta = indeciesData[name];
 //              if (index == null) {
@@ -194,13 +207,10 @@ class _WebSqlObjectStore extends ObjectStore {
             //            throw new ArgumentError("neither keyPath nor autoIncrement set");
             //          }
           });
-        });
-        return _lazyPrepare;
-      } else {
-        return _lazyPrepare.then((_) {
-          return computation();
+          */
         });
       }
+      await _lazyPrepare;
     }
     return computation();
   }
@@ -279,11 +289,11 @@ class _WebSqlObjectStore extends ObjectStore {
       args.insert(0, key);
     }
     // Add the index value for each index
-    _meta.indecies.values.forEach((_WebSqlIndexMeta indexMeta) {
-      columns += ", " + indexMeta.keyColumn;
+    for (IdbIndexMeta indexMeta in meta.indecies) {
+          columns += ", " + sqlColumnName(indexMeta.keyPath);
       values += ", ?";
       args.add(encodeKey(value[indexMeta.keyPath]));
-    });
+    }
 
     var sqlInsert = "INSERT INTO $sqlTableName ($columns) VALUES ($values)";
     return execute(sqlInsert, args).then((SqlResultSet rs) {
@@ -338,10 +348,10 @@ class _WebSqlObjectStore extends ObjectStore {
     List args = [encodeValue(value)];
 
     // Add the index value for each index
-    _meta.indecies.values.forEach((_WebSqlIndexMeta indexMeta) {
-      sets += ", ${indexMeta.keyColumn} = ?";
+    for (IdbIndexMeta indexMeta in meta.indecies) {
+      sets += ", ${sqlColumnName(indexMeta.keyPath)} = ?";
       args.add(encodeKey(value[indexMeta.keyPath]));
-    });
+    }
 
     // Add key arg
     args.add(encodeKey(key));
@@ -463,14 +473,13 @@ class _WebSqlObjectStore extends ObjectStore {
 
   @override
   Index createIndex(String name, keyPath, {bool unique, bool multiEntry}) {
-    _WebSqlIndexMeta indexMeta =
-        new _WebSqlIndexMeta(_meta, name, keyPath, unique, multiEntry);
+    IdbIndexMeta indexMeta =
+        new IdbIndexMeta(name, keyPath, unique, multiEntry);
+    meta.createIndex(database.meta, indexMeta);
     _WebSqlIndex index = new _WebSqlIndex(this, indexMeta);
-    _meta.indecies[name] = indexMeta;
 
+    meta.createIndex(database.meta, indexMeta);
     // let it for later
-    database.onVersionChangeCreatedIndexes.add(index);
-
     return index;
   }
 
@@ -495,16 +504,4 @@ class _WebSqlObjectStore extends ObjectStore {
       return query.count(transaction);
     });
   }
-
-  @override
-  get keyPath => _meta.keyPath;
-
-  @override
-  get autoIncrement => _meta.autoIncrement;
-
-  @override
-  get name => _meta.name;
-
-  @override
-  List<String> get indexNames => _meta.indexNames.toList();
 }

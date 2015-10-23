@@ -1,7 +1,7 @@
 @TestOn("browser")
 library websql_wrapper_test;
 
-import 'package:test/test.dart';
+import 'package:dev_test/test.dart';
 import 'package:idb_shim/src/websql/websql_wrapper.dart';
 
 main() {

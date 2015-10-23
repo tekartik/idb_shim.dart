@@ -7,8 +7,10 @@ class _NativeTransaction extends Transaction {
 
   @override
   ObjectStore objectStore(String name) {
-    idb.ObjectStore idbObjectStore = idbTransaction.objectStore(name);
-    return new _NativeObjectStore(idbObjectStore);
+    return _catchNativeError(() {
+      idb.ObjectStore idbObjectStore = idbTransaction.objectStore(name);
+      return new _NativeObjectStore(idbObjectStore);
+    });
   }
 
   @override

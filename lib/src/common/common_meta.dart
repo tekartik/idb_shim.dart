@@ -2,37 +2,88 @@ library tekartik_iodb.idb_meta;
 
 import 'package:idb_shim/idb_client.dart';
 import 'package:collection/equality.dart';
+import 'dart:async';
+
+abstract class TransactionWithMetaMixin {
+  IdbTransactionMeta get meta;
+}
 
 class IdbTransactionMeta {
   String mode;
   List<String> storeNames;
   IdbTransactionMeta(this.storeNames, this.mode);
 
+  void checkObjectStore(String storeName) {
+    if (!storeNames.contains(storeName)) {
+      throw new DatabaseTransactionStoreNotFoundError(storeName);
+    }
+  }
+
   // ref counting
   // start on 0
   int refCount;
+
+  @override
+  String toString() => "${mode} ${storeNames}";
+}
+
+
+class IdbVersionChangeTransactionMeta extends IdbTransactionMeta {
+  Map<String, List<IdbIndexMeta>> versionChangeCreatedIndexes = {}; // store deleted during onUpgradeNeeded
+  Set<IdbObjectStoreMeta> versionChangeCreatedStores = new Set(); // store deleted during onUpgradeNeeded
+  Set<IdbObjectStoreMeta> versionChangeDeletedStores = new Set(); // store deleted during onUpgradeNeeded
+  Set<IdbObjectStoreMeta> versionChangeStores = new Set(); // store modified during onUpgradeNeeded
+
+  IdbVersionChangeTransactionMeta() : super(null, idbModeReadWrite);
+
+}
+
+abstract class DatabaseWithMetaMixin {
+  IdbDatabaseMeta get meta;
+
+  //@implement
+  String get name => meta.name;
+
+  //@implement
+  int get version => meta.version;
+
+  //@override
+  void deleteObjectStore(String name) {
+    meta.deleteObjectStore(name);
+  }
+
+
+  //@override
+  Iterable<String> get objectStoreNames =>
+  meta.objectStoreNames;
+
+  @override
+  String toString() {
+    return meta.toString();
+  }
+
 }
 
 class IdbDatabaseMeta {
+  String name;
   int version;
 
   IdbDatabaseMeta([this.version]);
 
-  IdbTransactionMeta _versionChangeTransaction;
-  Set<IdbObjectStoreMeta> versionChangeDeletedStores; // store deleted during onUpgradeNeeded
-  Set<IdbObjectStoreMeta> versionChangeStores; // store modified during onUpgradeNeeded
+  IdbVersionChangeTransactionMeta _versionChangeTransaction;
   Map<String, IdbObjectStoreMeta> _stores = new Map();
 
-  IdbTransactionMeta get versionChangeTransaction => _versionChangeTransaction;
+  IdbVersionChangeTransactionMeta get versionChangeTransaction => _versionChangeTransaction;
 
-  onUpgradeNeeded(action()) {
-    versionChangeStores = new Set();
-    versionChangeDeletedStores = new Set();
-    _versionChangeTransaction = new IdbTransactionMeta(null, idbModeReadWrite);
+  onUpgradeNeeded(action()) async {
+    _versionChangeTransaction = new IdbVersionChangeTransactionMeta();
+
     var result = action();
+
+    if (result is Future) {
+      await result;
+    }
     _versionChangeTransaction = null;
-    versionChangeStores = null;
-    versionChangeDeletedStores = null;
     return result;
   }
 
@@ -41,8 +92,8 @@ class IdbDatabaseMeta {
       throw new StateError(
           "cannot create objectStore outside of a versionChangedEvent");
     }
-    versionChangeStores.add(store);
-    addObjectStore(store);
+    versionChangeTransaction.versionChangeCreatedStores.add(store);
+    putObjectStore(store);
   }
 
   deleteObjectStore(String storeName) {
@@ -54,7 +105,7 @@ class IdbDatabaseMeta {
     // we store object store on quit
     IdbObjectStoreMeta storeMeta = _stores[storeName];
     if (storeMeta != null) {
-      versionChangeDeletedStores.add(storeMeta);
+      versionChangeTransaction.versionChangeDeletedStores.add(storeMeta);
       _stores.remove(storeName);
     }
   }
@@ -83,7 +134,7 @@ class IdbDatabaseMeta {
     }
   }
 
-  addObjectStore(IdbObjectStoreMeta store) {
+  putObjectStore(IdbObjectStoreMeta store) {
     _stores[store.name] = store;
   }
 
@@ -115,9 +166,33 @@ class IdbDatabaseMeta {
   }
 }
 
+abstract class ObjectStoreWithMetaMixin {
+  IdbObjectStoreMeta get meta;
+
+  //@override
+  get keyPath => meta.keyPath;
+
+  //@override
+  get autoIncrement => meta.autoIncrement;
+
+  //@override
+  get name => meta.name;
+
+  //@override
+  List<String> get indexNames => meta.indexNames.toList();
+
+
+}
 // meta data is loaded only once
 class IdbObjectStoreMeta {
+  static const String NAME_KEY = "name";
+  static const String KEY_PATH_KEY = "keyPath";
+  static const String AUTO_INCREMENT_KEY = "autoIncrement";
+  static const String INDECIES_KEY = "indecies";
+
   //final IdbDatabaseMeta databaseMeta;
+  // might be set later...
+  // TODO check if can be final
   final String name;
   final String keyPath;
   final bool autoIncrement;
@@ -141,8 +216,15 @@ class IdbObjectStoreMeta {
       throw new StateError(
           "cannot create index outside of a versionChangedEvent");
     }
-    databaseMeta.versionChangeStores.add(this);
-    addIndex(index);
+    databaseMeta.versionChangeTransaction.versionChangeStores.add(this);
+    List list = databaseMeta.versionChangeTransaction.versionChangeCreatedIndexes[name];
+    if (list == null) {
+      databaseMeta.versionChangeTransaction.versionChangeCreatedIndexes[name] = [index];
+    } else {
+      list.add(index);
+
+    }
+    putIndex(index);
   }
 
   IdbObjectStoreMeta.fromObjectStore(ObjectStore objectStore)
@@ -153,7 +235,7 @@ class IdbObjectStoreMeta {
       : autoIncrement = (autoIncrement == true) {
     if (indecies != null) {
       indecies.forEach((IdbIndexMeta indexMeta) {
-        addIndex(indexMeta);
+        putIndex(indexMeta);
       });
     }
   }
@@ -161,16 +243,16 @@ class IdbObjectStoreMeta {
   IdbObjectStoreMeta.fromMap(Map<String, Object> map) //
       : this(
             //
-            map["name"], //
-            map["keyPath"], //
-            map["autoIncrement"],
-            IdbIndexMeta.fromMapList(map["indecies"]));
+            map[NAME_KEY], //
+            map[KEY_PATH_KEY], //
+            map[AUTO_INCREMENT_KEY],
+            IdbIndexMeta.fromMapList(map[INDECIES_KEY]));
 
   IdbObjectStoreMeta clone() {
     return new IdbObjectStoreMeta(name, keyPath, autoIncrement);
   }
 
-  addIndex(IdbIndexMeta index) {
+  putIndex(IdbIndexMeta index) {
     _indecies[index.name] = index;
   }
 
@@ -179,19 +261,19 @@ class IdbObjectStoreMeta {
   }
 
   Map<String, Object> toMap() {
-    Map map = {"name": name};
+    Map map = {NAME_KEY: name};
     if (keyPath != null) {
-      map["keyPath"] = keyPath;
+      map[KEY_PATH_KEY] = keyPath;
     }
     if (autoIncrement) {
-      map["autoIncrement"] = autoIncrement;
+      map[AUTO_INCREMENT_KEY] = autoIncrement;
     }
     if (indecies.isNotEmpty) {
       List<Map> indecies = [];
       this.indecies.forEach((IdbIndexMeta indexMeta) {
         indecies.add(indexMeta.toMap());
       });
-      map['indecies'] = indecies;
+      map[INDECIES_KEY] = indecies;
     }
     return map;
   }
@@ -262,6 +344,27 @@ class IdbCursorMeta {
   @override
   String toString() {
     return toDebugMap().toString();
+  }
+}
+
+abstract class IndexWithMetaMixin {
+  IdbIndexMeta get meta;
+
+  //@override
+  String get name => meta.name;
+
+  //@override
+  String get keyPath => meta.keyPath;
+
+  //@override
+  bool get unique => meta.unique;
+
+  //@override
+  bool get multiEntry => meta.multiEntry;
+
+  @override
+  String toString() {
+    return meta.toString();
   }
 }
 

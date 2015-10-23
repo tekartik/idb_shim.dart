@@ -39,7 +39,7 @@ class _SdbVersionChangeEvent extends VersionChangeEvent {
   }
 }
 
-class _SdbTransaction extends Transaction {
+class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
   _SdbDatabase get database => super.database as _SdbDatabase;
   sdb.Database get sdbDatabase => database.db;
 
@@ -187,6 +187,7 @@ class _SdbTransaction extends Transaction {
 
   @override
   ObjectStore objectStore(String name) {
+    meta.checkObjectStore(name);
     return new _SdbObjectStore(this, database.meta.getObjectStore(name));
   }
 
@@ -196,7 +197,7 @@ class _SdbTransaction extends Transaction {
 //  }
 }
 
-class _SdbIndex extends Index {
+class _SdbIndex extends Index with IndexWithMetaMixin {
   final _SdbObjectStore store;
   final IdbIndexMeta meta;
 
@@ -253,14 +254,6 @@ class _SdbIndex extends Index {
     });
   }
 
-  @override
-  get keyPath => meta.keyPath;
-
-  @override
-  bool get multiEntry => meta.multiEntry;
-
-  @override
-  String get name => meta.name;
 
   @override
   Stream<CursorWithValue> openCursor(
@@ -291,9 +284,6 @@ class _SdbIndex extends Index {
 
     return ctlr.stream;
   }
-
-  @override
-  bool get unique => meta.unique;
 
   sdb.Filter cursorFilter(key, KeyRange range) {
     return _keyCursorFilter(keyPath, key, range);
@@ -646,7 +636,7 @@ class _SdbStoreCursorWithValueController extends Object
   }
 }
 
-class _SdbObjectStore extends ObjectStore {
+class _SdbObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
   final IdbObjectStoreMeta meta;
   final _SdbTransaction transaction;
   _SdbDatabase get database => transaction.database;
@@ -826,12 +816,6 @@ class _SdbObjectStore extends ObjectStore {
     return new _SdbIndex(this, indexMeta);
   }
 
-  @override
-  List<String> get indexNames =>
-      new List.from(meta.indexNames, growable: false);
-
-  @override
-  String get name => meta.name;
 
   sdb.SortOrder sortOrder(bool ascending) {
     return new sdb.SortOrder(keyField, ascending);
@@ -869,11 +853,6 @@ class _SdbObjectStore extends ObjectStore {
     });
   }
 
-  @override
-  bool get autoIncrement => meta.autoIncrement;
-
-  @override
-  get keyPath => meta.keyPath;
 }
 
 ///
@@ -882,13 +861,12 @@ class _SdbObjectStore extends ObjectStore {
 /// {"key":"stores","value":["test_store"]}
 /// {"key":"store_test_store","value":{"name":"test_store","keyPath":"my_key","autoIncrement":true}}
 
-class _SdbDatabase extends Database {
+class _SdbDatabase extends Database with DatabaseWithMetaMixin {
   static Logger logger = new Logger("SembastIdb");
   final bool LOGV = logger.isLoggable(Level.FINEST);
 
   _SdbTransaction versionChangeTransaction;
   final IdbDatabaseMeta meta = new IdbDatabaseMeta();
-  final String _name;
   sdb.Database db;
 
   @override
@@ -896,7 +874,9 @@ class _SdbDatabase extends Database {
 
   sdb.DatabaseFactory get sdbFactory => factory._databaseFactory;
 
-  _SdbDatabase(IdbFactory factory, this._name) : super(factory);
+  _SdbDatabase(IdbFactory factory, String name) : super(factory) {
+    meta.name = name;
+  }
 
   Future<List<IdbObjectStoreMeta>> _loadStoresMeta(List<String> storeNames) {
     List<String> keys = [];
@@ -935,7 +915,7 @@ class _SdbDatabase extends Database {
                 return _loadStoresMeta(storeNames)
                     .then((List<IdbObjectStoreMeta> storeMetas) {
                   storeMetas.forEach((IdbObjectStoreMeta store) {
-                    meta.addObjectStore(store);
+                    meta.putObjectStore(store);
                   });
                 });
               }
@@ -958,8 +938,8 @@ class _SdbDatabase extends Database {
             onUpgradeNeeded(
                 new _SdbVersionChangeEvent(this, previousVersion, newVersion));
           }
-          changedStores = meta.versionChangeStores;
-          deletedStores = meta.versionChangeDeletedStores;
+          changedStores = meta.versionChangeTransaction.versionChangeStores;
+          deletedStores = meta.versionChangeTransaction.versionChangeDeletedStores;
         });
 
         return db.inTransaction(() async {
@@ -1008,9 +988,6 @@ class _SdbDatabase extends Database {
   void deleteObjectStore(String name) {
     meta.deleteObjectStore(name);
   }
-
-  @override
-  String get name => _name;
 
   @override
   Iterable<String> get objectStoreNames {

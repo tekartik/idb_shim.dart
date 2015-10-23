@@ -19,7 +19,7 @@ class _WebSqlVersionChangeEvent extends VersionChangeEvent {
   }
 }
 
-class _WebSqlDatabase extends Database {
+class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
   // To allow for proper schema migration if needed
 
   // V1 include the following schema
@@ -27,24 +27,28 @@ class _WebSqlDatabase extends Database {
   // INSERT INTO version (internal_version, value, signature) VALUES (1, 0, com.tekartik.idb)
   // CREATE TABLE stores (name TEXT UNIQUE, key_path TEXT, auto_increment BOOLEAN, indecies TEXT)
   static const int INTERNAL_VERSION_1 = 1;
-  static const int INTERNAL_VERSION = INTERNAL_VERSION_1;
+  // CREATE TABLE stores (name TEXT UNIQUE, meta TEXT)
+  static const int INTERNAL_VERSION_2 = 2;
+  static const int INTERNAL_VERSION = INTERNAL_VERSION_2;
 
   //int version = 0;
   //bool opened = true;
 
-  String name;
-  _WebSqlDatabase(this.name) : super(idbWebSqlFactory);
+  _WebSqlDatabase(String name) : super(idbWebSqlFactory) {
+    meta.name = name;
+  }
   _WebSqlTransaction versionChangeTransaction;
   SqlDatabase sqlDb;
 
+  /*
   List<_WebSqlObjectStore> onVersionChangeDeletedObjectStores;
   List<_WebSqlObjectStore> onVersionChangeCreatedObjectStores;
   List<_WebSqlIndex> onVersionChangeCreatedIndexes;
 
   // Cache
   Map<String, _WebSqlObjectStoreMeta> stores = new Map();
-
-  int version;
+  */
+  final IdbDatabaseMeta meta = new IdbDatabaseMeta();
 
   int _getVersionFromResultSet(SqlResultSet resultSet) {
     if (resultSet.rows.length > 0) {
@@ -115,108 +119,98 @@ class _WebSqlDatabase extends Database {
     return initialization;
   }
 
-  Future open(int newVersion, void onUpgradeNeeded(VersionChangeEvent event)) {
-    Future _checkVersion(SqlTransaction tx, int oldVersion) {
+  Future _upgrade(SqlTransaction tx, int oldVersion, int newVersion,
+      void onUpgradeNeeded(VersionChangeEvent event)) async {
+    Future stepCreateIndexes() async {
+      meta.versionChangeTransaction.versionChangeCreatedIndexes
+          .forEach((String storeName, List<IdbIndexMeta> indexMetas) async {
+        for (IdbIndexMeta indexMeta in indexMetas) {
+          _WebSqlObjectStore store =
+              versionChangeTransaction.objectStore(storeName);
+          _WebSqlIndex index = new _WebSqlIndex(store, indexMeta);
+          await index.create();
+        }
+      });
+    }
+
+    Future stepCreateObjectStores() async {
+      for (IdbObjectStoreMeta storeMeta
+          in meta.versionChangeTransaction.versionChangeCreatedStores) {
+        _WebSqlObjectStore store =
+            new _WebSqlObjectStore(versionChangeTransaction, storeMeta);
+        await store.create();
+      }
+    }
+
+    Future removeDeletedObjectStores() async {
+      for (IdbObjectStoreMeta storeMeta
+          in meta.versionChangeTransaction.versionChangeDeletedStores) {
+        _WebSqlObjectStore store =
+            new _WebSqlObjectStore(versionChangeTransaction, storeMeta);
+        await store._deleteTable(versionChangeTransaction);
+        var sqlDelete = "DELETE FROM stores WHERE name = ?";
+        var sqlArgs = [store.name];
+        await versionChangeTransaction.execute(sqlDelete, sqlArgs);
+      }
+    }
+
+    versionChangeTransaction =
+        new _WebSqlTransaction(this, tx, meta.versionChangeTransaction);
+    _WebSqlVersionChangeEvent event = new _WebSqlVersionChangeEvent(
+        this, oldVersion, newVersion, versionChangeTransaction);
+
+    onUpgradeNeeded(event);
+
+    // Delete store that have been deleted
+    await removeDeletedObjectStores();
+    await stepCreateObjectStores();
+    await stepCreateIndexes();
+
+    // nullify when done
+    versionChangeTransaction = null;
+  }
+
+  Future open(
+      int newVersion, void onUpgradeNeeded(VersionChangeEvent event)) async {
+    Future _checkVersion(SqlTransaction tx, int oldVersion) async {
       bool upgrading = false;
+
+      IdbTransactionMeta txnMeta = meta.transaction(null, idbModeReadWrite);
       _WebSqlTransaction transaction =
-          new _WebSqlTransaction(this, tx, null, idbModeReadWrite);
+          new _WebSqlTransaction(this, tx, txnMeta);
+      // Wrap in init block so that last one win
+
       //print("$oldVersion vs $newVersion");
       if (oldVersion != newVersion) {
         if (oldVersion > newVersion) {
           // cannot downgrade
-          return new Future.error(new StateError(
-              "cannot downgrade from ${oldVersion} to $newVersion"));
+          throw new StateError("cannot downgrade from ${oldVersion} to $newVersion");
         } else {
           upgrading = true;
 
-          Future stepUpdateVersion() {
-            // Wrap in init block so that last one win
+          Future updateVersion() async {
             // return initBlock(() {
-            return transaction
-                .execute("UPDATE version SET value = ?", [newVersion]) //
-                .then((_) {
-              this.version = newVersion;
-            }) //})
-                .then((_) {
-              // Only mark as open when the first transaction complete
-              return transaction.completed;
-            });
-          }
-
-          Future stepCreateIndexes() {
-            int index = 0;
-            _createNextIndex() {
-              if (index >= onVersionChangeCreatedIndexes.length) {
-                return stepUpdateVersion();
-              }
-              return onVersionChangeCreatedIndexes[index++].create().then((_) {
-                return _createNextIndex();
-              });
-            }
-            return _createNextIndex();
-          }
-
-          Future stepCreateObjectStores() {
-            int index = 0;
-            createNextObjectStore() {
-              if (index >= onVersionChangeCreatedObjectStores.length) {
-                return stepCreateIndexes();
-              }
-              return onVersionChangeCreatedObjectStores[index++]
-                  .create()
-                  .then((_) {
-                return createNextObjectStore();
-              });
-            }
-            return createNextObjectStore();
-          }
-
-          Future createNewObjects() {
-            return stepCreateObjectStores();
-          }
-
-          Future stepRemoveDeletedObjectStores(
-              _WebSqlTransaction transaction) async {
-            for (_WebSqlObjectStore store
-                in onVersionChangeDeletedObjectStores) {
-              await store._deleteTable(transaction);
-              var sqlDelete = "DELETE FROM stores WHERE name = ?";
-              var sqlArgs = [store.name];
-              await transaction.execute(sqlDelete, sqlArgs);
-            }
+            await transaction.execute(
+                    "UPDATE version SET value = ?", [newVersion]) //
+                ;
+            meta.version = newVersion;
           }
 
           //return initBlock(() {
-          return _loadStores(transaction) //})
-              .then((_) async {
-            if (onUpgradeNeeded != null) {
-              _WebSqlTransaction transaction =
-                  new _WebSqlTransaction(this, tx, null, idbModeReadWrite);
-              _WebSqlVersionChangeEvent event = new _WebSqlVersionChangeEvent(
-                  this, oldVersion, newVersion, transaction);
-              versionChangeTransaction = event.transaction;
+          await _loadStores(transaction);
+          if (onUpgradeNeeded != null) {
+            meta.onUpgradeNeeded(() async {
+              await _upgrade(tx, oldVersion, newVersion, onUpgradeNeeded);
+            });
+          }
+          await updateVersion();
 
-              onVersionChangeDeletedObjectStores = [];
-              onVersionChangeCreatedObjectStores = [];
-              onVersionChangeCreatedIndexes = [];
-
-              onUpgradeNeeded(event);
-              // nulliy when done
-              versionChangeTransaction = null;
-
-              // Delete store that have been deleted
-              await stepRemoveDeletedObjectStores(transaction);
-
-              return createNewObjects();
-            } else {
-              return stepUpdateVersion();
-            }
-          });
         }
       }
+
       if (!upgrading) {
-        this.version = newVersion;
-        return _loadStores(transaction);
+        meta.version = newVersion;
+        await _loadStores(transaction);
       }
       return transaction.completed;
     }
@@ -238,7 +232,7 @@ class _WebSqlDatabase extends Database {
         return tx.execute("DROP TABLE IF EXISTS stores");
       }).then((_) {
         return tx.execute("CREATE TABLE stores " //
-            "(name TEXT UNIQUE, key_path TEXT, auto_increment BOOLEAN, indecies TEXT)");
+            "(name TEXT UNIQUE, meta TEXT)");
         // indecies json text
       }).then((_) {
         return _checkVersion(tx, 0);
@@ -268,65 +262,19 @@ class _WebSqlDatabase extends Database {
       });
     }
 
-    return _setup();
+    await _setup();
   }
 
   @override
   ObjectStore createObjectStore(String name,
       {String keyPath, bool autoIncrement: false}) {
-    if (versionChangeTransaction == null) {
-      throw new StateError(
-          "cannot create objectStore outside of a versionChangedEvent");
-    }
-    _WebSqlObjectStoreMeta storeMeta =
-        new _WebSqlObjectStoreMeta(name, keyPath, autoIncrement);
+    IdbObjectStoreMeta storeMeta =
+        new IdbObjectStoreMeta(name, keyPath, autoIncrement);
+    meta.createObjectStore(storeMeta);
+
     _WebSqlObjectStore store =
         new _WebSqlObjectStore(versionChangeTransaction, storeMeta);
-
-    // Put in the map
-    stores[name] = storeMeta;
-
-    // Add for later creation
-    onVersionChangeCreatedObjectStores.add(store);
-
-    //    MemoryObjectStoreData data =  new MemoryObjectStoreData(name, keyPath, autoIncrement);
-    //    stores[name] = data;
-    //    return new MemoryObjectStore(null, data);
-
-    // This is a future
-    // Special as create is call in a synchronized method
-    //    initBlock(() {
-    //      return store.create(keyPath, autoIncrement);
-    //    });
-
     return store;
-  }
-
-  _initStoreFromRow(_WebSqlTransaction transaction, Map row) {
-    String name = row['name'];
-    String keyPath = row['key_path'];
-    bool autoIncrement = row['auto_increment'] > 0;
-
-    _WebSqlObjectStoreMeta storeMeta =
-        new _WebSqlObjectStoreMeta(name, keyPath, autoIncrement);
-    _WebSqlObjectStore store = new _WebSqlObjectStore(transaction, storeMeta);
-    store._initOptions(keyPath, autoIncrement);
-
-    String indeciesText = row['indecies'];
-
-    // merge lazy loaded data
-    Map indeciesData = storeMeta.indeciesDataFromString(indeciesText);
-    indeciesData.forEach((name, _WebSqlIndexMeta indexMeta) {
-      //_WebSqlIndex index = new _WebSqlIndex(store, indexMeta);
-      store._meta.indecies[name] = indexMeta;
-
-      // save store in cache
-
-      //             if (keyPath == null && !autoIncrement) {
-      //               throw new ArgumentError("neither keyPath nor autoIncrement set");
-      //             }
-    });
-    stores[name] = storeMeta;
   }
 
   /**
@@ -335,51 +283,38 @@ class _WebSqlDatabase extends Database {
   Future _loadStores(_WebSqlTransaction transaction) {
     // this is also an indicator
     var sqlSelect =
-        "SELECT name, key_path, auto_increment, indecies FROM stores"; // WHERE name = ?";
+        "SELECT name, meta FROM stores"; // WHERE name = ?";
     var sqlArgs = null; //[name];
     return transaction.execute(sqlSelect, sqlArgs).then((SqlResultSet rs) {
       rs.rows.forEach((Map row) {
-        _initStoreFromRow(transaction, row);
+        Map map = JSON.decode(row['meta']);
+        IdbObjectStoreMeta storeMeta =
+        new IdbObjectStoreMeta.fromMap(map);
+              meta.putObjectStore(storeMeta);
       });
     });
   }
 
-  bool _containsStore(String storeName) {
-    return stores.keys.contains(storeName);
-  }
 
   @override
   Transaction transaction(storeName_OR_storeNames, String mode) {
-    List<String> storeNames;
-    if (storeName_OR_storeNames is List) {
-      storeNames = storeName_OR_storeNames;
+    IdbTransactionMeta txnMeta =
+        meta.transaction(storeName_OR_storeNames, mode);
 
-      // check stores exist
-      for (String storeName in storeNames) {
-        if (!_containsStore(storeName)) {
-          throw new DatabaseStoreNotFoundError();
-        }
-      }
-    } else {
-      String storeName = storeName_OR_storeNames;
-      storeNames = [storeName];
-
-      // check store exist
-      if (!_containsStore(storeName)) {
-        throw new DatabaseStoreNotFoundError();
-      }
-    }
-    return new _WebSqlTransaction(this, null, storeNames, mode);
+    return new _WebSqlTransaction(this, null, txnMeta);
   }
 
   @override
   Transaction transactionList(List<String> stores, String mode) {
-    return new _WebSqlTransaction(this, null, stores, mode);
+    IdbTransactionMeta txnMeta = meta.transaction(stores, mode);
+    return new _WebSqlTransaction(this, null, txnMeta);
   }
 
+  /*
   _WebSqlTransaction newRawTransaction(String mode) {
     return new _WebSqlTransaction(this, null, null, mode);
   }
+  */
 
   //  @override
   //  Transaction transactionList(List<String> storeNames, String mode) {
@@ -393,33 +328,6 @@ class _WebSqlDatabase extends Database {
     //factory.dbMap[name];
     //stores = null; // so that it crashes
   }
-
-  _WebSqlObjectStore _getStore(Transaction transaction, String name) {
-    _WebSqlObjectStoreMeta storeMeta = stores[name];
-    if (storeMeta != null) {
-      return new _WebSqlObjectStore(transaction, storeMeta);
-    }
-    return null;
-  }
-
-  @override
-  void deleteObjectStore(String name) {
-    if (versionChangeTransaction == null) {
-      throw new StateError(
-          "cannot call deleteObjectStore outside of a versionChangedEvent");
-    }
-
-    _WebSqlObjectStore store = _getStore(versionChangeTransaction, name);
-
-    if (store != null) {
-      // delete the table
-      stores.remove(name);
-
-      onVersionChangeDeletedObjectStores.add(store);
-    }
-  }
-
-  Iterable<String> get objectStoreNames => stores.keys;
 
   // Only created when we asked for it
   // singleton

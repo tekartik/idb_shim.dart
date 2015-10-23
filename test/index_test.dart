@@ -525,7 +525,7 @@ void defineTests(IdbFactory idbFactory) {
 
       Future testIndex(IdbIndexMeta indexMeta) {
         IdbObjectStoreMeta storeMeta = idbSimpleObjectStoreMeta.clone();
-        storeMeta.addIndex(indexMeta);
+        storeMeta.putIndex(indexMeta);
         return setUpSimpleStore(idbFactory, meta: storeMeta)
             .then((Database db) {
           db.close();

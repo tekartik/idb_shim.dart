@@ -1,6 +1,7 @@
 websql
-- cache meta data between 2 transaction, version will change anyway (i.e. prevent calling 3 SELECT key_path, auto_increment, indecies FROM stores WHERE name = test_store )
-- check version on transaction begin
+x cache meta data between 2 transaction, version will change anyway (i.e. prevent calling 3 SELECT key_path, auto_increment, indecies FROM stores WHERE name = test_store )
+x check version on transaction begin
+- handle deleteIndex
 
 test
 - test cursor and key value null

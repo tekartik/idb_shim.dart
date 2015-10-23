@@ -58,7 +58,7 @@ class _WebSqlCursorWithValue extends CursorWithValue
 
   @override
   Object get value =>
-      decodeValue(_map[_WebSqlObjectStoreMeta.VALUE_COLUMN_NAME]);
+      decodeValue(_map[_WebSqlObjectStore.VALUE_COLUMN_NAME]);
 }
 
 abstract class _WebSqlCursorBaseController<T extends Cursor> {
@@ -193,7 +193,7 @@ abstract class _WebSqlCursorWithValueCommonController {
   String get baseSelectedColumns;
 
   String get selectedColumns {
-    return "$baseSelectedColumns, ${_WebSqlObjectStoreMeta.VALUE_COLUMN_NAME}";
+    return "$baseSelectedColumns, ${_WebSqlObjectStore.VALUE_COLUMN_NAME}";
   }
 }
 

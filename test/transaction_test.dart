@@ -157,7 +157,7 @@ void defineTests(IdbFactory idbFactory) {
         });
       });
 
-      test('bad_store', () {
+      test('bad_store_transaction', () {
         void _initializeDatabase(VersionChangeEvent e) {
           Database db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
@@ -171,6 +171,29 @@ void defineTests(IdbFactory idbFactory) {
           } catch (e) {
             //print(e);
             //print(e.runtimeType);
+            expect(isStoreNotFoundError(e), isTrue);
+          }
+
+          database.close();
+        });
+      });
+
+      test('bad_store', () {
+        void _initializeDatabase(VersionChangeEvent e) {
+          Database db = e.database;
+          db.createObjectStore(testStoreName, autoIncrement: true);
+        }
+        return idbFactory
+        .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
+        .then((Database database) {
+          Transaction transaction = database.transaction(testStoreName, idbModeReadWrite);
+          try {
+            transaction.objectStore(testStoreName2);
+            fail("exception expected");
+          } catch (e) {
+            // NotFoundError: An attempt was made to reference a Node in a context where it does not exist. The specified object store was not found.
+            print(e);
+            print(e.runtimeType);
             expect(isStoreNotFoundError(e), isTrue);
           }
 

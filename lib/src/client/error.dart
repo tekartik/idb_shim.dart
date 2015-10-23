@@ -22,6 +22,10 @@ class DatabaseStoreNotFoundError extends DatabaseError {
   DatabaseStoreNotFoundError() : super(_MESSAGE);
 }
 
+class DatabaseTransactionStoreNotFoundError extends DatabaseError {
+  DatabaseTransactionStoreNotFoundError(String store) : super("NotFoundError: store '${store}' not found in transaction.");
+}
+
 class DatabaseNoKeyError extends DatabaseError {
   static String _MESSAGE =
       "DataError: The data provided does not meet requirements. No key or key range specified.";

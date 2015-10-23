@@ -1,43 +1,26 @@
 part of idb_shim_websql;
 
-class _WebSqlIndexMeta {
+/*
+class _WebSqlIndexMeta extends IdbIndexMeta {
   _WebSqlObjectStoreMeta storeMeta;
-  String name;
-  String keyPath;
-  bool unique;
-  bool multiEntry;
   _WebSqlIndexMeta(
-      this.storeMeta, this.name, this.keyPath, this.unique, this.multiEntry) {
-    multiEntry = (multiEntry == true);
-    unique = (unique == true);
-  }
-
-  @override
-  String toString() {
-    return "index $name on $keyPath unique ${unique} multi ${multiEntry}";
-  }
+      this.storeMeta, String name, String keyPath, bool unique, bool multiEntry) : super(name, keyPath, unique, multiEntry);
 
   String get keyColumn => storeMeta.sqlColumnName(keyPath);
 }
+*/
 
-class _WebSqlIndex extends Index {
-  _WebSqlIndexMeta _meta;
-  _WebSqlIndexMeta get meta => _meta;
+class _WebSqlIndex extends Index with IndexWithMetaMixin {
   _WebSqlObjectStore store;
+final IdbIndexMeta meta;
 
-  @override
-  String get name => _meta.name;
-
-  @override
-  String get keyPath => _meta.keyPath;
-
-  @override
-  bool get unique => _meta.unique;
-
-  @override
-  bool get multiEntry => _meta.multiEntry;
-
-  String get keyColumn => _meta.keyColumn;
+  String _keyColumn;
+  String get keyColumn {
+    if (_keyColumn == null) {
+      _keyColumn = store.sqlColumnName(keyPath);
+    }
+    return _keyColumn;
+  }
   String get sqlIndexName => store.getSqlIndexName(keyPath);
   String get sqlTableName => store.sqlTableName;
 
@@ -46,26 +29,10 @@ class _WebSqlIndex extends Index {
 
   _WebSqlTransaction get transaction => store.transaction;
 
-  static String indeciesToString(Map<String, _WebSqlIndexMeta> indecies) {
-    if (indecies.isEmpty) {
-      return null;
-    }
-    List list = new List();
-    indecies.values.forEach((_WebSqlIndexMeta indexMeta) {
-      Map indexDef = new Map();
-      indexDef['name'] = indexMeta.name;
-      indexDef['key_path'] = indexMeta.keyPath;
-      indexDef['multi_entry'] = indexMeta.multiEntry;
-      indexDef['unique'] = indexMeta.unique;
-      list.add(indexDef);
-    });
-    return JSON.encode(list);
-  }
-
   /**
    * data can null, it will be lazy loaded
    */
-  _WebSqlIndex(this.store, this._meta) {
+  _WebSqlIndex(this.store, this.meta) {
     // Build the index based on the existing
     // TODO
     //devPrint("${store} ${_meta}");
@@ -75,9 +42,10 @@ class _WebSqlIndex extends Index {
     String sqlTableName = this.sqlTableName;
     String sqlIndexName = this.sqlIndexName;
     String alterSql = "ALTER TABLE ${sqlTableName} ADD ${keyColumn} BLOB";
-    String updateSql = "UPDATE stores SET indecies = ? WHERE name = ?";
+    String updateSql = "UPDATE stores SET meta = ? WHERE name = ?";
 
-    List updateArgs = [indeciesToString(store._meta.indecies), store.name];
+    String metaText = JSON.encode(meta);
+    List updateArgs = [metaText, store.name];
     return transaction.execute(alterSql).then((_) {
       return transaction.execute(updateSql, updateArgs);
     }).then((_) {
@@ -155,4 +123,6 @@ class _WebSqlIndex extends Index {
     });
     return ctlr.stream;
   }
+
+
 }

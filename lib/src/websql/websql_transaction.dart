@@ -1,14 +1,7 @@
 part of idb_shim_websql;
 
 class _WebSqlTransaction extends Transaction {
-  // extends CommonTransaction {
-
-  //int _operationCount = 0;
-
-  // readonly or readwrite
-  String _mode;
-
-  List<String> storeNames;
+  final IdbTransactionMeta _meta;
 
   SqlTransaction _sqlTransaction;
   Future<SqlTransaction> _lazySqlTransaction;
@@ -25,13 +18,13 @@ class _WebSqlTransaction extends Transaction {
   _WebSqlDatabase get idbWqlDatabase => (database as _WebSqlDatabase);
 
   _WebSqlTransaction(
-      Database database, this._sqlTransaction, this.storeNames, this._mode)
+      Database database, this._sqlTransaction, this._meta)
       : super(database);
 
   @override
-  ObjectStore objectStore(String name) {
-    _WebSqlObjectStore store = idbWqlDatabase._getStore(this, name);
-    return store;
+  _WebSqlObjectStore objectStore(String name) {
+    _meta.checkObjectStore(name);
+    return new _WebSqlObjectStore(this, idbWqlDatabase.meta.getObjectStore(name));
   }
 
   Future<SqlResultSet> execute(String statement, [List args]) {
@@ -80,6 +73,6 @@ class _WebSqlTransaction extends Transaction {
   }
 
   toString() {
-    return _mode;
+    return _meta.toString();
   }
 }
