@@ -45,7 +45,7 @@ class _WebSqlIndex extends Index with IndexWithMetaMixin {
     String alterSql = "ALTER TABLE ${sqlTableName} ADD ${keyColumn} BLOB";
     String updateSql = "UPDATE stores SET meta = ? WHERE name = ?";
 
-    String metaText = JSON.encode(meta);
+    String metaText = JSON.encode(meta.toMap());
     List updateArgs = [metaText, store.name];
     return transaction.execute(alterSql).then((_) {
       return transaction.execute(updateSql, updateArgs);

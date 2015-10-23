@@ -935,9 +935,8 @@ class _SdbDatabase extends Database with DatabaseWithMetaMixin {
             onUpgradeNeeded(
                 new _SdbVersionChangeEvent(this, previousVersion, newVersion));
           }
-          changedStores = meta.versionChangeTransaction.versionChangeStores;
-          deletedStores =
-              meta.versionChangeTransaction.versionChangeDeletedStores;
+          changedStores = meta.versionChangeTransaction.updatedStores;
+          deletedStores = meta.versionChangeTransaction.deletedStores;
         });
 
         return db.inTransaction(() async {

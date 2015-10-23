@@ -9,7 +9,7 @@ void main() => defineTests(idbTestMemoryFactory);
 
 void defineTests(IdbFactory idbFactory) {
   group('index', () {
-    solo_group('no', () {
+    group('no', () {
       Database db;
       Transaction transaction;
       ObjectStore objectStore;
@@ -542,7 +542,7 @@ void defineTests(IdbFactory idbFactory) {
         });
       }
 
-      test('all', () {
+      solo_test('all', () {
         Iterator<IdbIndexMeta> iterator = idbIndexMetas.iterator;
         _next() {
           if (iterator.moveNext()) {

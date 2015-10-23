@@ -28,16 +28,20 @@ class IdbTransactionMeta {
 }
 
 class IdbVersionChangeTransactionMeta extends IdbTransactionMeta {
-  Map<String, List<IdbIndexMeta>> versionChangeCreatedIndexes =
+  Map<String, List<IdbIndexMeta>> createdIndexes =
       {}; // store deleted during onUpgradeNeeded
-  Set<IdbObjectStoreMeta> versionChangeCreatedStores =
+  Set<IdbObjectStoreMeta> createdStores =
       new Set(); // store deleted during onUpgradeNeeded
-  Set<IdbObjectStoreMeta> versionChangeDeletedStores =
+  Set<IdbObjectStoreMeta> deletedStores =
       new Set(); // store deleted during onUpgradeNeeded
-  Set<IdbObjectStoreMeta> versionChangeStores =
+  Set<IdbObjectStoreMeta> updatedStores =
       new Set(); // store modified during onUpgradeNeeded
 
   IdbVersionChangeTransactionMeta() : super(null, idbModeReadWrite);
+
+  // don't check for versionChangeTransaction
+  @override
+  void checkObjectStore(String storeName) {}
 }
 
 abstract class DatabaseWithMetaMixin {
@@ -84,7 +88,6 @@ class IdbDatabaseMeta {
       await result;
     }
     _versionChangeTransaction = null;
-    return result;
   }
 
   createObjectStore(IdbObjectStoreMeta store) {
@@ -92,7 +95,7 @@ class IdbDatabaseMeta {
       throw new StateError(
           "cannot create objectStore outside of a versionChangedEvent");
     }
-    versionChangeTransaction.versionChangeCreatedStores.add(store);
+    versionChangeTransaction.createdStores.add(store);
     putObjectStore(store);
   }
 
@@ -105,7 +108,7 @@ class IdbDatabaseMeta {
     // we store object store on quit
     IdbObjectStoreMeta storeMeta = _stores[storeName];
     if (storeMeta != null) {
-      versionChangeTransaction.versionChangeDeletedStores.add(storeMeta);
+      versionChangeTransaction.deletedStores.add(storeMeta);
       _stores.remove(storeName);
     }
   }
@@ -215,12 +218,10 @@ class IdbObjectStoreMeta {
       throw new StateError(
           "cannot create index outside of a versionChangedEvent");
     }
-    databaseMeta.versionChangeTransaction.versionChangeStores.add(this);
-    List list =
-        databaseMeta.versionChangeTransaction.versionChangeCreatedIndexes[name];
+    databaseMeta.versionChangeTransaction.updatedStores.add(this);
+    List list = databaseMeta.versionChangeTransaction.createdIndexes[name];
     if (list == null) {
-      databaseMeta.versionChangeTransaction.versionChangeCreatedIndexes[name] =
-          [index];
+      databaseMeta.versionChangeTransaction.createdIndexes[name] = [index];
     } else {
       list.add(index);
     }

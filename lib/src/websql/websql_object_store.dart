@@ -476,8 +476,6 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
         new IdbIndexMeta(name, keyPath, unique, multiEntry);
     meta.createIndex(database.meta, indexMeta);
     _WebSqlIndex index = new _WebSqlIndex(this, indexMeta);
-
-    meta.createIndex(database.meta, indexMeta);
     // let it for later
     return index;
   }

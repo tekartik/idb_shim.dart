@@ -121,21 +121,23 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
 
   Future _upgrade(SqlTransaction tx, int oldVersion, int newVersion,
       void onUpgradeNeeded(VersionChangeEvent event)) async {
-    Future stepCreateIndexes() async {
-      meta.versionChangeTransaction.versionChangeCreatedIndexes
-          .forEach((String storeName, List<IdbIndexMeta> indexMetas) async {
+    Future createIndexes() async {
+      for (String storeName
+          in meta.versionChangeTransaction.createdIndexes.keys) {
+        List<IdbIndexMeta> indexMetas =
+            meta.versionChangeTransaction.createdIndexes[storeName];
         for (IdbIndexMeta indexMeta in indexMetas) {
           _WebSqlObjectStore store =
               versionChangeTransaction.objectStore(storeName);
           _WebSqlIndex index = new _WebSqlIndex(store, indexMeta);
           await index.create();
         }
-      });
+      }
     }
 
-    Future stepCreateObjectStores() async {
+    Future createObjectStores() async {
       for (IdbObjectStoreMeta storeMeta
-          in meta.versionChangeTransaction.versionChangeCreatedStores) {
+          in meta.versionChangeTransaction.createdStores) {
         _WebSqlObjectStore store =
             new _WebSqlObjectStore(versionChangeTransaction, storeMeta);
         await store.create();
@@ -144,7 +146,7 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
 
     Future removeDeletedObjectStores() async {
       for (IdbObjectStoreMeta storeMeta
-          in meta.versionChangeTransaction.versionChangeDeletedStores) {
+          in meta.versionChangeTransaction.deletedStores) {
         _WebSqlObjectStore store =
             new _WebSqlObjectStore(versionChangeTransaction, storeMeta);
         await store._deleteTable(versionChangeTransaction);
@@ -163,8 +165,8 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
 
     // Delete store that have been deleted
     await removeDeletedObjectStores();
-    await stepCreateObjectStores();
-    await stepCreateIndexes();
+    await createObjectStores();
+    await createIndexes();
 
     // nullify when done
     versionChangeTransaction = null;
@@ -200,7 +202,7 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
           //return initBlock(() {
           await _loadStores(transaction);
           if (onUpgradeNeeded != null) {
-            meta.onUpgradeNeeded(() async {
+            await meta.onUpgradeNeeded(() async {
               await _upgrade(tx, oldVersion, newVersion, onUpgradeNeeded);
             });
           }
