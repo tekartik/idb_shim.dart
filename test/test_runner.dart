@@ -24,35 +24,30 @@ import 'package:idb_shim/idb_client.dart';
 defineTests_(TestContext ctx) {
   database_test.defineTests_(ctx);
   index_cursor_test.defineTests(ctx);
-  defineTests(ctx.factory);
-}
-
-@deprecated
-defineTests(IdbFactory idbFactory) {
-  transaction_test.defineTests(idbFactory);
-  cursor_test.defineTests(idbFactory);
-  open_test.defineTests(idbFactory);
-  object_store_test.defineTests(idbFactory);
-  key_range_test.defineTests(idbFactory);
-  factory_test.defineTests(idbFactory);
-  index_test.defineTests(idbFactory);
-  simple_provider_test.defineTests(idbFactory);
-  quick_standalone_test.defineTests(idbFactory);
-  scenario_test.defineTests(idbFactory);
+  transaction_test.defineTests(ctx);
+  cursor_test.defineTests(ctx);
+  open_test.defineTests(ctx);
+  object_store_test.defineTests(ctx);
+  key_range_test.defineTests(ctx);
+  factory_test.defineTests(ctx);
+  index_test.defineTests(ctx);
+  simple_provider_test.defineTests(ctx);
+  quick_standalone_test.defineTests(ctx);
+  scenario_test.defineTests(ctx);
 
   group('indexeddb_1', () {
-    indexeddb_1_test.defineTests(idbFactory);
+    indexeddb_1_test.defineTests(ctx);
   });
   group('indexeddb_2', () {
-    indexeddb_2_test.defineTests(idbFactory);
+    indexeddb_2_test.defineTests(ctx);
   });
   group('indexeddb_3', () {
-    indexeddb_3_test.defineTests(idbFactory);
+    indexeddb_3_test.defineTests(ctx);
   });
   group('indexeddb_4', () {
-    indexeddb_4_test.defineTests(idbFactory);
+    indexeddb_4_test.defineTests(ctx);
   });
   group('indexeddb_5', () {
-    indexeddb_5_test.defineTests(idbFactory);
+    indexeddb_5_test.defineTests(ctx);
   });
 }

@@ -15,9 +15,12 @@ class TestIdNameRow {
 }
 
 // so that this can be run directly
-void main() => defineTests(idbTestMemoryFactory);
+main() {
+  defineTests(idbMemoryContext);
+}
 
-void defineTests(IdbFactory idbFactory) {
+void defineTests(TestContext ctx) {
+  IdbFactory idbFactory = ctx.factory;
   group('cursor', () {
     Database db;
     Transaction transaction;

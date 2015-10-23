@@ -309,24 +309,8 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
     return new _WebSqlTransaction(this, null, txnMeta);
   }
 
-  /*
-  _WebSqlTransaction newRawTransaction(String mode) {
-    return new _WebSqlTransaction(this, null, null, mode);
-  }
-  */
-
-  //  @override
-  //  Transaction transactionList(List<String> storeNames, String mode) {
-  //    return newRawTransaction;
-  //  }
-
   @override
-  void close() {
-    //opened = false;
-    // nothing?
-    //factory.dbMap[name];
-    //stores = null; // so that it crashes
-  }
+  void close() {}
 
   // Only created when we asked for it
   // singleton
@@ -334,9 +318,7 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
 
   @override
   Stream<VersionChangeEvent> get onVersionChange {
-    /**
-  * only fired when a new call is made!
-  */
+    // only fired when a new call is made!
     if (onVersionChangeCtlr != null) {
       throw new UnsupportedError("onVersionChange should be called only once");
     }
@@ -345,10 +327,4 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
     onVersionChangeCtlr = new StreamController(sync: true);
     return onVersionChangeCtlr.stream;
   }
-  /*
-  @override
-  String toString() {
-    return 'db: $name';
-  }
-  */
 }

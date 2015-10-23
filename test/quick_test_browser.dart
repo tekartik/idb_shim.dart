@@ -8,19 +8,20 @@ import 'package:idb_shim/idb_client_websql.dart';
 import 'package:idb_shim/idb_client_memory.dart';
 import 'package:idb_shim/idb_client.dart';
 import 'dart:async';
-import 'package:test/test.dart';
+import 'idb_test_common.dart';
 
-testMain(IdbFactory idbFactory) {
-  simple_provider_test.defineTests(idbFactory);
-  index_test.defineTests(idbFactory);
-  transaction_test.defineTests(idbFactory);
+testMain(TestContext ctx) {
+  simple_provider_test.defineTests(ctx);
+  index_test.defineTests(ctx);
+  transaction_test.defineTests(ctx);
 }
 
 main() {
   group('native', () {
     if (IdbNativeFactory.supported) {
       IdbFactory idbFactory = new IdbNativeFactory();
-      testMain(idbFactory);
+      TestContext ctx = new TestContext()..factory = idbFactory;
+      testMain(ctx);
     } else {
       test("not supported", () {
         return new Future.error("not supported");
@@ -30,7 +31,8 @@ main() {
   group('websql', () {
     if (IdbWebSqlFactory.supported) {
       IdbWebSqlFactory idbFactory = new IdbWebSqlFactory();
-      testMain(idbFactory);
+      TestContext ctx = new TestContext()..factory = idbFactory;
+      testMain(ctx);
     } else {
       test("not supported", () {
         return new Future.error("not supported");
@@ -38,6 +40,6 @@ main() {
     }
   });
   group('memory', () {
-    testMain(idbMemoryFactory);
+    testMain(idbMemoryContext);
   });
 }

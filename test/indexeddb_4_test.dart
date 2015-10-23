@@ -6,10 +6,7 @@ import 'package:idb_shim/idb_client.dart';
 // so that this can be run directly
 import 'idb_test_common.dart';
 
-void main() => defineTests(idbTestMemoryFactory);
-
 // Test for KeyRange and Cursor.
-
 const String DB_NAME = 'Test4';
 const String STORE_NAME = 'TEST';
 const int VERSION = 1;
@@ -100,8 +97,12 @@ testRange(db, range, expectedFirst, expectedLast) {
   });
 }
 
-defineTests(IdbFactory idbFactory_) {
-  IdbFactory idbFactory = idbFactory_;
+main() {
+  defineTests(idbMemoryContext);
+}
+
+void defineTests(TestContext ctx) {
+  IdbFactory idbFactory = ctx.factory;
   //useHtmlConfiguration();
 
   // Don't bother with these tests if it's unsupported.

@@ -194,9 +194,6 @@ class IdbObjectStoreMeta {
   static const String AUTO_INCREMENT_KEY = "autoIncrement";
   static const String INDECIES_KEY = "indecies";
 
-  //final IdbDatabaseMeta databaseMeta;
-  // might be set later...
-  // TODO check if can be final
   final String name;
   final String keyPath;
   final bool autoIncrement;
@@ -376,6 +373,7 @@ class IdbIndexMeta {
   final String keyPath;
   final bool unique;
   final bool multiEntry;
+
   IdbIndexMeta(this.name, this.keyPath, bool unique, bool multiEntry)
       : multiEntry = (multiEntry == true),
         unique = (unique == true);

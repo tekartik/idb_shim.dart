@@ -24,12 +24,6 @@ class _SelectQuery extends _Query {
 
   Future<SqlResultSet> execute(_WebSqlTransaction transaction) {
     String order;
-    //    if (key != null) {
-    //      return new Future.error(new UnimplementedError("cursor by key not supported"));
-    //    }
-    //    if (keyRange != null) {
-    //      return new Future.error(new UnimplementedError("cursor by range not supported"));
-    //    }
 
     if (_direction != null) {
       switch (_direction) {

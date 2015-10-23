@@ -922,12 +922,12 @@ class _SdbDatabase extends Database with DatabaseWithMetaMixin {
       });
     }
 
-    return _open().then((sdb.Database db) {
+    return _open().then((sdb.Database db) async {
       if (newVersion != previousVersion) {
         Set<IdbObjectStoreMeta> changedStores;
         Set<IdbObjectStoreMeta> deletedStores;
 
-        meta.onUpgradeNeeded(() {
+        await meta.onUpgradeNeeded(() async {
           versionChangeTransaction =
               new _SdbTransaction(this, meta.versionChangeTransaction);
           // could be null when opening an empty database

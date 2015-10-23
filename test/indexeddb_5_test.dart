@@ -6,11 +6,13 @@ import 'package:idb_shim/idb_client.dart';
 // so that this can be run directly
 import 'idb_test_common.dart';
 
-void main() => defineTests(idbTestMemoryFactory);
+main() {
+  defineTests(idbMemoryContext);
+}
 
-defineTests(IdbFactory idbFactory_) {
+void defineTests(TestContext ctx) {
+  IdbFactory idbFactory = ctx.factory;
   group('indexeddb_5', () {
-    IdbFactory idbFactory = idbFactory_;
     //useHtmlConfiguration();
 
     if (!IdbFactory.supported) {

@@ -6,9 +6,12 @@ import 'idb_test_common.dart';
 // File created to reproduce bugs
 
 // so that this can be run directly
-void main() => defineTests(idbTestMemoryFactory);
+main() {
+  defineTests(idbMemoryContext);
+}
 
-void defineTests(IdbFactory idbFactory) {
+void defineTests(TestContext ctx) {
+  IdbFactory idbFactory = ctx.factory;
   //debugQuickLogging(Level.ALL);
   group('bug_put_delete', () {
     Database db;

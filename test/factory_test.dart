@@ -5,9 +5,12 @@ import 'idb_test_common.dart';
 import 'dart:async';
 
 // so that this can be run directly
-void main() => defineTests(idbTestMemoryFactory);
+main() {
+  defineTests(idbMemoryContext);
+}
 
-void defineTests(IdbFactory idbFactory) {
+void defineTests(TestContext ctx) {
+  IdbFactory idbFactory = ctx.factory;
   group('factory', () {
     test('delete database', () {
       return idbFactory.deleteDatabase(testDbName);

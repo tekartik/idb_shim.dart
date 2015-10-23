@@ -6,7 +6,6 @@ import 'test_runner.dart' as test_runner;
 import 'websql_wrapper_test.dart' as websql_wrapper_test;
 import 'websql_client_test.dart' as websql_client_test;
 import 'package:idb_shim/idb_client_websql.dart';
-import 'package:idb_shim/src/websql/websql_wrapper.dart' as wrapper;
 import 'dart:web_sql';
 import 'dart:html';
 import 'dart:async';

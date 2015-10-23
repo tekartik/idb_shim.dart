@@ -114,16 +114,6 @@ class SqlTransaction {
             _database.debugLog("- $map");
           });
         }
-        //        else if (upperCaseStatement.startsWith("CREATE TABLE")) {
-        //          print("  updated ${rs.rowsAffected}");
-        //        }
-
-        // if (upperCaseStatement.startsWith("CREATE TABLE")) {
-        // nothing interesting: rowsAffected 0, insertId 0
-
-        // else if (upperCaseStatement.startsWith("DROP TABLE")) {
-        // nothing interesting: rowsAffected 0
-
       }
       _endOperation();
       completer.complete(rs);

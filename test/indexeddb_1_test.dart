@@ -11,8 +11,6 @@ import 'package:idb_shim/idb_client.dart' as idb;
 // so that this can be run directly
 import 'idb_test_common.dart';
 
-void main() => defineTests(idbTestMemoryFactory);
-
 const String STORE_NAME = 'TEST';
 const int VERSION = 1;
 
@@ -170,8 +168,12 @@ void testTypes(testFunction, idb.IdbFactory idbFactory) {
 }
 
 //TEKARTIK_IDB_REMOVED main() {
-defineTests(idb.IdbFactory idbFactory_) {
-  idb.IdbFactory idbFactory = idbFactory_;
+main() {
+  defineTests(idbMemoryContext);
+}
+
+void defineTests(TestContext ctx) {
+  idb.IdbFactory idbFactory = ctx.factory;
   //TEKARTIK_IDB_REMOVED useHtmlIndividualConfiguration();
 
   // Test that indexed_db is properly flagged as supported or not.

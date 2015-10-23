@@ -77,23 +77,6 @@ abstract class _WebSqlCursorBaseController<T extends Cursor> {
 
   T get newCursor;
 
-  // should be one or 0
-  //int _operationCount = 0;
-  //
-  //  void beginOperation() {
-  //    _operationCount++;
-  //    transaction._beginOperation();
-  //  }
-  //
-  //  bool endOperation() {
-  //    if (_operationCount > 0) {
-  //      --_operationCount;
-  //      transaction._endOperation();
-  //      return true;
-  //    }
-  //    return false;
-  //  }
-
   _WebSqlCursorBaseController(this.direction, this.autoAdvance) {
     if (direction == null) {
       direction = idbDirectionNext;
@@ -149,14 +132,6 @@ abstract class _WebSqlCursorBaseController<T extends Cursor> {
   void set sqlResultSet(SqlResultSet sqlResultSet) {
     currentIndex = -1;
     rows = sqlResultSet.rows;
-    //    if (sqlResultSet.rows.first;
-    //    sqlResultSet.rows.
-    //    if (rows.length == 0) {
-    //      _ctlr.close();
-    //    } else {
-    //      _ctlr.add(new WebSqlCursorWithValue(this, row));
-    //    }
-    //beginOperation();
     _autoNext();
   }
 }

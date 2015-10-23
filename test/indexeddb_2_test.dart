@@ -11,8 +11,6 @@ import 'indexeddb_utils.dart';
 // so that this can be run directly
 import 'idb_test_common.dart';
 
-void main() => defineTests(idbTestMemoryFactory);
-
 // Write and re-read Maps: simple Maps; Maps with DAGs; Maps with cycles.
 
 const String DB_NAME = 'Test2';
@@ -60,8 +58,12 @@ List<String> get nonNativeListData {
   return list;
 }
 
-defineTests(idb.IdbFactory idbFactory_) {
-  idb.IdbFactory idbFactory = idbFactory_;
+main() {
+  defineTests(idbMemoryContext);
+}
+
+void defineTests(TestContext ctx) {
+  idb.IdbFactory idbFactory = ctx.factory;
   //useHtmlConfiguration();
 
   var obj1 = {'a': 100, 'b': 's'};

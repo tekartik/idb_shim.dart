@@ -6,9 +6,12 @@ import 'dart:async';
 import 'idb_test_common.dart' hide testNameIndex, testNameField;
 
 // so that this can be run directly
-void main() => defineTests(idbTestMemoryFactory);
+main() {
+  defineTests(idbMemoryContext);
+}
 
-void defineTests(IdbFactory idbFactory) {
+void defineTests(TestContext ctx) {
+  IdbFactory idbFactory = ctx.factory;
   group('simple provider', () {
     group('with data', () {
       SimpleProvider provider;

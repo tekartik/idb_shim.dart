@@ -1,15 +1,5 @@
 part of idb_shim_websql;
 
-/*
-class _WebSqlIndexMeta extends IdbIndexMeta {
-  _WebSqlObjectStoreMeta storeMeta;
-  _WebSqlIndexMeta(
-      this.storeMeta, String name, String keyPath, bool unique, bool multiEntry) : super(name, keyPath, unique, multiEntry);
-
-  String get keyColumn => storeMeta.sqlColumnName(keyPath);
-}
-*/
-
 class _WebSqlIndex extends Index with IndexWithMetaMixin {
   _WebSqlObjectStore store;
   final IdbIndexMeta meta;
@@ -43,7 +33,6 @@ class _WebSqlIndex extends Index with IndexWithMetaMixin {
     String sqlTableName = this.sqlTableName;
     String sqlIndexName = this.sqlIndexName;
     String alterSql = "ALTER TABLE ${sqlTableName} ADD ${keyColumn} BLOB";
-    String updateSql = "UPDATE stores SET meta = ? WHERE name = ?";
 
     // update meta in store
     await store.update();

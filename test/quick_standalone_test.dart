@@ -9,9 +9,12 @@ const NAME_INDEX = "quick_index";
 const NAME_FIELD = "quick_field";
 
 // so that this can be run directly
-void main() => defineTests(idbTestMemoryFactory);
+main() {
+  defineTests(idbMemoryContext);
+}
 
-void defineTests(IdbFactory idbFactory) {
+void defineTests(TestContext ctx) {
+  IdbFactory idbFactory = ctx.factory;
   group('quick_standalone', () {
     Database db;
     Transaction transaction;

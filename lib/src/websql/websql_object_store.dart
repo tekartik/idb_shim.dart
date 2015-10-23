@@ -87,22 +87,9 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
     return "_store_$storeName";
   }
 
-//  static String getSqlIndexName(String storeName) {
-//      return "_index_$storeName";
-//    }
-
   Future<SqlResultSet> execute(String statement, [List args]) {
     return transaction.execute(statement, args);
   }
-
-  /*
-  void _initOptions(String keyPath, bool autoIncrement) {
-    meta.autoIncrement = (autoIncrement != null && autoIncrement);
-    meta.keyPath = keyPath;
-
-    this.keyColumn = meta.sqlColumnName(keyPath);
-  }
-  */
 
   Future _deleteTable(_WebSqlTransaction transaction) {
     String dropSql = "DROP TABLE IF EXISTS $sqlTableName";
@@ -120,10 +107,6 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
 
   // create
   Future create() {
-    //_initOptions(keyPath, autoIncrement);
-
-    // Here don't call _addRequest as we don't want to load from db
-
     String createSql = "CREATE TABLE $sqlTableName (${keyColumn} " +
         (autoIncrement
             ? "INTEGER PRIMARY KEY AUTOINCREMENT"
@@ -177,119 +160,12 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
           return new Future.error(new StateError(
               "database upgraded from ${database.version} to $newVersion"));
         }
-        /*
-          var sqlSelect =
-              "SELECT key_path, auto_increment, indecies FROM stores WHERE name = ?";
-          var sqlArgs = [name];
-
-          // No DO not do this anymore
-          return execute(sqlSelect, sqlArgs).then((SqlResultSet rs) {
-            if (rs.rows.length == 0) {
-              return new Future.error("store $name not found");
-            }
-            Map row = rs.rows[0];
-            String keyPath = row['key_path'];
-            bool autoIncrement = row['auto_increment'] > 0;
-
-            _initOptions(keyPath, autoIncrement);
-
-            String indeciesText = row['indecies'];
-
-            // merge lazy loaded data
-            Map indeciesData = meta.indeciesDataFromString(indeciesText);
-            indeciesData.forEach((name, _WebSqlIndexMeta indexMeta) {
-              // always replace the existing
-              meta.setIndex(indexMeta);
-//              // existing
-//              _WebSqlIndexMeta indexMeta = indeciesData[name];
-//              if (index == null) {
-//                // create
-//                index = new _WebSqlIndex(this, name, data);
-//                indecies[name] = index;
-//              } else {
-//                // merge
-//                index._meta = data;
-//              }
-            });
-            return computation();
-
-            //          if (keyPath == null && !autoIncrement) {
-            //            throw new ArgumentError("neither keyPath nor autoIncrement set");
-            //          }
-          });
-          */
       });
     }
     return _lazyPrepare.then((_) {
       return computation();
     });
-    //}
-    return computation();
   }
-
-  //  /**
-  //   * keyPath might not be valid before
-  //   */
-  //  @deprecated
-  //  Future<WebSqlTransaction> _checkStoreOld() {
-  //
-  //    // this is also an indicator
-  //    if (!ready) {
-  //      // Make sure the db was not upgrade
-  //      // TODO do this at the beginning of each transaction
-  //      var sqlSelect = "SELECT value FROM version WHERE value > ?";
-  //      var sqlArgs = [database.version];
-  //      return execute(sqlSelect, sqlArgs).then((SqlResultSet rs) {
-  //        if (rs.rows.length > 0) {
-  //          // Send an onVersionChange event
-  //          //Map map = rs.rows.first; - BUG dart, first is null:
-  //          Map map = rs.rows[0];
-  //          int newVersion = map['value'];
-  //          if (database.onVersionChangeCtlr != null) {
-  //
-  //            database.onVersionChangeCtlr.add(new _WebSqlVersionChangeEvent(database, database.version, newVersion, transaction));
-  //          }
-  //          return new Future.error(new StateError("database upgraded from ${database.version} to $newVersion"));
-  //        }
-  //        print("A");
-  //        var sqlSelect = "SELECT key_path, auto_increment, indecies FROM stores WHERE name = ?";
-  //        var sqlArgs = [name];
-  //        return execute(sqlSelect, sqlArgs).then((SqlResultSet rs) {
-  //          if (rs.rows.length == 0) {
-  //            return new Future.error("store $name not found");
-  //          }
-  //          Map row = rs.rows[0];
-  //          String keyPath = row['key_path'];
-  //          bool autoIncrement = row['auto_increment'] > 0;
-  //
-  //          _initOptions(keyPath, autoIncrement);
-  //
-  //          String indeciesText = row['indecies'];
-  //
-  //          // merge lazy loaded data
-  //          Map indeciesData = WebSqlIndex.indeciesDataFromString(indeciesText);
-  //          indeciesData.forEach((name, data) {
-  //            WebSqlIndex index = indecies[name];
-  //            if (index == null) {
-  //              // create
-  //              index = new WebSqlIndex(this, name, data);
-  //              indecies[name] = index;
-  //            } else {
-  //              // merge
-  //              index.data = data;
-  //            }
-  //          });
-  //          return transaction;
-  //
-  //          //          if (keyPath == null && !autoIncrement) {
-  //          //            throw new ArgumentError("neither keyPath nor autoIncrement set");
-  //          //          }
-  //
-  //        });
-  //      });
-  //    }
-  //    return new Future.value(transaction);
-  //  }
 
   Future _add(dynamic value, dynamic key) {
     String columns = VALUE_COLUMN_NAME;
@@ -380,10 +256,6 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
 
   @override
   Future put(dynamic value, [dynamic key]) {
-//    if (key == null) {
-//      return add(value);
-//    }
-
     return _checkWritableStore(() {
       return _put(value, key);
     });
@@ -456,31 +328,6 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
   Index index(String name) {
     devWarning;
     return _getIndex(name);
-//    _WebSqlIndex cachedIndex = indecies[name];
-//    _WebSqlIndex index;
-//
-//    devWarning; // testing why cached could be null
-//    index = new _WebSqlIndex(this, name, cachedIndex._meta);
-//
-//    if (cachedIndex == null) {
-//      // lazy loaded already?
-//      if (ready) {
-//        throw new ArgumentError("index $name not found");
-//      }
-//      index = new _WebSqlIndex(this, name, null);
-//
-//      // cache it
-//      indecies[name] = index;
-//
-//      //
-//      // throw new ArgumentError("index $name not found");
-//    } else {
-//      index = new _WebSqlIndex(this, name, cachedIndex._meta);
-//    }
-//
-//
-//    // loader later when used
-//    return index;
   }
 
   @override

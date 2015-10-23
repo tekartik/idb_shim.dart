@@ -5,8 +5,6 @@ import 'dart:async';
 import 'package:idb_shim/idb_client.dart';
 
 // Read with cursor.
-void main() => defineTests(idbTestMemoryFactory);
-
 const String DB_NAME = 'Test3';
 const String STORE_NAME = 'TEST';
 const int VERSION = 1;
@@ -105,8 +103,12 @@ Future<Database> readAllReversedViaCursor(Database db) {
   return cursors.last.then((_) => db);
 }
 
-defineTests(IdbFactory idbFactory_) {
-  IdbFactory idbFactory = idbFactory_;
+main() {
+  defineTests(idbMemoryContext);
+}
+
+void defineTests(TestContext ctx) {
+  IdbFactory idbFactory = ctx.factory;
   //useHtmlConfiguration();
 
   // Don't bother with these tests if it's unsupported.
