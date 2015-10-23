@@ -254,7 +254,6 @@ class _SdbIndex extends Index with IndexWithMetaMixin {
     });
   }
 
-
   @override
   Stream<CursorWithValue> openCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
@@ -816,7 +815,6 @@ class _SdbObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
     return new _SdbIndex(this, indexMeta);
   }
 
-
   sdb.SortOrder sortOrder(bool ascending) {
     return new sdb.SortOrder(keyField, ascending);
   }
@@ -852,7 +850,6 @@ class _SdbObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
       return _put(value, _getKey(value, key));
     });
   }
-
 }
 
 ///
@@ -939,7 +936,8 @@ class _SdbDatabase extends Database with DatabaseWithMetaMixin {
                 new _SdbVersionChangeEvent(this, previousVersion, newVersion));
           }
           changedStores = meta.versionChangeTransaction.versionChangeStores;
-          deletedStores = meta.versionChangeTransaction.versionChangeDeletedStores;
+          deletedStores =
+              meta.versionChangeTransaction.versionChangeDeletedStores;
         });
 
         return db.inTransaction(() async {

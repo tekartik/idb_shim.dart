@@ -184,7 +184,8 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
       if (oldVersion != newVersion) {
         if (oldVersion > newVersion) {
           // cannot downgrade
-          throw new StateError("cannot downgrade from ${oldVersion} to $newVersion");
+          throw new StateError(
+              "cannot downgrade from ${oldVersion} to $newVersion");
         } else {
           upgrading = true;
 
@@ -204,7 +205,6 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
             });
           }
           await updateVersion();
-
         }
       }
 
@@ -282,19 +282,16 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
    */
   Future _loadStores(_WebSqlTransaction transaction) {
     // this is also an indicator
-    var sqlSelect =
-        "SELECT name, meta FROM stores"; // WHERE name = ?";
+    var sqlSelect = "SELECT name, meta FROM stores"; // WHERE name = ?";
     var sqlArgs = null; //[name];
     return transaction.execute(sqlSelect, sqlArgs).then((SqlResultSet rs) {
       rs.rows.forEach((Map row) {
         Map map = JSON.decode(row['meta']);
-        IdbObjectStoreMeta storeMeta =
-        new IdbObjectStoreMeta.fromMap(map);
-              meta.putObjectStore(storeMeta);
+        IdbObjectStoreMeta storeMeta = new IdbObjectStoreMeta.fromMap(map);
+        meta.putObjectStore(storeMeta);
       });
     });
   }
-
 
   @override
   Transaction transaction(storeName_OR_storeNames, String mode) {

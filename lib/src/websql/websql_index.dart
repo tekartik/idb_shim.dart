@@ -12,7 +12,7 @@ class _WebSqlIndexMeta extends IdbIndexMeta {
 
 class _WebSqlIndex extends Index with IndexWithMetaMixin {
   _WebSqlObjectStore store;
-final IdbIndexMeta meta;
+  final IdbIndexMeta meta;
 
   String _keyColumn;
   String get keyColumn {
@@ -21,6 +21,7 @@ final IdbIndexMeta meta;
     }
     return _keyColumn;
   }
+
   String get sqlIndexName => store.getSqlIndexName(keyPath);
   String get sqlTableName => store.sqlTableName;
 
@@ -123,6 +124,4 @@ final IdbIndexMeta meta;
     });
     return ctlr.stream;
   }
-
-
 }

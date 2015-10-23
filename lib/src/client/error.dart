@@ -23,7 +23,8 @@ class DatabaseStoreNotFoundError extends DatabaseError {
 }
 
 class DatabaseTransactionStoreNotFoundError extends DatabaseError {
-  DatabaseTransactionStoreNotFoundError(String store) : super("NotFoundError: store '${store}' not found in transaction.");
+  DatabaseTransactionStoreNotFoundError(String store)
+      : super("NotFoundError: store '${store}' not found in transaction.");
 }
 
 class DatabaseNoKeyError extends DatabaseError {

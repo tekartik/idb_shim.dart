@@ -6,7 +6,9 @@ class OBSOLETE_WebSqlObjectStoreMeta extends IdbObjectStoreMeta {
   static const String VALUE_COLUMN_NAME = 'value';
   static const String KEY_DEFAULT_COLUMN_NAME = 'key';
 
-  OBSOLETE_WebSqlObjectStoreMeta(String name, String keyPath, bool autoIncrement) : super(name, keyPath, autoIncrement){
+  OBSOLETE_WebSqlObjectStoreMeta(
+      String name, String keyPath, bool autoIncrement)
+      : super(name, keyPath, autoIncrement) {
     autoIncrement = (autoIncrement == true);
   }
 
@@ -42,10 +44,8 @@ class OBSOLETE_WebSqlObjectStoreMeta extends IdbObjectStoreMeta {
 }
 
 class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
-  static const String VALUE_COLUMN_NAME =
-  'value';
-  static const String KEY_DEFAULT_COLUMN_NAME =
-      'key';
+  static const String VALUE_COLUMN_NAME = 'value';
+  static const String KEY_DEFAULT_COLUMN_NAME = 'key';
 
   _WebSqlTransaction transaction;
 
@@ -119,8 +119,7 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
             ? "INTEGER PRIMARY KEY AUTOINCREMENT"
             : "BLOB PRIMARY KEY") +
         ", $VALUE_COLUMN_NAME BLOB)";
-    String insertStore =
-        "INSERT INTO stores (name, meta) VALUES (?, ?)";
+    String insertStore = "INSERT INTO stores (name, meta) VALUES (?, ?)";
     String metaText = JSON.encode(meta.toMap());
     List insertStoreArgs = [name, metaText];
 
@@ -290,7 +289,7 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
     }
     // Add the index value for each index
     for (IdbIndexMeta indexMeta in meta.indecies) {
-          columns += ", " + sqlColumnName(indexMeta.keyPath);
+      columns += ", " + sqlColumnName(indexMeta.keyPath);
       values += ", ?";
       args.add(encodeKey(value[indexMeta.keyPath]));
     }

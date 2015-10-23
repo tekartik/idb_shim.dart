@@ -57,8 +57,7 @@ class _WebSqlCursorWithValue extends CursorWithValue
   }
 
   @override
-  Object get value =>
-      decodeValue(_map[_WebSqlObjectStore.VALUE_COLUMN_NAME]);
+  Object get value => decodeValue(_map[_WebSqlObjectStore.VALUE_COLUMN_NAME]);
 }
 
 abstract class _WebSqlCursorBaseController<T extends Cursor> {

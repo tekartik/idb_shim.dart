@@ -184,9 +184,10 @@ void defineTests(IdbFactory idbFactory) {
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
         return idbFactory
-        .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
-        .then((Database database) {
-          Transaction transaction = database.transaction(testStoreName, idbModeReadWrite);
+            .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
+            .then((Database database) {
+          Transaction transaction =
+              database.transaction(testStoreName, idbModeReadWrite);
           try {
             transaction.objectStore(testStoreName2);
             fail("exception expected");

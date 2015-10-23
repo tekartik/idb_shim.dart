@@ -113,9 +113,7 @@ void defineTests(TestContext ctx) {
         expect(await getIndexRecords(), [
           {"dummy": 2, testNameField: "ok"}
         ]);
-        expect(await getIndexKeys(), [
-          "ok"
-        ]);
+        expect(await getIndexKeys(), ["ok"]);
       });
 
       tearDown(_tearDown);

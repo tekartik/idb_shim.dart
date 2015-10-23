@@ -27,15 +27,17 @@ class IdbTransactionMeta {
   String toString() => "${mode} ${storeNames}";
 }
 
-
 class IdbVersionChangeTransactionMeta extends IdbTransactionMeta {
-  Map<String, List<IdbIndexMeta>> versionChangeCreatedIndexes = {}; // store deleted during onUpgradeNeeded
-  Set<IdbObjectStoreMeta> versionChangeCreatedStores = new Set(); // store deleted during onUpgradeNeeded
-  Set<IdbObjectStoreMeta> versionChangeDeletedStores = new Set(); // store deleted during onUpgradeNeeded
-  Set<IdbObjectStoreMeta> versionChangeStores = new Set(); // store modified during onUpgradeNeeded
+  Map<String, List<IdbIndexMeta>> versionChangeCreatedIndexes =
+      {}; // store deleted during onUpgradeNeeded
+  Set<IdbObjectStoreMeta> versionChangeCreatedStores =
+      new Set(); // store deleted during onUpgradeNeeded
+  Set<IdbObjectStoreMeta> versionChangeDeletedStores =
+      new Set(); // store deleted during onUpgradeNeeded
+  Set<IdbObjectStoreMeta> versionChangeStores =
+      new Set(); // store modified during onUpgradeNeeded
 
   IdbVersionChangeTransactionMeta() : super(null, idbModeReadWrite);
-
 }
 
 abstract class DatabaseWithMetaMixin {
@@ -52,16 +54,13 @@ abstract class DatabaseWithMetaMixin {
     meta.deleteObjectStore(name);
   }
 
-
   //@override
-  Iterable<String> get objectStoreNames =>
-  meta.objectStoreNames;
+  Iterable<String> get objectStoreNames => meta.objectStoreNames;
 
   @override
   String toString() {
     return meta.toString();
   }
-
 }
 
 class IdbDatabaseMeta {
@@ -73,7 +72,8 @@ class IdbDatabaseMeta {
   IdbVersionChangeTransactionMeta _versionChangeTransaction;
   Map<String, IdbObjectStoreMeta> _stores = new Map();
 
-  IdbVersionChangeTransactionMeta get versionChangeTransaction => _versionChangeTransaction;
+  IdbVersionChangeTransactionMeta get versionChangeTransaction =>
+      _versionChangeTransaction;
 
   onUpgradeNeeded(action()) async {
     _versionChangeTransaction = new IdbVersionChangeTransactionMeta();
@@ -180,9 +180,8 @@ abstract class ObjectStoreWithMetaMixin {
 
   //@override
   List<String> get indexNames => meta.indexNames.toList();
-
-
 }
+
 // meta data is loaded only once
 class IdbObjectStoreMeta {
   static const String NAME_KEY = "name";
@@ -217,12 +216,13 @@ class IdbObjectStoreMeta {
           "cannot create index outside of a versionChangedEvent");
     }
     databaseMeta.versionChangeTransaction.versionChangeStores.add(this);
-    List list = databaseMeta.versionChangeTransaction.versionChangeCreatedIndexes[name];
+    List list =
+        databaseMeta.versionChangeTransaction.versionChangeCreatedIndexes[name];
     if (list == null) {
-      databaseMeta.versionChangeTransaction.versionChangeCreatedIndexes[name] = [index];
+      databaseMeta.versionChangeTransaction.versionChangeCreatedIndexes[name] =
+          [index];
     } else {
       list.add(index);
-
     }
     putIndex(index);
   }

@@ -17,14 +17,14 @@ class _WebSqlTransaction extends Transaction {
 
   _WebSqlDatabase get idbWqlDatabase => (database as _WebSqlDatabase);
 
-  _WebSqlTransaction(
-      Database database, this._sqlTransaction, this._meta)
+  _WebSqlTransaction(Database database, this._sqlTransaction, this._meta)
       : super(database);
 
   @override
   _WebSqlObjectStore objectStore(String name) {
     _meta.checkObjectStore(name);
-    return new _WebSqlObjectStore(this, idbWqlDatabase.meta.getObjectStore(name));
+    return new _WebSqlObjectStore(
+        this, idbWqlDatabase.meta.getObjectStore(name));
   }
 
   Future<SqlResultSet> execute(String statement, [List args]) {
