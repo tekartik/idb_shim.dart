@@ -120,5 +120,5 @@ defineTests(SembastFsTestContext ctx) {
       await memSdb.put(storeMeta.toMap(), "store_${storeMeta.name}");
       await _checkExport();
     });
-  }, solo_group);
+  });
 }

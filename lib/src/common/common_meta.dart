@@ -289,7 +289,7 @@ class IdbObjectStoreMeta {
   }
 
   @override
-  int get hashCode => toMap().hashCode;
+  int get hashCode => const MapEquality().hash(toMap());
 
   @override
   operator ==(o) {
@@ -425,7 +425,7 @@ class IdbIndexMeta {
   }
 
   @override
-  int get hashCode => toMap().hashCode;
+  int get hashCode => const MapEquality().hash(toMap());
 
   @override
   operator ==(o) {

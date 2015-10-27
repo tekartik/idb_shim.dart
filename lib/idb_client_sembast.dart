@@ -950,17 +950,12 @@ class _SdbDatabase extends Database with DatabaseWithMetaMixin {
           }
 
           if (changedStores.isNotEmpty) {
-            return db.put(new List.from(objectStoreNames), "stores");
+            await db.put(new List.from(objectStoreNames), "stores");
           }
-        }).then((_) {
-// write changes
-          List<Future> futures = [];
 
-          changedStores.forEach((IdbObjectStoreMeta storeMeta) {
-            futures.add(db.put(storeMeta.toMap(), "store_${storeMeta.name}"));
-          });
-
-          return Future.wait(futures);
+          for (IdbObjectStoreMeta storeMeta in changedStores) {
+            await db.put(storeMeta.toMap(), "store_${storeMeta.name}");
+          }
         }).then((_) {
           // considered as opened
           meta.version = newVersion;
