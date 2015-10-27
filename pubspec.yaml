@@ -13,6 +13,6 @@ dev_dependencies:
   logging: any
   test: any
   dev_test: any
-dependency_overrides:
-  sembast:
-    git: https://github.com/alextekartik/sembast.dart
+#dependency_overrides:
+#  sembast:
+#    git: https://github.com/alextekartik/sembast.dart

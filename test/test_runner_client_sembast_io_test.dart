@@ -6,5 +6,7 @@ import 'idb_io_test_common.dart';
 
 void main() {
   IoTestContext ctx = new IoTestContext();
-  defineTests(ctx);
+  group('io', () {
+    defineTests(ctx);
+  });
 }

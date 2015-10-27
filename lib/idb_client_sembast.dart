@@ -897,7 +897,7 @@ class _SdbDatabase extends Database with DatabaseWithMetaMixin {
     int previousVersion;
     _open() {
       return sdbFactory
-          .openDatabase(factory._getDbPath(name), version: 1)
+          .openDatabase(factory.getDbPath(name), version: 1)
           .then((sdb.Database db) {
         this.db = db;
         return db.inTransaction(() {
@@ -1037,8 +1037,10 @@ class IdbSembastFactory extends IdbFactory {
   final sdb.DatabaseFactory _databaseFactory;
   final String _path;
 
-  String _getDbPath(String dbName) =>
+  String getDbPath(String dbName) =>
       _path == null ? dbName : join(_path, dbName);
+
+  sdb.DatabaseFactory get sdbFactory => _databaseFactory;
 
   @override
   bool get persistent => _databaseFactory.hasStorage;
@@ -1079,7 +1081,7 @@ class IdbSembastFactory extends IdbFactory {
     if (dbName == null) {
       return new Future.error(new ArgumentError('dbName cannot be null'));
     }
-    return _databaseFactory.deleteDatabase(_getDbPath(dbName));
+    return _databaseFactory.deleteDatabase(getDbPath(dbName));
   }
 
   @override

@@ -477,9 +477,11 @@ void defineTests(TestContext ctx) {
       });
     });
 
-    group('create index and re-open', () {
+    dbGroup(ctx, 'create index and re-open', () {
+      int index = 0;
       Future testIndex(IdbIndexMeta indexMeta) async {
-        await _setupDeleteDb();
+        String _dbName = "${dbTestName}-${++index}";
+        await idbFactory.deleteDatabase(_dbName);
         IdbObjectStoreMeta storeMeta = idbSimpleObjectStoreMeta.clone();
         storeMeta.putIndex(indexMeta);
         return setUpSimpleStore(idbFactory, meta: storeMeta, dbName: _dbName)
@@ -498,7 +500,7 @@ void defineTests(TestContext ctx) {
         });
       }
 
-      test('all', () {
+      dbTest('all', () {
         Iterator<IdbIndexMeta> iterator = idbIndexMetas.iterator;
         _next() {
           if (iterator.moveNext()) {

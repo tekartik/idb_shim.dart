@@ -9,7 +9,6 @@ import 'package:path/path.dart';
 
 class IoTestContext extends SembastFsTestContext {
   IoTestContext() {
-    sdbFactory = ioDatabaseFactory;
     factory = new IdbSembastFactory(ioDatabaseFactory, testOutTopPath);
   }
 }
