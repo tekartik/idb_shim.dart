@@ -462,7 +462,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('properties', () async {
-        await _setupDeleteDb();
+        await _setUp();
         Index index = objectStore.index(testNameIndex);
         expect(index.name, testNameIndex);
         expect(index.keyPath, testNameField);
