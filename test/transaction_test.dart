@@ -19,7 +19,7 @@ void defineTests(TestContext ctx) {
       _dbName = ctx.dbName;
       await idbFactory.deleteDatabase(_dbName);
     }
-    Future _tearDown() {
+    Future _tearDown() async {
       if (db != null) {
         db.close();
         db = null;
@@ -188,7 +188,7 @@ void defineTests(TestContext ctx) {
         try {
           db.transactionList([], idbModeReadWrite);
           fail("exception expected");
-        } on DatabaseError catch (e) {
+        } on DatabaseError catch (_) {
           //print(e);
           //print(e.runtimeType);
           // InvalidAccessError: A parameter or an operation was not supported by the underlying object. The storeNames parameter was empty.
