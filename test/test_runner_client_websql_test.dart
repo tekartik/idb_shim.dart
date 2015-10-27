@@ -67,7 +67,7 @@ main() {
       //idb_wql.SqlDatabase.debug = true;
       IdbWebSqlFactory idbFactory = new IdbWebSqlFactory();
       TestContext ctx = new TestContext()..factory = idbFactory;
-      test_runner.defineTests_(ctx);
+      test_runner.defineTests(ctx);
       websql_wrapper_test.main();
       websql_client_test.main();
       webSqlTest(idbFactory);

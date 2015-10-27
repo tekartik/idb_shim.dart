@@ -15,7 +15,7 @@ main() {
         expect(idbFactory.persistent, isTrue);
       });
 
-      defineTests_(ctx);
+      defineTests(ctx);
     } else {
       test("idb native not supported", null, skip: "idb native not supported");
     }

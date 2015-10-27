@@ -7,7 +7,7 @@ import 'package:sembast/sembast_io.dart';
 import 'package:idb_shim/idb_client_sembast.dart';
 import 'package:path/path.dart';
 
-class IoTestContext extends SembastTestContext {
+class IoTestContext extends SembastFsTestContext {
   IoTestContext() {
     sdbFactory = ioDatabaseFactory;
     factory = new IdbSembastFactory(ioDatabaseFactory, testOutTopPath);

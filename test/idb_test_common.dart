@@ -7,6 +7,7 @@ import 'package:idb_shim/src/common/common_meta.dart';
 import 'package:idb_shim/idb_client_sembast.dart';
 import 'package:idb_shim/idb_client_memory.dart';
 import 'package:sembast/sembast.dart' as sdb;
+import 'package:sembast/sembast_memory.dart' as sdb;
 export 'package:idb_shim/idb_client_memory.dart';
 import 'dart:async';
 
@@ -45,8 +46,13 @@ class SembastTestContext extends TestContext {
   String get dbName => join(joinAll(testDescriptions), "test.db");
 }
 
+class SembastFsTestContext extends SembastTestContext {}
+
 TestContext idbMemoryContext = new SembastTestContext()
   ..factory = idbMemoryFactory;
+
+TestContext idbMemoryFsContext = new SembastFsTestContext()
+  ..factory = idbMemoryFsFactory;
 
 IdbFactory idbTestMemoryFactory = idbMemoryFactory;
 

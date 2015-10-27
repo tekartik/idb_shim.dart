@@ -4,5 +4,5 @@ import 'test_runner.dart';
 import 'idb_test_common.dart';
 
 void main() {
-  defineTests_(idbMemoryContext);
+  defineTests(idbMemoryContext);
 }

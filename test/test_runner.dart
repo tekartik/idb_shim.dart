@@ -21,7 +21,7 @@ import 'indexeddb_3_test.dart' as indexeddb_3_test;
 import 'indexeddb_4_test.dart' as indexeddb_4_test;
 import 'indexeddb_5_test.dart' as indexeddb_5_test;
 
-defineTests_(TestContext ctx) {
+defineTests(TestContext ctx) {
   database_test.defineTests(ctx);
   index_cursor_test.defineTests(ctx);
   transaction_test.defineTests(ctx);

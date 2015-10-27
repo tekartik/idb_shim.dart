@@ -786,25 +786,16 @@ void defineTests(TestContext ctx) {
     });
 
     group('various', () {
-      Database db;
-      Transaction transaction;
-      ObjectStore objectStore;
-      setUp(() {
-        return setUpSimpleStore(idbFactory, dbName: testDbName)
-            .then((Database database) {
-          db = database;
-          transaction = db.transaction(testStoreName, idbModeReadWrite);
-          objectStore = transaction.objectStore(testStoreName);
-        });
-      });
+      _setUp() async {
+        await _setupDeleteDb();
+        db = await setUpSimpleStore(idbFactory, dbName: _dbName);
+        _createTransaction();
+      }
 
-      tearDown(() {
-        return transaction.completed.then((_) {
-          db.close();
-        });
-      });
+      tearDown(_tearDown);
 
-      test('delete', () {
+      test('delete', () async {
+        await _setUp();
         return objectStore.add("test").then((key) {
           return objectStore.delete(key).then((result) {
             expect(result, isNull);
