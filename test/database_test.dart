@@ -5,10 +5,10 @@ import 'idb_test_common.dart';
 //import 'idb_test_factory.dart';
 
 main() {
-  defineTests_(idbMemoryContext);
+  defineTests(idbMemoryContext);
 }
 
-void defineTests_(TestContext ctx) {
+void defineTests(TestContext ctx) {
   IdbFactory idbFactory = ctx.factory;
 
   group('database', () {

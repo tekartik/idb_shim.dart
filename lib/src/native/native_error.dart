@@ -21,7 +21,11 @@ _catchNativeError(action()) {
   try {
     return action();
   } catch (e) {
-    throw new DatabaseError(e.toString());
+    if (e is DatabaseError) {
+      rethrow;
+    } else {
+      throw new DatabaseError(e.toString());
+    }
   }
 }
 
@@ -29,6 +33,10 @@ _catchAsyncNativeError(Future action()) async {
   try {
     return await action();
   } catch (e) {
-    throw new DatabaseError(e.toString());
+    if (e is DatabaseError) {
+      rethrow;
+    } else {
+      throw new DatabaseError(e.toString());
+    }
   }
 }

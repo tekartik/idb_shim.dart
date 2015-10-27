@@ -126,6 +126,10 @@ class IdbDatabaseMeta {
       }
       return new IdbTransactionMeta([storeName_OR_storeNames], mode);
     } else if (storeName_OR_storeNames is List) {
+      if (storeName_OR_storeNames.isEmpty) {
+        throw new DatabaseError(
+            "InvalidAccessError: The storeNames parameter is empty");
+      }
       for (String storeName in storeName_OR_storeNames) {
         if (!_containsStore(storeName)) {
           throw new DatabaseStoreNotFoundError(
@@ -135,6 +139,7 @@ class IdbDatabaseMeta {
       return new IdbTransactionMeta(storeName_OR_storeNames, mode);
     } else {
       // assume null - it will complain otherwise
+      // this is use for transaction created on open
       return new IdbTransactionMeta(storeName_OR_storeNames, mode);
     }
   }

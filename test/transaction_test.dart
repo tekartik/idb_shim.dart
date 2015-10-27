@@ -11,56 +11,64 @@ main() {
 void defineTests(TestContext ctx) {
   IdbFactory idbFactory = ctx.factory;
   group('transaction', () {
+    // new
+    Database db;
+    String _dbName;
+    // prepare for test
+    Future _setupDeleteDb() async {
+      _dbName = ctx.dbName;
+      await idbFactory.deleteDatabase(_dbName);
+    }
+    Future _tearDown() {
+      if (db != null) {
+        db.close();
+        db = null;
+      }
+    }
+    //String testDbName = ctx.dbName;
     group('scratch', () {
       setUp(() {
         return idbFactory.deleteDatabase(testDbName);
       });
 
-      test('put & completed', () {
-        Database db;
+      tearDown(_tearDown);
+
+      test('put & completed', () async {
+        await _setupDeleteDb();
         void _initializeDatabase(VersionChangeEvent e) {
           db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
-        return idbFactory
-            .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
-            .then((Database database) {
-          Transaction transaction =
-              database.transaction(testStoreName, idbModeReadWrite);
-          ObjectStore objectStore = transaction.objectStore(testStoreName);
-          bool putDone = false;
-          objectStore.put(1).then((_) {
-            putDone = true;
-          });
-          return transaction.completed.then((Database db) {
-            expect(putDone, isTrue);
-          });
-        }).then((_) {
-          db.close();
+        db = await idbFactory.open(testDbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+
+        Transaction transaction =
+            db.transaction(testStoreName, idbModeReadWrite);
+        ObjectStore objectStore = transaction.objectStore(testStoreName);
+        bool putDone = false;
+        objectStore.put(1).then((_) {
+          putDone = true;
         });
+        await transaction.completed;
+        expect(putDone, isTrue);
       });
 
-      test('empty transaction', () {
-        Database db;
+      test('empty transaction', () async {
+        await _setupDeleteDb();
         void _initializeDatabase(VersionChangeEvent e) {
           db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
-        return idbFactory
-            .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
-            .then((Database database) {
-          Transaction transaction =
-              database.transaction(testStoreName, idbModeReadWrite);
-          return transaction.completed;
-        }).then((Database db) {
-          db.close();
-        });
+        db = await idbFactory.open(testDbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+        Transaction transaction =
+            db.transaction(testStoreName, idbModeReadWrite);
+        await transaction.completed;
       });
-      test('multiple transaction', () {
-        Database db;
+      test('multiple transaction', () async {
+        await _setupDeleteDb();
         void _initializeDatabase(VersionChangeEvent e) {
-          db = e.database;
-          db.createObjectStore(testStoreName, autoIncrement: true);
+          e.database.createObjectStore(testStoreName, autoIncrement: true);
         }
         return idbFactory
             .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
@@ -86,121 +94,125 @@ void defineTests(TestContext ctx) {
         });
       });
 
-      test('chain 2 transactions', () {
-        Database db;
+      test('chain 2 transactions', () async {
+        await _setupDeleteDb();
         void _initializeDatabase(VersionChangeEvent e) {
-          db = e.database;
-          db.createObjectStore(testStoreName, autoIncrement: true);
+          e.database.createObjectStore(testStoreName, autoIncrement: true);
         }
-        return idbFactory
-            .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
-            .then((Database database) {
-          Transaction transaction =
-              database.transaction(testStoreName, idbModeReadWrite);
-          ObjectStore objectStore = transaction.objectStore(testStoreName);
-          return objectStore.put({}).then((_) {
-            Transaction transaction =
-                database.transaction(testStoreName, idbModeReadWrite);
-            ObjectStore objectStore = transaction.objectStore(testStoreName);
-            return objectStore.openCursor(autoAdvance: true).listen((cursor) {
-              //print(cursor);
-            }).asFuture().then((_) {
-              return transaction.completed.then((_) {
-                database.close();
-              });
-            });
-          });
-        });
+        db = await idbFactory.open(testDbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+
+        Transaction transaction =
+            db.transaction(testStoreName, idbModeReadWrite);
+        ObjectStore objectStore = transaction.objectStore(testStoreName);
+        await objectStore.put({});
+        Transaction transaction2 =
+            db.transaction(testStoreName, idbModeReadWrite);
+        objectStore = transaction2.objectStore(testStoreName);
+        await objectStore.openCursor(autoAdvance: true).listen((cursor) {
+          //print(cursor);
+        }).asFuture();
+        await transaction2.completed;
+        // BUG in indexeddb native - this never complete await transaction.completed;
       });
       //temp
-      test('transactionList', () {
+      test('transactionList', () async {
+        await _setupDeleteDb();
         void _initializeDatabase(VersionChangeEvent e) {
           Database db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
           db.createObjectStore(testStoreName2, autoIncrement: true);
         }
-        return idbFactory
-            .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
-            .then((Database database) {
-          Transaction transaction = database.transactionList(
-              [testStoreName, testStoreName2], idbModeReadWrite);
-          //database.close();
-          return transaction.completed.then((_) {
-            database.close();
-          });
-        });
+        db = await idbFactory.open(testDbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+
+        Transaction transaction = db.transactionList(
+            [testStoreName, testStoreName2], idbModeReadWrite);
+        await transaction.completed;
       });
 
-      test('bad_mode', () {
+      test('bad_mode', () async {
+        await _setupDeleteDb();
         void _initializeDatabase(VersionChangeEvent e) {
           Database db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
-        return idbFactory
-            .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
-            .then((Database database) {
-          Transaction transaction =
-              database.transaction(testStoreName, idbModeReadOnly);
+        db = await idbFactory.open(testDbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+        Transaction transaction =
+            db.transaction(testStoreName, idbModeReadOnly);
 
-          ObjectStore store = transaction.objectStore(testStoreName);
+        ObjectStore store = transaction.objectStore(testStoreName);
 
-          store.put({}).catchError((e) {
-            // There must be an error!
-            //print(e);
-            //print(e.runtimeType);
-            return e;
-          }).then((e) {
-            // there must be an error
-            expect(isTransactionReadOnlyError(e), isTrue);
-          }).then((_) {});
-          //database.close();
-          return transaction.completed.then((_) {
-            database.close();
-          });
+        await store.put({}).catchError((e) {
+          // There must be an error!
+          //print(e);
+          //print(e.runtimeType);
+          return e;
+        }).then((e) {
+          // there must be an error
+          expect(isTransactionReadOnlyError(e), isTrue);
         });
+        //database.close();
+        await transaction.completed;
       });
 
-      test('bad_store_transaction', () {
+      test('bad_store_transaction', () async {
+        await _setupDeleteDb();
         void _initializeDatabase(VersionChangeEvent e) {
           Database db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
-        return idbFactory
-            .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
-            .then((Database database) {
-          try {
-            database.transaction(testStoreName2, idbModeReadWrite);
-            fail("exception expected");
-          } catch (e) {
-            //print(e);
-            //print(e.runtimeType);
-            expect(isStoreNotFoundError(e), isTrue);
-          }
+        db = await idbFactory.open(testDbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
 
-          database.close();
-        });
+        try {
+          db.transaction(testStoreName2, idbModeReadWrite);
+          fail("exception expected");
+        } catch (e) {
+          //print(e);
+          //print(e.runtimeType);
+          expect(isStoreNotFoundError(e), isTrue);
+        }
       });
 
-      test('bad_store', () {
+      test('no_store_transaction_list', () async {
+        await _setupDeleteDb();
         void _initializeDatabase(VersionChangeEvent e) {
           Database db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
-        return idbFactory
-            .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
-            .then((Database database) {
-          Transaction transaction =
-              database.transaction(testStoreName, idbModeReadWrite);
-          try {
-            transaction.objectStore(testStoreName2);
-            fail("exception expected");
-          } catch (e) {
-            // NotFoundError: An attempt was made to reference a Node in a context where it does not exist. The specified object store was not found.
-            expect(isStoreNotFoundError(e), isTrue);
-          }
+        db = await idbFactory.open(testDbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
 
-          database.close();
-        });
+        try {
+          db.transactionList([], idbModeReadWrite);
+          fail("exception expected");
+        } on DatabaseError catch (e) {
+          //print(e);
+          //print(e.runtimeType);
+          // InvalidAccessError: A parameter or an operation was not supported by the underlying object. The storeNames parameter was empty.
+        }
+      });
+
+      test('bad_store', () async {
+        await _setupDeleteDb();
+        void _initializeDatabase(VersionChangeEvent e) {
+          Database db = e.database;
+          db.createObjectStore(testStoreName, autoIncrement: true);
+        }
+        db = await idbFactory.open(testDbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+
+        Transaction transaction =
+            db.transaction(testStoreName, idbModeReadWrite);
+        try {
+          transaction.objectStore(testStoreName2);
+          fail("exception expected");
+        } catch (e) {
+          // NotFoundError: An attempt was made to reference a Node in a context where it does not exist. The specified object store was not found.
+          expect(isStoreNotFoundError(e), isTrue);
+        }
       });
     });
 

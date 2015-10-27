@@ -28,7 +28,7 @@ class _NativeDatabase extends Database {
   idb.Database idbDatabase;
   _NativeDatabase(this.idbDatabase) : super(idbNativeFactory);
 
-  int get version => idbDatabase.version;
+  int get version => _catchNativeError(() => idbDatabase.version);
 
   @override
   ObjectStore createObjectStore(String name,
@@ -39,39 +39,45 @@ class _NativeDatabase extends Database {
 
   @override
   Transaction transaction(storeName_OR_storeNames, String mode) {
-    try {
+    return _catchNativeError(() {
       idb.Transaction idbTransaction =
           idbDatabase.transaction(storeName_OR_storeNames, mode);
       return new _NativeTransaction(this, idbTransaction);
-    } catch (e) {
-      throw new DatabaseError(e.toString());
-    }
+    });
   }
 
   @override
   Transaction transactionList(List<String> storeNames, String mode) {
-    idb.Transaction idbTransaction =
-        idbDatabase.transactionList(storeNames, mode);
-    return new _NativeTransaction(this, idbTransaction);
+    return _catchNativeError(() {
+      idb.Transaction idbTransaction =
+          idbDatabase.transactionList(storeNames, mode);
+      return new _NativeTransaction(this, idbTransaction);
+    });
   }
 
   @override
   void close() {
-    idbDatabase.close();
+    return _catchNativeError(() {
+      idbDatabase.close();
+    });
   }
 
   @override
   void deleteObjectStore(String name) {
-    idbDatabase.deleteObjectStore(name);
+    return _catchNativeError(() {
+      idbDatabase.deleteObjectStore(name);
+    });
   }
 
   @override
   Iterable<String> get objectStoreNames {
-    return idbDatabase.objectStoreNames;
+    return _catchNativeError(() {
+      return idbDatabase.objectStoreNames;
+    });
   }
 
   @override
-  String get name => idbDatabase.name;
+  String get name => _catchNativeError(() => idbDatabase.name);
 
   @override
   Stream<VersionChangeEvent> get onVersionChange {

@@ -14,6 +14,7 @@ import 'simple_provider_test.dart' as simple_provider_test;
 import 'factory_test.dart' as factory_test;
 import 'quick_standalone_test.dart' as quick_standalone_test;
 import 'scenario_test.dart' as scenario_test;
+import 'utils_test.dart' as utils_test;
 import 'indexeddb_1_test.dart' as indexeddb_1_test;
 import 'indexeddb_2_test.dart' as indexeddb_2_test;
 import 'indexeddb_3_test.dart' as indexeddb_3_test;
@@ -21,7 +22,7 @@ import 'indexeddb_4_test.dart' as indexeddb_4_test;
 import 'indexeddb_5_test.dart' as indexeddb_5_test;
 
 defineTests_(TestContext ctx) {
-  database_test.defineTests_(ctx);
+  database_test.defineTests(ctx);
   index_cursor_test.defineTests(ctx);
   transaction_test.defineTests(ctx);
   cursor_test.defineTests(ctx);
@@ -33,6 +34,7 @@ defineTests_(TestContext ctx) {
   simple_provider_test.defineTests(ctx);
   quick_standalone_test.defineTests(ctx);
   scenario_test.defineTests(ctx);
+  utils_test.defineTests(ctx);
 
   group('indexeddb_1', () {
     indexeddb_1_test.defineTests(ctx);
