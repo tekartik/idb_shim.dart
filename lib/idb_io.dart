@@ -16,17 +16,15 @@ IdbFactory get idbSembastMemoryFactory {
   return _idbSembastMemoryFactory;
 }
 
-IdbFactory _idbSembastIoFactory;
-IdbFactory getIdbSembastIoFactory(String path) {
-  if (_idbSembastIoFactory == null) {
-    _idbSembastIoFactory = new IdbSembastFactory(ioDatabaseFactory, path);
-  }
-  return _idbSembastIoFactory;
-}
+IdbFactory getIdbSembastIoFactory(String path) =>
+    new IdbSembastFactory(ioDatabaseFactory, path);
 
-IdbFactory getIdbFactory([String name, String path]) {
+/// do no use
+/// choose manually
+@deprecated
+IdbFactory getIdbFactory({String name, String path}) {
   if (name == null) {
-    name = idbFactoryBrowser;
+    name = idbFactoryPersistent;
   }
   switch (name) {
     case idbFactorySembastMemory:
