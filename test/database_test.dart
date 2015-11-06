@@ -176,6 +176,7 @@ void defineTests(TestContext ctx) {
         Database db = e.database;
 
         ObjectStore store = e.transaction.objectStore(testStoreName);
+        print(store.indexNames);
         store.deleteIndex(testNameIndex2);
 
         expect(store.indexNames, []);

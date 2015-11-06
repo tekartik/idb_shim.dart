@@ -242,7 +242,7 @@ class IdbObjectStoreMeta {
       throw new StateError(
           "cannot delete index outside of a versionChangedEvent");
     }
-    IdbIndexMeta indexMeta = _indecies[name];
+    IdbIndexMeta indexMeta = _indecies[indexName];
     if (indexMeta == null) {
       throw new DatabaseIndexNotFoundError(indexName);
     }
