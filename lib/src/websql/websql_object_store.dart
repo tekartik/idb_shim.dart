@@ -341,6 +341,11 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   @override
+  void deleteIndex(String name) {
+    meta.deleteIndex(database.meta, name);
+  }
+
+  @override
   Stream<CursorWithValue> openCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
     _WebSqlCursorWithValueController ctlr =

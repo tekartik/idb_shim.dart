@@ -41,9 +41,8 @@ class _WebSqlIndex extends Index with IndexWithMetaMixin {
     await transaction.execute(alterSql);
 
     // Drop the index if needed
+    await drop();
 
-    String dropIndexSql = "DROP INDEX IF EXISTS $sqlIndexName";
-    await transaction.execute(dropIndexSql);
     // create the index
     StringBuffer sb = new StringBuffer();
     sb.write("CREATE ");
@@ -54,6 +53,12 @@ class _WebSqlIndex extends Index with IndexWithMetaMixin {
     String createIndexSql = sb.toString();
 
     await transaction.execute(createIndexSql);
+  }
+
+  Future drop() async {
+    // Drop the index if needed
+    String dropIndexSql = "DROP INDEX IF EXISTS $sqlIndexName";
+    await transaction.execute(dropIndexSql);
   }
 
   Future _checkIndex(computation()) {

@@ -1,3 +1,7 @@
+## 1.3.1
+
+* Add support for ObjectStore.deleteIndex
+
 ## 1.2.1
 
 * Fix openCursor for Index that included null key before (sembast)

@@ -115,7 +115,6 @@ void defineTests(TestContext ctx) {
           db.deleteObjectStore(testStoreName2);
           fail('should fail');
         } on DatabaseError catch (e) {
-          print(e);
           // NotFoundError: An attempt was made to reference a Node in a context where it does not exist. The specified object store was not found.
           // NotFoundError: One of the specified object stores 'test_store_2' was not found.
           expect(isNotFoundError(e), isTrue);
@@ -137,7 +136,36 @@ void defineTests(TestContext ctx) {
       await db.close();
     });
 
-    solo_test('delete_non_existing_index', () async {
+    test('create_delete_index', () async {
+      await _setupDeleteDb();
+      db = await idbFactory.open(_dbName, version: 1,
+          onUpgradeNeeded: (VersionChangeEvent e) {
+        Database db = e.database;
+        ObjectStore store = db.createObjectStore(testStoreName);
+        store.createIndex(testNameIndex, testNameField);
+
+        expect(store.indexNames, [testNameIndex]);
+      });
+      await db.close();
+      db = await idbFactory.open(_dbName, version: 2,
+          onUpgradeNeeded: (VersionChangeEvent e) {
+        ObjectStore store = e.transaction.objectStore(testStoreName);
+
+        expect(store.indexNames, [testNameIndex]);
+        store.deleteIndex(testNameIndex);
+
+        expect(store.indexNames, []);
+      });
+      await db.close();
+      // check that the index is indeed gone
+      db = await idbFactory.open(_dbName, version: 3,
+          onUpgradeNeeded: (VersionChangeEvent e) {
+        ObjectStore store = e.transaction.objectStore(testStoreName);
+        expect(store.indexNames, []);
+      });
+      await db.close();
+    });
+    test('delete_non_existing_index', () async {
       await _setupDeleteDb();
 
       db = await idbFactory.open(_dbName, version: 1,
@@ -149,16 +177,14 @@ void defineTests(TestContext ctx) {
           store.deleteIndex(testNameIndex);
           fail('should fail');
         } on DatabaseError catch (e) {
-          print(e);
           // NotFoundError: An attempt was made to reference a Node in a context where it does not exist. The specified index was not found.
+          // NotFoundError: The specified index 'name_index' was not found.
           expect(isNotFoundError(e), isTrue);
         }
       });
       await db.close();
       db = await idbFactory.open(_dbName, version: 2,
           onUpgradeNeeded: (VersionChangeEvent e) {
-        Database db = e.database;
-
         ObjectStore store = e.transaction.objectStore(testStoreName);
         try {
           store.deleteIndex(testNameIndex);
@@ -173,10 +199,16 @@ void defineTests(TestContext ctx) {
       await db.close();
       db = await idbFactory.open(_dbName, version: 3,
           onUpgradeNeeded: (VersionChangeEvent e) {
-        Database db = e.database;
-
         ObjectStore store = e.transaction.objectStore(testStoreName);
-        print(store.indexNames);
+        store.deleteIndex(testNameIndex2);
+
+        expect(store.indexNames, []);
+      });
+      await db.close();
+      // check that the index is indeed gone
+      db = await idbFactory.open(_dbName, version: 3,
+          onUpgradeNeeded: (VersionChangeEvent e) {
+        ObjectStore store = e.transaction.objectStore(testStoreName);
         store.deleteIndex(testNameIndex2);
 
         expect(store.indexNames, []);

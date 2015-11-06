@@ -121,32 +121,50 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
 
   Future _upgrade(SqlTransaction tx, int oldVersion, int newVersion,
       void onUpgradeNeeded(VersionChangeEvent event)) async {
-    Future createIndexes() async {
-      for (String storeName
-          in meta.versionChangeTransaction.createdIndexes.keys) {
-        List<IdbIndexMeta> indexMetas =
-            meta.versionChangeTransaction.createdIndexes[storeName];
+    IdbVersionChangeTransactionMeta txnMeta = meta.versionChangeTransaction;
+
+    Future createIndecies() async {
+      for (String storeName in txnMeta.createdIndexes.keys) {
+        _WebSqlObjectStore store =
+            versionChangeTransaction.objectStore(storeName);
+        List<IdbIndexMeta> indexMetas = txnMeta.createdIndexes[storeName];
         for (IdbIndexMeta indexMeta in indexMetas) {
-          _WebSqlObjectStore store =
-              versionChangeTransaction.objectStore(storeName);
           _WebSqlIndex index = new _WebSqlIndex(store, indexMeta);
           await index.create();
         }
       }
     }
 
+    Future removeDeletedIndecies() async {
+      for (String storeName in txnMeta.deletedIndexes.keys) {
+        _WebSqlObjectStore store =
+            versionChangeTransaction.objectStore(storeName);
+        List<IdbIndexMeta> indexMetas = txnMeta.deletedIndexes[storeName];
+        for (IdbIndexMeta indexMeta in indexMetas) {
+          _WebSqlIndex index = new _WebSqlIndex(store, indexMeta);
+          await index.drop();
+        }
+      }
+    }
+
     Future createObjectStores() async {
-      for (IdbObjectStoreMeta storeMeta
-          in meta.versionChangeTransaction.createdStores) {
+      for (IdbObjectStoreMeta storeMeta in txnMeta.createdStores) {
         _WebSqlObjectStore store =
             new _WebSqlObjectStore(versionChangeTransaction, storeMeta);
         await store.create();
       }
     }
 
+    Future updateObjectStores() async {
+      for (IdbObjectStoreMeta storeMeta in txnMeta.updatedStores) {
+        _WebSqlObjectStore store =
+            new _WebSqlObjectStore(versionChangeTransaction, storeMeta);
+        await store.update();
+      }
+    }
+
     Future removeDeletedObjectStores() async {
-      for (IdbObjectStoreMeta storeMeta
-          in meta.versionChangeTransaction.deletedStores) {
+      for (IdbObjectStoreMeta storeMeta in txnMeta.deletedStores) {
         _WebSqlObjectStore store =
             new _WebSqlObjectStore(versionChangeTransaction, storeMeta);
         await store._deleteTable(versionChangeTransaction);
@@ -156,8 +174,7 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
       }
     }
 
-    versionChangeTransaction =
-        new _WebSqlTransaction(this, tx, meta.versionChangeTransaction);
+    versionChangeTransaction = new _WebSqlTransaction(this, tx, txnMeta);
     _WebSqlVersionChangeEvent event = new _WebSqlVersionChangeEvent(
         this, oldVersion, newVersion, versionChangeTransaction);
 
@@ -166,8 +183,14 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
     // Delete store that have been deleted
     await removeDeletedObjectStores();
     await createObjectStores();
-    await createIndexes();
+    await createIndecies();
+    await removeDeletedIndecies();
 
+    // Update meta for updated Store
+    txnMeta.updatedStores
+      ..removeAll(txnMeta.createdStores)
+      ..removeAll(txnMeta.deletedStores);
+    await updateObjectStores();
     // nullify when done
     versionChangeTransaction = null;
   }

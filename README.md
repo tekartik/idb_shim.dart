@@ -1,7 +1,9 @@
 # idb shim
 
-Pure dart indexed db like API on top of native, websql or memory implementation. Its goal is to support browser such as
-Safari and any browser on iOS (that do not support the indexed_db api) with very few changes.
+Pure dart indexed db like API on top of native, websql or memory implementation. Its goal is to support browsers that do
+not support the indexed_db api with very few changes.
+
+It also  allows to test your database schema and access in vm unit tests.
 
 * Project [home page](http://alextekartik.github.io/idb_shim.dart/)
 * Project [source code](https://github.com/alextekartik/idb_shim.dart)
@@ -58,22 +60,31 @@ await txn.completed;
  
 ### Known limitations/issues
 
-* For autoincrement, key cannot be set as a different type than int
-* Native exception type have no match in dart so a custom DatabaseError object is created to wrap the exception
+#### Memory/Io/WebSql implementation
+
+* For autoincrement, if key is set, it cannot be set as a different type than int
 * Nextunique and prevunique not support (for now)
 * No support for Cursor.source
 * No generic support for blocked. It is always possible to upgrade the database, however other tabs will get blocked in their future calls
 * Blocked and onVersionChange event support, this is actually tricky for websql, actually the new db won't be blocked but the old one will!
   so the proper common implementation is to register for onVersionChange event and when receiving simply reload the page. Sample code to come
-* Type of data
-  * Only stuff that can be JSON serialized/deserialized
-  * DateTime is not supported, it should be converted to string using toIso8601String
-  * Cyclic dependecy are not supported (per JSON serialization)
-  * Large float are not converted to int (native indexeddb implementation does this)
-* Type of key
-  * String and num (double and int) are supported
-  * DateTime is not supported
 * Index.get: only by key is supported (no range yet)
 * WebSql implementation issue SqlResultSet.rows.first is not working in dart2js (bug?)
+
+##### Type of data
+
+* Only stuff that can be JSON serialized/deserialized
+* DateTime is not supported, it should be converted to string using toIso8601String
+* Cyclic dependecy are not supported (per JSON serialization)
+* Large float are not converted to int (native indexeddb implementation does this)
+
+##### Type of key
+
+* String and num (double and int) are supported
+* DateTime is not supported, convert them to String
+
+#### Native exception
+
+* Native exception type have no match in dart so a custom DatabaseError object is created to wrap the exception
 
 
