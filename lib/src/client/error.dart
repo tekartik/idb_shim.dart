@@ -24,6 +24,12 @@ class DatabaseStoreNotFoundError extends DatabaseError {
   DatabaseStoreNotFoundError([String message = _MESSAGE]) : super(message);
 }
 
+class DatabaseIndexNotFoundError extends DatabaseError {
+  static String indexMessage(var indexName) =>
+      "NotFoundError: The specified index '${indexName}' was not found.";
+  DatabaseIndexNotFoundError(String indexName) : super(indexMessage(indexName));
+}
+
 class DatabaseTransactionStoreNotFoundError extends DatabaseError {
   DatabaseTransactionStoreNotFoundError(String store)
       : super("NotFoundError: store '${store}' not found in transaction.");

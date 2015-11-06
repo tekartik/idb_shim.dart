@@ -52,12 +52,38 @@ abstract class Transaction {
 }
 
 abstract class ObjectStore {
+  ///
+  /// Destroys the index with the specified name in the connected database, used
+  /// during a version upgrade.
+  ///
+  /// Note that this method must be called only from a VersionChange transaction
+  /// mode callback. Note that this method synchronously modifies the
+  /// [ObjectStore.indexNames] property.
+  ///
+  void deleteIndex(String name);
+
+  ///
+  /// Creates and returns a new Index object in the connected database.
+  ///
+  /// Note that this method must be called only from a VersionChange transaction
+  /// mode callback.
+  ///
   Index createIndex(String name, keyPath, {bool unique, bool multiEntry});
 
-  /**
-   * Typically value is a Map and the future contains the key
-   */
+  ///
+  /// Creates a structured clone of the value, and stores the cloned value in
+  /// the object store. This is for adding new records to an object store.
+  ///
+  /// Returns the key of the inserted object
+  /// The add method is an insert only method. If a record already exists in the
+  /// object store with the key parameter as its key, then an error
+  /// ConstrainError event is fired on the returned request object.
+  /// For updating existing records, you should use the [ObjectStore.put]
+  /// method instead.
+  ///
+  ///
   Future add(dynamic value, [dynamic key]);
+
   Future put(dynamic value, [dynamic key]);
   Future getObject(dynamic key);
   Future delete(dynamic key);

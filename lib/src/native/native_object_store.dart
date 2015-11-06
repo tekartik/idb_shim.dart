@@ -11,6 +11,13 @@ class _NativeObjectStore extends ObjectStore {
   }
 
   @override
+  void deleteIndex(String name) {
+    _catchNativeError(() {
+      idbObjectStore.deleteIndex(name);
+    });
+  }
+
+  @override
   Future add(dynamic value, [dynamic key]) {
     return _catchAsyncNativeError(() {
       return idbObjectStore.add(value, key);

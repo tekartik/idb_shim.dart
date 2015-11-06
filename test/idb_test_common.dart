@@ -122,7 +122,7 @@ bool isTransactionReadOnlyError(e) {
   return false;
 }
 
-bool isStoreNotFoundError(e) {
+bool isNotFoundError(e) {
   if (e is DatabaseError) {
     String message = e.toString().toLowerCase();
     if (message.contains('notfounderror')) {

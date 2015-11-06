@@ -29,7 +29,9 @@ class IdbTransactionMeta {
 
 class IdbVersionChangeTransactionMeta extends IdbTransactionMeta {
   Map<String, List<IdbIndexMeta>> createdIndexes =
-      {}; // store deleted during onUpgradeNeeded
+      {}; // index deleted during onUpgradeNeeded
+  Map<String, List<IdbIndexMeta>> deletedIndexes =
+      {}; // index deleted during onUpgradeNeeded
   Set<IdbObjectStoreMeta> createdStores =
       new Set(); // store deleted during onUpgradeNeeded
   Set<IdbObjectStoreMeta> deletedStores =
@@ -110,6 +112,9 @@ class IdbDatabaseMeta {
     if (storeMeta != null) {
       versionChangeTransaction.deletedStores.add(storeMeta);
       _stores.remove(storeName);
+    } else {
+      throw new DatabaseStoreNotFoundError(
+          DatabaseStoreNotFoundError.storeMessage(storeName));
     }
   }
 
@@ -232,6 +237,25 @@ class IdbObjectStoreMeta {
     putIndex(index);
   }
 
+  deleteIndex(IdbDatabaseMeta databaseMeta, String indexName) {
+    if (databaseMeta.versionChangeTransaction == null) {
+      throw new StateError(
+          "cannot delete index outside of a versionChangedEvent");
+    }
+    IdbIndexMeta indexMeta = _indecies[name];
+    if (indexMeta == null) {
+      throw new DatabaseIndexNotFoundError(indexName);
+    }
+    databaseMeta.versionChangeTransaction.updatedStores.add(this);
+    List list = databaseMeta.versionChangeTransaction.deletedIndexes[name];
+    if (list == null) {
+      databaseMeta.versionChangeTransaction.deletedIndexes[name] = [indexMeta];
+    } else {
+      list.add(indexMeta);
+    }
+    removeIndex(indexMeta);
+  }
+
   IdbObjectStoreMeta.fromObjectStore(ObjectStore objectStore)
       : this(objectStore.name, objectStore.keyPath, objectStore.autoIncrement);
 
@@ -259,6 +283,10 @@ class IdbObjectStoreMeta {
 
   putIndex(IdbIndexMeta index) {
     _indecies[index.name] = index;
+  }
+
+  removeIndex(IdbIndexMeta index) {
+    _indecies.remove(index.name);
   }
 
   Map toDebugMap() {

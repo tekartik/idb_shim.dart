@@ -777,6 +777,11 @@ class _SdbObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   @override
+  void deleteIndex(String name) {
+    meta.deleteIndex(database.meta, name);
+  }
+
+  @override
   Future delete(key) {
     return inWritableTransaction(() {
       return sdbStore.delete(key).then((_) {

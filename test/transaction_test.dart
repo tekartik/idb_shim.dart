@@ -172,7 +172,7 @@ void defineTests(TestContext ctx) {
         } catch (e) {
           //print(e);
           //print(e.runtimeType);
-          expect(isStoreNotFoundError(e), isTrue);
+          expect(isNotFoundError(e), isTrue);
         }
       });
 
@@ -211,7 +211,7 @@ void defineTests(TestContext ctx) {
           fail("exception expected");
         } catch (e) {
           // NotFoundError: An attempt was made to reference a Node in a context where it does not exist. The specified object store was not found.
-          expect(isStoreNotFoundError(e), isTrue);
+          expect(isNotFoundError(e), isTrue);
         }
       });
     });

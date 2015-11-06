@@ -19,13 +19,13 @@ void main() {
     });
 
     test('store_notfound_error', () {
-      expect(isStoreNotFoundError(null), isFalse);
-      expect(isStoreNotFoundError(new DatabaseReadOnlyError()), isFalse);
+      expect(isNotFoundError(null), isFalse);
+      expect(isNotFoundError(new DatabaseReadOnlyError()), isFalse);
 
-      expect(isStoreNotFoundError(new DatabaseStoreNotFoundError()), isTrue);
+      expect(isNotFoundError(new DatabaseStoreNotFoundError()), isTrue);
       // Firefox
       expect(
-          isStoreNotFoundError(new DatabaseError(
+          isNotFoundError(new DatabaseError(
               'The operation failed because the requested database object could not be found. For example, an object store did not exist but was being opened."  code: "8" nsresult: "0x80660003 (NotFoundError)"  location: "<unknown>"')),
           isTrue);
     });
