@@ -238,6 +238,12 @@ abstract class ObjectStore {
       {key, KeyRange range, String direction, bool autoAdvance});
 
   ///
+  /// Used for iterating through an object store with a key cursor.
+  ///
+  /// not supported yet
+  /// Stream<Cursor> openKeyCursor({key, KeyRange range, String direction, bool autoAdvance});
+
+  ///
   /// returns the total number of records that match the provided key or
   /// IDBKeyRange. If no arguments are provided, it returns the total number of
   /// records in the store.

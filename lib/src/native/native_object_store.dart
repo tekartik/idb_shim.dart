@@ -92,6 +92,33 @@ class _NativeObjectStore extends ObjectStore {
     return ctlr.stream;
   }
 
+  //@override
+  // Used for iterating through an object store with a key cursor.
+  /*
+  Stream<Cursor> openKeyCursor(
+      {key, KeyRange range, String direction, bool autoAdvance}) {
+    idb.KeyRange idbKeyRange = _nativeKeyRange(range);
+    //idbDevWarning;
+    //idbDevPrint("kr1 $range native $idbKeyRange");
+
+    Stream<idb.Cursor> stream;
+
+      stream = idbObjectStore.openKeyCursor(
+      //
+          key: key, //
+          range: idbKeyRange,
+          direction: direction, //
+          autoAdvance: autoAdvance);
+
+
+    _NativeCursorWithValueController ctlr =
+    new _NativeCursorWithValueController(//
+        stream);
+    //idbDevPrint("kr2 $range native $idbKeyRange");
+    return ctlr.stream;
+  }
+  */
+
   @override
   Future<int> count([dynamic key_OR_range]) {
     Future<int> countFuture;

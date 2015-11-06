@@ -15,8 +15,10 @@ class _NativeTransaction extends Transaction {
 
   @override
   Future<Database> get completed {
-    return idbTransaction.completed.then((_) {
-      return database;
+    return _catchAsyncNativeError(() {
+      return idbTransaction.completed.then((_) {
+        return database;
+      });
     });
   }
 }
