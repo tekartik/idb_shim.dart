@@ -19,4 +19,4 @@ class _TestUtils {
 }
 
 String get testScriptPath => _TestUtils.scriptPath;
-String get testOutTopPath => join(dirname(testScriptPath), "out");
+String get testOutTopPath => join(dirname(dirname(testScriptPath)), "test_out");
