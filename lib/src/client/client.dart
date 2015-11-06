@@ -1,4 +1,4 @@
-part of idb_shim_client;
+library idb_shim.src.client.client;
 
 /**
  * to simply add a warning in a code for

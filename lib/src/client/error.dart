@@ -1,13 +1,6 @@
-part of idb_shim_client;
+library idb_shim.src.client.error;
 
-// added definition
-class DatabaseError extends Error {
-  String get message => _message;
-  String _message;
-  DatabaseError(this._message);
-
-  String toString() => message;
-}
+import '../../idb.dart';
 
 // native exception won't be of this type
 // the text here has been copied to match the DomException message
