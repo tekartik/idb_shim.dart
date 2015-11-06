@@ -3,8 +3,17 @@ x cache meta data between 2 transaction, version will change anyway (i.e. preven
 x check version on transaction begin
 - handle deleteIndex
 
+Transaction
+- objectStoreNames (Mozilla)
+
+ObjectStore
+- openKeyCursor (when sdk is fixed)
+
 Cursor.
 - update: "If the cursor points to a record that has just been deleted, a new record is created."
+
+Value:
+- make sure a list written then read cannot be modified
 
 test
 - test cursor and key value null
