@@ -3,6 +3,9 @@ x cache meta data between 2 transaction, version will change anyway (i.e. preven
 x check version on transaction begin
 - handle deleteIndex
 
+Cursor.
+- update: "If the cursor points to a record that has just been deleted, a new record is created."
+
 test
 - test cursor and key value null
 - cursor and int value in index
