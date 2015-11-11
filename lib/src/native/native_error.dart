@@ -29,14 +29,12 @@ _catchNativeError(action()) {
   }
 }
 
-_catchAsyncNativeError(Future action()) async {
-  try {
-    return await action();
-  } catch (e) {
+Future _catchAsyncNativeError(Future action()) {
+  return action().catchError((e) {
     if (e is DatabaseError) {
-      rethrow;
+      throw e;
     } else {
       throw new DatabaseError(e.toString());
     }
-  }
+  });
 }

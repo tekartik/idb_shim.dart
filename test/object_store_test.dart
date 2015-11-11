@@ -213,7 +213,7 @@ void defineTests(TestContext ctx) {
         await _setUp();
         expect(objectStore.keyPath, null);
         expect(objectStore.autoIncrement, true);
-      });
+      }, testOn: "!ie");
 
       // Good first test
       test('add', () async {

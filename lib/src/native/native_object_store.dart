@@ -24,8 +24,9 @@ class _NativeObjectStore extends ObjectStore {
     });
   }
 
+  // Not async please for ie!
   @override
-  Future getObject(dynamic key) async {
+  Future getObject(dynamic key) {
     return _catchAsyncNativeError(() {
       return idbObjectStore.getObject(key);
     });
@@ -136,6 +137,7 @@ class _NativeObjectStore extends ObjectStore {
   @override
   get keyPath => idbObjectStore.keyPath;
 
+  // ie return null so make sure it is a bool
   @override
   get autoIncrement => idbObjectStore.autoIncrement;
 
