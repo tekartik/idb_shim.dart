@@ -205,16 +205,21 @@ void defineTests(TestContext ctx) {
         Index index = objectStore.index(testNameIndex);
         expect(index.name, testNameIndex);
         expect(index.keyPath, testNameField);
-        expect(index.multiEntry, false);
+        // Not supported on ie
+        if (!ctx.isIdbIe) {
+          expect(index.multiEntry, false);
+        }
         expect(index.unique, true);
       });
 
       test('primary', () async {
         await _setUp();
         Index index = objectStore.index(testNameIndex);
-        return index.count().then((result) {
-          expect(result, 0);
-        });
+
+        // Crashes on ie for now
+        if (!ctx.isIdbIe) {
+          expect(await index.count(), 0);
+        }
       });
 
       test('count by key', () async {
@@ -339,9 +344,13 @@ void defineTests(TestContext ctx) {
               expect(readValue, value1);
               return index.get("test2").then((Map readValue) {
                 expect(readValue, value2);
-                return index.count().then((result) {
-                  expect(result, 2);
-                });
+
+                // count() crashes on ie
+                if (!ctx.isIdbIe) {
+                  return index.count().then((result) {
+                    expect(result, 2);
+                  });
+                }
               });
             });
           });
@@ -377,7 +386,11 @@ void defineTests(TestContext ctx) {
         Index index = objectStore.index(testNameIndex);
         expect(index.name, testNameIndex);
         expect(index.keyPath, testNameField);
-        expect(index.multiEntry, true);
+
+        // multiEntry not supported on ie
+        if (!ctx.isIdbIe) {
+          expect(index.multiEntry, true);
+        }
         expect(index.unique, false);
       });
 
@@ -415,9 +428,13 @@ void defineTests(TestContext ctx) {
         Index index = objectStore.index(testNameIndex);
         return objectStore.add(value).then((key) {
           // get(null) does not work
-          return index.count().then((int count) {
-            expect(count, 0);
-          });
+
+          // crashes on ie for now
+          if (!ctx.isIdbIe) {
+            return index.count().then((int count) {
+              expect(count, 0);
+            });
+          }
         });
       });
 
@@ -466,13 +483,19 @@ void defineTests(TestContext ctx) {
         Index index = objectStore.index(testNameIndex);
         expect(index.name, testNameIndex);
         expect(index.keyPath, testNameField);
-        expect(index.multiEntry, true);
+
+        // multiEntry not supported on ie
+        if (!ctx.isIdbIe) {
+          expect(index.multiEntry, true);
+        }
         expect(index.unique, false);
 
         index = objectStore.index(testNameIndex2);
         expect(index.name, testNameIndex2);
         expect(index.keyPath, testNameField2);
-        expect(index.multiEntry, false);
+        if (!ctx.isIdbIe) {
+          expect(index.multiEntry, false);
+        }
         expect(index.unique, true);
       });
     });
@@ -494,6 +517,12 @@ void defineTests(TestContext ctx) {
             ObjectStore objectStore = transaction.objectStore(storeMeta.name);
             Index index = objectStore.index(indexMeta.name);
             IdbIndexMeta readMeta = new IdbIndexMeta.fromIndex(index);
+
+            // multi entry not supported on ie
+            if (ctx.isIdbIe) {
+              readMeta = new IdbIndexMeta(readMeta.name, readMeta.keyPath,
+                  readMeta.unique, indexMeta.multiEntry);
+            }
             expect(readMeta, indexMeta);
             db.close();
           });

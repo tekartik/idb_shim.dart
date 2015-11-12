@@ -20,7 +20,7 @@ main() {
 
 void defineTests(TestContext ctx) {
   IdbFactory idbFactory = ctx.factory;
-  solo_group('index_cursor', () {
+  group('index_cursor', () {
     Database db;
     Transaction transaction;
     ObjectStore objectStore;

@@ -361,7 +361,11 @@ void defineTests(TestContext ctx) {
             db.transaction(testStoreName, idbModeReadOnly);
         ObjectStore objectStore = transaction.objectStore(testStoreName);
         await objectStore.getObject(0);
-        await new Future.value();
+
+        // this cause the transaction to terminate on ie
+        if (!ctx.isIdbIe) {
+          await new Future.value();
+        }
         await objectStore.getObject(0);
         await transaction.completed;
       });
@@ -371,8 +375,11 @@ void defineTests(TestContext ctx) {
             db.transaction(testStoreName, idbModeReadOnly);
         ObjectStore objectStore = transaction.objectStore(testStoreName);
         await objectStore.getObject(0);
-        await new Future.value();
-        await new Future.value();
+        // this cause the transaction to terminate on ie
+        if (!ctx.isIdbIe) {
+          await new Future.value();
+          await new Future.value();
+        }
         await objectStore.getObject(0);
         await transaction.completed;
       });
@@ -382,8 +389,11 @@ void defineTests(TestContext ctx) {
             db.transaction(testStoreName, idbModeReadWrite);
         ObjectStore objectStore = transaction.objectStore(testStoreName);
         await objectStore.put({});
-        await new Future.value();
-        await new Future.value();
+        // this cause the transaction to terminate on ie
+        if (!ctx.isIdbIe) {
+          await new Future.value();
+          await new Future.value();
+        }
         await objectStore.put({});
         await transaction.completed;
       });

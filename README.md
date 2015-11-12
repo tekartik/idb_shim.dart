@@ -93,3 +93,6 @@ IE 11, Edge 12 has the following limitations:
 
 * no support for reading objectStore.autoIncrement properties
 * ObjectStore.count() without argument throw a 'DataError' exception...better avoid count() on IE...
+* it seems ie close the transaction 'sooner' then chrome/firefox, i.e. calling an sync function that wrap an idb calls
+  makes the transaction terminate
+* IDBIndex.multiEntry not supported on ie
