@@ -87,4 +87,9 @@ await txn.completed;
 
 * Native exception type have no match in dart so a custom DatabaseError object is created to wrap the exception
 
+### Ie limitation
 
+IE 11, Edge 12 has the following limitations:
+
+* no support for reading objectStore.autoIncrement properties
+* ObjectStore.count() without argument throw a 'DataError' exception...better avoid count() on IE...

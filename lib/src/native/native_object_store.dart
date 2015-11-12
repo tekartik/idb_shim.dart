@@ -122,16 +122,18 @@ class _NativeObjectStore extends ObjectStore {
 
   @override
   Future<int> count([dynamic key_OR_range]) {
-    Future<int> countFuture;
-    if (key_OR_range == null) {
-      countFuture = idbObjectStore.count();
-    } else if (key_OR_range is KeyRange) {
-      idb.KeyRange idbKeyRange = _nativeKeyRange(key_OR_range);
-      countFuture = idbObjectStore.count(idbKeyRange);
-    } else {
-      countFuture = idbObjectStore.count(key_OR_range);
-    }
-    return countFuture;
+    return _catchAsyncNativeError(() {
+      Future<int> countFuture;
+      if (key_OR_range == null) {
+        countFuture = idbObjectStore.count();
+      } else if (key_OR_range is KeyRange) {
+        idb.KeyRange idbKeyRange = _nativeKeyRange(key_OR_range);
+        countFuture = idbObjectStore.count(idbKeyRange);
+      } else {
+        countFuture = idbObjectStore.count(key_OR_range);
+      }
+      return countFuture;
+    });
   }
 
   @override

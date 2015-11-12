@@ -63,6 +63,9 @@ dbTest(String description, body, [_test = test]) {
 class TestContext {
   IdbFactory factory;
   String get dbName => testDescriptions.join('-') + ".db";
+
+  // special internet explorer handling
+  bool isIdbIe = false;
 }
 
 class SembastTestContext extends TestContext {
