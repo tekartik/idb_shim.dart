@@ -102,6 +102,8 @@ class _NativeCursorController {
       _ctlr.add(new _NativeCursor(cursor));
     }, onDone: () {
       _ctlr.close();
+    }, onError: (error) {
+      _ctlr.addError(error);
     });
   }
 

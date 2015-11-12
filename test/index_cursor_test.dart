@@ -20,7 +20,7 @@ main() {
 
 void defineTests(TestContext ctx) {
   IdbFactory idbFactory = ctx.factory;
-  group('index_cursor', () {
+  solo_group('index_cursor', () {
     Database db;
     Transaction transaction;
     ObjectStore objectStore;
@@ -79,28 +79,28 @@ void defineTests(TestContext ctx) {
         index = objectStore.index(testNameIndex);
       }
 
-      Future<List<Map>> getIndexRecords() async {
+      // Don't make this function async, crashes on ie
+      Future<List<Map>> getIndexRecords() {
         List<Map> list = [];
         Stream<CursorWithValue> stream = index.openCursor(autoAdvance: true);
-        await stream.listen((CursorWithValue cwv) {
+        return stream.listen((CursorWithValue cwv) {
           list.add(cwv.value);
-        }).asFuture();
-        return list;
+        }).asFuture(list);
       }
 
-      Future<List<String>> getIndexKeys() async {
+      // Don't make this function async, crashes on ie
+      Future<List<String>> getIndexKeys() {
         List<String> list = [];
         Stream<Cursor> stream = index.openKeyCursor(autoAdvance: true);
-        await stream.listen((Cursor c) {
+        return stream.listen((Cursor c) {
           list.add(c.key);
-        }).asFuture();
-        return list;
+        }).asFuture(list);
       }
 
       test('one_record', () async {
         await _openDb();
         await objectStore.put({"dummy": 1});
-        // must be empy as the key is not specified
+
         expect(await getIndexRecords(), []);
         expect(await getIndexKeys(), []);
       });
