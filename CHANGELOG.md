@@ -1,3 +1,7 @@
+## 1.3.2
+
+* Fix implementation for IE/Edge where the transaction life-cycle is shorter
+
 ## 1.3.1
 
 * Add support for ObjectStore.deleteIndex
