@@ -68,7 +68,11 @@ void defineTests(TestContext ctx) {
         ObjectStore store = txn.objectStore(testStoreName);
         expect(store.name, testStoreName);
         expect(store.keyPath, testNameField);
-        expect(store.autoIncrement, isTrue);
+
+        // autoIncrement not supported on ie
+        if (!ctx.isIdbIe) {
+          expect(store.autoIncrement, isTrue);
+        }
         expect(store.indexNames, []);
         await txn.completed;
       });
@@ -95,7 +99,11 @@ void defineTests(TestContext ctx) {
         expect(index.name, testNameIndex);
         expect(index.keyPath, testNameField);
         expect(index.unique, isTrue);
-        expect(index.multiEntry, isTrue);
+
+        // multiEntry not supported on ie
+        if (!ctx.isIdbIe) {
+          expect(index.multiEntry, isTrue);
+        }
         await txn.completed;
       });
     });
@@ -120,7 +128,11 @@ void defineTests(TestContext ctx) {
 
         Transaction txn = db.transaction(testStoreName2, idbModeReadOnly);
         ObjectStore store = txn.objectStore(testStoreName2);
-        expect(await store.count(), 0);
+
+        // count() not supported on ie
+        if (!ctx.isIdbIe) {
+          expect(await store.count(), 0);
+        }
         await txn.completed;
       });
 
@@ -151,10 +163,15 @@ void defineTests(TestContext ctx) {
         txn = db.transaction([testStoreName, testStoreName2], idbModeReadOnly);
         store = txn.objectStore(testStoreName);
         expect(await store.getObject("key1"), "value1");
-        expect(await store.count(), 1);
+        if (!ctx.isIdbIe) {
+          expect(await store.count(), 1);
+        }
         store2 = txn.objectStore(testStoreName2);
         expect(await store2.getObject("key1"), "value1");
-        expect(await store2.count(), 1);
+
+        if (!ctx.isIdbIe) {
+          expect(await store2.count(), 1);
+        }
         await txn.completed;
       });
     });
@@ -198,9 +215,15 @@ void defineTests(TestContext ctx) {
         store = txn.objectStore(testStoreName);
         expect(await store.getObject("key1"), "value1");
         expect(await store.getObject("key2"), "value2");
-        expect(await store.count(), 2);
+
+        if (!ctx.isIdbIe) {
+          expect(await store.count(), 2);
+        }
         ObjectStore store2 = txn.objectStore(testStoreName2);
-        expect(await store2.count(), 0);
+
+        if (!ctx.isIdbIe) {
+          expect(await store2.count(), 0);
+        }
         await txn.completed;
       });
     });

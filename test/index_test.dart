@@ -216,7 +216,7 @@ void defineTests(TestContext ctx) {
         await _setUp();
         Index index = objectStore.index(testNameIndex);
 
-        // Crashes on ie for now
+        // count() crashes on ie
         if (!ctx.isIdbIe) {
           expect(await index.count(), 0);
         }
@@ -429,7 +429,7 @@ void defineTests(TestContext ctx) {
         return objectStore.add(value).then((key) {
           // get(null) does not work
 
-          // crashes on ie for now
+          // count() crashes on ie
           if (!ctx.isIdbIe) {
             return index.count().then((int count) {
               expect(count, 0);

@@ -353,16 +353,14 @@ void defineTests(TestContext ctx) {
         });
       });
 
-      test('count', () async {
-        // ie fails on count
+      test('count_one', () async {
+        await _setUp();
+        Map value = {};
+        await objectStore.add(value);
+
+        // crashes on ie
         if (!ctx.isIdbIe) {
-          await _setUp();
-          Map value = {};
-          return objectStore.add(value).then((_) {
-            return objectStore.count().then((int count) {
-              expect(count, 1);
-            });
-          });
+          expect(await objectStore.count(), 1);
         }
       });
 
@@ -401,6 +399,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('count_empty', () async {
+        // count() crashes on ie
         if (!ctx.isIdbIe) {
           await _setUp();
           return objectStore.count().then((int count) {
@@ -767,7 +766,7 @@ void defineTests(TestContext ctx) {
         // There must be only one item
         expect(await objectStore.count(key), 1);
 
-        // count without argument not supported for ie
+        // count() crashes on ie
         if (!ctx.isIdbIe) {
           expect(await objectStore.count(), 1);
         }

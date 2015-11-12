@@ -126,6 +126,21 @@ class _NativeObjectStore extends ObjectStore {
       Future<int> countFuture;
       if (key_OR_range == null) {
         countFuture = idbObjectStore.count();
+
+        /*  .catchError((e) {
+          // as of SDK 1.12 count() without argument crashes
+          // so let's count manually
+          if (e.toString().contains('DataError')) {
+            int count = 0;
+            // count manually
+            return idbObjectStore.openCursor(autoAdvance: true).listen((_) {
+              count++;
+            }).asFuture(count);
+          } else {
+            throw e;
+          }
+          });
+          */
       } else if (key_OR_range is KeyRange) {
         idb.KeyRange idbKeyRange = _nativeKeyRange(key_OR_range);
         countFuture = idbObjectStore.count(idbKeyRange);

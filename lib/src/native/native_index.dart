@@ -24,6 +24,21 @@ class _NativeIndex extends Index {
     return _catchAsyncNativeError(() {
       if (key_OR_range == null) {
         countFuture = idbIndex.count();
+        /*
+            .catchError((e) {
+          // as of SDK 1.12 count() without argument crashes
+          // so let's count manually
+          if (e.toString().contains('DataError')) {
+            int count = 0;
+            // count manually
+            return idbIndex.openKeyCursor(autoAdvance: true).listen((_) {
+              count++;
+            }).asFuture(count);
+          } else {
+            throw e;
+          }
+        });
+        */
       } else if (key_OR_range is KeyRange) {
         idb.KeyRange idbKeyRange = _nativeKeyRange(key_OR_range);
         countFuture = idbIndex.count(idbKeyRange);
