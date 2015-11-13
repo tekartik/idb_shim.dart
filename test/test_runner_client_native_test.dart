@@ -15,6 +15,7 @@ main() {
 
       // ie and idb special test marker
       ctx.isIdbIe = isIe;
+      ctx.isIdbSafari = isSafari;
 
       test('properties', () {
         expect(idbFactory.persistent, isTrue);

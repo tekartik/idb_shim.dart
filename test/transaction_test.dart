@@ -294,7 +294,7 @@ void defineTests(TestContext ctx) {
       });
     });
 
-    group('auto', () {
+    group('timing', () {
       Database db;
 
       setUp(() {
@@ -354,6 +354,36 @@ void defineTests(TestContext ctx) {
         await objectStore.getObject(0);
         await objectStore.getObject(0);
         await transaction.completed;
+      });
+
+      skip_test('transaction_async_add', () async {
+        Transaction transaction;
+        ObjectStore objectStore;
+        _createTransactionSync() {
+          transaction = db.transaction(testStoreName, idbModeReadWrite);
+          objectStore = transaction.objectStore(testStoreName);
+        }
+        _createTransaction() async {
+          await new Future.delayed(new Duration(milliseconds: 1));
+          _createTransactionSync();
+        }
+        // Sync ok
+        _createTransactionSync();
+        await objectStore.add("value1");
+        await transaction.completed;
+
+        // Async not ok on Safari
+        await _createTransaction();
+        try {
+          await objectStore.add("value1");
+          if (ctx.isIdbSafari || ctx.isIdbSembast) {
+            fail('should fail');
+          }
+        } on DatabaseError catch (e) {
+          // Transaction inactive
+          print(e);
+        }
+        return transaction.completed;
       });
 
       test('get_wait_get', () async {

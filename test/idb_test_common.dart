@@ -66,9 +66,14 @@ class TestContext {
 
   // special internet explorer handling
   bool isIdbIe = false;
+  bool isIdbSafari = false;
+  bool isIdbSembast = false;
 }
 
 class SembastTestContext extends TestContext {
+  @override
+  bool get isIdbSembast => true;
+
   sdb.DatabaseFactory sdbFactory;
   IdbSembastFactory get factory => super.factory;
   String get dbName => join(joinAll(testDescriptions), "test.db");
