@@ -328,13 +328,11 @@ void defineTests(TestContext ctx) {
         await objectStore.add(value1);
         try {
           await objectStore.add(value1);
-        } on DatabaseError catch (e) {
-        }
+        } on DatabaseError catch (_) {}
         // indexed db throw the exception during completed...
         try {
-        await transaction.completed;
-        } on DatabaseError catch (e) {
-        }
+          await transaction.completed;
+        } on DatabaseError catch (_) {}
         // create new transaction;
         _createTransaction();
         index = objectStore.index(testNameIndex);
@@ -348,8 +346,6 @@ void defineTests(TestContext ctx) {
         } else {
           expect(count == 0 || count == 1, isTrue);
         }
-
-        // });
       });
 
       test('add/get 2', () async {
