@@ -10,7 +10,7 @@ main() {
 
 void defineTests(TestContext ctx) {
   IdbFactory idbFactory = ctx.factory;
-  group('transaction', () {
+  solo_group('transaction', () {
     // new
     Database db;
     String _dbName;
@@ -115,20 +115,31 @@ void defineTests(TestContext ctx) {
         await transaction2.completed;
         // BUG in indexeddb native - this never complete await transaction.completed;
       });
-      //temp
+
       test('transactionList', () async {
         await _setupDeleteDb();
         void _initializeDatabase(VersionChangeEvent e) {
           Database db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
-          db.createObjectStore(testStoreName2, autoIncrement: true);
+          db.createObjectStore(testStoreName2, autoIncrement: false);
         }
         db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
 
-        Transaction transaction = db.transactionList(
-            [testStoreName, testStoreName2], idbModeReadWrite);
-        await transaction.completed;
+        // not supported on safari!
+        try {
+          Transaction transaction = db.transactionList(
+              [testStoreName, testStoreName2], idbModeReadWrite);
+          if (ctx.isIdbSafari) {
+            fail("currently fails...");
+          }
+          await transaction.completed;
+        } on DatabaseError catch (e) {
+          if (!ctx.isIdbSafari) {
+            rethrow;
+          }
+          expect(isNotFoundError(e), isTrue);
+        }
       });
 
       test('bad_mode', () async {
