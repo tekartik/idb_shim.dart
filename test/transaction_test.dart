@@ -410,7 +410,7 @@ void defineTests(TestContext ctx) {
           expect(isTransactionInactiveError(e), isTrue);
         }
         await transaction.completed;
-      });
+      }, skip: "different behavior on 1.12 and 1.13");
 
       test('get_wait_get', () async {
         Transaction transaction =
