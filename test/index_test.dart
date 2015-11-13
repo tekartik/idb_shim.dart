@@ -326,12 +326,16 @@ void defineTests(TestContext ctx) {
 
         Index index = objectStore.index(testNameIndex);
         await objectStore.add(value1);
-        await objectStore.add(value1).catchError((DatabaseError e) {
-          //devPrint(e);
-          //print(e);
-        });
+        try {
+          await objectStore.add(value1);
+        } on DatabaseError catch (e) {
+        }
+        // indexed db throw the exception during completed...
+        try {
         await transaction.completed;
-//            // create new transaction;
+        } on DatabaseError catch (e) {
+        }
+        // create new transaction;
         _createTransaction();
         index = objectStore.index(testNameIndex);
         int count = await index.count(new KeyRange.only("test1"));

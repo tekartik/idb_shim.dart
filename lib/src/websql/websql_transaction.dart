@@ -3,6 +3,7 @@ part of idb_shim_websql;
 class _WebSqlTransaction extends Transaction {
   final IdbTransactionMeta _meta;
 
+  bool _inactive = false;
   SqlTransaction _sqlTransaction;
   Future<SqlTransaction> _lazySqlTransaction;
   Future<SqlTransaction> get sqlTransaction {
@@ -28,6 +29,9 @@ class _WebSqlTransaction extends Transaction {
   }
 
   Future<SqlResultSet> execute(String statement, [List args]) {
+    if (_inactive) {
+      throw new DatabaseError("TransactionInactiveError");
+    }
     if (args == null) {
       args = [];
     }
@@ -67,6 +71,8 @@ class _WebSqlTransaction extends Transaction {
       return sqlTransaction.then((tx) {
         return tx.completed.then((_) {
           return database;
+        }).whenComplete(() {
+          _inactive = true;
         });
       });
     }
