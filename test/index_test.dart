@@ -328,7 +328,7 @@ void defineTests(TestContext ctx) {
         await objectStore.add(value1);
         await objectStore.add(value1).catchError((DatabaseError e) {
           //devPrint(e);
-          print(e);
+          //print(e);
         });
         await transaction.completed;
 //            // create new transaction;

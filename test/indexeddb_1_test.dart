@@ -210,7 +210,10 @@ void defineTests(TestContext ctx) {
       }, skip: true);
 
       group('typed', () {
-        testTypes(testReadWriteTyped, idbFactory);
+        // crashes on Safari
+        if (!ctx.isIdbSafari) {
+          testTypes(testReadWriteTyped, idbFactory);
+        }
       });
     }
   });

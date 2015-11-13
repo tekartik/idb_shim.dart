@@ -10,7 +10,7 @@ main() {
 
 void defineTests(TestContext ctx) {
   IdbFactory idbFactory = ctx.factory;
-  solo_group('transaction', () {
+  group('transaction', () {
     // new
     Database db;
     String _dbName;
@@ -429,7 +429,6 @@ void defineTests(TestContext ctx) {
           }
         } on DatabaseError catch (e) {
           // Transaction inactive
-          print(e);
           expect(e.message.contains("TransactionInactiveError"), isTrue);
         }
         await transaction.completed;

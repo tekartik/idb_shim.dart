@@ -262,7 +262,11 @@ void defineTests(TestContext ctx) {
           expect(key, 1234);
         }).then((_) {
           return objectStore.add(value).then((key) {
-            expect(key, 1235);
+            if (ctx.isIdbSafari) {
+              expect(key, 1);
+            } else {
+              expect(key, 1235);
+            }
           });
         });
       });
@@ -294,7 +298,11 @@ void defineTests(TestContext ctx) {
           });
         }).then((_) {
           return objectStore.add(value).then((key) {
-            expect(key, 1235);
+            if (ctx.isIdbSafari) {
+              expect(key, 1);
+            } else {
+              expect(key, 1235);
+            }
           });
         });
       });

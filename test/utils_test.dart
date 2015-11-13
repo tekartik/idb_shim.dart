@@ -136,44 +136,48 @@ void defineTests(TestContext ctx) {
         await txn.completed;
       });
 
-      test('one_record', () async {
-        await _setupDeleteDb();
+      // safari does not support multiple stores
+      if (!ctx.isIdbSafari) {
+        test('one_record', () async {
+          await _setupDeleteDb();
 
-        void _initializeDatabase(VersionChangeEvent e) {
-          Database db = e.database;
-          //ObjectStore objectStore =
-          db.createObjectStore(testStoreName);
-          db.createObjectStore(testStoreName2);
-        }
+          void _initializeDatabase(VersionChangeEvent e) {
+            Database db = e.database;
+            //ObjectStore objectStore =
+            db.createObjectStore(testStoreName);
+            db.createObjectStore(testStoreName2);
+          }
 
-        db = await idbFactory.open(_srcDbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+          db = await idbFactory.open(_srcDbName,
+              version: 1, onUpgradeNeeded: _initializeDatabase);
 
-        // put one in src and one in dst that should get deleted
-        Transaction txn =
-            db.transaction([testStoreName, testStoreName2], idbModeReadWrite);
-        ObjectStore store = txn.objectStore(testStoreName);
-        await (store.put("value1", "key1"));
-        ObjectStore store2 = txn.objectStore(testStoreName2);
-        await (store2.put("value2", "key2"));
-        await txn.completed;
+          // put one in src and one in dst that should get deleted
+          Transaction txn =
+              db.transaction([testStoreName, testStoreName2], idbModeReadWrite);
+          ObjectStore store = txn.objectStore(testStoreName);
+          await (store.put("value1", "key1"));
+          ObjectStore store2 = txn.objectStore(testStoreName2);
+          await (store2.put("value2", "key2"));
+          await txn.completed;
 
-        await copyStore(db, testStoreName, db, testStoreName2);
+          await copyStore(db, testStoreName, db, testStoreName2);
 
-        txn = db.transaction([testStoreName, testStoreName2], idbModeReadOnly);
-        store = txn.objectStore(testStoreName);
-        expect(await store.getObject("key1"), "value1");
-        if (!ctx.isIdbIe) {
-          expect(await store.count(), 1);
-        }
-        store2 = txn.objectStore(testStoreName2);
-        expect(await store2.getObject("key1"), "value1");
+          txn =
+              db.transaction([testStoreName, testStoreName2], idbModeReadOnly);
+          store = txn.objectStore(testStoreName);
+          expect(await store.getObject("key1"), "value1");
+          if (!ctx.isIdbIe) {
+            expect(await store.count(), 1);
+          }
+          store2 = txn.objectStore(testStoreName2);
+          expect(await store2.getObject("key1"), "value1");
 
-        if (!ctx.isIdbIe) {
-          expect(await store2.count(), 1);
-        }
-        await txn.completed;
-      });
+          if (!ctx.isIdbIe) {
+            expect(await store2.count(), 1);
+          }
+          await txn.completed;
+        });
+      }
     });
 
     group('copyDatabase', () {
@@ -188,44 +192,47 @@ void defineTests(TestContext ctx) {
         expect(dstDb.version, 1);
       });
 
-      test('two_store_two_records', () async {
-        await _setupDeleteDb();
+      // safari does not support multiple stores
+      if (!ctx.isIdbSafari) {
+        test('two_store_two_records', () async {
+          await _setupDeleteDb();
 
-        void _initializeDatabase(VersionChangeEvent e) {
-          Database db = e.database;
-          //ObjectStore objectStore =
-          db.createObjectStore(testStoreName);
-          db.createObjectStore(testStoreName2);
-        }
+          void _initializeDatabase(VersionChangeEvent e) {
+            Database db = e.database;
+            //ObjectStore objectStore =
+            db.createObjectStore(testStoreName);
+            db.createObjectStore(testStoreName2);
+          }
 
-        db = await idbFactory.open(_srcDbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+          db = await idbFactory.open(_srcDbName,
+              version: 1, onUpgradeNeeded: _initializeDatabase);
 
-        // put one in src and one in dst that should get deleted
-        Transaction txn = db.transaction(testStoreName, idbModeReadWrite);
-        ObjectStore store = txn.objectStore(testStoreName);
-        await (store.put("value1", "key1"));
-        await (store.put("value2", "key2"));
-        await txn.completed;
+          // put one in src and one in dst that should get deleted
+          Transaction txn = db.transaction(testStoreName, idbModeReadWrite);
+          ObjectStore store = txn.objectStore(testStoreName);
+          await (store.put("value1", "key1"));
+          await (store.put("value2", "key2"));
+          await txn.completed;
 
-        dstDb = await copyDatabase(db, idbFactory, _dstDbName);
+          dstDb = await copyDatabase(db, idbFactory, _dstDbName);
 
-        txn =
-            dstDb.transaction([testStoreName, testStoreName2], idbModeReadOnly);
-        store = txn.objectStore(testStoreName);
-        expect(await store.getObject("key1"), "value1");
-        expect(await store.getObject("key2"), "value2");
+          txn = dstDb.transaction(
+              [testStoreName, testStoreName2], idbModeReadOnly);
+          store = txn.objectStore(testStoreName);
+          expect(await store.getObject("key1"), "value1");
+          expect(await store.getObject("key2"), "value2");
 
-        if (!ctx.isIdbIe) {
-          expect(await store.count(), 2);
-        }
-        ObjectStore store2 = txn.objectStore(testStoreName2);
+          if (!ctx.isIdbIe) {
+            expect(await store.count(), 2);
+          }
+          ObjectStore store2 = txn.objectStore(testStoreName2);
 
-        if (!ctx.isIdbIe) {
-          expect(await store2.count(), 0);
-        }
-        await txn.completed;
-      });
+          if (!ctx.isIdbIe) {
+            expect(await store2.count(), 0);
+          }
+          await txn.completed;
+        });
+      }
     });
   });
 }
