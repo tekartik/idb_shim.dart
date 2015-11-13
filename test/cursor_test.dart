@@ -67,6 +67,10 @@ void defineTests(TestContext ctx) {
     }
 
     group('auto', () {
+      _createTransaction() {
+        transaction = db.transaction(testStoreName, idbModeReadWrite);
+        objectStore = transaction.objectStore(testStoreName);
+      }
       setUp(() {
         return idbFactory.deleteDatabase(testDbName).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
@@ -79,8 +83,6 @@ void defineTests(TestContext ctx) {
                   version: 1, onUpgradeNeeded: _initializeDatabase)
               .then((Database database) {
             db = database;
-            transaction = db.transaction(testStoreName, idbModeReadWrite);
-            objectStore = transaction.objectStore(testStoreName);
             // must return something not null...
             return db;
           });
@@ -95,6 +97,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('empty cursor', () {
+        _createTransaction();
         Stream<CursorWithValue> stream =
             objectStore.openCursor(autoAdvance: true);
         int count = 0;
@@ -106,6 +109,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('one item cursor', () {
+        _createTransaction();
         return add("test1").then((_) {
           Stream<CursorWithValue> stream =
               objectStore.openCursor(autoAdvance: true);
@@ -124,6 +128,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('openCursor_read_2_row', () async {
+        _createTransaction();
         await fill3SampleRows();
 
         int count = 0;
@@ -140,6 +145,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('openCursor no auto advance timeout', () {
+        _createTransaction();
         return fill3SampleRows().then((_) {
           return objectStore
               .openCursor(autoAdvance: false)
@@ -150,6 +156,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('openCursor null auto advance timeout', () {
+        _createTransaction();
         return fill3SampleRows().then((_) {
           return objectStore
               .openCursor(autoAdvance: null)
@@ -159,6 +166,7 @@ void defineTests(TestContext ctx) {
         });
       });
       test('3 item cursor no auto advance', () {
+        _createTransaction();
         return fill3SampleRows().then((_) {
           return manualCursorToList(objectStore.openCursor(autoAdvance: false))
               .then((list) {
@@ -172,6 +180,7 @@ void defineTests(TestContext ctx) {
         });
       });
       test('3 item cursor', () {
+        _createTransaction();
         return fill3SampleRows().then((_) {
           return cursorToList(objectStore.openCursor(autoAdvance: true))
               .then((list) {

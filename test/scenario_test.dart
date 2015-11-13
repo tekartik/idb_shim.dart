@@ -52,7 +52,7 @@ void defineTests(TestContext ctx) {
         await objectStore.getObject(key);
 
         // wait crashes on ie
-        if (!ctx.isIdbIe) {
+        if (!ctx.isIdbNoLazy) {
           await new Future.value();
         }
         await objectStore.delete(key);

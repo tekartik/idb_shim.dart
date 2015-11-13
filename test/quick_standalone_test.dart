@@ -37,7 +37,6 @@ void defineTests(TestContext ctx) {
             .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
             .then((Database database) {
           db = database;
-          _createTransaction();
         });
       });
     });
@@ -53,6 +52,7 @@ void defineTests(TestContext ctx) {
     });
 
     test('add/get map', () {
+      _createTransaction();
       Map value = {NAME_FIELD: "test1"};
       Index index = objectStore.index(NAME_INDEX);
       return objectStore.add(value).then((key) {

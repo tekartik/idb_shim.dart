@@ -123,7 +123,7 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, autoIncrement: true);
           db.createObjectStore(testStoreName2, autoIncrement: true);
         }
-        db = await idbFactory.open(testDbName,
+        db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
 
         Transaction transaction = db.transactionList(
@@ -137,7 +137,7 @@ void defineTests(TestContext ctx) {
           Database db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
-        db = await idbFactory.open(testDbName,
+        db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadOnly);
@@ -163,7 +163,7 @@ void defineTests(TestContext ctx) {
           Database db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
-        db = await idbFactory.open(testDbName,
+        db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
 
         try {
@@ -182,7 +182,7 @@ void defineTests(TestContext ctx) {
           Database db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
-        db = await idbFactory.open(testDbName,
+        db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
 
         try {
@@ -201,7 +201,7 @@ void defineTests(TestContext ctx) {
           Database db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
-        db = await idbFactory.open(testDbName,
+        db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
 
         Transaction transaction =
@@ -356,7 +356,21 @@ void defineTests(TestContext ctx) {
         await transaction.completed;
       });
 
-      skip_test('transaction_async_add', () async {
+      test('get_after_completed', () async {
+        Transaction transaction =
+            db.transaction(testStoreName, idbModeReadOnly);
+        ObjectStore objectStore = transaction.objectStore(testStoreName);
+        await objectStore.getObject(0);
+        await transaction.completed;
+        try {
+          await objectStore.getObject(0);
+        } on DatabaseError catch (e) {
+          // Transaction inactive
+          expect(isTransactionInactiveError(e), isTrue);
+        }
+      });
+
+      test('transaction_async_get', () async {
         Transaction transaction;
         ObjectStore objectStore;
         _createTransactionSync() {
@@ -367,23 +381,24 @@ void defineTests(TestContext ctx) {
           await new Future.delayed(new Duration(milliseconds: 1));
           _createTransactionSync();
         }
+
         // Sync ok
         _createTransactionSync();
-        await objectStore.add("value1");
+        await objectStore.getObject(0);
         await transaction.completed;
 
         // Async not ok on Safari
         await _createTransaction();
         try {
-          await objectStore.add("value1");
-          if (ctx.isIdbSafari || ctx.isIdbSembast) {
+          await objectStore.getObject(0);
+          if (ctx.isIdbNoLazyOnFirstAction) {
             fail('should fail');
           }
         } on DatabaseError catch (e) {
           // Transaction inactive
-          print(e);
+          expect(isTransactionInactiveError(e), isTrue);
         }
-        return transaction.completed;
+        await transaction.completed;
       });
 
       test('get_wait_get', () async {
@@ -393,10 +408,19 @@ void defineTests(TestContext ctx) {
         await objectStore.getObject(0);
 
         // this cause the transaction to terminate on ie
-        if (!ctx.isIdbIe) {
-          await new Future.value();
+        // and so on sembast
+        await new Future.value();
+
+        try {
+          await objectStore.getObject(0);
+          if (ctx.isIdbSembast || ctx.isIdbIe) {
+            fail('should fail');
+          }
+        } on DatabaseError catch (e) {
+          // Transaction inactive
+          print(e);
+          expect(e.message.contains("TransactionInactiveError"), isTrue);
         }
-        await objectStore.getObject(0);
         await transaction.completed;
       });
 
@@ -406,7 +430,7 @@ void defineTests(TestContext ctx) {
         ObjectStore objectStore = transaction.objectStore(testStoreName);
         await objectStore.getObject(0);
         // this cause the transaction to terminate on ie
-        if (!ctx.isIdbIe) {
+        if (!ctx.isIdbNoLazy) {
           await new Future.value();
           await new Future.value();
         }
@@ -420,7 +444,7 @@ void defineTests(TestContext ctx) {
         ObjectStore objectStore = transaction.objectStore(testStoreName);
         await objectStore.put({});
         // this cause the transaction to terminate on ie
-        if (!ctx.isIdbIe) {
+        if (!ctx.isIdbNoLazy) {
           await new Future.value();
           await new Future.value();
         }

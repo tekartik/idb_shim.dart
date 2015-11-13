@@ -112,11 +112,11 @@ void defineTests(TestContext ctx) {
         }
         db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
-        _createTransaction();
       }
 
       test('properties', () async {
         await _setUp();
+        _createTransaction();
         expect(objectStore.keyPath, null);
         expect(objectStore.name, testStoreName);
         expect(objectStore.indexNames, []);
@@ -131,6 +131,7 @@ void defineTests(TestContext ctx) {
 
       test('add/get map', () async {
         await _setUp();
+        _createTransaction();
         Map value = {};
         return objectStore.add(value, 123).then((key) {
           expect(key, 123);
@@ -143,6 +144,7 @@ void defineTests(TestContext ctx) {
       // not working in js firefox
       test('add_twice_same_key', () async {
         await _setUp();
+        _createTransaction();
         Map value = {};
         return objectStore.add(value, 123).then((key) {
           expect(key, 123);
@@ -160,6 +162,7 @@ void defineTests(TestContext ctx) {
 
       test('add/get string', () async {
         await _setUp();
+        _createTransaction();
         String value = "4567";
         return objectStore.add(value, 123).then((key) {
           expect(key, 123);
@@ -171,6 +174,7 @@ void defineTests(TestContext ctx) {
 
       test('getObject_null', () async {
         await _setUp();
+        _createTransaction();
         try {
           await objectStore.getObject(null);
           fail("error");
@@ -181,6 +185,7 @@ void defineTests(TestContext ctx) {
 
       test('getObject_boolean', () async {
         await _setUp();
+        _createTransaction();
         try {
           await objectStore.getObject(true);
           fail("error");
@@ -191,6 +196,7 @@ void defineTests(TestContext ctx) {
 
       test('put/get_key_double', () async {
         await _setUp();
+        _createTransaction();
         String value = "test";
         expect(await objectStore.getObject(1.2), isNull);
         double key = 0.001;
@@ -210,13 +216,13 @@ void defineTests(TestContext ctx) {
         }
         db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
-        _createTransaction();
       }
 
       tearDown(_tearDown);
 
       test('properties', () async {
         await _setUp();
+        _createTransaction();
         expect(objectStore.keyPath, null);
         if (ctx.isIdbIe) {
           expect(objectStore.autoIncrement, isNull);
@@ -228,6 +234,7 @@ void defineTests(TestContext ctx) {
       // Good first test
       test('add', () async {
         await _setUp();
+        _createTransaction();
         Map value = {};
         return objectStore.add(value).then((key) {
           expect(key, 1);
@@ -236,6 +243,7 @@ void defineTests(TestContext ctx) {
 
       test('add2', () async {
         await _setUp();
+        _createTransaction();
         Map value = {};
         return objectStore.add(value).then((key) {
           expect(key, 1);
@@ -248,6 +256,7 @@ void defineTests(TestContext ctx) {
 
       test('add with key and next', () async {
         await _setUp();
+        _createTransaction();
         Map value = {};
         return objectStore.add(value, 1234).then((key) {
           expect(key, 1234);
@@ -261,6 +270,7 @@ void defineTests(TestContext ctx) {
       // limitation, this crashes everywhere
       test('add_with_same_key', () async {
         await _setUp();
+        _createTransaction();
         Map value = {};
         int key = await objectStore.add(value, 1234);
         expect(key, 1234);
@@ -274,6 +284,7 @@ void defineTests(TestContext ctx) {
 
       test('add with key then back', () async {
         await _setUp();
+        _createTransaction();
         Map value = {};
         return objectStore.add(value, 1234).then((key) {
           expect(key, 1234);
@@ -292,6 +303,7 @@ void defineTests(TestContext ctx) {
       // websql make it 3 while idb and sembast make it one...
       test('add_with_text_number_key_and_next', () async {
         await _setUp();
+        _createTransaction();
         Map value = {};
         String key2 = await objectStore.add(value, "2");
         expect(key2, "2");
@@ -303,6 +315,7 @@ void defineTests(TestContext ctx) {
       // Sql does not support text and auto increment
       test('add_with_text_key_and_next', () async {
         await _setUp();
+        _createTransaction();
         Map value1 = {'test': 1};
         Map value2 = {'test': 2};
         String keyTest = await objectStore.add(value1, "test");
@@ -317,6 +330,7 @@ void defineTests(TestContext ctx) {
 
       test('get', () async {
         await _setUp();
+        _createTransaction();
         Map value = {};
         return objectStore.add(value).then((key) {
           return objectStore.getObject(key).then((Map value) {
@@ -327,6 +341,7 @@ void defineTests(TestContext ctx) {
 
       test('simple get', () async {
         await _setUp();
+        _createTransaction();
         Map value = {'test': 'test_value'};
         return objectStore.add(value).then((key) {
           return objectStore.getObject(key).then((Map valueRead) {
@@ -337,6 +352,7 @@ void defineTests(TestContext ctx) {
 
       test('get dummy', () async {
         await _setUp();
+        _createTransaction();
         Map value = {};
         return objectStore.add(value).then((key) {
           return objectStore.getObject(key + 1).then((value) {
@@ -347,6 +363,7 @@ void defineTests(TestContext ctx) {
 
       test('get none', () async {
         await _setUp();
+        _createTransaction();
         //Map value = {};
         return objectStore.getObject(1234).then((value) {
           expect(value, null);
@@ -355,6 +372,7 @@ void defineTests(TestContext ctx) {
 
       test('count_one', () async {
         await _setUp();
+        _createTransaction();
         Map value = {};
         await objectStore.add(value);
 
@@ -366,6 +384,7 @@ void defineTests(TestContext ctx) {
 
       test('count by key', () async {
         await _setUp();
+        _createTransaction();
         Map value = {};
         return objectStore.add(value).then((key1) {
           return objectStore.add(value).then((key2) {
@@ -381,6 +400,7 @@ void defineTests(TestContext ctx) {
 
       test('count by range', () async {
         await _setUp();
+        _createTransaction();
         Map value = {};
         return objectStore.add(value).then((key1) {
           return objectStore.add(value).then((key2) {
@@ -402,6 +422,7 @@ void defineTests(TestContext ctx) {
         // count() crashes on ie
         if (!ctx.isIdbIe) {
           await _setUp();
+          _createTransaction();
           return objectStore.count().then((int count) {
             expect(count, 0);
           });
@@ -410,6 +431,7 @@ void defineTests(TestContext ctx) {
 
       test('delete', () async {
         await _setUp();
+        _createTransaction();
         Map value = {};
         return objectStore.add(value).then((key) {
           return objectStore.delete(key).then((_) {
@@ -422,6 +444,7 @@ void defineTests(TestContext ctx) {
 
       test('delete empty', () async {
         await _setUp();
+        _createTransaction();
         return objectStore.getObject(1234).then((value) {
           expect(value, null);
         });
@@ -429,6 +452,7 @@ void defineTests(TestContext ctx) {
 
       test('delete dummy', () async {
         await _setUp();
+        _createTransaction();
         Map value = {'test': 'test_value'};
         return objectStore.add(value).then((key) {
           return objectStore.delete(key + 1).then((delete_result) {
@@ -442,6 +466,7 @@ void defineTests(TestContext ctx) {
 
       test('simple update', () async {
         await _setUp();
+        _createTransaction();
         Map value = {'test': 'test_value'};
         return objectStore.add(value).then((key) {
           return objectStore.getObject(key).then((Map valueRead) {
@@ -460,6 +485,7 @@ void defineTests(TestContext ctx) {
 
       test('update empty', () async {
         await _setUp();
+        _createTransaction();
         Map value = {};
         return objectStore.put(value, 1234).then((value) {
           expect(value, 1234);
@@ -468,6 +494,7 @@ void defineTests(TestContext ctx) {
 
       test('update dummy', () async {
         await _setUp();
+        _createTransaction();
         Map value = {'test': 'test_value'};
         return objectStore.add(value).then((key) {
           Map newValue = cloneValue(value);
@@ -483,6 +510,7 @@ void defineTests(TestContext ctx) {
 
       test('clear', () async {
         await _setUp();
+        _createTransaction();
         Map value = {};
         return objectStore.add(value).then((key) {
           return objectStore.clear().then((clearResult) {
@@ -497,6 +525,7 @@ void defineTests(TestContext ctx) {
 
       test('clear empty', () async {
         await _setUp();
+        _createTransaction();
         return objectStore.clear().then((clearResult) {
           expect(clearResult, null);
         });
@@ -504,6 +533,10 @@ void defineTests(TestContext ctx) {
     });
 
     group('readonly', () {
+      _createTransaction() {
+        transaction = db.transaction(testStoreName, idbModeReadOnly);
+        objectStore = transaction.objectStore(testStoreName);
+      }
       _setUp() async {
         await _setupDeleteDb();
 
@@ -513,14 +546,13 @@ void defineTests(TestContext ctx) {
         }
         db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
-        transaction = db.transaction(testStoreName, idbModeReadOnly);
-        objectStore = transaction.objectStore(testStoreName);
       }
 
       tearDown(_tearDown);
 
       test('add', () async {
         await _setUp();
+        _createTransaction();
         return objectStore.add({}, 1).catchError((e) {
           // There must be an error!
           return e;
@@ -531,6 +563,7 @@ void defineTests(TestContext ctx) {
 
       test('put', () async {
         await _setUp();
+        _createTransaction();
         return objectStore.put({}, 1).catchError((e) {
           // There must be an error!
           return e;
@@ -541,6 +574,7 @@ void defineTests(TestContext ctx) {
 
       test('clear', () async {
         await _setUp();
+        _createTransaction();
         return objectStore.clear().catchError((e) {
           // There must be an error!
           return e;
@@ -551,6 +585,7 @@ void defineTests(TestContext ctx) {
 
       test('delete', () async {
         await _setUp();
+        _createTransaction();
         return objectStore.delete(1).catchError((e) {
           // There must be an error!
           return e;
@@ -573,13 +608,13 @@ void defineTests(TestContext ctx) {
         }
         db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
-        _createTransaction();
       }
 
       tearDown(_tearDown);
 
       test('properties', () async {
         await _setUp();
+        _createTransaction();
         expect(objectStore.keyPath, keyPath);
 
         if (ctx.isIdbIe) {
@@ -591,6 +626,7 @@ void defineTests(TestContext ctx) {
 
       test('simple get', () async {
         await _setUp();
+        _createTransaction();
         Map value = {'test': 'test_value'};
         return objectStore.add(value).then((key) {
           expect(key, 1);
@@ -604,6 +640,7 @@ void defineTests(TestContext ctx) {
 
       test('simple add with keyPath and next', () async {
         await _setUp();
+        _createTransaction();
         Map value = {'test': 'test_value', keyPath: 123};
         return objectStore.add(value).then((key) {
           expect(key, 123);
@@ -613,13 +650,19 @@ void defineTests(TestContext ctx) {
         }).then((_) {
           Map value = {'test': 'test_value',};
           return objectStore.add(value).then((key) {
-            expect(key, 124);
+            // On Safari this is 1
+            if (ctx.isIdbSafari) {
+              expect(key, 1);
+            } else {
+              expect(key, 124);
+            }
           });
         });
       });
 
       test('put with keyPath', () async {
         await _setUp();
+        _createTransaction();
         Map value = {'test': 'test_value', keyPath: 123};
         return objectStore.put(value).then((key) {
           expect(key, 123);
@@ -631,6 +674,7 @@ void defineTests(TestContext ctx) {
 
       test('add key and keyPath', () async {
         await _setUp();
+        _createTransaction();
         Map value = {'test': 'test_value', keyPath: 123};
         return objectStore.add(value, 123).then((_) {
           fail("should fail");
@@ -644,6 +688,7 @@ void defineTests(TestContext ctx) {
 
       test('put key and keyPath', () async {
         await _setUp();
+        _createTransaction();
         Map value = {'test': 'test_value', keyPath: 123};
         return objectStore.put(value, 123).then((_) {
           fail("should fail");
@@ -666,13 +711,13 @@ void defineTests(TestContext ctx) {
         }
         db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
-        _createTransaction();
       }
 
       tearDown(_tearDown);
 
       test('properties', () async {
         await _setUp();
+        _createTransaction();
         expect(objectStore.keyPath, keyPath);
         if (ctx.isIdbIe) {
           expect(objectStore.autoIncrement, isNull);
@@ -683,6 +728,7 @@ void defineTests(TestContext ctx) {
 
       test('simple add_get', () async {
         await _setUp();
+        _createTransaction();
         Map value = {keyPath: 'test_value'};
         return objectStore.add(value).then((key) {
           expect(key, 'test_value');
@@ -696,6 +742,7 @@ void defineTests(TestContext ctx) {
 
       test('simple put_get', () async {
         await _setUp();
+        _createTransaction();
         Map value = {keyPath: 'test_value'};
         return objectStore.put(value).then((key) {
           expect(key, 'test_value');
@@ -709,6 +756,7 @@ void defineTests(TestContext ctx) {
 
       test('add_null', () async {
         await _setUp();
+        _createTransaction();
         Map value = {"dummy": 'test_value'};
         return objectStore.add(value).catchError((DatabaseError e) {
           // There must be an error!
@@ -724,6 +772,7 @@ void defineTests(TestContext ctx) {
 
       test('put_null', () async {
         await _setUp();
+        _createTransaction();
         Map value = {"dummy": 'test_value'};
         return objectStore.put(value).catchError((DatabaseError e) {
           // There must be an error!
@@ -738,6 +787,7 @@ void defineTests(TestContext ctx) {
 
       test('add_twice', () async {
         await _setUp();
+        _createTransaction();
         Map value = {keyPath: 'test_value'};
         return objectStore.add(value).then((key) {
           expect(key, 'test_value');
@@ -758,6 +808,7 @@ void defineTests(TestContext ctx) {
       // put twice should be fine
       test('put_twice', () async {
         await _setUp();
+        _createTransaction();
         Map value = {keyPath: 'test_value'};
         String key = await objectStore.put(value);
         expect(key, 'test_value');
@@ -782,22 +833,22 @@ void defineTests(TestContext ctx) {
         return setUpSimpleStore(idbFactory, meta: storeMeta, dbName: testDbName)
             .then((Database db) {
           db.close();
-        }).then((_) {
-          return idbFactory.open(testDbName).then((Database db) {
-            Transaction transaction =
-                db.transaction(storeMeta.name, idbModeReadOnly);
-            ObjectStore objectStore = transaction.objectStore(storeMeta.name);
-            IdbObjectStoreMeta readMeta =
-                new IdbObjectStoreMeta.fromObjectStore(objectStore);
+        }).then((_) async {
+          Database db = await idbFactory.open(testDbName);
+          Transaction transaction =
+              db.transaction(storeMeta.name, idbModeReadOnly);
+          ObjectStore objectStore = transaction.objectStore(storeMeta.name);
+          IdbObjectStoreMeta readMeta =
+              new IdbObjectStoreMeta.fromObjectStore(objectStore);
 
-            // ie idb does not have autoIncrement
-            if (ctx.isIdbIe) {
-              readMeta = new IdbObjectStoreMeta(readMeta.name, readMeta.keyPath,
-                  storeMeta.autoIncrement, readMeta.indecies);
-            }
-            expect(readMeta, storeMeta);
-            db.close();
-          });
+          // ie idb does not have autoIncrement
+          if (ctx.isIdbIe) {
+            readMeta = new IdbObjectStoreMeta(readMeta.name, readMeta.keyPath,
+                storeMeta.autoIncrement, readMeta.indecies);
+          }
+          expect(readMeta, storeMeta);
+          await transaction.completed;
+          db.close();
         });
       }
 
@@ -819,13 +870,13 @@ void defineTests(TestContext ctx) {
       _setUp() async {
         await _setupDeleteDb();
         db = await setUpSimpleStore(idbFactory, dbName: _dbName);
-        _createTransaction();
       }
 
       tearDown(_tearDown);
 
       test('delete', () async {
         await _setUp();
+        _createTransaction();
         return objectStore.add("test").then((key) {
           return objectStore.delete(key).then((result) {
             expect(result, isNull);

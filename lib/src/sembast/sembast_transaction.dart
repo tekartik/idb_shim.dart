@@ -5,13 +5,15 @@ bool _debugTransaction = false;
 
 // _lazyMode is what indexeddb on chrome supports
 // supporting wait between calls
-bool _transactionLazyMode = true;
+// default is false to matche ie/safari strict behavior
+bool _transactionLazyMode = false;
 
 class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
   _SdbDatabase get database => super.database as _SdbDatabase;
   sdb.Database get sdbDatabase => database.db;
 
   int index = 0;
+  bool _inactive = false;
 
   _execute(i) {
     if (_debugTransaction) {
@@ -61,6 +63,7 @@ class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
         if (_debugTransaction) {
           print('transaction done');
         }
+        _inactive = true;
       }
 
       if (_transactionLazyMode) {
@@ -132,6 +135,12 @@ class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
   }
 
   _enqueue(action()) {
+    if (_debugTransaction) {
+      print('enqueing');
+    }
+    if (_inactive) {
+      throw new DatabaseError("TransactionInactiveError");
+    }
 // not lazy
     Completer completer = new Completer.sync();
     completers.add(completer);
@@ -151,10 +160,20 @@ class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
   List<Future> futures = [];
 
   final IdbTransactionMeta meta;
-  _SdbTransaction(_SdbDatabase database, this.meta) : super(database);
+  _SdbTransaction(_SdbDatabase database, this.meta) : super(database) {
+    // Trigger a timer to close the transaction if nothing happens
+    if (!_transactionLazyMode) {
+      // simply call completed
+      completed;
+    }
+  }
 
   Future<Database> get _completed {
     if (lazyExecution == null) {
+      if (_debugTransaction) {
+        print('no lazy executor...');
+      }
+      _inactive = true;
       return new Future.value(database);
     }
     return lazyExecution.then((_) {
@@ -172,9 +191,18 @@ class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
 
   @override
   Future<Database> get completed {
+    Future<Database> _completed() => this._completed.then((Database db) {
+          if (_debugTransaction) {
+            print('completed');
+          }
+          _inactive = true;
+          return db;
+        });
+
     // postpone to next 2 cycles to allow enqueing
     // actions after completed has been called
-    return new Future.value().then((_) => _completed);
+    //if (_transactionLazyMode) {
+    return new Future.value().then((_) => _completed());
   }
 
 //    sdbTransaction == null ? new Future.value(database) : sdbTransaction.completed.then((_) {

@@ -68,6 +68,9 @@ class TestContext {
   bool isIdbIe = false;
   bool isIdbSafari = false;
   bool isIdbSembast = false;
+
+  bool get isIdbNoLazy => isIdbSembast || isIdbIe;
+  bool get isIdbNoLazyOnFirstAction => isIdbSembast || isIdbSafari;
 }
 
 class SembastTestContext extends TestContext {
@@ -124,6 +127,16 @@ bool isTransactionReadOnlyError(e) {
       return true;
     }
     if (message.contains('read_only')) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool isTransactionInactiveError(e) {
+  if (e is DatabaseError) {
+    String message = e.toString().toLowerCase();
+    if (message.contains('inactive')) {
       return true;
     }
   }

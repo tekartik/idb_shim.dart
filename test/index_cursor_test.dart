@@ -63,6 +63,11 @@ void defineTests(TestContext ctx) {
     }
 
     group('with_null_key', () {
+      _createTransaction() {
+        transaction = db.transaction(testStoreName, idbModeReadWrite);
+        objectStore = transaction.objectStore(testStoreName);
+        index = objectStore.index(testNameIndex);
+      }
       Future _openDb() async {
         String _dbName = ctx.dbName;
         await idbFactory.deleteDatabase(_dbName);
@@ -74,9 +79,6 @@ void defineTests(TestContext ctx) {
         }
         db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
-        transaction = db.transaction(testStoreName, idbModeReadWrite);
-        objectStore = transaction.objectStore(testStoreName);
-        index = objectStore.index(testNameIndex);
       }
 
       // Don't make this function async, crashes on ie
@@ -99,6 +101,7 @@ void defineTests(TestContext ctx) {
 
       test('one_record', () async {
         await _openDb();
+        _createTransaction();
         await objectStore.put({"dummy": 1});
 
         expect(await getIndexRecords(), []);
@@ -107,6 +110,7 @@ void defineTests(TestContext ctx) {
 
       test('two_record', () async {
         await _openDb();
+        _createTransaction();
         await objectStore.put({"dummy": 1});
         await objectStore.put({"dummy": 2, testNameField: "ok"});
         // must be empy as the key is not specified
@@ -118,7 +122,14 @@ void defineTests(TestContext ctx) {
 
       tearDown(_tearDown);
     });
+
     group('auto', () {
+      _createTransaction() {
+        transaction = db.transaction(testStoreName, idbModeReadWrite);
+        objectStore = transaction.objectStore(testStoreName);
+        index = objectStore.index(testNameIndex);
+      }
+
       setUp(() {
         return idbFactory.deleteDatabase(testDbName).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
@@ -132,9 +143,6 @@ void defineTests(TestContext ctx) {
                   version: 1, onUpgradeNeeded: _initializeDatabase)
               .then((Database database) {
             db = database;
-            transaction = db.transaction(testStoreName, idbModeReadWrite);
-            objectStore = transaction.objectStore(testStoreName);
-            index = objectStore.index(testNameIndex);
             return db;
           });
         });
@@ -143,6 +151,7 @@ void defineTests(TestContext ctx) {
       tearDown(_tearDown);
 
       test('empty key cursor', () {
+        _createTransaction();
         Stream<Cursor> stream = index.openKeyCursor(autoAdvance: true);
         int count = 0;
         Completer completer = new Completer();
@@ -157,6 +166,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('empty key cursor by key', () {
+        _createTransaction();
         Stream<Cursor> stream = index.openKeyCursor(key: 1, autoAdvance: true);
         int count = 0;
         Completer completer = new Completer();
@@ -171,6 +181,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('empty cursor', () {
+        _createTransaction();
         Stream<CursorWithValue> stream = index.openCursor(autoAdvance: true);
         int count = 0;
         Completer completer = new Completer();
@@ -185,6 +196,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('empty cursor by key', () {
+        _createTransaction();
         Stream<CursorWithValue> stream =
             index.openCursor(key: 1, autoAdvance: true);
         int count = 0;
@@ -200,6 +212,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('one item key cursor', () {
+        _createTransaction();
         return add("test1").then((_) {
           Stream<Cursor> stream = index.openKeyCursor(autoAdvance: true);
           int count = 0;
@@ -219,6 +232,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('one item cursor', () {
+        _createTransaction();
         return add("test1").then((_) {
           Stream<CursorWithValue> stream = index.openCursor(autoAdvance: true);
           int count = 0;
@@ -237,6 +251,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('index get 1', () {
+        _createTransaction();
         return add("test1").then((key) {
           return index.get("test1").then((value) {
             expect(value[testNameField], "test1");
@@ -245,6 +260,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('cursor non-auto', () {
+        _createTransaction();
         return add("test1").then((key) {
           int count = 0;
           // non auto to control advance
@@ -263,6 +279,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('cursor none auto delete 1', () {
+        _createTransaction();
         return add("test1").then((key) {
           // non auto to control advance
           return index
@@ -285,6 +302,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('cursor none auto update 1', () {
+        _createTransaction();
         return add("test1").then((key) {
           Map map;
           // non auto to control advance
@@ -309,6 +327,7 @@ void defineTests(TestContext ctx) {
         });
       });
       test('3 item cursor', () {
+        _createTransaction();
         return fill3SampleRows().then((_) {
           return cursorToList(index.openCursor(autoAdvance: true)).then((list) {
             expect(list[0].name, equals('test1'));
@@ -345,6 +364,13 @@ void defineTests(TestContext ctx) {
     group('multiple', () {
       Index nameIndex;
       Index valueIndex;
+
+      _createTransaction() {
+        transaction = db.transaction(testStoreName, idbModeReadWrite);
+        objectStore = transaction.objectStore(testStoreName);
+        nameIndex = objectStore.index(testNameIndex);
+        valueIndex = objectStore.index(testValueIndex);
+      }
       setUp(() {
         return idbFactory.deleteDatabase(testDbName).then((_) {
           void _initializeDatabase(VersionChangeEvent e) {
@@ -359,10 +385,6 @@ void defineTests(TestContext ctx) {
                   version: 1, onUpgradeNeeded: _initializeDatabase)
               .then((Database database) {
             db = database;
-            transaction = db.transaction(testStoreName, idbModeReadWrite);
-            objectStore = transaction.objectStore(testStoreName);
-            nameIndex = objectStore.index(testNameIndex);
-            valueIndex = objectStore.index(testValueIndex);
             return db;
           });
         });
@@ -371,6 +393,7 @@ void defineTests(TestContext ctx) {
       tearDown(_tearDown);
 
       test('add and read', () {
+        _createTransaction();
         Future<List<int>> getKeys(Stream<Cursor> stream) {
           List<int> keys = [];
           return stream.listen((Cursor cursor) {
