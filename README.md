@@ -96,3 +96,10 @@ IE 11, Edge 12 has the following limitations:
 * it seems ie close the transaction 'sooner' then chrome/firefox, i.e. calling an sync function that wrap an idb calls
   makes the transaction terminate
 * IDBIndex.multiEntry not supported on ie
+
+### Safari limitation
+
+Safari has the following limitations (as of v 9.0)
+
+* no support for transactions on multiple stores
+* very short transaction life cycle (no await on sdk 1.12)
