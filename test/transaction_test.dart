@@ -435,6 +435,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('get_delay_get', () async {
+        // this hangs on ie now
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadOnly);
         ObjectStore objectStore = transaction.objectStore(testStoreName);
@@ -449,10 +450,13 @@ void defineTests(TestContext ctx) {
           //} on DatabaseError catch (e) {
         } catch (e) {
           // Transaction inactive
-          print(e);
           expect(e.message.contains("TransactionInactiveError"), isTrue);
         }
-        await transaction.completed;
+
+        // this hangs on ie
+        if (!ctx.isIdbIe) {
+          await transaction.completed;
+        }
       });
 
       test('get_wait_wait_get', () async {
