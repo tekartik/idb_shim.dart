@@ -1,5 +1,8 @@
 part of idb_shim_websql;
 
+// set to true to debug transaction life cycle
+bool _debugTransaction = false;
+
 class _WebSqlTransaction extends Transaction {
   final IdbTransactionMeta _meta;
 
@@ -8,8 +11,20 @@ class _WebSqlTransaction extends Transaction {
   Future<SqlTransaction> _lazySqlTransaction;
   Future<SqlTransaction> get sqlTransaction {
     if (_lazySqlTransaction == null) {
+      if (_debugTransaction) {
+        print('transaction');
+      }
       _lazySqlTransaction = idbWqlDatabase.sqlDb.transaction().then((tx) {
         _sqlTransaction = tx;
+
+        // When inactive
+        _sqlTransaction.completed.then((_) {
+          if (_debugTransaction) {
+            print('completed');
+          }
+          _inactive = true;
+        });
+
         return tx;
       });
     }
@@ -19,7 +34,7 @@ class _WebSqlTransaction extends Transaction {
   _WebSqlDatabase get idbWqlDatabase => (database as _WebSqlDatabase);
 
   _WebSqlTransaction(Database database, this._sqlTransaction, this._meta)
-      : super(database);
+      : super(database) {}
 
   @override
   _WebSqlObjectStore objectStore(String name) {
@@ -70,9 +85,8 @@ class _WebSqlTransaction extends Transaction {
     } else {
       return sqlTransaction.then((tx) {
         return tx.completed.then((_) {
-          return database;
-        }).whenComplete(() {
           _inactive = true;
+          return database;
         });
       });
     }

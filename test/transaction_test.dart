@@ -434,6 +434,27 @@ void defineTests(TestContext ctx) {
         await transaction.completed;
       });
 
+      test('get_delay_get', () async {
+        Transaction transaction =
+            db.transaction(testStoreName, idbModeReadOnly);
+        ObjectStore objectStore = transaction.objectStore(testStoreName);
+        await objectStore.getObject(0);
+
+        // this cause the transaction to terminate on every implementation
+        await new Future.delayed(new Duration());
+
+        try {
+          await objectStore.getObject(0);
+          fail('should fail');
+          //} on DatabaseError catch (e) {
+        } catch (e) {
+          // Transaction inactive
+          print(e);
+          expect(e.message.contains("TransactionInactiveError"), isTrue);
+        }
+        await transaction.completed;
+      });
+
       test('get_wait_wait_get', () async {
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadOnly);
