@@ -32,6 +32,8 @@ main() {
   group('raw', () {
     // Safari crashes if there is a pause
     // after the transaction creation
+    // true on dart version 1.12
+    // not anymore on dart version 1.13
     test('pause_after_transaction', () async {
       String dbName = testDescriptions.join('_');
       await window.indexedDB.deleteDatabase(dbName);
@@ -66,10 +68,11 @@ main() {
         }
       } catch (e) {
         // Transaction inactive
+        print(e);
         expect(e.message.contains("TransactionInactiveError"), isTrue);
       }
       return transaction.completed;
-    });
+    }, skip: "fails on 1.13, no more transaction delay issues");
 
     // ie crashes if there is a pause between 2 calls
     // after the transaction creation
