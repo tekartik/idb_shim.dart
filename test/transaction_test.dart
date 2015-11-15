@@ -436,6 +436,29 @@ void defineTests(TestContext ctx) {
         await transaction.completed;
       });
 
+      test('get_then_get', () async {
+        Transaction transaction =
+            db.transaction(testStoreName, idbModeReadOnly);
+        ObjectStore objectStore = transaction.objectStore(testStoreName);
+
+        await objectStore.getObject(0).then((_) {
+          // this cause the transaction to terminate on ie
+          // and so on sembast
+          new Future.value().then((_) {
+            objectStore.getObject(0).then((_) {
+              if (ctx.isIdbSembast || ctx.isIdbIe) {
+                fail('should fail');
+              }
+            }).catchError((DatabaseError e) {
+              // Transaction inactive
+              expect(e.message.contains("TransactionInactiveError"), isTrue);
+            }).then((_) {
+              return transaction.completed;
+            });
+          });
+        });
+      });
+
       test('get_delay_get', () async {
         // this hangs on ie now
         Transaction transaction =
@@ -633,6 +656,8 @@ void defineTests(TestContext ctx) {
         transaction1.objectStore(testStoreName).put("test").then((key) {
           expect(key, 1);
         });
+        // This somehow ones failed on ie 11 but works on edge
+        // bah ugly bug for ie then...
         transaction2.objectStore(testStoreName).put("test").then((key) {
           expect(key, 2);
         });

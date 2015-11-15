@@ -139,7 +139,7 @@ class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
       print('enqueing');
     }
     if (_inactive) {
-      throw new DatabaseError("TransactionInactiveError");
+      return new Future.error(new DatabaseError("TransactionInactiveError"));
     }
 // not lazy
     Completer completer = new Completer.sync();
