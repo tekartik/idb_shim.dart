@@ -50,7 +50,7 @@ main() {
       transaction = db.transactionList(["store2"], "readonly");
       await transaction.completed;
 
-      // This fails too
+      // This fails now
       transaction = db.transactionList(["store1", "store2"], "readonly");
       await transaction.completed;
     }, skip: "failing on 1.13");
