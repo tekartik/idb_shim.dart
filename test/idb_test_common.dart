@@ -69,8 +69,8 @@ class TestContext {
   bool isIdbSafari = false;
   bool isIdbSembast = false;
 
+  // ie don't except any pause between 2 calls
   bool get isIdbNoLazy => isIdbSembast || isIdbIe;
-  bool get isIdbNoLazyOnFirstAction => false; //isIdbSembast || isIdbSafari;
 }
 
 class SembastTestContext extends TestContext {

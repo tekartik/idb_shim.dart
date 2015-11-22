@@ -398,16 +398,31 @@ void defineTests(TestContext ctx) {
         await objectStore.getObject(0);
         await transaction.completed;
 
-        // Async not ok on Safari
+        // Async ok now even on Safari
+        // this used to fail with a transactioninactiveerror
         await _createTransaction();
+        await objectStore.getObject(0);
+
+        await transaction.completed;
+      });
+
+      test('transaction_wait_get', () async {
+        Transaction transaction =
+            db.transaction(testStoreName, idbModeReadOnly);
+        ObjectStore objectStore = transaction.objectStore(testStoreName);
+
+        // this cause the transaction to terminate on ie
+        // and so on sembast
+        await new Future.value();
+
         try {
           await objectStore.getObject(0);
-          if (ctx.isIdbNoLazyOnFirstAction) {
+          if (ctx.isIdbSembast || ctx.isIdbIe) {
             fail('should fail');
           }
         } on DatabaseError catch (e) {
           // Transaction inactive
-          expect(isTransactionInactiveError(e), isTrue);
+          expect(e.message.contains("TransactionInactiveError"), isTrue);
         }
         await transaction.completed;
       });

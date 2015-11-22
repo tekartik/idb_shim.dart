@@ -30,6 +30,31 @@ main() {
   });
 
   group('raw', () {
+    test('transaction_multi_store', () async {
+      String dbName = testDescriptions.join('_');
+
+      // This test now fails on dart 1.13
+      await window.indexedDB.deleteDatabase(dbName);
+      idb.Database db = await window.indexedDB.open(dbName, version: 1,
+          onUpgradeNeeded: (idb.VersionChangeEvent e) {
+        idb.Database db = (e.target as idb.Request).result;
+        db.createObjectStore("store1", autoIncrement: true);
+        db.createObjectStore("store2", autoIncrement: true);
+      });
+
+      // This work
+      idb.Transaction transaction = db.transaction(["store1"], "readonly");
+      await transaction.completed;
+
+      // This works too
+      transaction = db.transactionList(["store2"], "readonly");
+      await transaction.completed;
+
+      // This fails too
+      transaction = db.transactionList(["store1", "store2"], "readonly");
+      await transaction.completed;
+    }, skip: "failing on 1.13");
+
     // Safari crashes if there is a pause
     // after the transaction creation
     // true on dart version 1.12
@@ -59,20 +84,12 @@ main() {
       await objectStore.getObject(0);
       await transaction.completed;
 
-      // Async not ok on Safari
+      // Async ok even on Safari with dart 1.13
       await _createTransaction();
-      try {
-        await objectStore.getObject(0);
-        if (isSafari) {
-          fail('should fail');
-        }
-      } catch (e) {
-        // Transaction inactive
-        print(e);
-        expect(e.message.contains("TransactionInactiveError"), isTrue);
-      }
-      return transaction.completed;
-    }, skip: "fails on 1.13, no more transaction delay issues");
+      await objectStore.getObject(0);
+
+      await transaction.completed;
+    });
 
     // ie crashes if there is a pause between 2 calls
     // after the transaction creation

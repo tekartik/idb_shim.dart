@@ -523,8 +523,9 @@ void defineTests(TestContext ctx) {
       });
     });
 
-    dbGroup(ctx, 'create index and re-open', () {
+    group('create index and re-open', () {
       int index = 0;
+
       Future testIndex(IdbIndexMeta indexMeta) async {
         String _dbName = "${dbTestName}-${++index}";
         await idbFactory.deleteDatabase(_dbName);
@@ -552,16 +553,12 @@ void defineTests(TestContext ctx) {
         });
       }
 
-      dbTest('all', () {
-        Iterator<IdbIndexMeta> iterator = idbIndexMetas.iterator;
-        _next() {
-          if (iterator.moveNext()) {
-            return testIndex(iterator.current).then((_) {
-              return _next();
-            });
-          }
+      test('all', () async {
+        dbTestName = ctx.dbName;
+
+        for (IdbIndexMeta indexMeta in idbIndexMetas) {
+          await testIndex(indexMeta);
         }
-        return _next();
       });
     });
   });
