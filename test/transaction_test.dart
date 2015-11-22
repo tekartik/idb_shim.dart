@@ -410,9 +410,7 @@ void defineTests(TestContext ctx) {
           expect(isTransactionInactiveError(e), isTrue);
         }
         await transaction.completed;
-      },
-          skip:
-              "different behavior on 1.12 and 1.13 - not more error for sembast and safari here");
+      });
 
       test('get_wait_get', () async {
         Transaction transaction =
@@ -478,10 +476,9 @@ void defineTests(TestContext ctx) {
           expect(e.message.contains("TransactionInactiveError"), isTrue);
         }
 
-        // this hangs on idb ie/safari
-        if (!(ctx.isIdbIe || ctx.isIdbSafari)) {
-          await transaction.completed;
-        }
+        // this hangs on idb, chrome ie/safari
+        // if (!(ctx.isIdbIe || ctx.isIdbSafari)) {
+        //  await transaction.completed;
       });
 
       test('get_wait_wait_get', () async {

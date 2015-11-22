@@ -70,7 +70,7 @@ class TestContext {
   bool isIdbSembast = false;
 
   bool get isIdbNoLazy => isIdbSembast || isIdbIe;
-  bool get isIdbNoLazyOnFirstAction => isIdbSembast || isIdbSafari;
+  bool get isIdbNoLazyOnFirstAction => false; //isIdbSembast || isIdbSafari;
 }
 
 class SembastTestContext extends TestContext {
