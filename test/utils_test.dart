@@ -134,28 +134,25 @@ void defineTests(TestContext ctx) {
           await txn.completed;
         }
 
-        await _checkAll(
-            db,
+        Map expectedExport = {
+          'sembast_export': 1,
+          'version': 1,
+          'stores': [
             {
-              'sembast_export': 1,
-              'version': 1,
-              'stores': [
-                {
-                  'name': '_main',
-                  'keys': ['version', 'stores', 'store_test_store'],
-                  'values': [
-                    2,
-                    ['test_store'],
-                    {
-                      'name': 'test_store',
-                      'keyPath': 'name',
-                      'autoIncrement': true
-                    }
-                  ]
-                }
+              'name': '_main',
+              'keys': ['version', 'stores', 'store_test_store'],
+              'values': [
+                2,
+                ['test_store'],
+                {'name': 'test_store', 'keyPath': 'name', 'autoIncrement': true}
               ]
-            },
-            _check);
+            }
+          ]
+        };
+        if (ctx.isIdbIe) {
+          expectedExport['stores'][0]['values'][2].remove('autoIncrement');
+        }
+        await _checkAll(db, expectedExport, _check);
       });
 
       test('one_index', () async {
@@ -188,35 +185,37 @@ void defineTests(TestContext ctx) {
           await txn.completed;
         }
 
-        await _checkAll(
-            db,
+        Map expectedExport = {
+          'sembast_export': 1,
+          'version': 1,
+          'stores': [
             {
-              'sembast_export': 1,
-              'version': 1,
-              'stores': [
+              'name': '_main',
+              'keys': ['version', 'stores', 'store_test_store'],
+              'values': [
+                3,
+                ['test_store'],
                 {
-                  'name': '_main',
-                  'keys': ['version', 'stores', 'store_test_store'],
-                  'values': [
-                    3,
-                    ['test_store'],
+                  'name': 'test_store',
+                  'autoIncrement': true,
+                  'indecies': [
                     {
-                      'name': 'test_store',
-                      'autoIncrement': true,
-                      'indecies': [
-                        {
-                          'name': 'name_index',
-                          'keyPath': 'name',
-                          'unique': true,
-                          'multiEntry': true
-                        }
-                      ]
+                      'name': 'name_index',
+                      'keyPath': 'name',
+                      'unique': true,
+                      'multiEntry': true
                     }
                   ]
                 }
               ]
-            },
-            _check);
+            }
+          ]
+        };
+        if (ctx.isIdbIe) {
+          expectedExport['stores'][0]['values'][2].remove('autoIncrement');
+          expectedExport['stores'][0]['values'][2]['indecies'][0].remove('multiEntry');
+        }
+        await _checkAll(db, expectedExport, _check);
       });
     });
 

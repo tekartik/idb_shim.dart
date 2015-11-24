@@ -163,8 +163,13 @@ class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
   _SdbTransaction(_SdbDatabase database, this.meta) : super(database) {
     // Trigger a timer to close the transaction if nothing happens
     if (!_transactionLazyMode) {
+      // in 1.12, calling completed matched ie behavior
       // simply call completed
-      completed;
+      // completed;
+
+      new Future.delayed(new Duration(), () {
+        completed;
+      });
     }
   }
 
