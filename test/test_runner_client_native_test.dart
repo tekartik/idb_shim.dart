@@ -91,6 +91,60 @@ main() {
       await transaction.completed;
     });
 
+    // ie has issue with timing
+    test('async_timing', () async {
+      String dbName = testDescriptions.join('_');
+      await window.indexedDB.deleteDatabase(dbName);
+      idb.Database db = await window.indexedDB.open(dbName, version: 1,
+          onUpgradeNeeded: (idb.VersionChangeEvent e) {
+        idb.Database db = (e.target as idb.Request).result;
+        db.createObjectStore("store", autoIncrement: true);
+      });
+
+      idb.Transaction transaction;
+      idb.ObjectStore objectStore;
+      _createTransactionSync() {
+        transaction = db.transaction("store", "readonly");
+        objectStore = transaction.objectStore("store");
+      }
+
+      _createTransactionSync();
+      await objectStore.getObject(0);
+      _get() async {
+        await objectStore.getObject(0);
+      }
+      await _get();
+
+      await transaction.completed;
+    }, skip: 'crashing on ie');
+
+    test('future_timing', () async {
+      String dbName = testDescriptions.join('_');
+      await window.indexedDB.deleteDatabase(dbName);
+      idb.Database db = await window.indexedDB.open(dbName, version: 1,
+          onUpgradeNeeded: (idb.VersionChangeEvent e) {
+        idb.Database db = (e.target as idb.Request).result;
+        db.createObjectStore("store", autoIncrement: true);
+      });
+
+      idb.Transaction transaction;
+      idb.ObjectStore objectStore;
+      _createTransactionSync() {
+        transaction = db.transaction("store", "readonly");
+        objectStore = transaction.objectStore("store");
+      }
+
+      _createTransactionSync();
+      _get() async {
+        await objectStore.getObject(0);
+      }
+      await objectStore.getObject(0).then((_) async {
+        await _get();
+      });
+
+      await transaction.completed;
+    }, skip: 'crashing on ie');
+
     // ie crashes if there is a pause between 2 calls
     // after the transaction creation
     test('pause_between_calls', () async {

@@ -1,4 +1,4 @@
-library idb_shim.utils;
+library idb_shim.utils.idb_utils;
 
 import '../idb_client.dart';
 import 'dart:async';
@@ -15,7 +15,9 @@ class _SchemaMeta {
 Future<Database> copySchema(
     Database srcDatabase, IdbFactory dstFactory, String dstDbName) async {
   // Delete the existing
-  await dstFactory.deleteDatabase(dstDbName);
+  if (dstDbName != null) {
+    await dstFactory.deleteDatabase(dstDbName);
+  }
 
   int version = srcDatabase.version;
 

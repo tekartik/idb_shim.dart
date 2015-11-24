@@ -411,19 +411,14 @@ void defineTests(TestContext ctx) {
             db.transaction(testStoreName, idbModeReadOnly);
         ObjectStore objectStore = transaction.objectStore(testStoreName);
 
-        // this cause the transaction to terminate on ie
-        // and so on sembast
+        // In 1.12 this was causing the transaction to terminate on ie
+        // this is no longer the case in 1.13
+        await new Future.value();
+        await new Future.value();
         await new Future.value();
 
-        try {
-          await objectStore.getObject(0);
-          if (ctx.isIdbSembast || ctx.isIdbIe) {
-            fail('should fail');
-          }
-        } on DatabaseError catch (e) {
-          // Transaction inactive
-          expect(e.message.contains("TransactionInactiveError"), isTrue);
-        }
+        await objectStore.getObject(0);
+
         await transaction.completed;
       });
 
@@ -439,14 +434,34 @@ void defineTests(TestContext ctx) {
 
         try {
           await objectStore.getObject(0);
-          if (ctx.isIdbSembast || ctx.isIdbIe) {
+          if (ctx.isIdbNoLazy) {
             fail('should fail');
           }
+          await transaction.completed;
         } on DatabaseError catch (e) {
           // Transaction inactive
-          expect(e.message.contains("TransactionInactiveError"), isTrue);
+          expect(isTransactionInactiveError(e), isTrue);
         }
-        await transaction.completed;
+
+      });
+
+      test('get_async_get', () async {
+        Transaction transaction =
+            db.transaction(testStoreName, idbModeReadOnly);
+        ObjectStore objectStore = transaction.objectStore(testStoreName);
+        _get() async {
+          await objectStore.getObject(0);
+        }
+        await objectStore.getObject(0);
+        try {
+          await _get();
+          if (ctx.isIdbNoLazy) {
+            fail('should fail');
+          }
+          await transaction.completed;
+        } catch (e) {
+          expect(isTransactionInactiveError(e), isTrue);
+        }
       });
 
       test('get_then_get', () async {

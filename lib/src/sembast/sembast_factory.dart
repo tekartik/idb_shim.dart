@@ -16,6 +16,12 @@ class _IdbSembastFactory extends IdbSembastFactory {
 
   String get name => "${idbFactoryNameSembast}";
 
+  // get the underlying sembast database for a given database
+  sdb.Database getSdbDatabase(Database db) => (db as _SdbDatabase).db;
+
+  Future<Database> openFromSdbDatabase(sdb.Database sdbDb) =>
+      _SdbDatabase.fromDatabase(this, sdbDb);
+
   @override
   Future<Database> open(String dbName,
       {int version,
@@ -32,10 +38,10 @@ class _IdbSembastFactory extends IdbSembastFactory {
       version = 1;
     }
 
-    // name null no
-    if (dbName == null) {
-      return new Future.error(new ArgumentError('name cannot be null'));
-    }
+    // name null ok for in memory
+    // if (dbName == null) {
+    //  return new Future.error(new ArgumentError('name cannot be null'));
+    // }
 
     _SdbDatabase db = new _SdbDatabase(this, dbName);
 

@@ -39,21 +39,46 @@ class _NativeDatabase extends Database {
 
   @override
   Transaction transaction(storeName_OR_storeNames, String mode) {
-    return _catchNativeError(() {
-      idb.Transaction idbTransaction =
-          idbDatabase.transaction(storeName_OR_storeNames, mode);
-      return new _NativeTransaction(this, idbTransaction);
-    });
+    // bug in 1.13
+    // https://github.com/dart-lang/sdk/issues/25013
+    try {
+      return _catchNativeError(() {
+        idb.Transaction idbTransaction =
+            idbDatabase.transaction(storeName_OR_storeNames, mode);
+        return new _NativeTransaction(this, idbTransaction);
+      });
+    } catch (e) {
+      if (_isNotFoundError(e) && (storeName_OR_storeNames is List)) {
+        try {
+          return _catchNativeError(() {
+            idb.Transaction idbTransaction = idbDatabase.transaction(
+                html_common.convertDartToNative_SerializedScriptValue(
+                    storeName_OR_storeNames),
+                mode);
+            return new _NativeTransaction(this, idbTransaction);
+          });
+        } catch (e2) {
+          throw e;
+        }
+      } else {
+        rethrow;
+      }
+    }
+  }
+
+  bool _isNotFoundError(e) {
+    if (e is DatabaseError) {
+      String message = e.toString().toLowerCase();
+      if (message.contains('notfounderror')) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @override
-  Transaction transactionList(List<String> storeNames, String mode) {
-    return _catchNativeError(() {
-      idb.Transaction idbTransaction =
-          idbDatabase.transactionList(storeNames, mode);
-      return new _NativeTransaction(this, idbTransaction);
-    });
-  }
+  Transaction transactionList(List<String> storeNames, String mode) =>
+      transaction(storeNames, mode);
 
   @override
   void close() {
