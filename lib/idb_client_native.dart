@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:idb_shim/idb_client.dart';
 import 'dart:indexed_db' as idb;
 import 'dart:html' as html;
+import 'dart:html_common' as html_common;
 
 part 'src/native/native_event.dart';
 part 'src/native/native_transaction.dart';
