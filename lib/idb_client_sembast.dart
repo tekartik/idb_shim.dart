@@ -28,6 +28,11 @@ abstract class IdbSembastFactory extends IdbFactory {
   // The underlying factory
   sdb.DatabaseFactory get sdbFactory;
 
+  // get the underlying sembast database for a given database
+  sdb.Database getSdbDatabase(Database db);
+
+  Future<Database> openFromSdbDatabase(sdb.Database sdbDb);
+
   // The path of a named _SdbDatabase
   String getDbPath(String dbName);
 }

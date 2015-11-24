@@ -43,6 +43,16 @@ class _SdbDatabase extends Database with DatabaseWithMetaMixin {
 
   sdb.DatabaseFactory get sdbFactory => factory._databaseFactory;
 
+  _SdbDatabase._(IdbFactory factory) : super(factory);
+
+  static Future<_SdbDatabase> fromDatabase(
+      IdbFactory factory, sdb.Database db) async {
+    _SdbDatabase idbDb = new _SdbDatabase._(factory);
+    idbDb.db = db;
+    await idbDb._readMeta();
+    return idbDb;
+  }
+
   _SdbDatabase(IdbFactory factory, String name) : super(factory) {
     meta.name = name;
   }
@@ -64,34 +74,36 @@ class _SdbDatabase extends Database with DatabaseWithMetaMixin {
     });
   }
 
+  // return the previous version
+  Future<int> _readMeta() async {
+    return db.inTransaction(() async {
+      // read version
+      meta.version = await db.mainStore.get("version");
+      // read store meta
+      sdb.Record record = await db.mainStore.getRecord("stores");
+      if (record != null) {
+        // for now load all at once
+        List<String> storeNames = record.value;
+        return _loadStoresMeta(storeNames)
+            .then((List<IdbObjectStoreMeta> storeMetas) {
+          storeMetas.forEach((IdbObjectStoreMeta store) {
+            meta.putObjectStore(store);
+          });
+        });
+      }
+      return meta.version;
+    });
+  }
+
   Future<sdb.Database> open(
       int newVersion, void onUpgradeNeeded(VersionChangeEvent event)) {
     int previousVersion;
-    _open() {
-      return sdbFactory
-          .openDatabase(factory.getDbPath(name), version: 1)
-          .then((sdb.Database db) {
-        this.db = db;
-        return db.inTransaction(() {
-          return db.mainStore.get("version").then((int version) {
-            previousVersion = version;
-          }).then((_) {
-            // read meta
-            return db.mainStore.getRecord("stores").then((sdb.Record record) {
-              if (record != null) {
-                // for now load all at once
-                List<String> storeNames = record.value;
-                return _loadStoresMeta(storeNames)
-                    .then((List<IdbObjectStoreMeta> storeMetas) {
-                  storeMetas.forEach((IdbObjectStoreMeta store) {
-                    meta.putObjectStore(store);
-                  });
-                });
-              }
-            });
-          });
-        }).then((_) => db);
-      });
+
+    // Open the sembast database
+    Future<sdb.Database> _open() async {
+      db = await sdbFactory.openDatabase(factory.getDbPath(name), version: 1);
+      previousVersion = await _readMeta();
+      return db;
     }
 
     return _open().then((sdb.Database db) async {

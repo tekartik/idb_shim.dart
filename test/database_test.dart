@@ -209,8 +209,12 @@ void defineTests(TestContext ctx) {
       db = await idbFactory.open(_dbName, version: 3,
           onUpgradeNeeded: (VersionChangeEvent e) {
         ObjectStore store = e.transaction.objectStore(testStoreName);
-        store.deleteIndex(testNameIndex2);
-
+        try {
+          store.deleteIndex(testNameIndex2);
+          fail('should fail');
+        } on DatabaseError catch (e) {
+          expect(isNotFoundError(e), isTrue);
+        }
         expect(store.indexNames, []);
       });
       await db.close();
