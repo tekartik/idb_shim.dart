@@ -50,7 +50,8 @@ void defineTests(TestContext ctx) {
       // import
       Database importedDb =
           await sdbImportDatabase(export, idbFactory, _importedDbName);
-      expect(importedDb.name, _importedDbName);
+      // The name might be relative...
+      expect(importedDb.name.endsWith(_importedDbName), isTrue);
 
       await check(importedDb);
 
