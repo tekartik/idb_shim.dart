@@ -38,10 +38,10 @@ class _IdbSembastFactory extends IdbSembastFactory {
       version = 1;
     }
 
-    // name null no
-    if (dbName == null) {
-      return new Future.error(new ArgumentError('name cannot be null'));
-    }
+    // name null ok for in memory
+    // if (dbName == null) {
+    //  return new Future.error(new ArgumentError('name cannot be null'));
+    // }
 
     _SdbDatabase db = new _SdbDatabase(this, dbName);
 

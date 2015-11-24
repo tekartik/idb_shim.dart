@@ -50,6 +50,8 @@ class _SdbDatabase extends Database with DatabaseWithMetaMixin {
     _SdbDatabase idbDb = new _SdbDatabase._(factory);
     idbDb.db = db;
     await idbDb._readMeta();
+    // Copy name from path
+    idbDb.meta.name = db.path;
     return idbDb;
   }
 

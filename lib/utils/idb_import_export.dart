@@ -1,4 +1,4 @@
-library idb_shim.utils;
+library idb_shim.utils.idb_import_export;
 
 import '../idb_client.dart';
 import '../idb_client_sembast.dart';
@@ -18,13 +18,14 @@ Future<Map> sdbExportDatabase(Database db) async {
   sdb.Database sdbDatabase;
 
   // if already a sembast database use it
+  // if (false) {
   if (srcIdbFactory is IdbSembastFactory) {
     sdbDatabase = srcIdbFactory.getSdbDatabase(db);
     return exportDatabase(sdbDatabase);
   } else {
     // otherwise copy to a memory one
     db = await copyDatabase(db, idbMemoryFactory, null);
-    sdbDatabase = srcIdbFactory.getSdbDatabase(db);
+    sdbDatabase = (idbMemoryFactory as IdbSembastFactory).getSdbDatabase(db);
     Map export = await exportDatabase(sdbDatabase);
     db.close();
     return export;
@@ -38,9 +39,10 @@ Future<Map> sdbExportDatabase(Database db) async {
 Future<Database> sdbImportDatabase(
     Map data, IdbFactory dstFactory, String dstDbName) async {
   // if it is a sembast factory use it!
+  // if (false) {
   if (dstFactory is IdbSembastFactory) {
-    sdb.Database sdbDb =
-        await importDatabase(data, dstFactory.sdbFactory, dstDbName);
+    sdb.Database sdbDb = await importDatabase(
+        data, dstFactory.sdbFactory, dstFactory.getDbPath(dstDbName));
     return dstFactory.openFromSdbDatabase(sdbDb);
   } else {
     // import to a memory one

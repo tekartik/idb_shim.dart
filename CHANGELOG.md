@@ -1,3 +1,7 @@
+## 1.3.3
+
+* Add support for import/export (sembast export format)
+
 ## 1.3.2
 
 * Fix implementation for IE/Edge where the transaction life-cycle is shorter
