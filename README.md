@@ -83,6 +83,10 @@ await txn.completed;
 * String and num (double and int) are supported
 * DateTime is not supported, convert them to String
 
+##### Index
+
+* No support for compound index
+
 #### Native exception
 
 * Native exception type have no match in dart so a custom DatabaseError object is created to wrap the exception

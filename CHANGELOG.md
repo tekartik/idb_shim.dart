@@ -1,6 +1,8 @@
 ## 1.3.3
 
 * Add support for import/export (sembast export format)
+* Fix timing to mimic IE limitation
+* Add workaround for transaction bug in sdk 1.13
 
 ## 1.3.2
 
