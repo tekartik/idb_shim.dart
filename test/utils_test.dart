@@ -213,7 +213,8 @@ void defineTests(TestContext ctx) {
         };
         if (ctx.isIdbIe) {
           expectedExport['stores'][0]['values'][2].remove('autoIncrement');
-          expectedExport['stores'][0]['values'][2]['indecies'][0].remove('multiEntry');
+          expectedExport['stores'][0]['values'][2]['indecies'][0]
+              .remove('multiEntry');
         }
         await _checkAll(db, expectedExport, _check);
       });

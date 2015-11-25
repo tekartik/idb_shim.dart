@@ -442,7 +442,6 @@ void defineTests(TestContext ctx) {
           // Transaction inactive
           expect(isTransactionInactiveError(e), isTrue);
         }
-
       });
 
       test('get_async_get', () async {
