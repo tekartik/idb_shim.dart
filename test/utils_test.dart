@@ -261,43 +261,41 @@ void defineTests(TestContext ctx) {
         await _checkCopyStore(db, testStoreName, db, testStoreName2, _check);
       });
 
-      // safari does not support multiple stores
-      if (!ctx.isIdbSafari) {
-        test('one_record', () async {
-          await _setupDeleteDb();
+      test('two_stores_one_record_each', () async {
+        // fake multi store transaction on safari ctx.isIdbSafari;
+        await _setupDeleteDb();
 
-          void _initializeDatabase(VersionChangeEvent e) {
-            Database db = e.database;
-            //ObjectStore objectStore =
-            db.createObjectStore(testStoreName);
-            db.createObjectStore(testStoreName2);
+        void _initializeDatabase(VersionChangeEvent e) {
+          Database db = e.database;
+          //ObjectStore objectStore =
+          db.createObjectStore(testStoreName);
+          db.createObjectStore(testStoreName2);
+        }
+
+        db = await idbFactory.open(_srcDbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+
+        // put one in src and one in dst that should get deleted
+        Transaction txn =
+            db.transaction([testStoreName, testStoreName2], idbModeReadWrite);
+        ObjectStore store = txn.objectStore(testStoreName);
+        await (store.put("value1", "key1"));
+        ObjectStore store2 = txn.objectStore(testStoreName2);
+        await (store2.put("value2", "key2"));
+        await txn.completed;
+
+        _check(Database db, String storeName) async {
+          Transaction txn = db.transaction(storeName, idbModeReadOnly);
+          store = txn.objectStore(storeName);
+          expect(await store.getObject("key1"), "value1");
+          if (!ctx.isIdbIe) {
+            expect(await store.count(), 1);
           }
 
-          db = await idbFactory.open(_srcDbName,
-              version: 1, onUpgradeNeeded: _initializeDatabase);
-
-          // put one in src and one in dst that should get deleted
-          Transaction txn =
-              db.transaction([testStoreName, testStoreName2], idbModeReadWrite);
-          ObjectStore store = txn.objectStore(testStoreName);
-          await (store.put("value1", "key1"));
-          ObjectStore store2 = txn.objectStore(testStoreName2);
-          await (store2.put("value2", "key2"));
           await txn.completed;
-
-          _check(Database db, String storeName) async {
-            Transaction txn = db.transaction(storeName, idbModeReadOnly);
-            store = txn.objectStore(storeName);
-            expect(await store.getObject("key1"), "value1");
-            if (!ctx.isIdbIe) {
-              expect(await store.count(), 1);
-            }
-
-            await txn.completed;
-          }
-          await _checkCopyStore(db, testStoreName, db, testStoreName2, _check);
-        });
-      }
+        }
+        await _checkCopyStore(db, testStoreName, db, testStoreName2, _check);
+      });
     });
 
     group('copyDatabase', () {
@@ -343,79 +341,77 @@ void defineTests(TestContext ctx) {
             _check);
       });
 
-      // safari does not support multiple stores
-      if (!ctx.isIdbSafari) {
-        test('two_store_two_records', () async {
-          await _setupDeleteDb();
+      // safari does not support multiple stores - fakes
+      test('two_store_two_records', () async {
+        await _setupDeleteDb();
 
-          void _initializeDatabase(VersionChangeEvent e) {
-            Database db = e.database;
-            //ObjectStore objectStore =
-            db.createObjectStore(testStoreName);
-            db.createObjectStore(testStoreName2);
+        void _initializeDatabase(VersionChangeEvent e) {
+          Database db = e.database;
+          //ObjectStore objectStore =
+          db.createObjectStore(testStoreName);
+          db.createObjectStore(testStoreName2);
+        }
+
+        db = await idbFactory.open(_srcDbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+
+        // put one in src and one in dst that should get deleted
+        Transaction txn = db.transaction(testStoreName, idbModeReadWrite);
+        ObjectStore store = txn.objectStore(testStoreName);
+        await (store.put("value1", "key1"));
+        await (store.put("value2", "key2"));
+        await txn.completed;
+
+        //dstDb = await copyDatabase(db, idbFactory, _dstDbName);
+
+        _check(Database db) async {
+          Transaction txn =
+              db.transaction([testStoreName, testStoreName2], idbModeReadOnly);
+          store = txn.objectStore(testStoreName);
+          expect(await store.getObject("key1"), "value1");
+          expect(await store.getObject("key2"), "value2");
+
+          if (!ctx.isIdbIe) {
+            expect(await store.count(), 2);
           }
+          ObjectStore store2 = txn.objectStore(testStoreName2);
 
-          db = await idbFactory.open(_srcDbName,
-              version: 1, onUpgradeNeeded: _initializeDatabase);
-
-          // put one in src and one in dst that should get deleted
-          Transaction txn = db.transaction(testStoreName, idbModeReadWrite);
-          ObjectStore store = txn.objectStore(testStoreName);
-          await (store.put("value1", "key1"));
-          await (store.put("value2", "key2"));
+          if (!ctx.isIdbIe) {
+            expect(await store2.count(), 0);
+          }
           await txn.completed;
+        }
 
-          //dstDb = await copyDatabase(db, idbFactory, _dstDbName);
-
-          _check(Database db) async {
-            Transaction txn = db.transaction(
-                [testStoreName, testStoreName2], idbModeReadOnly);
-            store = txn.objectStore(testStoreName);
-            expect(await store.getObject("key1"), "value1");
-            expect(await store.getObject("key2"), "value2");
-
-            if (!ctx.isIdbIe) {
-              expect(await store.count(), 2);
-            }
-            ObjectStore store2 = txn.objectStore(testStoreName2);
-
-            if (!ctx.isIdbIe) {
-              expect(await store2.count(), 0);
-            }
-            await txn.completed;
-          }
-
-          await _checkAll(
-              db,
-              {
-                'sembast_export': 1,
-                'version': 1,
-                'stores': [
-                  {
-                    'name': '_main',
-                    'keys': [
-                      'version',
-                      'stores',
-                      'store_test_store',
-                      'store_test_store_2'
-                    ],
-                    'values': [
-                      1,
-                      ['test_store', 'test_store_2'],
-                      {'name': 'test_store'},
-                      {'name': 'test_store_2'}
-                    ]
-                  },
-                  {
-                    'name': 'test_store',
-                    'keys': ['key1', 'key2'],
-                    'values': ['value1', 'value2']
-                  }
-                ]
-              },
-              _check);
-        });
-      }
+        await _checkAll(
+            db,
+            {
+              'sembast_export': 1,
+              'version': 1,
+              'stores': [
+                {
+                  'name': '_main',
+                  'keys': [
+                    'version',
+                    'stores',
+                    'store_test_store',
+                    'store_test_store_2'
+                  ],
+                  'values': [
+                    1,
+                    ['test_store', 'test_store_2'],
+                    {'name': 'test_store'},
+                    {'name': 'test_store_2'}
+                  ]
+                },
+                {
+                  'name': 'test_store',
+                  'keys': ['key1', 'key2'],
+                  'values': ['value1', 'value2']
+                }
+              ]
+            },
+            _check);
+      });
     });
   });
 }

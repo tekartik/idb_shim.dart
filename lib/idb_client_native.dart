@@ -2,6 +2,7 @@ library idb_shim_native;
 
 import 'dart:async';
 import 'package:idb_shim/idb_client.dart';
+import 'src/utils/browser_utils.dart';
 import 'dart:indexed_db' as idb;
 import 'dart:html' as html;
 import 'dart:html_common' as html_common;

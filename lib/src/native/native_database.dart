@@ -40,7 +40,11 @@ class _NativeDatabase extends Database {
   @override
   Transaction transaction(storeName_OR_storeNames, String mode) {
     // bug in 1.13
+    // It only happens in dart for list
     // https://github.com/dart-lang/sdk/issues/25013
+
+    // Safari has the issue of not supporting multistore
+    // simulate them!
     try {
       return _catchNativeError(() {
         idb.Transaction idbTransaction =
@@ -48,21 +52,40 @@ class _NativeDatabase extends Database {
         return new _NativeTransaction(this, idbTransaction);
       });
     } catch (e) {
-      if (_isNotFoundError(e) && (storeName_OR_storeNames is List)) {
-        try {
-          return _catchNativeError(() {
-            idb.Transaction idbTransaction = idbDatabase.transaction(
-                html_common.convertDartToNative_SerializedScriptValue(
-                    storeName_OR_storeNames),
-                mode);
-            return new _NativeTransaction(this, idbTransaction);
-          });
-        } catch (e2) {
-          throw e;
+
+      // Only handle the issue for non empty list returning a NotFoundError
+      if ((storeName_OR_storeNames is List) && (storeName_OR_storeNames.isNotEmpty) && (_isNotFoundError(e))) {
+        List<String> stores = storeName_OR_storeNames;
+
+        // Make sure they indeed exists
+        bool allFound = true;
+        for (String store in stores) {
+          if (!objectStoreNames.contains(store)) {
+            allFound = false;
+            break;
+          }
         }
-      } else {
-        rethrow;
+
+        if (allFound) {
+          if (!isDartVm) {
+            // In javascript this is likely a safari issue...
+            return new _FakeMultiStoreTransaction(this, mode);
+          } else {
+            // This is likely the 1.13 bug
+            try {
+              return _catchNativeError(() {
+                idb.Transaction idbTransaction = idbDatabase.transaction(
+                    html_common.convertDartToNative_SerializedScriptValue(
+                        storeName_OR_storeNames),
+                    mode);
+                return new _NativeTransaction(this, idbTransaction);
+              });
+            } catch (e2) {}
+          }
+        }
       }
+      rethrow;
+
     }
   }
 

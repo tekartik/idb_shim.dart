@@ -127,19 +127,10 @@ void defineTests(TestContext ctx) {
             version: 1, onUpgradeNeeded: _initializeDatabase);
 
         // not supported on safari!
-        try {
           Transaction transaction = db.transactionList(
               [testStoreName, testStoreName2], idbModeReadWrite);
-          if (ctx.isIdbSafari) {
-            fail("currently fails...");
-          }
           await transaction.completed;
-        } on DatabaseError catch (e) {
-          if (!ctx.isIdbSafari) {
-            rethrow;
-          }
-          expect(isNotFoundError(e), isTrue);
-        }
+
       });
 
       test('bad_mode', () async {
