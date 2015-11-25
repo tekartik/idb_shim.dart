@@ -52,9 +52,10 @@ class _NativeDatabase extends Database {
         return new _NativeTransaction(this, idbTransaction);
       });
     } catch (e) {
-
       // Only handle the issue for non empty list returning a NotFoundError
-      if ((storeName_OR_storeNames is List) && (storeName_OR_storeNames.isNotEmpty) && (_isNotFoundError(e))) {
+      if ((storeName_OR_storeNames is List) &&
+          (storeName_OR_storeNames.isNotEmpty) &&
+          (_isNotFoundError(e))) {
         List<String> stores = storeName_OR_storeNames;
 
         // Make sure they indeed exists
@@ -85,7 +86,6 @@ class _NativeDatabase extends Database {
         }
       }
       rethrow;
-
     }
   }
 

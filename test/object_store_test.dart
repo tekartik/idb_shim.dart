@@ -892,5 +892,97 @@ void defineTests(TestContext ctx) {
         });
       });
     });
+
+    group('multi_store', () {
+      _setUp() async {
+        await _setupDeleteDb();
+
+        void _initializeDatabase(VersionChangeEvent e) {
+          Database db = e.database;
+          db.createObjectStore(testStoreName, autoIncrement: true);
+          db.createObjectStore(testStoreName2, autoIncrement: true);
+        }
+        db = await idbFactory.open(_dbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+      }
+
+      tearDown(_tearDown);
+
+      test('simple add_get', () async {
+        await _setUp();
+        transaction =
+            db.transaction([testStoreName, testStoreName2], idbModeReadWrite);
+        ObjectStore objectStore1 = transaction.objectStore(testStoreName);
+        var key1 = await objectStore1.add("test_value1");
+        expect(key1, 1);
+        ObjectStore objectStore2 = transaction.objectStore(testStoreName2);
+        var key2 = await objectStore2.add("test_value2");
+        expect(key2, 1);
+        await transaction.completed;
+
+        transaction =
+            db.transaction([testStoreName, testStoreName2], idbModeReadOnly);
+        objectStore1 = transaction.objectStore(testStoreName);
+        expect(await objectStore1.getObject(key1), "test_value1");
+        objectStore2 = transaction.objectStore(testStoreName2);
+        expect(await objectStore2.getObject(key2), "test_value2");
+      });
+
+      test('simple add_put_get', () async {
+        await _setUp();
+        transaction =
+            db.transaction([testStoreName, testStoreName2], idbModeReadWrite);
+        ObjectStore objectStore1 = transaction.objectStore(testStoreName);
+        var key1 = await objectStore1.add("test_value1");
+        expect(key1, 1);
+        ObjectStore objectStore2 = transaction.objectStore(testStoreName2);
+        var key2 = await objectStore2.add("test_value2");
+        expect(key2, 1);
+        await transaction.completed;
+
+        transaction =
+            db.transaction([testStoreName, testStoreName2], idbModeReadWrite);
+        objectStore1 = transaction.objectStore(testStoreName);
+        await objectStore1.put("update_value1", key1);
+        objectStore2 = transaction.objectStore(testStoreName2);
+        await objectStore2.put("update_value2", key2);
+        await transaction.completed;
+
+        transaction =
+            db.transaction([testStoreName, testStoreName2], idbModeReadOnly);
+        objectStore1 = transaction.objectStore(testStoreName);
+        expect(await objectStore1.getObject(key1), "update_value1");
+        objectStore2 = transaction.objectStore(testStoreName2);
+        expect(await objectStore2.getObject(key2), "update_value2");
+      });
+
+      test('order_add_get', () async {
+        await _setUp();
+        transaction =
+            db.transaction([testStoreName, testStoreName2], idbModeReadWrite);
+        ObjectStore objectStore1 = transaction.objectStore(testStoreName);
+        var key1 = await objectStore1.add("test_value1");
+        expect(key1, 1);
+        objectStore1 = transaction.objectStore(testStoreName);
+        var key1_1 = await objectStore1.add("test_value1_1");
+        expect(key1_1, 2);
+        ObjectStore objectStore2 = transaction.objectStore(testStoreName2);
+        var key2 = await objectStore2.add("test_value2");
+        expect(key2, 1);
+        objectStore1 = transaction.objectStore(testStoreName);
+        var key1_2 = await objectStore1.add("test_value1_2");
+        expect(key1_2, 3);
+        await transaction.completed;
+
+        transaction =
+            db.transaction([testStoreName, testStoreName2], idbModeReadOnly);
+        objectStore1 = transaction.objectStore(testStoreName);
+        expect(await objectStore1.getObject(key1), "test_value1");
+        expect(await objectStore1.getObject(key1_1), "test_value1_1");
+        expect(await objectStore1.getObject(key1_2), "test_value1_2");
+        objectStore2 = transaction.objectStore(testStoreName2);
+        expect(await objectStore2.getObject(key2), "test_value2");
+      });
+    });
   });
 }

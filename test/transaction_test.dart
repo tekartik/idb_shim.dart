@@ -127,10 +127,9 @@ void defineTests(TestContext ctx) {
             version: 1, onUpgradeNeeded: _initializeDatabase);
 
         // not supported on safari!
-          Transaction transaction = db.transactionList(
-              [testStoreName, testStoreName2], idbModeReadWrite);
-          await transaction.completed;
-
+        Transaction transaction = db.transactionList(
+            [testStoreName, testStoreName2], idbModeReadWrite);
+        await transaction.completed;
       });
 
       test('bad_mode', () async {
