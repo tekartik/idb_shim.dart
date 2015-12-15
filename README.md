@@ -5,11 +5,11 @@ not support the indexed_db api with very few changes.
 
 It also  allows to test your database schema and access in vm unit tests.
 
-* Project [home page](http://alextekartik.github.io/idb_shim.dart/)
-* Project [source code](https://github.com/alextekartik/idb_shim.dart)
-* [Samples](https://alextekartik.github.io/idb_shim_samples.dart) (code and live demo)
+* Project [home page](http://tekartik.github.io/idb_shim.dart/)
+* Project [source code](https://github.com/tekartik/idb_shim.dart)
+* [Samples](https://tekartik.github.io/idb_shim_samples.dart) (code and live demo)
 
-[![Build Status](https://travis-ci.org/alextekartik/idb_shim.dart.svg?branch=master)](https://travis-ci.org/alextekartik/idb_shim.dart)
+[![Build Status](https://travis-ci.org/tekartik/idb_shim.dart.svg?branch=master)](https://travis-ci.org/tekartik/idb_shim.dart)
 
 ### Usage
 
