@@ -1,6 +1,7 @@
-## 1.3.5?
+## 1.3.5
 
 * Simulate multistore transaction on Safari
+
 ## 1.3.3
 
 * Add support for import/export (sembast export format)
