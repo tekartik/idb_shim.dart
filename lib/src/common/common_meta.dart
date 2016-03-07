@@ -1,7 +1,7 @@
 library tekartik_iodb.idb_meta;
 
 import 'package:idb_shim/idb_client.dart';
-import 'package:collection/equality.dart';
+import 'package:collection/collection.dart';
 import 'dart:async';
 
 abstract class TransactionWithMetaMixin {
