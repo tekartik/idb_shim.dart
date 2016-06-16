@@ -566,6 +566,8 @@ void defineTests(TestContext ctx) {
           return e;
         }).then((e) {
           expect(isTransactionReadOnlyError(e), isTrue);
+          // don't wait for transaction
+          transaction = null;
         });
       });
 
@@ -577,6 +579,8 @@ void defineTests(TestContext ctx) {
           return e;
         }).then((e) {
           expect(isTransactionReadOnlyError(e), isTrue);
+          // don't wait for transaction
+          transaction = null;
         });
       });
 
@@ -588,6 +592,8 @@ void defineTests(TestContext ctx) {
           return e;
         }).then((e) {
           expect(isTransactionReadOnlyError(e), isTrue);
+          // don't wait for transaction
+          transaction = null;
         });
       });
 
@@ -599,6 +605,8 @@ void defineTests(TestContext ctx) {
           return e;
         }).then((e) {
           expect(isTransactionReadOnlyError(e), isTrue);
+          // don't wait for transaction
+          transaction = null;
         });
       });
     });
