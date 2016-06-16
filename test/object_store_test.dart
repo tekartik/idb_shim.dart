@@ -540,6 +540,7 @@ void defineTests(TestContext ctx) {
       });
     });
 
+    // skipped for firefox
     group('readonly', () {
       _createTransaction() {
         transaction = db.transaction(testStoreName, idbModeReadOnly);
@@ -609,7 +610,7 @@ void defineTests(TestContext ctx) {
           transaction = null;
         });
       });
-    });
+    }, testOn: "!firefox");
 
     group('key_path_auto', () {
       const String keyPath = "my_key";
