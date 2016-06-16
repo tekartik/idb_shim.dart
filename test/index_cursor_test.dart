@@ -26,6 +26,14 @@ void defineTests(TestContext ctx) {
     ObjectStore objectStore;
     Index index;
 
+    // new
+    String _dbName;
+    // prepare for test
+    Future _setupDeleteDb() async {
+      _dbName = ctx.dbName;
+      await idbFactory.deleteDatabase(_dbName);
+    }
+
     Future add(String name) {
       var obj = {testNameField: name};
       return objectStore.put(obj);
@@ -130,27 +138,23 @@ void defineTests(TestContext ctx) {
         index = objectStore.index(testNameIndex);
       }
 
-      setUp(() {
-        return idbFactory.deleteDatabase(testDbName).then((_) {
-          void _initializeDatabase(VersionChangeEvent e) {
-            Database db = e.database;
-            ObjectStore objectStore =
-                db.createObjectStore(testStoreName, autoIncrement: true);
-            objectStore.createIndex(testNameIndex, testNameField);
-          }
-          return idbFactory
-              .open(testDbName,
-                  version: 1, onUpgradeNeeded: _initializeDatabase)
-              .then((Database database) {
-            db = database;
-            return db;
-          });
-        });
-      });
+      _setUp() async {
+        await _setupDeleteDb();
+
+        void _initializeDatabase(VersionChangeEvent e) {
+          Database db = e.database;
+          ObjectStore objectStore =
+              db.createObjectStore(testStoreName, autoIncrement: true);
+          objectStore.createIndex(testNameIndex, testNameField);
+        }
+        db = await idbFactory.open(_dbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+      }
 
       tearDown(_tearDown);
 
-      test('empty key cursor', () {
+      test('empty key cursor', () async {
+        await _setUp();
         _createTransaction();
         Stream<Cursor> stream = index.openKeyCursor(autoAdvance: true);
         int count = 0;
@@ -165,7 +169,8 @@ void defineTests(TestContext ctx) {
         });
       });
 
-      test('empty key cursor by key', () {
+      test('empty key cursor by key', () async {
+        await _setUp();
         _createTransaction();
         Stream<Cursor> stream = index.openKeyCursor(key: 1, autoAdvance: true);
         int count = 0;
@@ -180,7 +185,8 @@ void defineTests(TestContext ctx) {
         });
       });
 
-      test('empty cursor', () {
+      test('empty cursor', () async {
+        await _setUp();
         _createTransaction();
         Stream<CursorWithValue> stream = index.openCursor(autoAdvance: true);
         int count = 0;
@@ -195,7 +201,8 @@ void defineTests(TestContext ctx) {
         });
       });
 
-      test('empty cursor by key', () {
+      test('empty cursor by key', () async {
+        await _setUp();
         _createTransaction();
         Stream<CursorWithValue> stream =
             index.openCursor(key: 1, autoAdvance: true);
@@ -211,7 +218,8 @@ void defineTests(TestContext ctx) {
         });
       });
 
-      test('one item key cursor', () {
+      test('one item key cursor', () async {
+        await _setUp();
         _createTransaction();
         return add("test1").then((_) {
           Stream<Cursor> stream = index.openKeyCursor(autoAdvance: true);
@@ -231,7 +239,8 @@ void defineTests(TestContext ctx) {
         });
       });
 
-      test('one item cursor', () {
+      test('one item cursor', () async {
+        await _setUp();
         _createTransaction();
         return add("test1").then((_) {
           Stream<CursorWithValue> stream = index.openCursor(autoAdvance: true);
@@ -250,7 +259,8 @@ void defineTests(TestContext ctx) {
         });
       });
 
-      test('index get 1', () {
+      test('index get 1', () async {
+        await _setUp();
         _createTransaction();
         return add("test1").then((key) {
           return index.get("test1").then((value) {
@@ -259,7 +269,8 @@ void defineTests(TestContext ctx) {
         });
       });
 
-      test('cursor non-auto', () {
+      test('cursor non-auto', () async {
+        await _setUp();
         _createTransaction();
         return add("test1").then((key) {
           int count = 0;
@@ -267,41 +278,47 @@ void defineTests(TestContext ctx) {
           return index
               .openCursor(autoAdvance: false)
               .listen((CursorWithValue cwv) {
-            expect(cwv.value, {testNameField: "test1"});
-            expect(cwv.key, "test1");
-            expect(cwv.primaryKey, key);
-            count++;
-            cwv.next();
-          }).asFuture().then((_) {
-            expect(count, 1);
-          });
+                expect(cwv.value, {testNameField: "test1"});
+                expect(cwv.key, "test1");
+                expect(cwv.primaryKey, key);
+                count++;
+                cwv.next();
+              })
+              .asFuture()
+              .then((_) {
+                expect(count, 1);
+              });
         });
       });
 
-      test('cursor none auto delete 1', () {
+      test('cursor none auto delete 1', () async {
+        await _setUp();
         _createTransaction();
         return add("test1").then((key) {
           // non auto to control advance
           return index
               .openCursor(autoAdvance: false)
               .listen((CursorWithValue cwv) {
-            cwv.delete().then((_) {
-              cwv.next();
-            });
-          }).asFuture().then((_) {
-            return transaction.completed.then((_) {
-              transaction = db.transaction(testStoreName, idbModeReadWrite);
-              objectStore = transaction.objectStore(testStoreName);
-              index = objectStore.index(testNameIndex);
-              return index.get(key).then((value) {
-                expect(value, isNull);
+                cwv.delete().then((_) {
+                  cwv.next();
+                });
+              })
+              .asFuture()
+              .then((_) {
+                return transaction.completed.then((_) {
+                  transaction = db.transaction(testStoreName, idbModeReadWrite);
+                  objectStore = transaction.objectStore(testStoreName);
+                  index = objectStore.index(testNameIndex);
+                  return index.get(key).then((value) {
+                    expect(value, isNull);
+                  });
+                });
               });
-            });
-          });
         });
       });
 
-      test('cursor none auto update 1', () {
+      test('cursor none auto update 1', () async {
+        await _setUp();
         _createTransaction();
         return add("test1").then((key) {
           Map map;
@@ -309,24 +326,27 @@ void defineTests(TestContext ctx) {
           return index
               .openCursor(autoAdvance: false)
               .listen((CursorWithValue cwv) {
-            map = new Map.from(cwv.value);
-            map["other"] = "too";
-            cwv.update(map).then((_) {
-              cwv.next();
-            });
-          }).asFuture().then((_) {
-            return transaction.completed.then((_) {
-              transaction = db.transaction(testStoreName, idbModeReadWrite);
-              objectStore = transaction.objectStore(testStoreName);
-              index = objectStore.index(testNameIndex);
-              return index.get("test1").then((value) {
-                expect(value, map);
+                map = new Map.from(cwv.value);
+                map["other"] = "too";
+                cwv.update(map).then((_) {
+                  cwv.next();
+                });
+              })
+              .asFuture()
+              .then((_) {
+                return transaction.completed.then((_) {
+                  transaction = db.transaction(testStoreName, idbModeReadWrite);
+                  objectStore = transaction.objectStore(testStoreName);
+                  index = objectStore.index(testNameIndex);
+                  return index.get("test1").then((value) {
+                    expect(value, map);
+                  });
+                });
               });
-            });
-          });
         });
       });
-      test('3 item cursor', () {
+      test('3 item cursor', () async {
+        await _setUp();
         _createTransaction();
         return fill3SampleRows().then((_) {
           return cursorToList(index.openCursor(autoAdvance: true)).then((list) {
@@ -371,36 +391,38 @@ void defineTests(TestContext ctx) {
         nameIndex = objectStore.index(testNameIndex);
         valueIndex = objectStore.index(testValueIndex);
       }
-      setUp(() {
-        return idbFactory.deleteDatabase(testDbName).then((_) {
-          void _initializeDatabase(VersionChangeEvent e) {
-            Database db = e.database;
-            ObjectStore objectStore =
-                db.createObjectStore(testStoreName, autoIncrement: true);
-            objectStore.createIndex(testNameIndex, testNameField);
-            objectStore.createIndex(testValueIndex, testValueField);
-          }
-          return idbFactory
-              .open(testDbName,
-                  version: 1, onUpgradeNeeded: _initializeDatabase)
-              .then((Database database) {
-            db = database;
-            return db;
-          });
+      _setUp() async {
+        await _setupDeleteDb();
+        void _initializeDatabase(VersionChangeEvent e) {
+          Database db = e.database;
+          ObjectStore objectStore =
+              db.createObjectStore(testStoreName, autoIncrement: true);
+          objectStore.createIndex(testNameIndex, testNameField);
+          objectStore.createIndex(testValueIndex, testValueField);
+        }
+        return idbFactory
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
+            .then((Database database) {
+          db = database;
+          return db;
         });
-      });
+      }
 
       tearDown(_tearDown);
 
-      test('add and read', () {
+      test('add and read', () async {
+        await _setUp();
         _createTransaction();
         Future<List<int>> getKeys(Stream<Cursor> stream) {
           List<int> keys = [];
-          return stream.listen((Cursor cursor) {
-            keys.add(cursor.primaryKey);
-          }).asFuture().then((_) {
-            return keys;
-          });
+          return stream
+              .listen((Cursor cursor) {
+                keys.add(cursor.primaryKey);
+              })
+              .asFuture()
+              .then((_) {
+                return keys;
+              });
         }
         Future add(String name, int value) {
           var obj = {testNameField: name, testValueField: value};

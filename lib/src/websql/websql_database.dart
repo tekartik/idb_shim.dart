@@ -216,8 +216,8 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
 
           Future updateVersion() async {
             // return initBlock(() {
-            await transaction.execute(
-                    "UPDATE version SET value = ?", [newVersion]) //
+            await transaction
+                    .execute("UPDATE version SET value = ?", [newVersion]) //
                 ;
             meta.version = newVersion;
           }
@@ -243,8 +243,7 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
     sqlDb = _openSqlDb(name);
 
     Future _cleanup(SqlTransaction tx) {
-      return tx
-          .execute("DROP TABLE IF EXISTS version") //
+      return tx.execute("DROP TABLE IF EXISTS version") //
           .then((_) {
         return tx.execute(
             "CREATE TABLE version (internal_version INT, value INT, signature TEXT)");

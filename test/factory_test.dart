@@ -12,8 +12,17 @@ main() {
 void defineTests(TestContext ctx) {
   IdbFactory idbFactory = ctx.factory;
   group('factory', () {
-    test('delete database', () {
-      return idbFactory.deleteDatabase(testDbName);
+    String _dbName;
+
+    // prepare for test
+    Future _setupDeleteDb() async {
+      _dbName = ctx.dbName;
+      await idbFactory.deleteDatabase(_dbName);
+    }
+
+    test('delete database', () async {
+      await _setupDeleteDb();
+      await idbFactory.deleteDatabase(_dbName);
     });
 
     /*
@@ -41,7 +50,9 @@ void defineTests(TestContext ctx) {
       });
 
       group('databases', () {
+        /*
         setUp(() {
+          // delete all
           return idbFactory.getDatabaseNames().then((List<String> names) {
             List<Future> futures = new List();
             names.forEach((String name) {
@@ -50,61 +61,57 @@ void defineTests(TestContext ctx) {
             return Future.wait(futures);
           });
         });
+        */
 
-        test('open find', () {
-          return idbFactory.open("test").then((Database db) {
-            db.close();
-            return idbFactory.getDatabaseNames().then((List<String> names) {
-              expect(names.length, 1);
-              expect(names[0], "test");
-            });
-          });
+        test('open find', () async {
+          await _setupDeleteDb();
+          Database db = await idbFactory.open(_dbName);
+          db.close();
+
+          List<String> names = await idbFactory.getDatabaseNames();
+          expect(names, contains(_dbName));
         });
 
-        test('open delete', () {
-          return idbFactory.open("test").then((Database db) {
-            db.close();
-            return idbFactory.deleteDatabase("test").then((_) {
-              return idbFactory.getDatabaseNames().then((List<String> names) {
-                expect(names.length, 0);
-              });
-            });
-          });
+        test('open delete', () async {
+          await _setupDeleteDb();
+          Database db = await idbFactory.open(_dbName);
+          db.close();
+
+          List<String> names = await idbFactory.getDatabaseNames();
+          expect(names, contains(_dbName));
+          await idbFactory.deleteDatabase(_dbName);
+          names = await idbFactory.getDatabaseNames();
+          expect(names, isNot(contains(_dbName)));
         });
 
-        test('open 2 db', () {
-          return idbFactory.open("test").then((Database db1) {
-            db1.close();
-            return idbFactory.open("test2").then((Database db2) {
-              db2.close();
-              return idbFactory.getDatabaseNames().then((List<String> names) {
-                expect(names.length, 2);
-                expect(names[0], "test");
-                expect(names[1], "test2");
-              });
-            });
-          });
+        test('open 2 db', () async {
+          String dbName1 = "${ctx.dbName}1";
+          String dbName2 = "${ctx.dbName}2";
+          await idbFactory.deleteDatabase(dbName1);
+          await idbFactory.deleteDatabase(dbName2);
+          (await idbFactory.open(dbName1)).close();
+          (await idbFactory.open(dbName2)).close();
+
+          List<String> names = await idbFactory.getDatabaseNames();
+          expect(names, contains(dbName1));
+          expect(names, contains(dbName2));
         });
 
-        test('open 2 db reopen 1', () {
-          return idbFactory.open("test").then((Database db1) {
-            db1.close();
+        test('open 2 db reopen 1', () async {
+          String dbName1 = "${ctx.dbName}1";
+          String dbName2 = "${ctx.dbName}2";
+          await idbFactory.deleteDatabase(dbName1);
+          await idbFactory.deleteDatabase(dbName2);
+          (await idbFactory.open(dbName1)).close();
+          (await idbFactory.open(dbName2)).close();
 
-            return idbFactory.open("test2").then((Database db2) {
-              db2.close();
+          List<String> names = await idbFactory.getDatabaseNames();
+          int length = names.length;
+          expect(names, contains(dbName1));
+          expect(names, contains(dbName2));
 
-              return idbFactory.open("test").then((Database db1) {
-                db1.close();
-
-                return idbFactory.getDatabaseNames().then((List<String> names) {
-                  //print(names.toString() + " - " + idbFactory.runtimeType.toString());
-                  expect(names.length, 2);
-                  expect(names[0], "test");
-                  expect(names[1], "test2");
-                });
-              });
-            });
-          });
+          names = await idbFactory.getDatabaseNames();
+          expect(names.length, length);
         });
       });
     } else {

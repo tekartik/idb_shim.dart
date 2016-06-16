@@ -326,7 +326,7 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
 
   @override
   Index index(String name) {
-    devWarning;
+    //devWarning;
     return _getIndex(name);
   }
 

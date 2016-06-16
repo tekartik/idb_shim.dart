@@ -68,10 +68,13 @@ class TodoList {
   Future _addTodo(String text) {
     var trans = _db.transaction(_todosStore, 'readwrite');
     var store = trans.objectStore(_todosStore);
-    return store.put({
-      'text': text,
-      'timeStamp': new DateTime.now().millisecondsSinceEpoch.toString()
-    }).then((_) => _getAllTodoItems()).catchError((e) => _onError);
+    return store
+        .put({
+          'text': text,
+          'timeStamp': new DateTime.now().millisecondsSinceEpoch.toString()
+        })
+        .then((_) => _getAllTodoItems())
+        .catchError((e) => _onError);
   }
 
   void _deleteTodo(String id) {

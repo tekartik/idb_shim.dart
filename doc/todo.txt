@@ -26,3 +26,8 @@ test
 Publishing note:
 alex.tekartik.pub@gmail.com
 pub publish -n
+
+Native indexed db test quick
+----------------------------
+
+pubtest -p dartium -j 1 test/test_runner_client_native_test.dart --reporter expanded

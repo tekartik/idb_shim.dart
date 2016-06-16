@@ -25,6 +25,7 @@ import 'package:path/path.dart';
 const Level debugLevel = Level.FINE;
 @deprecated
 const String testDbName = 'test.db';
+const String _testDbName = 'test.db';
 const String testStoreName = 'test_store';
 const String testStoreName2 = 'test_store_2';
 
@@ -96,7 +97,7 @@ TestContext idbMemoryFsContext = new SembastFsTestContext()
 IdbFactory idbTestMemoryFactory = idbMemoryFactory;
 
 Future<Database> setUpSimpleStore(IdbFactory idbFactory, //
-    {String dbName: testDbName,
+    {String dbName: _testDbName,
     IdbObjectStoreMeta meta}) {
   if (meta == null) {
     meta = idbSimpleObjectStoreMeta;

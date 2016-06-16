@@ -150,8 +150,8 @@ void defineTests(TestContext ctx) {
           expect(key, 123);
           return transaction.completed.then((_) {
             _createTransaction();
-            return objectStore.add(value, 123).then((_) {
-            }, onError: (DatabaseError e) {
+            return objectStore.add(value, 123).then((_) {},
+                onError: (DatabaseError e) {
               transaction = null;
             }).then((_) {
               expect(transaction, null);

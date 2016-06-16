@@ -115,8 +115,7 @@ class _WebSqlGlobalStore {
     }
 
     Future<SqlTransaction> _cleanup(SqlTransaction tx) {
-      return tx
-          .dropTableIfExists("version") //
+      return tx.dropTableIfExists("version") //
           .then((_) {
         return tx.execute(
             "CREATE TABLE version (internal_version INT, signature TEXT)");
@@ -134,8 +133,7 @@ class _WebSqlGlobalStore {
 
     Future<SqlTransaction> _setup() {
       return db.transaction().then((tx) {
-        return tx
-            .execute("SELECT internal_version, signature FROM version") //
+        return tx.execute("SELECT internal_version, signature FROM version") //
             .then((SqlResultSet rs) {
           if (rs.rows.length != 1) {
             return _cleanup(tx);

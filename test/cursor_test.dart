@@ -21,11 +21,31 @@ main() {
 
 void defineTests(TestContext ctx) {
   IdbFactory idbFactory = ctx.factory;
-  group('cursor', () {
-    Database db;
-    Transaction transaction;
-    ObjectStore objectStore;
 
+  Database db;
+  Transaction transaction;
+  ObjectStore objectStore;
+
+  String _dbName;
+
+  // prepare for test
+  Future _setupDeleteDb() async {
+    _dbName = ctx.dbName;
+    await idbFactory.deleteDatabase(_dbName);
+  }
+
+  _tearDown() async {
+    if (transaction != null) {
+      await transaction.completed;
+      transaction = null;
+    }
+    if (db != null) {
+      db.close();
+      db = null;
+    }
+  }
+
+  group('cursor', () {
     Future add(String name) {
       var obj = {testNameField: name};
       return objectStore.put(obj);
@@ -67,48 +87,42 @@ void defineTests(TestContext ctx) {
     }
 
     group('auto', () {
+      tearDown(_tearDown);
+
       _createTransaction() {
         transaction = db.transaction(testStoreName, idbModeReadWrite);
         objectStore = transaction.objectStore(testStoreName);
       }
-      setUp(() {
-        return idbFactory.deleteDatabase(testDbName).then((_) {
-          void _initializeDatabase(VersionChangeEvent e) {
-            Database db = e.database;
-            //ObjectStore objectStore =
-            db.createObjectStore(testStoreName, autoIncrement: true);
-          }
-          return idbFactory
-              .open(testDbName,
-                  version: 1, onUpgradeNeeded: _initializeDatabase)
-              .then((Database database) {
-            db = database;
-            // must return something not null...
-            return db;
-          });
-        });
-      });
 
-      tearDown(() {
-        // This sometimes block in dart2js
-        //return transaction.completed.then((_) {
-        db.close();
-        //});
-      });
+      _setUp() async {
+        await _setupDeleteDb();
+        void _initializeDatabase(VersionChangeEvent e) {
+          Database db = e.database;
+          //ObjectStore objectStore =
+          db.createObjectStore(testStoreName, autoIncrement: true);
+        }
+        db = await idbFactory.open(_dbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+      }
 
-      test('empty cursor', () {
+      test('empty cursor', () async {
+        await _setUp();
         _createTransaction();
         Stream<CursorWithValue> stream =
             objectStore.openCursor(autoAdvance: true);
         int count = 0;
-        return stream.listen((CursorWithValue cwv) {
-          count++;
-        }).asFuture().then((_) {
-          expect(count, 0);
-        });
+        return stream
+            .listen((CursorWithValue cwv) {
+              count++;
+            })
+            .asFuture()
+            .then((_) {
+              expect(count, 0);
+            });
       });
 
-      test('one item cursor', () {
+      test('one item cursor', () async {
+        await _setUp();
         _createTransaction();
         return add("test1").then((_) {
           Stream<CursorWithValue> stream =
@@ -128,6 +142,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('openCursor_read_2_row', () async {
+        await _setUp();
         _createTransaction();
         await fill3SampleRows();
 
@@ -141,31 +156,45 @@ void defineTests(TestContext ctx) {
           }
         });
         await transaction.completed;
+        transaction = null;
         expect(count, limit);
       });
 
-      test('openCursor no auto advance timeout', () {
+      test('openCursor no auto advance timeout', () async {
+        await _setUp();
         _createTransaction();
         return fill3SampleRows().then((_) {
           return objectStore
               .openCursor(autoAdvance: false)
-              .listen((CursorWithValue cwv) {}).asFuture().then((_) {
+              .listen((CursorWithValue cwv) {})
+              .asFuture()
+              .then((_) {
             fail('should not complete');
-          }).timeout(new Duration(milliseconds: 500), onTimeout: () {});
+          }).timeout(new Duration(milliseconds: 500), onTimeout: () {
+            // don't wait on the transaction
+            transaction = null;
+          });
         });
       });
 
-      test('openCursor null auto advance timeout', () {
+      test('openCursor null auto advance timeout', () async {
+        await _setUp();
         _createTransaction();
         return fill3SampleRows().then((_) {
           return objectStore
               .openCursor(autoAdvance: null)
-              .listen((CursorWithValue cwv) {}).asFuture().then((_) {
+              .listen((CursorWithValue cwv) {})
+              .asFuture()
+              .then((_) {
             fail('should not complete');
-          }).timeout(new Duration(milliseconds: 500), onTimeout: () {});
+          }).timeout(new Duration(milliseconds: 500), onTimeout: () {
+            // don't wait on the transaction
+            transaction = null;
+          });
         });
       });
-      test('3 item cursor no auto advance', () {
+      test('3 item cursor no auto advance', () async {
+        await _setUp();
         _createTransaction();
         return fill3SampleRows().then((_) {
           return manualCursorToList(objectStore.openCursor(autoAdvance: false))
@@ -179,7 +208,8 @@ void defineTests(TestContext ctx) {
           });
         });
       });
-      test('3 item cursor', () {
+      test('3 item cursor', () async {
+        await _setUp();
         _createTransaction();
         return fill3SampleRows().then((_) {
           return cursorToList(objectStore.openCursor(autoAdvance: true))
@@ -230,7 +260,9 @@ void defineTests(TestContext ctx) {
                       expect(list[0].name, equals('test1'));
                       expect(list[0].id, equals(2));
 
-                      return transaction.completed;
+                      return transaction.completed.then((_) {
+                        transaction = null;
+                      });
                     });
                   });
                 });

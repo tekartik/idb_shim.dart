@@ -10,27 +10,32 @@ main() {
 
 void defineTests(TestContext ctx) {
   IdbFactory idbFactory = ctx.factory;
+
+  // new
+  Database db;
+  Transaction transaction;
+
+  String _dbName;
+  // prepare for test
+  Future _setupDeleteDb() async {
+    _dbName = ctx.dbName;
+    await idbFactory.deleteDatabase(_dbName);
+  }
+
+  _tearDown() async {
+    if (transaction != null) {
+      await transaction.completed;
+      transaction = null;
+    }
+    if (db != null) {
+      db.close();
+      db = null;
+    }
+  }
+
   group('transaction', () {
-    // new
-    Database db;
-    String _dbName;
-    // prepare for test
-    Future _setupDeleteDb() async {
-      _dbName = ctx.dbName;
-      await idbFactory.deleteDatabase(_dbName);
-    }
-    Future _tearDown() async {
-      if (db != null) {
-        db.close();
-        db = null;
-      }
-    }
     //String testDbName = ctx.dbName;
     group('scratch', () {
-      setUp(() {
-        return idbFactory.deleteDatabase(testDbName);
-      });
-
       tearDown(_tearDown);
 
       test('put & completed', () async {
@@ -39,7 +44,7 @@ void defineTests(TestContext ctx) {
           db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
-        db = await idbFactory.open(testDbName,
+        db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
 
         Transaction transaction =
@@ -59,7 +64,7 @@ void defineTests(TestContext ctx) {
           db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
-        db = await idbFactory.open(testDbName,
+        db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadWrite);
@@ -71,7 +76,7 @@ void defineTests(TestContext ctx) {
           e.database.createObjectStore(testStoreName, autoIncrement: true);
         }
         return idbFactory
-            .open(testDbName, version: 1, onUpgradeNeeded: _initializeDatabase)
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
             .then((Database database) {
           Transaction transaction1 =
               database.transaction(testStoreName, idbModeReadWrite);
@@ -99,7 +104,7 @@ void defineTests(TestContext ctx) {
         void _initializeDatabase(VersionChangeEvent e) {
           e.database.createObjectStore(testStoreName, autoIncrement: true);
         }
-        db = await idbFactory.open(testDbName,
+        db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
 
         Transaction transaction =
@@ -127,8 +132,8 @@ void defineTests(TestContext ctx) {
             version: 1, onUpgradeNeeded: _initializeDatabase);
 
         // not supported on safari!
-        Transaction transaction = db.transactionList(
-            [testStoreName, testStoreName2], idbModeReadWrite);
+        Transaction transaction = db
+            .transactionList([testStoreName, testStoreName2], idbModeReadWrite);
         await transaction.completed;
       });
 
@@ -219,40 +224,37 @@ void defineTests(TestContext ctx) {
 
     group('simple', () {
       group('transaction auto', () {
-        Database db;
-        Transaction transaction;
         //ObjectStore objectStore;
 
-        setUp(() {
-          return idbFactory.deleteDatabase(testDbName).then((_) {
-            void _initializeDatabase(VersionChangeEvent e) {
-              Database db = e.database;
-              db.createObjectStore(testStoreName, autoIncrement: true);
-            }
-            return idbFactory
-                .open(testDbName,
-                    version: 1, onUpgradeNeeded: _initializeDatabase)
-                .then((Database database) {
-              db = database;
-              transaction = db.transaction(testStoreName, idbModeReadWrite);
-              transaction.objectStore(testStoreName);
-              return db;
-            });
+        _setUp() async {
+          await _setupDeleteDb();
+
+          void _initializeDatabase(VersionChangeEvent e) {
+            Database db = e.database;
+            db.createObjectStore(testStoreName, autoIncrement: true);
+          }
+          return idbFactory
+              .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
+              .then((Database database) {
+            db = database;
+            //transaction = db.transaction(testStoreName, idbModeReadWrite);
+            //transaction.objectStore(testStoreName);
+            return db;
           });
-        });
+        }
 
-        tearDown(() {
-          db.close();
-        });
+        tearDown(_tearDown);
 
-        test('immediate completed', () {
+        test('immediate completed', () async {
+          await _setUp();
           //bool done = false;
           Transaction transaction =
               db.transaction(testStoreName, idbModeReadWrite);
           return transaction.completed;
         });
 
-        test('add immediate completed', () {
+        test('add immediate completed', () async {
+          await _setUp();
           // not working in memory
           // devPrint("***** ${idbFactory.name}");
           if (idbFactory.name != idbFactoryWebSql) {
@@ -272,7 +274,8 @@ void defineTests(TestContext ctx) {
         });
 
         // not working in memory
-        test('immediate completed then add', () {
+        test('immediate completed then add', () async {
+          await _setUp();
 // not working in memory
           // devPrint("***** ${idbFactory.name}");
           if (idbFactory.name != idbFactoryWebSql) {
@@ -298,23 +301,24 @@ void defineTests(TestContext ctx) {
     group('timing', () {
       Database db;
 
-      setUp(() {
-        return setUpSimpleStore(idbFactory).then((Database database) {
+      _setUp() async {
+        return setUpSimpleStore(idbFactory, dbName: ctx.dbName)
+            .then((Database database) {
           db = database;
         });
-      });
+      }
 
-      tearDown(() {
-        db.close();
-      });
+      tearDown(_tearDown);
 
-      test('immediate completed', () {
+      test('immediate completed', () async {
+        await _setUp();
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadWrite);
         return transaction.completed;
       });
 
-      test('add immediate completed', () {
+      test('add immediate completed', () async {
+        await _setUp();
         bool done = false;
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadWrite);
@@ -329,7 +333,8 @@ void defineTests(TestContext ctx) {
         });
       });
 
-      test('add 1 then 1 immediate completed', () {
+      test('add 1 then 1 immediate completed', () async {
+        await _setUp();
         bool done = false;
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadWrite);
@@ -349,6 +354,7 @@ void defineTests(TestContext ctx) {
       // The following tests when there are extra await in the transaction
 
       test('get_get', () async {
+        await _setUp();
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadOnly);
         ObjectStore objectStore = transaction.objectStore(testStoreName);
@@ -358,6 +364,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('get_after_completed', () async {
+        await _setUp();
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadOnly);
         ObjectStore objectStore = transaction.objectStore(testStoreName);
@@ -372,6 +379,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('transaction_async_get', () async {
+        await _setUp();
         Transaction transaction;
         ObjectStore objectStore;
         _createTransactionSync() {
@@ -397,6 +405,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('transaction_wait_get', () async {
+        await _setUp();
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadOnly);
         ObjectStore objectStore = transaction.objectStore(testStoreName);
@@ -413,6 +422,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('get_wait_get', () async {
+        await _setUp();
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadOnly);
         ObjectStore objectStore = transaction.objectStore(testStoreName);
@@ -435,6 +445,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('get_async_get', () async {
+        await _setUp();
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadOnly);
         ObjectStore objectStore = transaction.objectStore(testStoreName);
@@ -454,6 +465,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('get_then_get', () async {
+        await _setUp();
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadOnly);
         ObjectStore objectStore = transaction.objectStore(testStoreName);
@@ -477,6 +489,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('get_delay_get', () async {
+        await _setUp();
         // this hangs on ie now
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadOnly);
@@ -501,6 +514,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('get_wait_wait_get', () async {
+        await _setUp();
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadOnly);
         ObjectStore objectStore = transaction.objectStore(testStoreName);
@@ -515,6 +529,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('put_wait_wait_put', () async {
+        await _setUp();
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadWrite);
         ObjectStore objectStore = transaction.objectStore(testStoreName);
@@ -528,7 +543,8 @@ void defineTests(TestContext ctx) {
         await transaction.completed;
       });
 
-      test('add 1 then 1 then 1 immediate completed', () {
+      test('add 1 then 1 then 1 immediate completed', () async {
+        await _setUp();
         bool done = false;
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadWrite);
@@ -547,7 +563,8 @@ void defineTests(TestContext ctx) {
         });
       });
 
-      test('add 1 level 5 deep immediate completed', () {
+      test('add 1 level 5 deep immediate completed', () async {
+        await _setUp();
         bool done = false;
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadWrite);
@@ -570,7 +587,8 @@ void defineTests(TestContext ctx) {
         });
       });
 
-      test('immediate completed then add', () {
+      test('immediate completed then add', () async {
+        await _setUp();
         if ((idbFactory.name != idbFactoryWebSql)) {
           bool done = false;
           Transaction transaction =
@@ -589,7 +607,8 @@ void defineTests(TestContext ctx) {
         }
       });
 
-      test('add 2 immediate completed', () {
+      test('add 2 immediate completed', () async {
+        await _setUp();
         bool done1 = false;
         bool done2 = false;
         Transaction transaction =
@@ -610,7 +629,8 @@ void defineTests(TestContext ctx) {
         });
       });
 
-      test('add/put immediate completed', () {
+      test('add/put immediate completed', () async {
+        await _setUp();
         if ((idbFactory.name != idbFactoryWebSql)) {
           bool done = false;
           Transaction transaction =
@@ -629,7 +649,8 @@ void defineTests(TestContext ctx) {
         }
       });
 
-      test('add/put/get/delete', () {
+      test('add/put/get/delete', () async {
+        await _setUp();
         bool done = false;
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadWrite);
@@ -656,7 +677,8 @@ void defineTests(TestContext ctx) {
         });
       });
 
-      test('2 embedded transaction empty', () {
+      test('2 embedded transaction empty', () async {
+        await _setUp();
         Transaction transaction1 =
             db.transaction(testStoreName, idbModeReadWrite);
         Transaction transaction2 =
@@ -664,7 +686,8 @@ void defineTests(TestContext ctx) {
         return Future.wait([transaction1.completed, transaction2.completed]);
       });
 
-      test('2 embedded transaction 2 put', () {
+      test('2 embedded transaction 2 put', () async {
+        await _setUp();
         Transaction transaction1 =
             db.transaction(testStoreName, idbModeReadWrite);
         Transaction transaction2 =
