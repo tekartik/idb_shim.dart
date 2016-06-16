@@ -610,7 +610,7 @@ void defineTests(TestContext ctx) {
           transaction = null;
         });
       });
-    }, testOn: "!firefox");
+    });
 
     group('key_path_auto', () {
       const String keyPath = "my_key";
@@ -640,7 +640,7 @@ void defineTests(TestContext ctx) {
           expect(objectStore.autoIncrement, true);
         }
 
-      }, testOn: "!firefox"); // Expermental next test is failing...
+      });
 
       test('simple get', () async {
         await _setUp();
@@ -702,7 +702,7 @@ void defineTests(TestContext ctx) {
           // mark transaction as null
           transaction = null;
         });
-      }, testOn: "!firefox");
+      });
 
       test('put key and keyPath', () async {
         await _setUp();
@@ -714,7 +714,7 @@ void defineTests(TestContext ctx) {
           //print(e);
           transaction = null;
         });
-      }, testOn: "!firefox");
+      });
     });
 
     group('key_path_non_auto', () {
@@ -786,7 +786,7 @@ void defineTests(TestContext ctx) {
           expect(e is DatabaseError, isTrue);
           transaction = null;
         });
-      }, testOn: "!firefox");
+      });
 
       test('put_null', () async {
         await _setUp();
@@ -801,7 +801,7 @@ void defineTests(TestContext ctx) {
           expect(e is DatabaseError, isTrue);
           transaction = null;
         });
-      }, testOn: "!firefox");
+      });
 
       test('add_twice', () async {
         await _setUp();
@@ -821,7 +821,7 @@ void defineTests(TestContext ctx) {
             transaction = null;
           });
         });
-      }, testOn: "!firefox");
+      });
 
       // put twice should be fine
       test('put_twice', () async {

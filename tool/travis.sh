@@ -15,4 +15,4 @@ dartanalyzer --fatal-warnings \
   lib/idb_io.dart \
 
 pub run test -p vm --reporter expanded
-pub run test -p firefox -j 1 --reporter expanded
+# pub run test -p firefox -j 1 --reporter expanded
