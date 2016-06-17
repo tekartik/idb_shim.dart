@@ -14,5 +14,6 @@ dartanalyzer --fatal-warnings \
   lib/idb_console.dart \
   lib/idb_io.dart \
 
-pub run test -p vm --reporter expanded
+pub run test -p vm
+pub run test -p content-shell -j 1
 # pub run test -p firefox -j 1 --reporter expanded
