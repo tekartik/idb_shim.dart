@@ -1,8 +1,9 @@
 library index_test;
 
 import 'package:idb_shim/idb_client.dart';
-import 'idb_test_common.dart';
+
 import 'common_meta_test.dart';
+import 'idb_test_common.dart';
 
 // so that this can be run directly
 main() {
@@ -561,5 +562,103 @@ void defineTests(TestContext ctx) {
         }
       });
     });
+
+    /*
+    group('one index array not unique', () {
+      _setUp() async {
+        await _setupDeleteDb();
+
+        void _initializeDatabase(VersionChangeEvent e) {
+          Database db = e.database;
+          ObjectStore objectStore =
+          db.createObjectStore(testStoreName, autoIncrement: true);
+          objectStore.createIndex(testNameIndex, [testNameField, testNameField2], unique: false);
+        }
+        db = await idbFactory.open(_dbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+      }
+
+      tearDown(_tearDown);
+
+      solo_test('add_twice_same_key', () async {
+        await _setUp();
+        _createTransaction();
+        Map value1 = {testNameField: "test1", testNameField2: 456};
+        Index index = objectStore.index(testNameIndex);
+        await objectStore.add(value1);
+        await objectStore.add(value1);
+        index = objectStore.index(testNameIndex);
+        int count = await index.count([new KeyRange.only(["test1", 456])]); //, new KeyRange.only(456)]);
+        print("6");
+        expect(count, 2);
+      });
+
+      test('get_null', () async {
+        await _setUp();
+        _createTransaction();
+        Index index = objectStore.index(testNameIndex);
+        try {
+          await index.get(null);
+          fail("error");
+        } on DatabaseError catch (e) {
+          expect(e, isNotNull);
+        }
+      });
+
+      test('get_boolean', () async {
+        await _setUp();
+        _createTransaction();
+        Index index = objectStore.index(testNameIndex);
+        try {
+          await index.get(null);
+          fail("error");
+        } on DatabaseError catch (e) {
+          expect(e, isNotNull);
+        }
+      });
+      test('getKey_null', () async {
+        await _setUp();
+        _createTransaction();
+        Index index = objectStore.index(testNameIndex);
+        try {
+          await index.getKey(null);
+          fail("error");
+        } on DatabaseError catch (e) {
+          expect(e, isNotNull);
+        }
+      });
+
+      test('getKey_boolean', () async {
+        await _setUp();
+        _createTransaction();
+        Index index = objectStore.index(testNameIndex);
+        try {
+          await index.getKey(true);
+          fail("error");
+        } on DatabaseError catch (e) {
+          expect(e, isNotNull);
+        }
+      });
+//
+//      solo_test('add_twice_same_key', () {
+//        Map value1 = {
+//          NAME_FIELD: "test1"
+//        };
+//
+//        Index index = objectStore.index(NAME_INDEX);
+//        objectStore.add(value1);
+//        objectStore.add(value1);
+//        return transaction.completed.then((_) {
+////            // create new transaction;
+//          _createTransaction();
+//          index = objectStore.index(NAME_INDEX);
+//          return index.count(new KeyRange.only("test1")).then((int count) {
+//            expect(count == 2, isTrue);
+//          });
+//          // });
+//        });
+//      });
+    });
+    */
   });
 }
