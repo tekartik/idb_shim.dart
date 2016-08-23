@@ -1,8 +1,9 @@
 library idb_shim;
 
 import 'dart:async';
-export 'src/client/error.dart';
+
 export 'src/client/client.dart';
+export 'src/client/error.dart';
 
 const String idbModeReadWrite = "readwrite";
 const String idbModeReadOnly = "readonly";
@@ -409,8 +410,10 @@ abstract class Index {
   /// the whole record as [Index.get] does.
   ///
   Future getKey(dynamic key);
+
   Stream<CursorWithValue> openCursor(
       {key, KeyRange range, String direction, bool autoAdvance});
+
   Stream<Cursor> openKeyCursor(
       {key, KeyRange range, String direction, bool autoAdvance});
 
@@ -459,6 +462,7 @@ abstract class Index {
 abstract class Request {
   Database result;
   Transaction transaction;
+
   Request(this.result, this.transaction);
 }
 
@@ -486,6 +490,7 @@ abstract class VersionChangeEvent {
 
   // event target
   Object get target;
+
   Object get currentTarget => target;
 
   ///
@@ -501,6 +506,7 @@ abstract class VersionChangeEvent {
 abstract class Event {}
 
 typedef void OnUpgradeNeededFunction(VersionChangeEvent event);
+
 typedef void OnBlockedFunction(Event event);
 
 ///
@@ -518,13 +524,17 @@ typedef void OnBlockedFunction(Event event);
 ///
 class KeyRange {
   KeyRange();
+
   KeyRange.only(/*Key*/ value) : this.bound(value, value);
+
   KeyRange.lowerBound(this._lowerBound, [bool open = false]) {
     _lowerBoundOpen = open;
   }
+
   KeyRange.upperBound(this._upperBound, [bool open = false]) {
     _upperBoundOpen = open;
   }
+
   KeyRange.bound(this._lowerBound, this._upperBound,
       [bool lowerOpen = false, bool upperOpen = false]) {
     _lowerBoundOpen = lowerOpen;
@@ -537,8 +547,11 @@ class KeyRange {
   bool _upperBoundOpen = true;
 
   Object get lower => _lowerBound;
+
   bool get lowerOpen => _lowerBoundOpen;
+
   Object get upper => _upperBound;
+
   bool get upperOpen => _upperBoundOpen;
 
   ///
@@ -659,6 +672,12 @@ abstract class IdbFactory {
       OnBlockedFunction onBlocked});
 
   ///
+  /// compares two values as keys to determine equality and ordering for
+  /// IndexedDB operations, such as storing and iterating.
+  ///
+  int cmp(Object first, Object second);
+
+  ///
   /// performs the deletion operation asynchronously.
   ///
   ///  Will trigger an upgradedneeded event and, if any other tabs have open
@@ -694,6 +713,7 @@ abstract class IdbFactory {
 class DatabaseError extends Error {
   String get message => _message;
   String _message;
+
   DatabaseError(this._message);
 
   String toString() => message;

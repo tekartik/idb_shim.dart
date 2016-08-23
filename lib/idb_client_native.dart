@@ -1,20 +1,27 @@
 library idb_shim_native;
 
 import 'dart:async';
-import 'package:idb_shim/idb_client.dart';
-import 'src/utils/browser_utils.dart';
-import 'dart:indexed_db' as idb;
 import 'dart:html' as html;
 import 'dart:html_common' as html_common;
+import 'dart:indexed_db' as idb;
+
+import 'package:idb_shim/idb_client.dart';
+
+import 'src/utils/browser_utils.dart';
+
+part 'src/native/native_cursor.dart';
+
+part 'src/native/native_database.dart';
+
+part 'src/native/native_error.dart';
 
 part 'src/native/native_event.dart';
-part 'src/native/native_transaction.dart';
-part 'src/native/native_database.dart';
-part 'src/native/native_object_store.dart';
-part 'src/native/native_cursor.dart';
 part 'src/native/native_index.dart';
 part 'src/native/native_key_range.dart';
-part 'src/native/native_error.dart';
+
+part 'src/native/native_object_store.dart';
+
+part 'src/native/native_transaction.dart';
 
 IdbNativeFactory get idbNativeFactory => new IdbNativeFactory();
 
@@ -92,5 +99,10 @@ class IdbNativeFactory extends IdbFactory {
 
   static bool get supported {
     return idb.IdbFactory.supported;
+  }
+
+  @override
+  int cmp(Object first, Object second) {
+    return _catchNativeError(() => html.window.indexedDB.cmp(first, second));
   }
 }

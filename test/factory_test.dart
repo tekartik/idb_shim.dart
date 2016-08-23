@@ -1,8 +1,10 @@
 library factory_test;
 
-import 'package:idb_shim/idb_client.dart';
-import 'idb_test_common.dart';
 import 'dart:async';
+
+import 'package:idb_shim/idb_client.dart';
+
+import 'idb_test_common.dart';
 
 // so that this can be run directly
 main() {
@@ -23,6 +25,29 @@ void defineTests(TestContext ctx) {
     test('delete database', () async {
       await _setupDeleteDb();
       await idbFactory.deleteDatabase(_dbName);
+    });
+
+    test('cmp', () {
+      expect(idbFactory.cmp(1, 2), -1);
+      expect(idbFactory.cmp(1, 1), 0);
+      expect(idbFactory.cmp(2, 1), 1);
+      expect(idbFactory.cmp("a", "b"), -1);
+      expect(idbFactory.cmp("a", "a"), 0);
+      expect(idbFactory.cmp("b", "a"), 1);
+      expect(idbFactory.cmp(3.14, 3.45), -1);
+      expect(idbFactory.cmp(3.14, 3.14), 0);
+      expect(idbFactory.cmp(3.64, 3.45), 1);
+      //expect(idbFactory.cmp(1, "0"), -1);
+    });
+
+
+    test('cmp array', () {
+      expect(idbFactory.cmp([1, 2], [1, 3]), -1);
+      expect(idbFactory.cmp([1, 2], [1, 2]), 0);
+      expect(idbFactory.cmp([1, 2], [1, 1]), 1);
+    }, onPlatform: {
+      "dartium": new Skip(
+          "cmp expect single argument (not array) in dartium 45")
     });
 
     /*
@@ -46,7 +71,7 @@ void defineTests(TestContext ctx) {
       test('database names', () {
         return idbFactory.getDatabaseNames().then((List<String> names) {
           expect(names, isNotNull);
-        });
+      });
       });
 
       group('databases', () {
@@ -112,10 +137,11 @@ void defineTests(TestContext ctx) {
 
           names = await idbFactory.getDatabaseNames();
           expect(names.length, length);
-        });
+      });
       });
     } else {
       test('database names not supported', () {});
     }
-  });
+  }
+  );
 }

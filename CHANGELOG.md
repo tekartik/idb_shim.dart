@@ -1,3 +1,7 @@
+## 1.3.6
+
+* Add IdbFactory.cmp
+
 ## 1.3.5
 
 * Simulate multistore transaction on Safari

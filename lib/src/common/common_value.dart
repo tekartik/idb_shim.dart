@@ -2,6 +2,8 @@ library idb_shim_common_value;
 
 import 'dart:convert';
 
+import '../client/error.dart';
+
 // for now use JSON
 dynamic encodeValue(dynamic value) {
   if (value == null) {
@@ -68,4 +70,24 @@ dynamic cloneValue(dynamic value, [String keyPath, dynamic key]) {
     clone[keyPath] = key;
   }
   return clone;
+}
+
+// handle single object and array!
+int compareKeys(dynamic first, dynamic second) {
+  if (first is num) {
+    return first < second ? -1 : (first == second ? 0 : 1);
+  } else if (first is String) {
+    int compare = first.compareTo(second);
+    return compare < 0 ? -1 : (compare == 0 ? 0 : 1);
+  } else if (first is List) {
+    for (int i = 0; i < first.length; i++) {
+      int compare = compareKeys(first[i], second[i]);
+      if (compare != 0) {
+        return compare;
+      }
+    }
+    return 0;
+  }
+  //print(first.runtimeType);
+  throw new DatabaseInvalidKeyError(first);
 }
