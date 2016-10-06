@@ -13,6 +13,8 @@ dev_dependencies:
   logging: any
   test: any
   dev_test: any
+  chrome_travis:
+    git: git://github.com/tekartik/chrome_travis.dart
 #dependency_overrides:
 #  sembast:
 #    git: https://github.com/alextekartik/sembast.dart
