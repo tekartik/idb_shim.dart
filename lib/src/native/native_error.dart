@@ -1,40 +1,32 @@
 part of idb_shim_native;
 
-/*
-class _NativeDatabaseError extends DatabaseError {
-  dynamic _nativeError;
-  _NativeDatabaseError(this._nativeError) : super(null) {}
-  String get message {
-    if (_nativeError is html.Event) {
-      if (_nativeError.currentTarget is idb.Request) {
-        if (_nativeError.currentTarget.error is html.DomError) {
-          return _nativeError.currentTarget.error.message;
-        }
-      }
-    }
-    return _nativeError.toString();
-  }
-}
-*/
+//bool dev = true;
 
 _catchNativeError(action()) {
   try {
     return action();
-  } catch (e) {
+  } on Error catch (e) {
     if (e is DatabaseError) {
       rethrow;
     } else {
       throw new DatabaseError(e.toString());
     }
+  } catch (e) {
+    if (e is DatabaseError) {
+      rethrow;
+    } else {
+      //devPrint(e);
+      //devPrint(e.runtimeType);
+      throw new DatabaseError(e.toString());
+    }
   }
 }
 
+//
+// We no longer catch the native exception asynchronously
+// as it makes the stack trace lost...
+//
 Future _catchAsyncNativeError(Future action()) {
-  return action().catchError((e) {
-    if (e is DatabaseError) {
-      throw e;
-    } else {
-      throw new DatabaseError(e.toString());
-    }
-  });
+  Future result = _catchNativeError(action);
+  return result;
 }

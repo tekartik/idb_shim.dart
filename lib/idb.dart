@@ -714,7 +714,29 @@ class DatabaseError extends Error {
   String get message => _message;
   String _message;
 
+  StackTrace _stackTrace;
+  StackTrace get stackTrace => _stackTrace ?? super.stackTrace;
+  set stackTrace(StackTrace stackTrace) {
+    _stackTrace = stackTrace;
+  }
+
   DatabaseError(this._message);
 
   String toString() => message;
+}
+
+///
+/// Generic database exception
+///
+class DatabaseException implements Exception {
+
+  String get message => _message;
+  String _message;
+
+  DatabaseException(this._message);
+
+  String toString() {
+    if (message == null) return "DatabaseException";
+    return "DatabaseException: $message";
+  }
 }

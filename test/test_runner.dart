@@ -15,6 +15,7 @@ import 'factory_test.dart' as factory_test;
 import 'quick_standalone_test.dart' as quick_standalone_test;
 import 'scenario_test.dart' as scenario_test;
 import 'utils_test.dart' as utils_test;
+import 'exception_test.dart' as exception_test;
 import 'indexeddb_1_test.dart' as indexeddb_1_test;
 import 'indexeddb_2_test.dart' as indexeddb_2_test;
 import 'indexeddb_3_test.dart' as indexeddb_3_test;
@@ -35,6 +36,7 @@ defineTests(TestContext ctx) {
   quick_standalone_test.defineTests(ctx);
   scenario_test.defineTests(ctx);
   utils_test.defineTests(ctx);
+  exception_test.defineTests(ctx);
 
   group('indexeddb_1', () {
     indexeddb_1_test.defineTests(ctx);

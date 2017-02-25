@@ -33,8 +33,10 @@ class _NativeDatabase extends Database {
   @override
   ObjectStore createObjectStore(String name,
       {String keyPath, bool autoIncrement}) {
-    return new _NativeObjectStore(idbDatabase.createObjectStore(name,
-        keyPath: keyPath, autoIncrement: autoIncrement));
+    return _catchNativeError(() {
+      return new _NativeObjectStore(idbDatabase.createObjectStore(name,
+          keyPath: keyPath, autoIncrement: autoIncrement));
+    });
   }
 
   @override

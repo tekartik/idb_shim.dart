@@ -151,7 +151,7 @@ void defineTests(TestContext ctx) {
           return transaction.completed.then((_) {
             _createTransaction();
             return objectStore.add(value, 123).then((_) {},
-                onError: (DatabaseError e) {
+                onError: (e) {
               transaction = null;
             }).then((_) {
               expect(transaction, null);
@@ -178,7 +178,8 @@ void defineTests(TestContext ctx) {
         try {
           await objectStore.getObject(null);
           fail("error");
-        } on DatabaseError catch (e) {
+        } catch (e) {
+          expect(isTestFailure(e), isFalse);
           expect(e, isNotNull);
         }
       });
@@ -189,7 +190,8 @@ void defineTests(TestContext ctx) {
         try {
           await objectStore.getObject(true);
           fail("error");
-        } on DatabaseError catch (e) {
+        } catch (e) {
+          expect(isTestFailure(e), isFalse);
           expect(e, isNotNull);
         }
       });
@@ -281,7 +283,9 @@ void defineTests(TestContext ctx) {
         try {
           await objectStore.add(value, 1234);
           fail("should fail");
-        } on DatabaseError catch (_) {}
+        } catch (e) {
+          expect(isTestFailure(e), isFalse);
+        }
         // cancel transaction
         transaction = null;
       });
@@ -566,6 +570,7 @@ void defineTests(TestContext ctx) {
           // There must be an error!
           return e;
         }).then((e) {
+          expect(isTestFailure(e), isFalse);
           expect(isTransactionReadOnlyError(e), isTrue);
           // don't wait for transaction
           transaction = null;
@@ -579,6 +584,7 @@ void defineTests(TestContext ctx) {
           // There must be an error!
           return e;
         }).then((e) {
+          expect(isTestFailure(e), isFalse);
           expect(isTransactionReadOnlyError(e), isTrue);
           // don't wait for transaction
           transaction = null;
@@ -592,6 +598,7 @@ void defineTests(TestContext ctx) {
           // There must be an error!
           return e;
         }).then((e) {
+          expect(isTestFailure(e), isFalse);
           expect(isTransactionReadOnlyError(e), isTrue);
           // don't wait for transaction
           transaction = null;
@@ -605,6 +612,7 @@ void defineTests(TestContext ctx) {
           // There must be an error!
           return e;
         }).then((e) {
+          expect(isTestFailure(e), isFalse);
           expect(isTransactionReadOnlyError(e), isTrue);
           // don't wait for transaction
           transaction = null;
@@ -776,14 +784,15 @@ void defineTests(TestContext ctx) {
         await _setUp();
         _createTransaction();
         Map value = {"dummy": 'test_value'};
-        return objectStore.add(value).catchError((DatabaseError e) {
+        return objectStore.add(value).catchError((e) {
           // There must be an error!
           return e;
         }).then((e) {
           //expect(isTransactionReadOnlyError(e), isTrue);
           //devPrint(e);
           // IdbMemoryError(3): neither keyPath nor autoIncrement set and trying to add object without key
-          expect(e is DatabaseError, isTrue);
+          expect(isTestFailure(e), isFalse);
+          //expect(e is DatabaseError, isTrue);
           transaction = null;
         });
       });
@@ -792,13 +801,14 @@ void defineTests(TestContext ctx) {
         await _setUp();
         _createTransaction();
         Map value = {"dummy": 'test_value'};
-        return objectStore.put(value).catchError((DatabaseError e) {
+        return objectStore.put(value).catchError((e) {
           // There must be an error!
           return e;
         }).then((e) {
           //expect(isTransactionReadOnlyError(e), isTrue);
           //devPrint(e);
-          expect(e is DatabaseError, isTrue);
+          expect(isTestFailure(e), isFalse);
+          //expect(e is DatabaseError, isTrue);
           transaction = null;
         });
       });
@@ -809,13 +819,14 @@ void defineTests(TestContext ctx) {
         Map value = {keyPath: 'test_value'};
         return objectStore.add(value).then((key) {
           expect(key, 'test_value');
-          return objectStore.add(value).catchError((DatabaseError e) {
+          return objectStore.add(value).catchError((e) {
             // There must be an error!
             return e;
           }).then((e) {
             //expect(isTransactionReadOnlyError(e), isTrue);
             //devPrint(e);
-            expect(e is DatabaseError, isTrue);
+            // expect(e is DatabaseError, isTrue);
+            expect(isTestFailure(e), isFalse);
 
             // in native completed will never succeed so remove it
             transaction = null;

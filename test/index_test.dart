@@ -68,7 +68,7 @@ void defineTests(TestContext ctx) {
           objectStore.index(null);
           fail("should fail");
         } catch (e) {
-          // print(e);
+          expect(isTestFailure(e), isFalse);
         }
       });
 
@@ -79,7 +79,7 @@ void defineTests(TestContext ctx) {
           objectStore.index("dummy");
           fail("should fail");
         } catch (e) {
-          // print(e);
+          expect(isTestFailure(e), isFalse);
         }
       });
     });
@@ -121,7 +121,8 @@ void defineTests(TestContext ctx) {
         try {
           await index.get(null);
           fail("error");
-        } on DatabaseError catch (e) {
+        } catch (e) {
+          expect(isTestFailure(e), isFalse);
           expect(e, isNotNull);
         }
       });
@@ -133,7 +134,8 @@ void defineTests(TestContext ctx) {
         try {
           await index.get(null);
           fail("error");
-        } on DatabaseError catch (e) {
+        } catch (e) {
+          expect(isTestFailure(e), isFalse);
           expect(e, isNotNull);
         }
       });
@@ -144,7 +146,8 @@ void defineTests(TestContext ctx) {
         try {
           await index.getKey(null);
           fail("error");
-        } on DatabaseError catch (e) {
+        } catch (e) {
+          expect(isTestFailure(e), isFalse);
           expect(e, isNotNull);
         }
       });
@@ -156,7 +159,8 @@ void defineTests(TestContext ctx) {
         try {
           await index.getKey(true);
           fail("error");
-        } on DatabaseError catch (e) {
+        } catch (e) {
+          expect(isTestFailure(e), isFalse);
           expect(e, isNotNull);
         }
       });
@@ -329,11 +333,11 @@ void defineTests(TestContext ctx) {
         await objectStore.add(value1);
         try {
           await objectStore.add(value1);
-        } on DatabaseError catch (_) {}
+        } catch (_) {}
         // indexed db throw the exception during completed...
         try {
           await transaction.completed;
-        } on DatabaseError catch (_) {}
+        } catch (_) {}
         // create new transaction;
         _createTransaction();
         index = objectStore.index(testNameIndex);

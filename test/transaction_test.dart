@@ -151,12 +151,14 @@ void defineTests(TestContext ctx) {
         ObjectStore store = transaction.objectStore(testStoreName);
 
         await store.put({}).catchError((e) {
+          expect(e is TestFailure, isFalse);
           // There must be an error!
           //print(e);
           //print(e.runtimeType);
           return e;
         }).then((e) {
           // there must be an error
+          expect(e is TestFailure, isFalse);
           expect(isTransactionReadOnlyError(e), isTrue);
         });
         //database.close();
@@ -178,6 +180,7 @@ void defineTests(TestContext ctx) {
         } catch (e) {
           //print(e);
           //print(e.runtimeType);
+          expect(isTestFailure(e), isFalse);
           expect(isNotFoundError(e), isTrue);
         }
       });
@@ -194,10 +197,8 @@ void defineTests(TestContext ctx) {
         try {
           db.transactionList([], idbModeReadWrite);
           fail("exception expected");
-        } on DatabaseError catch (_) {
-          //print(e);
-          //print(e.runtimeType);
-          // InvalidAccessError: A parameter or an operation was not supported by the underlying object. The storeNames parameter was empty.
+        } catch (e) {
+          expect(e is TestFailure, isFalse);
         }
       });
 
@@ -216,7 +217,7 @@ void defineTests(TestContext ctx) {
           transaction.objectStore(testStoreName2);
           fail("exception expected");
         } catch (e) {
-          // NotFoundError: An attempt was made to reference a Node in a context where it does not exist. The specified object store was not found.
+          expect(e is TestFailure, isFalse);
           expect(isNotFoundError(e), isTrue);
         }
       });
@@ -372,8 +373,9 @@ void defineTests(TestContext ctx) {
         await transaction.completed;
         try {
           await objectStore.getObject(0);
-        } on DatabaseError catch (e) {
+        } catch (e) {
           // Transaction inactive
+          expect(isTestFailure(e), isFalse);
           expect(isTransactionInactiveError(e), isTrue);
         }
       });
@@ -438,8 +440,9 @@ void defineTests(TestContext ctx) {
             fail('should fail');
           }
           await transaction.completed;
-        } on DatabaseError catch (e) {
+        } catch (e) {
           // Transaction inactive
+          expect(isTestFailure(e), isFalse);
           expect(isTransactionInactiveError(e), isTrue);
         }
       });
@@ -460,6 +463,7 @@ void defineTests(TestContext ctx) {
           }
           await transaction.completed;
         } catch (e) {
+          expect(isTestFailure(e), isFalse);
           expect(isTransactionInactiveError(e), isTrue);
         }
       });
@@ -478,9 +482,10 @@ void defineTests(TestContext ctx) {
               if (ctx.isIdbSembast || ctx.isIdbIe) {
                 fail('should fail');
               }
-            }).catchError((DatabaseError e) {
+            }).catchError((e) {
               // Transaction inactive
-              expect(e.message.contains("TransactionInactiveError"), isTrue);
+              expect(isTestFailure(e), isFalse);
+              expect(isTransactionInactiveError(e), isTrue);
             }).then((_) {
               return transaction.completed;
             });
@@ -504,8 +509,8 @@ void defineTests(TestContext ctx) {
           fail('should fail');
           //} on DatabaseError catch (e) {
         } catch (e) {
-          // Transaction inactive
-          expect(e.message.contains("TransactionInactiveError"), isTrue);
+          expect(isTestFailure(e), isFalse);
+          expect(isTransactionInactiveError(e), isTrue);
         }
 
         // this hangs on idb, chrome ie/safari

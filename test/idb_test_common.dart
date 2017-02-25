@@ -15,6 +15,7 @@ import 'dart:async';
 import 'common_meta_test.dart';
 //export 'common_meta_test.dart' hide main;
 export 'package:idb_shim/src/common/common_meta.dart';
+export 'package:idb_shim/src/utils/dev_utils.dart';
 //export 'package:tekartik_test/test_utils.dart';
 import 'package:dev_test/test.dart';
 export 'package:dev_test/test.dart';
@@ -122,7 +123,7 @@ bool isDatabaseError(e) {
 }
 
 bool isTransactionReadOnlyError(e) {
-  if (e is DatabaseError) {
+  // if (e is DatabaseError) {
     String message = e.toString().toLowerCase();
     if (message.contains('readonly')) {
       return true;
@@ -130,26 +131,30 @@ bool isTransactionReadOnlyError(e) {
     if (message.contains('read_only')) {
       return true;
     }
-  }
+
   return false;
 }
 
 bool isTransactionInactiveError(e) {
-  if (e is DatabaseError) {
+  // if (e is DatabaseError) {
     String message = e.toString().toLowerCase();
     if (message.contains('inactive')) {
       return true;
     }
-  }
+  //}
   return false;
 }
 
 bool isNotFoundError(e) {
-  if (e is DatabaseError) {
+  //if (e is DatabaseError) {
     String message = e.toString().toLowerCase();
     if (message.contains('notfounderror')) {
       return true;
     }
-  }
+  //}
   return false;
+}
+
+bool isTestFailure(e) {
+  return e is TestFailure;
 }

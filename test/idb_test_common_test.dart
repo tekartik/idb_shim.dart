@@ -29,5 +29,18 @@ void main() {
               'The operation failed because the requested database object could not be found. For example, an object store did not exist but was being opened."  code: "8" nsresult: "0x80660003 (NotFoundError)"  location: "<unknown>"')),
           isTrue);
     });
+
+    test('isTestFailure', () {
+      try {
+        fail("failure");
+      } catch (e) {
+        expect(isTestFailure(e), isTrue);
+      }
+      try {
+        throw 'some string';
+      } catch (e) {
+        expect(isTestFailure(e), isFalse);
+      }
+    });
   });
 }
