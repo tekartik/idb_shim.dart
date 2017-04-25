@@ -46,6 +46,8 @@ void defineTests(TestContext ctx) {
       expect(idbFactory.cmp([1, 2], [1, 2]), 0);
       expect(idbFactory.cmp([1, 2], [1, 1]), 1);
     }, onPlatform: {
+      "content-shell": new Skip(
+          "cmp expect single argument (not array) in content_shell 1.23.0"),
       "dartium": new Skip(
           "cmp expect single argument (not array) in dartium 45")
     });
