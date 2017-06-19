@@ -185,13 +185,13 @@ abstract class ObjectStoreWithMetaMixin {
   IdbObjectStoreMeta get meta;
 
   //@override
-  get keyPath => meta.keyPath;
+  String get keyPath => meta.keyPath;
 
   //@override
-  get autoIncrement => meta.autoIncrement;
+  bool get autoIncrement => meta.autoIncrement;
 
   //@override
-  get name => meta.name;
+  String get name => meta.name;
 
   //@override
   List<String> get indexNames => meta.indexNames.toList();

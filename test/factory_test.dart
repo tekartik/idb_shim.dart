@@ -40,7 +40,6 @@ void defineTests(TestContext ctx) {
       //expect(idbFactory.cmp(1, "0"), -1);
     });
 
-
     test('cmp array', () {
       expect(idbFactory.cmp([1, 2], [1, 3]), -1);
       expect(idbFactory.cmp([1, 2], [1, 2]), 0);
@@ -48,8 +47,8 @@ void defineTests(TestContext ctx) {
     }, onPlatform: {
       "content-shell": new Skip(
           "cmp expect single argument (not array) in content_shell 1.23.0"),
-      "dartium": new Skip(
-          "cmp expect single argument (not array) in dartium 45")
+      "dartium":
+          new Skip("cmp expect single argument (not array) in dartium 45")
     });
 
     /*
@@ -73,7 +72,7 @@ void defineTests(TestContext ctx) {
       test('database names', () {
         return idbFactory.getDatabaseNames().then((List<String> names) {
           expect(names, isNotNull);
-      });
+        });
       });
 
       group('databases', () {
@@ -139,11 +138,10 @@ void defineTests(TestContext ctx) {
 
           names = await idbFactory.getDatabaseNames();
           expect(names.length, length);
-      });
+        });
       });
     } else {
       test('database names not supported', () {});
     }
-  }
-  );
+  });
 }

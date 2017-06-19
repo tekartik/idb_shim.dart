@@ -21,6 +21,7 @@ void defineTests(TestContext ctx) {
       _dbName = ctx.dbName;
       await idbFactory.deleteDatabase(_dbName);
     }
+
     Future _openDb() async {
       db = await idbFactory.open(_dbName);
     }
@@ -31,6 +32,7 @@ void defineTests(TestContext ctx) {
         //ObjectStore objectStore =
         db.createObjectStore(testStoreName);
       }
+
       return idbFactory
           .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
           .then((Database database) {
@@ -48,6 +50,7 @@ void defineTests(TestContext ctx) {
         // ObjectStore objectStore =
         db.createObjectStore(testStoreName + "_2");
       }
+
       db = await idbFactory.open(_dbName,
           version: 2,
           onUpgradeNeeded: _initializeDatabase,

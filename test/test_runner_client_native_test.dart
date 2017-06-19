@@ -74,6 +74,7 @@ main() {
         transaction = db.transaction("store", "readonly");
         objectStore = transaction.objectStore("store");
       }
+
       _createTransaction() async {
         await new Future.delayed(new Duration(milliseconds: 1));
         _createTransactionSync();
@@ -113,6 +114,7 @@ main() {
       _get() async {
         await objectStore.getObject(0);
       }
+
       await _get();
 
       await transaction.completed;
@@ -138,6 +140,7 @@ main() {
       _get() async {
         await objectStore.getObject(0);
       }
+
       await objectStore.getObject(0).then((_) async {
         await _get();
       });

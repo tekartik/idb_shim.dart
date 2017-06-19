@@ -22,8 +22,6 @@ part 'src/sembast/sembast_object_store.dart';
 part 'src/sembast/sembast_transaction.dart';
 //import 'package:tekartik_core/dev_utils.dart';
 
-
-
 const idbFactoryNameSembast = "sembast";
 
 abstract class IdbSembastFactory extends IdbFactory {

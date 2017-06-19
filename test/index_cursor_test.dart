@@ -76,6 +76,7 @@ void defineTests(TestContext ctx) {
         objectStore = transaction.objectStore(testStoreName);
         index = objectStore.index(testNameIndex);
       }
+
       Future _openDb() async {
         String _dbName = ctx.dbName;
         await idbFactory.deleteDatabase(_dbName);
@@ -85,6 +86,7 @@ void defineTests(TestContext ctx) {
               db.createObjectStore(testStoreName, autoIncrement: true);
           objectStore.createIndex(testNameIndex, testNameField);
         }
+
         db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
       }
@@ -147,6 +149,7 @@ void defineTests(TestContext ctx) {
               db.createObjectStore(testStoreName, autoIncrement: true);
           objectStore.createIndex(testNameIndex, testNameField);
         }
+
         db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
       }
@@ -391,6 +394,7 @@ void defineTests(TestContext ctx) {
         nameIndex = objectStore.index(testNameIndex);
         valueIndex = objectStore.index(testValueIndex);
       }
+
       _setUp() async {
         await _setupDeleteDb();
         void _initializeDatabase(VersionChangeEvent e) {
@@ -400,6 +404,7 @@ void defineTests(TestContext ctx) {
           objectStore.createIndex(testNameIndex, testNameField);
           objectStore.createIndex(testValueIndex, testValueField);
         }
+
         return idbFactory
             .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
             .then((Database database) {
@@ -424,6 +429,7 @@ void defineTests(TestContext ctx) {
                 return keys;
               });
         }
+
         Future add(String name, int value) {
           var obj = {testNameField: name, testValueField: value};
           return objectStore.put(obj);

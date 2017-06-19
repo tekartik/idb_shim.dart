@@ -113,6 +113,7 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName,
               keyPath: testNameField, autoIncrement: true);
         }
+
         db = await idbFactory.open(_srcDbName,
             version: 2, onUpgradeNeeded: _initializeDatabase);
 
@@ -165,6 +166,7 @@ void defineTests(TestContext ctx) {
           objectStore.createIndex(testNameIndex, testNameField,
               unique: true, multiEntry: true);
         }
+
         db = await idbFactory.open(_srcDbName,
             version: 3, onUpgradeNeeded: _initializeDatabase);
 
@@ -294,6 +296,7 @@ void defineTests(TestContext ctx) {
 
           await txn.completed;
         }
+
         await _checkCopyStore(db, testStoreName, db, testStoreName2, _check);
       });
     });

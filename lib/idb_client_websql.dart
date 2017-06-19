@@ -29,7 +29,6 @@ part 'src/websql/websql_utils.dart';
 // import 'dart:web_sql' as wql;
 //import 'package:idb_shim/src/utils/dev_utils.dart';
 
-
 IdbWebSqlFactory get idbWebSqlFactory => new IdbWebSqlFactory();
 
 class IdbWebSqlFactory extends IdbFactory {

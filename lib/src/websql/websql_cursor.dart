@@ -149,7 +149,8 @@ abstract class _WebSqlCursorWithValueBaseController
   _WebSqlCursorWithValueBaseController(String direction, bool autoAdvance)
       : super(direction, autoAdvance);
 
-  Cursor get newCursor => new _WebSqlCursorWithValue(this, rows[currentIndex]);
+  CursorWithValue get newCursor =>
+      new _WebSqlCursorWithValue(this, rows[currentIndex]);
 }
 
 class _WebSqlCursorWithValueController

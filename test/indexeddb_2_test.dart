@@ -18,7 +18,7 @@ const String STORE_NAME = 'TEST';
 const int VERSION = 1;
 
 testReadWrite(idb.IdbFactory idbFactory, key, value, check,
-    [dbName = DB_NAME, storeName = STORE_NAME, version = VERSION]) {
+    [dbName = DB_NAME, storeName = STORE_NAME, version = VERSION]) async {
   createObjectStore(e) {
     var store = e.target.result.createObjectStore(storeName);
     expect(store, isNotNull);
@@ -26,27 +26,27 @@ testReadWrite(idb.IdbFactory idbFactory, key, value, check,
 
   var db;
   // Delete any existing DBs.
-  return idbFactory.deleteDatabase(dbName).then(expectAsync((_) {
-    return idbFactory.open(dbName,
+  await idbFactory.deleteDatabase(dbName);
+
+  try {
+    db = await idbFactory.open(dbName,
         version: version, onUpgradeNeeded: createObjectStore);
-  })).then(expectAsync((result) {
-    db = result;
     var transaction = db.transactionList([storeName], 'readwrite');
     transaction.objectStore(storeName).put(value, key);
 
-    return transaction.completed;
-  })).then(expectAsync((db) {
-    var transaction = db.transaction(storeName, 'readonly');
-    return transaction.objectStore(storeName).getObject(key);
-  })).then(expectAsync((object) {
+    await transaction.completed;
+    transaction = db.transaction(storeName, 'readonly');
+    var object = await transaction.objectStore(storeName).getObject(key);
     db.close();
+    db = null;
     check(value, object);
-  })).catchError((e) {
+  } catch (e) {
     if (db != null) {
       db.close();
     }
-    throw e;
-  });
+    rethrow;
+  }
+  ;
 }
 
 List<String> get nonNativeListData {
@@ -101,7 +101,7 @@ void defineTests(TestContext ctx) {
               [1, 2, 3],
               [1, 2, 3]
             ], l2),
-        throws);
+        throwsA(anything));
 
     verifyGraph(cyclic_list, cyclic_list);
   });

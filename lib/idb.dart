@@ -683,7 +683,7 @@ abstract class IdbFactory {
   ///  Will trigger an upgradedneeded event and, if any other tabs have open
   ///  connections to the database, a blocked event.
   ///
-  Future<IdbFactory> deleteDatabase(String name, {void onBlocked(Event)});
+  Future<IdbFactory> deleteDatabase(String name, {OnBlockedFunction onBlocked});
 
   ///
   /// if getDatabaseNames can be called
@@ -729,7 +729,6 @@ class DatabaseError extends Error {
 /// Generic database exception
 ///
 class DatabaseException implements Exception {
-
   String get message => _message;
   String _message;
 

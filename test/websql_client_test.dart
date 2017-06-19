@@ -118,8 +118,7 @@ main() {
         });
       }
 
-      TestContext ctx = new TestContext()
-        ..factory = idbFactory;
+      TestContext ctx = new TestContext()..factory = idbFactory;
 
       group('tools', () {
         test('get table names rs', () {
@@ -301,7 +300,7 @@ main() {
 
             return idbFactory
                 .open(ctx.dbName,
-                version: 1, onUpgradeNeeded: _initializeDatabase)
+                    version: 1, onUpgradeNeeded: _initializeDatabase)
                 .then((idb) {
               expect(idb.objectStoreNames, [testStoreName]);
 

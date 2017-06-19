@@ -30,6 +30,7 @@ void defineTests(TestContext ctx) {
     _dbName = ctx.dbName;
     await idbFactory.deleteDatabase(_dbName);
   }
+
   // generic tearDown
   _tearDown() async {
     if (transaction != null) {
@@ -75,6 +76,7 @@ void defineTests(TestContext ctx) {
           Database db = e.database;
           db.createObjectStore(testStoreName);
         }
+
         Database db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _createStore);
         Transaction txn = db.transaction(testStoreName, idbModeReadWrite);
@@ -90,6 +92,7 @@ void defineTests(TestContext ctx) {
           db.deleteObjectStore(testStoreName);
           db.createObjectStore(testStoreName);
         }
+
         db = await idbFactory.open(_dbName,
             version: 2, onUpgradeNeeded: _deleteAndCreateStore);
         txn = db.transaction(testStoreName, idbModeReadOnly);
@@ -110,6 +113,7 @@ void defineTests(TestContext ctx) {
           Database db = e.database;
           db.createObjectStore(testStoreName);
         }
+
         db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
       }
@@ -150,8 +154,7 @@ void defineTests(TestContext ctx) {
           expect(key, 123);
           return transaction.completed.then((_) {
             _createTransaction();
-            return objectStore.add(value, 123).then((_) {},
-                onError: (e) {
+            return objectStore.add(value, 123).then((_) {}, onError: (e) {
               transaction = null;
             }).then((_) {
               expect(transaction, null);
@@ -216,6 +219,7 @@ void defineTests(TestContext ctx) {
           Database db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
+
         db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
       }
@@ -550,6 +554,7 @@ void defineTests(TestContext ctx) {
         transaction = db.transaction(testStoreName, idbModeReadOnly);
         objectStore = transaction.objectStore(testStoreName);
       }
+
       _setUp() async {
         await _setupDeleteDb();
 
@@ -557,6 +562,7 @@ void defineTests(TestContext ctx) {
           Database db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
+
         db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
       }
@@ -631,6 +637,7 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName,
               keyPath: keyPath, autoIncrement: true);
         }
+
         db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
       }
@@ -647,7 +654,6 @@ void defineTests(TestContext ctx) {
         } else {
           expect(objectStore.autoIncrement, true);
         }
-
       });
 
       test('simple get', () async {
@@ -674,7 +680,9 @@ void defineTests(TestContext ctx) {
             expect(value, valueRead);
           });
         }).then((_) {
-          Map value = {'test': 'test_value',};
+          Map value = {
+            'test': 'test_value',
+          };
           return objectStore.add(value).then((key) {
             // On Safari this is 1
             if (ctx.isIdbSafari) {
@@ -735,6 +743,7 @@ void defineTests(TestContext ctx) {
           Database db = e.database;
           db.createObjectStore(testStoreName, keyPath: keyPath);
         }
+
         db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
       }
@@ -891,6 +900,7 @@ void defineTests(TestContext ctx) {
             });
           }
         }
+
         return _next();
       });
     });
@@ -923,6 +933,7 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, autoIncrement: true);
           db.createObjectStore(testStoreName2, autoIncrement: true);
         }
+
         db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
       }

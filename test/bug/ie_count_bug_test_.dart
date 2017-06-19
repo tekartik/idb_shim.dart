@@ -11,6 +11,7 @@ main() {
         Database db = (e.target as Request).result;
         db.createObjectStore("store", autoIncrement: true);
       }
+
       Database db = await window.indexedDB
           .open(dbName, version: 1, onUpgradeNeeded: _setupDb);
 

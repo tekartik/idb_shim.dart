@@ -1,6 +1,7 @@
 import 'package:idb_shim/idb_client.dart';
 import 'idb_test_common.dart';
 import 'package:stack_trace/stack_trace.dart';
+
 // so that this can be run directly
 main() {
   defineTests(idbMemoryContext);
@@ -36,8 +37,6 @@ void defineTests(TestContext ctx) {
       db = database;
     });
   }
-
-
 
   group('exception', () {
     // Make testDbName less bad

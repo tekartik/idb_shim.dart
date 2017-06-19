@@ -29,6 +29,7 @@ void defineTests(TestContext ctx) {
       _dbName = ctx.dbName;
       await idbFactory.deleteDatabase(_dbName);
     }
+
     // generic tearDown
     _tearDown() async {
       if (transaction != null) {
@@ -49,6 +50,7 @@ void defineTests(TestContext ctx) {
           Database db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
+
         db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
       }
@@ -94,6 +96,7 @@ void defineTests(TestContext ctx) {
               db.createObjectStore(testStoreName, autoIncrement: true);
           objectStore.createIndex(testNameIndex, testNameField, unique: false);
         }
+
         db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
       }
@@ -195,6 +198,7 @@ void defineTests(TestContext ctx) {
               db.createObjectStore(testStoreName, autoIncrement: true);
           objectStore.createIndex(testNameIndex, testNameField, unique: true);
         }
+
         db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
       }
@@ -392,6 +396,7 @@ void defineTests(TestContext ctx) {
           objectStore.createIndex(testNameIndex, testNameField,
               multiEntry: true);
         }
+
         db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
       }
@@ -494,6 +499,7 @@ void defineTests(TestContext ctx) {
               multiEntry: true);
           objectStore.createIndex(testNameIndex2, testNameField2, unique: true);
         }
+
         db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
         _createTransaction();

@@ -79,6 +79,7 @@ class IdbNativeFactory extends IdbFactory {
       Event event = new _NativeEvent(e);
       onBlocked(event);
     }
+
     return html.window.indexedDB
         .deleteDatabase(dbName,
             onBlocked: onBlocked == null ? null : _onBlocked)

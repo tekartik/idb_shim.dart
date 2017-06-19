@@ -80,6 +80,7 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
         return tx.dropTablesIfExists(names);
       });
     }
+
     // delete all tables
     SqlDatabase sqlDb = _openSqlDb(name);
     return sqlDb.transaction().then((tx) {

@@ -87,6 +87,7 @@ defineTests(SembastFsTestContext ctx) {
             keyPath: testNameField, autoIncrement: true);
         storeMeta = new IdbObjectStoreMeta.fromObjectStore(store);
       }
+
       db = await idbFactory.open(dbTestName,
           version: 2, onUpgradeNeeded: _initializeDatabase);
 
@@ -110,6 +111,7 @@ defineTests(SembastFsTestContext ctx) {
         IdbIndexMeta indexMeta = new IdbIndexMeta.fromIndex(index);
         storeMeta.putIndex(indexMeta);
       }
+
       db = await idbFactory.open(dbTestName,
           version: 3, onUpgradeNeeded: _initializeDatabase);
 

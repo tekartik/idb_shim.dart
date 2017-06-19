@@ -101,6 +101,7 @@ void defineTests(TestContext ctx) {
           //ObjectStore objectStore =
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
+
         db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
       }

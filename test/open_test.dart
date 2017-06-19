@@ -88,6 +88,7 @@ void defineTests(TestContext ctx) {
         // should be called
         initCalled = true;
       }
+
       return idbFactory
           .open(_dbName, version: 0, onUpgradeNeeded: _initializeDatabase)
           .then((Database database) {
@@ -109,6 +110,7 @@ void defineTests(TestContext ctx) {
           // should not be called
           initCalled = true;
         }
+
         return idbFactory
             .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
             .then((Database database) {
@@ -127,6 +129,7 @@ void defineTests(TestContext ctx) {
         expect(e.newVersion, 1);
         initCalled = true;
       }
+
       return idbFactory
           .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
           .then((Database database) {
@@ -144,6 +147,7 @@ void defineTests(TestContext ctx) {
         expect(e.newVersion, 1);
         initCalled = true;
       }
+
       return idbFactory
           .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
           .then((Database database) {
@@ -157,6 +161,7 @@ void defineTests(TestContext ctx) {
           expect(e.newVersion, 2);
           upgradeCalled = true;
         }
+
         return idbFactory
             .open(_dbName, version: 2, onUpgradeNeeded: _upgradeDatabase)
             .then((Database database) {
@@ -173,6 +178,7 @@ void defineTests(TestContext ctx) {
         // should not be called
         initCalled = true;
       }
+
       return idbFactory
           .open(_dbName, version: 2, onUpgradeNeeded: _initializeDatabase)
           .then((Database database) {
@@ -184,6 +190,7 @@ void defineTests(TestContext ctx) {
           // should not be be called
           downgradeCalled = true;
         }
+
         return idbFactory
             .open(_dbName, version: 1, onUpgradeNeeded: _downgradeDatabase)
             .then((Database database) {

@@ -33,6 +33,7 @@ void defineTests(TestContext ctx) {
               db.createObjectStore(STORE_NAME, autoIncrement: true);
           objectStore.createIndex(NAME_INDEX, NAME_FIELD, unique: true);
         }
+
         return idbFactory
             .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
             .then((Database database) {

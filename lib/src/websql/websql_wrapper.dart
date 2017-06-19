@@ -145,6 +145,7 @@ class SqlTransaction {
       }
       completer.complete();
     }
+
     dropNextTable();
     return completer.future;
   }

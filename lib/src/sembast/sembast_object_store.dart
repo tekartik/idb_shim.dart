@@ -121,7 +121,7 @@ class _SdbObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   _storeKeyOrRangeFilter([key_OR_range]) {
-    return _keyOrRangeFilter(sdb.Field.KEY, key_OR_range);
+    return _keyOrRangeFilter(sdb.Field.key, key_OR_range);
   }
 
   @override
@@ -195,7 +195,7 @@ class _SdbObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
     }
   }
 
-  String get keyField => keyPath != null ? keyPath : sdb.Field.KEY;
+  String get keyField => keyPath != null ? keyPath : sdb.Field.key;
 
   @override
   Stream<CursorWithValue> openCursor(

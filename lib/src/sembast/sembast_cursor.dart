@@ -213,17 +213,18 @@ abstract class _SdbStoreCursorControllerMixin implements _ISdbCursor {
   }
 }
 
-abstract class _SdbBaseCursorControllerMixin implements _ISdbCursor {
+abstract class _SdbBaseCursorControllerMixin<T extends Cursor>
+    implements _ISdbCursor {
   IdbCursorMeta meta;
   _SdbObjectStore get store;
 
 // To implement for KeyCursor vs CursorWithValue
-  Cursor nextEvent(int index);
+  T nextEvent(int index);
 
   List<sdb.Record> records;
   bool get done => currentIndex == null;
   int currentIndex = -1;
-  StreamController ctlr;
+  StreamController<T> ctlr;
 
   void init() {
     ctlr = new StreamController(sync: true);
@@ -291,7 +292,7 @@ class _SdbStoreKeyCursorController extends Object
 class _SdbIndexKeyCursorController extends Object
     with
         _SdbKeyCursorControllerMixin,
-        _SdbBaseCursorControllerMixin,
+        _SdbBaseCursorControllerMixin<Cursor>,
         _SdbIndexCursorControllerMixin {
   _SdbIndex index;
   _SdbObjectStore get store => index.store;
@@ -310,7 +311,7 @@ class _SdbIndexKeyCursorController extends Object
 class _SdbIndexCursorWithValueController extends Object
     with
         _SdbCursorWithValueControllerMixin,
-        _SdbBaseCursorControllerMixin,
+        _SdbBaseCursorControllerMixin<CursorWithValue>,
         _SdbIndexCursorControllerMixin {
   _SdbIndex index;
   _SdbObjectStore get store => index.store;
@@ -319,7 +320,7 @@ class _SdbIndexCursorWithValueController extends Object
     init();
   }
 
-  Cursor nextEvent(int index) {
+  CursorWithValue nextEvent(int index) {
     _SdbIndexCursorWithValue cursor = new _SdbIndexCursorWithValue(this, index);
     return cursor;
   }
@@ -328,7 +329,7 @@ class _SdbIndexCursorWithValueController extends Object
 class _SdbStoreCursorWithValueController extends Object
     with
         _SdbCursorWithValueControllerMixin,
-        _SdbBaseCursorControllerMixin,
+        _SdbBaseCursorControllerMixin<CursorWithValue>,
         _SdbStoreCursorControllerMixin {
   _SdbObjectStore store;
   _SdbStoreCursorWithValueController(this.store, IdbCursorMeta meta) {
@@ -336,7 +337,7 @@ class _SdbStoreCursorWithValueController extends Object
     init();
   }
 
-  Cursor nextEvent(int index) {
+  CursorWithValue nextEvent(int index) {
     _SdbStoreCursorWithValue cursor = new _SdbStoreCursorWithValue(this, index);
     return cursor;
   }

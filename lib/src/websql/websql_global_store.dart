@@ -23,7 +23,7 @@ class _WebSqlGlobalStore {
           .execute("SELECT $NAME_COLUMN_NAME FROM $DATABASES_TABLE_NAME")
           .then((SqlResultSet resultSet) {
         List<String> names = [];
-        resultSet.rows.forEach((Map<String, String> row) {
+        resultSet.rows.forEach((Map row) {
           //print(row);
           names.add(row[NAME_COLUMN_NAME]);
         });
@@ -55,6 +55,7 @@ class _WebSqlGlobalStore {
         return count == 1;
       });
     }
+
     return _checkOpenTransaction().then((tx) {
       return checkExists(tx).then((exists) {
         if (!exists) {
@@ -132,26 +133,27 @@ class _WebSqlGlobalStore {
     }
 
     Future<SqlTransaction> _setup() {
-      return db.transaction().then((tx) {
-        return tx.execute("SELECT internal_version, signature FROM version") //
-            .then((SqlResultSet rs) {
+      return db.transaction().then((tx) async {
+        try {
+          SqlResultSet rs = await tx
+              .execute("SELECT internal_version, signature FROM version"); //
           if (rs.rows.length != 1) {
-            return _cleanup(tx);
+            return await _cleanup(tx);
           }
           int internalVersion = _getInternalVersionFromResultSet(rs);
           String signature = _getSignatureFromResultSet(rs);
           if (signature != INTERNAL_SIGNATURE) {
-            return _cleanup(tx);
+            return await _cleanup(tx);
           }
           if (internalVersion != INTERNAL_VERSION) {
-            return _cleanup(tx);
+            return await _cleanup(tx);
           }
           return tx;
-        }).catchError((e) {
+        } catch (_) {
           //return db.transaction().then((tx) {
-          return _cleanup(tx);
+          return await _cleanup(tx);
           //});
-        });
+        }
       });
     }
 

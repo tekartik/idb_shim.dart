@@ -192,13 +192,16 @@ void defineTests(TestContext ctx) {
   }, skip: true);
 
   group('functional', () {
-    test('throws when unsupported', () {
-      var expectation = idb.IdbFactory.supported ? returnsNormally : throws;
+    test('throws when unsupported', () async {
+      bool failed = false;
 
-      expect(() {
+      try {
         var db = idbFactory;
-        db.open('random_db');
-      }, expectation);
+        await db.open('random_db');
+      } catch (_) {
+        failed = true;
+      }
+      expect(failed, !idb.IdbFactory.supported);
     });
 
     // Don't bother with these tests if it's unsupported.

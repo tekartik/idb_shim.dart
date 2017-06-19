@@ -113,6 +113,7 @@ Future<Database> setUpSimpleStore(IdbFactory idbFactory, //
             unique: indexMeta.unique, multiEntry: indexMeta.multiEntry);
       }
     }
+
     return idbFactory.open(dbName,
         version: 1, onUpgradeNeeded: _initializeDatabase);
   });
@@ -124,33 +125,33 @@ bool isDatabaseError(e) {
 
 bool isTransactionReadOnlyError(e) {
   // if (e is DatabaseError) {
-    String message = e.toString().toLowerCase();
-    if (message.contains('readonly')) {
-      return true;
-    }
-    if (message.contains('read_only')) {
-      return true;
-    }
+  String message = e.toString().toLowerCase();
+  if (message.contains('readonly')) {
+    return true;
+  }
+  if (message.contains('read_only')) {
+    return true;
+  }
 
   return false;
 }
 
 bool isTransactionInactiveError(e) {
   // if (e is DatabaseError) {
-    String message = e.toString().toLowerCase();
-    if (message.contains('inactive')) {
-      return true;
-    }
+  String message = e.toString().toLowerCase();
+  if (message.contains('inactive')) {
+    return true;
+  }
   //}
   return false;
 }
 
 bool isNotFoundError(e) {
   //if (e is DatabaseError) {
-    String message = e.toString().toLowerCase();
-    if (message.contains('notfounderror')) {
-      return true;
-    }
+  String message = e.toString().toLowerCase();
+  if (message.contains('notfounderror')) {
+    return true;
+  }
   //}
   return false;
 }
