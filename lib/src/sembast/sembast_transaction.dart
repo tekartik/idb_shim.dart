@@ -12,6 +12,9 @@ class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
   _SdbDatabase get database => super.database as _SdbDatabase;
   sdb.Database get sdbDatabase => database.db;
 
+  static int debugAllIds = 0;
+  int _debugId;
+
   int index = 0;
   bool _inactive = false;
 
@@ -94,7 +97,7 @@ class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
       //lazyExecution = new Future.delayed(new Duration(), () {
 
       _sdbAction() {
-        assert(sdbDatabase.transaction == null);
+        //assert(sdbDatabase.transaction == null);
 
         // No return value here
         return sdbDatabase.inTransaction(() {
@@ -161,6 +164,10 @@ class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
 
   final IdbTransactionMeta meta;
   _SdbTransaction(_SdbDatabase database, this.meta) : super(database) {
+    if (_debugTransaction) {
+      _debugId = ++debugAllIds;
+    }
+
     // Trigger a timer to close the transaction if nothing happens
     if (!_transactionLazyMode) {
       // in 1.12, calling completed matched ie behavior
@@ -176,10 +183,14 @@ class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
   Future<Database> get _completed {
     if (lazyExecution == null) {
       if (_debugTransaction) {
-        print('no lazy executor...');
+        print('no lazy executor $_debugId...');
       }
       _inactive = true;
       return new Future.value(database);
+    } else {
+      if (_debugTransaction) {
+        print('lazy executor created $_debugId...');
+      }
     }
     return lazyExecution.then((_) {
       return sdbTransaction.completed.then((_) {
@@ -196,6 +207,9 @@ class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
 
   @override
   Future<Database> get completed {
+    if (_debugTransaction) {
+      print('completed $_debugId...');
+    }
     Future<Database> _completed() => this._completed.then((Database db) {
           if (_debugTransaction) {
             print('completed');

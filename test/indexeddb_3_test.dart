@@ -52,7 +52,9 @@ Future<Database> writeItems(Database db) {
 }
 
 Future<Database> setupDb(IdbFactory idbFactory) {
-  return createAndOpenDb(idbFactory).then(writeItems);
+  return createAndOpenDb(idbFactory).then(writeItems).then((db) {
+    return db;
+  });
 }
 
 Future<Database> readAllViaCursor(Database db) {
@@ -117,7 +119,7 @@ void defineTests(TestContext ctx) {
     var db;
     //var oldTimeout;
 
-    group('', () {
+    group('indexeddb_3', () {
       setUp(() {
         //oldTimeout = unittestConfiguration.timeout;
         //unittestConfiguration.timeout = new Duration(seconds: 30);
