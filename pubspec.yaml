@@ -31,7 +31,7 @@ web:
     debug: dartdevc
 
 # dev only
-dependency_overrides:
-  sembast:
-    # git: https://github.com/tekartik/sembast.dart
-    # path: ../sembast.dart
+# dependency_overrides:
+#  sembast:
+#    git: https://github.com/tekartik/sembast.dart
+#    path: ../sembast.dart
