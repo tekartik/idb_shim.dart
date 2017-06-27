@@ -77,7 +77,7 @@ void defineTests(TestContext ctx) {
   obj4['a'] = 100;
   obj4['b'] = 's';
 
-  var cyclic_list = [1, 2, 3];
+  List<Object> cyclic_list = [1, 2, 3];
   cyclic_list[1] = cyclic_list;
 
   skip_go(name, data) => null;

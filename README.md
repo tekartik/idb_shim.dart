@@ -58,6 +58,13 @@ await txn.completed;
 ### Author
  * [Alexandre Roux Tekartik](https://github.com/alextekartik) ([+Alexandre Roux Tekartik](https://plus.google.com/+AlexandreRouxTekartik/about))
  
+### Testing
+
+#### Testing with dartdevc
+
+    pub serve test --web-compiler=dartdevc --port=8079
+    pub run test -p chrome --pub-serve=8079
+
 ### Known limitations/issues
 
 #### Memory/Io/WebSql implementation
@@ -107,3 +114,4 @@ Safari has the following limitations (as of v 9.0)
 
 * no support for transactions on multiple stores
 * very short transaction life cycle (no await on sdk 1.12)
+
