@@ -27,3 +27,6 @@ pubspec.lock
 # Test generated file
 test/out/
 test_out/
+
+# Local folder
+.local/
