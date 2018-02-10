@@ -86,8 +86,8 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
     return sqlDb.transaction().then((tx) {
       return tx.execute("SELECT internal_version, signature FROM version").then(
           (rs) {
-        String signature = _getSignatureFromResultSet(rs);
-        int internalVersion = _getInternalVersionFromResultSet(rs);
+        String signature = getSignatureFromResultSet(rs);
+        int internalVersion = getInternalVersionFromResultSet(rs);
         // Stores table is valid since the first version
         if ((signature == INTERNAL_SIGNATURE) &&
             (internalVersion >= INTERNAL_VERSION_1)) {
@@ -270,8 +270,8 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
             .execute(
                 "SELECT internal_version, value, signature FROM version") //
             .then((SqlResultSet rs) {
-          int internalVersion = _getInternalVersionFromResultSet(rs);
-          String signature = _getSignatureFromResultSet(rs);
+          int internalVersion = getInternalVersionFromResultSet(rs);
+          String signature = getSignatureFromResultSet(rs);
           if (signature != INTERNAL_SIGNATURE) {
             return _cleanup(tx);
           }

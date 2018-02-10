@@ -140,8 +140,8 @@ class _WebSqlGlobalStore {
           if (rs.rows.length != 1) {
             return await _cleanup(tx);
           }
-          int internalVersion = _getInternalVersionFromResultSet(rs);
-          String signature = _getSignatureFromResultSet(rs);
+          int internalVersion = getInternalVersionFromResultSet(rs);
+          String signature = getSignatureFromResultSet(rs);
           if (signature != INTERNAL_SIGNATURE) {
             return await _cleanup(tx);
           }

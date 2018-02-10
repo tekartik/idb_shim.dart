@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:idb_shim/src/common/common_meta.dart';
 import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/websql/websql_client_constants.dart';
+import 'package:idb_shim/src/websql/websql_utils.dart';
 import 'package:idb_shim/src/websql/websql_wrapper.dart';
 
 import 'idb_client.dart';
@@ -14,20 +15,12 @@ import "src/utils/core_imports.dart";
 
 part 'src/websql/websql_cursor.dart';
 part 'src/websql/websql_database.dart';
-
 part 'src/websql/websql_error.dart';
 part 'src/websql/websql_global_store.dart';
 part 'src/websql/websql_index.dart';
-
 part 'src/websql/websql_object_store.dart';
 part 'src/websql/websql_query.dart';
-
 part 'src/websql/websql_transaction.dart';
-
-part 'src/websql/websql_utils.dart';
-
-// import 'dart:web_sql' as wql;
-//import 'package:idb_shim/src/utils/dev_utils.dart';
 
 IdbWebSqlFactory get idbWebSqlFactory => new IdbWebSqlFactory();
 
@@ -39,6 +32,7 @@ class IdbWebSqlFactory extends IdbFactory {
   _WebSqlGlobalStore _globalStore = new _WebSqlGlobalStore();
 
   static IdbWebSqlFactory _instance;
+
   IdbWebSqlFactory._();
 
   String get name => idbFactoryWebSql;
