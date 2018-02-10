@@ -16,13 +16,24 @@ main() {
             "websql_raw_test_2", "1", "WebSql raw test 2", 50 * 1000);
         var completer = new Completer();
         SqlResultSet rs_;
+
+        // Default error callback => return boolean
+        bool _errorCallback(_, __) {
+          return true;
+        }
+
         db.transaction((txn) {
-          txn.executeSql("DROP TABLE IF EXISTS test");
-          txn.executeSql("CREATE TABLE test (value TEXT)");
-          txn.executeSql("INSERT INTO test (value) VALUES (?)", ["first"]);
-          txn.executeSql("SELECT * FROM test", [], (_, SqlResultSet rs) {
-            rs_ = rs;
-          });
+          txn.executeSql("DROP TABLE IF EXISTS test", [], (txn, __) {
+            txn.executeSql("CREATE TABLE test (value TEXT)", [], (txn, __) {
+              txn.executeSql("INSERT INTO test (value) VALUES (?)", ["first"],
+                  (txn, __) {
+                txn.executeSql("SELECT * FROM test", [],
+                    (txn, SqlResultSet rs) {
+                  rs_ = rs;
+                }, _errorCallback);
+              }, _errorCallback);
+            }, _errorCallback);
+          }, _errorCallback);
         }, (e) {
           completer.completeError(e.message);
         }, () {
