@@ -50,11 +50,14 @@ class _IdbSembastFactory extends IdbSembastFactory {
     });
   }
 
-  Future<IdbFactory> deleteDatabase(String dbName, {void onBlocked(Event)}) {
+  @override
+  Future<IdbFactory> deleteDatabase(String dbName,
+      {OnBlockedFunction onBlocked}) async {
     if (dbName == null) {
       return new Future.error(new ArgumentError('dbName cannot be null'));
     }
-    return _databaseFactory.deleteDatabase(getDbPath(dbName));
+    await _databaseFactory.deleteDatabase(getDbPath(dbName));
+    return this;
   }
 
   @override

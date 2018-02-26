@@ -73,7 +73,8 @@ class IdbNativeFactory extends IdbFactory {
   }
 
   @override
-  Future<IdbFactory> deleteDatabase(String dbName, {void onBlocked(Event)}) {
+  Future<IdbFactory> deleteDatabase(String dbName,
+      {OnBlockedFunction onBlocked}) {
     void _onBlocked(html.Event e) {
       print("blocked deleting $dbName");
       Event event = new _NativeEvent(e);
