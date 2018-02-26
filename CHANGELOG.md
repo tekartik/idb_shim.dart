@@ -1,3 +1,7 @@
+## 1.4.0
+
+* Depends on sembast 1.4.0
+
 ## 1.3.6
 
 * Add IdbFactory.cmp
