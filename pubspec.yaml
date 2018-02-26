@@ -9,6 +9,7 @@ dependencies:
   sembast: '>=1.4.0'
   collection: '>=1.4.0'
   path: any
+  js: any
 dev_dependencies:
   stack_trace: any
   browser: any
