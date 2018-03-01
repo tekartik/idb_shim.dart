@@ -1,3 +1,7 @@
+## 1.4.2
+
+* Add `implicit-cast: false` support
+
 ## 1.4.0
 
 * Depends on sembast 1.4.0
