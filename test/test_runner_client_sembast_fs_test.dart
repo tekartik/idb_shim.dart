@@ -62,7 +62,7 @@ defineTests(SembastFsTestContext ctx) {
     Future<sdb.Database> openTmpDatabase([int version = 1]) async {
       String sdbName = "${dbTestName}_mem";
       sdb.Database db = await tmpSdbFactory.openDatabase(sdbName,
-          version: version, mode: sdb.DatabaseMode.EMPTY);
+          version: version, mode: sdb.databaseModeEmpty);
       return db;
     }
 

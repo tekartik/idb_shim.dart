@@ -205,10 +205,6 @@ class _SdbDatabase extends Database with DatabaseWithMetaMixin {
     } else {
       map = {};
     }
-
-    if (db != null) {
-      map["db"] = db.toJson();
-    }
     return map;
   }
 

@@ -6,7 +6,7 @@ homepage: http://alextekartik.github.io/idb_shim.dart/
 environment:
   sdk: '>=1.24.0 <2.0.0'
 dependencies:
-  sembast: '>=1.6.1'
+  sembast: '>=1.7.0'
   collection: '>=1.4.0'
   path: any
   js: any
@@ -33,6 +33,6 @@ web:
 
 # dev only
 # dependency_overrides:
-#  sembast:
+#   sembast:
 #    git: https://github.com/tekartik/sembast.dart
-#    path: ../sembast.dart
+#     path: ../sembast.dart
