@@ -1,6 +1,6 @@
 import 'dart:web_sql';
 
-import 'package:idb_shim/src/websql/websql_js.dart';
+import 'package:idb_shim/src/websql/websql_interop.dart';
 import 'package:js/js_util.dart';
 
 int getInternalVersionFromResultSet(SqlResultSet resultSet) {
