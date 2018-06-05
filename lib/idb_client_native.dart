@@ -96,6 +96,7 @@ class IdbNativeFactory extends IdbFactory {
 
   @override
   Future<List<String>> getDatabaseNames() {
+    // ignore: undefined_method
     return html.window.indexedDB.getDatabaseNames();
   }
 

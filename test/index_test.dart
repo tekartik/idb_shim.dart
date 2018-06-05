@@ -300,20 +300,18 @@ void defineTests(TestContext ctx) {
         _createTransaction();
         Map value = {testNameField: "test1"};
         Index index = objectStore.index(testNameIndex);
-        return objectStore.add(value).then((key) {
-          return index.get("test1").then((Map readValue) {
-            expect(readValue, value);
-          });
-        });
+        var key = await objectStore.add(value);
+        expect(key, 1);
+        var readValue = await index.get("test1");
+        expect(readValue, value);
       });
 
       test('get key none', () async {
         await _setUp();
         _createTransaction();
         Index index = objectStore.index(testNameIndex);
-        return index.getKey("test1").then((int readKey) {
-          expect(readKey, isNull);
-        });
+        var readKey = await index.getKey("test1");
+        expect(readKey, isNull);
       });
 
       test('add/get key', () async {
@@ -321,11 +319,9 @@ void defineTests(TestContext ctx) {
         _createTransaction();
         Map value = {testNameField: "test1"};
         Index index = objectStore.index(testNameIndex);
-        return objectStore.add(value).then((int key) {
-          return index.getKey("test1").then((int readKey) {
-            expect(readKey, key);
-          });
-        });
+        var key = await objectStore.add(value);
+        var readKey = await index.getKey("test1");
+        expect(readKey, key);
       });
 
       test('add_twice_same_key', () async {
@@ -362,26 +358,21 @@ void defineTests(TestContext ctx) {
         _createTransaction();
         Map value1 = {testNameField: "test1"};
         Map value2 = {testNameField: "test2"};
-        return objectStore.add(value1).then((key) {
-          expect(key, 1);
-          return objectStore.add(value2).then((key) {
-            expect(key, 2);
-            Index index = objectStore.index(testNameIndex);
-            return index.get("test1").then((Map readValue) {
-              expect(readValue, value1);
-              return index.get("test2").then((Map readValue) {
-                expect(readValue, value2);
+        var key = await objectStore.add(value1);
+        expect(key, 1);
+        key = await objectStore.add(value2);
+        expect(key, 2);
+        Index index = objectStore.index(testNameIndex);
+        var readValue = await index.get("test1");
+        expect(readValue, value1);
+        readValue = await index.get("test2");
+        expect(readValue, value2);
 
-                // count() crashes on ie
-                if (!ctx.isIdbIe) {
-                  return index.count().then((result) {
-                    expect(result, 2);
-                  });
-                }
-              });
-            });
-          });
-        });
+        // count() crashes on ie
+        if (!ctx.isIdbIe) {
+          var result = await index.count();
+          expect(result, 2);
+        }
       });
     });
 
@@ -429,11 +420,10 @@ void defineTests(TestContext ctx) {
         Map value = {testNameField: "test1"};
 
         Index index = objectStore.index(testNameIndex);
-        return objectStore.add(value).then((key) {
-          return index.get("test1").then((Map readValue) {
-            expect(readValue, value);
-          });
-        });
+        var key = await objectStore.add(value);
+        expect(key, 1);
+        var readValue = await index.get("test1");
+        expect(readValue, value);
       });
 
       test('add_twice_same_key', () async {
@@ -442,13 +432,9 @@ void defineTests(TestContext ctx) {
         Map value = {testNameField: "test1"};
 
         Index index = objectStore.index(testNameIndex);
-        return objectStore.add(value).then((key) {
-          return objectStore.add(value).then((key) {
-            return index.get("test1").then((Map readValue) {
-              expect(readValue, value);
-            });
-          });
-        });
+        await objectStore.add(value);
+        var readValue = await index.get("test1");
+        expect(readValue, value);
       });
 
       test('add_null', () async {
@@ -477,13 +463,10 @@ void defineTests(TestContext ctx) {
 
         // There was a bug in memory implementation when a key was null
         Index index = objectStore.index(testNameIndex);
-        return objectStore.add({}).then((key) {
-          return objectStore.add(value).then((key) {
-            return index.get("test1").then((Map readValue) {
-              expect(readValue, value);
-            });
-          });
-        });
+        await objectStore.add({});
+        await objectStore.add(value);
+        var readValue = await index.get("test1");
+        expect(readValue, value);
       });
     });
 
