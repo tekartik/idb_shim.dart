@@ -12,6 +12,7 @@ const int VERSION = 1;
 Future<Database> createAndOpenDb(IdbFactory idbFactory) {
   return idbFactory.deleteDatabase(DB_NAME).then((_) {
     return idbFactory.open(DB_NAME, version: VERSION, onUpgradeNeeded: (e) {
+      // ignore: undefined_getter
       var db = e.target.result;
       db.createObjectStore(STORE_NAME);
     });

@@ -6,6 +6,7 @@ import 'dart:html';
 import 'dart:web_sql';
 
 import 'package:dev_test/test.dart';
+import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:idb_shim/src/websql/websql_utils.dart';
 
 main() {
@@ -53,7 +54,7 @@ main() {
             "websql_raw_test_2", "1", "WebSql raw test 2", 50 * 1000);
         SqlResultSet rs_;
 
-        db.transaction((txn) async {
+        await db.transaction((txn) async {
           await txn.executeSql("DROP TABLE IF EXISTS test");
           await txn.executeSql("CREATE TABLE test (value TEXT)");
           await txn.executeSql("INSERT INTO test (value) VALUES (?)", ["first"]);
@@ -61,6 +62,7 @@ main() {
         });
 
         // We should get a single row {"value": "first"}
+        devPrint("result set: ${rs_}");
         var row = getRowsFromResultSet(rs_).first;
         expect(row['value'], "first");
       });

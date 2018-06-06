@@ -33,6 +33,6 @@ web:
 
 # dev only
 # dependency_overrides:
-#   sembast:
+#  sembast:
 #    git: https://github.com/tekartik/sembast.dart
-#     path: ../sembast.dart
+#    path: ../sembast.dart

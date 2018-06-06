@@ -102,7 +102,7 @@ class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
         // No return value here
         return sdbDatabase.inTransaction(() {
           // assign right away as this is tested
-          sdbTransaction = sdbDatabase.transaction;
+          // sdbTransaction = sdbDatabase.currentTransaction;
 
           return _next();
 
@@ -119,6 +119,10 @@ class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
 //                    }
 //
 //          return _checkNext();
+        }).whenComplete(() {
+          transactionCompleter.complete();
+        }).catchError((e) {
+          transactionCompleter.completeError(e);
         });
       }
       //lazyExecution = new Future.sync(() {
@@ -157,7 +161,8 @@ class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
     });
   }
 
-  sdb.Transaction sdbTransaction;
+  //sdb.Transaction sdbTransaction;
+  var transactionCompleter = new Completer();
   List<Completer> completers = [];
   List<Function> actions = [];
   List<Future> futures = [];
@@ -193,7 +198,7 @@ class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
       }
     }
     return lazyExecution.then((_) {
-      return sdbTransaction.completed.then((_) {
+      return transactionCompleter.future.then((_) {
         return Future.wait(futures).then((_) {
           return database;
         }).catchError((e, st) {
