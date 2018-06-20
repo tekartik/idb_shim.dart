@@ -71,7 +71,8 @@ void defineTests(TestContext ctx) {
         dstDb.close();
       }
 
-      _checkAll(Database db, Map expectedExport, Future check(Database database)) async {
+      _checkAll(Database db, Map expectedExport,
+          Future check(Database database)) async {
         await check(db);
         await _checkCopySchema(db, check);
         await _checkExportImport(db, expectedExport, check);
@@ -311,7 +312,8 @@ void defineTests(TestContext ctx) {
         dstDb.close();
       }
 
-      _checkAll(Database db, Map expectedExport, Future check(Database database)) async {
+      _checkAll(Database db, Map expectedExport,
+          Future check(Database database)) async {
         await check(db);
         await _checkCopyDatabase(db, check);
         await _checkExportImport(db, expectedExport, check);

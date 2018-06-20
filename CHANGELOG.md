@@ -1,3 +1,8 @@
+## 1.5.0
+
+* Dart2 compatible (expect websql shim)
+* Depends on sembast 1.7.0
+
 ## 1.4.2
 
 * Add `implicit-cast: false` support
