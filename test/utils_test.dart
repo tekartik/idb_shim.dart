@@ -71,7 +71,7 @@ void defineTests(TestContext ctx) {
         dstDb.close();
       }
 
-      _checkAll(Database db, Map expectedExport, Future check(Database)) async {
+      _checkAll(Database db, Map expectedExport, Future check(Database database)) async {
         await check(db);
         await _checkCopySchema(db, check);
         await _checkExportImport(db, expectedExport, check);
@@ -230,7 +230,7 @@ void defineTests(TestContext ctx) {
           String srcStoreName,
           Database dstDatabase,
           String dstStoreName,
-          check(Database, String)) async {
+          check(Database database, String name)) async {
         await check(srcDatabase, srcStoreName);
         await copyStore(srcDatabase, srcStoreName, dstDatabase, dstStoreName);
         await check(dstDatabase, dstStoreName);
@@ -304,14 +304,14 @@ void defineTests(TestContext ctx) {
     group('copyDatabase', () {
       tearDown(_tearDown);
 
-      _checkCopyDatabase(Database db, Future check(Database)) async {
+      _checkCopyDatabase(Database db, Future check(Database database)) async {
         Database dstDb = await copyDatabase(db, idbFactory, _dstDbName);
         expect(dstDb.name, _dstDbName);
         await check(dstDb);
         dstDb.close();
       }
 
-      _checkAll(Database db, Map expectedExport, Future check(Database)) async {
+      _checkAll(Database db, Map expectedExport, Future check(Database database)) async {
         await check(db);
         await _checkCopyDatabase(db, check);
         await _checkExportImport(db, expectedExport, check);

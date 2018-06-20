@@ -139,7 +139,7 @@ void defineTests(TestContext ctx) {
         Map value = {};
         return objectStore.add(value, 123).then((key) {
           expect(key, 123);
-          return objectStore.getObject(key).then((Map readValue) {
+          return objectStore.getObject(key).then((readValue) {
             expect(readValue, value);
           });
         });
@@ -169,7 +169,7 @@ void defineTests(TestContext ctx) {
         String value = "4567";
         return objectStore.add(value, 123).then((key) {
           expect(key, 123);
-          return objectStore.getObject(key).then((String readValue) {
+          return objectStore.getObject(key).then((readValue) {
             expect(readValue, value);
           });
         });
@@ -349,7 +349,7 @@ void defineTests(TestContext ctx) {
         _createTransaction();
         Map value = {};
         return objectStore.add(value).then((key) {
-          return objectStore.getObject(key).then((Map value) {
+          return objectStore.getObject(key).then((value) {
             expect(value.length, 0);
           });
         });
@@ -360,7 +360,7 @@ void defineTests(TestContext ctx) {
         _createTransaction();
         Map value = {'test': 'test_value'};
         return objectStore.add(value).then((key) {
-          return objectStore.getObject(key).then((Map valueRead) {
+          return objectStore.getObject(key).then((valueRead) {
             expect(value, valueRead);
           });
         });
@@ -473,7 +473,7 @@ void defineTests(TestContext ctx) {
         return objectStore.add(value).then((key) {
           return objectStore.delete(key + 1).then((delete_result) {
             // check fist one still here
-            return objectStore.getObject(key).then((Map valueRead) {
+            return objectStore.getObject(key).then((valueRead) {
               expect(value, valueRead);
             });
           });
@@ -485,12 +485,12 @@ void defineTests(TestContext ctx) {
         _createTransaction();
         Map value = {'test': 'test_value'};
         return objectStore.add(value).then((key) {
-          return objectStore.getObject(key).then((Map valueRead) {
+          return objectStore.getObject(key).then((valueRead) {
             expect(value, valueRead);
             value['test'] = 'new_value';
             return objectStore.put(value, key).then((putResult) {
               expect(putResult, key);
-              return objectStore.getObject(key).then((Map valueRead2) {
+              return objectStore.getObject(key).then((valueRead2) {
                 expect(valueRead2, value);
                 expect(valueRead2, isNot(equals(valueRead)));
               });
@@ -517,7 +517,7 @@ void defineTests(TestContext ctx) {
           newValue['test'] = 'new_value';
           return objectStore.put(newValue, key + 1).then((delete_result) {
             // check fist one still here
-            return objectStore.getObject(key).then((Map valueRead) {
+            return objectStore.getObject(key).then((valueRead) {
               expect(value, valueRead);
             });
           });
@@ -662,7 +662,7 @@ void defineTests(TestContext ctx) {
         Map value = {'test': 'test_value'};
         return objectStore.add(value).then((key) {
           expect(key, 1);
-          return objectStore.getObject(key).then((Map valueRead) {
+          return objectStore.getObject(key).then((valueRead) {
             Map expectedValue = cloneValue(value);
             expectedValue[keyPath] = 1;
             expect(valueRead, expectedValue);
@@ -676,7 +676,7 @@ void defineTests(TestContext ctx) {
         Map value = {'test': 'test_value', keyPath: 123};
         return objectStore.add(value).then((key) {
           expect(key, 123);
-          return objectStore.getObject(key).then((Map valueRead) {
+          return objectStore.getObject(key).then((valueRead) {
             expect(value, valueRead);
           });
         }).then((_) {
@@ -700,7 +700,7 @@ void defineTests(TestContext ctx) {
         Map value = {'test': 'test_value', keyPath: 123};
         return objectStore.put(value).then((key) {
           expect(key, 123);
-          return objectStore.getObject(key).then((Map valueRead) {
+          return objectStore.getObject(key).then((valueRead) {
             expect(value, valueRead);
           });
         });
@@ -767,7 +767,7 @@ void defineTests(TestContext ctx) {
         Map value = {keyPath: 'test_value'};
         return objectStore.add(value).then((key) {
           expect(key, 'test_value');
-          return objectStore.getObject(key).then((Map valueRead) {
+          return objectStore.getObject(key).then((valueRead) {
 //               Map expectedValue = cloneValue(value);
 //               expectedValue[keyPath] = 1;
             expect(valueRead, value);
@@ -781,7 +781,7 @@ void defineTests(TestContext ctx) {
         Map value = {keyPath: 'test_value'};
         return objectStore.put(value).then((key) {
           expect(key, 'test_value');
-          return objectStore.getObject(key).then((Map valueRead) {
+          return objectStore.getObject(key).then((valueRead) {
 //               Map expectedValue = cloneValue(value);
 //               expectedValue[keyPath] = 1;
             expect(valueRead, value);
