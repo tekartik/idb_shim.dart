@@ -17,7 +17,7 @@ IdbFactory get idbSembastMemoryFactory {
 }
 
 IdbFactory getIdbSembastIoFactory(String path) =>
-    new IdbSembastFactory(ioDatabaseFactory, path);
+    new IdbSembastFactory(databaseFactoryIo, path);
 
 /// do no use
 /// choose manually

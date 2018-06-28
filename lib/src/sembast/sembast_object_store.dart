@@ -3,22 +3,37 @@ part of idb_shim_sembast;
 class _SdbObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
   final IdbObjectStoreMeta meta;
   final _SdbTransaction transaction;
+
   _SdbDatabase get database => transaction.database;
+
   sdb.Database get sdbDatabase => database.db;
-  sdb.Store sdbStore;
+  sdb.StoreExecutor _sdbStore;
+
+  // lazy creation
+  // If we are not in a transaction that's likely during open
+  sdb.StoreExecutor get sdbStore =>
+      _sdbStore ??= transaction.sdbTransaction == null
+          ? sdbDatabase.getStore(name)
+          : transaction.sdbTransaction.getStore(name);
 
   _SdbObjectStore(this.transaction, this.meta) {
-    sdbStore = sdbDatabase.getStore(name);
+    // Don't compute sdbStore yet we don't have the transaction
+    /*
+    // If we are not in a transaction that's likely during open
+    sdbStore = transaction.sdbTransaction == null
+        ? sdbDatabase.getStore(name)
+        : transaction.sdbTransaction.getStore(name);
+        */
   }
 
-  Future inWritableTransaction(Future computation()) {
+  Future<T> inWritableTransaction<T>(FutureOr<T> computation()) {
     if (transaction.meta.mode != idbModeReadWrite) {
       return new Future.error(new DatabaseReadOnlyError());
     }
     return inTransaction(computation);
   }
 
-  Future inTransaction(computation()) {
+  Future<T> inTransaction<T>(FutureOr<T> computation()) {
     return transaction.execute(computation);
 //    transaction.txn
 
@@ -64,7 +79,7 @@ class _SdbObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
     return key;
   }
 
-  _put(value, key) {
+  Future _put(value, key) {
     // Check all indexes
     List<Future> futures = [];
     if (value is Map) {

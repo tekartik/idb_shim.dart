@@ -9,7 +9,7 @@ dynamic encodeValue(dynamic value) {
   if (value == null) {
     return null;
   }
-  return JSON.encode(value);
+  return json.encode(value);
 //  return JSON.encode(value, toEncodable: (nonEncodable) {
 //    //throw new JsonUnsupportedObjectError(nonEncodable, cause: "Cannot convert $nonEncodable (type: ${nonEncodable.runtimeType})");
 //    if (nonEncodable is DateTime) {
@@ -23,7 +23,7 @@ dynamic decodeValue(dynamic value) {
   if (value == null) {
     return null;
   }
-  return JSON.decode(value);
+  return json.decode(value);
 }
 
 dynamic encodeKey(dynamic key) {

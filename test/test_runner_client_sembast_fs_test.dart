@@ -45,7 +45,7 @@ defineTests(SembastFsTestContext ctx) {
           .transform(const Utf8Decoder())
           .transform(const LineSplitter())
           .listen((String line) {
-        content.add(JSON.decode(line));
+        content.add(json.decode(line));
       }).asFuture();
       return content;
     }
@@ -62,7 +62,7 @@ defineTests(SembastFsTestContext ctx) {
     Future<sdb.Database> openTmpDatabase([int version = 1]) async {
       String sdbName = "${dbTestName}_mem";
       sdb.Database db = await tmpSdbFactory.openDatabase(sdbName,
-          version: version, mode: sdb.databaseModeEmpty);
+          version: version, mode: sdb.DatabaseMode.empty);
       return db;
     }
 

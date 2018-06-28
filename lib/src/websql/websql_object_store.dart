@@ -100,7 +100,7 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
   Future update() async {
     String updateSql = "UPDATE stores SET meta = ? WHERE name = ?";
 
-    String metaText = JSON.encode(meta.toMap());
+    String metaText = json.encode(meta.toMap());
     List updateArgs = [metaText, name];
     await transaction.execute(updateSql, updateArgs);
   }
@@ -113,7 +113,7 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
             : "BLOB PRIMARY KEY") +
         ", $VALUE_COLUMN_NAME BLOB)";
     String insertStore = "INSERT INTO stores (name, meta) VALUES (?, ?)";
-    String metaText = JSON.encode(meta.toMap());
+    String metaText = json.encode(meta.toMap());
     List insertStoreArgs = [name, metaText];
 
     return _deleteTable(transaction).then((_) {

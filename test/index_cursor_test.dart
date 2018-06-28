@@ -60,7 +60,7 @@ void defineTests(TestContext ctx) {
     }
 
     Future<List<TestIdNameRow>> cursorToList(Stream<CursorWithValue> stream) {
-      Completer completer = new Completer.sync();
+      var completer = new Completer<List<TestIdNameRow>>.sync();
       List<TestIdNameRow> list = new List();
       stream.listen((CursorWithValue cwv) {
         list.add(new TestIdNameRow(cwv));

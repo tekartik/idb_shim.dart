@@ -159,8 +159,8 @@ class IdbDatabaseMeta {
     return _stores[name];
   }
 
-  Map<String, Object> toDebugMap() {
-    Map map = {"stores": _stores, "version": version};
+  Map<String, dynamic> toDebugMap() {
+    var map = <String, dynamic>{"stores": _stores, "version": version};
     return map;
   }
 
@@ -272,10 +272,11 @@ class IdbObjectStoreMeta {
   IdbObjectStoreMeta.fromMap(Map<String, Object> map) //
       : this(
             //
-            map[NAME_KEY], //
-            map[KEY_PATH_KEY], //
-            map[AUTO_INCREMENT_KEY],
-            IdbIndexMeta.fromMapList(map[INDECIES_KEY]));
+            map[NAME_KEY] as String, //
+            map[KEY_PATH_KEY] as String, //
+            map[AUTO_INCREMENT_KEY] as bool,
+            IdbIndexMeta
+                .fromMapList(((map[INDECIES_KEY]) as List)?.cast<Map>()));
 
   IdbObjectStoreMeta clone() {
     return new IdbObjectStoreMeta(name, keyPath, autoIncrement);
@@ -289,12 +290,12 @@ class IdbObjectStoreMeta {
     _indecies.remove(index.name);
   }
 
-  Map toDebugMap() {
+  Map<String, dynamic> toDebugMap() {
     return toMap();
   }
 
-  Map<String, Object> toMap() {
-    Map map = {NAME_KEY: name};
+  Map<String, dynamic> toMap() {
+    var map = <String, dynamic>{NAME_KEY: name};
     if (keyPath != null) {
       map[KEY_PATH_KEY] = keyPath;
     }
@@ -415,7 +416,7 @@ class IdbIndexMeta {
     if (list == null) {
       return null;
     }
-    var metas = [];
+    var metas = <IdbIndexMeta>[];
     list.forEach((map) {
       metas.add(new IdbIndexMeta.fromMap(map));
     });
@@ -436,8 +437,8 @@ class IdbIndexMeta {
     return toMap();
   }
 
-  Map<String, Object> toMap() {
-    Map map = {"name": name, "keyPath": keyPath};
+  Map<String, dynamic> toMap() {
+    var map = <String, dynamic>{"name": name, "keyPath": keyPath};
     if (unique) {
       map["unique"] = unique;
     }

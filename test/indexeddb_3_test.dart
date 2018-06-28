@@ -13,7 +13,7 @@ Future<Database> createAndOpenDb(IdbFactory idbFactory) {
   return idbFactory.deleteDatabase(DB_NAME).then((_) {
     return idbFactory.open(DB_NAME, version: VERSION, onUpgradeNeeded: (e) {
       // ignore: undefined_getter
-      var db = e.target.result;
+      var db = e.database;
       db.createObjectStore(STORE_NAME);
     });
   });

@@ -78,14 +78,14 @@ class _SdbDatabase extends Database with DatabaseWithMetaMixin {
 
   // return the previous version
   Future<int> _readMeta() async {
-    return db.inTransaction(() async {
+    return db.transaction((txn) async {
       // read version
-      meta.version = await db.mainStore.get("version");
+      meta.version = await txn.mainStore.get("version");
       // read store meta
-      sdb.Record record = await db.mainStore.getRecord("stores");
+      sdb.Record record = await txn.mainStore.getRecord("stores");
       if (record != null) {
         // for now load all at once
-        List<String> storeNames = record.value;
+        List<String> storeNames = (record.value as List)?.cast<String>();
         return _loadStoresMeta(storeNames)
             .then((List<IdbObjectStoreMeta> storeMetas) {
           storeMetas.forEach((IdbObjectStoreMeta store) {
@@ -127,20 +127,20 @@ class _SdbDatabase extends Database with DatabaseWithMetaMixin {
           deletedStores = meta.versionChangeTransaction.deletedStores;
         });
 
-        return db.inTransaction(() async {
-          await db.put(newVersion, "version");
+        return db.transaction((txn) async {
+          await txn.put(newVersion, "version");
 
           // First delete everything from deleted stores
           for (IdbObjectStoreMeta storeMeta in deletedStores) {
-            await db.deleteStore(storeMeta.name);
+            await txn.deleteStore(storeMeta.name);
           }
 
           if (changedStores.isNotEmpty) {
-            await db.put(new List.from(objectStoreNames), "stores");
+            await txn.put(new List.from(objectStoreNames), "stores");
           }
 
           for (IdbObjectStoreMeta storeMeta in changedStores) {
-            await db.put(storeMeta.toMap(), "store_${storeMeta.name}");
+            await txn.put(storeMeta.toMap(), "store_${storeMeta.name}");
           }
         }).then((_) {
           // considered as opened

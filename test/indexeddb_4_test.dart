@@ -14,7 +14,7 @@ const int VERSION = 1;
 Future<Database> createAndOpenDb(IdbFactory idbFactory) {
   return idbFactory.deleteDatabase(DB_NAME).then((_) {
     return idbFactory.open(DB_NAME, version: VERSION, onUpgradeNeeded: (e) {
-      var db = e.target.result;
+      var db = e.database;
       db.createObjectStore(STORE_NAME);
     });
   });
@@ -72,7 +72,7 @@ testRange(db, range, expectedFirst, expectedLast) {
   int lastKey;
   cursors.listen((cursor) {
     lastKey = cursor.key;
-    var value = cursor.value;
+    var value = cursor.value as Map;
     expect(value['content'], 'Item ${cursor.key}');
   });
 

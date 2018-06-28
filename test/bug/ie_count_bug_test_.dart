@@ -8,7 +8,7 @@ main() {
       String dbName = "com.tekartik.ie_count_bug.test";
       await window.indexedDB.deleteDatabase(dbName);
       _setupDb(VersionChangeEvent e) {
-        Database db = (e.target as Request).result;
+        Database db = e.target.result;
         db.createObjectStore("store", autoIncrement: true);
       }
 

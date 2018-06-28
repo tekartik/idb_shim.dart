@@ -41,8 +41,8 @@ void defineTests(TestContext ctx) {
   }
 
   group('utils', () {
-    _checkExportImport(
-        Database db, Map expectedExport, Future check(Database)) async {
+    Future _checkExportImport(
+        Database db, Map expectedExport, Future check(Database db)) async {
       // export
       Map export = await sdbExportDatabase(db);
       expect(export, expectedExport);
@@ -64,14 +64,14 @@ void defineTests(TestContext ctx) {
     group('copySchema', () {
       tearDown(_tearDown);
 
-      _checkCopySchema(Database db, Future check(Database)) async {
+      Future _checkCopySchema(Database db, Future check(Database db)) async {
         Database dstDb = await copySchema(db, idbFactory, _dstDbName);
         expect(dstDb.name, _dstDbName);
         await check(dstDb);
         dstDb.close();
       }
 
-      _checkAll(Database db, Map expectedExport,
+      Future _checkAll(Database db, Map expectedExport,
           Future check(Database database)) async {
         await check(db);
         await _checkCopySchema(db, check);
@@ -82,7 +82,7 @@ void defineTests(TestContext ctx) {
         await _setupDeleteDb();
         db = await idbFactory.open(_srcDbName);
 
-        _check(Database db) async {
+        Future _check(Database db) async {
           expect(db.factory, idbFactory);
           expect(db.objectStoreNames.isEmpty, true);
           expect(basename(db.name).endsWith(basename(_srcDbName)), isTrue);
@@ -118,7 +118,7 @@ void defineTests(TestContext ctx) {
         db = await idbFactory.open(_srcDbName,
             version: 2, onUpgradeNeeded: _initializeDatabase);
 
-        _check(Database db) async {
+        Future _check(Database db) async {
           expect(db.factory, idbFactory);
           expect(db.objectStoreNames, [testStoreName]);
           expect(basename(db.name).endsWith(basename(_srcDbName)), isTrue);
@@ -171,7 +171,7 @@ void defineTests(TestContext ctx) {
         db = await idbFactory.open(_srcDbName,
             version: 3, onUpgradeNeeded: _initializeDatabase);
 
-        _check(Database db) async {
+        Future _check(Database db) async {
           expect(db.version, 3);
           Transaction txn = db.transaction(testStoreName, idbModeReadOnly);
           ObjectStore store = txn.objectStore(testStoreName);
@@ -226,12 +226,12 @@ void defineTests(TestContext ctx) {
     group('copyStore', () {
       tearDown(_tearDown);
 
-      _checkCopyStore(
+      Future _checkCopyStore(
           Database srcDatabase,
           String srcStoreName,
           Database dstDatabase,
           String dstStoreName,
-          check(Database database, String name)) async {
+          Future check(Database database, String name)) async {
         await check(srcDatabase, srcStoreName);
         await copyStore(srcDatabase, srcStoreName, dstDatabase, dstStoreName);
         await check(dstDatabase, dstStoreName);
@@ -250,7 +250,7 @@ void defineTests(TestContext ctx) {
         db = await idbFactory.open(_srcDbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
 
-        _check(Database db, String storeName) async {
+        Future _check(Database db, String storeName) async {
           Transaction txn = db.transaction(storeName, idbModeReadOnly);
           ObjectStore store = txn.objectStore(storeName);
 
@@ -287,7 +287,7 @@ void defineTests(TestContext ctx) {
         await (store2.put("value2", "key2"));
         await txn.completed;
 
-        _check(Database db, String storeName) async {
+        Future _check(Database db, String storeName) async {
           Transaction txn = db.transaction(storeName, idbModeReadOnly);
           store = txn.objectStore(storeName);
           expect(await store.getObject("key1"), "value1");
@@ -305,14 +305,15 @@ void defineTests(TestContext ctx) {
     group('copyDatabase', () {
       tearDown(_tearDown);
 
-      _checkCopyDatabase(Database db, Future check(Database database)) async {
+      Future _checkCopyDatabase(
+          Database db, Future check(Database database)) async {
         Database dstDb = await copyDatabase(db, idbFactory, _dstDbName);
         expect(dstDb.name, _dstDbName);
         await check(dstDb);
         dstDb.close();
       }
 
-      _checkAll(Database db, Map expectedExport,
+      Future _checkAll(Database db, Map expectedExport,
           Future check(Database database)) async {
         await check(db);
         await _checkCopyDatabase(db, check);

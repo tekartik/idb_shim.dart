@@ -6,7 +6,7 @@ class _SdbIndex extends Index with IndexWithMetaMixin {
 
   _SdbIndex(this.store, this.meta);
 
-  Future inTransaction(Future computation()) {
+  Future<T> inTransaction<T>(FutureOr<T> computation()) {
     return store.inTransaction(computation);
   }
 

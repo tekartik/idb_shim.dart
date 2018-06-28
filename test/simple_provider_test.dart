@@ -105,7 +105,7 @@ void defineTests(TestContext ctx) {
           int key = r;
           expect(key, equals(1));
           //print('added $r');
-          objectStore.getObject(r).then((Map newObject) {
+          objectStore.getObject(r).then((newObject) {
             //print(newObject);
             expect(newObject.length, equals(1));
             expect(newObject[NAME_FIELD], equals('test'));

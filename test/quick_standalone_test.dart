@@ -57,7 +57,7 @@ void defineTests(TestContext ctx) {
       Map value = {NAME_FIELD: "test1"};
       Index index = objectStore.index(NAME_INDEX);
       return objectStore.add(value).then((key) {
-        return index.get("test1").then((Map readValue) {
+        return index.get("test1").then((readValue) {
           expect(readValue, value);
         });
       });

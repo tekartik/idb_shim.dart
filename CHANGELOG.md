@@ -1,6 +1,6 @@
 ## 1.5.0
 
-* Dart2 compatible (expect websql shim)
+* Dart2 compatible (except websql shim)
 * Depends on sembast 1.7.0
 
 ## 1.4.2

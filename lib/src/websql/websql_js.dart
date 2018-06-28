@@ -25,15 +25,14 @@ class SqlTransaction {
 
   Future<SqlResultSet> executeSql(String sql, [List arguments]) {
     var completer = new Completer<SqlResultSet>.sync();
-    jsObject.executeSql(sql, arguments,
-        allowInterop((txn, js.JsWebSqlResultSet result) {
+    jsObject.executeSql(sql, arguments, allowInterop((txn, result) {
       if (result == null) {
         completer.complete(null);
       } else {
-        completer.complete(new SqlResultSet._(result));
+        completer.complete(new SqlResultSet._(result as js.JsWebSqlResultSet));
       }
-    }), allowInterop((txn, js.JsWebSqlError error) {
-      completer.completeError(new SqlError(error));
+    }), allowInterop((txn, error) {
+      completer.completeError(new SqlError(error as js.JsWebSqlError));
     }));
     return completer.future;
   }
@@ -91,8 +90,8 @@ class SqlDatabase {
   Future<T> transaction<T>(FutureOr<T> action(SqlTransaction txn)) {
     FutureOr<T> result;
     var completer = new Completer<T>();
-    jsObject.transaction(allowInterop((js.JsWebSqlTransaction jsTxn) {
-      result = action(new SqlTransaction._(jsTxn));
+    jsObject.transaction(allowInterop((jsTxn) {
+      result = action(new SqlTransaction._(jsTxn as js.JsWebSqlTransaction));
     }), allowInterop((error) {
       completer.completeError(error);
     }), allowInterop(() {
@@ -104,8 +103,8 @@ class SqlDatabase {
   Future<T> readTransaction<T>(FutureOr<T> action(SqlTransaction txn)) {
     FutureOr<T> result;
     var completer = new Completer<T>();
-    jsObject.transaction(allowInterop((js.JsWebSqlTransaction jsTxn) {
-      result = action(new SqlTransaction._(jsTxn));
+    jsObject.transaction(allowInterop((jsTxn) {
+      result = action(new SqlTransaction._(jsTxn as js.JsWebSqlTransaction));
     }), allowInterop((error) {
       completer.completeError(error);
     }), allowInterop(() {

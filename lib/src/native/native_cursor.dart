@@ -107,5 +107,5 @@ class _NativeCursorController {
     });
   }
 
-  Stream<CursorWithValue> get stream => _ctlr.stream;
+  Stream<Cursor> get stream => _ctlr.stream;
 }

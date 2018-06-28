@@ -2,7 +2,7 @@ part of idb_shim_native;
 
 //bool dev = true;
 
-_catchNativeError(action()) {
+T _catchNativeError<T>(T action()) {
   try {
     return action();
   } on Error catch (e) {
@@ -26,7 +26,7 @@ _catchNativeError(action()) {
 // We no longer catch the native exception asynchronously
 // as it makes the stack trace lost...
 //
-Future _catchAsyncNativeError(Future action()) {
-  Future result = _catchNativeError(action);
+Future<T> _catchAsyncNativeError<T>(Future<T> action()) {
+  var result = _catchNativeError(action);
   return result;
 }

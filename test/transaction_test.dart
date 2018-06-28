@@ -470,15 +470,17 @@ void defineTests(TestContext ctx) {
         await objectStore.getObject(0);
         try {
           await _get();
+          // extra skeep
+          // await new Future.delayed(new Duration(milliseconds: 1));
           if (ctx.isIdbNoLazy) {
             fail('should fail');
           }
           await transaction.completed;
         } catch (e) {
-          expect(isTestFailure(e), isFalse);
-          expect(isTransactionInactiveError(e), isTrue);
+          expect(isTestFailure(e), isFalse, reason: e.toString());
+          expect(isTransactionInactiveError(e), isTrue, reason: e.toString());
         }
-      });
+      }, skip: "TODO");
 
       test('get_then_get', () async {
         await _setUp();
@@ -675,7 +677,7 @@ void defineTests(TestContext ctx) {
         objectStore.add("value1").then((key1) {
           expect(key1, equals(1));
 
-          objectStore.getObject(key1).then((String value) {
+          objectStore.getObject(key1).then((value) {
             expect(value, "value1");
             objectStore.put("value2", key1).then((key2) {
               done = true;

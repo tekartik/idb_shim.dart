@@ -18,23 +18,18 @@ main() {
         var completer = new Completer();
         SqlResultSet rs_;
 
-        // Default error callback => return boolean
-        bool _errorCallback(_, __) {
-          return true;
-        }
-
         db.transaction((txn) {
-          txn.executeSql("DROP TABLE IF EXISTS test", [], (txn, __) {
-            txn.executeSql("CREATE TABLE test (value TEXT)", [], (txn, __) {
-              txn.executeSql("INSERT INTO test (value) VALUES (?)", ["first"],
-                  (txn, __) {
-                txn.executeSql("SELECT * FROM test", [],
-                    (txn, SqlResultSet rs) {
+          txn.executeSql("DROP TABLE IF EXISTS test", []).then((_) {
+            txn.executeSql("CREATE TABLE test (value TEXT)", []).then((__) {
+              txn.executeSql(
+                  "INSERT INTO test (value) VALUES (?)", ["first"]).then((___) {
+                txn.executeSql("SELECT * FROM test", []).then(
+                    (SqlResultSet rs) {
                   rs_ = rs;
-                }, _errorCallback);
-              }, _errorCallback);
-            }, _errorCallback);
-          }, _errorCallback);
+                });
+              });
+            });
+          });
         }, (e) {
           completer.completeError(e.message);
         }, () {

@@ -311,7 +311,7 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
     var sqlArgs = null; //[name];
     return transaction.execute(sqlSelect, sqlArgs).then((SqlResultSet rs) {
       rs.rows.forEach((Map row) {
-        Map map = JSON.decode(row['meta']);
+        Map map = json.decode(row['meta']);
         IdbObjectStoreMeta storeMeta = new IdbObjectStoreMeta.fromMap(map);
         meta.putObjectStore(storeMeta);
       });

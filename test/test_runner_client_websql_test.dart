@@ -32,7 +32,7 @@ webSqlTest(IdbWebSqlFactory idbFactory) {
       SqlDatabase db = window.openDatabase(
           "com.tekartik.test", "1", "com.tekartik.test", 1024 * 1024);
       db.transaction((txn) {
-        txn.executeSql("DROP TABLE IF EXISTS test", [], (txn, rs) {
+        txn.executeSql("DROP TABLE IF EXISTS test", []).then((rs) {
           completer.complete();
         });
       });

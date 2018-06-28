@@ -11,6 +11,7 @@ bool _transactionLazyMode = false;
 class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
   _SdbDatabase get database => super.database as _SdbDatabase;
   sdb.Database get sdbDatabase => database.db;
+  sdb.Transaction sdbTransaction;
 
   static int debugAllIds = 0;
   int _debugId;
@@ -87,8 +88,8 @@ class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
   // Since it must run everything in a single call, let all the actions
   // in the first callback enqueue before running
   //
-  Future execute(action()) {
-    Future actionFuture = _enqueue(action);
+  Future<T> execute<T>(FutureOr<T> action()) {
+    Future<T> actionFuture = _enqueue(action);
     futures.add(actionFuture);
 
     if (lazyExecution == null) {
@@ -100,25 +101,10 @@ class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
         //assert(sdbDatabase.transaction == null);
 
         // No return value here
-        return sdbDatabase.inTransaction(() {
+        return sdbDatabase.transaction((txn) {
           // assign right away as this is tested
-          // sdbTransaction = sdbDatabase.currentTransaction;
-
+          sdbTransaction = txn;
           return _next();
-
-//
-//          _checkNext() {
-//            _next();
-//            if (index < actions.length) {
-//              return new Future.sync(_next());
-//            }
-//
-//                return finalResult;
-//
-//              }();
-//                    }
-//
-//          return _checkNext();
         }).whenComplete(() {
           transactionCompleter.complete();
         }).catchError((e) {
@@ -141,7 +127,7 @@ class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
     return actionFuture;
   }
 
-  _enqueue(action()) {
+  Future<T> _enqueue<T>(FutureOr<T> action()) {
     if (_debugTransaction) {
       print('enqueing');
     }
@@ -149,7 +135,7 @@ class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
       return new Future.error(new DatabaseError("TransactionInactiveError"));
     }
 // not lazy
-    Completer completer = new Completer.sync();
+    var completer = new Completer<T>.sync();
     completers.add(completer);
     actions.add(action);
     //devPrint("push ${actions.length}");

@@ -45,7 +45,7 @@ class SimpleProvider {
   }
 
   Future<List<SimpleRow>> cursorToList(Stream<CursorWithValue> stream) {
-    Completer completer = new Completer();
+    var completer = new Completer<List<SimpleRow>>();
     List<SimpleRow> list = new List();
     stream.listen((CursorWithValue cwv) {
       SimpleRow row = new SimpleRow(cwv);

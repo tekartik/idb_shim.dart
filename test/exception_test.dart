@@ -64,7 +64,7 @@ void defineTests(TestContext ctx) {
           fail("should fail");
         } catch (e, st) {
           expect(isTestFailure(e), isFalse);
-          expect(Trace.format(st), contains(".createObjectStore"));
+          expect(Trace.format(st), contains("createObjectStore"));
           //devPrint(e);
           //devPrint(Trace.format(st));
         }
@@ -83,7 +83,7 @@ void defineTests(TestContext ctx) {
           //devPrint(e);
           //devPrint("got: ${Trace.format(st)}");
           //devPrint("full: ${st}");
-          expect(Trace.format(st), contains(".getObject"));
+          expect(Trace.format(st), contains("getObject"));
 
           expect(e, isNotNull);
         }

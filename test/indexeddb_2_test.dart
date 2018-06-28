@@ -18,7 +18,9 @@ const String STORE_NAME = 'TEST';
 const int VERSION = 1;
 
 testReadWrite(idb.IdbFactory idbFactory, key, value, check,
-    [dbName = DB_NAME, storeName = STORE_NAME, version = VERSION]) async {
+    [String dbName = DB_NAME,
+    String storeName = STORE_NAME,
+    int version = VERSION]) async {
   createObjectStore(e) {
     var store = e.target.result.createObjectStore(storeName);
     expect(store, isNotNull);

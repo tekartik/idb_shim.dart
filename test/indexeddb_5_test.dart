@@ -27,7 +27,7 @@ void defineTests(TestContext ctx) {
     setUp(() {
       return idbFactory.deleteDatabase(dbName).then((_) {
         return idbFactory.open(dbName, version: 1, onUpgradeNeeded: (e) {
-          var db = e.target.result;
+          var db = e.database;
           var objectStore =
               db.createObjectStore(storeName, autoIncrement: true);
           objectStore.createIndex(indexName, 'name_index', unique: false);
@@ -142,17 +142,17 @@ void defineTests(TestContext ctx) {
       transaction.objectStore(storeName).add(value);
       transaction.objectStore(storeName).add(value);
 
-      return transaction.completed.then((_) {
+      return transaction.completed.then((_) async {
         transaction = db.transactionList([storeName], 'readonly');
         var index = transaction.objectStore(storeName).index(indexName);
 
         // count() crashes on ie
         if (!ctx.isIdbIe) {
-          return index.count();
+          return await index.count();
         } else {
           return 4;
         }
-      }).then((count) {
+      }).then((int count) {
         expect(count, 4);
         return transaction.completed;
       }).then((_) {
@@ -204,7 +204,7 @@ void defineTests(TestContext ctx) {
 
         cursors.listen((cursor) {
           //print("cursor $cursor");
-          var value = cursor.value;
+          var value = cursor.value as Map;
           if (value['value'] == 'delete_value') {
             cursor.delete().then((_) {
               cursor.next();
