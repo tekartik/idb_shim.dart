@@ -1,3 +1,7 @@
+## 1.6.0
+
+* dart2 only, no websql yet
+
 ## 1.5.0
 
 * Dart2 compatible (except websql shim)
