@@ -7,7 +7,6 @@ import 'dart:async';
 //TEKARTIK_IDB_REMOVED import 'dart:html' as html;
 //TEKARTIK_IDB_REMOVED import 'dart:indexed_db' as idb;
 import 'package:idb_shim/idb_client.dart' as idb;
-import 'package:idb_shim/idb_client_native.dart';
 
 // so that this can be run directly
 import 'idb_test_common.dart';
@@ -52,8 +51,8 @@ testReadWrite(idb.IdbFactory idbFactory, key, value, matcher,
       if (dbName == null) {
         dbName = nextDatabaseName();
       }
-      createObjectStore(e) {
-        var store =  databaseFromVersionChangeEvent(e).createObjectStore(storeName);
+      createObjectStore(idb.VersionChangeEvent e) {
+        var store = e.database.createObjectStore(storeName);
         expect(store, isNotNull);
       }
 
@@ -97,8 +96,8 @@ testReadWriteTyped(idb.IdbFactory idbFactory, key, value, matcher,
       if (dbName == null) {
         dbName = nextDatabaseName();
       }
-      void createObjectStore(e) {
-        var store =  databaseFromVersionChangeEvent(e).createObjectStore(storeName);
+      void createObjectStore(idb.VersionChangeEvent e) {
+        var store = e.database.createObjectStore(storeName);
         expect(store, isNotNull);
       }
 

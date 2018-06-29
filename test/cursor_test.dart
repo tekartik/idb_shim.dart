@@ -223,8 +223,8 @@ void defineTests(TestContext ctx) {
             expect(list.length, 3);
 
             return cursorToList(objectStore.openCursor(
-                range: new KeyRange.bound(2, 3),
-                autoAdvance: true)).then((list) {
+                    range: new KeyRange.bound(2, 3), autoAdvance: true))
+                .then((list) {
               expect(list.length, 2);
               expect(list[0].name, equals('test1'));
               expect(list[0].id, equals(2));
@@ -232,15 +232,16 @@ void defineTests(TestContext ctx) {
               expect(list[1].id, equals(3));
 
               return cursorToList(objectStore.openCursor(
-                  range: new KeyRange.bound(1, 3, true, true),
-                  autoAdvance: true)).then((list) {
+                      range: new KeyRange.bound(1, 3, true, true),
+                      autoAdvance: true))
+                  .then((list) {
                 expect(list.length, 1);
                 expect(list[0].name, equals('test1'));
                 expect(list[0].id, equals(2));
 
                 return cursorToList(objectStore.openCursor(
-                    range: new KeyRange.lowerBound(2),
-                    autoAdvance: true)).then((list) {
+                        range: new KeyRange.lowerBound(2), autoAdvance: true))
+                    .then((list) {
                   expect(list.length, 2);
                   expect(list[0].name, equals('test1'));
                   expect(list[0].id, equals(2));
@@ -248,8 +249,9 @@ void defineTests(TestContext ctx) {
                   expect(list[1].id, equals(3));
 
                   return cursorToList(objectStore.openCursor(
-                      range: new KeyRange.upperBound(2, true),
-                      autoAdvance: true)).then((list) {
+                          range: new KeyRange.upperBound(2, true),
+                          autoAdvance: true))
+                      .then((list) {
                     expect(list.length, 1);
                     expect(list[0].name, equals('test2'));
                     expect(list[0].id, equals(1));

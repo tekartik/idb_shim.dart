@@ -4,7 +4,6 @@
 library IndexedDB2Test;
 
 import 'package:idb_shim/idb_client.dart' as idb;
-import 'package:idb_shim/idb_client_native.dart';
 
 import 'dart:collection';
 import 'indexeddb_utils.dart';
@@ -22,8 +21,8 @@ testReadWrite(idb.IdbFactory idbFactory, key, value, check,
     [String dbName = DB_NAME,
     String storeName = STORE_NAME,
     int version = VERSION]) async {
-  createObjectStore(e) {
-    var store =  databaseFromVersionChangeEvent(e).createObjectStore(storeName);
+  createObjectStore(idb.VersionChangeEvent e) {
+    var store = e.database.createObjectStore(storeName);
     expect(store, isNotNull);
   }
 

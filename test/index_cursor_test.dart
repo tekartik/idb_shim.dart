@@ -361,8 +361,9 @@ void defineTests(TestContext ctx) {
             expect(list.length, 3);
 
             return cursorToList(index.openCursor(
-                range: new KeyRange.bound('test2', 'test3'),
-                autoAdvance: true)).then((list) {
+                    range: new KeyRange.bound('test2', 'test3'),
+                    autoAdvance: true))
+                .then((list) {
               expect(list.length, 2);
               expect(list[0].name, equals('test2'));
               expect(list[0].id, equals(1));

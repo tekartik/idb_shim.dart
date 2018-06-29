@@ -37,7 +37,7 @@ main() {
       await window.indexedDB.deleteDatabase(dbName);
       idb.Database db = await window.indexedDB.open(dbName, version: 1,
           onUpgradeNeeded: (idb.VersionChangeEvent e) {
-        idb.Database db =  databaseFromVersionChangeEvent(e);
+        idb.Database db = databaseFromVersionChangeEvent(e);
         db.createObjectStore("store1", autoIncrement: true);
         db.createObjectStore("store2", autoIncrement: true);
       });
@@ -64,7 +64,7 @@ main() {
       await window.indexedDB.deleteDatabase(dbName);
       idb.Database db = await window.indexedDB.open(dbName, version: 1,
           onUpgradeNeeded: (idb.VersionChangeEvent e) {
-        idb.Database db =  databaseFromVersionChangeEvent(e);
+        idb.Database db = databaseFromVersionChangeEvent(e);
         db.createObjectStore("store", autoIncrement: true);
       });
 
@@ -125,7 +125,7 @@ main() {
       await window.indexedDB.deleteDatabase(dbName);
       idb.Database db = await window.indexedDB.open(dbName, version: 1,
           onUpgradeNeeded: (idb.VersionChangeEvent e) {
-        idb.Database db =  databaseFromVersionChangeEvent(e);
+        idb.Database db = databaseFromVersionChangeEvent(e);
         db.createObjectStore("store", autoIncrement: true);
       });
 

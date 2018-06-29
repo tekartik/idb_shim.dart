@@ -199,10 +199,10 @@ abstract class ObjectStoreWithMetaMixin {
 
 // meta data is loaded only once
 class IdbObjectStoreMeta {
-  static const String NAME_KEY = "name";
-  static const String KEY_PATH_KEY = "keyPath";
-  static const String AUTO_INCREMENT_KEY = "autoIncrement";
-  static const String INDECIES_KEY = "indecies";
+  static const String nameKey = "name";
+  static const String keyPathKey = "keyPath";
+  static const String autoIncrementKey = "autoIncrement";
+  static const String indeciesKey = "indecies";
 
   final String name;
   final String keyPath;
@@ -272,11 +272,11 @@ class IdbObjectStoreMeta {
   IdbObjectStoreMeta.fromMap(Map<String, Object> map) //
       : this(
             //
-            map[NAME_KEY] as String, //
-            map[KEY_PATH_KEY] as String, //
-            map[AUTO_INCREMENT_KEY] as bool,
-            IdbIndexMeta
-                .fromMapList(((map[INDECIES_KEY]) as List)?.cast<Map>()));
+            map[nameKey] as String, //
+            map[keyPathKey] as String, //
+            map[autoIncrementKey] as bool,
+            IdbIndexMeta.fromMapList(
+                ((map[indeciesKey]) as List)?.cast<Map>()));
 
   IdbObjectStoreMeta clone() {
     return new IdbObjectStoreMeta(name, keyPath, autoIncrement);
@@ -295,19 +295,19 @@ class IdbObjectStoreMeta {
   }
 
   Map<String, dynamic> toMap() {
-    var map = <String, dynamic>{NAME_KEY: name};
+    var map = <String, dynamic>{nameKey: name};
     if (keyPath != null) {
-      map[KEY_PATH_KEY] = keyPath;
+      map[keyPathKey] = keyPath;
     }
     if (autoIncrement) {
-      map[AUTO_INCREMENT_KEY] = autoIncrement;
+      map[autoIncrementKey] = autoIncrement;
     }
     if (indecies.isNotEmpty) {
       List<Map> indecies = [];
       this.indecies.forEach((IdbIndexMeta indexMeta) {
         indecies.add(indexMeta.toMap());
       });
-      map[INDECIES_KEY] = indecies;
+      map[indeciesKey] = indecies;
     }
     return map;
   }

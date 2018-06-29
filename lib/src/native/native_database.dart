@@ -25,6 +25,8 @@ class _NativeVersionChangeEvent extends VersionChangeEvent {
 }
 
 idb.Database databaseFromVersionChangeEvent(idb.VersionChangeEvent event) {
+  return event.target.transaction.db;
+  /*
   // This is null for onChangeEvent on Database
   // but ok when opening the database
   try {
@@ -43,6 +45,7 @@ idb.Database databaseFromVersionChangeEvent(idb.VersionChangeEvent event) {
     }
   }
   return null;
+  */
 }
 
 class _NativeDatabase extends Database {
