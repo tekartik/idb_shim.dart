@@ -1,10 +1,16 @@
-part of idb_shim_sembast;
+import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/src/common/common_meta.dart';
+import 'package:idb_shim/src/common/common_validation.dart';
+import 'package:idb_shim/src/sembast/sembast_cursor.dart';
+import 'package:idb_shim/src/sembast/sembast_object_store.dart';
+import 'package:idb_shim/src/utils/core_imports.dart';
+import 'package:sembast/sembast.dart' as sdb;
 
-class _SdbIndex extends Index with IndexWithMetaMixin {
-  final _SdbObjectStore store;
+class IndexSembast extends Index with IndexWithMetaMixin {
+  final ObjectStoreSembast store;
   final IdbIndexMeta meta;
 
-  _SdbIndex(this.store, this.meta);
+  IndexSembast(this.store, this.meta);
 
   Future<T> inTransaction<T>(FutureOr<T> computation()) {
     return store.inTransaction(computation);
@@ -15,7 +21,7 @@ class _SdbIndex extends Index with IndexWithMetaMixin {
     if (key_OR_range == null) {
       return new sdb.Filter.notEqual(meta.keyPath, null);
     }
-    return _keyOrRangeFilter(meta.keyPath, key_OR_range);
+    return keyOrRangeFilter(meta.keyPath, key_OR_range);
   }
 
   @override
@@ -62,8 +68,8 @@ class _SdbIndex extends Index with IndexWithMetaMixin {
       {key, KeyRange range, String direction, bool autoAdvance}) {
     IdbCursorMeta cursorMeta =
         new IdbCursorMeta(key, range, direction, autoAdvance);
-    _SdbIndexCursorWithValueController ctlr =
-        new _SdbIndexCursorWithValueController(this, cursorMeta);
+    IndexCursorWithValueControllerSembast ctlr =
+        new IndexCursorWithValueControllerSembast(this, cursorMeta);
 
     inTransaction(() {
       return ctlr.openCursor();
@@ -77,8 +83,8 @@ class _SdbIndex extends Index with IndexWithMetaMixin {
       {key, KeyRange range, String direction, bool autoAdvance}) {
     IdbCursorMeta cursorMeta =
         new IdbCursorMeta(key, range, direction, autoAdvance);
-    _SdbIndexKeyCursorController ctlr =
-        new _SdbIndexKeyCursorController(this, cursorMeta);
+    IndexKeyCursorControllerSembast ctlr =
+        new IndexKeyCursorControllerSembast(this, cursorMeta);
 
     inTransaction(() {
       return ctlr.openCursor();
@@ -88,7 +94,7 @@ class _SdbIndex extends Index with IndexWithMetaMixin {
   }
 
   sdb.Filter cursorFilter(key, KeyRange range) {
-    return _keyCursorFilter(keyPath, key, range);
+    return keyCursorFilter(keyPath, key, range);
   }
 
   sdb.SortOrder sortOrder(bool ascending) {

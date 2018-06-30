@@ -8,7 +8,7 @@ import 'package:path/path.dart';
 
 class IoTestContext extends SembastFsTestContext {
   IoTestContext() {
-    factory = new IdbSembastFactory(databaseFactoryIo, testOutTopPath);
+    factory = new IdbFactorySembast(databaseFactoryIo, testOutTopPath);
   }
 }
 

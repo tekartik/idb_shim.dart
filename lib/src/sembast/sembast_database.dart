@@ -1,4 +1,10 @@
-part of idb_shim_sembast;
+import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/idb_client_sembast.dart';
+import 'package:idb_shim/src/common/common_meta.dart';
+import 'package:idb_shim/src/sembast/sembast_object_store.dart';
+import 'package:idb_shim/src/sembast/sembast_transaction.dart';
+import 'package:idb_shim/src/utils/core_imports.dart';
+import 'package:sembast/sembast.dart' as sdb;
 
 class _SdbVersionChangeEvent extends VersionChangeEvent {
   final int oldVersion;
@@ -9,10 +15,10 @@ class _SdbVersionChangeEvent extends VersionChangeEvent {
   /**
    * added for convenience
    */
-  _SdbTransaction get transaction => request.transaction;
+  TransactionSembast get transaction => request.transaction;
 
   _SdbVersionChangeEvent(
-      _SdbDatabase database, int oldVersion, this.newVersion) //
+      DatabaseSembast database, int oldVersion, this.newVersion) //
       : oldVersion = oldVersion == null ? 0 : oldVersion {
     // handle = too to catch programatical errors
     if (this.oldVersion >= newVersion) {
@@ -33,21 +39,21 @@ class _SdbVersionChangeEvent extends VersionChangeEvent {
 /// {"key":"stores","value":["test_store"]}
 /// {"key":"store_test_store","value":{"name":"test_store","keyPath":"my_key","autoIncrement":true}}
 
-class _SdbDatabase extends Database with DatabaseWithMetaMixin {
-  _SdbTransaction versionChangeTransaction;
+class DatabaseSembast extends Database with DatabaseWithMetaMixin {
+  TransactionSembast versionChangeTransaction;
   final IdbDatabaseMeta meta = new IdbDatabaseMeta();
   sdb.Database db;
 
   @override
-  _IdbSembastFactory get factory => super.factory;
+  IdbFactorySembast get factory => super.factory;
 
-  sdb.DatabaseFactory get sdbFactory => factory._databaseFactory;
+  sdb.DatabaseFactory get sdbFactory => factory.sdbFactory;
 
-  _SdbDatabase._(IdbFactory factory) : super(factory);
+  DatabaseSembast._(IdbFactory factory) : super(factory);
 
-  static Future<_SdbDatabase> fromDatabase(
+  static Future<DatabaseSembast> fromDatabase(
       IdbFactory factory, sdb.Database db) async {
-    _SdbDatabase idbDb = new _SdbDatabase._(factory);
+    DatabaseSembast idbDb = new DatabaseSembast._(factory);
     idbDb.db = db;
     await idbDb._readMeta();
     // Copy name from path
@@ -55,7 +61,7 @@ class _SdbDatabase extends Database with DatabaseWithMetaMixin {
     return idbDb;
   }
 
-  _SdbDatabase(IdbFactory factory, String name) : super(factory) {
+  DatabaseSembast(IdbFactory factory, String name) : super(factory) {
     meta.name = name;
   }
 
@@ -81,6 +87,7 @@ class _SdbDatabase extends Database with DatabaseWithMetaMixin {
     return db.transaction((txn) async {
       // read version
       meta.version = await txn.mainStore.get("version");
+      //devPrint("meta version :${meta.version})
       // read store meta
       sdb.Record record = await txn.mainStore.getRecord("stores");
       if (record != null) {
@@ -115,7 +122,7 @@ class _SdbDatabase extends Database with DatabaseWithMetaMixin {
 
         await meta.onUpgradeNeeded(() async {
           versionChangeTransaction =
-              new _SdbTransaction(this, meta.versionChangeTransaction);
+              new TransactionSembast(this, meta.versionChangeTransaction);
           // could be null when opening an empty database
           if (onUpgradeNeeded != null) {
             onUpgradeNeeded(
@@ -161,7 +168,7 @@ class _SdbDatabase extends Database with DatabaseWithMetaMixin {
     IdbObjectStoreMeta storeMeta =
         new IdbObjectStoreMeta(name, keyPath, autoIncrement);
     meta.createObjectStore(storeMeta);
-    return new _SdbObjectStore(versionChangeTransaction, storeMeta);
+    return new ObjectStoreSembast(versionChangeTransaction, storeMeta);
   }
 
   @override
@@ -181,18 +188,18 @@ class _SdbDatabase extends Database with DatabaseWithMetaMixin {
 
   @override
   Transaction transaction(storeName_OR_storeNames, String mode) {
-    if (_debugTransaction) {
-      print('transaction($storeName_OR_storeNames)');
-    }
+    //if (_debugTransaction) {
+    //  print('transaction($storeName_OR_storeNames)');
+    // }
     IdbTransactionMeta txnMeta =
         meta.transaction(storeName_OR_storeNames, mode);
-    return new _SdbTransaction(this, txnMeta);
+    return new TransactionSembast(this, txnMeta);
   }
 
   @override
   Transaction transactionList(List<String> storeNames, String mode) {
     IdbTransactionMeta txnMeta = meta.transaction(storeNames, mode);
-    return new _SdbTransaction(this, txnMeta);
+    return new TransactionSembast(this, txnMeta);
   }
 
   @override

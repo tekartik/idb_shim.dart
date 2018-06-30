@@ -1,10 +1,18 @@
-part of idb_shim_sembast;
+import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/src/common/common_meta.dart';
+import 'package:idb_shim/src/common/common_validation.dart';
+import 'package:idb_shim/src/sembast/sembast_cursor.dart';
+import 'package:idb_shim/src/sembast/sembast_database.dart';
+import 'package:idb_shim/src/sembast/sembast_index.dart';
+import 'package:idb_shim/src/sembast/sembast_transaction.dart';
+import 'package:idb_shim/src/utils/core_imports.dart';
+import 'package:sembast/sembast.dart' as sdb;
 
-class _SdbObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
+class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   final IdbObjectStoreMeta meta;
-  final _SdbTransaction transaction;
+  final TransactionSembast transaction;
 
-  _SdbDatabase get database => transaction.database;
+  DatabaseSembast get database => transaction.database;
 
   sdb.Database get sdbDatabase => database.db;
   sdb.StoreExecutor _sdbStore;
@@ -16,7 +24,7 @@ class _SdbObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
           ? sdbDatabase.getStore(name)
           : transaction.sdbTransaction.getStore(name);
 
-  _SdbObjectStore(this.transaction, this.meta) {
+  ObjectStoreSembast(this.transaction, this.meta) {
     // Don't compute sdbStore yet we don't have the transaction
     /*
     // If we are not in a transaction that's likely during open
@@ -136,7 +144,7 @@ class _SdbObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   _storeKeyOrRangeFilter([key_OR_range]) {
-    return _keyOrRangeFilter(sdb.Field.key, key_OR_range);
+    return keyOrRangeFilter(sdb.Field.key, key_OR_range);
   }
 
   @override
@@ -151,7 +159,7 @@ class _SdbObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
     IdbIndexMeta indexMeta =
         new IdbIndexMeta(name, keyPath, unique, multiEntry);
     meta.createIndex(database.meta, indexMeta);
-    return new _SdbIndex(this, indexMeta);
+    return new IndexSembast(this, indexMeta);
   }
 
   @override
@@ -195,7 +203,7 @@ class _SdbObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
   @override
   Index index(String name) {
     IdbIndexMeta indexMeta = meta.index(name);
-    return new _SdbIndex(this, indexMeta);
+    return new IndexSembast(this, indexMeta);
   }
 
   sdb.SortOrder sortOrder(bool ascending) {
@@ -204,9 +212,9 @@ class _SdbObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
 
   sdb.Filter cursorFilter(key, KeyRange range) {
     if (range != null) {
-      return _keyRangeFilter(keyField, range);
+      return keyRangeFilter(keyField, range);
     } else {
-      return _keyFilter(keyField, key);
+      return keyFilter(keyField, key);
     }
   }
 
@@ -217,8 +225,8 @@ class _SdbObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
       {key, KeyRange range, String direction, bool autoAdvance}) {
     IdbCursorMeta cursorMeta =
         new IdbCursorMeta(key, range, direction, autoAdvance);
-    _SdbStoreCursorWithValueController ctlr =
-        new _SdbStoreCursorWithValueController(this, cursorMeta);
+    StoreCursorWithValueControllerSembast ctlr =
+        new StoreCursorWithValueControllerSembast(this, cursorMeta);
 
     inTransaction(() {
       return ctlr.openCursor();

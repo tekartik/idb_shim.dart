@@ -1,14 +1,19 @@
-part of idb_shim_sembast;
+import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/src/common/common_meta.dart';
+import 'package:idb_shim/src/sembast/sembast_index.dart';
+import 'package:idb_shim/src/sembast/sembast_object_store.dart';
+import 'package:idb_shim/src/utils/core_imports.dart';
+import 'package:sembast/sembast.dart' as sdb;
 
-sdb.Filter _keyCursorFilter(String keyField, key, KeyRange range) {
+sdb.Filter keyCursorFilter(String keyField, key, KeyRange range) {
   if (range != null) {
-    return _keyRangeFilter(keyField, range);
+    return keyRangeFilter(keyField, range);
   } else {
-    return _keyFilter(keyField, key);
+    return keyFilter(keyField, key);
   }
 }
 
-sdb.Filter _keyRangeFilter(String keyPath, KeyRange range) {
+sdb.Filter keyRangeFilter(String keyPath, KeyRange range) {
   sdb.Filter lowerFilter;
   sdb.Filter upperFilter;
   List<sdb.Filter> filters = [];
@@ -31,7 +36,7 @@ sdb.Filter _keyRangeFilter(String keyPath, KeyRange range) {
   return new sdb.Filter.and(filters);
 }
 
-sdb.Filter _keyFilter(String keyPath, var key) {
+sdb.Filter keyFilter(String keyPath, var key) {
   if (key == null) {
     // key must not be nulled
     return new sdb.Filter.notEqual(keyPath, null);
@@ -39,11 +44,11 @@ sdb.Filter _keyFilter(String keyPath, var key) {
   return new sdb.Filter.equal(keyPath, key);
 }
 
-sdb.Filter _keyOrRangeFilter(String keyPath, [key_OR_range]) {
+sdb.Filter keyOrRangeFilter(String keyPath, [key_OR_range]) {
   if (key_OR_range is KeyRange) {
-    return _keyRangeFilter(keyPath, key_OR_range);
+    return keyRangeFilter(keyPath, key_OR_range);
   } else {
-    return _keyFilter(keyPath, key_OR_range);
+    return keyFilter(keyPath, key_OR_range);
   }
 }
 
@@ -61,12 +66,12 @@ sdb.Filter _keyOrRangeFilter(String keyPath, [key_OR_range]) {
 //  //Object get value;
 //}
 
-abstract class _SdbKeyCursorMixin implements Cursor {
+abstract class KeyCursorSembastMixin implements Cursor {
   // set upon creation
   int recordIndex;
-  _SdbBaseCursorControllerMixin ctlr;
+  BaseCursorControllerSembastMixin ctlr;
 
-  _SdbObjectStore get store => ctlr.store;
+  ObjectStoreSembast get store => ctlr.store;
   IdbCursorMeta get meta => ctlr.meta;
 
   sdb.Record get record => ctlr.records[recordIndex];
@@ -98,9 +103,9 @@ abstract class _SdbKeyCursorMixin implements Cursor {
   Future update(value) => store.put(value, primaryKey);
 }
 
-abstract class _SdbIndexCursorMixin implements Cursor {
-  _SdbIndexCursorControllerMixin get indexCtlr;
-  _SdbIndex get index => indexCtlr.index;
+abstract class IndexCursorSembastMixin implements Cursor {
+  IndexCursorControllerSembastMixin get indexCtlr;
+  IndexSembast get index => indexCtlr.index;
   sdb.Record get record;
 
   ///
@@ -110,19 +115,19 @@ abstract class _SdbIndexCursorMixin implements Cursor {
   Object get key => record.value[index.keyPath];
 }
 
-abstract class _SdbCursorWithValueMixin implements CursorWithValue {
+abstract class CursorWithValueSembastMixin implements CursorWithValue {
   sdb.Record get record;
 
   @override
   Object get value => record.value;
 }
 
-class _SdbIndexKeyCursor extends Object
-    with _SdbKeyCursorMixin, _SdbIndexCursorMixin
+class IndexKeyCursorSembast extends Object
+    with KeyCursorSembastMixin, IndexCursorSembastMixin
     implements Cursor {
-  _SdbIndexKeyCursorController get indexCtlr => ctlr;
+  IndexKeyCursorControllerSembast get indexCtlr => ctlr;
 
-  _SdbIndexKeyCursor(_SdbIndexKeyCursorController ctlr, int index) {
+  IndexKeyCursorSembast(IndexKeyCursorControllerSembast ctlr, int index) {
     this.ctlr = ctlr;
     this.recordIndex = index;
   }
@@ -145,10 +150,11 @@ class _SdbStoreKeyCursor extends Object
 }
 */
 
-class _SdbIndexCursorWithValue extends Object
-    with _SdbKeyCursorMixin, _SdbCursorWithValueMixin {
-  _SdbIndexCursorWithValueController get indexCtlr => ctlr;
-  _SdbIndexCursorWithValue(_SdbBaseCursorControllerMixin ctlr, int index) {
+class IndexCursorWithValueSembast extends Object
+    with KeyCursorSembastMixin, CursorWithValueSembastMixin {
+  IndexCursorWithValueControllerSembast get indexCtlr => ctlr;
+  IndexCursorWithValueSembast(
+      BaseCursorControllerSembastMixin ctlr, int index) {
     this.ctlr = ctlr;
     this.recordIndex = index;
   }
@@ -160,9 +166,10 @@ class _SdbIndexCursorWithValue extends Object
   Object get key => record.value[indexCtlr.index.keyPath];
 }
 
-class _SdbStoreCursorWithValue extends Object
-    with _SdbKeyCursorMixin, _SdbCursorWithValueMixin {
-  _SdbStoreCursorWithValue(_SdbBaseCursorControllerMixin ctlr, int index) {
+class StoreCursorWithValueSembast extends Object
+    with KeyCursorSembastMixin, CursorWithValueSembastMixin {
+  StoreCursorWithValueSembast(
+      BaseCursorControllerSembastMixin ctlr, int index) {
     this.ctlr = ctlr;
     this.recordIndex = index;
   }
@@ -183,8 +190,8 @@ abstract class _ISdbCursor {
   sdb.SortOrder get sortOrder;
 }
 
-abstract class _SdbIndexCursorControllerMixin implements _ISdbCursor {
-  _SdbIndex index;
+abstract class IndexCursorControllerSembastMixin implements _ISdbCursor {
+  IndexSembast index;
   IdbCursorMeta get meta;
 
   @override
@@ -198,8 +205,8 @@ abstract class _SdbIndexCursorControllerMixin implements _ISdbCursor {
   }
 }
 
-abstract class _SdbStoreCursorControllerMixin implements _ISdbCursor {
-  _SdbObjectStore get store;
+abstract class StoreCursorControllerSembastMixin implements _ISdbCursor {
+  ObjectStoreSembast get store;
   IdbCursorMeta get meta;
 
   @override
@@ -213,10 +220,10 @@ abstract class _SdbStoreCursorControllerMixin implements _ISdbCursor {
   }
 }
 
-abstract class _SdbBaseCursorControllerMixin<T extends Cursor>
+abstract class BaseCursorControllerSembastMixin<T extends Cursor>
     implements _ISdbCursor {
   IdbCursorMeta meta;
-  _SdbObjectStore get store;
+  ObjectStoreSembast get store;
 
 // To implement for KeyCursor vs CursorWithValue
   T nextEvent(int index);
@@ -260,12 +267,12 @@ abstract class _SdbBaseCursorControllerMixin<T extends Cursor>
   }
 }
 
-abstract class _SdbKeyCursorControllerMixin {
+abstract class KeyCursorControllerSembastMixin {
   StreamController<Cursor> get ctlr;
   Stream<Cursor> get stream => ctlr.stream;
 }
 
-abstract class _SdbCursorWithValueControllerMixin {
+abstract class CursorWithValueControllerSembastMixin {
   StreamController<CursorWithValue> get ctlr;
   Stream<CursorWithValue> get stream => ctlr.stream;
 }
@@ -289,56 +296,58 @@ class _SdbStoreKeyCursorController extends Object
 }
 */
 
-class _SdbIndexKeyCursorController extends Object
+class IndexKeyCursorControllerSembast extends Object
     with
-        _SdbKeyCursorControllerMixin,
-        _SdbBaseCursorControllerMixin<Cursor>,
-        _SdbIndexCursorControllerMixin {
-  _SdbIndex index;
-  _SdbObjectStore get store => index.store;
-  _SdbIndexKeyCursorController(_SdbIndex index, IdbCursorMeta meta) {
+        KeyCursorControllerSembastMixin,
+        BaseCursorControllerSembastMixin<Cursor>,
+        IndexCursorControllerSembastMixin {
+  IndexSembast index;
+  ObjectStoreSembast get store => index.store;
+  IndexKeyCursorControllerSembast(IndexSembast index, IdbCursorMeta meta) {
     this.meta = meta;
     this.index = index;
     init();
   }
 
   Cursor nextEvent(int index) {
-    _SdbIndexKeyCursor cursor = new _SdbIndexKeyCursor(this, index);
+    IndexKeyCursorSembast cursor = new IndexKeyCursorSembast(this, index);
     return cursor;
   }
 }
 
-class _SdbIndexCursorWithValueController extends Object
+class IndexCursorWithValueControllerSembast extends Object
     with
-        _SdbCursorWithValueControllerMixin,
-        _SdbBaseCursorControllerMixin<CursorWithValue>,
-        _SdbIndexCursorControllerMixin {
-  _SdbIndex index;
-  _SdbObjectStore get store => index.store;
-  _SdbIndexCursorWithValueController(this.index, IdbCursorMeta meta) {
+        CursorWithValueControllerSembastMixin,
+        BaseCursorControllerSembastMixin<CursorWithValue>,
+        IndexCursorControllerSembastMixin {
+  IndexSembast index;
+  ObjectStoreSembast get store => index.store;
+  IndexCursorWithValueControllerSembast(this.index, IdbCursorMeta meta) {
     this.meta = meta;
     init();
   }
 
   CursorWithValue nextEvent(int index) {
-    _SdbIndexCursorWithValue cursor = new _SdbIndexCursorWithValue(this, index);
+    IndexCursorWithValueSembast cursor =
+        new IndexCursorWithValueSembast(this, index);
     return cursor;
   }
 }
 
-class _SdbStoreCursorWithValueController extends Object
+class StoreCursorWithValueControllerSembast extends Object
     with
-        _SdbCursorWithValueControllerMixin,
-        _SdbBaseCursorControllerMixin<CursorWithValue>,
-        _SdbStoreCursorControllerMixin {
-  _SdbObjectStore store;
-  _SdbStoreCursorWithValueController(this.store, IdbCursorMeta meta) {
+        CursorWithValueControllerSembastMixin,
+        BaseCursorControllerSembastMixin<CursorWithValue>,
+        StoreCursorControllerSembastMixin {
+  ObjectStoreSembast store;
+  StoreCursorWithValueControllerSembast(this.store, IdbCursorMeta meta) {
     this.meta = meta;
     init();
   }
 
   CursorWithValue nextEvent(int index) {
-    _SdbStoreCursorWithValue cursor = new _SdbStoreCursorWithValue(this, index);
+    StoreCursorWithValueSembast cursor =
+        new StoreCursorWithValueSembast(this, index);
     return cursor;
   }
 }

@@ -6,6 +6,7 @@ import 'dart:html_common' as html_common;
 import 'dart:indexed_db' as idb;
 
 import 'package:idb_shim/idb_client.dart';
+import 'package:idb_shim/src/common/common_factory.dart';
 
 import 'src/utils/browser_utils.dart';
 
@@ -25,7 +26,7 @@ part 'src/native/native_transaction.dart';
 
 IdbNativeFactory get idbNativeFactory => new IdbNativeFactory();
 
-class IdbNativeFactory extends IdbFactory {
+class IdbNativeFactory extends IdbFactoryBase {
   @override
   bool get persistent => true;
 

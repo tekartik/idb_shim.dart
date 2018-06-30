@@ -1,6 +1,11 @@
-part of idb_shim_sembast;
-
 // set to true to debug transaction life cycle
+import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/src/common/common_meta.dart';
+import 'package:idb_shim/src/sembast/sembast_database.dart';
+import 'package:idb_shim/src/sembast/sembast_object_store.dart';
+import 'package:idb_shim/src/utils/core_imports.dart';
+import 'package:sembast/sembast.dart' as sdb;
+
 bool _debugTransaction = false;
 
 // _lazyMode is what indexeddb on chrome supports
@@ -8,8 +13,8 @@ bool _debugTransaction = false;
 // default is false to matche ie/safari strict behavior
 bool _transactionLazyMode = false;
 
-class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
-  _SdbDatabase get database => super.database as _SdbDatabase;
+class TransactionSembast extends Transaction with TransactionWithMetaMixin {
+  DatabaseSembast get database => super.database as DatabaseSembast;
   sdb.Database get sdbDatabase => database.db;
   sdb.Transaction sdbTransaction;
 
@@ -154,7 +159,7 @@ class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
   List<Future> futures = [];
 
   final IdbTransactionMeta meta;
-  _SdbTransaction(_SdbDatabase database, this.meta) : super(database) {
+  TransactionSembast(DatabaseSembast database, this.meta) : super(database) {
     if (_debugTransaction) {
       _debugId = ++debugAllIds;
     }
@@ -223,7 +228,7 @@ class _SdbTransaction extends Transaction with TransactionWithMetaMixin {
   @override
   ObjectStore objectStore(String name) {
     meta.checkObjectStore(name);
-    return new _SdbObjectStore(this, database.meta.getObjectStore(name));
+    return new ObjectStoreSembast(this, database.meta.getObjectStore(name));
   }
 
 //  @override

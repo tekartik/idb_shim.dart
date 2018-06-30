@@ -11,13 +11,13 @@ IdbFactory _idbSembastMemoryFactory;
 IdbFactory get idbSembastMemoryFactory {
   if (_idbSembastMemoryFactory == null) {
     _idbSembastMemoryFactory =
-        new IdbSembastFactory(memoryDatabaseFactory, null);
+        new IdbFactorySembast(memoryDatabaseFactory, null);
   }
   return _idbSembastMemoryFactory;
 }
 
 IdbFactory getIdbSembastIoFactory(String path) =>
-    new IdbSembastFactory(databaseFactoryIo, path);
+    new IdbFactorySembast(databaseFactoryIo, path);
 
 /// do no use
 /// choose manually

@@ -80,13 +80,13 @@ class SembastTestContext extends TestContext {
   bool get isIdbSembast => true;
 
   sdb.DatabaseFactory sdbFactory;
-  IdbSembastFactory get factory => super.factory;
+  IdbFactorySembast get factory => super.factory;
   String get dbName => join(joinAll(testDescriptions), "test.db");
 }
 
 class SembastFsTestContext extends SembastTestContext {
   sdb_fs.FsDatabaseFactory get sdbFactory => factory.sdbFactory;
-  IdbSembastFactory get factory => super.factory;
+  IdbFactorySembast get factory => super.factory;
 }
 
 TestContext idbMemoryContext = new SembastTestContext()

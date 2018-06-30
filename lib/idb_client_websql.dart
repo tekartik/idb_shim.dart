@@ -3,6 +3,7 @@ library idb_shim_websql;
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:idb_shim/src/common/common_factory.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
 import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/websql/websql_client_constants.dart';
@@ -24,7 +25,7 @@ part 'src/websql/websql_transaction.dart';
 
 IdbWebSqlFactory get idbWebSqlFactory => new IdbWebSqlFactory();
 
-class IdbWebSqlFactory extends IdbFactory {
+class IdbWebSqlFactory extends IdbFactoryBase {
   @override
   bool get persistent => true;
 

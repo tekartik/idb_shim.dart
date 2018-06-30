@@ -17,7 +17,14 @@ void main() {
 }
 
 defineTests(SembastFsTestContext ctx) {
-  IdbSembastFactory idbFactory = ctx.factory;
+  IdbFactorySembast idbFactory = ctx.factory;
+
+  group('simple', () {
+    test('open', () async {
+      var db = await idbFactory.open('test');
+      await db.close();
+    });
+  });
 
   // common tests
   test_runner.defineTests(ctx);

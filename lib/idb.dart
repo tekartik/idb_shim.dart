@@ -2,6 +2,8 @@ library idb_shim;
 
 import 'dart:async';
 
+import 'package:idb_shim/src/common/common_factory.dart';
+
 export 'src/client/client.dart';
 export 'src/client/error.dart';
 
@@ -648,13 +650,6 @@ class KeyRange {
 ///
 abstract class IdbFactory {
   ///
-  /// When a factory is created, mark it as supported
-  ///
-  IdbFactory() {
-    IdbFactory.supported = true;
-  }
-
-  ///
   /// requests opening a connection to a database.
   ///
   /// performs he open operation asynchronously. If the operation is successful,
@@ -696,7 +691,7 @@ abstract class IdbFactory {
   Future<List<String>> getDatabaseNames();
 
   /// Changed to true when a factory is created
-  static bool supported = false;
+  static bool get supported => IdbFactoryBase.supported;
 
   ///
   /// idb_shim specific

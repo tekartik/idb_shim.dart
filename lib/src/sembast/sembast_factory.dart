@@ -1,6 +1,14 @@
-part of idb_shim_sembast;
+import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/idb_client_sembast.dart';
+import 'package:idb_shim/src/common/common_factory.dart';
+import 'package:idb_shim/src/common/common_value.dart';
+import 'package:idb_shim/src/sembast/sembast_database.dart';
+import 'package:idb_shim/src/utils/core_imports.dart';
+import 'package:path/path.dart';
+import 'package:sembast/sembast.dart' as sdb;
 
-class _IdbSembastFactory extends IdbSembastFactory {
+class IdbFactorySembastImpl extends IdbFactoryBase
+    implements IdbFactorySembast {
   final sdb.DatabaseFactory _databaseFactory;
   final String _path;
 
@@ -12,15 +20,15 @@ class _IdbSembastFactory extends IdbSembastFactory {
   @override
   bool get persistent => _databaseFactory.hasStorage;
 
-  _IdbSembastFactory(this._databaseFactory, [this._path]) : super._();
+  IdbFactorySembastImpl(this._databaseFactory, [this._path]);
 
   String get name => "${idbFactoryNameSembast}";
 
   // get the underlying sembast database for a given database
-  sdb.Database getSdbDatabase(Database db) => (db as _SdbDatabase).db;
+  sdb.Database getSdbDatabase(Database db) => (db as DatabaseSembast).db;
 
   Future<Database> openFromSdbDatabase(sdb.Database sdbDb) =>
-      _SdbDatabase.fromDatabase(this, sdbDb);
+      DatabaseSembast.fromDatabase(this, sdbDb);
 
   @override
   Future<Database> open(String dbName,
@@ -43,7 +51,7 @@ class _IdbSembastFactory extends IdbSembastFactory {
     //  return new Future.error(new ArgumentError('name cannot be null'));
     // }
 
-    _SdbDatabase db = new _SdbDatabase(this, dbName);
+    DatabaseSembast db = new DatabaseSembast(this, dbName);
 
     return db.open(version, onUpgradeNeeded).then((_) {
       return db;
@@ -66,6 +74,9 @@ class _IdbSembastFactory extends IdbSembastFactory {
   }
 
   Future<List<String>> getDatabaseNames() {
-    return null;
+    throw 'getDatabaseNames not supported';
   }
+
+  // common implementation
+  int cmp(Object first, Object second) => compareKeys(first, second);
 }
