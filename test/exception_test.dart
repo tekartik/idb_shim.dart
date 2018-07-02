@@ -3,7 +3,7 @@ import 'idb_test_common.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 // so that this can be run directly
-main() {
+void main() {
   defineTests(idbMemoryContext);
 }
 
@@ -14,13 +14,13 @@ void defineTests(TestContext ctx) {
   Transaction transaction;
   ObjectStore objectStore;
 
-  _createTransaction() {
+  void _createTransaction() {
     transaction = db.transaction(testStoreName, idbModeReadWrite);
     objectStore = transaction.objectStore(testStoreName);
   }
 
   // generic tearDown
-  _tearDown() async {
+  Future _tearDown() async {
     if (transaction != null) {
       await transaction.completed;
       transaction = null;
@@ -31,7 +31,7 @@ void defineTests(TestContext ctx) {
     }
   }
 
-  _setUp() async {
+  Future _setUp() async {
     return setUpSimpleStore(idbFactory, dbName: ctx.dbName)
         .then((Database database) {
       db = database;

@@ -5,7 +5,7 @@ import 'package:dev_test/test.dart';
 import 'package:idb_shim/idb_browser.dart';
 import 'package:idb_shim/idb_client.dart';
 
-main() {
+void main() {
   group('idb_browser', () {
     test('native', () {
       IdbFactory native = idbNativeFactory;

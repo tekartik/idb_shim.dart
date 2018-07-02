@@ -7,7 +7,8 @@ import 'dart:indexed_db' as idb;
 
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/common/common_factory.dart';
-
+import 'package:idb_shim/src/common/common_transaction.dart';
+import 'package:idb_shim/src/common/common_database.dart';
 import 'src/utils/browser_utils.dart';
 
 part 'src/native/native_cursor.dart';
@@ -33,6 +34,7 @@ class IdbNativeFactory extends IdbFactoryBase {
   static IdbNativeFactory _instance;
   IdbNativeFactory._();
 
+  @override
   String get name => idbFactoryNative;
 
   factory IdbNativeFactory() {
@@ -69,7 +71,7 @@ class IdbNativeFactory extends IdbFactoryBase {
                 ? null
                 : _onBlocked)
         .then((idb.Database database) {
-      return new _NativeDatabase(database);
+      return new DatabaseNative(database);
     });
   }
 

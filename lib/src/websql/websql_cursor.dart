@@ -141,6 +141,7 @@ abstract class _WebSqlKeyCursorBaseController
   _WebSqlKeyCursorBaseController(String direction, bool autoAdvance)
       : super(direction, autoAdvance);
 
+  @override
   Cursor get newCursor => new _WebSqlCursor(this, rows[currentIndex]);
 }
 
@@ -149,6 +150,7 @@ abstract class _WebSqlCursorWithValueBaseController
   _WebSqlCursorWithValueBaseController(String direction, bool autoAdvance)
       : super(direction, autoAdvance);
 
+  @override
   CursorWithValue get newCursor =>
       new _WebSqlCursorWithValue(this, rows[currentIndex]);
 }
@@ -156,12 +158,14 @@ abstract class _WebSqlCursorWithValueBaseController
 class _WebSqlCursorWithValueController
     extends _WebSqlCursorWithValueBaseController
     with _WebSqlCursorCommonController, _WebSqlCursorWithValueCommonController {
+  @override
   _WebSqlObjectStore store;
+  @override
   String get keyColumn => primaryKeyColumn;
 
   _WebSqlCursorWithValueController(
       this.store, String direction, bool autoAdvance) //
-      : super(direction, autoAdvance) {}
+      : super(direction, autoAdvance);
 }
 
 abstract class _WebSqlCursorWithValueCommonController {
@@ -194,7 +198,7 @@ abstract class _WebSqlCursorCommonController {
   String get keyColumn;
 
   Future execute(key, KeyRange keyRange) {
-    var key_OR_range = null;
+    var key_OR_range;
     if (key != null) {
       key_OR_range = key;
     } else if (keyRange != null) {

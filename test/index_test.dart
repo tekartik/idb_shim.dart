@@ -31,7 +31,7 @@ void defineTests(TestContext ctx) {
     }
 
     // generic tearDown
-    _tearDown() async {
+    Future _tearDown() async {
       if (transaction != null) {
         await transaction.completed;
         transaction = null;
@@ -377,7 +377,7 @@ void defineTests(TestContext ctx) {
     });
 
     group('one_multi_entry', () {
-      _setUp() async {
+      Future _setUp() async {
         await _setupDeleteDb();
 
         void _initializeDatabase(VersionChangeEvent e) {
@@ -471,7 +471,7 @@ void defineTests(TestContext ctx) {
     });
 
     group('two_indecies', () {
-      _setUp() async {
+      Future _setUp() async {
         await _setupDeleteDb();
 
         void _initializeDatabase(VersionChangeEvent e) {

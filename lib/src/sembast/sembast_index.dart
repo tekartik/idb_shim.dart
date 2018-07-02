@@ -8,6 +8,7 @@ import 'package:sembast/sembast.dart' as sdb;
 
 class IndexSembast extends Index with IndexWithMetaMixin {
   final ObjectStoreSembast store;
+  @override
   final IdbIndexMeta meta;
 
   IndexSembast(this.store, this.meta);
@@ -16,7 +17,7 @@ class IndexSembast extends Index with IndexWithMetaMixin {
     return store.inTransaction(computation);
   }
 
-  _indexKeyOrRangeFilter([key_OR_range]) {
+  sdb.Filter _indexKeyOrRangeFilter([key_OR_range]) {
     // null means all entry without null value
     if (key_OR_range == null) {
       return new sdb.Filter.notEqual(meta.keyPath, null);

@@ -3,18 +3,18 @@ library simple_provider;
 import 'dart:async';
 import 'package:idb_shim/idb_client.dart';
 
-const String DB_NAME = 'com.tekartik.simple_provider';
-const String STORE_NAME = 'test_store';
+const String dbName = 'com.tekartik.simple_provider';
+const String storeName = 'test_store';
 
-const String STORE = 'test_store';
-const String NAME_INDEX = 'name_index';
-const String NAME_FIELD = 'name';
+//const String testStoreName = 'test_store';
+const String nameIndex = 'name_index';
+const String nameField = 'name';
 
 class SimpleRow {
   SimpleRow(CursorWithValue cwv) {
-    Object value = cwv.value;
-    name = (value as Map)[NAME_FIELD];
-    id = cwv.primaryKey;
+    Map map = cwv.value as Map;
+    name = map[nameField] as String;
+    id = cwv.primaryKey as int;
   }
   int id;
   String name;
@@ -29,15 +29,15 @@ class SimpleProvider {
   void _initializeDatabase(VersionChangeEvent e) {
     Database db = (e.target as Request).result;
 
-    var objectStore = db.createObjectStore(STORE, autoIncrement: true);
-    objectStore.createIndex(NAME_INDEX, NAME_FIELD, unique: true);
+    var objectStore = db.createObjectStore(storeName, autoIncrement: true);
+    objectStore.createIndex(nameIndex, nameField, unique: true);
   }
 
   Future add(String name) {
-    var trans = db.transaction(STORE, idbModeReadWrite);
-    var store = trans.objectStore(STORE);
+    var trans = db.transaction(storeName, idbModeReadWrite);
+    var store = trans.objectStore(storeName);
 
-    var obj = {NAME_FIELD: name};
+    var obj = {nameField: name};
     store.put(obj);
     //store.openCursor(key: NAME_FIELD).then((_) {
     return trans.completed;
@@ -64,10 +64,10 @@ class SimpleProvider {
   }
 
   Future openEmpty() {
-    return idbFactory.deleteDatabase(DB_NAME).then((_) {
+    return idbFactory.deleteDatabase(dbName).then((_) {
       //done();
       return idbFactory
-          .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+          .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
           .then((Database db) {
         this.db = db;
       });

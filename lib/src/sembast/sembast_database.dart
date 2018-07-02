@@ -1,21 +1,28 @@
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/idb_client_sembast.dart';
+import 'package:idb_shim/src/common/common_database.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
 import 'package:idb_shim/src/sembast/sembast_object_store.dart';
 import 'package:idb_shim/src/sembast/sembast_transaction.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:sembast/sembast.dart' as sdb;
 
-class _SdbVersionChangeEvent extends VersionChangeEvent {
+class _SdbVersionChangeEvent extends IdbVersionChangeEventBase {
+  @override
   final int oldVersion;
+  @override
   final int newVersion;
   Request request;
+  @override
   Object get target => request;
+  @override
   Database get database => transaction.database;
   /**
    * added for convenience
    */
-  TransactionSembast get transaction => request.transaction;
+  @override
+  TransactionSembast get transaction =>
+      request.transaction as TransactionSembast;
 
   _SdbVersionChangeEvent(
       DatabaseSembast database, int oldVersion, this.newVersion) //
@@ -39,13 +46,14 @@ class _SdbVersionChangeEvent extends VersionChangeEvent {
 /// {"key":"stores","value":["test_store"]}
 /// {"key":"store_test_store","value":{"name":"test_store","keyPath":"my_key","autoIncrement":true}}
 
-class DatabaseSembast extends Database with DatabaseWithMetaMixin {
+class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
   TransactionSembast versionChangeTransaction;
+  @override
   final IdbDatabaseMeta meta = new IdbDatabaseMeta();
   sdb.Database db;
 
   @override
-  IdbFactorySembast get factory => super.factory;
+  IdbFactorySembast get factory => super.factory as IdbFactorySembast;
 
   sdb.DatabaseFactory get sdbFactory => factory.sdbFactory;
 
@@ -74,7 +82,7 @@ class DatabaseSembast extends Database with DatabaseWithMetaMixin {
     return db.mainStore.getRecords(keys).then((List<sdb.Record> records) {
       List<IdbObjectStoreMeta> list = [];
       records.forEach((sdb.Record record) {
-        Map map = record.value;
+        var map = (record.value as Map)?.cast<String, dynamic>();
         IdbObjectStoreMeta store = new IdbObjectStoreMeta.fromMap(map);
         list.add(store);
       });
@@ -86,7 +94,7 @@ class DatabaseSembast extends Database with DatabaseWithMetaMixin {
   Future<int> _readMeta() async {
     return db.transaction((txn) async {
       // read version
-      meta.version = await txn.mainStore.get("version");
+      meta.version = await txn.mainStore.get("version") as int;
       //devPrint("meta version :${meta.version})
       // read store meta
       sdb.Record record = await txn.mainStore.getRecord("stores");
@@ -105,56 +113,51 @@ class DatabaseSembast extends Database with DatabaseWithMetaMixin {
   }
 
   Future<sdb.Database> open(
-      int newVersion, void onUpgradeNeeded(VersionChangeEvent event)) {
+      int newVersion, OnUpgradeNeededFunction onUpgradeNeeded) async {
     int previousVersion;
 
     // Open the sembast database
-    Future<sdb.Database> _open() async {
-      db = await sdbFactory.openDatabase(factory.getDbPath(name), version: 1);
-      previousVersion = await _readMeta();
-      return db;
+    db = await sdbFactory.openDatabase(factory.getDbPath(name), version: 1);
+    previousVersion = await _readMeta();
+    if (newVersion != previousVersion) {
+      Set<IdbObjectStoreMeta> changedStores;
+      Set<IdbObjectStoreMeta> deletedStores;
+
+      await meta.onUpgradeNeeded(() async {
+        versionChangeTransaction =
+            new TransactionSembast(this, meta.versionChangeTransaction);
+        // could be null when opening an empty database
+        if (onUpgradeNeeded != null) {
+          onUpgradeNeeded(
+              new _SdbVersionChangeEvent(this, previousVersion, newVersion));
+        }
+        changedStores =
+            new Set.from(meta.versionChangeTransaction.createdStores);
+        changedStores.addAll(meta.versionChangeTransaction.updatedStores);
+        deletedStores = meta.versionChangeTransaction.deletedStores;
+      });
+
+      return db.transaction((txn) async {
+        await txn.put(newVersion, "version");
+
+        // First delete everything from deleted stores
+        for (IdbObjectStoreMeta storeMeta in deletedStores) {
+          await txn.deleteStore(storeMeta.name);
+        }
+
+        if (changedStores.isNotEmpty) {
+          await txn.put(new List.from(objectStoreNames), "stores");
+        }
+
+        for (IdbObjectStoreMeta storeMeta in changedStores) {
+          await txn.put(storeMeta.toMap(), "store_${storeMeta.name}");
+        }
+      }).then((_) {
+        // considered as opened
+        meta.version = newVersion;
+      });
     }
-
-    return _open().then((sdb.Database db) async {
-      if (newVersion != previousVersion) {
-        Set<IdbObjectStoreMeta> changedStores;
-        Set<IdbObjectStoreMeta> deletedStores;
-
-        await meta.onUpgradeNeeded(() async {
-          versionChangeTransaction =
-              new TransactionSembast(this, meta.versionChangeTransaction);
-          // could be null when opening an empty database
-          if (onUpgradeNeeded != null) {
-            onUpgradeNeeded(
-                new _SdbVersionChangeEvent(this, previousVersion, newVersion));
-          }
-          changedStores =
-              new Set.from(meta.versionChangeTransaction.createdStores);
-          changedStores.addAll(meta.versionChangeTransaction.updatedStores);
-          deletedStores = meta.versionChangeTransaction.deletedStores;
-        });
-
-        return db.transaction((txn) async {
-          await txn.put(newVersion, "version");
-
-          // First delete everything from deleted stores
-          for (IdbObjectStoreMeta storeMeta in deletedStores) {
-            await txn.deleteStore(storeMeta.name);
-          }
-
-          if (changedStores.isNotEmpty) {
-            await txn.put(new List.from(objectStoreNames), "stores");
-          }
-
-          for (IdbObjectStoreMeta storeMeta in changedStores) {
-            await txn.put(storeMeta.toMap(), "store_${storeMeta.name}");
-          }
-        }).then((_) {
-          // considered as opened
-          meta.version = newVersion;
-        });
-      }
-    });
+    return db;
   }
 
   @override
@@ -215,6 +218,7 @@ class DatabaseSembast extends Database with DatabaseWithMetaMixin {
     return map;
   }
 
+  @override
   String toString() {
     return toDebugMap().toString();
   }

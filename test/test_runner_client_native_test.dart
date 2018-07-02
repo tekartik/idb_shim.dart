@@ -70,7 +70,7 @@ main() {
 
       idb.Transaction transaction;
       idb.ObjectStore objectStore;
-      _createTransactionSync() {
+      void _createTransactionSync() {
         transaction = db.transaction("store", "readonly");
         objectStore = transaction.objectStore("store");
       }
@@ -161,7 +161,7 @@ main() {
 
       idb.Transaction transaction;
       idb.ObjectStore objectStore;
-      _createTransactionSync() {
+      void _createTransactionSync() {
         transaction = db.transaction("store", "readonly");
         objectStore = transaction.objectStore("store");
       }

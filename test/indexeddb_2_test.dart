@@ -17,11 +17,11 @@ const String DB_NAME = 'Test2';
 const String STORE_NAME = 'TEST';
 const int VERSION = 1;
 
-testReadWrite(idb.IdbFactory idbFactory, key, value, check,
+Future testReadWrite(idb.IdbFactory idbFactory, key, value, check,
     [String dbName = DB_NAME,
     String storeName = STORE_NAME,
     int version = VERSION]) async {
-  createObjectStore(idb.VersionChangeEvent e) {
+  void createObjectStore(idb.VersionChangeEvent e) {
     var store = e.database.createObjectStore(storeName);
     expect(store, isNotNull);
   }
@@ -83,7 +83,7 @@ void defineTests(TestContext ctx) {
   cyclic_list[1] = cyclic_list;
 
   skip_go(name, data) => null;
-  go(name, data) =>
+  go(String name, data) =>
       test(name, () => testReadWrite(idbFactory, 123, data, verifyGraph));
 
   test('test_verifyGraph', () {

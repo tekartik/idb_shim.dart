@@ -61,9 +61,7 @@ class _NativeIndex extends Index {
     return ctlr.stream;
   }
 
-  /**
-   * Same implementation than for the Store
-   */
+  /// Same implementation than for the Store
   @override
   Stream<CursorWithValue> openCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {

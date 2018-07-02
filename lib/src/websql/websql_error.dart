@@ -7,6 +7,7 @@ class _IdbWebSqlError extends DatabaseError {
 
   _IdbWebSqlError(this.errorCode, String message) : super(message);
 
+  @override
   String toString() {
     String text = "IdbWebSqlError(${errorCode})";
     if (message != null) {
@@ -21,16 +22,17 @@ class _WebSqlDatabaseError extends DatabaseError {
 
   int get code {
     if (_nativeError is SqlError) {
-      return _nativeError.code;
+      return (_nativeError as SqlError).code;
     }
     return 0;
   }
 
   _WebSqlDatabaseError(this._nativeError) : super(null);
 
+  @override
   String get message {
     if (_nativeError is SqlError) {
-      return _nativeError.message;
+      return (_nativeError as SqlError).message;
     }
     return _nativeError.toString();
   }

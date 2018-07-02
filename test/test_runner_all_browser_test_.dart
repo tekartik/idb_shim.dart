@@ -9,7 +9,7 @@ import 'common_value_test.dart' as common_value_test;
 import 'idb_test_common_test.dart' as idb_test_common_test;
 import 'package:dev_test/test.dart';
 
-main() {
+void main() {
   native.main();
   websql.main();
   sembast_memory.main();

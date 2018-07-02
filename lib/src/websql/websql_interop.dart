@@ -9,7 +9,7 @@ external List<String> objectKeys(Object obj);
 @anonymous
 @JS()
 class JsWebSqlTransaction {
-  external executeSql(String sql, List arguments, callback(txn, result),
+  external dynamic executeSql(String sql, List arguments, callback(txn, result),
       errorCallback(txn, error));
 }
 
@@ -33,10 +33,10 @@ class JsWebSqlResultSet {
 @anonymous
 @JS()
 class JsWebSqlDatapabase {
-  external transaction(
+  external dynamic transaction(
       txnCallback(txn), errorCallback(error), successCallback());
 
-  external readtransaction(
+  external dynamic readtransaction(
       txnCallback(txn), errorCallback(error), successCallback());
 }
 

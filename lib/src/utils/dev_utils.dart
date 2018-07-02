@@ -24,10 +24,10 @@ void devPrint(Object object) {
 @deprecated
 int devWarning;
 
-_devError([String msg = null]) {
+void _devError([Object msg]) {
   // one day remove the print however sometimes the error thrown is hidden
   try {
-    throw new UnsupportedError(msg);
+    throw new UnsupportedError(msg?.toString());
   } catch (e, st) {
     if (_devPrintEnabled) {
       print("# ERROR $msg");
@@ -38,7 +38,7 @@ _devError([String msg = null]) {
 }
 
 @deprecated
-devError([String msg = null]) => _devError(msg);
+void devError([String msg]) => _devError(msg);
 
 // exported for testing
 void tekartikDevPrint(Object object) => _devPrint(object);

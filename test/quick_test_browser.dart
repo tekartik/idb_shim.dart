@@ -10,14 +10,14 @@ import 'package:idb_shim/idb_client.dart';
 import 'dart:async';
 import 'idb_test_common.dart';
 
-testMain(TestContext ctx) {
+void testMain(TestContext ctx) {
   simple_provider_test.defineTests(ctx);
   index_test.defineTests(ctx);
   transaction_test.defineTests(ctx);
   exception_test.defineTests(ctx);
 }
 
-main() {
+void main() {
   group('native', () {
     if (IdbNativeFactory.supported) {
       IdbFactory idbFactory = new IdbNativeFactory();

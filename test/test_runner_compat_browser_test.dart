@@ -9,7 +9,7 @@ import 'test_runner_client_native_test.dart' as native;
 import 'test_runner_client_sembast_memory_test.dart' as sembast_memory;
 
 // only the supported for now
-main() {
+void main() {
   native.main();
   // websql.main();
   sembast_memory.main();

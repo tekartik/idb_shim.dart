@@ -42,11 +42,16 @@ Future testUpgrade(idb.IdbFactory idbFactory) {
   });
 }
 
-testReadWrite(idb.IdbFactory idbFactory, key, value, matcher,
-        [dbName,
-        storeName = STORE_NAME,
-        version = VERSION,
-        stringifyResult = false]) =>
+typedef dynamic BodyFunc();
+
+typedef BodyFunc TestFunc(idb.IdbFactory idbFactory, key, value, matcher,
+    [String dbName, String storeName, int version, bool stringifyResult]);
+
+BodyFunc testReadWrite(idb.IdbFactory idbFactory, key, value, matcher,
+        [String dbName,
+        String storeName = STORE_NAME,
+        int version = VERSION,
+        bool stringifyResult = false]) =>
     () {
       if (dbName == null) {
         dbName = nextDatabaseName();
@@ -87,11 +92,11 @@ testReadWrite(idb.IdbFactory idbFactory, key, value, matcher,
       });
     };
 
-testReadWriteTyped(idb.IdbFactory idbFactory, key, value, matcher,
-        [dbName,
-        storeName = STORE_NAME,
-        version = VERSION,
-        stringifyResult = false]) =>
+BodyFunc testReadWriteTyped(idb.IdbFactory idbFactory, key, value, matcher,
+        [String dbName,
+        String storeName = STORE_NAME,
+        int version = VERSION,
+        bool stringifyResult = false]) =>
     () {
       if (dbName == null) {
         dbName = nextDatabaseName();
@@ -133,7 +138,7 @@ testReadWriteTyped(idb.IdbFactory idbFactory, key, value, matcher,
       });
     };
 
-void testTypes(testFunction, idb.IdbFactory idbFactory) {
+void testTypes(TestFunc testFunction, idb.IdbFactory idbFactory) {
   test('String', testFunction(idbFactory, 123, 'Hoot!', equals('Hoot!')));
   test('int', testFunction(idbFactory, 123, 12345, equals(12345)));
   test('List', testFunction(idbFactory, 123, [1, 2, 3], equals([1, 2, 3])));
@@ -168,7 +173,7 @@ void testTypes(testFunction, idb.IdbFactory idbFactory) {
 }
 
 //TEKARTIK_IDB_REMOVED main() {
-main() {
+void main() {
   defineTests(idbMemoryContext);
 }
 

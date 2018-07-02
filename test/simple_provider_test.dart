@@ -6,7 +6,7 @@ import 'dart:async';
 import 'idb_test_common.dart' hide testNameIndex, testNameField;
 
 // so that this can be run directly
-main() {
+void main() {
   defineTests(idbMemoryContext);
 }
 
@@ -27,8 +27,9 @@ void defineTests(TestContext ctx) {
 
       test('simple cursor auto advance', () {
         // Check ordered by id
-        ObjectStore store =
-            provider.db.transaction(STORE, idbModeReadOnly).objectStore(STORE);
+        ObjectStore store = provider.db
+            .transaction(testStoreName, idbModeReadOnly)
+            .objectStore(testStoreName);
         Stream<CursorWithValue> stream = store.openCursor(autoAdvance: true);
         return provider.cursorToList(stream).then((List<SimpleRow> list) {
           expect(list[0].name, equals('test2'));
@@ -39,9 +40,9 @@ void defineTests(TestContext ctx) {
         }).then((_) {
           // Check ordered by name
           ObjectStore store = provider.db
-              .transaction(STORE, idbModeReadOnly)
-              .objectStore(STORE);
-          Index index = store.index(NAME_INDEX);
+              .transaction(testStoreName, idbModeReadOnly)
+              .objectStore(testStoreName);
+          Index index = store.index(nameIndex);
           Stream<CursorWithValue> stream = index.openCursor(autoAdvance: true);
           return provider.cursorToList(stream).then((List<SimpleRow> list) {
             expect(list[0].name, equals('test1'));
@@ -55,8 +56,9 @@ void defineTests(TestContext ctx) {
 
       test('simple cursor no auto advance', () {
         // Check ordered by id
-        ObjectStore store =
-            provider.db.transaction(STORE, idbModeReadOnly).objectStore(STORE);
+        ObjectStore store = provider.db
+            .transaction(testStoreName, idbModeReadOnly)
+            .objectStore(testStoreName);
         Stream<CursorWithValue> stream = store.openCursor();
         Completer completer = new Completer();
         List<SimpleRow> list = new List();
@@ -78,9 +80,10 @@ void defineTests(TestContext ctx) {
 
       test('simple cursor reverse', () {
         // Check ordered by name reverse
-        ObjectStore store =
-            provider.db.transaction(STORE, idbModeReadOnly).objectStore(STORE);
-        Index index = store.index(NAME_INDEX);
+        ObjectStore store = provider.db
+            .transaction(testStoreName, idbModeReadOnly)
+            .objectStore(testStoreName);
+        Index index = store.index(nameIndex);
         Stream<CursorWithValue> stream =
             index.openCursor(direction: idbDirectionPrev, autoAdvance: true);
         return provider.cursorToList(stream).then((List<SimpleRow> list) {
@@ -98,9 +101,9 @@ void defineTests(TestContext ctx) {
       SimpleProvider provider = new SimpleProvider(idbFactory);
       return provider.openEmpty().then((_) {
         Transaction transaction =
-            provider.db.transaction(STORE, idbModeReadWrite);
-        ObjectStore objectStore = transaction.objectStore(STORE);
-        Map object = {NAME_FIELD: "test"};
+            provider.db.transaction(testStoreName, idbModeReadWrite);
+        ObjectStore objectStore = transaction.objectStore(testStoreName);
+        Map object = {nameField: "test"};
         objectStore.add(object).then((r) {
           int key = r;
           expect(key, equals(1));
@@ -108,14 +111,14 @@ void defineTests(TestContext ctx) {
           objectStore.getObject(r).then((newObject) {
             //print(newObject);
             expect(newObject.length, equals(1));
-            expect(newObject[NAME_FIELD], equals('test'));
+            expect(newObject[nameField], equals('test'));
 
             objectStore.put(newObject, r).then((newR) {
               int key = newR;
               expect(key, equals(1));
               //print(newObject);
               expect(newObject.length, equals(1));
-              expect(newObject[NAME_FIELD], equals('test'));
+              expect(newObject[nameField], equals('test'));
 
               objectStore.delete(r).then((nullValue) {
                 expect(nullValue, isNull);

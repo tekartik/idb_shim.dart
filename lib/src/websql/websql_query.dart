@@ -5,8 +5,8 @@ class _Query {
   List<Object> arguments;
 }
 
-const String _SQL_COUNT_COLUMN = "_COUNT";
-const _SQL_COUNT = "COUNT(*) AS $_SQL_COUNT_COLUMN";
+const String sqlCountColumn = "_COUNT";
+const _SQL_COUNT = "COUNT(*) AS $sqlCountColumn";
 
 class _SelectQuery extends _Query {
   String _selectedColumns;
@@ -85,7 +85,7 @@ class _CountQuery extends _SelectQuery {
       if (rs.rows.length == 0) {
         return null;
       }
-      return (rs.rows[0][_SQL_COUNT_COLUMN]);
+      return (rs.rows[0][sqlCountColumn] as int);
     });
   }
 }

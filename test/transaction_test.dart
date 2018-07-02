@@ -22,7 +22,7 @@ void defineTests(TestContext ctx) {
     await idbFactory.deleteDatabase(_dbName);
   }
 
-  _tearDown() async {
+  Future _tearDown() async {
     if (transaction != null) {
       await transaction.completed;
       transaction = null;
@@ -399,7 +399,7 @@ void defineTests(TestContext ctx) {
           objectStore = transaction.objectStore(testStoreName);
         }
 
-        _createTransaction() async {
+        Future _createTransaction() async {
           await new Future.delayed(new Duration(milliseconds: 1));
           _createTransactionSync();
         }

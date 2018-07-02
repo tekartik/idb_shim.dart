@@ -40,7 +40,7 @@ Future<Database> copySchema(
     await txn.completed;
   }
 
-  _onUpgradeNeeded(VersionChangeEvent event) {
+  void _onUpgradeNeeded(VersionChangeEvent event) {
     Database db = event.database;
     for (IdbObjectStoreMeta storeMeta in schemaMeta.stores) {
       ObjectStore store = db.createObjectStore(storeMeta.name,

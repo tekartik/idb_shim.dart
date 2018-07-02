@@ -1,9 +1,13 @@
 part of idb_shim_native;
 
-class _NativeTransaction extends Transaction {
+abstract class TransactionNativeBase extends IdbTransactionBase {
+  TransactionNativeBase(Database database) : super(database);
+}
+
+class TransactionNative extends TransactionNativeBase {
   idb.Transaction idbTransaction;
 
-  _NativeTransaction(Database database, this.idbTransaction) : super(database);
+  TransactionNative(Database database, this.idbTransaction) : super(database);
 
   @override
   ObjectStore objectStore(String name) {
@@ -26,14 +30,16 @@ class _NativeTransaction extends Transaction {
 //
 // Safari fake multistore transaction
 // create the transaction when objectStore is called
-class _FakeMultiStoreTransaction extends Transaction {
+class FakeMultiStoreTransactionNative extends TransactionNativeBase {
   //List<_NativeTransaction> transactions = [];
   // We sequencialize the transactions
-  _NativeTransaction lastTransaction;
+  DatabaseNative get _nativeDatabase => (database as DatabaseNative);
+  TransactionNative lastTransaction;
   ObjectStore lastStore;
-  idb.Database get idbDatabase => (database as _NativeDatabase).idbDatabase;
+  idb.Database get idbDatabase => _nativeDatabase.idbDatabase;
   String mode;
-  _FakeMultiStoreTransaction(Database database, this.mode) : super(database);
+  FakeMultiStoreTransactionNative(Database database, this.mode)
+      : super(database);
 
   @override
   ObjectStore objectStore(String name) {
@@ -47,7 +53,8 @@ class _FakeMultiStoreTransaction extends Transaction {
       // so that it wannot be re-used
       lastTransaction.completed;
     }
-    lastTransaction = database.transaction(name, mode);
+    lastTransaction =
+        _nativeDatabase.transaction(name, mode) as TransactionNative;
     lastStore = lastTransaction.objectStore(name);
     return lastStore;
   }

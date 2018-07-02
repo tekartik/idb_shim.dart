@@ -52,7 +52,7 @@ defineTests(SembastFsTestContext ctx) {
           .transform(const Utf8Decoder())
           .transform(const LineSplitter())
           .listen((String line) {
-        content.add(json.decode(line));
+        content.add(json.decode(line) as Map);
       }).asFuture();
       return content;
     }

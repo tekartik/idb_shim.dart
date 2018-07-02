@@ -7,8 +7,8 @@ import 'idb_test_common.dart';
 class TestIdNameRow {
   TestIdNameRow(CursorWithValue cwv) {
     Object value = cwv.value;
-    name = (value as Map)[testNameField];
-    id = cwv.primaryKey;
+    name = (value as Map)[testNameField] as String;
+    id = cwv.primaryKey as int;
   }
   int id;
   String name;
@@ -94,7 +94,7 @@ void defineTests(TestContext ctx) {
         objectStore = transaction.objectStore(testStoreName);
       }
 
-      _setUp() async {
+      Future _setUp() async {
         await _setupDeleteDb();
         void _initializeDatabase(VersionChangeEvent e) {
           Database db = e.database;

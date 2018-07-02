@@ -7,14 +7,14 @@ import 'idb_test_common.dart';
 class TestIdNameRow {
   TestIdNameRow(CursorWithValue cwv) {
     Object value = cwv.value;
-    name = (value as Map)[testNameField];
-    id = cwv.primaryKey;
+    name = (value as Map)[testNameField] as String;
+    id = cwv.primaryKey as int;
   }
   int id;
   String name;
 }
 
-main() {
+void main() {
   defineTests(idbMemoryContext);
 }
 
@@ -96,7 +96,7 @@ void defineTests(TestContext ctx) {
         List<Map> list = [];
         Stream<CursorWithValue> stream = index.openCursor(autoAdvance: true);
         return stream.listen((CursorWithValue cwv) {
-          list.add(cwv.value);
+          list.add(cwv.value as Map);
         }).asFuture(list);
       }
 
@@ -105,7 +105,7 @@ void defineTests(TestContext ctx) {
         List<String> list = [];
         Stream<Cursor> stream = index.openKeyCursor(autoAdvance: true);
         return stream.listen((Cursor c) {
-          list.add(c.key);
+          list.add(c.key as String);
         }).asFuture(list);
       }
 
@@ -329,7 +329,7 @@ void defineTests(TestContext ctx) {
           return index
               .openCursor(autoAdvance: false)
               .listen((CursorWithValue cwv) {
-                map = new Map.from(cwv.value);
+                map = new Map.from(cwv.value as Map);
                 map["other"] = "too";
                 cwv.update(map).then((_) {
                   cwv.next();
@@ -423,7 +423,7 @@ void defineTests(TestContext ctx) {
           List<int> keys = [];
           return stream
               .listen((Cursor cursor) {
-                keys.add(cursor.primaryKey);
+                keys.add(cursor.primaryKey as int);
               })
               .asFuture()
               .then((_) {
@@ -439,36 +439,23 @@ void defineTests(TestContext ctx) {
         int key1, key2, key3;
         // order should be key1, key3, key2 for name
         // order should be key2, key1, key3 for value
-        return add("a", 2).then((key) {
-          key1 = key;
-          return add("c", 1);
-        }).then((key) {
-          key2 = key;
-          return add("b", 3);
-        }).then((key) {
-          key3 = key;
-          Stream<Cursor> stream = nameIndex.openKeyCursor(autoAdvance: true);
-          return getKeys(stream).then((result) {
-            expect(result, [key1, key3, key2]);
-          });
-        }).then((_) {
-          Stream<Cursor> stream = valueIndex.openKeyCursor(autoAdvance: true);
-          return getKeys(stream).then((result) {
-            expect(result, [key2, key1, key3]);
-          });
-        }).then((_) {
-          Stream<Cursor> stream = valueIndex.openKeyCursor(
-              range: new KeyRange.lowerBound(2), autoAdvance: true);
-          return getKeys(stream).then((result) {
-            expect(result, [key1, key3]);
-          });
-        }).then((_) {
-          Stream<Cursor> stream = valueIndex.openKeyCursor(
-              range: new KeyRange.upperBound(2, true), autoAdvance: true);
-          return getKeys(stream).then((result) {
-            expect(result, [key2]);
-          });
-        });
+        key1 = await add("a", 2) as int;
+        key2 = await add("c", 1) as int;
+        key3 = await add("b", 3) as int;
+
+        Stream<Cursor> stream = nameIndex.openKeyCursor(autoAdvance: true);
+        expect(await getKeys(stream), [key1, key3, key2]);
+
+        stream = valueIndex.openKeyCursor(autoAdvance: true);
+        expect(await getKeys(stream), [key2, key1, key3]);
+
+        stream = valueIndex.openKeyCursor(
+            range: new KeyRange.lowerBound(2), autoAdvance: true);
+        expect(await getKeys(stream), [key1, key3]);
+
+        stream = valueIndex.openKeyCursor(
+            range: new KeyRange.upperBound(2, true), autoAdvance: true);
+        expect(await getKeys(stream), [key2]);
       });
     });
   });

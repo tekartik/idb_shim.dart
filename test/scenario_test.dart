@@ -16,7 +16,7 @@ void defineTests(TestContext ctx) {
   group('scenario', () {
     group('bug_put_delete', () {
       Database db;
-      _setUp() async {
+      Future _setUp() async {
         await idbFactory.deleteDatabase(ctx.dbName);
         void _initializeDatabase(VersionChangeEvent e) {
           db = e.database;

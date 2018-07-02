@@ -7,7 +7,7 @@ import 'idb_test_common.dart';
 import 'common_meta_test.dart';
 
 // so that this can be run directly
-main() {
+void main() {
   defineTests(idbMemoryContext);
 }
 
@@ -340,7 +340,7 @@ void defineTests(TestContext ctx) {
         expect(key1, 1);
 
         Map valueRead = await objectStore.getObject(1);
-        valueRead = await objectStore.getObject('test');
+        valueRead = await objectStore.getObject('test') as Map;
         expect(valueRead, value1);
       }, skip: true);
 
@@ -629,7 +629,7 @@ void defineTests(TestContext ctx) {
     group('key_path_auto', () {
       const String keyPath = "my_key";
 
-      _setUp() async {
+      Future _setUp() async {
         await _setupDeleteDb();
 
         void _initializeDatabase(VersionChangeEvent e) {
@@ -850,7 +850,7 @@ void defineTests(TestContext ctx) {
         Map value = {keyPath: 'test_value'};
         String key = await objectStore.put(value);
         expect(key, 'test_value');
-        key = await objectStore.put(value);
+        key = await objectStore.put(value) as String;
 
         // There must be only one item
         expect(await objectStore.count(key), 1);
@@ -882,7 +882,7 @@ void defineTests(TestContext ctx) {
           // ie idb does not have autoIncrement
           if (ctx.isIdbIe) {
             readMeta = new IdbObjectStoreMeta(readMeta.name, readMeta.keyPath,
-                storeMeta.autoIncrement, readMeta.indecies);
+                storeMeta.autoIncrement, readMeta.indecies.toList());
           }
           expect(readMeta, storeMeta);
           await transaction.completed;

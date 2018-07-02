@@ -1,14 +1,19 @@
 part of idb_shim_websql;
 
-class _WebSqlVersionChangeEvent extends VersionChangeEvent {
+class _WebSqlVersionChangeEvent extends IdbVersionChangeEventBase {
+  @override
   int oldVersion;
+  @override
   int newVersion;
   Request request;
+  @override
   Object get target => request;
+  @override
   Database get database => transaction.database;
   /**
      * added for convenience
      */
+  @override
   Transaction get transaction => request.transaction;
 
   _WebSqlVersionChangeEvent(_WebSqlDatabase database, this.oldVersion,
@@ -48,11 +53,12 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
   // Cache
   Map<String, _WebSqlObjectStoreMeta> stores = new Map();
   */
+  @override
   final IdbDatabaseMeta meta = new IdbDatabaseMeta();
 
   int _getVersionFromResultSet(SqlResultSet resultSet) {
     if (resultSet.rows.length > 0) {
-      return resultSet.rows[0]['value'];
+      return resultSet.rows[0]['value'] as int;
     }
     return 0;
   }
@@ -66,7 +72,7 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
     List<String> tableNamesFromResultSet(SqlResultSet rs) {
       List<String> names = [];
       rs.rows.forEach((row) {
-        names.add(_WebSqlObjectStore.getSqlTableName(row['name']));
+        names.add(_WebSqlObjectStore.getSqlTableName(row['name'] as String));
       });
       return names;
     }
@@ -196,8 +202,7 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
     versionChangeTransaction = null;
   }
 
-  Future open(
-      int newVersion, void onUpgradeNeeded(VersionChangeEvent event)) async {
+  Future open(int newVersion, OnUpgradeNeededFunction onUpgradeNeeded) async {
     Future _checkVersion(SqlTransaction tx, int oldVersion) async {
       bool upgrading = false;
 
@@ -308,10 +313,11 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
   Future _loadStores(_WebSqlTransaction transaction) {
     // this is also an indicator
     var sqlSelect = "SELECT name, meta FROM stores"; // WHERE name = ?";
-    var sqlArgs = null; //[name];
+    List sqlArgs;
     return transaction.execute(sqlSelect, sqlArgs).then((SqlResultSet rs) {
       rs.rows.forEach((Map row) {
-        Map map = json.decode(row['meta']);
+        var map = (json.decode(row['meta'] as String) as Map)
+            ?.cast<String, dynamic>();
         IdbObjectStoreMeta storeMeta = new IdbObjectStoreMeta.fromMap(map);
         meta.putObjectStore(storeMeta);
       });
@@ -337,6 +343,7 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
 
   // Only created when we asked for it
   // singleton
+  // ignore: close_sinks
   StreamController<VersionChangeEvent> onVersionChangeCtlr;
 
   @override

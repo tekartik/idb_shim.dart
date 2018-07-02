@@ -7,7 +7,7 @@
 
 import 'dart:html';
 import 'package:idb_shim/idb_browser.dart' as idb;
-import 'package:idb_shim/idb_client.dart' as idb;
+import 'package:idb_shim/idb.dart' as idb;
 //import 'dart:indexed_db' as idb;
 import 'dart:async';
 
@@ -20,7 +20,7 @@ class TodoList {
 
   TodoList() {
     _todoItems = querySelector('#todo-items');
-    _input = querySelector('#todo');
+    _input = querySelector('#todo') as InputElement;
     querySelector('input#submit').onClick.listen((e) => _onAddTodo());
   }
 
@@ -92,17 +92,18 @@ class TodoList {
 
     // Get everything in the store.
     store.openCursor(autoAdvance: true).listen((cursor) {
-      _renderTodo(cursor.value);
+      _renderTodo(cursor.value as Map);
     }, onError: _onError);
   }
 
   void _renderTodo(Map todoItem) {
     var textDisplay = new Element.tag('span');
-    textDisplay.text = todoItem['text'];
+    textDisplay.text = todoItem['text'] as String;
 
     var deleteControl = new Element.tag('a');
     deleteControl.text = '[Delete]';
-    deleteControl.onClick.listen((e) => _deleteTodo(todoItem['timeStamp']));
+    deleteControl.onClick
+        .listen((e) => _deleteTodo(todoItem['timeStamp'] as String));
 
     var item = new Element.tag('li');
     item.nodes.add(textDisplay);
@@ -111,9 +112,9 @@ class TodoList {
   }
 }
 
-/**
- * Typically the argument is window.location.search
- */
+///
+/// Typically the argument is window.location.search
+///
 Map<String, String> getArguments(String search) {
   Map<String, String> params = new Map();
   if (search != null) {
@@ -126,7 +127,7 @@ Map<String, String> getArguments(String search) {
         List<String> split = e.split("=");
         params[split[0]] = split[1];
       } else {
-        if (!e.isEmpty) {
+        if (e.isNotEmpty) {
           params[e] = '';
         }
       }
@@ -135,7 +136,7 @@ Map<String, String> getArguments(String search) {
   return params;
 }
 
-main() async {
+Future main() async {
   var urlArgs = getArguments(window.location.search);
   String idbFactoryName = urlArgs['idb_factory'];
   // init factory from url

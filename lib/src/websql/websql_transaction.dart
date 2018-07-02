@@ -3,7 +3,7 @@ part of idb_shim_websql;
 // set to true to debug transaction life cycle
 bool _debugTransaction = false;
 
-class _WebSqlTransaction extends Transaction {
+class _WebSqlTransaction extends IdbTransactionBase {
   final IdbTransactionMeta _meta;
 
   bool _inactive = false;
@@ -34,7 +34,7 @@ class _WebSqlTransaction extends Transaction {
   _WebSqlDatabase get idbWqlDatabase => (database as _WebSqlDatabase);
 
   _WebSqlTransaction(Database database, this._sqlTransaction, this._meta)
-      : super(database) {}
+      : super(database);
 
   @override
   _WebSqlObjectStore objectStore(String name) {
@@ -79,6 +79,7 @@ class _WebSqlTransaction extends Transaction {
     }
   }
 
+  @override
   Future<Database> get completed {
     if (_lazySqlTransaction == null) {
       return new Future.value(database);
@@ -92,7 +93,8 @@ class _WebSqlTransaction extends Transaction {
     }
   }
 
-  toString() {
+  @override
+  String toString() {
     return _meta.toString();
   }
 }

@@ -1,7 +1,6 @@
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/idb_client_sembast.dart';
 import 'package:idb_shim/src/common/common_factory.dart';
-import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/sembast/sembast_database.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:path/path.dart';
@@ -12,9 +11,11 @@ class IdbFactorySembastImpl extends IdbFactoryBase
   final sdb.DatabaseFactory _databaseFactory;
   final String _path;
 
+  @override
   String getDbPath(String dbName) =>
       _path == null ? dbName : join(_path, dbName);
 
+  @override
   sdb.DatabaseFactory get sdbFactory => _databaseFactory;
 
   @override
@@ -22,11 +23,14 @@ class IdbFactorySembastImpl extends IdbFactoryBase
 
   IdbFactorySembastImpl(this._databaseFactory, [this._path]);
 
+  @override
   String get name => "${idbFactoryNameSembast}";
 
   // get the underlying sembast database for a given database
+  @override
   sdb.Database getSdbDatabase(Database db) => (db as DatabaseSembast).db;
 
+  @override
   Future<Database> openFromSdbDatabase(sdb.Database sdbDb) =>
       DatabaseSembast.fromDatabase(this, sdbDb);
 
@@ -73,10 +77,8 @@ class IdbFactorySembastImpl extends IdbFactoryBase
     return false;
   }
 
+  @override
   Future<List<String>> getDatabaseNames() {
-    throw 'getDatabaseNames not supported';
+    throw new DatabaseException('getDatabaseNames not supported');
   }
-
-  // common implementation
-  int cmp(Object first, Object second) => compareKeys(first, second);
 }

@@ -10,22 +10,22 @@ class _WebSqlGlobalStore {
   // can be changed for testing
   String dbName = _DB_NAME;
   static String _DB_NAME = GLOBAL_STORE_DB_NAME;
-  static String DB_VERSION = GLOBAL_STORE_DB_VERSION;
-  static int DB_ESTIMATED_SIZE = GLOBAL_STORE_DB_ESTIMATED_SIZE;
-  static String NAME_COLUMN_NAME = "name";
-  static String DATABASES_TABLE_NAME = "databases";
+  static String dbVersion = GLOBAL_STORE_DB_VERSION;
+  static int dbEstimatedSize = GLOBAL_STORE_DB_ESTIMATED_SIZE;
+  static String nameColumnName = "name";
+  static String databasesTableName = "databases";
 
   SqlDatabase db;
 
   Future<List<String>> getDatabaseNames() {
     return _checkOpenTransaction().then((tx) {
       return tx
-          .execute("SELECT $NAME_COLUMN_NAME FROM $DATABASES_TABLE_NAME")
+          .execute("SELECT $nameColumnName FROM $databasesTableName")
           .then((SqlResultSet resultSet) {
         List<String> names = [];
         resultSet.rows.forEach((Map row) {
           //print(row);
-          names.add(row[NAME_COLUMN_NAME]);
+          names.add(row[nameColumnName] as String);
         });
         return names;
       });
@@ -36,16 +36,16 @@ class _WebSqlGlobalStore {
   }
 
   Future createDatabasesTable(SqlTransaction tx) {
-    return tx.execute("DROP TABLE IF EXISTS $DATABASES_TABLE_NAME").then((_) {
+    return tx.execute("DROP TABLE IF EXISTS $databasesTableName").then((_) {
       return tx.execute(
-          "CREATE TABLE $DATABASES_TABLE_NAME ($NAME_COLUMN_NAME TEXT UNIQUE NOT NULL)");
+          "CREATE TABLE $databasesTableName ($nameColumnName TEXT UNIQUE NOT NULL)");
     });
   }
 
   Future addDatabaseName(String name) {
     Future<SqlResultSet> insert(SqlTransaction tx) {
       String insertSqlStatement =
-          "INSERT INTO $DATABASES_TABLE_NAME ($NAME_COLUMN_NAME) VALUES(?)";
+          "INSERT INTO $databasesTableName ($nameColumnName) VALUES(?)";
       List<String> insertSqlArguments = [name];
       return tx.execute(insertSqlStatement, insertSqlArguments);
     }
@@ -68,7 +68,7 @@ class _WebSqlGlobalStore {
   Future deleteDatabaseName(String name) {
     return _checkOpenTransaction().then((tx) {
       String deleteSqlStatement =
-          "DELETE FROM $DATABASES_TABLE_NAME WHERE $NAME_COLUMN_NAME ";
+          "DELETE FROM $databasesTableName WHERE $nameColumnName ";
       List<String> deleteSqlArguments;
       if (name == null) {
         deleteSqlStatement += "IS NULL";
@@ -102,7 +102,7 @@ class _WebSqlGlobalStore {
   }
 
   Future<SqlTransaction> _checkOpen() {
-    Completer completer = new Completer.sync();
+    var completer = new Completer<SqlTransaction>.sync();
     _checkOpenNew((SqlTransaction tx) {
       completer.complete(tx);
     });
@@ -112,7 +112,7 @@ class _WebSqlGlobalStore {
   void _checkOpenNew(void action(SqlTransaction tx)) {
     if (db == null) {
       db = sqlDatabaseFactory.openDatabase(
-          dbName, DB_VERSION, dbName, DB_ESTIMATED_SIZE);
+          dbName, dbVersion, dbName, dbEstimatedSize);
     }
 
     Future<SqlTransaction> _cleanup(SqlTransaction tx) {

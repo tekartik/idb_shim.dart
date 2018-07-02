@@ -6,7 +6,7 @@ library idb_shim.src.client.client;
  * idbDevWarning;
  */
 @deprecated
-get idbDevWarning => null;
+dynamic get idbDevWarning => null;
 
 @deprecated
-idbDevPrint(msg) => print(msg);
+void idbDevPrint(msg) => print(msg);

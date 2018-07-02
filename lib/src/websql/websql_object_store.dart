@@ -3,8 +3,8 @@ part of idb_shim_websql;
 // meta data is loaded only once
 
 class OBSOLETE_WebSqlObjectStoreMeta extends IdbObjectStoreMeta {
-  static const String VALUE_COLUMN_NAME = 'value';
-  static const String KEY_DEFAULT_COLUMN_NAME = 'key';
+  static const String valueColumnName = 'value';
+  static const String keyDefaultColumnName = 'key';
 
   OBSOLETE_WebSqlObjectStoreMeta(
       String name, String keyPath, bool autoIncrement)
@@ -14,7 +14,7 @@ class OBSOLETE_WebSqlObjectStoreMeta extends IdbObjectStoreMeta {
 
   String sqlColumnName(String keyPath) {
     if (keyPath == null) {
-      return KEY_DEFAULT_COLUMN_NAME;
+      return keyDefaultColumnName;
     } else {
       return "_col_$keyPath";
     }
@@ -49,14 +49,15 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
 
   _WebSqlTransaction transaction;
 
+  @override
   final IdbObjectStoreMeta meta;
 
-  _WebSqlDatabase get database => transaction.database;
+  _WebSqlDatabase get database => transaction.database as _WebSqlDatabase;
 
   bool get ready => keyColumn != null;
   Future _lazyPrepare;
 
-  _WebSqlObjectStore(this.transaction, this.meta) {}
+  _WebSqlObjectStore(this.transaction, this.meta);
 
   String sqlColumnName(String keyPath) {
     if (keyPath == null) {
@@ -139,7 +140,7 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   // Don't make it async as it must run before completed is called
-  Future _checkStore(Future computation()) {
+  Future<T> _checkStore<T>(FutureOr<T> computation()) {
     // this is also an indicator
     //if (!ready) {
     if (_lazyPrepare == null) {
@@ -333,7 +334,7 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
   @override
   Index createIndex(String name, keyPath, {bool unique, bool multiEntry}) {
     IdbIndexMeta indexMeta =
-        new IdbIndexMeta(name, keyPath, unique, multiEntry);
+        new IdbIndexMeta(name, keyPath as String, unique, multiEntry);
     meta.createIndex(database.meta, indexMeta);
     _WebSqlIndex index = new _WebSqlIndex(this, indexMeta);
     // let it for later

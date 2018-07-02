@@ -75,8 +75,8 @@ void defineTests() {
       expect(meta1, isNot(meta3));
     });
 
-    testStoreRoundTrip(IdbObjectStoreMeta meta) {
-      Map map = meta.toMap();
+    void testStoreRoundTrip(IdbObjectStoreMeta meta) {
+      var map = meta.toMap();
       IdbObjectStoreMeta newMeta = new IdbObjectStoreMeta.fromMap(map);
       expect(newMeta, meta);
     }

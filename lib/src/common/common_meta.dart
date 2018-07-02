@@ -81,7 +81,7 @@ class IdbDatabaseMeta {
   IdbVersionChangeTransactionMeta get versionChangeTransaction =>
       _versionChangeTransaction;
 
-  onUpgradeNeeded(action()) async {
+  Future onUpgradeNeeded(action()) async {
     _versionChangeTransaction = new IdbVersionChangeTransactionMeta();
 
     var result = action();
@@ -141,11 +141,15 @@ class IdbDatabaseMeta {
               DatabaseStoreNotFoundError.storeMessage(storeName_OR_storeNames));
         }
       }
-      return new IdbTransactionMeta(storeName_OR_storeNames, mode);
+      return new IdbTransactionMeta(
+          storeName_OR_storeNames.cast<String>(), mode);
+    } else if (storeName_OR_storeNames != null) {
+      throw new DatabaseError(
+          "Invalid store name(s) parameter: ${storeName_OR_storeNames}");
     } else {
       // assume null - it will complain otherwise
       // this is use for transaction created on open
-      return new IdbTransactionMeta(storeName_OR_storeNames, mode);
+      return new IdbTransactionMeta(null, mode);
     }
   }
 
@@ -173,7 +177,7 @@ class IdbDatabaseMeta {
   int get hashCode => version;
 
   @override
-  operator ==(o) {
+  bool operator ==(o) {
     if (o is IdbDatabaseMeta) {
       return version == o.version;
     }
@@ -257,7 +261,8 @@ class IdbObjectStoreMeta {
   }
 
   IdbObjectStoreMeta.fromObjectStore(ObjectStore objectStore)
-      : this(objectStore.name, objectStore.keyPath, objectStore.autoIncrement);
+      : this(objectStore.name, objectStore.keyPath as String,
+            objectStore.autoIncrement);
 
   IdbObjectStoreMeta(this.name, this.keyPath, bool autoIncrement,
       [List<IdbIndexMeta> indecies])
@@ -269,7 +274,7 @@ class IdbObjectStoreMeta {
     }
   }
 
-  IdbObjectStoreMeta.fromMap(Map<String, Object> map) //
+  IdbObjectStoreMeta.fromMap(Map<String, dynamic> map) //
       : this(
             //
             map[nameKey] as String, //
@@ -282,11 +287,11 @@ class IdbObjectStoreMeta {
     return new IdbObjectStoreMeta(name, keyPath, autoIncrement);
   }
 
-  putIndex(IdbIndexMeta index) {
+  void putIndex(IdbIndexMeta index) {
     _indecies[index.name] = index;
   }
 
-  removeIndex(IdbIndexMeta index) {
+  void removeIndex(IdbIndexMeta index) {
     _indecies.remove(index.name);
   }
 
@@ -418,20 +423,21 @@ class IdbIndexMeta {
     }
     var metas = <IdbIndexMeta>[];
     list.forEach((map) {
-      metas.add(new IdbIndexMeta.fromMap(map));
+      metas.add(new IdbIndexMeta.fromMap(map?.cast<String, dynamic>()));
     });
     return metas;
   }
 
-  IdbIndexMeta.fromMap(Map<String, Object> map) //
+  IdbIndexMeta.fromMap(Map<String, dynamic> map) //
       : this(
-            map["name"], //
-            map["keyPath"], //
-            map["unique"], //
-            map["multiEntry"]);
+            map["name"] as String, //
+            map["keyPath"] as String, //
+            map["unique"] as bool, //
+            map["multiEntry"] as bool);
 
   IdbIndexMeta.fromIndex(Index index)
-      : this(index.name, index.keyPath, index.unique, index.multiEntry);
+      : this(index.name, index.keyPath as String, index.unique,
+            index.multiEntry);
 
   Map toDebugMap() {
     return toMap();

@@ -5,14 +5,14 @@ import 'package:js/js_util.dart';
 
 int getInternalVersionFromResultSet(SqlResultSet resultSet) {
   if (resultSet.rows.length > 0) {
-    return resultSet.rows[0]['internal_version'];
+    return resultSet.rows[0]['internal_version'] as int;
   }
   return 0;
 }
 
 String getSignatureFromResultSet(SqlResultSet resultSet) {
   if (resultSet.rows.length > 0) {
-    return resultSet.rows[0]['signature'];
+    return resultSet.rows[0]['signature'] as String;
   }
   return null;
 }

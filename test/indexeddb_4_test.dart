@@ -66,12 +66,12 @@ testRange(db, range, expectedFirst, expectedLast) {
   Transaction txn = db.transaction(STORE_NAME, 'readonly');
   ObjectStore objectStore = txn.objectStore(STORE_NAME);
   var cursors = objectStore
-      .openCursor(range: range, autoAdvance: true)
+      .openCursor(range: range as KeyRange, autoAdvance: true)
       .asBroadcastStream();
 
   int lastKey;
   cursors.listen((cursor) {
-    lastKey = cursor.key;
+    lastKey = cursor.key as int;
     var value = cursor.value as Map;
     expect(value['content'], 'Item ${cursor.key}');
   });
@@ -97,7 +97,7 @@ testRange(db, range, expectedFirst, expectedLast) {
   });
 }
 
-main() {
+void main() {
   defineTests(idbMemoryContext);
 }
 

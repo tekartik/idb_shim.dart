@@ -43,7 +43,7 @@ String dbTestName;
 // current dbContext
 TestContext _dbTestContext;
 
-dbGroup(TestContext ctx, String description, body, [_group = group]) {
+void dbGroup(TestContext ctx, String description, body, [_group = group]) {
   _group(description, () {
     _dbTestContext = ctx;
     body();
@@ -51,7 +51,7 @@ dbGroup(TestContext ctx, String description, body, [_group = group]) {
   });
 }
 
-dbTest(String description, body, [_test = test]) {
+void dbTest(String description, body, [_test = test]) {
   // We save it for later
   // only valid during definition
   TestContext ctx = _dbTestContext;
@@ -80,19 +80,25 @@ class SembastTestContext extends TestContext {
   bool get isIdbSembast => true;
 
   sdb.DatabaseFactory sdbFactory;
-  IdbFactorySembast get factory => super.factory;
+  @override
+  IdbFactorySembast get factory => super.factory as IdbFactorySembast;
+
+  @override
   String get dbName => join(joinAll(testDescriptions), "test.db");
 }
 
 class SembastFsTestContext extends SembastTestContext {
-  sdb_fs.FsDatabaseFactory get sdbFactory => factory.sdbFactory;
+  @override
+  sdb_fs.FsDatabaseFactory get sdbFactory =>
+      factory.sdbFactory as sdb_fs.FsDatabaseFactory;
+  @override
   IdbFactorySembast get factory => super.factory;
 }
 
 TestContext idbMemoryContext = new SembastTestContext()
   ..factory = idbMemoryFactory;
 
-TestContext idbMemoryFsContext = new SembastFsTestContext()
+SembastFsTestContext idbMemoryFsContext = new SembastFsTestContext()
   ..factory = idbMemoryFsFactory;
 
 IdbFactory idbTestMemoryFactory = idbMemoryFactory;

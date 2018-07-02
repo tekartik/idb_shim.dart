@@ -6,7 +6,7 @@ import 'package:dev_test/test.dart';
 import 'idb_test_common.dart';
 //import 'dart:web_sql';
 
-main() {
+void main() {
   /*
   if (SqlDatabase.supported) {
     group('websql_js', () {

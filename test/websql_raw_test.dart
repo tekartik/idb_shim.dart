@@ -9,7 +9,7 @@ import 'package:dev_test/test.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:idb_shim/src/websql/websql_utils.dart';
 
-main() {
+void main() {
   if (SqlDatabase.supported) {
     group('websql_raw', () {
       test('bug_dart2.0.0-dev', () async {

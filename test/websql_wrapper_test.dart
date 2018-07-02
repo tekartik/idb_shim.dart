@@ -4,7 +4,7 @@ library websql_wrapper_test;
 import 'package:dev_test/test.dart';
 import 'package:idb_shim/src/websql/websql_wrapper.dart';
 
-main() {
+void main() {
   if (SqlDatabase.supported) {
     group('wrapper', () {
       //wrapped.sqlDatabaseFactory.o

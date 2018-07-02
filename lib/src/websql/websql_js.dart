@@ -15,6 +15,7 @@ class SqlError {
 
   int get code => jsObject.code;
 
+  @override
   String toString() => "$code $message";
 }
 
@@ -48,7 +49,7 @@ class SqlResultSetRowList extends ListBase<Map> {
 
   @override
   Map operator [](int index) {
-    return jsObject.item(index);
+    return jsObject.item(index) as Map;
   }
 
   @override

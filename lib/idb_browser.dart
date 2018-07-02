@@ -56,12 +56,12 @@ IdbFactory get idbSembastMemoryFactory {
   return _idbSembastMemoryFactory;
 }
 
-/**
- * Use either native (indexeddb) or websql implementation
- * This means that the memory implementation won't be linked
- * if you use this function
- * This can return null;
- */
+///
+/// Use either native (indexeddb) or websql implementation
+/// This means that the memory implementation won't be linked
+/// if you use this function
+/// This can return null;
+///
 IdbFactory get idbPersistentFactory {
   IdbFactory idbFactory = idbNativeFactory;
   if (idbFactory == null) {
@@ -70,10 +70,10 @@ IdbFactory get idbPersistentFactory {
   return idbFactory;
 }
 
-/**
- * this use the best implementation available
- * defaulting to memory
- */
+///
+/// this use the best implementation available
+/// defaulting to memory
+///
 IdbFactory get idbBrowserFactory {
   IdbFactory idbFactory = idbPersistentFactory;
   if (idbFactory == null) {

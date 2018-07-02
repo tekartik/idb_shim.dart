@@ -84,7 +84,7 @@ Future<List<String>> getTableNames(SqlTransaction tx) {
   });
 }
 
-main() {
+void main() {
   if (SqlDatabase.supported) {
     group('websql', () {
       IdbWebSqlFactory idbFactory = new IdbWebSqlFactory();

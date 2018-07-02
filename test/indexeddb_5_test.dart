@@ -6,7 +6,7 @@ import 'package:idb_shim/idb_client.dart';
 // so that this can be run directly
 import 'idb_test_common.dart';
 
-main() {
+void main() {
   defineTests(idbMemoryContext);
 }
 

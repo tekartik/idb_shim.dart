@@ -20,7 +20,7 @@ void defineTests(TestContext ctx) {
     Transaction transaction;
     ObjectStore objectStore;
 
-    _createTransaction() {
+    void _createTransaction() {
       transaction = db.transaction(STORE_NAME, idbModeReadWrite);
       objectStore = transaction.objectStore(STORE_NAME);
     }

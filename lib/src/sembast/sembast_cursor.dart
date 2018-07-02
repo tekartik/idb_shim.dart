@@ -80,6 +80,7 @@ abstract class KeyCursorSembastMixin implements Cursor {
   //
   @override
   String get direction => meta.direction;
+  @override
   void advance(int count) {
     // no future
     ctlr.advance(count);
@@ -125,7 +126,9 @@ abstract class CursorWithValueSembastMixin implements CursorWithValue {
 class IndexKeyCursorSembast extends Object
     with KeyCursorSembastMixin, IndexCursorSembastMixin
     implements Cursor {
-  IndexKeyCursorControllerSembast get indexCtlr => ctlr;
+  @override
+  IndexKeyCursorControllerSembast get indexCtlr =>
+      ctlr as IndexKeyCursorControllerSembast;
 
   IndexKeyCursorSembast(IndexKeyCursorControllerSembast ctlr, int index) {
     this.ctlr = ctlr;
@@ -152,7 +155,8 @@ class _SdbStoreKeyCursor extends Object
 
 class IndexCursorWithValueSembast extends Object
     with KeyCursorSembastMixin, CursorWithValueSembastMixin {
-  IndexCursorWithValueControllerSembast get indexCtlr => ctlr;
+  IndexCursorWithValueControllerSembast get indexCtlr =>
+      ctlr as IndexCursorWithValueControllerSembast;
   IndexCursorWithValueSembast(
       BaseCursorControllerSembastMixin ctlr, int index) {
     this.ctlr = ctlr;
@@ -301,7 +305,9 @@ class IndexKeyCursorControllerSembast extends Object
         KeyCursorControllerSembastMixin,
         BaseCursorControllerSembastMixin<Cursor>,
         IndexCursorControllerSembastMixin {
+  @override
   IndexSembast index;
+  @override
   ObjectStoreSembast get store => index.store;
   IndexKeyCursorControllerSembast(IndexSembast index, IdbCursorMeta meta) {
     this.meta = meta;
@@ -309,6 +315,7 @@ class IndexKeyCursorControllerSembast extends Object
     init();
   }
 
+  @override
   Cursor nextEvent(int index) {
     IndexKeyCursorSembast cursor = new IndexKeyCursorSembast(this, index);
     return cursor;
@@ -320,13 +327,16 @@ class IndexCursorWithValueControllerSembast extends Object
         CursorWithValueControllerSembastMixin,
         BaseCursorControllerSembastMixin<CursorWithValue>,
         IndexCursorControllerSembastMixin {
+  @override
   IndexSembast index;
+  @override
   ObjectStoreSembast get store => index.store;
   IndexCursorWithValueControllerSembast(this.index, IdbCursorMeta meta) {
     this.meta = meta;
     init();
   }
 
+  @override
   CursorWithValue nextEvent(int index) {
     IndexCursorWithValueSembast cursor =
         new IndexCursorWithValueSembast(this, index);
@@ -339,12 +349,14 @@ class StoreCursorWithValueControllerSembast extends Object
         CursorWithValueControllerSembastMixin,
         BaseCursorControllerSembastMixin<CursorWithValue>,
         StoreCursorControllerSembastMixin {
+  @override
   ObjectStoreSembast store;
   StoreCursorWithValueControllerSembast(this.store, IdbCursorMeta meta) {
     this.meta = meta;
     init();
   }
 
+  @override
   CursorWithValue nextEvent(int index) {
     StoreCursorWithValueSembast cursor =
         new StoreCursorWithValueSembast(this, index);

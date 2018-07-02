@@ -23,7 +23,7 @@ dynamic decodeValue(dynamic value) {
   if (value == null) {
     return null;
   }
-  return json.decode(value);
+  return json.decode(value as String);
 }
 
 dynamic encodeKey(dynamic key) {
@@ -73,13 +73,13 @@ dynamic cloneValue(dynamic value, [String keyPath, dynamic key]) {
 }
 
 // handle single object and array!
-int compareKeys(dynamic first, dynamic second) {
-  if (first is num) {
+int compareKeys<T>(T first, T second) {
+  if (first is num && second is num) {
     return first < second ? -1 : (first == second ? 0 : 1);
-  } else if (first is String) {
+  } else if (first is String && second is String) {
     int compare = first.compareTo(second);
     return compare < 0 ? -1 : (compare == 0 ? 0 : 1);
-  } else if (first is List) {
+  } else if (first is List && second is List) {
     for (int i = 0; i < first.length; i++) {
       int compare = compareKeys(first[i], second[i]);
       if (compare != 0) {

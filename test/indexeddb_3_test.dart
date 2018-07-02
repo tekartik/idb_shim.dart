@@ -63,14 +63,14 @@ Future<Database> readAllViaCursor(Database db) {
   ObjectStore objectStore = txn.objectStore(STORE_NAME);
   int itemCount = 0;
   int sumKeys = 0;
-  var lastKey = null;
+  int lastKey;
 
   var cursors = objectStore.openCursor().asBroadcastStream();
   cursors.listen((CursorWithValue cursor) {
     //print(cursor);
     ++itemCount;
-    lastKey = cursor.key;
-    sumKeys += cursor.key;
+    lastKey = cursor.key as int;
+    sumKeys += lastKey;
     expect(cursor.value, 'Item ${cursor.key}');
     cursor.next();
   });
@@ -88,13 +88,13 @@ Future<Database> readAllReversedViaCursor(Database db) {
   ObjectStore objectStore = txn.objectStore(STORE_NAME);
   int itemCount = 0;
   int sumKeys = 0;
-  var lastKey = null;
+  int lastKey;
 
   var cursors = objectStore.openCursor(direction: 'prev').asBroadcastStream();
   cursors.listen((cursor) {
     ++itemCount;
-    lastKey = cursor.key;
-    sumKeys += cursor.key;
+    lastKey = cursor.key as int;
+    sumKeys += lastKey;
     expect(cursor.value, 'Item ${cursor.key}');
     cursor.next();
   });
@@ -106,7 +106,7 @@ Future<Database> readAllReversedViaCursor(Database db) {
   return cursors.last.then((_) => db);
 }
 
-main() {
+void main() {
   defineTests(idbMemoryContext);
 }
 
@@ -117,7 +117,7 @@ void defineTests(TestContext ctx) {
   // Don't bother with these tests if it's unsupported.
   // Support is tested in indexeddb_1_test
   if (IdbFactory.supported) {
-    var db;
+    Database db;
     //var oldTimeout;
 
     group('indexeddb_3', () {

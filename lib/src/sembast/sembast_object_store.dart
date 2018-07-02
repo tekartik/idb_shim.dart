@@ -9,7 +9,9 @@ import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:sembast/sembast.dart' as sdb;
 
 class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
+  @override
   final IdbObjectStoreMeta meta;
+
   final TransactionSembast transaction;
 
   DatabaseSembast get database => transaction.database;
@@ -143,7 +145,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     });
   }
 
-  _storeKeyOrRangeFilter([key_OR_range]) {
+  sdb.Filter _storeKeyOrRangeFilter([key_OR_range]) {
     return keyOrRangeFilter(sdb.Field.key, key_OR_range);
   }
 
@@ -157,7 +159,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   @override
   Index createIndex(String name, keyPath, {bool unique, bool multiEntry}) {
     IdbIndexMeta indexMeta =
-        new IdbIndexMeta(name, keyPath, unique, multiEntry);
+        new IdbIndexMeta(name, keyPath as String, unique, multiEntry);
     meta.createIndex(database.meta, indexMeta);
     return new IndexSembast(this, indexMeta);
   }

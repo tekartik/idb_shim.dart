@@ -1,7 +1,7 @@
 import 'package:idb_shim/idb_io.dart';
-import 'package:idb_shim/idb_client.dart';
+import 'package:idb_shim/idb.dart';
 
-main() async {
+void main() async {
   IdbFactory idbFactory = getIdbPersistentFactory('test/tmp/out');
 
   // define the store name

@@ -2,6 +2,7 @@ part of idb_shim_websql;
 
 class _WebSqlIndex extends Index with IndexWithMetaMixin {
   _WebSqlObjectStore store;
+  @override
   final IdbIndexMeta meta;
 
   String _keyColumn;
@@ -61,7 +62,7 @@ class _WebSqlIndex extends Index with IndexWithMetaMixin {
     await transaction.execute(dropIndexSql);
   }
 
-  Future _checkIndex(computation()) {
+  Future<T> _checkIndex<T>(FutureOr<T> computation()) {
     return store._checkStore(computation);
   }
 
@@ -69,6 +70,7 @@ class _WebSqlIndex extends Index with IndexWithMetaMixin {
     return store.execute(statement, args);
   }
 
+  @override
   Future<int> count([key_OR_range]) {
     return _checkIndex(() {
       _CountQuery query =
@@ -77,6 +79,7 @@ class _WebSqlIndex extends Index with IndexWithMetaMixin {
     });
   }
 
+  @override
   Stream<Cursor> openKeyCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
     _WebSqlKeyIndexCursorController ctlr =

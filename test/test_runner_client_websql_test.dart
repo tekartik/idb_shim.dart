@@ -11,7 +11,7 @@ import 'dart:web_sql';
 import 'dart:html';
 import 'dart:async';
 
-webSqlTest(IdbWebSqlFactory idbFactory) {
+void webSqlTest(IdbWebSqlFactory idbFactory) {
   test('properties', () {
     expect(idbFactory.persistent, isTrue);
   });
@@ -61,7 +61,7 @@ webSqlTest(IdbWebSqlFactory idbFactory) {
   });
 }
 
-main() {
+void main() {
   group('websql', () {
     //
     // To view sql output

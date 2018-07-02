@@ -128,7 +128,7 @@ abstract class Transaction {
   ///
   /// returns the database connection with which this transaction is associated.
   ///
-  Database database;
+  Database get database;
 
   ///
   /// returns an object store that has already been added to the scope of this
@@ -140,9 +140,6 @@ abstract class Transaction {
   /// is returned.
   ///
   ObjectStore objectStore(String name);
-
-  /// ctor
-  Transaction(this.database);
 
   ///
   /// complete when the transaction is done
@@ -493,7 +490,7 @@ abstract class VersionChangeEvent {
   // event target
   Object get target;
 
-  Object get currentTarget => target;
+  Object get currentTarget;
 
   ///
   /// idb_shim specific
@@ -563,18 +560,18 @@ class KeyRange {
     if (_lowerBound != null) {
       if (_lowerBoundOpen != null && _lowerBoundOpen) {
         if (key is num) {
-          return (key > _lowerBound);
+          return (key > (_lowerBound as num));
         } else if (key is String) {
-          return key.compareTo(_lowerBound) > 0;
+          return key.compareTo(_lowerBound as String) > 0;
         } else {
           throw new UnsupportedError(
               "key '$key' of type ${key.runtimeType} not supported");
         }
       } else {
         if (key is num) {
-          return (key >= _lowerBound);
+          return (key >= (_lowerBound as num));
         } else if (key is String) {
-          return key.compareTo(_lowerBound) >= 0;
+          return key.compareTo(_lowerBound as String) >= 0;
         } else {
           throw new UnsupportedError(
               "key '$key' of type ${key.runtimeType} not supported");
@@ -588,18 +585,18 @@ class KeyRange {
     if (_upperBound != null) {
       if (_upperBoundOpen != null && _upperBoundOpen) {
         if (key is num) {
-          return (key < _upperBound);
+          return (key < (_upperBound as num));
         } else if (key is String) {
-          return key.compareTo(_upperBound) < 0;
+          return key.compareTo(_upperBound as String) < 0;
         } else {
           throw new UnsupportedError(
               "key '$key' of type ${key.runtimeType} not supported");
         }
       } else {
         if (key is num) {
-          return (key <= _upperBound);
+          return (key <= (_upperBound as num));
         } else if (key is String) {
-          return key.compareTo(_upperBound) <= 0;
+          return key.compareTo(_upperBound as String) <= 0;
         } else {
           throw new UnsupportedError(
               "key '$key' of type ${key.runtimeType} not supported");
@@ -710,6 +707,7 @@ class DatabaseError extends Error {
   String _message;
 
   StackTrace _stackTrace;
+  @override
   StackTrace get stackTrace => _stackTrace ?? super.stackTrace;
   set stackTrace(StackTrace stackTrace) {
     _stackTrace = stackTrace;
@@ -717,6 +715,7 @@ class DatabaseError extends Error {
 
   DatabaseError(this._message);
 
+  @override
   String toString() => message;
 }
 
@@ -729,6 +728,7 @@ class DatabaseException implements Exception {
 
   DatabaseException(this._message);
 
+  @override
   String toString() {
     if (message == null) return "DatabaseException";
     return "DatabaseException: $message";

@@ -7,7 +7,7 @@ import 'idb_test_common.dart';
 import 'package:path/path.dart';
 //import 'idb_test_factory.dart';
 
-main() {
+void main() {
   defineTests(idbMemoryContext);
 }
 
@@ -27,7 +27,7 @@ void defineTests(TestContext ctx) {
     await idbFactory.deleteDatabase(_srcDbName);
   }
 
-  _tearDown() {
+  void _tearDown() {
     if (db != null) {
       db.close();
       db = null;
@@ -370,7 +370,7 @@ void defineTests(TestContext ctx) {
 
         //dstDb = await copyDatabase(db, idbFactory, _dstDbName);
 
-        _check(Database db) async {
+        Future _check(Database db) async {
           Transaction txn =
               db.transaction([testStoreName, testStoreName2], idbModeReadOnly);
           store = txn.objectStore(testStoreName);

@@ -6,6 +6,8 @@ import 'dart:convert';
 import 'package:idb_shim/src/common/common_factory.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
 import 'package:idb_shim/src/common/common_value.dart';
+import 'package:idb_shim/src/common/common_transaction.dart';
+import 'package:idb_shim/src/common/common_database.dart';
 import 'package:idb_shim/src/websql/websql_client_constants.dart';
 import 'package:idb_shim/src/websql/websql_utils.dart';
 import 'package:idb_shim/src/websql/websql_wrapper.dart';
@@ -36,6 +38,7 @@ class IdbWebSqlFactory extends IdbFactoryBase {
 
   IdbWebSqlFactory._();
 
+  @override
   String get name => idbFactoryWebSql;
 
   factory IdbWebSqlFactory() {
@@ -115,7 +118,4 @@ class IdbWebSqlFactory extends IdbFactoryBase {
   static bool get supported {
     return SqlDatabase.supported;
   }
-
-  // common implementation
-  int cmp(Object first, Object second) => compareKeys(first, second);
 }

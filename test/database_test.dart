@@ -4,7 +4,7 @@ import 'package:idb_shim/idb_client.dart';
 import 'idb_test_common.dart';
 //import 'idb_test_factory.dart';
 
-main() {
+void main() {
   defineTests(idbMemoryContext);
 }
 
@@ -26,25 +26,22 @@ void defineTests(TestContext ctx) {
       db = await idbFactory.open(_dbName);
     }
 
-    _openWith1Store() {
+    Future _openWith1Store() async {
       void _initializeDatabase(VersionChangeEvent e) {
         Database db = e.database;
         //ObjectStore objectStore =
         db.createObjectStore(testStoreName);
       }
 
-      return idbFactory
-          .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
-          .then((Database database) {
-        db = database;
-      });
+      db = await idbFactory.open(_dbName,
+          version: 1, onUpgradeNeeded: _initializeDatabase);
     }
 
-    _onBlocked(Event event) {
+    void _onBlocked(Event event) {
       //idbDevPrint("# onBlocked: $event");
     }
 
-    _openWith1OtherStore() async {
+    Future _openWith1OtherStore() async {
       void _initializeDatabase(VersionChangeEvent e) {
         Database db = e.database;
         // ObjectStore objectStore =

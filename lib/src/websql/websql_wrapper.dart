@@ -59,7 +59,7 @@ class SqlDatabase {
   }
 
   Future<SqlTransaction> transaction() {
-    Completer completer = new Completer.sync();
+    var completer = new Completer<SqlTransaction>.sync();
     _sqlDatabase.transaction((txn) {
       if (_DEBUG) {
         debugLog("BEGIN TRANSACTION");
@@ -88,7 +88,7 @@ class SqlTransaction {
       return text;
     }
 
-    Completer completer = new Completer.sync();
+    var completer = new Completer<SqlResultSet>.sync();
     if (arguments == null) {
       arguments = EMPTY_ARGS;
     }
@@ -136,7 +136,7 @@ class SqlTransaction {
   Future dropTablesIfExists(List<String> names) {
     int i = 0;
     Completer completer = new Completer.sync();
-    dropNextTable() {
+    FutureOr dropNextTable() {
       if (i < names.length) {
         String name = names[i++];
         return dropTableIfExists(name).then((_) {
@@ -144,6 +144,7 @@ class SqlTransaction {
         });
       }
       completer.complete();
+      return null;
     }
 
     dropNextTable();
@@ -156,7 +157,7 @@ class SqlTransaction {
   Future<int> selectCount(String from, [List<Object> arguments]) {
     return execute("SELECT COUNT(*) as _count FROM " + from, arguments)
         .then((rs) {
-      return rs.rows[0]['_count'];
+      return rs.rows[0]['_count'] as int;
     });
   }
 

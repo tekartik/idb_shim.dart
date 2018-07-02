@@ -1,24 +1,31 @@
 part of idb_shim_native;
 
-class _NativeVersionChangeEvent extends VersionChangeEvent {
+class _NativeVersionChangeEvent extends IdbVersionChangeEventBase {
   idb.VersionChangeEvent idbVersionChangeEvent;
 
+  @override
   int get oldVersion => idbVersionChangeEvent.oldVersion;
+
+  @override
   int get newVersion => idbVersionChangeEvent.newVersion;
   Request request;
+  @override
   Object get target => request;
+  @override
   Transaction get transaction => request.transaction;
+
+  @override
   Database database;
   _NativeVersionChangeEvent(this.idbVersionChangeEvent) {
     // This is null for onChangeEvent on Database
     // but ok when opening the database
-    Object currentTarget = idbVersionChangeEvent.currentTarget;
+    dynamic currentTarget = idbVersionChangeEvent.currentTarget;
     if (currentTarget is idb.Database) {
-      database = new _NativeDatabase(currentTarget);
+      database = new DatabaseNative(currentTarget);
     } else if (currentTarget is idb.Request) {
-      database = new _NativeDatabase(currentTarget.result);
-      _NativeTransaction transaction =
-          new _NativeTransaction(database, currentTarget.transaction);
+      database = new DatabaseNative(currentTarget.result as idb.Database);
+      TransactionNative transaction =
+          new TransactionNative(database, currentTarget.transaction);
       request = new OpenDBRequest(database, transaction);
     }
   }
@@ -48,10 +55,11 @@ idb.Database databaseFromVersionChangeEvent(idb.VersionChangeEvent event) {
   */
 }
 
-class _NativeDatabase extends Database {
+class DatabaseNative extends IdbDatabaseBase {
   idb.Database idbDatabase;
-  _NativeDatabase(this.idbDatabase) : super(idbNativeFactory);
+  DatabaseNative(this.idbDatabase) : super(idbNativeFactory);
 
+  @override
   int get version => _catchNativeError(() => idbDatabase.version);
 
   @override
@@ -64,7 +72,7 @@ class _NativeDatabase extends Database {
   }
 
   @override
-  Transaction transaction(storeName_OR_storeNames, String mode) {
+  TransactionNativeBase transaction(storeName_OR_storeNames, String mode) {
     // bug in 1.13
     // It only happens in dart for list
     // https://github.com/dart-lang/sdk/issues/25013
@@ -75,7 +83,7 @@ class _NativeDatabase extends Database {
       return _catchNativeError(() {
         idb.Transaction idbTransaction =
             idbDatabase.transaction(storeName_OR_storeNames, mode);
-        return new _NativeTransaction(this, idbTransaction);
+        return new TransactionNative(this, idbTransaction);
       });
     } catch (e) {
       // Only handle the issue for non empty list returning a NotFoundError
@@ -96,7 +104,7 @@ class _NativeDatabase extends Database {
         if (allFound) {
           if (!isDartVm) {
             // In javascript this is likely a safari issue...
-            return new _FakeMultiStoreTransaction(this, mode);
+            return new FakeMultiStoreTransactionNative(this, mode);
           } else {
             // This is likely the 1.13 bug
             try {
@@ -105,7 +113,7 @@ class _NativeDatabase extends Database {
                     html_common.convertDartToNative_SerializedScriptValue(
                         storeName_OR_storeNames),
                     mode);
-                return new _NativeTransaction(this, idbTransaction);
+                return new TransactionNative(this, idbTransaction);
               });
             } catch (e2) {}
           }

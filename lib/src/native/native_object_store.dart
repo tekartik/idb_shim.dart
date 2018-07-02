@@ -152,14 +152,14 @@ class _NativeObjectStore extends ObjectStore {
   }
 
   @override
-  get keyPath => idbObjectStore.keyPath;
+  String get keyPath => idbObjectStore.keyPath as String;
 
   // ie return null so make sure it is a bool
   @override
-  get autoIncrement => idbObjectStore.autoIncrement;
+  bool get autoIncrement => idbObjectStore.autoIncrement;
 
   @override
-  get name => idbObjectStore.name;
+  String get name => idbObjectStore.name;
 
   @override
   List<String> get indexNames => idbObjectStore.indexNames;

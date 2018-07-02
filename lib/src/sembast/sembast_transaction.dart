@@ -1,6 +1,7 @@
 // set to true to debug transaction life cycle
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
+import 'package:idb_shim/src/common/common_transaction.dart';
 import 'package:idb_shim/src/sembast/sembast_database.dart';
 import 'package:idb_shim/src/sembast/sembast_object_store.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
@@ -13,7 +14,11 @@ bool _debugTransaction = false;
 // default is false to matche ie/safari strict behavior
 bool _transactionLazyMode = false;
 
-class TransactionSembast extends Transaction with TransactionWithMetaMixin {
+typedef FutureOr Action();
+
+class TransactionSembast extends IdbTransactionBase
+    with TransactionWithMetaMixin {
+  @override
   DatabaseSembast get database => super.database as DatabaseSembast;
   sdb.Database get sdbDatabase => database.db;
   sdb.Transaction sdbTransaction;
@@ -24,12 +29,12 @@ class TransactionSembast extends Transaction with TransactionWithMetaMixin {
   int index = 0;
   bool _inactive = false;
 
-  _execute(i) {
+  Future _execute(int i) {
     if (_debugTransaction) {
       print("exec $i");
     }
     Completer completer = completers[i];
-    Function action = actions[i];
+    Action action = actions[i];
     return new Future.sync(action).then((result) {
       if (_debugTransaction) {
         print("done $i");
@@ -44,7 +49,7 @@ class TransactionSembast extends Transaction with TransactionWithMetaMixin {
     });
   }
 
-  _next() {
+  Future _next() {
     //print('_next? ${index}/${actions.length}');
     if (index < actions.length) {
       // Always try more
@@ -102,7 +107,7 @@ class TransactionSembast extends Transaction with TransactionWithMetaMixin {
 
       //lazyExecution = new Future.delayed(new Duration(), () {
 
-      _sdbAction() {
+      Future _sdbAction() {
         //assert(sdbDatabase.transaction == null);
 
         // No return value here
@@ -158,6 +163,7 @@ class TransactionSembast extends Transaction with TransactionWithMetaMixin {
   List<Function> actions = [];
   List<Future> futures = [];
 
+  @override
   final IdbTransactionMeta meta;
   TransactionSembast(DatabaseSembast database, this.meta) : super(database) {
     if (_debugTransaction) {
