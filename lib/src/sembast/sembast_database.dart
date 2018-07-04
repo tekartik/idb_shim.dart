@@ -2,6 +2,7 @@ import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/idb_client_sembast.dart';
 import 'package:idb_shim/src/common/common_database.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
+import 'package:idb_shim/src/sembast/sembast_factory.dart';
 import 'package:idb_shim/src/sembast/sembast_object_store.dart';
 import 'package:idb_shim/src/sembast/sembast_transaction.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
@@ -116,6 +117,12 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
       int newVersion, OnUpgradeNeededFunction onUpgradeNeeded) async {
     int previousVersion;
 
+    // devPrint("open ${onUpgradeNeeded} ${onUpgradeNeeded != null ? "NOT NULL": "NULL"}");
+    if (sembastDebug) {
+      print("open2 ${onUpgradeNeeded} ${onUpgradeNeeded != null
+          ? "NOT NULL"
+          : "NULL"}");
+    }
     // Open the sembast database
     db = await sdbFactory.openDatabase(factory.getDbPath(name), version: 1);
     previousVersion = await _readMeta();

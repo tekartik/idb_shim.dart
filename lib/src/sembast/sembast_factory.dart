@@ -6,6 +6,8 @@ import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:path/path.dart';
 import 'package:sembast/sembast.dart' as sdb;
 
+bool sembastDebug = false;
+
 class IdbFactorySembastImpl extends IdbFactoryBase
     implements IdbFactorySembast {
   final sdb.DatabaseFactory _databaseFactory;
@@ -38,7 +40,7 @@ class IdbFactorySembastImpl extends IdbFactoryBase
   Future<Database> open(String dbName,
       {int version,
       OnUpgradeNeededFunction onUpgradeNeeded,
-      OnBlockedFunction onBlocked}) {
+      OnBlockedFunction onBlocked}) async {
     // check params
     if ((version == null) != (onUpgradeNeeded == null)) {
       return new Future.error(new ArgumentError(
@@ -57,9 +59,13 @@ class IdbFactorySembastImpl extends IdbFactoryBase
 
     DatabaseSembast db = new DatabaseSembast(this, dbName);
 
-    return db.open(version, onUpgradeNeeded).then((_) {
-      return db;
-    });
+    if (sembastDebug) {
+      print("open1 ${onUpgradeNeeded} ${onUpgradeNeeded != null
+          ? "NOT NULL"
+          : "NULL"}");
+    }
+    await db.open(version, onUpgradeNeeded);
+    return db;
   }
 
   @override

@@ -264,7 +264,8 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
 
   Future _get(dynamic key, [String keyPath]) {
     var sqlSelect =
-        "SELECT $VALUE_COLUMN_NAME FROM $sqlTableName WHERE ${sqlColumnName(keyPath)} = ? LIMIT 1";
+        "SELECT $VALUE_COLUMN_NAME FROM $sqlTableName WHERE ${sqlColumnName(
+            keyPath)} = ? LIMIT 1";
     var sqlArgs = [encodeKey(key)];
     return execute(sqlSelect, sqlArgs).then((SqlResultSet rs) {
       if (rs.rows.length == 0) {
@@ -281,8 +282,8 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   Future _getKey(dynamic key, [String keyPath]) {
-    var sqlSelect =
-        "SELECT $keyColumn FROM $sqlTableName WHERE ${sqlColumnName(keyPath)} = ? LIMIT 1";
+    var sqlSelect = "SELECT $keyColumn FROM $sqlTableName WHERE ${sqlColumnName(
+        keyPath)} = ? LIMIT 1";
     var sqlArgs = [encodeKey(key)];
     return execute(sqlSelect, sqlArgs).then((SqlResultSet rs) {
       if (rs.rows.length == 0) {
