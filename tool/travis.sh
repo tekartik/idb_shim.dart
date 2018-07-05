@@ -10,6 +10,7 @@ pub run test -p vm -j 1
 # pub run test -p chrome -j 1 test/test_runner_compat_browser_test_.dart
 pub run build_runner test -- -p vm -j 1
 pub run build_runner test -- -p chrome -j 1 test/test_runner_compat_browser_test.dart
+pub run test -p chrome -j 1 test/test_runner_compat_browser_test.dart
 # pub run build_runner test -r -- -p chrome -j 1 test/test_runner_compat_browser_test.dart
 # failing on 2.0.0-dev.66
 # pub run test -p chrome test/test_runner_bug_test.dart
