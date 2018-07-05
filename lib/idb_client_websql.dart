@@ -58,7 +58,8 @@ class IdbWebSqlFactory extends IdbFactoryBase {
       OnUpgradeNeededFunction onUpgradeNeeded,
       OnBlockedFunction onBlocked}) {
     // check params
-    if ((version == null) != (onUpgradeNeeded == null)) {
+    if (((version != null) || (onUpgradeNeeded != null)) &&
+        ((version == null) || (onUpgradeNeeded == null))) {
       return new Future.error(new ArgumentError(
           'version and onUpgradeNeeded must be specified together'));
     }

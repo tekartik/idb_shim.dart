@@ -41,8 +41,19 @@ class IdbFactorySembastImpl extends IdbFactoryBase
       {int version,
       OnUpgradeNeededFunction onUpgradeNeeded,
       OnBlockedFunction onBlocked}) async {
+
+    //TODO
+    // dart2js when using
+    // pub run test -p chrome test/test_runner_bug_test.dart
+    // The following optimization somehow fails using dart2js
+    //
+    // if ((version == null) != (onUpgradeNeeded == null)) {
+    //
+    // To see the issue swap the test below with the test above
+
     // check params
-    if ((version == null) != (onUpgradeNeeded == null)) {
+    if (((version != null) || (onUpgradeNeeded != null)) &&
+        ((version == null) || (onUpgradeNeeded == null))) {
       return new Future.error(new ArgumentError(
           'version and onUpgradeNeeded must be specified together'));
     }
