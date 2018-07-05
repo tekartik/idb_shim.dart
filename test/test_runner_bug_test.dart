@@ -27,9 +27,6 @@ void main() {
 
       var db = await idbFactory.open(dbName,
           version: 1, onUpgradeNeeded: _initializeDatabase);
-      List<String> storeNames = new List.from(db.objectStoreNames);
-      expect(storeNames.length, 1);
-      expect(storeNames[0], testStoreName);
 
       db.close();
     } finally {

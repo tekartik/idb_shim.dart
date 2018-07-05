@@ -31,30 +31,6 @@ class _NativeVersionChangeEvent extends IdbVersionChangeEventBase {
   }
 }
 
-idb.Database databaseFromVersionChangeEvent(idb.VersionChangeEvent event) {
-  return event.target.transaction.db;
-  /*
-  // This is null for onChangeEvent on Database
-  // but ok when opening the database
-  try {
-    Object currentTarget = event.currentTarget;
-    if (currentTarget is idb.Database) {
-      return currentTarget;
-    } else if (currentTarget is idb.Request) {
-      return currentTarget.result;
-    }
-  } catch (_) {
-    Object target = event.target;
-    if (target is idb.Database) {
-      return target;
-    } else if (target is idb.Request) {
-      return target.result;
-    }
-  }
-  return null;
-  */
-}
-
 class DatabaseNative extends IdbDatabaseBase {
   idb.Database idbDatabase;
   DatabaseNative(this.idbDatabase) : super(idbNativeFactory);

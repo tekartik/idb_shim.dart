@@ -41,7 +41,6 @@ class IdbFactorySembastImpl extends IdbFactoryBase
       {int version,
       OnUpgradeNeededFunction onUpgradeNeeded,
       OnBlockedFunction onBlocked}) async {
-
     //TODO
     // dart2js when using
     // pub run test -p chrome test/test_runner_bug_test.dart

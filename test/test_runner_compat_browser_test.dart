@@ -7,12 +7,14 @@ import 'common_value_test.dart' as common_value_test;
 import 'idb_test_common_test.dart' as idb_test_common_test;
 import 'test_runner_client_native_test.dart' as native;
 import 'test_runner_client_sembast_memory_test.dart' as sembast_memory;
+import 'test_runner_client_sembast_fs_test.dart' as sembast_fs;
 
 // only the supported for now
 void main() {
   native.main();
   // websql.main();
   sembast_memory.main();
+  sembast_fs.main();
 
   // browser.main();
   common_value_test.main();

@@ -1,6 +1,6 @@
 import 'dart:html';
 import 'dart:indexed_db';
-import 'package:idb_shim/idb_client_native.dart';
+
 import 'package:test/test.dart';
 
 void main() {
@@ -8,8 +8,8 @@ void main() {
     if (IdbFactory.supported) {
       String dbName = "com.tekartik.ie_count_bug.test";
       await window.indexedDB.deleteDatabase(dbName);
-      void _setupDb(VersionChangeEvent e) {
-        Database db = databaseFromVersionChangeEvent(e);
+      void _setupDb(e) {
+        Database db = e.target.result;
         db.createObjectStore("store", autoIncrement: true);
       }
 
