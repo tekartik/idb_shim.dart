@@ -21,9 +21,8 @@ void main() {
         db.createObjectStore(testStoreName);
       }
 
-      print(" init ${_initializeDatabase} ${_initializeDatabase != null
-          ? "NOT NULL"
-          : "NULL"}");
+      print(
+          " init ${_initializeDatabase} ${_initializeDatabase != null ? "NOT NULL" : "NULL"}");
 
       var db = await idbFactory.open(dbName,
           version: 1, onUpgradeNeeded: _initializeDatabase);
@@ -32,5 +31,7 @@ void main() {
     } finally {
       sembastDebug = false;
     }
-  });
+  },
+      skip:
+          true); // Was setup for dart2 2.0.0-dev63 for an existing dart2 optimization
 }

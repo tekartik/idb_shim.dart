@@ -70,9 +70,8 @@ class IdbFactorySembastImpl extends IdbFactoryBase
     DatabaseSembast db = new DatabaseSembast(this, dbName);
 
     if (sembastDebug) {
-      print("open1 ${onUpgradeNeeded} ${onUpgradeNeeded != null
-          ? "NOT NULL"
-          : "NULL"}");
+      print(
+          "open1 ${onUpgradeNeeded} ${onUpgradeNeeded != null ? "NOT NULL" : "NULL"}");
     }
     await db.open(version, onUpgradeNeeded);
     return db;

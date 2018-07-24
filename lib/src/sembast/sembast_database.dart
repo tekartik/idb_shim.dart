@@ -119,9 +119,8 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
 
     // devPrint("open ${onUpgradeNeeded} ${onUpgradeNeeded != null ? "NOT NULL": "NULL"}");
     if (sembastDebug) {
-      print("open2 ${onUpgradeNeeded} ${onUpgradeNeeded != null
-          ? "NOT NULL"
-          : "NULL"}");
+      print(
+          "open2 ${onUpgradeNeeded} ${onUpgradeNeeded != null ? "NOT NULL" : "NULL"}");
     }
     // Open the sembast database
     db = await sdbFactory.openDatabase(factory.getDbPath(name), version: 1);
