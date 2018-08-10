@@ -22,7 +22,7 @@ defineTests(SembastFsTestContext ctx) {
   group('simple', () {
     test('open', () async {
       var db = await idbFactory.open('test');
-      await db.close();
+      db.close();
     });
   });
 

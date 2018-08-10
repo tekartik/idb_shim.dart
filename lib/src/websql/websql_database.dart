@@ -105,6 +105,7 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
             });
           });
         }
+        return null;
       }, onError: (e) {
         // No such version table
         // assume everything is fine

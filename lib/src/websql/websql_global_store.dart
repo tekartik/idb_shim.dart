@@ -61,6 +61,7 @@ class _WebSqlGlobalStore {
         if (!exists) {
           return insert(tx);
         }
+        return null;
       });
     });
   }

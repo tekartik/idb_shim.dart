@@ -453,6 +453,7 @@ void defineTests(TestContext ctx) {
               expect(count, 0);
             });
           }
+          return null;
         });
       });
 

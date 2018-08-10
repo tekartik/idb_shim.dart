@@ -69,7 +69,7 @@ class TransactionSembast extends IdbTransactionBase
       // however any delayed action will be out of the transaction
       // This fixes sample get/await/get
 
-      _checkNextAction() {
+      Future _checkNextAction() {
         //return new Future.value().then((_) {
         if (index < actions.length) {
           return _next();
@@ -78,6 +78,7 @@ class TransactionSembast extends IdbTransactionBase
           print('transaction done');
         }
         _inactive = true;
+        return new Future.value(null);
       }
 
       if (_transactionLazyMode) {

@@ -50,6 +50,7 @@ void defineTests(TestContext ctx) {
       } else {
         db.close();
       }
+      return null;
     });
 
     test('add/get map', () {

@@ -893,12 +893,13 @@ void defineTests(TestContext ctx) {
       test('all', () {
         Iterator<IdbObjectStoreMeta> iterator = idbObjectStoreMetas.iterator;
 
-        _next() {
+        Future _next() {
           if (iterator.moveNext()) {
             return testStore(iterator.current).then((_) {
               return _next();
             });
           }
+          return new Future.value();
         }
 
         return _next();

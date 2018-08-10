@@ -161,6 +161,7 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
           return new Future.error(new StateError(
               "database upgraded from ${database.version} to $newVersion"));
         }
+        return null;
       });
     }
     return _lazyPrepare.then((_) {

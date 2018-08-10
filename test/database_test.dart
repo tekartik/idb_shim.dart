@@ -121,7 +121,7 @@ void defineTests(TestContext ctx) {
         }
         db.createObjectStore(testStoreName);
       });
-      await db.close();
+      db.close();
       db = await idbFactory.open(_dbName, version: 2,
           onUpgradeNeeded: (VersionChangeEvent e) {
         Database db = e.database;
@@ -133,7 +133,7 @@ void defineTests(TestContext ctx) {
         }
       });
 
-      await db.close();
+      db.close();
     });
 
     test('create_delete_index', () async {
@@ -146,7 +146,7 @@ void defineTests(TestContext ctx) {
 
         expect(store.indexNames, [testNameIndex]);
       });
-      await db.close();
+      db.close();
       db = await idbFactory.open(_dbName, version: 2,
           onUpgradeNeeded: (VersionChangeEvent e) {
         ObjectStore store = e.transaction.objectStore(testStoreName);
@@ -156,14 +156,14 @@ void defineTests(TestContext ctx) {
 
         expect(store.indexNames, []);
       });
-      await db.close();
+      db.close();
       // check that the index is indeed gone
       db = await idbFactory.open(_dbName, version: 3,
           onUpgradeNeeded: (VersionChangeEvent e) {
         ObjectStore store = e.transaction.objectStore(testStoreName);
         expect(store.indexNames, []);
       });
-      await db.close();
+      db.close();
     });
     test('delete_non_existing_index', () async {
       await _setupDeleteDb();
@@ -182,7 +182,7 @@ void defineTests(TestContext ctx) {
           expect(isNotFoundError(e), isTrue);
         }
       });
-      await db.close();
+      db.close();
       db = await idbFactory.open(_dbName, version: 2,
           onUpgradeNeeded: (VersionChangeEvent e) {
         ObjectStore store = e.transaction.objectStore(testStoreName);
@@ -196,7 +196,7 @@ void defineTests(TestContext ctx) {
 
         expect(store.indexNames, [testNameIndex2]);
       });
-      await db.close();
+      db.close();
       db = await idbFactory.open(_dbName, version: 3,
           onUpgradeNeeded: (VersionChangeEvent e) {
         ObjectStore store = e.transaction.objectStore(testStoreName);
@@ -204,7 +204,7 @@ void defineTests(TestContext ctx) {
 
         expect(store.indexNames, []);
       });
-      await db.close();
+      db.close();
       // check that the index is indeed gone
       db = await idbFactory.open(_dbName, version: 3,
           onUpgradeNeeded: (VersionChangeEvent e) {
@@ -217,7 +217,7 @@ void defineTests(TestContext ctx) {
         }
         expect(store.indexNames, []);
       });
-      await db.close();
+      db.close();
     });
 
     test('twice', () async {

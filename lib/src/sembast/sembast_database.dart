@@ -102,7 +102,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
       if (record != null) {
         // for now load all at once
         List<String> storeNames = (record.value as List)?.cast<String>();
-        return _loadStoresMeta(storeNames)
+        await _loadStoresMeta(storeNames)
             .then((List<IdbObjectStoreMeta> storeMetas) {
           storeMetas.forEach((IdbObjectStoreMeta store) {
             meta.putObjectStore(store);
@@ -143,7 +143,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
         deletedStores = meta.versionChangeTransaction.deletedStores;
       });
 
-      return db.transaction((txn) async {
+      await db.transaction((txn) async {
         await txn.put(newVersion, "version");
 
         // First delete everything from deleted stores

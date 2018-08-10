@@ -246,6 +246,7 @@ abstract class BaseCursorControllerSembastMixin<T extends Cursor>
       if (meta.autoAdvance && (!done)) {
         return autoNext();
       }
+      return null;
     });
   }
 
