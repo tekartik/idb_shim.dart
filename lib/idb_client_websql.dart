@@ -25,14 +25,14 @@ part 'src/websql/websql_object_store.dart';
 part 'src/websql/websql_query.dart';
 part 'src/websql/websql_transaction.dart';
 
-IdbWebSqlFactory get idbWebSqlFactory => new IdbWebSqlFactory();
+IdbWebSqlFactory get idbWebSqlFactory => IdbWebSqlFactory();
 
 class IdbWebSqlFactory extends IdbFactoryBase {
   @override
   bool get persistent => true;
 
   // global store
-  _WebSqlGlobalStore _globalStore = new _WebSqlGlobalStore();
+  _WebSqlGlobalStore _globalStore = _WebSqlGlobalStore();
 
   static IdbWebSqlFactory _instance;
 
@@ -43,7 +43,7 @@ class IdbWebSqlFactory extends IdbFactoryBase {
 
   factory IdbWebSqlFactory() {
     if (_instance == null) {
-      _instance = new IdbWebSqlFactory._();
+      _instance = IdbWebSqlFactory._();
     }
     return _instance;
   }
@@ -60,22 +60,22 @@ class IdbWebSqlFactory extends IdbFactoryBase {
     // check params
     if (((version != null) || (onUpgradeNeeded != null)) &&
         ((version == null) || (onUpgradeNeeded == null))) {
-      return new Future.error(new ArgumentError(
+      return Future.error(ArgumentError(
           'version and onUpgradeNeeded must be specified together'));
     }
     if (version == 0) {
-      return new Future.error(new ArgumentError('version cannot be 0'));
+      return Future.error(ArgumentError('version cannot be 0'));
     } else if (version == null) {
       version = 1;
     }
 
     if (dbName == null) {
-      return new Future.error(new ArgumentError('dbName cannot be null'));
+      return Future.error(ArgumentError('dbName cannot be null'));
     }
 
     // add the db name and remove it if it fails
     return _globalStore.addDatabaseName(dbName).then((_) {
-      _WebSqlDatabase database = new _WebSqlDatabase(dbName);
+      _WebSqlDatabase database = _WebSqlDatabase(dbName);
       return database.open(version, onUpgradeNeeded).then((_) {
         return database;
       }, onError: (e) {
@@ -89,11 +89,11 @@ class IdbWebSqlFactory extends IdbFactoryBase {
   Future<IdbFactory> deleteDatabase(String dbName,
       {OnBlockedFunction onBlocked}) {
     if (dbName == null) {
-      return new Future.error(new ArgumentError('dbName cannot be null'));
+      return Future.error(ArgumentError('dbName cannot be null'));
     }
     // remove the db name and add it back if it fails
     return _globalStore.deleteDatabaseName(dbName).then((_) {
-      _WebSqlDatabase database = new _WebSqlDatabase(dbName);
+      _WebSqlDatabase database = _WebSqlDatabase(dbName);
       return database._delete().then((_) {
         return this;
       }, onError: (e) {

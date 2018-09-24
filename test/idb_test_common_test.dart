@@ -7,25 +7,24 @@ void main() {
   group('idb_test_common', () {
     test('transaction_readonly_error', () {
       expect(isTransactionReadOnlyError(null), isFalse);
-      expect(isTransactionReadOnlyError(new DatabaseStoreNotFoundError()),
-          isFalse);
+      expect(isTransactionReadOnlyError(DatabaseStoreNotFoundError()), isFalse);
 
-      expect(isTransactionReadOnlyError(new DatabaseReadOnlyError()), isTrue);
+      expect(isTransactionReadOnlyError(DatabaseReadOnlyError()), isTrue);
       // Firefox
       expect(
-          isTransactionReadOnlyError(new DatabaseError(
+          isTransactionReadOnlyError(DatabaseError(
               "A mutation operation was attempted in a READ_ONLY transaction.")),
           isTrue);
     });
 
     test('store_notfound_error', () {
       expect(isNotFoundError(null), isFalse);
-      expect(isNotFoundError(new DatabaseReadOnlyError()), isFalse);
+      expect(isNotFoundError(DatabaseReadOnlyError()), isFalse);
 
-      expect(isNotFoundError(new DatabaseStoreNotFoundError()), isTrue);
+      expect(isNotFoundError(DatabaseStoreNotFoundError()), isTrue);
       // Firefox
       expect(
-          isNotFoundError(new DatabaseError(
+          isNotFoundError(DatabaseError(
               'The operation failed because the requested database object could not be found. For example, an object store did not exist but was being opened."  code: "8" nsresult: "0x80660003 (NotFoundError)"  location: "<unknown>"')),
           isTrue);
     });

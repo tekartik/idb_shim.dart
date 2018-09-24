@@ -126,7 +126,7 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
 
   Future _checkWritableStore(Future computation()) {
     if (transaction._meta.mode != idbModeReadWrite) {
-      return new Future.error(new DatabaseReadOnlyError());
+      return Future.error(DatabaseReadOnlyError());
     }
     return _checkStore(computation);
   }
@@ -134,7 +134,7 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
   _WebSqlIndex _getIndex(String name) {
     IdbIndexMeta indexMeta = meta.index(name);
     if (indexMeta != null) {
-      return new _WebSqlIndex(this, indexMeta);
+      return _WebSqlIndex(this, indexMeta);
     }
     return null;
   }
@@ -155,10 +155,10 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
           Map map = rs.rows[0];
           int newVersion = map['value'];
           if (database.onVersionChangeCtlr != null) {
-            database.onVersionChangeCtlr.add(new _WebSqlVersionChangeEvent(
+            database.onVersionChangeCtlr.add(_WebSqlVersionChangeEvent(
                 database, database.version, newVersion, transaction));
           }
-          return new Future.error(new StateError(
+          return Future.error(StateError(
               "database upgraded from ${database.version} to $newVersion"));
         }
         return null;
@@ -203,12 +203,12 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
         }
       } else {
         if (!checkKeyValueParam(keyPath, key, value)) {
-          return new Future.error(new ArgumentError(
+          return Future.error(ArgumentError(
               "both key $key and inline keyPath ${value[keyPath]}"));
         }
       }
       if ((key == null) && (!autoIncrement)) {
-        throw new _IdbWebSqlError(_IdbWebSqlError.MISSING_KEY,
+        throw _IdbWebSqlError(_IdbWebSqlError.MISSING_KEY,
             "neither keyPath nor autoIncrement set and trying to add object without key");
       }
 
@@ -218,8 +218,8 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
 
   Future _put(dynamic value, [dynamic key]) {
     if (!checkKeyValueParam(keyPath, key, value)) {
-      return new Future.error(new ArgumentError(
-          "both key $key and inline keyPath ${value[keyPath]}"));
+      return Future.error(
+          ArgumentError("both key $key and inline keyPath ${value[keyPath]}"));
     }
 
     if (key == null) {
@@ -229,7 +229,7 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
     }
 
     if ((key == null) && (!autoIncrement)) {
-      throw new _IdbWebSqlError(_IdbWebSqlError.MISSING_KEY,
+      throw _IdbWebSqlError(_IdbWebSqlError.MISSING_KEY,
           "neither keyPath nor autoIncrement set and trying to add object without key");
     }
 
@@ -335,9 +335,9 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
   @override
   Index createIndex(String name, keyPath, {bool unique, bool multiEntry}) {
     IdbIndexMeta indexMeta =
-        new IdbIndexMeta(name, keyPath as String, unique, multiEntry);
+        IdbIndexMeta(name, keyPath as String, unique, multiEntry);
     meta.createIndex(database.meta, indexMeta);
-    _WebSqlIndex index = new _WebSqlIndex(this, indexMeta);
+    _WebSqlIndex index = _WebSqlIndex(this, indexMeta);
     // let it for later
     return index;
   }
@@ -351,7 +351,7 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
   Stream<CursorWithValue> openCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
     _WebSqlCursorWithValueController ctlr =
-        new _WebSqlCursorWithValueController(this, direction, autoAdvance);
+        _WebSqlCursorWithValueController(this, direction, autoAdvance);
 
     // Future
     _checkStore(() {
@@ -363,8 +363,7 @@ class _WebSqlObjectStore extends ObjectStore with ObjectStoreWithMetaMixin {
   @override
   Future<int> count([key_OR_range]) {
     return _checkStore(() {
-      _CountQuery query =
-          new _CountQuery(sqlTableName, keyColumn, key_OR_range);
+      _CountQuery query = _CountQuery(sqlTableName, keyColumn, key_OR_range);
       return query.count(transaction);
     });
   }

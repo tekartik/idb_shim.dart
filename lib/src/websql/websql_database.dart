@@ -20,7 +20,7 @@ class _WebSqlVersionChangeEvent extends IdbVersionChangeEventBase {
       this.newVersion, Transaction transaction) {
     // special transaction
     //WebSqlTransaction versionChangeTransaction = new WebSqlTransaction(database, tx, null, MODE_READ_WRITE);
-    request = new OpenDBRequest(database, transaction);
+    request = OpenDBRequest(database, transaction);
   }
 }
 
@@ -54,7 +54,7 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
   Map<String, _WebSqlObjectStoreMeta> stores = new Map();
   */
   @override
-  final IdbDatabaseMeta meta = new IdbDatabaseMeta();
+  final IdbDatabaseMeta meta = IdbDatabaseMeta();
 
   int _getVersionFromResultSet(SqlResultSet resultSet) {
     if (resultSet.rows.length > 0) {
@@ -115,7 +115,7 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
   }
 
   // This is set on object store create and index create
-  Future initialization = new Future.value();
+  Future initialization = Future.value();
 
   // very ugly
   // basically some init function are not async, this is a hack to group action here...
@@ -137,7 +137,7 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
             versionChangeTransaction.objectStore(storeName);
         List<IdbIndexMeta> indexMetas = txnMeta.createdIndexes[storeName];
         for (IdbIndexMeta indexMeta in indexMetas) {
-          _WebSqlIndex index = new _WebSqlIndex(store, indexMeta);
+          _WebSqlIndex index = _WebSqlIndex(store, indexMeta);
           await index.create();
         }
       }
@@ -149,7 +149,7 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
             versionChangeTransaction.objectStore(storeName);
         List<IdbIndexMeta> indexMetas = txnMeta.deletedIndexes[storeName];
         for (IdbIndexMeta indexMeta in indexMetas) {
-          _WebSqlIndex index = new _WebSqlIndex(store, indexMeta);
+          _WebSqlIndex index = _WebSqlIndex(store, indexMeta);
           await index.drop();
         }
       }
@@ -158,7 +158,7 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
     Future createObjectStores() async {
       for (IdbObjectStoreMeta storeMeta in txnMeta.createdStores) {
         _WebSqlObjectStore store =
-            new _WebSqlObjectStore(versionChangeTransaction, storeMeta);
+            _WebSqlObjectStore(versionChangeTransaction, storeMeta);
         await store.create();
       }
     }
@@ -166,7 +166,7 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
     Future updateObjectStores() async {
       for (IdbObjectStoreMeta storeMeta in txnMeta.updatedStores) {
         _WebSqlObjectStore store =
-            new _WebSqlObjectStore(versionChangeTransaction, storeMeta);
+            _WebSqlObjectStore(versionChangeTransaction, storeMeta);
         await store.update();
       }
     }
@@ -174,7 +174,7 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
     Future removeDeletedObjectStores() async {
       for (IdbObjectStoreMeta storeMeta in txnMeta.deletedStores) {
         _WebSqlObjectStore store =
-            new _WebSqlObjectStore(versionChangeTransaction, storeMeta);
+            _WebSqlObjectStore(versionChangeTransaction, storeMeta);
         await store._deleteTable(versionChangeTransaction);
         var sqlDelete = "DELETE FROM stores WHERE name = ?";
         var sqlArgs = [store.name];
@@ -182,8 +182,8 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
       }
     }
 
-    versionChangeTransaction = new _WebSqlTransaction(this, tx, txnMeta);
-    _WebSqlVersionChangeEvent event = new _WebSqlVersionChangeEvent(
+    versionChangeTransaction = _WebSqlTransaction(this, tx, txnMeta);
+    _WebSqlVersionChangeEvent event = _WebSqlVersionChangeEvent(
         this, oldVersion, newVersion, versionChangeTransaction);
 
     onUpgradeNeeded(event);
@@ -208,15 +208,14 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
       bool upgrading = false;
 
       IdbTransactionMeta txnMeta = meta.transaction(null, idbModeReadWrite);
-      _WebSqlTransaction transaction =
-          new _WebSqlTransaction(this, tx, txnMeta);
+      _WebSqlTransaction transaction = _WebSqlTransaction(this, tx, txnMeta);
       // Wrap in init block so that last one win
 
       //print("$oldVersion vs $newVersion");
       if (oldVersion != newVersion) {
         if (oldVersion > newVersion) {
           // cannot downgrade
-          throw new StateError(
+          throw StateError(
               "cannot downgrade from ${oldVersion} to $newVersion");
         } else {
           upgrading = true;
@@ -298,13 +297,13 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
 
   @override
   ObjectStore createObjectStore(String name,
-      {String keyPath, bool autoIncrement: false}) {
+      {String keyPath, bool autoIncrement = false}) {
     IdbObjectStoreMeta storeMeta =
-        new IdbObjectStoreMeta(name, keyPath, autoIncrement);
+        IdbObjectStoreMeta(name, keyPath, autoIncrement);
     meta.createObjectStore(storeMeta);
 
     _WebSqlObjectStore store =
-        new _WebSqlObjectStore(versionChangeTransaction, storeMeta);
+        _WebSqlObjectStore(versionChangeTransaction, storeMeta);
     return store;
   }
 
@@ -319,7 +318,7 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
       rs.rows.forEach((Map row) {
         var map = (json.decode(row['meta'] as String) as Map)
             ?.cast<String, dynamic>();
-        IdbObjectStoreMeta storeMeta = new IdbObjectStoreMeta.fromMap(map);
+        IdbObjectStoreMeta storeMeta = IdbObjectStoreMeta.fromMap(map);
         meta.putObjectStore(storeMeta);
       });
     });
@@ -330,13 +329,13 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
     IdbTransactionMeta txnMeta =
         meta.transaction(storeName_OR_storeNames, mode);
 
-    return new _WebSqlTransaction(this, null, txnMeta);
+    return _WebSqlTransaction(this, null, txnMeta);
   }
 
   @override
   Transaction transactionList(List<String> stores, String mode) {
     IdbTransactionMeta txnMeta = meta.transaction(stores, mode);
-    return new _WebSqlTransaction(this, null, txnMeta);
+    return _WebSqlTransaction(this, null, txnMeta);
   }
 
   @override
@@ -351,11 +350,11 @@ class _WebSqlDatabase extends Database with DatabaseWithMetaMixin {
   Stream<VersionChangeEvent> get onVersionChange {
     // only fired when a new call is made!
     if (onVersionChangeCtlr != null) {
-      throw new UnsupportedError("onVersionChange should be called only once");
+      throw UnsupportedError("onVersionChange should be called only once");
     }
     // sync needed in testing to make sure we receive the onCloseEvent before the
     // new database is actually open (test: websql database one keep open then one)
-    onVersionChangeCtlr = new StreamController(sync: true);
+    onVersionChangeCtlr = StreamController(sync: true);
     return onVersionChangeCtlr.stream;
   }
 }

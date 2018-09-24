@@ -13,7 +13,7 @@ void defineTests(TestContext ctx) {
     setUp(() {});
 
     test('only', () {
-      KeyRange keyRange = new KeyRange.only(1);
+      KeyRange keyRange = KeyRange.only(1);
       expect(keyRange.lower, equals(1));
       expect(keyRange.lowerOpen, isFalse);
       expect(keyRange.upper, equals(1));
@@ -25,7 +25,7 @@ void defineTests(TestContext ctx) {
     });
 
     test('lowerOpen', () {
-      KeyRange keyRange = new KeyRange.lowerBound(1, true);
+      KeyRange keyRange = KeyRange.lowerBound(1, true);
       expect(keyRange.lower, equals(1));
       expect(keyRange.lowerOpen, isTrue);
       //TODO expect(keyRange.upper, isNull);
@@ -37,7 +37,7 @@ void defineTests(TestContext ctx) {
     });
 
     test('lowerClose', () {
-      KeyRange keyRange = new KeyRange.lowerBound(1, false);
+      KeyRange keyRange = KeyRange.lowerBound(1, false);
       var range = keyRange;
       expect(range.contains(1), isTrue);
       expect(range.contains(0), isFalse);
@@ -45,7 +45,7 @@ void defineTests(TestContext ctx) {
     });
 
     test('upperOpen', () {
-      KeyRange keyRange = new KeyRange.upperBound(3, true);
+      KeyRange keyRange = KeyRange.upperBound(3, true);
       var range = keyRange;
       expect(range.contains(2), isTrue);
       expect(range.contains(3), isFalse);
@@ -53,7 +53,7 @@ void defineTests(TestContext ctx) {
     });
 
     test('upper', () {
-      KeyRange keyRange = new KeyRange.upperBound(3);
+      KeyRange keyRange = KeyRange.upperBound(3);
       //TODO expect(keyRange.lower, isNull);
       expect(keyRange.lowerOpen, isTrue);
       expect(keyRange.upper, equals(3));
@@ -65,7 +65,7 @@ void defineTests(TestContext ctx) {
     });
 
     test('lower/upper', () {
-      KeyRange keyRange = new KeyRange.bound(1, 3);
+      KeyRange keyRange = KeyRange.bound(1, 3);
       var range = keyRange;
       expect(range.contains(1), isTrue);
       expect(range.contains(3), isTrue);

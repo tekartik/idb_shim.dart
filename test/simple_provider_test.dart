@@ -17,7 +17,7 @@ void defineTests(TestContext ctx) {
       SimpleProvider provider;
 
       setUp(() {
-        provider = new SimpleProvider(idbFactory);
+        provider = SimpleProvider(idbFactory);
         return provider.openWith3SampleRows();
       });
 
@@ -60,11 +60,11 @@ void defineTests(TestContext ctx) {
             .transaction(testStoreName, idbModeReadOnly)
             .objectStore(testStoreName);
         Stream<CursorWithValue> stream = store.openCursor();
-        Completer completer = new Completer();
-        List<SimpleRow> list = new List();
+        Completer completer = Completer();
+        List<SimpleRow> list = List();
         stream.listen((CursorWithValue cwv) {
           expect(cwv.direction, "next");
-          list.add(new SimpleRow(cwv));
+          list.add(SimpleRow(cwv));
           cwv.next();
         }).onDone(() {
           expect(list.length, equals(3));
@@ -98,7 +98,7 @@ void defineTests(TestContext ctx) {
 
     test('add/get/put/delete', () {
       //Function done = expectDone();
-      SimpleProvider provider = new SimpleProvider(idbFactory);
+      SimpleProvider provider = SimpleProvider(idbFactory);
       return provider.openEmpty().then((_) {
         Transaction transaction =
             provider.db.transaction(testStoreName, idbModeReadWrite);

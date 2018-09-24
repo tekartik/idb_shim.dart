@@ -71,17 +71,17 @@ void defineTests(TestContext ctx) {
 //    }
 
     Future<List<TestIdNameRow>> cursorToList(Stream<CursorWithValue> stream) {
-      List<TestIdNameRow> list = new List();
+      List<TestIdNameRow> list = List();
       return stream.listen((CursorWithValue cwv) {
-        list.add(new TestIdNameRow(cwv));
+        list.add(TestIdNameRow(cwv));
       }).asFuture(list);
     }
 
     Future<List<TestIdNameRow>> manualCursorToList(
         Stream<CursorWithValue> stream) {
-      List<TestIdNameRow> list = new List();
+      List<TestIdNameRow> list = List();
       return stream.listen((CursorWithValue cwv) {
-        list.add(new TestIdNameRow(cwv));
+        list.add(TestIdNameRow(cwv));
         cwv.next();
       }).asFuture(list);
     }
@@ -129,7 +129,7 @@ void defineTests(TestContext ctx) {
           Stream<CursorWithValue> stream =
               objectStore.openCursor(autoAdvance: true);
           int count = 0;
-          Completer completer = new Completer();
+          Completer completer = Completer();
           stream.listen((CursorWithValue cwv) {
             expect((cwv.value as Map)[testNameField], "test1");
             count++;
@@ -171,7 +171,7 @@ void defineTests(TestContext ctx) {
               .asFuture()
               .then((_) {
             fail('should not complete');
-          }).timeout(new Duration(milliseconds: 500), onTimeout: () {
+          }).timeout(Duration(milliseconds: 500), onTimeout: () {
             // don't wait on the transaction
             transaction = null;
           });
@@ -188,7 +188,7 @@ void defineTests(TestContext ctx) {
               .asFuture()
               .then((_) {
             fail('should not complete');
-          }).timeout(new Duration(milliseconds: 500), onTimeout: () {
+          }).timeout(Duration(milliseconds: 500), onTimeout: () {
             // don't wait on the transaction
             transaction = null;
           });
@@ -223,7 +223,7 @@ void defineTests(TestContext ctx) {
             expect(list.length, 3);
 
             return cursorToList(objectStore.openCursor(
-                    range: new KeyRange.bound(2, 3), autoAdvance: true))
+                    range: KeyRange.bound(2, 3), autoAdvance: true))
                 .then((list) {
               expect(list.length, 2);
               expect(list[0].name, equals('test1'));
@@ -232,7 +232,7 @@ void defineTests(TestContext ctx) {
               expect(list[1].id, equals(3));
 
               return cursorToList(objectStore.openCursor(
-                      range: new KeyRange.bound(1, 3, true, true),
+                      range: KeyRange.bound(1, 3, true, true),
                       autoAdvance: true))
                   .then((list) {
                 expect(list.length, 1);
@@ -240,7 +240,7 @@ void defineTests(TestContext ctx) {
                 expect(list[0].id, equals(2));
 
                 return cursorToList(objectStore.openCursor(
-                        range: new KeyRange.lowerBound(2), autoAdvance: true))
+                        range: KeyRange.lowerBound(2), autoAdvance: true))
                     .then((list) {
                   expect(list.length, 2);
                   expect(list[0].name, equals('test1'));
@@ -249,7 +249,7 @@ void defineTests(TestContext ctx) {
                   expect(list[1].id, equals(3));
 
                   return cursorToList(objectStore.openCursor(
-                          range: new KeyRange.upperBound(2, true),
+                          range: KeyRange.upperBound(2, true),
                           autoAdvance: true))
                       .then((list) {
                     expect(list.length, 1);

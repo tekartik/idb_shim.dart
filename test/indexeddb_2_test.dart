@@ -52,7 +52,7 @@ Future testReadWrite(idb.IdbFactory idbFactory, key, value, check,
 }
 
 List<String> get nonNativeListData {
-  var list = new List<String>();
+  var list = List<String>();
   list.add("data");
   list.add("clone");
   list.add("error");
@@ -75,7 +75,7 @@ void defineTests(TestContext ctx) {
   obj3['a'] = 100;
   obj3['b'] = obj3; // Cycle.
 
-  var obj4 = new SplayTreeMap<String, dynamic>(); // Different implementation.
+  var obj4 = SplayTreeMap<String, dynamic>(); // Different implementation.
   obj4['a'] = 100;
   obj4['b'] = 's';
 
@@ -89,8 +89,8 @@ void defineTests(TestContext ctx) {
   test('test_verifyGraph', () {
     // Nice to know verifyGraph is working before we rely on it.
     verifyGraph(obj4, obj4);
-    verifyGraph(obj1, new Map.from(obj1));
-    verifyGraph(obj4, new Map.from(obj4));
+    verifyGraph(obj1, Map.from(obj1));
+    verifyGraph(obj4, Map.from(obj4));
 
     var l1 = [1, 2, 3];
     var l2 = [
@@ -116,12 +116,12 @@ void defineTests(TestContext ctx) {
     skip_go('test_cycle', obj3);
     go('test_simple_splay', obj4);
     go('const_array_1', const [
-      const [1],
-      const [2]
+      [1],
+      [2]
     ]);
     skip_go('const_array_dag', const [
-      const [1],
-      const [1]
+      [1],
+      [1]
     ]);
     skip_go('array_deferred_copy', [1, 2, 3, obj3, obj3, 6]);
     skip_go('array_deferred_copy_2', [

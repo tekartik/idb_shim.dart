@@ -9,7 +9,7 @@ T _catchNativeError<T>(T action()) {
     if (e is DatabaseError) {
       rethrow;
     } else {
-      throw new DatabaseError(e.toString());
+      throw DatabaseError(e.toString());
     }
   } catch (e) {
     if (e is DatabaseError) {
@@ -17,7 +17,7 @@ T _catchNativeError<T>(T action()) {
     } else {
       //devPrint(e);
       //devPrint(e.runtimeType);
-      throw new DatabaseError(e.toString());
+      throw DatabaseError(e.toString());
     }
   }
 }

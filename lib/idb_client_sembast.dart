@@ -12,7 +12,7 @@ const idbFactoryNameSembast = "sembast";
 abstract class IdbFactorySembast extends IdbFactoryBase {
   factory IdbFactorySembast(sdb.DatabaseFactory databaseFactory,
           [String path]) =>
-      new IdbFactorySembastImpl(databaseFactory, path);
+      IdbFactorySembastImpl(databaseFactory, path);
 
   // The underlying factory
   sdb.DatabaseFactory get sdbFactory;

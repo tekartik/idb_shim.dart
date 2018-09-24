@@ -15,7 +15,7 @@ class SqlDatabaseFactory {
     if (database == null) {
       return null;
     }
-    return new SqlDatabase(database, name, version, displayName, estimatedSize);
+    return SqlDatabase(database, name, version, displayName, estimatedSize);
   }
 }
 
@@ -23,7 +23,7 @@ SqlDatabaseFactory _sqlDatabaseFactory;
 
 SqlDatabaseFactory get sqlDatabaseFactory {
   if (_sqlDatabaseFactory == null) {
-    _sqlDatabaseFactory = new SqlDatabaseFactory();
+    _sqlDatabaseFactory = SqlDatabaseFactory();
   }
   return _sqlDatabaseFactory;
 }
@@ -54,17 +54,17 @@ class SqlDatabase {
   }
 
   void debugLog(String msg) {
-    String timeText = new DateTime.now().toIso8601String().substring(18);
+    String timeText = DateTime.now().toIso8601String().substring(18);
     print("$timeText $_debugId $msg");
   }
 
   Future<SqlTransaction> transaction() {
-    var completer = new Completer<SqlTransaction>.sync();
+    var completer = Completer<SqlTransaction>.sync();
     _sqlDatabase.transaction((txn) {
       if (_DEBUG) {
         debugLog("BEGIN TRANSACTION");
       }
-      completer.complete(new SqlTransaction(this, txn));
+      completer.complete(SqlTransaction(this, txn));
     });
     return completer.future;
   }
@@ -88,7 +88,7 @@ class SqlTransaction {
       return text;
     }
 
-    var completer = new Completer<SqlResultSet>.sync();
+    var completer = Completer<SqlResultSet>.sync();
     if (arguments == null) {
       arguments = EMPTY_ARGS;
     }
@@ -135,7 +135,7 @@ class SqlTransaction {
 
   Future dropTablesIfExists(List<String> names) {
     int i = 0;
-    Completer completer = new Completer.sync();
+    Completer completer = Completer.sync();
     FutureOr dropNextTable() {
       if (i < names.length) {
         String name = names[i++];
@@ -177,11 +177,11 @@ class SqlTransaction {
     return execute("SELECT 0 WHERE 0 = 1");
   }
 
-  Completer<SqlTransaction> _completer = new Completer();
+  Completer<SqlTransaction> _completer = Completer();
 
   void _asyncCompleteIfDone() {
     if (_operationCount == 0) {
-      new Future(_completeIfDone);
+      Future(_completeIfDone);
     }
   }
 

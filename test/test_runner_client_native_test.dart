@@ -11,8 +11,8 @@ import 'test_runner.dart';
 main() {
   group('native', () {
     if (IdbNativeFactory.supported) {
-      IdbFactory idbFactory = new IdbNativeFactory();
-      TestContext ctx = new TestContext()..factory = idbFactory;
+      IdbFactory idbFactory = IdbNativeFactory();
+      TestContext ctx = TestContext()..factory = idbFactory;
 
       // ie and idb special test marker
       ctx.isIdbIe = isIe;

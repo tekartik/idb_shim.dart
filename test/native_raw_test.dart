@@ -90,7 +90,7 @@ main() {
       }
 
       _createTransaction() async {
-        await new Future.delayed(new Duration(milliseconds: 1));
+        await Future.delayed(Duration(milliseconds: 1));
         _createTransactionSync();
       }
 
@@ -185,7 +185,7 @@ main() {
       // Sync ok
       _createTransactionSync();
       await objectStore.getObject(0);
-      await new Future.value();
+      await Future.value();
 
       try {
         await objectStore.getObject(0);

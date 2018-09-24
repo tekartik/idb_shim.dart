@@ -21,18 +21,17 @@ Future<Database> copySchema(
 
   int version = srcDatabase.version;
 
-  _SchemaMeta schemaMeta = new _SchemaMeta();
+  _SchemaMeta schemaMeta = _SchemaMeta();
   // Get schema
-  List<String> storeNames = new List.from(srcDatabase.objectStoreNames);
+  List<String> storeNames = List.from(srcDatabase.objectStoreNames);
   if (storeNames.isNotEmpty) {
     Transaction txn = srcDatabase.transactionList(storeNames, idbModeReadOnly);
     for (String storeName in storeNames) {
       ObjectStore store = txn.objectStore(storeName);
-      IdbObjectStoreMeta storeMeta =
-          new IdbObjectStoreMeta.fromObjectStore(store);
+      IdbObjectStoreMeta storeMeta = IdbObjectStoreMeta.fromObjectStore(store);
       for (String indexName in store.indexNames) {
         Index index = store.index(indexName);
-        IdbIndexMeta indexMeta = new IdbIndexMeta.fromIndex(index);
+        IdbIndexMeta indexMeta = IdbIndexMeta.fromIndex(index);
         storeMeta.putIndex(indexMeta);
       }
       schemaMeta.stores.add(storeMeta);
@@ -72,7 +71,7 @@ Future copyStore(Database srcDatabase, String srcStoreName,
       srcDatabase.transaction(srcStoreName, idbModeReadOnly);
   ObjectStore store = srcTransaction.objectStore(srcStoreName);
   store.openCursor(autoAdvance: true).listen((CursorWithValue cwv) {
-    records.add(new _Record()
+    records.add(_Record()
       ..key = cwv.key
       ..value = cwv.value);
   });

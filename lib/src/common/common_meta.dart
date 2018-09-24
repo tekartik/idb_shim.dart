@@ -15,7 +15,7 @@ class IdbTransactionMeta {
 
   void checkObjectStore(String storeName) {
     if (!storeNames.contains(storeName)) {
-      throw new DatabaseTransactionStoreNotFoundError(storeName);
+      throw DatabaseTransactionStoreNotFoundError(storeName);
     }
   }
 
@@ -33,11 +33,11 @@ class IdbVersionChangeTransactionMeta extends IdbTransactionMeta {
   Map<String, List<IdbIndexMeta>> deletedIndexes =
       {}; // index deleted during onUpgradeNeeded
   Set<IdbObjectStoreMeta> createdStores =
-      new Set(); // store deleted during onUpgradeNeeded
+      Set(); // store deleted during onUpgradeNeeded
   Set<IdbObjectStoreMeta> deletedStores =
-      new Set(); // store deleted during onUpgradeNeeded
+      Set(); // store deleted during onUpgradeNeeded
   Set<IdbObjectStoreMeta> updatedStores =
-      new Set(); // store modified during onUpgradeNeeded
+      Set(); // store modified during onUpgradeNeeded
 
   IdbVersionChangeTransactionMeta() : super(null, idbModeReadWrite);
 
@@ -76,13 +76,13 @@ class IdbDatabaseMeta {
   IdbDatabaseMeta([this.version]);
 
   IdbVersionChangeTransactionMeta _versionChangeTransaction;
-  Map<String, IdbObjectStoreMeta> _stores = new Map();
+  Map<String, IdbObjectStoreMeta> _stores = Map();
 
   IdbVersionChangeTransactionMeta get versionChangeTransaction =>
       _versionChangeTransaction;
 
   Future onUpgradeNeeded(action()) async {
-    _versionChangeTransaction = new IdbVersionChangeTransactionMeta();
+    _versionChangeTransaction = IdbVersionChangeTransactionMeta();
 
     var result = action();
 
@@ -94,7 +94,7 @@ class IdbDatabaseMeta {
 
   createObjectStore(IdbObjectStoreMeta store) {
     if (versionChangeTransaction == null) {
-      throw new StateError(
+      throw StateError(
           "cannot create objectStore outside of a versionChangedEvent");
     }
     versionChangeTransaction.createdStores.add(store);
@@ -103,7 +103,7 @@ class IdbDatabaseMeta {
 
   deleteObjectStore(String storeName) {
     if (versionChangeTransaction == null) {
-      throw new StateError(
+      throw StateError(
           "cannot delete objectStore outside of a versionChangedEvent");
     }
     // Get the store and add it to the change list so that
@@ -113,7 +113,7 @@ class IdbDatabaseMeta {
       versionChangeTransaction.deletedStores.add(storeMeta);
       _stores.remove(storeName);
     } else {
-      throw new DatabaseStoreNotFoundError(
+      throw DatabaseStoreNotFoundError(
           DatabaseStoreNotFoundError.storeMessage(storeName));
     }
   }
@@ -126,30 +126,29 @@ class IdbDatabaseMeta {
     // Check store(s) exist
     if (storeName_OR_storeNames is String) {
       if (!_containsStore(storeName_OR_storeNames)) {
-        throw new DatabaseStoreNotFoundError(
+        throw DatabaseStoreNotFoundError(
             DatabaseStoreNotFoundError.storeMessage(storeName_OR_storeNames));
       }
-      return new IdbTransactionMeta([storeName_OR_storeNames], mode);
+      return IdbTransactionMeta([storeName_OR_storeNames], mode);
     } else if (storeName_OR_storeNames is List) {
       if (storeName_OR_storeNames.isEmpty) {
-        throw new DatabaseError(
+        throw DatabaseError(
             "InvalidAccessError: The storeNames parameter is empty");
       }
       for (String storeName in storeName_OR_storeNames) {
         if (!_containsStore(storeName)) {
-          throw new DatabaseStoreNotFoundError(
+          throw DatabaseStoreNotFoundError(
               DatabaseStoreNotFoundError.storeMessage(storeName_OR_storeNames));
         }
       }
-      return new IdbTransactionMeta(
-          storeName_OR_storeNames.cast<String>(), mode);
+      return IdbTransactionMeta(storeName_OR_storeNames.cast<String>(), mode);
     } else if (storeName_OR_storeNames != null) {
-      throw new DatabaseError(
+      throw DatabaseError(
           "Invalid store name(s) parameter: ${storeName_OR_storeNames}");
     } else {
       // assume null - it will complain otherwise
       // this is use for transaction created on open
-      return new IdbTransactionMeta(null, mode);
+      return IdbTransactionMeta(null, mode);
     }
   }
 
@@ -214,22 +213,21 @@ class IdbObjectStoreMeta {
 
   Iterable<IdbIndexMeta> get indecies => _indecies.values;
 
-  Map<String, IdbIndexMeta> _indecies = new Map();
+  Map<String, IdbIndexMeta> _indecies = Map();
 
   Iterable<String> get indexNames => _indecies.keys;
 
   IdbIndexMeta index(String name) {
     IdbIndexMeta indexMeta = _indecies[name];
     if (indexMeta == null) {
-      throw new ArgumentError("index $name not found");
+      throw ArgumentError("index $name not found");
     }
     return indexMeta;
   }
 
   createIndex(IdbDatabaseMeta databaseMeta, IdbIndexMeta index) {
     if (databaseMeta.versionChangeTransaction == null) {
-      throw new StateError(
-          "cannot create index outside of a versionChangedEvent");
+      throw StateError("cannot create index outside of a versionChangedEvent");
     }
     databaseMeta.versionChangeTransaction.updatedStores.add(this);
     List list = databaseMeta.versionChangeTransaction.createdIndexes[name];
@@ -243,12 +241,11 @@ class IdbObjectStoreMeta {
 
   deleteIndex(IdbDatabaseMeta databaseMeta, String indexName) {
     if (databaseMeta.versionChangeTransaction == null) {
-      throw new StateError(
-          "cannot delete index outside of a versionChangedEvent");
+      throw StateError("cannot delete index outside of a versionChangedEvent");
     }
     IdbIndexMeta indexMeta = _indecies[indexName];
     if (indexMeta == null) {
-      throw new DatabaseIndexNotFoundError(indexName);
+      throw DatabaseIndexNotFoundError(indexName);
     }
     databaseMeta.versionChangeTransaction.updatedStores.add(this);
     List list = databaseMeta.versionChangeTransaction.deletedIndexes[name];
@@ -284,7 +281,7 @@ class IdbObjectStoreMeta {
                 ((map[indeciesKey]) as List)?.cast<Map>()));
 
   IdbObjectStoreMeta clone() {
-    return new IdbObjectStoreMeta(name, keyPath, autoIncrement);
+    return IdbObjectStoreMeta(name, keyPath, autoIncrement);
   }
 
   void putIndex(IdbIndexMeta index) {
@@ -358,10 +355,10 @@ class IdbCursorMeta {
         _ascending = true;
         break;
       default:
-        throw new ArgumentError("direction '$direction' not supported");
+        throw ArgumentError("direction '$direction' not supported");
     }
     if (key != null && range != null) {
-      throw new ArgumentError(
+      throw ArgumentError(
           "both key '${key}' and range '${range}' are specified");
     }
   }
@@ -423,7 +420,7 @@ class IdbIndexMeta {
     }
     var metas = <IdbIndexMeta>[];
     list.forEach((map) {
-      metas.add(new IdbIndexMeta.fromMap(map?.cast<String, dynamic>()));
+      metas.add(IdbIndexMeta.fromMap(map?.cast<String, dynamic>()));
     });
     return metas;
   }

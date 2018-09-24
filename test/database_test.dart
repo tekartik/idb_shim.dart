@@ -77,14 +77,14 @@ void defineTests(TestContext ctx) {
     test('one', () async {
       await _setupDeleteDb();
       await _openWith1Store();
-      List<String> storeNames = new List.from(db.objectStoreNames);
+      List<String> storeNames = List.from(db.objectStoreNames);
       expect(storeNames.length, 1);
       expect(storeNames[0], testStoreName);
 
       db.close();
       // re-open
       await _openDb();
-      storeNames = new List.from(db.objectStoreNames);
+      storeNames = List.from(db.objectStoreNames);
       expect(storeNames.length, 1);
       expect(storeNames, [testStoreName]);
     });
@@ -92,14 +92,14 @@ void defineTests(TestContext ctx) {
     test('one_then_one', () async {
       await _setupDeleteDb();
       await _openWith1Store();
-      List<String> storeNames = new List.from(db.objectStoreNames);
+      List<String> storeNames = List.from(db.objectStoreNames);
       expect(storeNames.length, 1);
       expect(storeNames[0], testStoreName);
 
       db.close();
       // re-open
       await _openWith1OtherStore();
-      storeNames = new List.from(db.objectStoreNames);
+      storeNames = List.from(db.objectStoreNames);
       expect(storeNames.length, 2);
       expect(storeNames, [testStoreName, testStoreName + "_2"]);
     });
@@ -223,7 +223,7 @@ void defineTests(TestContext ctx) {
     test('twice', () async {
       await _setupDeleteDb();
       await _openWith1Store();
-      List<String> storeNames = new List.from(db.objectStoreNames);
+      List<String> storeNames = List.from(db.objectStoreNames);
       expect(storeNames.length, 1);
       expect(storeNames[0], testStoreName);
 
@@ -231,7 +231,7 @@ void defineTests(TestContext ctx) {
       // db.close();
       // re-open
       await _openWith1Store();
-      storeNames = new List.from(db.objectStoreNames);
+      storeNames = List.from(db.objectStoreNames);
       expect(storeNames.length, 1);
       expect(storeNames[0], testStoreName);
 
@@ -254,7 +254,7 @@ void defineTests(TestContext ctx) {
 
       // re-open
       await _openWith1OtherStore();
-      List<String> storeNames = new List.from(db.objectStoreNames);
+      List<String> storeNames = List.from(db.objectStoreNames);
       expect(storeNames, [testStoreName, testStoreName + "_2"]);
 
       // at this point native db should be close already

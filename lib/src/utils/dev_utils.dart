@@ -27,7 +27,7 @@ int devWarning;
 void _devError([Object msg]) {
   // one day remove the print however sometimes the error thrown is hidden
   try {
-    throw new UnsupportedError(msg?.toString());
+    throw UnsupportedError(msg?.toString());
   } catch (e, st) {
     if (_devPrintEnabled) {
       print("# ERROR $msg");

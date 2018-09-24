@@ -35,7 +35,7 @@ class TransactionSembast extends IdbTransactionBase
     }
     Completer completer = completers[i];
     Action action = actions[i];
-    return new Future.sync(action).then((result) {
+    return Future.sync(action).then((result) {
       if (_debugTransaction) {
         print("done $i");
       }
@@ -78,11 +78,11 @@ class TransactionSembast extends IdbTransactionBase
           print('transaction done');
         }
         _inactive = true;
-        return new Future.value(null);
+        return Future.value(null);
       }
 
       if (_transactionLazyMode) {
-        return new Future.delayed(new Duration(), _checkNextAction);
+        return Future.delayed(Duration(), _checkNextAction);
       } else {
         //return new Future.sync(new Duration(), _checkNextAction);
         return _checkNextAction();
@@ -127,9 +127,9 @@ class TransactionSembast extends IdbTransactionBase
 
       if (_transactionLazyMode) {
         // old lazy mode
-        lazyExecution = new Future.microtask(_sdbAction);
+        lazyExecution = Future.microtask(_sdbAction);
       } else {
-        lazyExecution = new Future.sync(_sdbAction);
+        lazyExecution = Future.sync(_sdbAction);
       }
 
       //return lazyExecution;
@@ -143,10 +143,10 @@ class TransactionSembast extends IdbTransactionBase
       print('enqueing');
     }
     if (_inactive) {
-      return new Future.error(new DatabaseError("TransactionInactiveError"));
+      return Future.error(DatabaseError("TransactionInactiveError"));
     }
 // not lazy
-    var completer = new Completer<T>.sync();
+    var completer = Completer<T>.sync();
     completers.add(completer);
     actions.add(action);
     //devPrint("push ${actions.length}");
@@ -159,7 +159,7 @@ class TransactionSembast extends IdbTransactionBase
   }
 
   //sdb.Transaction sdbTransaction;
-  var transactionCompleter = new Completer();
+  var transactionCompleter = Completer();
   List<Completer> completers = [];
   List<Function> actions = [];
   List<Future> futures = [];
@@ -177,7 +177,7 @@ class TransactionSembast extends IdbTransactionBase
       // simply call completed
       // completed;
 
-      new Future.delayed(new Duration(), () {
+      Future.delayed(Duration(), () {
         completed;
       });
     }
@@ -189,7 +189,7 @@ class TransactionSembast extends IdbTransactionBase
         print('no lazy executor $_debugId...');
       }
       _inactive = true;
-      return new Future.value(database);
+      return Future.value(database);
     } else {
       if (_debugTransaction) {
         print('lazy executor created $_debugId...');
@@ -224,7 +224,7 @@ class TransactionSembast extends IdbTransactionBase
     // postpone to next 2 cycles to allow enqueing
     // actions after completed has been called
     //if (_transactionLazyMode) {
-    return new Future.value().then((_) => _completed());
+    return Future.value().then((_) => _completed());
   }
 
 //    sdbTransaction == null ? new Future.value(database) : sdbTransaction.completed.then((_) {
@@ -235,7 +235,7 @@ class TransactionSembast extends IdbTransactionBase
   @override
   ObjectStore objectStore(String name) {
     meta.checkObjectStore(name);
-    return new ObjectStoreSembast(this, database.meta.getObjectStore(name));
+    return ObjectStoreSembast(this, database.meta.getObjectStore(name));
   }
 
 //  @override

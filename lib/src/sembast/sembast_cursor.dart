@@ -19,29 +19,29 @@ sdb.Filter keyRangeFilter(String keyPath, KeyRange range) {
   List<sdb.Filter> filters = [];
   if (range.lower != null) {
     if (range.lowerOpen == true) {
-      lowerFilter = new sdb.Filter.greaterThan(keyPath, range.lower);
+      lowerFilter = sdb.Filter.greaterThan(keyPath, range.lower);
     } else {
-      lowerFilter = new sdb.Filter.greaterThanOrEquals(keyPath, range.lower);
+      lowerFilter = sdb.Filter.greaterThanOrEquals(keyPath, range.lower);
     }
     filters.add(lowerFilter);
   }
   if (range.upper != null) {
     if (range.upperOpen == true) {
-      upperFilter = new sdb.Filter.lessThan(keyPath, range.upper);
+      upperFilter = sdb.Filter.lessThan(keyPath, range.upper);
     } else {
-      upperFilter = new sdb.Filter.lessThanOrEquals(keyPath, range.upper);
+      upperFilter = sdb.Filter.lessThanOrEquals(keyPath, range.upper);
     }
     filters.add(upperFilter);
   }
-  return new sdb.Filter.and(filters);
+  return sdb.Filter.and(filters);
 }
 
 sdb.Filter keyFilter(String keyPath, var key) {
   if (key == null) {
     // key must not be nulled
-    return new sdb.Filter.notEqual(keyPath, null);
+    return sdb.Filter.notEqual(keyPath, null);
   }
-  return new sdb.Filter.equal(keyPath, key);
+  return sdb.Filter.equal(keyPath, key);
 }
 
 sdb.Filter keyOrRangeFilter(String keyPath, [key_OR_range]) {
@@ -238,7 +238,7 @@ abstract class BaseCursorControllerSembastMixin<T extends Cursor>
   StreamController<T> ctlr;
 
   void init() {
-    ctlr = new StreamController(sync: true);
+    ctlr = StreamController(sync: true);
   }
 
   Future autoNext() {
@@ -258,13 +258,13 @@ abstract class BaseCursorControllerSembastMixin<T extends Cursor>
     }
 
     ctlr.add(nextEvent(currentIndex));
-    return new Future.value();
+    return Future.value();
   }
 
   Future openCursor() {
     sdb.Filter filter = this.filter;
     sdb.SortOrder sortOrder = this.sortOrder;
-    sdb.Finder finder = new sdb.Finder(filter: filter, sortOrders: [sortOrder]);
+    sdb.Finder finder = sdb.Finder(filter: filter, sortOrders: [sortOrder]);
     return store.sdbStore.findRecords(finder).then((List<sdb.Record> records) {
       this.records = records;
       return autoNext();
@@ -318,7 +318,7 @@ class IndexKeyCursorControllerSembast extends Object
 
   @override
   Cursor nextEvent(int index) {
-    IndexKeyCursorSembast cursor = new IndexKeyCursorSembast(this, index);
+    IndexKeyCursorSembast cursor = IndexKeyCursorSembast(this, index);
     return cursor;
   }
 }
@@ -340,7 +340,7 @@ class IndexCursorWithValueControllerSembast extends Object
   @override
   CursorWithValue nextEvent(int index) {
     IndexCursorWithValueSembast cursor =
-        new IndexCursorWithValueSembast(this, index);
+        IndexCursorWithValueSembast(this, index);
     return cursor;
   }
 }
@@ -360,7 +360,7 @@ class StoreCursorWithValueControllerSembast extends Object
   @override
   CursorWithValue nextEvent(int index) {
     StoreCursorWithValueSembast cursor =
-        new StoreCursorWithValueSembast(this, index);
+        StoreCursorWithValueSembast(this, index);
     return cursor;
   }
 }

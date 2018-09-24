@@ -18,7 +18,7 @@ void webSqlTest(IdbWebSqlFactory idbFactory) {
 
   group('native', () {
     test('openDatabase', () {
-      Completer completer = new Completer();
+      Completer completer = Completer();
       SqlDatabase db = window.openDatabase(
           "com.tekartik.test", "1", "com.tekartik.test", 1024 * 1024);
       db.transaction((txn) {
@@ -28,7 +28,7 @@ void webSqlTest(IdbWebSqlFactory idbFactory) {
     });
 
     test('transaction', () {
-      Completer completer = new Completer();
+      Completer completer = Completer();
       SqlDatabase db = window.openDatabase(
           "com.tekartik.test", "1", "com.tekartik.test", 1024 * 1024);
       db.transaction((txn) {
@@ -40,8 +40,8 @@ void webSqlTest(IdbWebSqlFactory idbFactory) {
     });
 
     test('transaction in future', () {
-      Completer completer = new Completer();
-      Completer syncCompleter = new Completer.sync();
+      Completer completer = Completer();
+      Completer syncCompleter = Completer.sync();
       SqlDatabase db = window.openDatabase(
           "com.tekartik.test", "1", "com.tekartik.test", 1024 * 1024);
       db.transaction((txn) {
@@ -69,8 +69,8 @@ void main() {
     //wrapper.SqlDatabase.debug = true;
     if (IdbWebSqlFactory.supported) {
       //idb_wql.SqlDatabase.debug = true;
-      IdbWebSqlFactory idbFactory = new IdbWebSqlFactory();
-      TestContext ctx = new TestContext()..factory = idbFactory;
+      IdbWebSqlFactory idbFactory = IdbWebSqlFactory();
+      TestContext ctx = TestContext()..factory = idbFactory;
       test_runner.defineTests(ctx);
       websql_wrapper_test.main();
       websql_client_test.main();

@@ -29,7 +29,7 @@ List<Map<String, dynamic>> getRowsFromResultSet(SqlResultSet resultSet) {
   // try access, only work on dart
   try {
     for (var sqlRow in rowList) {
-      list.add(new Map.from(sqlRow));
+      list.add(Map.from(sqlRow));
     }
   } catch (e) {
     // if it crashes it means it is not a dart map

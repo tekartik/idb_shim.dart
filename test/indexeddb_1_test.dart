@@ -159,7 +159,7 @@ void testTypes(TestFunc testFunction, idb.IdbFactory idbFactory) {
       'largeIntInMap',
       testFunction(idbFactory, 123, {'time': 4503599627370492},
           equals("{time: 4503599627370492}"), null, STORE_NAME, VERSION, true));
-  var now = new DateTime.now();
+  var now = DateTime.now();
   //TEKARTIK_IDB_REMOVED
   test(
       'DateTime',

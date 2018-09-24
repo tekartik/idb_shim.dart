@@ -15,7 +15,7 @@ void main() {
       test('bug_dart2.0.0-dev', () async {
         SqlDatabase db = window.openDatabase(
             "websql_raw_test_2", "1", "WebSql raw test 2", 50 * 1000);
-        var completer = new Completer();
+        var completer = Completer();
         SqlResultSet rs_;
 
         db.transaction((txn) {

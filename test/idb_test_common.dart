@@ -58,7 +58,7 @@ void dbTest(String description, body, [_test = test]) {
   _test(description, () async {
     dbTestName = ctx.dbName;
     await ctx.factory.deleteDatabase(dbTestName);
-    await new Future.value(body());
+    await Future.value(body());
   });
 }
 
@@ -95,16 +95,15 @@ class SembastFsTestContext extends SembastTestContext {
   IdbFactorySembast get factory => super.factory;
 }
 
-TestContext idbMemoryContext = new SembastTestContext()
-  ..factory = idbMemoryFactory;
+TestContext idbMemoryContext = SembastTestContext()..factory = idbMemoryFactory;
 
-SembastFsTestContext idbMemoryFsContext = new SembastFsTestContext()
+SembastFsTestContext idbMemoryFsContext = SembastFsTestContext()
   ..factory = idbMemoryFsFactory;
 
 IdbFactory idbTestMemoryFactory = idbMemoryFactory;
 
 Future<Database> setUpSimpleStore(IdbFactory idbFactory, //
-    {String dbName: _testDbName,
+    {String dbName = _testDbName,
     IdbObjectStoreMeta meta}) {
   if (meta == null) {
     meta = idbSimpleObjectStoreMeta;

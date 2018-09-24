@@ -4,10 +4,10 @@ import '../../idb_client.dart';
 
 void checkKeyParam(var key) {
   if (key == null) {
-    throw new DatabaseNoKeyError();
+    throw DatabaseNoKeyError();
   }
   if (!(key is String || key is num)) {
-    throw new DatabaseInvalidKeyError(key);
+    throw DatabaseInvalidKeyError(key);
   }
 }
 

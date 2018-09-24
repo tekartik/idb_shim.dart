@@ -25,15 +25,15 @@ class SqlTransaction {
   SqlTransaction._(this.jsObject);
 
   Future<SqlResultSet> executeSql(String sql, [List arguments]) {
-    var completer = new Completer<SqlResultSet>.sync();
+    var completer = Completer<SqlResultSet>.sync();
     jsObject.executeSql(sql, arguments, allowInterop((txn, result) {
       if (result == null) {
         completer.complete(null);
       } else {
-        completer.complete(new SqlResultSet._(result as js.JsWebSqlResultSet));
+        completer.complete(SqlResultSet._(result as js.JsWebSqlResultSet));
       }
     }), allowInterop((txn, error) {
-      completer.completeError(new SqlError(error as js.JsWebSqlError));
+      completer.completeError(SqlError(error as js.JsWebSqlError));
     }));
     return completer.future;
   }
@@ -54,12 +54,12 @@ class SqlResultSetRowList extends ListBase<Map> {
 
   @override
   void operator []=(int index, Map value) {
-    throw new Exception("read-only");
+    throw Exception("read-only");
   }
 
   @override
   set length(int newLength) {
-    throw new Exception("read-only");
+    throw Exception("read-only");
   }
 }
 
@@ -74,7 +74,7 @@ class SqlResultSet {
     if (jsObject.rows == null) {
       return null;
     } else {
-      return new SqlResultSetRowList._(jsObject.rows);
+      return SqlResultSetRowList._(jsObject.rows);
     }
   }
 
@@ -90,9 +90,9 @@ class SqlDatabase {
 
   Future<T> transaction<T>(FutureOr<T> action(SqlTransaction txn)) {
     FutureOr<T> result;
-    var completer = new Completer<T>();
+    var completer = Completer<T>();
     jsObject.transaction(allowInterop((jsTxn) {
-      result = action(new SqlTransaction._(jsTxn as js.JsWebSqlTransaction));
+      result = action(SqlTransaction._(jsTxn as js.JsWebSqlTransaction));
     }), allowInterop((error) {
       completer.completeError(error);
     }), allowInterop(() {
@@ -103,9 +103,9 @@ class SqlDatabase {
 
   Future<T> readTransaction<T>(FutureOr<T> action(SqlTransaction txn)) {
     FutureOr<T> result;
-    var completer = new Completer<T>();
+    var completer = Completer<T>();
     jsObject.transaction(allowInterop((jsTxn) {
-      result = action(new SqlTransaction._(jsTxn as js.JsWebSqlTransaction));
+      result = action(SqlTransaction._(jsTxn as js.JsWebSqlTransaction));
     }), allowInterop((error) {
       completer.completeError(error);
     }), allowInterop(() {
@@ -145,7 +145,7 @@ List<Map<String, dynamic>> getRowsFromResultSet(SqlResultSet resultSet) {
   // try access, only work on dart
   try {
     for (var sqlRow in rowList) {
-      list.add(new Map.from(sqlRow));
+      list.add(Map.from(sqlRow));
     }
   } catch (e) {
     // if it crashes it means it is not a dart map

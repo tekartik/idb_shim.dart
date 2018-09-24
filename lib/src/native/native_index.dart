@@ -52,7 +52,7 @@ class _NativeIndex extends Index {
   @override
   Stream<Cursor> openKeyCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
-    _NativeCursorController ctlr = new _NativeCursorController(
+    _NativeCursorController ctlr = _NativeCursorController(
         idbIndex.openKeyCursor(
             key: key,
             range: range == null ? null : _nativeKeyRange(range),
@@ -65,8 +65,8 @@ class _NativeIndex extends Index {
   @override
   Stream<CursorWithValue> openCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
-    _NativeCursorWithValueController ctlr =
-        new _NativeCursorWithValueController(idbIndex.openCursor(
+    _NativeCursorWithValueController ctlr = _NativeCursorWithValueController(
+        idbIndex.openCursor(
             key: key,
             range: range == null ? null : _nativeKeyRange(range),
             direction: direction,

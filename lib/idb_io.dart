@@ -10,14 +10,13 @@ IdbFactory get idbMemoryFactory => idbSembastMemoryFactory;
 IdbFactory _idbSembastMemoryFactory;
 IdbFactory get idbSembastMemoryFactory {
   if (_idbSembastMemoryFactory == null) {
-    _idbSembastMemoryFactory =
-        new IdbFactorySembast(memoryDatabaseFactory, null);
+    _idbSembastMemoryFactory = IdbFactorySembast(memoryDatabaseFactory, null);
   }
   return _idbSembastMemoryFactory;
 }
 
 IdbFactory getIdbSembastIoFactory(String path) =>
-    new IdbFactorySembast(databaseFactoryIo, path);
+    IdbFactorySembast(databaseFactoryIo, path);
 
 /// do no use
 /// choose manually
@@ -38,7 +37,7 @@ IdbFactory getIdbFactory({String name, String path}) {
     case idbFactoryMemory:
       return idbMemoryFactory;
     default:
-      throw new UnsupportedError("Factory '$name' not supported");
+      throw UnsupportedError("Factory '$name' not supported");
   }
 }
 

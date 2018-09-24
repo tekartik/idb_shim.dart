@@ -31,7 +31,7 @@ class _WebSqlGlobalStore {
       });
     }).catchError((e) {
       // Ok to fail
-      return new List<String>();
+      return List<String>();
     });
   }
 
@@ -103,7 +103,7 @@ class _WebSqlGlobalStore {
   }
 
   Future<SqlTransaction> _checkOpen() {
-    var completer = new Completer<SqlTransaction>.sync();
+    var completer = Completer<SqlTransaction>.sync();
     _checkOpenNew((SqlTransaction tx) {
       completer.complete(tx);
     });

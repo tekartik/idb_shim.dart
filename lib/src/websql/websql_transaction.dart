@@ -39,13 +39,12 @@ class _WebSqlTransaction extends IdbTransactionBase {
   @override
   _WebSqlObjectStore objectStore(String name) {
     _meta.checkObjectStore(name);
-    return new _WebSqlObjectStore(
-        this, idbWqlDatabase.meta.getObjectStore(name));
+    return _WebSqlObjectStore(this, idbWqlDatabase.meta.getObjectStore(name));
   }
 
   Future<SqlResultSet> execute(String statement, [List args]) {
     if (_inactive) {
-      throw new DatabaseError("TransactionInactiveError");
+      throw DatabaseError("TransactionInactiveError");
     }
     if (args == null) {
       args = [];
@@ -53,13 +52,13 @@ class _WebSqlTransaction extends IdbTransactionBase {
     if (_sqlTransaction != null) {
       return _sqlTransaction.execute(statement, args).catchError((e) {
         // convert to error that we understand
-        throw new _WebSqlDatabaseError(e);
+        throw _WebSqlDatabaseError(e);
       });
     } else {
       return sqlTransaction.then((tx) {
         return tx.execute(statement, args).catchError((e) {
           // convert to error that we understand
-          throw new _WebSqlDatabaseError(e);
+          throw _WebSqlDatabaseError(e);
         });
       });
     }
@@ -82,7 +81,7 @@ class _WebSqlTransaction extends IdbTransactionBase {
   @override
   Future<Database> get completed {
     if (_lazySqlTransaction == null) {
-      return new Future.value(database);
+      return Future.value(database);
     } else {
       return sqlTransaction.then((tx) {
         return tx.completed.then((_) {

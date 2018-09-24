@@ -92,7 +92,7 @@ defineTests(SembastFsTestContext ctx) {
         Database db = e.database;
         ObjectStore store = db.createObjectStore(testStoreName,
             keyPath: testNameField, autoIncrement: true);
-        storeMeta = new IdbObjectStoreMeta.fromObjectStore(store);
+        storeMeta = IdbObjectStoreMeta.fromObjectStore(store);
       }
 
       db = await idbFactory.open(dbTestName,
@@ -112,10 +112,10 @@ defineTests(SembastFsTestContext ctx) {
         Database db = e.database;
         ObjectStore store =
             db.createObjectStore(testStoreName, autoIncrement: true);
-        storeMeta = new IdbObjectStoreMeta.fromObjectStore(store);
+        storeMeta = IdbObjectStoreMeta.fromObjectStore(store);
         Index index = store.createIndex(testNameIndex, testNameField,
             unique: true, multiEntry: true);
-        IdbIndexMeta indexMeta = new IdbIndexMeta.fromIndex(index);
+        IdbIndexMeta indexMeta = IdbIndexMeta.fromIndex(index);
         storeMeta.putIndex(indexMeta);
       }
 

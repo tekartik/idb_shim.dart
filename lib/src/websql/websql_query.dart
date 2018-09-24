@@ -35,7 +35,7 @@ class _SelectQuery extends _Query {
           break;
 
         default:
-          throw new ArgumentError("direction '$_direction' not supported");
+          throw ArgumentError("direction '$_direction' not supported");
       }
     }
     List args = [];

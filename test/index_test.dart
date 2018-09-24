@@ -113,7 +113,7 @@ void defineTests(TestContext ctx) {
         await objectStore.add(value1);
 //            // create new transaction;
         index = objectStore.index(testNameIndex);
-        int count = await index.count(new KeyRange.only("test1"));
+        int count = await index.count(KeyRange.only("test1"));
         expect(count, 2);
       });
 
@@ -262,11 +262,11 @@ void defineTests(TestContext ctx) {
         return objectStore.add(value1).then((_) {
           return objectStore.add(value2).then((_) {
             return index
-                .count(new KeyRange.lowerBound("test1", true))
+                .count(KeyRange.lowerBound("test1", true))
                 .then((int count) {
               expect(count, 1);
               return index
-                  .count(new KeyRange.lowerBound("test1"))
+                  .count(KeyRange.lowerBound("test1"))
                   .then((int count) {
                 expect(count, 2);
               });
@@ -282,11 +282,11 @@ void defineTests(TestContext ctx) {
         return objectStore.add(value).then((key1) {
           return objectStore.add(value).then((key2) {
             return objectStore
-                .count(new KeyRange.lowerBound(key1, true))
+                .count(KeyRange.lowerBound(key1, true))
                 .then((int count) {
               expect(count, 1);
               return objectStore
-                  .count(new KeyRange.lowerBound(key1))
+                  .count(KeyRange.lowerBound(key1))
                   .then((int count) {
                 expect(count, 2);
               });
@@ -341,7 +341,7 @@ void defineTests(TestContext ctx) {
         // create new transaction;
         _createTransaction();
         index = objectStore.index(testNameIndex);
-        int count = await index.count(new KeyRange.only("test1"));
+        int count = await index.count(KeyRange.only("test1"));
         // 1 for websql sorry...
         // 2 for Safari idb, sorry...
         // devPrint(count);
@@ -535,11 +535,11 @@ void defineTests(TestContext ctx) {
                 db.transaction(storeMeta.name, idbModeReadOnly);
             ObjectStore objectStore = transaction.objectStore(storeMeta.name);
             Index index = objectStore.index(indexMeta.name);
-            IdbIndexMeta readMeta = new IdbIndexMeta.fromIndex(index);
+            IdbIndexMeta readMeta = IdbIndexMeta.fromIndex(index);
 
             // multi entry not supported on ie
             if (ctx.isIdbIe) {
-              readMeta = new IdbIndexMeta(readMeta.name, readMeta.keyPath,
+              readMeta = IdbIndexMeta(readMeta.name, readMeta.keyPath,
                   readMeta.unique, indexMeta.multiEntry);
             }
             expect(readMeta, indexMeta);

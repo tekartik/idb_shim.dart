@@ -6,7 +6,7 @@ class _NativeObjectStore extends ObjectStore {
 
   @override
   Index createIndex(String name, keyPath, {bool unique, bool multiEntry}) {
-    return new _NativeIndex(idbObjectStore.createIndex(name, keyPath,
+    return _NativeIndex(idbObjectStore.createIndex(name, keyPath,
         unique: unique, multiEntry: multiEntry));
   }
 
@@ -55,7 +55,7 @@ class _NativeObjectStore extends ObjectStore {
 
   @override
   Index index(String name) {
-    return new _NativeIndex(idbObjectStore.index(name));
+    return _NativeIndex(idbObjectStore.index(name));
   }
 
   @override
@@ -86,9 +86,8 @@ class _NativeObjectStore extends ObjectStore {
           autoAdvance: autoAdvance);
     }
 
-    _NativeCursorWithValueController ctlr =
-        new _NativeCursorWithValueController(//
-            stream);
+    _NativeCursorWithValueController ctlr = _NativeCursorWithValueController(//
+        stream);
     //idbDevPrint("kr2 $range native $idbKeyRange");
     return ctlr.stream;
   }

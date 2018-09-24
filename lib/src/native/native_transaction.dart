@@ -13,7 +13,7 @@ class TransactionNative extends TransactionNativeBase {
   ObjectStore objectStore(String name) {
     return _catchNativeError(() {
       idb.ObjectStore idbObjectStore = idbTransaction.objectStore(name);
-      return new _NativeObjectStore(idbObjectStore);
+      return _NativeObjectStore(idbObjectStore);
     });
   }
 
@@ -62,7 +62,7 @@ class FakeMultiStoreTransactionNative extends TransactionNativeBase {
   @override
   Future<Database> get completed {
     if (lastTransaction == null) {
-      return new Future.value(database);
+      return Future.value(database);
     } else {
       // Somehow waiting for all transaction hangs
       // just wait for the last one created!

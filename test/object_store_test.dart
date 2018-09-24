@@ -421,11 +421,11 @@ void defineTests(TestContext ctx) {
         return objectStore.add(value).then((key1) {
           return objectStore.add(value).then((key2) {
             return objectStore
-                .count(new KeyRange.lowerBound(key1, true))
+                .count(KeyRange.lowerBound(key1, true))
                 .then((int count) {
               expect(count, 1);
               return objectStore
-                  .count(new KeyRange.lowerBound(key1))
+                  .count(KeyRange.lowerBound(key1))
                   .then((int count) {
                 expect(count, 2);
               });
@@ -877,11 +877,11 @@ void defineTests(TestContext ctx) {
               db.transaction(storeMeta.name, idbModeReadOnly);
           ObjectStore objectStore = transaction.objectStore(storeMeta.name);
           IdbObjectStoreMeta readMeta =
-              new IdbObjectStoreMeta.fromObjectStore(objectStore);
+              IdbObjectStoreMeta.fromObjectStore(objectStore);
 
           // ie idb does not have autoIncrement
           if (ctx.isIdbIe) {
-            readMeta = new IdbObjectStoreMeta(readMeta.name, readMeta.keyPath,
+            readMeta = IdbObjectStoreMeta(readMeta.name, readMeta.keyPath,
                 storeMeta.autoIncrement, readMeta.indecies.toList());
           }
           expect(readMeta, storeMeta);
@@ -899,7 +899,7 @@ void defineTests(TestContext ctx) {
               return _next();
             });
           }
-          return new Future.value();
+          return Future.value();
         }
 
         return _next();

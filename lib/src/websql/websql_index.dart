@@ -17,7 +17,7 @@ class _WebSqlIndex extends Index with IndexWithMetaMixin {
   String get sqlTableName => store.sqlTableName;
 
   // Ordered keys
-  List keys = new List();
+  List keys = List();
 
   _WebSqlTransaction get transaction => store.transaction;
 
@@ -45,7 +45,7 @@ class _WebSqlIndex extends Index with IndexWithMetaMixin {
     await drop();
 
     // create the index
-    StringBuffer sb = new StringBuffer();
+    StringBuffer sb = StringBuffer();
     sb.write("CREATE ");
     if (unique) {
       sb.write("UNIQUE ");
@@ -73,8 +73,7 @@ class _WebSqlIndex extends Index with IndexWithMetaMixin {
   @override
   Future<int> count([key_OR_range]) {
     return _checkIndex(() {
-      _CountQuery query =
-          new _CountQuery(sqlTableName, keyColumn, key_OR_range);
+      _CountQuery query = _CountQuery(sqlTableName, keyColumn, key_OR_range);
       return query.count(transaction);
     });
   }
@@ -83,7 +82,7 @@ class _WebSqlIndex extends Index with IndexWithMetaMixin {
   Stream<Cursor> openKeyCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
     _WebSqlKeyIndexCursorController ctlr =
-        new _WebSqlKeyIndexCursorController(this, direction, autoAdvance);
+        _WebSqlKeyIndexCursorController(this, direction, autoAdvance);
 
     // Future
     _checkIndex(() {
@@ -112,7 +111,7 @@ class _WebSqlIndex extends Index with IndexWithMetaMixin {
   Stream<CursorWithValue> openCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
     _WebSqlIndexCursorWithValueController ctlr =
-        new _WebSqlIndexCursorWithValueController(this, direction, autoAdvance);
+        _WebSqlIndexCursorWithValueController(this, direction, autoAdvance);
 
     // Future
     _checkIndex(() {

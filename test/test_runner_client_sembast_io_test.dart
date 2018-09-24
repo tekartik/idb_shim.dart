@@ -5,7 +5,7 @@ import 'test_runner_client_sembast_fs_test.dart';
 import 'idb_io_test_common.dart';
 
 void main() {
-  IoTestContext ctx = new IoTestContext();
+  IoTestContext ctx = IoTestContext();
   group('io', () {
     defineTests(ctx);
   });

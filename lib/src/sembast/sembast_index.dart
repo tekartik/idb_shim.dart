@@ -20,7 +20,7 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   sdb.Filter _indexKeyOrRangeFilter([key_OR_range]) {
     // null means all entry without null value
     if (key_OR_range == null) {
-      return new sdb.Filter.notEqual(meta.keyPath, null);
+      return sdb.Filter.notEqual(meta.keyPath, null);
     }
     return keyOrRangeFilter(meta.keyPath, key_OR_range);
   }
@@ -37,7 +37,7 @@ class IndexSembast extends Index with IndexWithMetaMixin {
     checkKeyParam(key);
     return inTransaction(() {
       sdb.Finder finder =
-          new sdb.Finder(filter: _indexKeyOrRangeFilter(key), limit: 1);
+          sdb.Finder(filter: _indexKeyOrRangeFilter(key), limit: 1);
       return store.sdbStore
           .findRecords(finder)
           .then((List<sdb.Record> records) {
@@ -53,7 +53,7 @@ class IndexSembast extends Index with IndexWithMetaMixin {
     checkKeyParam(key);
     return inTransaction(() {
       sdb.Finder finder =
-          new sdb.Finder(filter: _indexKeyOrRangeFilter(key), limit: 1);
+          sdb.Finder(filter: _indexKeyOrRangeFilter(key), limit: 1);
       return store.sdbStore
           .findRecords(finder)
           .then((List<sdb.Record> records) {
@@ -68,9 +68,9 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   Stream<CursorWithValue> openCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
     IdbCursorMeta cursorMeta =
-        new IdbCursorMeta(key, range, direction, autoAdvance);
+        IdbCursorMeta(key, range, direction, autoAdvance);
     IndexCursorWithValueControllerSembast ctlr =
-        new IndexCursorWithValueControllerSembast(this, cursorMeta);
+        IndexCursorWithValueControllerSembast(this, cursorMeta);
 
     inTransaction(() {
       return ctlr.openCursor();
@@ -83,9 +83,9 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   Stream<Cursor> openKeyCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
     IdbCursorMeta cursorMeta =
-        new IdbCursorMeta(key, range, direction, autoAdvance);
+        IdbCursorMeta(key, range, direction, autoAdvance);
     IndexKeyCursorControllerSembast ctlr =
-        new IndexKeyCursorControllerSembast(this, cursorMeta);
+        IndexKeyCursorControllerSembast(this, cursorMeta);
 
     inTransaction(() {
       return ctlr.openCursor();
@@ -99,6 +99,6 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   }
 
   sdb.SortOrder sortOrder(bool ascending) {
-    return new sdb.SortOrder(keyPath, ascending);
+    return sdb.SortOrder(keyPath, ascending);
   }
 }

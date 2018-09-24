@@ -38,7 +38,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   Future<T> inWritableTransaction<T>(FutureOr<T> computation()) {
     if (transaction.meta.mode != idbModeReadWrite) {
-      return new Future.error(new DatabaseReadOnlyError());
+      return Future.error(DatabaseReadOnlyError());
     }
     return inTransaction(computation);
   }
@@ -73,7 +73,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
       var keyInValue = value[keyPath];
       if (keyInValue != null) {
         if (key != null) {
-          throw new ArgumentError(
+          throw ArgumentError(
               "both key ${key} and inline keyPath ${keyInValue} are specified");
         } else {
           return keyInValue;
@@ -82,7 +82,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     }
 
     if (key == null && (!autoIncrement)) {
-      throw new DatabaseError(
+      throw DatabaseError(
           'neither keyPath nor autoIncrement set and trying to add object without key');
     }
 
@@ -96,8 +96,8 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
       meta.indecies.forEach((IdbIndexMeta indexMeta) {
         var fieldValue = value[indexMeta.keyPath];
         if (fieldValue != null) {
-          sdb.Finder finder = new sdb.Finder(
-              filter: new sdb.Filter.equal(indexMeta.keyPath, fieldValue),
+          sdb.Finder finder = sdb.Finder(
+              filter: sdb.Filter.equal(indexMeta.keyPath, fieldValue),
               limit: 1);
           futures.add(sdbStore.findRecord(finder).then((sdb.Record record) {
             // not ourself
@@ -105,7 +105,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
                 (record.key != key) //
                 &&
                 ((!indexMeta.multiEntry) && indexMeta.unique)) {
-              throw new DatabaseError(
+              throw DatabaseError(
                   "key '${fieldValue}' already exists in ${record} for index ${indexMeta}");
             }
           }));
@@ -125,7 +125,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
       if (key != null) {
         return sdbStore.get(key).then((existingValue) {
           if (existingValue != null) {
-            throw new DatabaseError(
+            throw DatabaseError(
                 'Key ${key} already exists in the object store');
           }
           return _put(value, key);
@@ -159,9 +159,9 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   @override
   Index createIndex(String name, keyPath, {bool unique, bool multiEntry}) {
     IdbIndexMeta indexMeta =
-        new IdbIndexMeta(name, keyPath as String, unique, multiEntry);
+        IdbIndexMeta(name, keyPath as String, unique, multiEntry);
     meta.createIndex(database.meta, indexMeta);
-    return new IndexSembast(this, indexMeta);
+    return IndexSembast(this, indexMeta);
   }
 
   @override
@@ -205,11 +205,11 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   @override
   Index index(String name) {
     IdbIndexMeta indexMeta = meta.index(name);
-    return new IndexSembast(this, indexMeta);
+    return IndexSembast(this, indexMeta);
   }
 
   sdb.SortOrder sortOrder(bool ascending) {
-    return new sdb.SortOrder(keyField, ascending);
+    return sdb.SortOrder(keyField, ascending);
   }
 
   sdb.Filter cursorFilter(key, KeyRange range) {
@@ -226,9 +226,9 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   Stream<CursorWithValue> openCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
     IdbCursorMeta cursorMeta =
-        new IdbCursorMeta(key, range, direction, autoAdvance);
+        IdbCursorMeta(key, range, direction, autoAdvance);
     StoreCursorWithValueControllerSembast ctlr =
-        new StoreCursorWithValueControllerSembast(this, cursorMeta);
+        StoreCursorWithValueControllerSembast(this, cursorMeta);
 
     inTransaction(() {
       return ctlr.openCursor();

@@ -71,7 +71,7 @@ class TodoList {
     return store
         .put({
           'text': text,
-          'timeStamp': new DateTime.now().millisecondsSinceEpoch.toString()
+          'timeStamp': DateTime.now().millisecondsSinceEpoch.toString()
         })
         .then((_) => _getAllTodoItems())
         .catchError((e) => _onError);
@@ -97,15 +97,15 @@ class TodoList {
   }
 
   void _renderTodo(Map todoItem) {
-    var textDisplay = new Element.tag('span');
+    var textDisplay = Element.tag('span');
     textDisplay.text = todoItem['text'] as String;
 
-    var deleteControl = new Element.tag('a');
+    var deleteControl = Element.tag('a');
     deleteControl.text = '[Delete]';
     deleteControl.onClick
         .listen((e) => _deleteTodo(todoItem['timeStamp'] as String));
 
-    var item = new Element.tag('li');
+    var item = Element.tag('li');
     item.nodes.add(textDisplay);
     item.nodes.add(deleteControl);
     _todoItems.nodes.add(item);
@@ -116,7 +116,7 @@ class TodoList {
 /// Typically the argument is window.location.search
 ///
 Map<String, String> getArguments(String search) {
-  Map<String, String> params = new Map();
+  Map<String, String> params = Map();
   if (search != null) {
     int questionMarkIndex = search.indexOf('?');
     if (questionMarkIndex != -1) {
@@ -146,6 +146,6 @@ Future main() async {
         "No idbFactory of type '$idbFactoryName' supported on this browser");
   } else {
     querySelector("#idb span").innerHtml = "Using '${idbFactory.name}'";
-    await new TodoList().open();
+    await TodoList().open();
   }
 }

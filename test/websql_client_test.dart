@@ -38,7 +38,7 @@ Future<List<SqliteMasterRow>> getSqliteMasterRowsBadJs(SqlTransaction tx,
           return;
         }
       }
-      list.add(new SqliteMasterRow(type, name));
+      list.add(SqliteMasterRow(type, name));
     });
     return list;
   });
@@ -54,7 +54,7 @@ List<SqliteMasterRow> sqliteMasterRowsFromResultSet(SqlResultSet rs) {
         return;
       }
     }
-    list.add(new SqliteMasterRow(type, name));
+    list.add(SqliteMasterRow(type, name));
   });
 
   return list;
@@ -87,7 +87,7 @@ Future<List<String>> getTableNames(SqlTransaction tx) {
 void main() {
   if (SqlDatabase.supported) {
     group('websql', () {
-      IdbWebSqlFactory idbFactory = new IdbWebSqlFactory();
+      IdbWebSqlFactory idbFactory = IdbWebSqlFactory();
       idbFactory.globalStoreDbName = testGlobalStoreDbName;
 
       SqlDatabase openGlobalStoreDatabase() {
@@ -118,7 +118,7 @@ void main() {
         });
       }
 
-      TestContext ctx = new TestContext()..factory = idbFactory;
+      TestContext ctx = TestContext()..factory = idbFactory;
 
       group('tools', () {
         test('get table names rs', () {

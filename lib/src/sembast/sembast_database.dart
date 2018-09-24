@@ -30,10 +30,9 @@ class _SdbVersionChangeEvent extends IdbVersionChangeEventBase {
       : oldVersion = oldVersion == null ? 0 : oldVersion {
     // handle = too to catch programatical errors
     if (this.oldVersion >= newVersion) {
-      throw new StateError(
-          "cannot downgrade from ${oldVersion} to $newVersion");
+      throw StateError("cannot downgrade from ${oldVersion} to $newVersion");
     }
-    request = new OpenDBRequest(database, database.versionChangeTransaction);
+    request = OpenDBRequest(database, database.versionChangeTransaction);
   }
   @override
   String toString() {
@@ -50,7 +49,7 @@ class _SdbVersionChangeEvent extends IdbVersionChangeEventBase {
 class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
   TransactionSembast versionChangeTransaction;
   @override
-  final IdbDatabaseMeta meta = new IdbDatabaseMeta();
+  final IdbDatabaseMeta meta = IdbDatabaseMeta();
   sdb.Database db;
 
   @override
@@ -62,7 +61,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
 
   static Future<DatabaseSembast> fromDatabase(
       IdbFactory factory, sdb.Database db) async {
-    DatabaseSembast idbDb = new DatabaseSembast._(factory);
+    DatabaseSembast idbDb = DatabaseSembast._(factory);
     idbDb.db = db;
     await idbDb._readMeta();
     // Copy name from path
@@ -84,7 +83,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
       List<IdbObjectStoreMeta> list = [];
       records.forEach((sdb.Record record) {
         var map = (record.value as Map)?.cast<String, dynamic>();
-        IdbObjectStoreMeta store = new IdbObjectStoreMeta.fromMap(map);
+        IdbObjectStoreMeta store = IdbObjectStoreMeta.fromMap(map);
         list.add(store);
       });
       return list;
@@ -131,14 +130,13 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
 
       await meta.onUpgradeNeeded(() async {
         versionChangeTransaction =
-            new TransactionSembast(this, meta.versionChangeTransaction);
+            TransactionSembast(this, meta.versionChangeTransaction);
         // could be null when opening an empty database
         if (onUpgradeNeeded != null) {
           onUpgradeNeeded(
-              new _SdbVersionChangeEvent(this, previousVersion, newVersion));
+              _SdbVersionChangeEvent(this, previousVersion, newVersion));
         }
-        changedStores =
-            new Set.from(meta.versionChangeTransaction.createdStores);
+        changedStores = Set.from(meta.versionChangeTransaction.createdStores);
         changedStores.addAll(meta.versionChangeTransaction.updatedStores);
         deletedStores = meta.versionChangeTransaction.deletedStores;
       });
@@ -152,7 +150,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
         }
 
         if (changedStores.isNotEmpty) {
-          await txn.put(new List.from(objectStoreNames), "stores");
+          await txn.put(List.from(objectStoreNames), "stores");
         }
 
         for (IdbObjectStoreMeta storeMeta in changedStores) {
@@ -175,9 +173,9 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
   ObjectStore createObjectStore(String name,
       {String keyPath, bool autoIncrement}) {
     IdbObjectStoreMeta storeMeta =
-        new IdbObjectStoreMeta(name, keyPath, autoIncrement);
+        IdbObjectStoreMeta(name, keyPath, autoIncrement);
     meta.createObjectStore(storeMeta);
-    return new ObjectStoreSembast(versionChangeTransaction, storeMeta);
+    return ObjectStoreSembast(versionChangeTransaction, storeMeta);
   }
 
   @override
@@ -202,13 +200,13 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
     // }
     IdbTransactionMeta txnMeta =
         meta.transaction(storeName_OR_storeNames, mode);
-    return new TransactionSembast(this, txnMeta);
+    return TransactionSembast(this, txnMeta);
   }
 
   @override
   Transaction transactionList(List<String> storeNames, String mode) {
     IdbTransactionMeta txnMeta = meta.transaction(storeNames, mode);
-    return new TransactionSembast(this, txnMeta);
+    return TransactionSembast(this, txnMeta);
   }
 
   @override

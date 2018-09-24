@@ -6,8 +6,7 @@ import 'package:sembast/sembast_memory.dart';
 import 'package:idb_shim/idb_client_sembast.dart';
 
 /// The in-memory factory
-IdbFactory get idbMemoryFactory => new IdbFactorySembast(memoryDatabaseFactory);
+IdbFactory get idbMemoryFactory => IdbFactorySembast(memoryDatabaseFactory);
 
 /// Special factory in memory but supporting writing on a virtual file system (in memory too)
-IdbFactory get idbMemoryFsFactory =>
-    new IdbFactorySembast(memoryFsDatabaseFactory);
+IdbFactory get idbMemoryFsFactory => IdbFactorySembast(memoryFsDatabaseFactory);

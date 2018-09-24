@@ -564,7 +564,7 @@ class KeyRange {
         } else if (key is String) {
           return key.compareTo(_lowerBound as String) > 0;
         } else {
-          throw new UnsupportedError(
+          throw UnsupportedError(
               "key '$key' of type ${key.runtimeType} not supported");
         }
       } else {
@@ -573,7 +573,7 @@ class KeyRange {
         } else if (key is String) {
           return key.compareTo(_lowerBound as String) >= 0;
         } else {
-          throw new UnsupportedError(
+          throw UnsupportedError(
               "key '$key' of type ${key.runtimeType} not supported");
         }
       }
@@ -589,7 +589,7 @@ class KeyRange {
         } else if (key is String) {
           return key.compareTo(_upperBound as String) < 0;
         } else {
-          throw new UnsupportedError(
+          throw UnsupportedError(
               "key '$key' of type ${key.runtimeType} not supported");
         }
       } else {
@@ -598,7 +598,7 @@ class KeyRange {
         } else if (key is String) {
           return key.compareTo(_upperBound as String) <= 0;
         } else {
-          throw new UnsupportedError(
+          throw UnsupportedError(
               "key '$key' of type ${key.runtimeType} not supported");
         }
       }
@@ -616,7 +616,7 @@ class KeyRange {
 
   @override
   String toString() {
-    StringBuffer sb = new StringBuffer('kr');
+    StringBuffer sb = StringBuffer('kr');
     if (lower == null) {
       sb.write('...');
     } else {

@@ -20,23 +20,23 @@ void testMain(TestContext ctx) {
 void main() {
   group('native', () {
     if (IdbNativeFactory.supported) {
-      IdbFactory idbFactory = new IdbNativeFactory();
-      TestContext ctx = new TestContext()..factory = idbFactory;
+      IdbFactory idbFactory = IdbNativeFactory();
+      TestContext ctx = TestContext()..factory = idbFactory;
       testMain(ctx);
     } else {
       test("not supported", () {
-        return new Future.error("not supported");
+        return Future.error("not supported");
       });
     }
   });
   group('websql', () {
     if (IdbWebSqlFactory.supported) {
-      IdbWebSqlFactory idbFactory = new IdbWebSqlFactory();
-      TestContext ctx = new TestContext()..factory = idbFactory;
+      IdbWebSqlFactory idbFactory = IdbWebSqlFactory();
+      TestContext ctx = TestContext()..factory = idbFactory;
       testMain(ctx);
     } else {
       test("not supported", () {
-        return new Future.error("not supported");
+        return Future.error("not supported");
       });
     }
   });

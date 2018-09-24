@@ -53,11 +53,11 @@ class IdbFactorySembastImpl extends IdbFactoryBase
     // check params
     if (((version != null) || (onUpgradeNeeded != null)) &&
         ((version == null) || (onUpgradeNeeded == null))) {
-      return new Future.error(new ArgumentError(
+      return Future.error(ArgumentError(
           'version and onUpgradeNeeded must be specified together'));
     }
     if (version == 0) {
-      return new Future.error(new ArgumentError('version cannot be 0'));
+      return Future.error(ArgumentError('version cannot be 0'));
     } else if (version == null) {
       version = 1;
     }
@@ -67,7 +67,7 @@ class IdbFactorySembastImpl extends IdbFactoryBase
     //  return new Future.error(new ArgumentError('name cannot be null'));
     // }
 
-    DatabaseSembast db = new DatabaseSembast(this, dbName);
+    DatabaseSembast db = DatabaseSembast(this, dbName);
 
     if (sembastDebug) {
       print(
@@ -81,7 +81,7 @@ class IdbFactorySembastImpl extends IdbFactoryBase
   Future<IdbFactory> deleteDatabase(String dbName,
       {OnBlockedFunction onBlocked}) async {
     if (dbName == null) {
-      return new Future.error(new ArgumentError('dbName cannot be null'));
+      return Future.error(ArgumentError('dbName cannot be null'));
     }
     await _databaseFactory.deleteDatabase(getDbPath(dbName));
     return this;
@@ -94,6 +94,6 @@ class IdbFactorySembastImpl extends IdbFactoryBase
 
   @override
   Future<List<String>> getDatabaseNames() {
-    throw new DatabaseException('getDatabaseNames not supported');
+    throw DatabaseException('getDatabaseNames not supported');
   }
 }

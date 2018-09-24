@@ -22,7 +22,7 @@ void defineTests() {
     // not supported
     test('DateTime', () {
       try {
-        expect(encodeValue(new DateTime.now()), "xxxx");
+        expect(encodeValue(DateTime.now()), "xxxx");
         fail("should fail");
       } catch (e) {
         //devPrint(e);

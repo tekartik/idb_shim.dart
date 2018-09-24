@@ -400,7 +400,7 @@ void defineTests(TestContext ctx) {
         }
 
         Future _createTransaction() async {
-          await new Future.delayed(new Duration(milliseconds: 1));
+          await Future.delayed(Duration(milliseconds: 1));
           _createTransactionSync();
         }
 
@@ -425,9 +425,9 @@ void defineTests(TestContext ctx) {
 
         // In 1.12 this was causing the transaction to terminate on ie
         // this is no longer the case in 1.13
-        await new Future.value();
-        await new Future.value();
-        await new Future.value();
+        await Future.value();
+        await Future.value();
+        await Future.value();
 
         await objectStore.getObject(0);
 
@@ -443,7 +443,7 @@ void defineTests(TestContext ctx) {
 
         // this cause the transaction to terminate on ie
         // and so on sembast
-        await new Future.value();
+        await Future.value();
 
         try {
           await objectStore.getObject(0);
@@ -491,7 +491,7 @@ void defineTests(TestContext ctx) {
         await objectStore.getObject(0).then((_) {
           // this cause the transaction to terminate on ie
           // and so on sembast
-          new Future.value().then((_) {
+          Future.value().then((_) {
             objectStore.getObject(0).then((_) {
               if (ctx.isIdbSembast || ctx.isIdbIe) {
                 fail('should fail');
@@ -516,7 +516,7 @@ void defineTests(TestContext ctx) {
         await objectStore.getObject(0);
 
         // this cause the transaction to terminate on every implementation
-        await new Future.delayed(new Duration());
+        await Future.delayed(Duration());
 
         try {
           await objectStore.getObject(0);
@@ -540,8 +540,8 @@ void defineTests(TestContext ctx) {
         await objectStore.getObject(0);
         // this cause the transaction to terminate on ie
         if (!ctx.isIdbNoLazy) {
-          await new Future.value();
-          await new Future.value();
+          await Future.value();
+          await Future.value();
         }
         await objectStore.getObject(0);
         await transaction.completed;
@@ -555,8 +555,8 @@ void defineTests(TestContext ctx) {
         await objectStore.put({});
         // this cause the transaction to terminate on ie
         if (!ctx.isIdbNoLazy) {
-          await new Future.value();
-          await new Future.value();
+          await Future.value();
+          await Future.value();
         }
         await objectStore.put({});
         await transaction.completed;

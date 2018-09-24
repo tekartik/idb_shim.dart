@@ -60,10 +60,10 @@ void defineTests(TestContext ctx) {
     }
 
     Future<List<TestIdNameRow>> cursorToList(Stream<CursorWithValue> stream) {
-      var completer = new Completer<List<TestIdNameRow>>.sync();
-      List<TestIdNameRow> list = new List();
+      var completer = Completer<List<TestIdNameRow>>.sync();
+      List<TestIdNameRow> list = List();
       stream.listen((CursorWithValue cwv) {
-        list.add(new TestIdNameRow(cwv));
+        list.add(TestIdNameRow(cwv));
       }).onDone(() {
         completer.complete(list);
       });
@@ -161,7 +161,7 @@ void defineTests(TestContext ctx) {
         _createTransaction();
         Stream<Cursor> stream = index.openKeyCursor(autoAdvance: true);
         int count = 0;
-        Completer completer = new Completer();
+        Completer completer = Completer();
         stream.listen((Cursor cwv) {
           count++;
         }).onDone(() {
@@ -177,7 +177,7 @@ void defineTests(TestContext ctx) {
         _createTransaction();
         Stream<Cursor> stream = index.openKeyCursor(key: 1, autoAdvance: true);
         int count = 0;
-        Completer completer = new Completer();
+        Completer completer = Completer();
         stream.listen((Cursor cwv) {
           count++;
         }).onDone(() {
@@ -193,7 +193,7 @@ void defineTests(TestContext ctx) {
         _createTransaction();
         Stream<CursorWithValue> stream = index.openCursor(autoAdvance: true);
         int count = 0;
-        Completer completer = new Completer();
+        Completer completer = Completer();
         stream.listen((CursorWithValue cwv) {
           count++;
         }).onDone(() {
@@ -210,7 +210,7 @@ void defineTests(TestContext ctx) {
         Stream<CursorWithValue> stream =
             index.openCursor(key: 1, autoAdvance: true);
         int count = 0;
-        Completer completer = new Completer();
+        Completer completer = Completer();
         stream.listen((CursorWithValue cwv) {
           count++;
         }).onDone(() {
@@ -227,7 +227,7 @@ void defineTests(TestContext ctx) {
         return add("test1").then((_) {
           Stream<Cursor> stream = index.openKeyCursor(autoAdvance: true);
           int count = 0;
-          Completer completer = new Completer();
+          Completer completer = Completer();
           stream.listen((Cursor cursor) {
             // no value here
             expect(cursor is CursorWithValue, isFalse);
@@ -248,7 +248,7 @@ void defineTests(TestContext ctx) {
         return add("test1").then((_) {
           Stream<CursorWithValue> stream = index.openCursor(autoAdvance: true);
           int count = 0;
-          Completer completer = new Completer();
+          Completer completer = Completer();
           stream.listen((CursorWithValue cwv) {
             expect((cwv.value as Map)[testNameField], "test1");
             expect(cwv.key, "test1");
@@ -329,7 +329,7 @@ void defineTests(TestContext ctx) {
           return index
               .openCursor(autoAdvance: false)
               .listen((CursorWithValue cwv) {
-                map = new Map.from(cwv.value as Map);
+                map = Map.from(cwv.value as Map);
                 map["other"] = "too";
                 cwv.update(map).then((_) {
                   cwv.next();
@@ -361,8 +361,7 @@ void defineTests(TestContext ctx) {
             expect(list.length, 3);
 
             return cursorToList(index.openCursor(
-                    range: new KeyRange.bound('test2', 'test3'),
-                    autoAdvance: true))
+                    range: KeyRange.bound('test2', 'test3'), autoAdvance: true))
                 .then((list) {
               expect(list.length, 2);
               expect(list[0].name, equals('test2'));
@@ -450,11 +449,11 @@ void defineTests(TestContext ctx) {
         expect(await getKeys(stream), [key2, key1, key3]);
 
         stream = valueIndex.openKeyCursor(
-            range: new KeyRange.lowerBound(2), autoAdvance: true);
+            range: KeyRange.lowerBound(2), autoAdvance: true);
         expect(await getKeys(stream), [key1, key3]);
 
         stream = valueIndex.openKeyCursor(
-            range: new KeyRange.upperBound(2, true), autoAdvance: true);
+            range: KeyRange.upperBound(2, true), autoAdvance: true);
         expect(await getKeys(stream), [key2]);
       });
     });

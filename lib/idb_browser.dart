@@ -25,13 +25,13 @@ IdbFactory getIdbFactory([String name]) {
     case idbFactoryMemory:
       return idbSembastMemoryFactory;
     default:
-      throw new UnsupportedError("Factory '$name' not supported");
+      throw UnsupportedError("Factory '$name' not supported");
   }
 }
 
 IdbFactory get idbWebSqlFactory {
   if (IdbWebSqlFactory.supported) {
-    return new IdbWebSqlFactory();
+    return IdbWebSqlFactory();
   } else {
     return null;
   }
@@ -39,7 +39,7 @@ IdbFactory get idbWebSqlFactory {
 
 IdbFactory get idbNativeFactory {
   if (IdbNativeFactory.supported) {
-    return new IdbNativeFactory();
+    return IdbNativeFactory();
   } else {
     return null;
   }
@@ -51,7 +51,7 @@ IdbFactory _idbSembastMemoryFactory;
 IdbFactory get idbSembastMemoryFactory {
   if (_idbSembastMemoryFactory == null) {
     _idbSembastMemoryFactory =
-        new IdbFactorySembast(sembast.memoryDatabaseFactory, null);
+        IdbFactorySembast(sembast.memoryDatabaseFactory, null);
   }
   return _idbSembastMemoryFactory;
 }

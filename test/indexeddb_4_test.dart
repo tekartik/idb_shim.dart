@@ -117,29 +117,25 @@ void defineTests(TestContext ctx) {
     tearDown(() {
       db.close();
     });
-    test('only1', () => testRange(db, new KeyRange.only(55), 55, 55));
-    test('only2', () => testRange(db, new KeyRange.only(100), null, null));
-    test('only3', () => testRange(db, new KeyRange.only(-1), null, null));
+    test('only1', () => testRange(db, KeyRange.only(55), 55, 55));
+    test('only2', () => testRange(db, KeyRange.only(100), null, null));
+    test('only3', () => testRange(db, KeyRange.only(-1), null, null));
 
-    test('lower1', () => testRange(db, new KeyRange.lowerBound(40), 40, 99));
+    test('lower1', () => testRange(db, KeyRange.lowerBound(40), 40, 99));
     // OPTIONALS lower2() => testRange(db, new KeyRange.lowerBound(40, open: true), 41, 99);
-    test('lower2',
-        () => testRange(db, new KeyRange.lowerBound(40, true), 41, 99));
+    test('lower2', () => testRange(db, KeyRange.lowerBound(40, true), 41, 99));
     // OPTIONALS lower3() => testRange(db, new KeyRange.lowerBound(40, open: false), 40, 99);
-    test('lower3',
-        () => testRange(db, new KeyRange.lowerBound(40, false), 40, 99));
+    test('lower3', () => testRange(db, KeyRange.lowerBound(40, false), 40, 99));
 
-    test('upper1', () => testRange(db, new KeyRange.upperBound(40), 0, 40));
+    test('upper1', () => testRange(db, KeyRange.upperBound(40), 0, 40));
     // OPTIONALS upper2() => testRange(db, new KeyRange.upperBound(40, open: true), 0, 39);
-    test('upper2',
-        () => testRange(db, new KeyRange.upperBound(40, true), 0, 39));
+    test('upper2', () => testRange(db, KeyRange.upperBound(40, true), 0, 39));
     // upper3() => testRange(db, new KeyRange.upperBound(40, open: false), 0, 40);
-    test('upper3',
-        () => testRange(db, new KeyRange.upperBound(40, false), 0, 40));
+    test('upper3', () => testRange(db, KeyRange.upperBound(40, false), 0, 40));
 
-    test('bound1', () => testRange(db, new KeyRange.bound(20, 30), 20, 30));
+    test('bound1', () => testRange(db, KeyRange.bound(20, 30), 20, 30));
 
-    test('bound2', () => testRange(db, new KeyRange.bound(-100, 200), 0, 99));
+    test('bound2', () => testRange(db, KeyRange.bound(-100, 200), 0, 99));
 
     /*
     bound3() => // OPTIONALS testRange(db, new KeyRange.bound(20, 30, upperOpen: true),

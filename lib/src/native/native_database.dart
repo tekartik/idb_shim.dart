@@ -21,12 +21,12 @@ class _NativeVersionChangeEvent extends IdbVersionChangeEventBase {
     // but ok when opening the database
     dynamic currentTarget = idbVersionChangeEvent.currentTarget;
     if (currentTarget is idb.Database) {
-      database = new DatabaseNative(currentTarget);
+      database = DatabaseNative(currentTarget);
     } else if (currentTarget is idb.Request) {
-      database = new DatabaseNative(currentTarget.result as idb.Database);
+      database = DatabaseNative(currentTarget.result as idb.Database);
       TransactionNative transaction =
-          new TransactionNative(database, currentTarget.transaction);
-      request = new OpenDBRequest(database, transaction);
+          TransactionNative(database, currentTarget.transaction);
+      request = OpenDBRequest(database, transaction);
     }
   }
 }
@@ -42,7 +42,7 @@ class DatabaseNative extends IdbDatabaseBase {
   ObjectStore createObjectStore(String name,
       {String keyPath, bool autoIncrement}) {
     return _catchNativeError(() {
-      return new _NativeObjectStore(idbDatabase.createObjectStore(name,
+      return _NativeObjectStore(idbDatabase.createObjectStore(name,
           keyPath: keyPath, autoIncrement: autoIncrement));
     });
   }
@@ -59,7 +59,7 @@ class DatabaseNative extends IdbDatabaseBase {
       return _catchNativeError(() {
         idb.Transaction idbTransaction =
             idbDatabase.transaction(storeName_OR_storeNames, mode);
-        return new TransactionNative(this, idbTransaction);
+        return TransactionNative(this, idbTransaction);
       });
     } catch (e) {
       // Only handle the issue for non empty list returning a NotFoundError
@@ -80,7 +80,7 @@ class DatabaseNative extends IdbDatabaseBase {
         if (allFound) {
           if (!isDartVm) {
             // In javascript this is likely a safari issue...
-            return new FakeMultiStoreTransactionNative(this, mode);
+            return FakeMultiStoreTransactionNative(this, mode);
           } else {
             // This is likely the 1.13 bug
             try {
@@ -89,7 +89,7 @@ class DatabaseNative extends IdbDatabaseBase {
                     html_common.convertDartToNative_SerializedScriptValue(
                         storeName_OR_storeNames),
                     mode);
-                return new TransactionNative(this, idbTransaction);
+                return TransactionNative(this, idbTransaction);
               });
             } catch (e2) {}
           }
@@ -139,10 +139,10 @@ class DatabaseNative extends IdbDatabaseBase {
 
   @override
   Stream<VersionChangeEvent> get onVersionChange {
-    StreamController<VersionChangeEvent> ctlr = new StreamController();
+    StreamController<VersionChangeEvent> ctlr = StreamController();
     idbDatabase.onVersionChange.listen(
         (idb.VersionChangeEvent idbVersionChangeEvent) {
-      ctlr.add(new _NativeVersionChangeEvent(idbVersionChangeEvent));
+      ctlr.add(_NativeVersionChangeEvent(idbVersionChangeEvent));
     }, onDone: () {
       ctlr.close();
     }, onError: (error) {

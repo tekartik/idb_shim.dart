@@ -23,7 +23,7 @@ abstract class _WebSqlCommonCursor<T extends Cursor> {
 
   void next([Object key]) {
     if (key != null) {
-      throw new UnimplementedError();
+      throw UnimplementedError();
     }
     advance(1);
   }
@@ -87,7 +87,7 @@ abstract class _WebSqlCursorBaseController<T extends Cursor> {
   }
 
   // Sync must be true
-  StreamController<T> _ctlr = new StreamController(sync: true);
+  StreamController<T> _ctlr = StreamController(sync: true);
 
   bool get currentIndexValid {
     int length = rows.length;
@@ -142,7 +142,7 @@ abstract class _WebSqlKeyCursorBaseController
       : super(direction, autoAdvance);
 
   @override
-  Cursor get newCursor => new _WebSqlCursor(this, rows[currentIndex]);
+  Cursor get newCursor => _WebSqlCursor(this, rows[currentIndex]);
 }
 
 abstract class _WebSqlCursorWithValueBaseController
@@ -152,7 +152,7 @@ abstract class _WebSqlCursorWithValueBaseController
 
   @override
   CursorWithValue get newCursor =>
-      new _WebSqlCursorWithValue(this, rows[currentIndex]);
+      _WebSqlCursorWithValue(this, rows[currentIndex]);
 }
 
 class _WebSqlCursorWithValueController
@@ -204,7 +204,7 @@ abstract class _WebSqlCursorCommonController {
     } else if (keyRange != null) {
       key_OR_range = keyRange;
     }
-    _SelectQuery query = new _SelectQuery(
+    _SelectQuery query = _SelectQuery(
         selectedColumns, sqlTableName, keyColumn, key_OR_range, direction);
     return query.execute(transaction).then((SqlResultSet rs) {
       sqlResultSet = rs;

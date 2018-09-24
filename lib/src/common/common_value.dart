@@ -38,7 +38,7 @@ List _cloneList(List original) {
   if (original == null) {
     return null;
   }
-  List list = new List();
+  List list = List();
   original.forEach((value) {
     list.add(_cloneValue(value));
   });
@@ -46,7 +46,7 @@ List _cloneList(List original) {
 }
 
 Map _cloneMap(Map original) {
-  Map map = new Map();
+  Map map = Map();
   original.forEach((key, value) {
     map[key] = _cloneValue(value);
   });
@@ -89,5 +89,5 @@ int compareKeys<T>(T first, T second) {
     return 0;
   }
   //print(first.runtimeType);
-  throw new DatabaseInvalidKeyError(first);
+  throw DatabaseInvalidKeyError(first);
 }

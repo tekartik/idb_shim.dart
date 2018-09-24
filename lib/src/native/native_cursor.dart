@@ -80,10 +80,10 @@ class _NativeCursorWithValue extends CursorWithValue {
 
 class _NativeCursorWithValueController {
   // Sync must be true
-  StreamController<CursorWithValue> _ctlr = new StreamController(sync: true);
+  StreamController<CursorWithValue> _ctlr = StreamController(sync: true);
   _NativeCursorWithValueController(Stream<idb.CursorWithValue> stream) {
     stream.listen((idb.CursorWithValue cwv) {
-      _ctlr.add(new _NativeCursorWithValue(cwv));
+      _ctlr.add(_NativeCursorWithValue(cwv));
     }, onDone: () {
       _ctlr.close();
     }, onError: (error) {
@@ -96,10 +96,10 @@ class _NativeCursorWithValueController {
 
 class _NativeCursorController {
   // Sync must be true
-  StreamController<Cursor> _ctlr = new StreamController(sync: true);
+  StreamController<Cursor> _ctlr = StreamController(sync: true);
   _NativeCursorController(Stream<idb.Cursor> stream) {
     stream.listen((idb.Cursor cursor) {
-      _ctlr.add(new _NativeCursor(cursor));
+      _ctlr.add(_NativeCursor(cursor));
     }, onDone: () {
       _ctlr.close();
     }, onError: (error) {

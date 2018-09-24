@@ -25,7 +25,7 @@ part 'src/native/native_object_store.dart';
 
 part 'src/native/native_transaction.dart';
 
-IdbNativeFactory get idbNativeFactory => new IdbNativeFactory();
+IdbNativeFactory get idbNativeFactory => IdbNativeFactory();
 
 class IdbNativeFactory extends IdbFactoryBase {
   @override
@@ -39,7 +39,7 @@ class IdbNativeFactory extends IdbFactoryBase {
 
   factory IdbNativeFactory() {
     if (_instance == null) {
-      _instance = new IdbNativeFactory._();
+      _instance = IdbNativeFactory._();
     }
     return _instance;
   }
@@ -50,13 +50,13 @@ class IdbNativeFactory extends IdbFactoryBase {
       OnUpgradeNeededFunction onUpgradeNeeded,
       OnBlockedFunction onBlocked}) {
     void _onUpgradeNeeded(idb.VersionChangeEvent e) {
-      _NativeVersionChangeEvent event = new _NativeVersionChangeEvent(e);
+      _NativeVersionChangeEvent event = _NativeVersionChangeEvent(e);
       onUpgradeNeeded(event);
     }
 
     void _onBlocked(html.Event e) {
       if (onBlocked != null) {
-        Event event = new _NativeEvent(e);
+        Event event = _NativeEvent(e);
         onBlocked(event);
       } else {
         print("blocked opening $dbName v $version");
@@ -71,7 +71,7 @@ class IdbNativeFactory extends IdbFactoryBase {
                 ? null
                 : _onBlocked)
         .then((idb.Database database) {
-      return new DatabaseNative(database);
+      return DatabaseNative(database);
     });
   }
 
@@ -80,7 +80,7 @@ class IdbNativeFactory extends IdbFactoryBase {
       {OnBlockedFunction onBlocked}) {
     void _onBlocked(html.Event e) {
       print("blocked deleting $dbName");
-      Event event = new _NativeEvent(e);
+      Event event = _NativeEvent(e);
       onBlocked(event);
     }
 
@@ -100,7 +100,7 @@ class IdbNativeFactory extends IdbFactoryBase {
   @override
   Future<List<String>> getDatabaseNames() {
     // ignore: undefined_method
-    throw new DatabaseException('getDatabaseNames not supported');
+    throw DatabaseException('getDatabaseNames not supported');
   }
 
   static bool get supported {
