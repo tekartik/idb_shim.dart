@@ -30,7 +30,7 @@ void main() {
 
     test('memory', () {
       IdbFactory websql = idbMemoryFactory;
-      expect(websql.runtimeType.toString(), "_IdbSembastFactory");
+      expect(websql.runtimeType.toString(), "IdbFactorySembastImpl");
     });
 
     test('persistent', () {
