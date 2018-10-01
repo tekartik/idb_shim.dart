@@ -540,9 +540,9 @@ class KeyRange {
     _upperBoundOpen = upperOpen;
   }
 
-  var _lowerBound;
+  dynamic _lowerBound;
   bool _lowerBoundOpen = true;
-  var _upperBound;
+  dynamic _upperBound;
   bool _upperBoundOpen = true;
 
   Object get lower => _lowerBound;
@@ -553,16 +553,54 @@ class KeyRange {
 
   bool get upperOpen => _upperBoundOpen;
 
+  num _compareValue(value1, value2) {
+    if (value1 is num) {
+      return value1 - (value2 as num);
+    } else if (value1 is String) {
+      return value1.compareTo(value2 as String);
+    } else if (value1 is List) {
+      List list = value1;
+      for (int i = 0; i < list.length; i++) {
+        var diff = _compareValue(list[i], (value2 as List)[i]);
+        if (diff != 0) {
+          return diff;
+        }
+      }
+      return 0;
+    } else {
+      throw UnsupportedError(
+          "key '$value1' of type ${value1.runtimeType} not supported");
+    }
+  }
+
   ///
   /// Added method for memory implementation
   ///
   bool _checkLowerBound(key) {
     if (_lowerBound != null) {
+      bool exclude = _lowerBoundOpen != null && _lowerBoundOpen;
+      num cmp = _compareValue(key, _lowerBound);
+      if (cmp == 0 && exclude) {
+        return false;
+      } else {
+        return cmp >= 0;
+      }
+    }
+    /*
       if (_lowerBoundOpen != null && _lowerBoundOpen) {
         if (key is num) {
           return (key > (_lowerBound as num));
         } else if (key is String) {
           return key.compareTo(_lowerBound as String) > 0;
+        } else if (key is List) {
+          var list = key as List;
+          for (int i = 0; i < list.length; i++) {
+            var diff = compareValue(key, (_lowerBound as List)[i]);
+            if (diff != 0) {
+              return diff > 0;
+            }
+          }
+          return false;
         } else {
           throw UnsupportedError(
               "key '$key' of type ${key.runtimeType} not supported");
@@ -572,16 +610,28 @@ class KeyRange {
           return (key >= (_lowerBound as num));
         } else if (key is String) {
           return key.compareTo(_lowerBound as String) >= 0;
+        }  else if (key is List) {
+          var list = key as List;
+          for (int i = 0; i < list.length; i++) {
+            var diff = compareValue(key, (_lowerBound as List)[i]);
+            if (diff != 0) {
+              return diff >= 0;
+            }
+          }
+          return false;
         } else {
           throw UnsupportedError(
               "key '$key' of type ${key.runtimeType} not supported");
         }
       }
+
     }
+    */
     return true;
   }
 
   bool _checkUpperBound(key) {
+    /*
     if (_upperBound != null) {
       if (_upperBoundOpen != null && _upperBoundOpen) {
         if (key is num) {
@@ -601,6 +651,16 @@ class KeyRange {
           throw UnsupportedError(
               "key '$key' of type ${key.runtimeType} not supported");
         }
+      }
+    }
+    */
+    if (_upperBound != null) {
+      bool exclude = _upperBoundOpen != null && _upperBoundOpen;
+      num cmp = _compareValue(key, _upperBound);
+      if (cmp == 0 && exclude) {
+        return false;
+      } else {
+        return cmp <= 0;
       }
     }
     return true;

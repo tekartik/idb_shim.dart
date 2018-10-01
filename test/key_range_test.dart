@@ -24,6 +24,12 @@ void defineTests(TestContext ctx) {
       expect(range.contains(2), isFalse);
     });
 
+    test('array', () {
+      var keyRange = KeyRange.only([2018, 'John']);
+      expect(keyRange.lower, [2018, 'John']);
+      expect(keyRange.contains([2018, 'John']), isTrue);
+    });
+
     test('lowerOpen', () {
       KeyRange keyRange = KeyRange.lowerBound(1, true);
       expect(keyRange.lower, equals(1));

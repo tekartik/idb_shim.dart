@@ -83,6 +83,7 @@ class _NativeCursorWithValueController {
   StreamController<CursorWithValue> _ctlr = StreamController(sync: true);
   _NativeCursorWithValueController(Stream<idb.CursorWithValue> stream) {
     stream.listen((idb.CursorWithValue cwv) {
+      // idbDevPrint("adding ${cwv.key} ${cwv.value} ${cwv.primaryKey}");
       _ctlr.add(_NativeCursorWithValue(cwv));
     }, onDone: () {
       _ctlr.close();

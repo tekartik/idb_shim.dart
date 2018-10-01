@@ -96,3 +96,39 @@ Future<Database> copyDatabase(
   }
   return dstDatabase;
 }
+
+class CursorRow extends KeyCursorRow {
+  final dynamic value;
+
+  CursorRow(dynamic key, dynamic primaryKey, this.value)
+      : super(key, primaryKey);
+}
+
+class KeyCursorRow {
+  final dynamic key;
+  final dynamic primaryKey;
+
+  KeyCursorRow(this.key, this.primaryKey);
+}
+
+Future<List<CursorRow>> cursorToList(Stream<CursorWithValue> stream) {
+  var completer = Completer<List<CursorRow>>.sync();
+  List<CursorRow> list = List();
+  stream.listen((CursorWithValue cwv) {
+    list.add(CursorRow(cwv.key, cwv.primaryKey, cwv.value));
+  }).onDone(() {
+    completer.complete(list);
+  });
+  return completer.future;
+}
+
+Future<List<KeyCursorRow>> keyCursorToList(Stream<Cursor> stream) {
+  var completer = Completer<List<KeyCursorRow>>.sync();
+  List<KeyCursorRow> list = List();
+  stream.listen((Cursor cursor) {
+    list.add(KeyCursorRow(cursor.key, cursor.primaryKey));
+  }).onDone(() {
+    completer.complete(list);
+  });
+  return completer.future;
+}
