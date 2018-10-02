@@ -1,6 +1,7 @@
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
 import 'package:idb_shim/src/common/common_validation.dart';
+import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/sembast/sembast_cursor.dart';
 import 'package:idb_shim/src/sembast/sembast_database.dart';
 import 'package:idb_shim/src/sembast/sembast_index.dart';
@@ -94,11 +95,10 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     List<Future> futures = [];
     if (value is Map) {
       meta.indecies.forEach((IdbIndexMeta indexMeta) {
-        var fieldValue = value[indexMeta.keyPath];
+        var fieldValue = mapValueAtKeyPath(value, indexMeta.keyPath);
         if (fieldValue != null) {
           sdb.Finder finder = sdb.Finder(
-              filter: sdb.Filter.equal(indexMeta.keyPath, fieldValue),
-              limit: 1);
+              filter: keyFilter(indexMeta.keyPath, fieldValue), limit: 1);
           futures.add(sdbStore.findRecord(finder).then((sdb.Record record) {
             // not ourself
             if ((record != null) &&
@@ -158,8 +158,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   @override
   Index createIndex(String name, keyPath, {bool unique, bool multiEntry}) {
-    IdbIndexMeta indexMeta =
-        IdbIndexMeta(name, keyPath as String, unique, multiEntry);
+    IdbIndexMeta indexMeta = IdbIndexMeta(name, keyPath, unique, multiEntry);
     meta.createIndex(database.meta, indexMeta);
     return IndexSembast(this, indexMeta);
   }
@@ -208,9 +207,8 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     return IndexSembast(this, indexMeta);
   }
 
-  sdb.SortOrder sortOrder(bool ascending) {
-    return sdb.SortOrder(keyField, ascending);
-  }
+  List<sdb.SortOrder> sortOrders(bool ascending) =>
+      keyPathSortOrders(keyField, ascending);
 
   sdb.Filter cursorFilter(key, KeyRange range) {
     if (range != null) {
@@ -220,7 +218,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     }
   }
 
-  String get keyField => keyPath != null ? keyPath : sdb.Field.key;
+  dynamic get keyField => keyPath != null ? keyPath : sdb.Field.key;
 
   @override
   Stream<CursorWithValue> openCursor(

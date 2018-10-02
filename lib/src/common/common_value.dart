@@ -2,6 +2,8 @@ library idb_shim_common_value;
 
 import 'dart:convert';
 
+import 'package:idb_shim/idb.dart';
+
 import '../client/error.dart';
 
 // for now use JSON
@@ -90,4 +92,29 @@ int compareKeys<T>(T first, T second) {
   }
   //print(first.runtimeType);
   throw DatabaseInvalidKeyError(first);
+}
+
+// when keyPath is an array
+// Return the relevant keyPath at index
+KeyRange keyArrayRangeAt(KeyRange keyRange, int index) {
+  _valueAt(List value, int index) {
+    return value == null ? null : value[index];
+  }
+
+  return KeyRange.bound(
+      _valueAt(keyRange.lower as List, index),
+      _valueAt(keyRange.upper as List, index),
+      keyRange.lowerOpen,
+      keyRange.upperOpen);
+}
+
+// return a list if keyPath is an array
+dynamic mapValueAtKeyPath(Map map, keyPath) {
+  if (keyPath is String) {
+    return map[keyPath];
+  } else if (keyPath is List) {
+    List keyList = keyPath;
+    return List.generate(keyList.length, (i) => map[keyList[i]]);
+  }
+  throw 'keyPath $keyPath not supported';
 }

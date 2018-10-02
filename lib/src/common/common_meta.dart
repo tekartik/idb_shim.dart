@@ -188,7 +188,7 @@ abstract class ObjectStoreWithMetaMixin {
   IdbObjectStoreMeta get meta;
 
   //@override
-  String get keyPath => meta.keyPath;
+  dynamic get keyPath => meta.keyPath;
 
   //@override
   bool get autoIncrement => meta.autoIncrement;
@@ -390,7 +390,7 @@ abstract class IndexWithMetaMixin {
   String get name => meta.name;
 
   //@override
-  String get keyPath => meta.keyPath;
+  dynamic get keyPath => meta.keyPath;
 
   //@override
   bool get unique => meta.unique;
@@ -406,7 +406,7 @@ abstract class IndexWithMetaMixin {
 
 class IdbIndexMeta {
   final String name;
-  final String keyPath;
+  final dynamic keyPath;
   final bool unique;
   final bool multiEntry;
 

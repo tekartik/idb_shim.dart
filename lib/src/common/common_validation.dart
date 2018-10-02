@@ -7,6 +7,13 @@ void checkKeyParam(var key) {
     throw DatabaseNoKeyError();
   }
   if (!(key is String || key is num)) {
+    if (key is List && key.isNotEmpty) {
+      List keyList = key;
+      for (var item in keyList) {
+        checkKeyParam(item);
+      }
+      return;
+    }
     throw DatabaseInvalidKeyError(key);
   }
 }

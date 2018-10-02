@@ -2,6 +2,7 @@ library index_cursor_test;
 
 import 'dart:async';
 import 'package:idb_shim/idb_client.dart';
+import 'package:idb_shim/utils/idb_utils.dart';
 import 'idb_test_common.dart';
 
 class TestIdNameRow {
@@ -59,6 +60,7 @@ void defineTests(TestContext ctx) {
       }
     }
 
+    /*
     Future<List<TestIdNameRow>> cursorToList(Stream<CursorWithValue> stream) {
       var completer = Completer<List<TestIdNameRow>>.sync();
       List<TestIdNameRow> list = List();
@@ -69,6 +71,7 @@ void defineTests(TestContext ctx) {
       });
       return completer.future;
     }
+    */
 
     group('with_null_key', () {
       _createTransaction() {
@@ -353,28 +356,28 @@ void defineTests(TestContext ctx) {
         _createTransaction();
         return fill3SampleRows().then((_) {
           return cursorToList(index.openCursor(autoAdvance: true)).then((list) {
-            expect(list[0].name, equals('test1'));
-            expect(list[0].id, equals(2));
-            expect(list[1].name, equals('test2'));
-            expect(list[2].name, equals('test3'));
-            expect(list[2].id, equals(3));
+            expect(list[0].value['name'], equals('test1'));
+            expect(list[0].primaryKey, equals(2));
+            expect(list[1].value['name'], equals('test2'));
+            expect(list[2].value['name'], equals('test3'));
+            expect(list[2].primaryKey, equals(3));
             expect(list.length, 3);
 
             return cursorToList(index.openCursor(
                     range: KeyRange.bound('test2', 'test3'), autoAdvance: true))
                 .then((list) {
               expect(list.length, 2);
-              expect(list[0].name, equals('test2'));
-              expect(list[0].id, equals(1));
-              expect(list[1].name, equals('test3'));
-              expect(list[1].id, equals(3));
+              expect(list[0].value['name'], equals('test2'));
+              expect(list[0].primaryKey, equals(1));
+              expect(list[1].value['name'], equals('test3'));
+              expect(list[1].primaryKey, equals(3));
 
               return cursorToList(
                       index.openCursor(key: 'test1', autoAdvance: true))
                   .then((list) {
                 expect(list.length, 1);
-                expect(list[0].name, equals('test1'));
-                expect(list[0].id, equals(2));
+                expect(list[0].value['name'], equals('test1'));
+                expect(list[0].primaryKey, equals(2));
 
                 //return transaction.completed;
               });
@@ -455,6 +458,83 @@ void defineTests(TestContext ctx) {
         stream = valueIndex.openKeyCursor(
             range: KeyRange.upperBound(2, true), autoAdvance: true);
         expect(await getKeys(stream), [key2]);
+      });
+    });
+
+    group('keyPath', () async {
+      // new
+      String _dbName;
+      // prepare for test
+      Future _setupDeleteDb() async {
+        _dbName = ctx.dbName;
+        await idbFactory.deleteDatabase(_dbName);
+      }
+
+      test('multi', () async {
+        await _setupDeleteDb();
+        void _initializeDatabase(VersionChangeEvent e) {
+          var db = e.database;
+          var store = db.createObjectStore(testStoreName, autoIncrement: true);
+          var index = store.createIndex('test', ['year', 'name']);
+          expect(index.keyPath, ['year', 'name']);
+        }
+
+        var db = await idbFactory.open(_dbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+
+        Transaction transaction;
+        ObjectStore objectStore;
+
+        transaction = db.transaction(testStoreName, idbModeReadWrite);
+        objectStore = transaction.objectStore(testStoreName);
+        var index = objectStore.index('test');
+        int record1Key = await objectStore.put({'year': 2018, 'name': 'John'});
+        int record2Key = await objectStore.put({'year': 2018, 'name': 'Jack'});
+        int record3Key = await objectStore.put({'year': 2017, 'name': 'John'});
+        expect(index.keyPath, ['year', 'name']);
+        expect(await index.getKey([2018, 'Jack']), record2Key);
+        expect(await index.getKey([2018, 'John']), record1Key);
+        expect(await index.getKey([2017, 'Jack']), isNull);
+        expect(await index.get([2018, 'Jack']), {'year': 2018, 'name': 'Jack'});
+        var list = await cursorToList(index.openCursor(autoAdvance: true));
+
+        expect(list.length, 3);
+        expect(list[0].value, {'year': 2017, 'name': 'John'});
+        expect(list[0].primaryKey, record3Key);
+        expect(list[0].key, [2017, 'John']);
+        expect(list[2].key, [2018, 'John']);
+
+        await transaction.completed;
+
+        transaction = db.transaction(testStoreName, idbModeReadWrite);
+        objectStore = transaction.objectStore(testStoreName);
+        index = objectStore.index('test');
+
+        list = await cursorToList(index.openCursor(
+            range: KeyRange.bound([2018, 'Jack'], [2018, 'John']),
+            autoAdvance: true));
+        expect(list.length, 2);
+        expect(list[0].primaryKey, record2Key);
+        expect(list[1].primaryKey, record1Key);
+
+        await transaction.completed;
+
+        transaction = db.transaction(testStoreName, idbModeReadWrite);
+        objectStore = transaction.objectStore(testStoreName);
+        index = objectStore.index('test');
+
+        list = await cursorToList(index.openCursor(
+            range: KeyRange.upperBound([2018, 'Jack'], true),
+            autoAdvance: true));
+
+        /*TODO
+        expect(list.length, 1);
+        expect(list[0].primaryKey, record3Key);
+        expect(list[0].key, [2017, 'John']);
+        */
+        await transaction.completed;
+
+        await db.close();
       });
     });
   });

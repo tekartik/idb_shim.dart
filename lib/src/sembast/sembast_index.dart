@@ -20,7 +20,11 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   sdb.Filter _indexKeyOrRangeFilter([key_OR_range]) {
     // null means all entry without null value
     if (key_OR_range == null) {
-      return sdb.Filter.notEqual(meta.keyPath, null);
+      if (meta.keyPath is String) {
+        return sdb.Filter.notEqual(meta.keyPath as String, null);
+      } else {
+        throw 'key_OR_range is null, keyPath must not be an array';
+      }
     }
     return keyOrRangeFilter(meta.keyPath, key_OR_range);
   }
@@ -98,7 +102,6 @@ class IndexSembast extends Index with IndexWithMetaMixin {
     return keyCursorFilter(keyPath, key, range);
   }
 
-  sdb.SortOrder sortOrder(bool ascending) {
-    return sdb.SortOrder(keyPath, ascending);
-  }
+  List<sdb.SortOrder> sortOrders(bool ascending) =>
+      keyPathSortOrders(keyPath, ascending);
 }

@@ -1,50 +1,84 @@
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
+import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/sembast/sembast_index.dart';
 import 'package:idb_shim/src/sembast/sembast_object_store.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:sembast/sembast.dart' as sdb;
 
-sdb.Filter keyCursorFilter(String keyField, key, KeyRange range) {
+sdb.Filter keyCursorFilter(dynamic keyPath, key, KeyRange range) {
   if (range != null) {
-    return keyRangeFilter(keyField, range);
-  } else {
-    return keyFilter(keyField, key);
+    return keyRangeFilter(keyPath, range);
+  } else if (key != null) {
+    return keyFilter(keyPath, key);
   }
+  // no filtering
+  return null;
 }
 
-sdb.Filter keyRangeFilter(String keyPath, KeyRange range) {
-  sdb.Filter lowerFilter;
-  sdb.Filter upperFilter;
-  List<sdb.Filter> filters = [];
-  if (range.lower != null) {
-    if (range.lowerOpen == true) {
-      lowerFilter = sdb.Filter.greaterThan(keyPath, range.lower);
-    } else {
-      lowerFilter = sdb.Filter.greaterThanOrEquals(keyPath, range.lower);
+sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range) {
+  if (keyPath is String) {
+    sdb.Filter lowerFilter;
+    sdb.Filter upperFilter;
+    List<sdb.Filter> filters = [];
+    if (range.lower != null) {
+      if (range.lowerOpen == true) {
+        if (keyPath is String) {
+          lowerFilter = sdb.Filter.greaterThan(keyPath, range.lower);
+        } else {
+          throw 'TODO support keyPath array ${keyPath}';
+        }
+      } else {
+        if (keyPath is String) {
+          lowerFilter = sdb.Filter.greaterThanOrEquals(keyPath, range.lower);
+        } else {
+          throw 'TODO support keyPath array ${keyPath}';
+        }
+      }
+      filters.add(lowerFilter);
     }
-    filters.add(lowerFilter);
-  }
-  if (range.upper != null) {
-    if (range.upperOpen == true) {
-      upperFilter = sdb.Filter.lessThan(keyPath, range.upper);
-    } else {
-      upperFilter = sdb.Filter.lessThanOrEquals(keyPath, range.upper);
+    if (range.upper != null) {
+      if (range.upperOpen == true) {
+        if (keyPath is String) {
+          upperFilter = sdb.Filter.lessThan(keyPath, range.upper);
+        } else {
+          throw 'TODO support keyPath array ${keyPath}';
+        }
+      } else {
+        if (keyPath is String) {
+          upperFilter = sdb.Filter.lessThanOrEquals(keyPath, range.upper);
+        } else {
+          throw 'TODO support keyPath array ${keyPath}';
+        }
+      }
+      filters.add(upperFilter);
     }
-    filters.add(upperFilter);
+    return sdb.Filter.and(filters);
+  } else if (keyPath is List) {
+    List keyList = keyPath;
+    return sdb.Filter.and(List.generate(keyList.length,
+        (i) => keyRangeFilter(keyList[i], keyArrayRangeAt(range, i))));
   }
-  return sdb.Filter.and(filters);
+  throw 'keyPath $keyPath not supported';
 }
 
-sdb.Filter keyFilter(String keyPath, var key) {
-  if (key == null) {
-    // key must not be nulled
-    return sdb.Filter.notEqual(keyPath, null);
+sdb.Filter keyFilter(dynamic keyPath, var key) {
+  if (keyPath is String) {
+    if (key == null) {
+      // key must not be nulled
+      return sdb.Filter.notEqual(keyPath, null);
+    }
+    return sdb.Filter.equal(keyPath, key);
+  } else if (keyPath is List) {
+    List keyList = keyPath;
+    List valueList = key;
+    return sdb.Filter.and(List.generate(
+        keyList.length, (i) => keyFilter(keyList[i], valueList[i])));
   }
-  return sdb.Filter.equal(keyPath, key);
+  throw 'keyPath $keyPath not supported';
 }
 
-sdb.Filter keyOrRangeFilter(String keyPath, [key_OR_range]) {
+sdb.Filter keyOrRangeFilter(dynamic keyPath, [key_OR_range]) {
   if (key_OR_range is KeyRange) {
     return keyRangeFilter(keyPath, key_OR_range);
   } else {
@@ -113,7 +147,9 @@ abstract class IndexCursorSembastMixin implements Cursor {
   /// Return the index key of the record
   ///
   @override
-  Object get key => record.value[index.keyPath];
+  Object get key {
+    return mapValueAtKeyPath(record.value as Map, index.keyPath);
+  }
 }
 
 abstract class CursorWithValueSembastMixin implements CursorWithValue {
@@ -167,7 +203,8 @@ class IndexCursorWithValueSembast extends Object
   /// Return the index key of the record
   ///
   @override
-  Object get key => record.value[indexCtlr.index.keyPath];
+  Object get key =>
+      mapValueAtKeyPath(record.value as Map, indexCtlr.index.keyPath);
 }
 
 class StoreCursorWithValueSembast extends Object
@@ -191,7 +228,7 @@ class _SdbCursorWithValue extends Object
 
 abstract class _ISdbCursor {
   sdb.Filter get filter;
-  sdb.SortOrder get sortOrder;
+  List<sdb.SortOrder> get sortOrders;
 }
 
 abstract class IndexCursorControllerSembastMixin implements _ISdbCursor {
@@ -199,8 +236,8 @@ abstract class IndexCursorControllerSembastMixin implements _ISdbCursor {
   IdbCursorMeta get meta;
 
   @override
-  sdb.SortOrder get sortOrder {
-    return index.sortOrder(meta.ascending);
+  List<sdb.SortOrder> get sortOrders {
+    return index.sortOrders(meta.ascending);
   }
 
   @override
@@ -214,8 +251,8 @@ abstract class StoreCursorControllerSembastMixin implements _ISdbCursor {
   IdbCursorMeta get meta;
 
   @override
-  sdb.SortOrder get sortOrder {
-    return store.sortOrder(meta.ascending);
+  List<sdb.SortOrder> get sortOrders {
+    return store.sortOrders(meta.ascending);
   }
 
   @override
@@ -263,8 +300,8 @@ abstract class BaseCursorControllerSembastMixin<T extends Cursor>
 
   Future openCursor() {
     sdb.Filter filter = this.filter;
-    sdb.SortOrder sortOrder = this.sortOrder;
-    sdb.Finder finder = sdb.Finder(filter: filter, sortOrders: [sortOrder]);
+    List<sdb.SortOrder> sortOrders = this.sortOrders;
+    sdb.Finder finder = sdb.Finder(filter: filter, sortOrders: sortOrders);
     return store.sdbStore.findRecords(finder).then((List<sdb.Record> records) {
       this.records = records;
       return autoNext();
@@ -363,4 +400,15 @@ class StoreCursorWithValueControllerSembast extends Object
         StoreCursorWithValueSembast(this, index);
     return cursor;
   }
+}
+
+List<sdb.SortOrder> keyPathSortOrders(dynamic keyPath, bool ascending) {
+  if (keyPath is String) {
+    return [sdb.SortOrder(keyPath, ascending)];
+  } else if (keyPath is List) {
+    List keyList = keyPath;
+    return List.generate(
+        keyList.length, (i) => sdb.SortOrder(keyList[i] as String, ascending));
+  }
+  throw 'invalid keyPath $keyPath';
 }
