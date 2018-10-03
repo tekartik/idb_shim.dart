@@ -1,3 +1,8 @@
+## 1.7.0
+
+* remove websql support
+* support keyPath as array
+
 ## 1.6.0
 
 * dart2 only, no websql yet

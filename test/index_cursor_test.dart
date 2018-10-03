@@ -491,6 +491,7 @@ void defineTests(TestContext ctx) {
         int record1Key = await objectStore.put({'year': 2018, 'name': 'John'});
         int record2Key = await objectStore.put({'year': 2018, 'name': 'Jack'});
         int record3Key = await objectStore.put({'year': 2017, 'name': 'John'});
+        /*int record4Key = */ await objectStore.put({'name': 'John'});
         expect(index.keyPath, ['year', 'name']);
         expect(await index.getKey([2018, 'Jack']), record2Key);
         expect(await index.getKey([2018, 'John']), record1Key);
@@ -504,11 +505,22 @@ void defineTests(TestContext ctx) {
         expect(list[0].key, [2017, 'John']);
         expect(list[2].key, [2018, 'John']);
 
-        await transaction.completed;
+        Future terminateTransaction() async {
+          await transaction.completed;
+        }
 
-        transaction = db.transaction(testStoreName, idbModeReadWrite);
-        objectStore = transaction.objectStore(testStoreName);
-        index = objectStore.index('test');
+        initTransaction() {
+          transaction = db.transaction(testStoreName, idbModeReadWrite);
+          objectStore = transaction.objectStore(testStoreName);
+          index = objectStore.index('test');
+        }
+
+        Future reinitTransaction() async {
+          await terminateTransaction();
+          initTransaction();
+        }
+
+        await reinitTransaction();
 
         list = await cursorToList(index.openCursor(
             range: KeyRange.bound([2018, 'Jack'], [2018, 'John']),
@@ -517,7 +529,17 @@ void defineTests(TestContext ctx) {
         expect(list[0].primaryKey, record2Key);
         expect(list[1].primaryKey, record1Key);
 
-        await transaction.completed;
+        await reinitTransaction();
+
+        var keyList =
+            await keyCursorToList(index.openCursor(autoAdvance: true));
+        // devPrint(keyList);
+        expect(keyList.length, 3); // not the 4th one
+        expect(keyList[0].key, [2017, 'John']);
+        expect(keyList[0].primaryKey, record3Key);
+        // devPrint(keyList);
+
+        await reinitTransaction();
 
         transaction = db.transaction(testStoreName, idbModeReadWrite);
         objectStore = transaction.objectStore(testStoreName);
@@ -527,12 +549,22 @@ void defineTests(TestContext ctx) {
             range: KeyRange.upperBound([2018, 'Jack'], true),
             autoAdvance: true));
 
-        /*TODO
         expect(list.length, 1);
         expect(list[0].primaryKey, record3Key);
         expect(list[0].key, [2017, 'John']);
-        */
+
         await transaction.completed;
+
+        /* not valid on native
+        // with null
+        await reinitTransaction();
+        list = await cursorToList(index.openCursor(
+            range: KeyRange.bound([2018, null], [2018, null]),
+            autoAdvance: true));
+        expect(list.length, 2);
+        expect(list[0].primaryKey, record2Key);
+        expect(list[1].primaryKey, record1Key);
+        */
 
         await db.close();
       });

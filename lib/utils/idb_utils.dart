@@ -102,11 +102,21 @@ class CursorRow extends KeyCursorRow {
 
   CursorRow(dynamic key, dynamic primaryKey, this.value)
       : super(key, primaryKey);
+
+  @override
+  String toString() {
+    return '$value';
+  }
 }
 
 class KeyCursorRow {
   final dynamic key;
   final dynamic primaryKey;
+
+  @override
+  String toString() {
+    return '$key $primaryKey';
+  }
 
   KeyCursorRow(this.key, this.primaryKey);
 }

@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
 import 'package:idb_shim/src/common/common_value.dart';
@@ -5,15 +6,85 @@ import 'package:idb_shim/src/sembast/sembast_index.dart';
 import 'package:idb_shim/src/sembast/sembast_object_store.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:sembast/sembast.dart' as sdb;
+import 'package:sembast/utils/value_utils.dart' as utils;
 
 sdb.Filter keyCursorFilter(dynamic keyPath, key, KeyRange range) {
   if (range != null) {
     return keyRangeFilter(keyPath, range);
-  } else if (key != null) {
+  } else
+  // if (key != null)
+  {
     return keyFilter(keyPath, key);
   }
   // no filtering
-  return null;
+  // return null;
+}
+
+class KeyArrayRangeFilter implements sdb.Filter {
+  final List keyList;
+  final KeyRange range;
+
+  KeyArrayRangeFilter(this.keyList, this.range);
+
+  @override
+  bool match(sdb.Record record) {
+    List values =
+        List.generate(keyList.length, (i) => record[keyList[i] as String]);
+
+    // no null accepted
+    for (var value in values) {
+      if (value == null) {
+        return false;
+      }
+    }
+
+    if (range.lower != null) {
+      List boundValues = range.lower as List;
+      bool equals = true;
+      for (int i = 0; i < keyList.length; i++) {
+        var boundValue = boundValues[i];
+        if (boundValue == null) {
+          continue;
+        }
+        var value = values[i];
+        if (utils.greaterThan(value, boundValue)) {
+          return true;
+        } else if (value == boundValue) {
+          continue;
+        } else {
+          return false;
+        }
+      }
+
+      if (range.lowerOpen == true && equals) {
+        return false;
+      }
+    }
+    if (range.upper != null) {
+      List boundValues = range.upper as List;
+      bool equals = true;
+      for (int i = 0; i < keyList.length; i++) {
+        var boundValue = boundValues[i];
+        if (boundValue == null) {
+          continue;
+        }
+        var value = values[i];
+        if (utils.lessThan(value, boundValue)) {
+          return true;
+        } else if (value == boundValue) {
+          continue;
+        } else {
+          return false;
+        }
+      }
+
+      if (range.lowerOpen == true && equals) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 }
 
 sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range) {
@@ -22,6 +93,14 @@ sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range) {
     sdb.Filter upperFilter;
     List<sdb.Filter> filters = [];
     if (range.lower != null) {
+      // only
+      if (range.upper == range.lower &&
+          range.lowerOpen != true &&
+          range.lowerOpen != true) {
+        return sdb.Filter.equal(keyPath, range.lower);
+      }
+
+      // lower bound
       if (range.lowerOpen == true) {
         if (keyPath is String) {
           lowerFilter = sdb.Filter.greaterThan(keyPath, range.lower);
@@ -37,6 +116,7 @@ sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range) {
       }
       filters.add(lowerFilter);
     }
+    // upper bound
     if (range.upper != null) {
       if (range.upperOpen == true) {
         if (keyPath is String) {
@@ -56,12 +136,24 @@ sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range) {
     return sdb.Filter.and(filters);
   } else if (keyPath is List) {
     List keyList = keyPath;
-    return sdb.Filter.and(List.generate(keyList.length,
-        (i) => keyRangeFilter(keyList[i], keyArrayRangeAt(range, i))));
+
+    if (range.lower != null) {
+      // only?
+      if ((range.upper != null) &&
+          (ListEquality().equals(range.lower as List, range.upper as List)) &&
+          range.lowerOpen != true &&
+          range.lowerOpen != true) {
+        return sdb.Filter.and(List.generate(keyList.length,
+            (i) => sdb.Filter.equal(keyList[i] as String, range.lower)));
+      }
+    }
+
+    return KeyArrayRangeFilter(keyList, range);
   }
   throw 'keyPath $keyPath not supported';
 }
 
+// The null value for the key actually means any but null...
 sdb.Filter keyFilter(dynamic keyPath, var key) {
   if (keyPath is String) {
     if (key == null) {
@@ -71,9 +163,16 @@ sdb.Filter keyFilter(dynamic keyPath, var key) {
     return sdb.Filter.equal(keyPath, key);
   } else if (keyPath is List) {
     List keyList = keyPath;
-    List valueList = key;
-    return sdb.Filter.and(List.generate(
-        keyList.length, (i) => keyFilter(keyList[i], valueList[i])));
+    // No constraint on the key it just needs to exist
+    // so every field must be non-null
+    if (key == null) {
+      return sdb.Filter.and(
+          List.generate(keyList.length, (i) => keyFilter(keyList[i], null)));
+    } else {
+      List valueList = key;
+      return sdb.Filter.and(List.generate(
+          keyList.length, (i) => keyFilter(keyList[i], valueList[i])));
+    }
   }
   throw 'keyPath $keyPath not supported';
 }
