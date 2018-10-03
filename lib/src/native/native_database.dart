@@ -1,6 +1,16 @@
-part of idb_shim_native;
+import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/idb_client_native.dart';
+import 'dart:async';
+import 'dart:html_common' as html_common;
+import 'dart:indexed_db' as idb;
 
-class _NativeVersionChangeEvent extends IdbVersionChangeEventBase {
+import 'package:idb_shim/src/common/common_database.dart';
+import 'package:idb_shim/src/native/native_error.dart';
+import 'package:idb_shim/src/native/native_object_store.dart';
+import 'package:idb_shim/src/native/native_transaction.dart';
+import 'package:idb_shim/src/utils/browser_utils.dart';
+
+class VersionChangeEventNative extends IdbVersionChangeEventBase {
   idb.VersionChangeEvent idbVersionChangeEvent;
 
   @override
@@ -16,7 +26,7 @@ class _NativeVersionChangeEvent extends IdbVersionChangeEventBase {
 
   @override
   Database database;
-  _NativeVersionChangeEvent(this.idbVersionChangeEvent) {
+  VersionChangeEventNative(this.idbVersionChangeEvent) {
     // This is null for onChangeEvent on Database
     // but ok when opening the database
     dynamic currentTarget = idbVersionChangeEvent.currentTarget;
@@ -36,13 +46,13 @@ class DatabaseNative extends IdbDatabaseBase {
   DatabaseNative(this.idbDatabase) : super(idbNativeFactory);
 
   @override
-  int get version => _catchNativeError(() => idbDatabase.version);
+  int get version => catchNativeError(() => idbDatabase.version);
 
   @override
   ObjectStore createObjectStore(String name,
       {String keyPath, bool autoIncrement}) {
-    return _catchNativeError(() {
-      return _NativeObjectStore(idbDatabase.createObjectStore(name,
+    return catchNativeError(() {
+      return ObjectStoreNative(idbDatabase.createObjectStore(name,
           keyPath: keyPath, autoIncrement: autoIncrement));
     });
   }
@@ -56,7 +66,7 @@ class DatabaseNative extends IdbDatabaseBase {
     // Safari has the issue of not supporting multistore
     // simulate them!
     try {
-      return _catchNativeError(() {
+      return catchNativeError(() {
         idb.Transaction idbTransaction =
             idbDatabase.transaction(storeName_OR_storeNames, mode);
         return TransactionNative(this, idbTransaction);
@@ -84,7 +94,7 @@ class DatabaseNative extends IdbDatabaseBase {
           } else {
             // This is likely the 1.13 bug
             try {
-              return _catchNativeError(() {
+              return catchNativeError(() {
                 idb.Transaction idbTransaction = idbDatabase.transaction(
                     html_common.convertDartToNative_SerializedScriptValue(
                         storeName_OR_storeNames),
@@ -115,34 +125,34 @@ class DatabaseNative extends IdbDatabaseBase {
 
   @override
   void close() {
-    return _catchNativeError(() {
+    return catchNativeError(() {
       idbDatabase.close();
     });
   }
 
   @override
   void deleteObjectStore(String name) {
-    return _catchNativeError(() {
+    return catchNativeError(() {
       idbDatabase.deleteObjectStore(name);
     });
   }
 
   @override
   Iterable<String> get objectStoreNames {
-    return _catchNativeError(() {
+    return catchNativeError(() {
       return idbDatabase.objectStoreNames;
     });
   }
 
   @override
-  String get name => _catchNativeError(() => idbDatabase.name);
+  String get name => catchNativeError(() => idbDatabase.name);
 
   @override
   Stream<VersionChangeEvent> get onVersionChange {
     StreamController<VersionChangeEvent> ctlr = StreamController();
     idbDatabase.onVersionChange.listen(
         (idb.VersionChangeEvent idbVersionChangeEvent) {
-      ctlr.add(_NativeVersionChangeEvent(idbVersionChangeEvent));
+      ctlr.add(VersionChangeEventNative(idbVersionChangeEvent));
     }, onDone: () {
       ctlr.close();
     }, onError: (error) {

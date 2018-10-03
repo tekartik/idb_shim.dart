@@ -1,25 +1,32 @@
-part of idb_shim_native;
+import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/src/native/native_cursor.dart';
+import 'package:idb_shim/src/native/native_error.dart';
+import 'dart:async';
+import 'dart:indexed_db' as idb;
 
-class _NativeObjectStore extends ObjectStore {
+import 'package:idb_shim/src/native/native_index.dart';
+import 'package:idb_shim/src/native/native_key_range.dart';
+
+class ObjectStoreNative extends ObjectStore {
   idb.ObjectStore idbObjectStore;
-  _NativeObjectStore(this.idbObjectStore);
+  ObjectStoreNative(this.idbObjectStore);
 
   @override
   Index createIndex(String name, keyPath, {bool unique, bool multiEntry}) {
-    return _NativeIndex(idbObjectStore.createIndex(name, keyPath,
+    return IndexNative(idbObjectStore.createIndex(name, keyPath,
         unique: unique, multiEntry: multiEntry));
   }
 
   @override
   void deleteIndex(String name) {
-    _catchNativeError(() {
+    catchNativeError(() {
       idbObjectStore.deleteIndex(name);
     });
   }
 
   @override
   Future add(dynamic value, [dynamic key]) {
-    return _catchAsyncNativeError(() {
+    return catchAsyncNativeError(() {
       return idbObjectStore.add(value, key);
     });
   }
@@ -27,41 +34,41 @@ class _NativeObjectStore extends ObjectStore {
   // Not async please for ie!
   @override
   Future getObject(dynamic key) {
-    return _catchAsyncNativeError(() {
+    return catchAsyncNativeError(() {
       return idbObjectStore.getObject(key);
     });
   }
 
   @override
   Future clear() {
-    return _catchAsyncNativeError(() {
+    return catchAsyncNativeError(() {
       return idbObjectStore.clear();
     });
   }
 
   @override
   Future put(dynamic value, [dynamic key]) {
-    return _catchAsyncNativeError(() {
+    return catchAsyncNativeError(() {
       return idbObjectStore.put(value, key);
     });
   }
 
   @override
   Future delete(key) {
-    return _catchAsyncNativeError(() {
+    return catchAsyncNativeError(() {
       return idbObjectStore.delete(key);
     });
   }
 
   @override
   Index index(String name) {
-    return _NativeIndex(idbObjectStore.index(name));
+    return IndexNative(idbObjectStore.index(name));
   }
 
   @override
   Stream<CursorWithValue> openCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
-    idb.KeyRange idbKeyRange = _nativeKeyRange(range);
+    idb.KeyRange idbKeyRange = toNativeKeyRange(range);
     //idbDevWarning;
     //idbDevPrint("kr1 $range native $idbKeyRange");
 
@@ -86,7 +93,7 @@ class _NativeObjectStore extends ObjectStore {
           autoAdvance: autoAdvance);
     }
 
-    _NativeCursorWithValueController ctlr = _NativeCursorWithValueController(//
+    CursorWithValueControllerNative ctlr = CursorWithValueControllerNative(//
         stream);
     //idbDevPrint("kr2 $range native $idbKeyRange");
     return ctlr.stream;
@@ -97,7 +104,7 @@ class _NativeObjectStore extends ObjectStore {
   /*
   Stream<Cursor> openKeyCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
-    idb.KeyRange idbKeyRange = _nativeKeyRange(range);
+    idb.KeyRange idbKeyRange = toNativeKeyRange(range);
     //idbDevWarning;
     //idbDevPrint("kr1 $range native $idbKeyRange");
 
@@ -111,8 +118,8 @@ class _NativeObjectStore extends ObjectStore {
           autoAdvance: autoAdvance);
 
 
-    _NativeCursorWithValueController ctlr =
-    new _NativeCursorWithValueController(//
+    CursorWithValueControllerNative ctlr =
+    new CursorWithValueControllerNative(//
         stream);
     //idbDevPrint("kr2 $range native $idbKeyRange");
     return ctlr.stream;
@@ -121,7 +128,7 @@ class _NativeObjectStore extends ObjectStore {
 
   @override
   Future<int> count([dynamic key_OR_range]) {
-    return _catchAsyncNativeError(() {
+    return catchAsyncNativeError(() {
       Future<int> countFuture;
       if (key_OR_range == null) {
         countFuture = idbObjectStore.count();
@@ -141,7 +148,7 @@ class _NativeObjectStore extends ObjectStore {
           });
           */
       } else if (key_OR_range is KeyRange) {
-        idb.KeyRange idbKeyRange = _nativeKeyRange(key_OR_range);
+        idb.KeyRange idbKeyRange = toNativeKeyRange(key_OR_range);
         countFuture = idbObjectStore.count(idbKeyRange);
       } else {
         countFuture = idbObjectStore.count(key_OR_range);

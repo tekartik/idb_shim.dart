@@ -1,8 +1,9 @@
-part of idb_shim_native;
+import 'package:idb_shim/idb.dart';
+import 'dart:async';
 
 //bool dev = true;
 
-T _catchNativeError<T>(T action()) {
+T catchNativeError<T>(T action()) {
   try {
     return action();
   } on Error catch (e) {
@@ -26,7 +27,7 @@ T _catchNativeError<T>(T action()) {
 // We no longer catch the native exception asynchronously
 // as it makes the stack trace lost...
 //
-Future<T> _catchAsyncNativeError<T>(Future<T> action()) {
-  var result = _catchNativeError(action);
+Future<T> catchAsyncNativeError<T>(Future<T> action()) {
+  var result = catchNativeError(action);
   return result;
 }

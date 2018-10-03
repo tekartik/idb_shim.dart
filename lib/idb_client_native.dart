@@ -2,28 +2,13 @@ library idb_shim_native;
 
 import 'dart:async';
 import 'dart:html' as html;
-import 'dart:html_common' as html_common;
 import 'dart:indexed_db' as idb;
 
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/common/common_factory.dart';
-import 'package:idb_shim/src/common/common_transaction.dart';
-import 'package:idb_shim/src/common/common_database.dart';
-import 'src/utils/browser_utils.dart';
-
-part 'src/native/native_cursor.dart';
-
-part 'src/native/native_database.dart';
-
-part 'src/native/native_error.dart';
-
-part 'src/native/native_event.dart';
-part 'src/native/native_index.dart';
-part 'src/native/native_key_range.dart';
-
-part 'src/native/native_object_store.dart';
-
-part 'src/native/native_transaction.dart';
+import 'src/native/native_database.dart';
+import 'src/native/native_error.dart';
+import 'src/native/native_event.dart';
 
 IdbNativeFactory get idbNativeFactory => IdbNativeFactory();
 
@@ -50,13 +35,13 @@ class IdbNativeFactory extends IdbFactoryBase {
       OnUpgradeNeededFunction onUpgradeNeeded,
       OnBlockedFunction onBlocked}) {
     void _onUpgradeNeeded(idb.VersionChangeEvent e) {
-      _NativeVersionChangeEvent event = _NativeVersionChangeEvent(e);
+      VersionChangeEventNative event = VersionChangeEventNative(e);
       onUpgradeNeeded(event);
     }
 
     void _onBlocked(html.Event e) {
       if (onBlocked != null) {
-        Event event = _NativeEvent(e);
+        Event event = EventNative(e);
         onBlocked(event);
       } else {
         print("blocked opening $dbName v $version");
@@ -80,7 +65,7 @@ class IdbNativeFactory extends IdbFactoryBase {
       {OnBlockedFunction onBlocked}) {
     void _onBlocked(html.Event e) {
       print("blocked deleting $dbName");
-      Event event = _NativeEvent(e);
+      Event event = EventNative(e);
       onBlocked(event);
     }
 
@@ -109,6 +94,6 @@ class IdbNativeFactory extends IdbFactoryBase {
 
   @override
   int cmp(Object first, Object second) {
-    return _catchNativeError(() => html.window.indexedDB.cmp(first, second));
+    return catchNativeError(() => html.window.indexedDB.cmp(first, second));
   }
 }

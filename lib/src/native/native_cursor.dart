@@ -1,4 +1,6 @@
-part of idb_shim_native;
+import 'package:idb_shim/idb.dart';
+import 'dart:async';
+import 'dart:indexed_db' as idb;
 
 class _NativeCursor extends Cursor {
   idb.Cursor _cursor;
@@ -78,10 +80,10 @@ class _NativeCursorWithValue extends CursorWithValue {
   }
 }
 
-class _NativeCursorWithValueController {
+class CursorWithValueControllerNative {
   // Sync must be true
   StreamController<CursorWithValue> _ctlr = StreamController(sync: true);
-  _NativeCursorWithValueController(Stream<idb.CursorWithValue> stream) {
+  CursorWithValueControllerNative(Stream<idb.CursorWithValue> stream) {
     stream.listen((idb.CursorWithValue cwv) {
       // idbDevPrint("adding ${cwv.key} ${cwv.value} ${cwv.primaryKey}");
       _ctlr.add(_NativeCursorWithValue(cwv));
@@ -95,10 +97,10 @@ class _NativeCursorWithValueController {
   Stream<CursorWithValue> get stream => _ctlr.stream;
 }
 
-class _NativeCursorController {
+class CursorControllerNative {
   // Sync must be true
   StreamController<Cursor> _ctlr = StreamController(sync: true);
-  _NativeCursorController(Stream<idb.Cursor> stream) {
+  CursorControllerNative(Stream<idb.Cursor> stream) {
     stream.listen((idb.Cursor cursor) {
       _ctlr.add(_NativeCursor(cursor));
     }, onDone: () {

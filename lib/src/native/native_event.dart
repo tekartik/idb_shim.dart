@@ -1,8 +1,9 @@
-part of idb_shim_native;
+import 'package:idb_shim/idb.dart';
+import 'dart:html' as html;
 
-class _NativeEvent extends Event {
+class EventNative extends Event {
   html.Event _htmlEvent;
-  _NativeEvent(this._htmlEvent);
+  EventNative(this._htmlEvent);
 
   @override
   String toString() {

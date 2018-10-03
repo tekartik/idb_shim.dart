@@ -1,4 +1,11 @@
-part of idb_shim_native;
+import 'package:idb_shim/idb.dart';
+import 'dart:async';
+import 'dart:indexed_db' as idb;
+
+import 'package:idb_shim/src/common/common_transaction.dart';
+import 'package:idb_shim/src/native/native_database.dart';
+import 'package:idb_shim/src/native/native_error.dart';
+import 'package:idb_shim/src/native/native_object_store.dart';
 
 abstract class TransactionNativeBase extends IdbTransactionBase {
   TransactionNativeBase(Database database) : super(database);
@@ -11,15 +18,15 @@ class TransactionNative extends TransactionNativeBase {
 
   @override
   ObjectStore objectStore(String name) {
-    return _catchNativeError(() {
+    return catchNativeError(() {
       idb.ObjectStore idbObjectStore = idbTransaction.objectStore(name);
-      return _NativeObjectStore(idbObjectStore);
+      return ObjectStoreNative(idbObjectStore);
     });
   }
 
   @override
   Future<Database> get completed {
-    return _catchAsyncNativeError(() {
+    return catchAsyncNativeError(() {
       return idbTransaction.completed.then((_) {
         return database;
       });

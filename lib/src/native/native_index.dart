@@ -1,19 +1,25 @@
-part of idb_shim_native;
+import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/src/native/native_cursor.dart';
+import 'dart:async';
+import 'dart:indexed_db' as idb;
 
-class _NativeIndex extends Index {
+import 'package:idb_shim/src/native/native_error.dart';
+import 'package:idb_shim/src/native/native_key_range.dart';
+
+class IndexNative extends Index {
   idb.Index idbIndex;
-  _NativeIndex(this.idbIndex);
+  IndexNative(this.idbIndex);
 
   @override
   Future get(dynamic key) {
-    return _catchAsyncNativeError(() {
+    return catchAsyncNativeError(() {
       return idbIndex.get(key);
     });
   }
 
   @override
   Future getKey(dynamic key) {
-    return _catchAsyncNativeError(() {
+    return catchAsyncNativeError(() {
       return idbIndex.getKey(key);
     });
   }
@@ -21,7 +27,7 @@ class _NativeIndex extends Index {
   @override
   Future<int> count([key_OR_range]) {
     Future<int> countFuture;
-    return _catchAsyncNativeError(() {
+    return catchAsyncNativeError(() {
       if (key_OR_range == null) {
         countFuture = idbIndex.count();
         /*
@@ -40,7 +46,7 @@ class _NativeIndex extends Index {
         });
         */
       } else if (key_OR_range is KeyRange) {
-        idb.KeyRange idbKeyRange = _nativeKeyRange(key_OR_range);
+        idb.KeyRange idbKeyRange = toNativeKeyRange(key_OR_range);
         countFuture = idbIndex.count(idbKeyRange);
       } else {
         countFuture = idbIndex.count(key_OR_range);
@@ -52,12 +58,11 @@ class _NativeIndex extends Index {
   @override
   Stream<Cursor> openKeyCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
-    _NativeCursorController ctlr = _NativeCursorController(
-        idbIndex.openKeyCursor(
-            key: key,
-            range: range == null ? null : _nativeKeyRange(range),
-            direction: direction,
-            autoAdvance: autoAdvance));
+    CursorControllerNative ctlr = CursorControllerNative(idbIndex.openKeyCursor(
+        key: key,
+        range: range == null ? null : toNativeKeyRange(range),
+        direction: direction,
+        autoAdvance: autoAdvance));
     return ctlr.stream;
   }
 
@@ -65,10 +70,10 @@ class _NativeIndex extends Index {
   @override
   Stream<CursorWithValue> openCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
-    _NativeCursorWithValueController ctlr = _NativeCursorWithValueController(
+    CursorWithValueControllerNative ctlr = CursorWithValueControllerNative(
         idbIndex.openCursor(
             key: key,
-            range: range == null ? null : _nativeKeyRange(range),
+            range: range == null ? null : toNativeKeyRange(range),
             direction: direction,
             autoAdvance: autoAdvance));
 
@@ -92,7 +97,7 @@ class _NativeIndex extends Index {
 
   @override
   bool operator ==(other) {
-    if (other is _NativeIndex) {
+    if (other is IndexNative) {
       return idbIndex == other.idbIndex;
     }
     return false;

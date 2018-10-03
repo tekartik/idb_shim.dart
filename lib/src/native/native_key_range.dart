@@ -1,6 +1,7 @@
-part of idb_shim_native;
+import 'package:idb_shim/idb.dart';
+import 'dart:indexed_db' as idb;
 
-idb.KeyRange _nativeKeyRange(KeyRange common) {
+idb.KeyRange toNativeKeyRange(KeyRange common) {
   //print(common);
   if (common == null) {
     return null;
