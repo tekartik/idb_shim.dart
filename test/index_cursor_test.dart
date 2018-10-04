@@ -3,7 +3,6 @@ library index_cursor_test;
 import 'dart:async';
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/utils/idb_utils.dart';
-import 'idb_browser_test_common.dart';
 import 'idb_test_common.dart';
 
 class TestIdNameRow {
@@ -571,6 +570,6 @@ void defineTests(TestContext ctx) {
       });
     },
         // keyPath as array not supported on IE
-        skip: isEdge || isIe);
+        skip: ctx.isIdbEdge || ctx.isIdbIe);
   });
 }

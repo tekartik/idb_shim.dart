@@ -498,7 +498,7 @@ void defineTests(TestContext ctx) {
               }
             }).catchError((e) {
               // Transaction inactive
-              print('edge error :$e');
+              // print('edge error :$e');
               expect(isTestFailure(e), isFalse);
               expect(isTransactionInactiveError(e), isTrue);
             }).then((_) {
