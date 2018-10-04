@@ -64,7 +64,11 @@ void defineTests(TestContext ctx) {
           fail("should fail");
         } catch (e, st) {
           expect(isTestFailure(e), isFalse);
-          expect(Trace.format(st), contains("createObjectStore"));
+          if (!ctx.isIdbEdge) {
+            expect(Trace.format(st), contains("createObjectStore"));
+          } else {
+            print("edge error: $e");
+          }
           //devPrint(e);
           //devPrint(Trace.format(st));
         }

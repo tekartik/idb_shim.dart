@@ -68,6 +68,7 @@ class TestContext {
 
   // special internet explorer handling
   bool isIdbIe = false;
+  bool isIdbEdge = false;
   bool isIdbSafari = false;
   bool isIdbSembast = false;
 

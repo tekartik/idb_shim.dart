@@ -17,6 +17,7 @@ main() {
 
       // ie and idb special test marker
       ctx.isIdbIe = isIe;
+      ctx.isIdbEdge = isEdge;
       ctx.isIdbSafari = isSafari;
 
       test('properties', () {
@@ -105,7 +106,9 @@ main() {
           await transaction.completed;
 
           await db.close();
-        });
+        },
+            // keyPath as array not supported on IE
+            skip: isEdge || isIe);
       });
     } else {
       test("idb native not supported", null, skip: "idb native not supported");
