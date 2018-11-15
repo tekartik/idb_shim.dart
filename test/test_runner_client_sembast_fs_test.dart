@@ -59,11 +59,11 @@ defineTests(SembastFsTestContext ctx) {
 
     Future<List<Map>> getStorageContent() async {
       return getFileContent(
-          ctx.sdbFactory.fs.newFile(idbFactory.getDbPath(dbTestName)));
+          ctx.sdbFactory.fs.file(idbFactory.getDbPath(dbTestName)));
     }
 
     Future<List<Map>> getSdbStorageContext() async {
-      return getFileContent(tmpSdbFactory.fs.newFile(memSdb.path));
+      return getFileContent(tmpSdbFactory.fs.file(memSdb.path));
     }
 
     Future<sdb.Database> openTmpDatabase([int version = 1]) async {
