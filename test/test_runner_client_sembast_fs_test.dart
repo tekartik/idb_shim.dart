@@ -32,7 +32,7 @@ defineTests(SembastFsTestContext ctx) {
   dbGroup(ctx, 'format', () {
     // to compare
     //sdb.FsDatabaseFactory tmpSdbFactory = sdb.ioDatabaseFactory; //memoryFsDatabaseFactory;
-    sdb.FsDatabaseFactory tmpSdbFactory = sdb.memoryFsDatabaseFactory;
+    sdb.DatabaseFactoryFs tmpSdbFactory = sdb.databaseFactoryMemoryFs;
 
     Database db;
     sdb.Database memSdb;

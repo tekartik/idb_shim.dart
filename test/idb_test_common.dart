@@ -90,8 +90,8 @@ class SembastTestContext extends TestContext {
 
 class SembastFsTestContext extends SembastTestContext {
   @override
-  sdb_fs.FsDatabaseFactory get sdbFactory =>
-      factory.sdbFactory as sdb_fs.FsDatabaseFactory;
+  sdb_fs.DatabaseFactoryFs get sdbFactory =>
+      factory.sdbFactory as sdb_fs.DatabaseFactoryFs;
   @override
   IdbFactorySembast get factory => super.factory;
 }
