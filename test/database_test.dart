@@ -82,11 +82,15 @@ void defineTests(TestContext ctx) {
       expect(storeNames[0], testStoreName);
 
       db.close();
-      // re-open
-      await _openDb();
-      storeNames = List.from(db.objectStoreNames);
-      expect(storeNames.length, 1);
-      expect(storeNames, [testStoreName]);
+
+      // not working in memory since not persistent
+      if (!ctx.isInMemory) {
+        // re-open
+        await _openDb();
+        storeNames = List.from(db.objectStoreNames);
+        expect(storeNames.length, 1);
+        expect(storeNames, [testStoreName]);
+      }
     });
 
     test('one_then_one', () async {
@@ -97,11 +101,15 @@ void defineTests(TestContext ctx) {
       expect(storeNames[0], testStoreName);
 
       db.close();
-      // re-open
-      await _openWith1OtherStore();
-      storeNames = List.from(db.objectStoreNames);
-      expect(storeNames.length, 2);
-      expect(storeNames, [testStoreName, testStoreName + "_2"]);
+
+      // not working in memory since not persistent
+      if (!ctx.isInMemory) {
+        // re-open
+        await _openWith1OtherStore();
+        storeNames = List.from(db.objectStoreNames);
+        expect(storeNames.length, 2);
+        expect(storeNames, [testStoreName, testStoreName + "_2"]);
+      }
     });
 
     test('delete_non_existing_store', () async {
@@ -147,23 +155,26 @@ void defineTests(TestContext ctx) {
         expect(store.indexNames, [testNameIndex]);
       });
       db.close();
-      db = await idbFactory.open(_dbName, version: 2,
-          onUpgradeNeeded: (VersionChangeEvent e) {
-        ObjectStore store = e.transaction.objectStore(testStoreName);
+      // not working in memory since not persistent
+      if (!ctx.isInMemory) {
+        db = await idbFactory.open(_dbName, version: 2,
+            onUpgradeNeeded: (VersionChangeEvent e) {
+          ObjectStore store = e.transaction.objectStore(testStoreName);
 
-        expect(store.indexNames, [testNameIndex]);
-        store.deleteIndex(testNameIndex);
+          expect(store.indexNames, [testNameIndex]);
+          store.deleteIndex(testNameIndex);
 
-        expect(store.indexNames, []);
-      });
-      db.close();
-      // check that the index is indeed gone
-      db = await idbFactory.open(_dbName, version: 3,
-          onUpgradeNeeded: (VersionChangeEvent e) {
-        ObjectStore store = e.transaction.objectStore(testStoreName);
-        expect(store.indexNames, []);
-      });
-      db.close();
+          expect(store.indexNames, []);
+        });
+        db.close();
+        // check that the index is indeed gone
+        db = await idbFactory.open(_dbName, version: 3,
+            onUpgradeNeeded: (VersionChangeEvent e) {
+          ObjectStore store = e.transaction.objectStore(testStoreName);
+          expect(store.indexNames, []);
+        });
+        db.close();
+      }
     });
     test('delete_non_existing_index', () async {
       await _setupDeleteDb();
@@ -183,41 +194,45 @@ void defineTests(TestContext ctx) {
         }
       });
       db.close();
-      db = await idbFactory.open(_dbName, version: 2,
-          onUpgradeNeeded: (VersionChangeEvent e) {
-        ObjectStore store = e.transaction.objectStore(testStoreName);
-        try {
-          store.deleteIndex(testNameIndex);
-          fail('should fail');
-        } on DatabaseError catch (e) {
-          expect(isNotFoundError(e), isTrue);
-        }
-        store.createIndex(testNameIndex2, testNameField2);
 
-        expect(store.indexNames, [testNameIndex2]);
-      });
-      db.close();
-      db = await idbFactory.open(_dbName, version: 3,
-          onUpgradeNeeded: (VersionChangeEvent e) {
-        ObjectStore store = e.transaction.objectStore(testStoreName);
-        store.deleteIndex(testNameIndex2);
+      // not working in memory since not persistent
+      if (!ctx.isInMemory) {
+        db = await idbFactory.open(_dbName, version: 2,
+            onUpgradeNeeded: (VersionChangeEvent e) {
+          ObjectStore store = e.transaction.objectStore(testStoreName);
+          try {
+            store.deleteIndex(testNameIndex);
+            fail('should fail');
+          } on DatabaseError catch (e) {
+            expect(isNotFoundError(e), isTrue);
+          }
+          store.createIndex(testNameIndex2, testNameField2);
 
-        expect(store.indexNames, []);
-      });
-      db.close();
-      // check that the index is indeed gone
-      db = await idbFactory.open(_dbName, version: 3,
-          onUpgradeNeeded: (VersionChangeEvent e) {
-        ObjectStore store = e.transaction.objectStore(testStoreName);
-        try {
+          expect(store.indexNames, [testNameIndex2]);
+        });
+        db.close();
+        db = await idbFactory.open(_dbName, version: 3,
+            onUpgradeNeeded: (VersionChangeEvent e) {
+          ObjectStore store = e.transaction.objectStore(testStoreName);
           store.deleteIndex(testNameIndex2);
-          fail('should fail');
-        } on DatabaseError catch (e) {
-          expect(isNotFoundError(e), isTrue);
-        }
-        expect(store.indexNames, []);
-      });
-      db.close();
+
+          expect(store.indexNames, []);
+        });
+        db.close();
+        // check that the index is indeed gone
+        db = await idbFactory.open(_dbName, version: 3,
+            onUpgradeNeeded: (VersionChangeEvent e) {
+          ObjectStore store = e.transaction.objectStore(testStoreName);
+          try {
+            store.deleteIndex(testNameIndex2);
+            fail('should fail');
+          } on DatabaseError catch (e) {
+            expect(isNotFoundError(e), isTrue);
+          }
+          expect(store.indexNames, []);
+        });
+        db.close();
+      }
     });
 
     test('twice', () async {

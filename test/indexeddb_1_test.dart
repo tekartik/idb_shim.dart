@@ -211,7 +211,10 @@ void defineTests(TestContext ctx) {
 
     // Don't bother with these tests if it's unsupported.
     if (idb.IdbFactory.supported) {
-      test('upgrade', () => testUpgrade(idbFactory));
+      // not working in memory since not persistent
+      if (!ctx.isInMemory) {
+        test('upgrade', () => testUpgrade(idbFactory));
+      }
       // temp skip
       group('dynamic', () {
         testTypes(testReadWrite, idbFactory);

@@ -74,6 +74,8 @@ class TestContext {
 
   // ie don't except any pause between 2 calls
   bool get isIdbNoLazy => isIdbSembast || isIdbIe;
+
+  bool get isInMemory => false;
 }
 
 class SembastTestContext extends TestContext {
@@ -88,6 +90,16 @@ class SembastTestContext extends TestContext {
   String get dbName => join(joinAll(testDescriptions), "test.db");
 }
 
+class SembastMemoryTestContext extends SembastTestContext {
+  SembastMemoryTestContext() {
+    factory = idbMemoryFactory;
+  }
+  @override
+  bool get isInMemory => true;
+}
+
+TestContext idbMemoryContext = SembastMemoryTestContext();
+
 class SembastFsTestContext extends SembastTestContext {
   @override
   sdb_fs.DatabaseFactoryFs get sdbFactory =>
@@ -96,10 +108,17 @@ class SembastFsTestContext extends SembastTestContext {
   IdbFactorySembast get factory => super.factory;
 }
 
-TestContext idbMemoryContext = SembastTestContext()..factory = idbMemoryFactory;
+class SembastMemoryFsTestContext extends SembastFsTestContext {
+  SembastMemoryFsTestContext() {
+    factory = idbMemoryFsFactory;
+  }
 
-SembastFsTestContext idbMemoryFsContext = SembastFsTestContext()
-  ..factory = idbMemoryFsFactory;
+  // It is actually not considerd in memory in our tests
+  @override
+  bool get isInMemory => false;
+}
+
+SembastFsTestContext idbMemoryFsContext = SembastMemoryFsTestContext();
 
 IdbFactory idbTestMemoryFactory = idbMemoryFactory;
 

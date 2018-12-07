@@ -105,18 +105,21 @@ void defineTests(TestContext ctx) {
         expect(database.version, 1);
         database.close();
 
-        bool initCalled = false;
-        void _initializeDatabase(VersionChangeEvent e) {
-          // should not be called
-          initCalled = true;
-        }
+        // not working in memory since not persistent
+        if (!ctx.isInMemory) {
+          bool initCalled = false;
+          void _initializeDatabase(VersionChangeEvent e) {
+            // should not be called
+            initCalled = true;
+          }
 
-        return idbFactory
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
-            .then((Database database) {
-          expect(initCalled, false);
-          database.close();
-        });
+          return idbFactory
+              .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
+              .then((Database database) {
+            expect(initCalled, false);
+            database.close();
+          });
+        }
       });
     });
 
@@ -154,20 +157,23 @@ void defineTests(TestContext ctx) {
         expect(initCalled, true);
         database.close();
 
-        bool upgradeCalled = false;
-        void _upgradeDatabase(VersionChangeEvent e) {
-          // should be called
-          expect(e.oldVersion, 1);
-          expect(e.newVersion, 2);
-          upgradeCalled = true;
-        }
+        // not working in memory since not persistent
+        if (!ctx.isInMemory) {
+          bool upgradeCalled = false;
+          void _upgradeDatabase(VersionChangeEvent e) {
+            // should be called
+            expect(e.oldVersion, 1);
+            expect(e.newVersion, 2);
+            upgradeCalled = true;
+          }
 
-        return idbFactory
-            .open(_dbName, version: 2, onUpgradeNeeded: _upgradeDatabase)
-            .then((Database database) {
-          expect(upgradeCalled, true);
-          database.close();
-        });
+          return idbFactory
+              .open(_dbName, version: 2, onUpgradeNeeded: _upgradeDatabase)
+              .then((Database database) {
+            expect(upgradeCalled, true);
+            database.close();
+          });
+        }
       });
     });
 
@@ -185,20 +191,23 @@ void defineTests(TestContext ctx) {
         expect(initCalled, true);
         database.close();
 
-        bool downgradeCalled = false;
-        void _downgradeDatabase(VersionChangeEvent e) {
-          // should not be be called
-          downgradeCalled = true;
-        }
+        // not working in memory since not persistent
+        if (!ctx.isInMemory) {
+          bool downgradeCalled = false;
+          void _downgradeDatabase(VersionChangeEvent e) {
+            // should not be be called
+            downgradeCalled = true;
+          }
 
-        return idbFactory
-            .open(_dbName, version: 1, onUpgradeNeeded: _downgradeDatabase)
-            .then((Database database) {
-          fail("should fail");
-        }, onError: (err, st) {
-          // this should fail
-          expect(downgradeCalled, false);
-        });
+          return idbFactory
+              .open(_dbName, version: 1, onUpgradeNeeded: _downgradeDatabase)
+              .then((Database database) {
+            fail("should fail");
+          }, onError: (err, st) {
+            // this should fail
+            expect(downgradeCalled, false);
+          });
+        }
       });
     });
 

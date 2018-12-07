@@ -518,44 +518,47 @@ void defineTests(TestContext ctx) {
       });
     });
 
-    group('create index and re-open', () {
-      int index = 0;
+    // not working in memory since not persistent
+    if (!ctx.isInMemory) {
+      group('create index and re-open', () {
+        int index = 0;
 
-      Future testIndex(IdbIndexMeta indexMeta) async {
-        String _dbName = "${dbTestName}-${++index}";
-        await idbFactory.deleteDatabase(_dbName);
-        IdbObjectStoreMeta storeMeta = idbSimpleObjectStoreMeta.clone();
-        storeMeta.putIndex(indexMeta);
-        return setUpSimpleStore(idbFactory, meta: storeMeta, dbName: _dbName)
-            .then((Database db) {
-          db.close();
-        }).then((_) {
-          return idbFactory.open(_dbName).then((Database db) {
-            Transaction transaction =
-                db.transaction(storeMeta.name, idbModeReadOnly);
-            ObjectStore objectStore = transaction.objectStore(storeMeta.name);
-            Index index = objectStore.index(indexMeta.name);
-            IdbIndexMeta readMeta = IdbIndexMeta.fromIndex(index);
-
-            // multi entry not supported on ie
-            if (ctx.isIdbIe) {
-              readMeta = IdbIndexMeta(readMeta.name, readMeta.keyPath,
-                  readMeta.unique, indexMeta.multiEntry);
-            }
-            expect(readMeta, indexMeta);
+        Future testIndex(IdbIndexMeta indexMeta) async {
+          String _dbName = "${dbTestName}-${++index}";
+          await idbFactory.deleteDatabase(_dbName);
+          IdbObjectStoreMeta storeMeta = idbSimpleObjectStoreMeta.clone();
+          storeMeta.putIndex(indexMeta);
+          return setUpSimpleStore(idbFactory, meta: storeMeta, dbName: _dbName)
+              .then((Database db) {
             db.close();
+          }).then((_) {
+            return idbFactory.open(_dbName).then((Database db) {
+              Transaction transaction =
+                  db.transaction(storeMeta.name, idbModeReadOnly);
+              ObjectStore objectStore = transaction.objectStore(storeMeta.name);
+              Index index = objectStore.index(indexMeta.name);
+              IdbIndexMeta readMeta = IdbIndexMeta.fromIndex(index);
+
+              // multi entry not supported on ie
+              if (ctx.isIdbIe) {
+                readMeta = IdbIndexMeta(readMeta.name, readMeta.keyPath,
+                    readMeta.unique, indexMeta.multiEntry);
+              }
+              expect(readMeta, indexMeta);
+              db.close();
+            });
           });
-        });
-      }
-
-      test('all', () async {
-        dbTestName = ctx.dbName;
-
-        for (IdbIndexMeta indexMeta in idbIndexMetas) {
-          await testIndex(indexMeta);
         }
+
+        test('all', () async {
+          dbTestName = ctx.dbName;
+
+          for (IdbIndexMeta indexMeta in idbIndexMetas) {
+            await testIndex(indexMeta);
+          }
+        });
       });
-    });
+    }
 
     /*
     group('one index array not unique', () {

@@ -69,38 +69,45 @@ void defineTests(TestContext ctx) {
     group('init', () {
       tearDown(_tearDown);
 
-      test('delete', () async {
-        await _setupDeleteDb();
+      try {
+        test('delete', () async {
+          await _setupDeleteDb();
 
-        void _createStore(VersionChangeEvent e) {
-          Database db = e.database;
-          db.createObjectStore(testStoreName);
-        }
+          void _createStore(VersionChangeEvent e) {
+            Database db = e.database;
+            db.createObjectStore(testStoreName);
+          }
 
-        Database db = await idbFactory.open(_dbName,
-            version: 1, onUpgradeNeeded: _createStore);
-        Transaction txn = db.transaction(testStoreName, idbModeReadWrite);
-        ObjectStore store = txn.objectStore(testStoreName);
-        await store.put("value", "key");
-        expect(await store.getObject("key"), "value");
-        await txn.completed;
+          Database db = await idbFactory.open(_dbName,
+              version: 1, onUpgradeNeeded: _createStore);
+          Transaction txn = db.transaction(testStoreName, idbModeReadWrite);
+          ObjectStore store = txn.objectStore(testStoreName);
+          await store.put("value", "key");
+          expect(await store.getObject("key"), "value");
+          await txn.completed;
 
-        db.close();
+          db.close();
 
-        void _deleteAndCreateStore(VersionChangeEvent e) {
-          Database db = e.database;
-          db.deleteObjectStore(testStoreName);
-          db.createObjectStore(testStoreName);
-        }
+          // this does not work for in memory database..
+          if (!ctx.isInMemory) {
+            void _deleteAndCreateStore(VersionChangeEvent e) {
+              Database db = e.database;
+              db.deleteObjectStore(testStoreName);
+              db.createObjectStore(testStoreName);
+            }
 
-        db = await idbFactory.open(_dbName,
-            version: 2, onUpgradeNeeded: _deleteAndCreateStore);
-        txn = db.transaction(testStoreName, idbModeReadOnly);
-        store = txn.objectStore(testStoreName);
-        expect(await store.getObject("key"), null);
-        await txn.completed;
-        db.close();
-      });
+            db = await idbFactory.open(_dbName,
+                version: 2, onUpgradeNeeded: _deleteAndCreateStore);
+            txn = db.transaction(testStoreName, idbModeReadOnly);
+            store = txn.objectStore(testStoreName);
+            expect(await store.getObject("key"), null);
+            await txn.completed;
+            db.close();
+          }
+        });
+      } catch (e, s) {
+        print(s);
+      }
     });
 
     group('non_auto', () {
@@ -862,49 +869,53 @@ void defineTests(TestContext ctx) {
       });
     });
 
-    group('create store and re-open', () {
-      setUp(() {
-        return idbFactory.deleteDatabase(testDbName);
-      });
-
-      Future testStore(IdbObjectStoreMeta storeMeta) {
-        return setUpSimpleStore(idbFactory, meta: storeMeta, dbName: testDbName)
-            .then((Database db) {
-          db.close();
-        }).then((_) async {
-          Database db = await idbFactory.open(testDbName);
-          Transaction transaction =
-              db.transaction(storeMeta.name, idbModeReadOnly);
-          ObjectStore objectStore = transaction.objectStore(storeMeta.name);
-          IdbObjectStoreMeta readMeta =
-              IdbObjectStoreMeta.fromObjectStore(objectStore);
-
-          // ie idb does not have autoIncrement
-          if (ctx.isIdbIe) {
-            readMeta = IdbObjectStoreMeta(readMeta.name, readMeta.keyPath,
-                storeMeta.autoIncrement, readMeta.indecies.toList());
-          }
-          expect(readMeta, storeMeta);
-          await transaction.completed;
-          db.close();
+    // not working in memory since not persistent
+    if (!ctx.isInMemory) {
+      group('create store and re-open', () {
+        setUp(() {
+          return idbFactory.deleteDatabase(testDbName);
         });
-      }
 
-      test('all', () {
-        Iterator<IdbObjectStoreMeta> iterator = idbObjectStoreMetas.iterator;
+        Future testStore(IdbObjectStoreMeta storeMeta) {
+          return setUpSimpleStore(idbFactory,
+                  meta: storeMeta, dbName: testDbName)
+              .then((Database db) {
+            db.close();
+          }).then((_) async {
+            Database db = await idbFactory.open(testDbName);
+            Transaction transaction =
+                db.transaction(storeMeta.name, idbModeReadOnly);
+            ObjectStore objectStore = transaction.objectStore(storeMeta.name);
+            IdbObjectStoreMeta readMeta =
+                IdbObjectStoreMeta.fromObjectStore(objectStore);
 
-        Future _next() {
-          if (iterator.moveNext()) {
-            return testStore(iterator.current).then((_) {
-              return _next();
-            });
-          }
-          return Future.value();
+            // ie idb does not have autoIncrement
+            if (ctx.isIdbIe) {
+              readMeta = IdbObjectStoreMeta(readMeta.name, readMeta.keyPath,
+                  storeMeta.autoIncrement, readMeta.indecies.toList());
+            }
+            expect(readMeta, storeMeta);
+            await transaction.completed;
+            db.close();
+          });
         }
 
-        return _next();
+        test('all', () {
+          Iterator<IdbObjectStoreMeta> iterator = idbObjectStoreMetas.iterator;
+
+          Future _next() {
+            if (iterator.moveNext()) {
+              return testStore(iterator.current).then((_) {
+                return _next();
+              });
+            }
+            return Future.value();
+          }
+
+          return _next();
+        });
       });
-    });
+    }
 
     group('various', () {
       _setUp() async {
