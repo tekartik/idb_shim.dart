@@ -1,14 +1,16 @@
 library all_test_browser;
 
-import 'simple_provider_test.dart' as simple_provider_test;
-import 'transaction_test.dart' as transaction_test;
-import 'exception_test.dart' as exception_test;
-import 'index_test.dart' as index_test;
+import 'dart:async';
+
+import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/idb_client_native.dart';
 import 'package:idb_shim/idb_client_websql.dart';
-import 'package:idb_shim/idb_client.dart';
-import 'dart:async';
+
+import 'exception_test.dart' as exception_test;
 import 'idb_test_common.dart';
+import 'index_test.dart' as index_test;
+import 'simple_provider_test.dart' as simple_provider_test;
+import 'transaction_test.dart' as transaction_test;
 
 void testMain(TestContext ctx) {
   simple_provider_test.defineTests(ctx);

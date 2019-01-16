@@ -248,7 +248,7 @@ abstract class ObjectStore {
   /// IDBKeyRange. If no arguments are provided, it returns the total number of
   /// records in the store.
   ///
-  Future<int> count([dynamic key_OR_range]);
+  Future<int> count([dynamic keyOrRange]);
 
   ///
   /// Returns the key path of this object store.
@@ -308,7 +308,7 @@ abstract class Database {
   ///
   /// [mode] can be readonly (idbModeReadOnly), the default or readwrite (idbModeReadWrite)
   ///
-  Transaction transaction(storeName_OR_storeNames, String mode);
+  Transaction transaction(storeNameOrStoreNames, String mode);
 
   ///
   /// helper for transaction on list of object stores
@@ -392,7 +392,7 @@ abstract class Index {
   ///
   /// returns the number of records within a key range.
   ///
-  Future<int> count([key_OR_range]);
+  Future<int> count([keyOrRange]);
 
   ///
   /// finds either the value in the referenced object store that corresponds to
@@ -767,8 +767,10 @@ class DatabaseError extends Error {
   String _message;
 
   StackTrace _stackTrace;
+
   @override
   StackTrace get stackTrace => _stackTrace ?? super.stackTrace;
+
   set stackTrace(StackTrace stackTrace) {
     _stackTrace = stackTrace;
   }

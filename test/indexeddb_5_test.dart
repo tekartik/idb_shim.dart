@@ -1,10 +1,10 @@
-library IndexedDB5Test;
+library idb_shim.test.indexeddb_5_test;
 
 //import 'dart:async';
 import 'package:idb_shim/idb_client.dart';
 
-// so that this can be run directly
 import 'idb_test_common.dart';
+// so that this can be run directly
 
 void main() {
   defineTests(idbMemoryContext);

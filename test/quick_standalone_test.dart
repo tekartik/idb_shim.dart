@@ -1,6 +1,7 @@
 library idb_shim.quick_standalone;
 
 import 'package:idb_shim/idb_client.dart';
+
 import 'idb_test_common.dart';
 
 const STORE_NAME = "quick_store";
@@ -9,7 +10,7 @@ const NAME_INDEX = "quick_index";
 const NAME_FIELD = "quick_field";
 
 // so that this can be run directly
-main() {
+void main() {
   defineTests(idbMemoryContext);
 }
 

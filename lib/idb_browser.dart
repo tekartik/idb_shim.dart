@@ -1,10 +1,10 @@
 library idb_shim_browser;
 
-import 'package:idb_shim/idb_client_native.dart';
-import 'package:idb_shim/idb_client_websql.dart';
-import 'package:idb_shim/idb_client_sembast.dart';
-import 'package:sembast/sembast_memory.dart' as sembast;
 import 'package:idb_shim/idb_client.dart';
+import 'package:idb_shim/idb_client_native.dart';
+import 'package:idb_shim/idb_client_sembast.dart';
+import 'package:idb_shim/idb_client_websql.dart';
+import 'package:sembast/sembast_memory.dart' as sembast;
 
 IdbFactory getIdbFactory([String name]) {
   if (name == null) {
@@ -22,7 +22,6 @@ IdbFactory getIdbFactory([String name]) {
     case idbFactoryMemory:
       return idbMemoryFactory;
     case idbFactorySembastMemory:
-    case idbFactoryMemory:
       return idbSembastMemoryFactory;
     default:
       throw UnsupportedError("Factory '$name' not supported");
@@ -48,6 +47,7 @@ IdbFactory get idbNativeFactory {
 IdbFactory get idbMemoryFactory => idbSembastMemoryFactory;
 
 IdbFactory _idbSembastMemoryFactory;
+
 IdbFactory get idbSembastMemoryFactory {
   if (_idbSembastMemoryFactory == null) {
     _idbSembastMemoryFactory =

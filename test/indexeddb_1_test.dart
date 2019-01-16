@@ -1,20 +1,23 @@
 // https://dart.googlecode.com/svn/branches/bleeding_edge/dart/tests/html/indexeddb_1_test.dart
 // replace _idbFactory with _idbFactory
-library IndexedDB1Test;
+library idb_shim.test.indexeddb_1_test;
 
 //TEKARTIK_IDB_REMOVED import 'package:unittest/html_individual_config.dart';
 import 'dart:async';
-//TEKARTIK_IDB_REMOVED import 'dart:html' as html;
-//TEKARTIK_IDB_REMOVED import 'dart:indexed_db' as idb;
+
 import 'package:idb_shim/idb_client.dart' as idb;
 
-// so that this can be run directly
 import 'idb_test_common.dart';
+
+//TEKARTIK_IDB_REMOVED import 'dart:html' as html;
+//TEKARTIK_IDB_REMOVED import 'dart:indexed_db' as idb;
+// so that this can be run directly
 
 const String STORE_NAME = 'TEST';
 const int VERSION = 1;
 
 var databaseNameIndex = 0;
+
 String nextDatabaseName() {
   return 'Test1_${databaseNameIndex++}';
 }
@@ -56,7 +59,7 @@ BodyFunc testReadWrite(idb.IdbFactory idbFactory, key, value, matcher,
       if (dbName == null) {
         dbName = nextDatabaseName();
       }
-      createObjectStore(idb.VersionChangeEvent e) {
+      void createObjectStore(idb.VersionChangeEvent e) {
         var store = e.database.createObjectStore(storeName);
         expect(store, isNotNull);
       }

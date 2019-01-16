@@ -14,13 +14,14 @@ class _SdbVersionChangeEvent extends IdbVersionChangeEventBase {
   @override
   final int newVersion;
   Request request;
+
   @override
   Object get target => request;
+
   @override
   Database get database => transaction.database;
-  /**
-   * added for convenience
-   */
+
+  /// added for convenience
   @override
   TransactionSembast get transaction =>
       request.transaction as TransactionSembast;
@@ -34,6 +35,7 @@ class _SdbVersionChangeEvent extends IdbVersionChangeEventBase {
     }
     request = OpenDBRequest(database, database.versionChangeTransaction);
   }
+
   @override
   String toString() {
     return "${oldVersion} => ${newVersion}";
@@ -194,12 +196,11 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
   }
 
   @override
-  Transaction transaction(storeName_OR_storeNames, String mode) {
+  Transaction transaction(storeNameOrStoreNames, String mode) {
     //if (_debugTransaction) {
     //  print('transaction($storeName_OR_storeNames)');
     // }
-    IdbTransactionMeta txnMeta =
-        meta.transaction(storeName_OR_storeNames, mode);
+    IdbTransactionMeta txnMeta = meta.transaction(storeNameOrStoreNames, mode);
     return TransactionSembast(this, txnMeta);
   }
 

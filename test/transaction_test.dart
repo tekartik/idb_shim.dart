@@ -1,10 +1,11 @@
 library transaction_test_common;
 
 import 'package:idb_shim/idb_client.dart';
+
 import 'idb_test_common.dart';
 
 // so that this can be run directly
-main() {
+void main() {
   defineTests(idbMemoryContext);
 }
 
@@ -236,7 +237,7 @@ void defineTests(TestContext ctx) {
       group('transaction auto', () {
         //ObjectStore objectStore;
 
-        _setUp() async {
+        Future _setUp() async {
           await _setupDeleteDb();
 
           void _initializeDatabase(VersionChangeEvent e) {
@@ -312,7 +313,7 @@ void defineTests(TestContext ctx) {
     group('timing', () {
       Database db;
 
-      _setUp() async {
+      Future _setUp() async {
         return setUpSimpleStore(idbFactory, dbName: ctx.dbName)
             .then((Database database) {
           db = database;
@@ -394,7 +395,7 @@ void defineTests(TestContext ctx) {
         await _setUp();
         Transaction transaction;
         ObjectStore objectStore;
-        _createTransactionSync() {
+        void _createTransactionSync() {
           transaction = db.transaction(testStoreName, idbModeReadWrite);
           objectStore = transaction.objectStore(testStoreName);
         }
@@ -463,7 +464,7 @@ void defineTests(TestContext ctx) {
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadOnly);
         ObjectStore objectStore = transaction.objectStore(testStoreName);
-        _get() async {
+        Future _get() async {
           await objectStore.getObject(0);
         }
 

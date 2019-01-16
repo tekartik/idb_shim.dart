@@ -5,21 +5,25 @@ import '../../idb.dart';
 // native exception won't be of this type
 // the text here has been copied to match the DomException message
 class DatabaseReadOnlyError extends DatabaseError {
-  static String _MESSAGE = "ReadOnlyError: The transaction is read-only.";
-  DatabaseReadOnlyError() : super(_MESSAGE);
+  static String _errorMessage = "ReadOnlyError: The transaction is read-only.";
+
+  DatabaseReadOnlyError() : super(_errorMessage);
 }
 
 class DatabaseStoreNotFoundError extends DatabaseError {
-  static const String _MESSAGE =
+  static const String _errorMessage =
       "NotFoundError: One of the specified object stores was not found.";
-  static String storeMessage(var store_OR_stores) =>
-      "NotFoundError: One of the specified object stores '${store_OR_stores}' was not found.";
-  DatabaseStoreNotFoundError([String message = _MESSAGE]) : super(message);
+
+  static String storeMessage(var storeOrStores) =>
+      "NotFoundError: One of the specified object stores '${storeOrStores}' was not found.";
+
+  DatabaseStoreNotFoundError([String message = _errorMessage]) : super(message);
 }
 
 class DatabaseIndexNotFoundError extends DatabaseError {
   static String indexMessage(var indexName) =>
       "NotFoundError: The specified index '${indexName}' was not found.";
+
   DatabaseIndexNotFoundError(String indexName) : super(indexMessage(indexName));
 }
 
@@ -29,9 +33,10 @@ class DatabaseTransactionStoreNotFoundError extends DatabaseError {
 }
 
 class DatabaseNoKeyError extends DatabaseError {
-  static String _MESSAGE =
+  static String _errorMessage =
       "DataError: The data provided does not meet requirements. No key or key range specified.";
-  DatabaseNoKeyError() : super(_MESSAGE);
+
+  DatabaseNoKeyError() : super(_errorMessage);
 }
 
 class DatabaseInvalidKeyError extends DatabaseError {

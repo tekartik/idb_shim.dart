@@ -6,7 +6,7 @@ import 'common_meta_test.dart';
 import 'idb_test_common.dart';
 
 // so that this can be run directly
-main() {
+void main() {
   defineTests(idbMemoryContext);
 }
 
@@ -17,7 +17,7 @@ void defineTests(TestContext ctx) {
     Transaction transaction;
     ObjectStore objectStore;
 
-    _createTransaction() {
+    void _createTransaction() {
       transaction = db.transaction(testStoreName, idbModeReadWrite);
       objectStore = transaction.objectStore(testStoreName);
     }
@@ -43,7 +43,7 @@ void defineTests(TestContext ctx) {
     }
 
     group('no', () {
-      _setUp() async {
+      Future _setUp() async {
         await _setupDeleteDb();
 
         void _initializeDatabase(VersionChangeEvent e) {
@@ -87,7 +87,7 @@ void defineTests(TestContext ctx) {
     });
 
     group('one not unique', () {
-      _setUp() async {
+      Future _setUp() async {
         await _setupDeleteDb();
 
         void _initializeDatabase(VersionChangeEvent e) {
@@ -189,7 +189,7 @@ void defineTests(TestContext ctx) {
     });
 
     group('one unique', () {
-      _setUp() async {
+      Future _setUp() async {
         await _setupDeleteDb();
 
         void _initializeDatabase(VersionChangeEvent e) {

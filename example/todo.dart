@@ -5,11 +5,12 @@
 // This is a port of "A Simple ToDo List Using HTML5 IndexedDB" to Dart.
 // See: http://www.html5rocks.com/en/tutorials/indexeddb/todo/
 
-import 'dart:html';
-import 'package:idb_shim/idb_browser.dart' as idb;
-import 'package:idb_shim/idb.dart' as idb;
-//import 'dart:indexed_db' as idb;
 import 'dart:async';
+import 'dart:html';
+
+import 'package:idb_shim/idb.dart' as idb;
+import 'package:idb_shim/idb_browser.dart' as idb;
+//import 'dart:indexed_db' as idb;
 
 //idb.IdbFactory idbFactory = window.indexedDB;
 idb.IdbFactory idbFactory;
@@ -59,7 +60,7 @@ class TodoList {
 
   void _onAddTodo() {
     var value = _input.value.trim();
-    if (value.length > 0) {
+    if (value.isNotEmpty) {
       _addTodo(value);
     }
     _input.value = '';
@@ -116,7 +117,7 @@ class TodoList {
 /// Typically the argument is window.location.search
 ///
 Map<String, String> getArguments(String search) {
-  Map<String, String> params = Map();
+  Map<String, String> params = {};
   if (search != null) {
     int questionMarkIndex = search.indexOf('?');
     if (questionMarkIndex != -1) {

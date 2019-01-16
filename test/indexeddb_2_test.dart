@@ -1,15 +1,15 @@
 // https://dart.googlecode.com/svn/branches/bleeding_edge/dart/tests/html/indexeddb_1_test.dart
 // replace html.window.indexedDB with idbFactory
 // replace IndexedDB1Test with IndexedDB2Test
-library IndexedDB2Test;
+library idb_shim.test.indexeddb_2_test;
+
+import 'dart:collection';
 
 import 'package:idb_shim/idb_client.dart' as idb;
 
-import 'dart:collection';
-import 'indexeddb_utils.dart';
-
-// so that this can be run directly
 import 'idb_test_common.dart';
+import 'indexeddb_utils.dart';
+// so that this can be run directly
 
 // Write and re-read Maps: simple Maps; Maps with DAGs; Maps with cycles.
 
@@ -48,11 +48,10 @@ Future testReadWrite(idb.IdbFactory idbFactory, key, value, check,
     }
     rethrow;
   }
-  ;
 }
 
 List<String> get nonNativeListData {
-  var list = List<String>();
+  var list = <String>[];
   list.add("data");
   list.add("clone");
   list.add("error");
@@ -60,7 +59,7 @@ List<String> get nonNativeListData {
   return list;
 }
 
-main() {
+void main() {
   defineTests(idbMemoryContext);
 }
 
@@ -79,11 +78,11 @@ void defineTests(TestContext ctx) {
   obj4['a'] = 100;
   obj4['b'] = 's';
 
-  List<Object> cyclic_list = [1, 2, 3];
-  cyclic_list[1] = cyclic_list;
+  List<Object> cyclicList = [1, 2, 3];
+  cyclicList[1] = cyclicList;
 
-  skip_go(name, data) => null;
-  go(String name, data) =>
+  dynamic skipGo(name, data) => null;
+  void go(String name, data) =>
       test(name, () => testReadWrite(idbFactory, 123, data, verifyGraph));
 
   test('test_verifyGraph', () {
@@ -105,33 +104,33 @@ void defineTests(TestContext ctx) {
             ], l2),
         throwsA(anything));
 
-    verifyGraph(cyclic_list, cyclic_list);
+    verifyGraph(cyclicList, cyclicList);
   });
 
   // Don't bother with these tests if it's unsupported.
   // Support is tested in indexeddb_1_test
   if (idb.IdbFactory.supported) {
     go('test_simple', obj1);
-    skip_go('test_DAG', obj2);
-    skip_go('test_cycle', obj3);
+    skipGo('test_DAG', obj2);
+    skipGo('test_cycle', obj3);
     go('test_simple_splay', obj4);
     go('const_array_1', const [
       [1],
       [2]
     ]);
-    skip_go('const_array_dag', const [
+    skipGo('const_array_dag', const [
       [1],
       [1]
     ]);
-    skip_go('array_deferred_copy', [1, 2, 3, obj3, obj3, 6]);
-    skip_go('array_deferred_copy_2', [
+    skipGo('array_deferred_copy', [1, 2, 3, obj3, obj3, 6]);
+    skipGo('array_deferred_copy_2', [
       1,
       2,
       3,
       [4, 5, obj3],
       [obj3, 6]
     ]);
-    skip_go('cyclic_list', cyclic_list);
+    skipGo('cyclic_list', cyclicList);
     go('non-native lists', nonNativeListData);
   }
 }

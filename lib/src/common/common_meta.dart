@@ -1,8 +1,9 @@
 library tekartik_iodb.idb_meta;
 
-import 'package:idb_shim/idb_client.dart';
-import 'package:collection/collection.dart';
 import 'dart:async';
+
+import 'package:collection/collection.dart';
+import 'package:idb_shim/idb_client.dart';
 
 abstract class TransactionWithMetaMixin {
   IdbTransactionMeta get meta;
@@ -11,6 +12,7 @@ abstract class TransactionWithMetaMixin {
 class IdbTransactionMeta {
   String mode;
   List<String> storeNames;
+
   IdbTransactionMeta(this.storeNames, this.mode);
 
   void checkObjectStore(String storeName) {
@@ -76,7 +78,7 @@ class IdbDatabaseMeta {
   IdbDatabaseMeta([this.version]);
 
   IdbVersionChangeTransactionMeta _versionChangeTransaction;
-  Map<String, IdbObjectStoreMeta> _stores = Map();
+  Map<String, IdbObjectStoreMeta> _stores = {};
 
   IdbVersionChangeTransactionMeta get versionChangeTransaction =>
       _versionChangeTransaction;
@@ -92,7 +94,7 @@ class IdbDatabaseMeta {
     _versionChangeTransaction = null;
   }
 
-  createObjectStore(IdbObjectStoreMeta store) {
+  void createObjectStore(IdbObjectStoreMeta store) {
     if (versionChangeTransaction == null) {
       throw StateError(
           "cannot create objectStore outside of a versionChangedEvent");
@@ -101,7 +103,7 @@ class IdbDatabaseMeta {
     putObjectStore(store);
   }
 
-  deleteObjectStore(String storeName) {
+  void deleteObjectStore(String storeName) {
     if (versionChangeTransaction == null) {
       throw StateError(
           "cannot delete objectStore outside of a versionChangedEvent");
@@ -122,29 +124,29 @@ class IdbDatabaseMeta {
     return _stores.keys.contains(storeName);
   }
 
-  IdbTransactionMeta transaction(storeName_OR_storeNames, String mode) {
+  IdbTransactionMeta transaction(storeNameOrStoreNames, String mode) {
     // Check store(s) exist
-    if (storeName_OR_storeNames is String) {
-      if (!_containsStore(storeName_OR_storeNames)) {
+    if (storeNameOrStoreNames is String) {
+      if (!_containsStore(storeNameOrStoreNames)) {
         throw DatabaseStoreNotFoundError(
-            DatabaseStoreNotFoundError.storeMessage(storeName_OR_storeNames));
+            DatabaseStoreNotFoundError.storeMessage(storeNameOrStoreNames));
       }
-      return IdbTransactionMeta([storeName_OR_storeNames], mode);
-    } else if (storeName_OR_storeNames is List) {
-      if (storeName_OR_storeNames.isEmpty) {
+      return IdbTransactionMeta([storeNameOrStoreNames], mode);
+    } else if (storeNameOrStoreNames is List) {
+      if (storeNameOrStoreNames.isEmpty) {
         throw DatabaseError(
             "InvalidAccessError: The storeNames parameter is empty");
       }
-      for (String storeName in storeName_OR_storeNames) {
+      for (String storeName in storeNameOrStoreNames) {
         if (!_containsStore(storeName)) {
           throw DatabaseStoreNotFoundError(
-              DatabaseStoreNotFoundError.storeMessage(storeName_OR_storeNames));
+              DatabaseStoreNotFoundError.storeMessage(storeNameOrStoreNames));
         }
       }
-      return IdbTransactionMeta(storeName_OR_storeNames.cast<String>(), mode);
-    } else if (storeName_OR_storeNames != null) {
+      return IdbTransactionMeta(storeNameOrStoreNames.cast<String>(), mode);
+    } else if (storeNameOrStoreNames != null) {
       throw DatabaseError(
-          "Invalid store name(s) parameter: ${storeName_OR_storeNames}");
+          "Invalid store name(s) parameter: ${storeNameOrStoreNames}");
     } else {
       // assume null - it will complain otherwise
       // this is use for transaction created on open
@@ -152,7 +154,7 @@ class IdbDatabaseMeta {
     }
   }
 
-  putObjectStore(IdbObjectStoreMeta store) {
+  void putObjectStore(IdbObjectStoreMeta store) {
     _stores[store.name] = store;
   }
 
@@ -213,7 +215,7 @@ class IdbObjectStoreMeta {
 
   Iterable<IdbIndexMeta> get indecies => _indecies.values;
 
-  Map<String, IdbIndexMeta> _indecies = Map();
+  Map<String, IdbIndexMeta> _indecies = {};
 
   Iterable<String> get indexNames => _indecies.keys;
 
@@ -225,7 +227,7 @@ class IdbObjectStoreMeta {
     return indexMeta;
   }
 
-  createIndex(IdbDatabaseMeta databaseMeta, IdbIndexMeta index) {
+  void createIndex(IdbDatabaseMeta databaseMeta, IdbIndexMeta index) {
     if (databaseMeta.versionChangeTransaction == null) {
       throw StateError("cannot create index outside of a versionChangedEvent");
     }
@@ -239,7 +241,7 @@ class IdbObjectStoreMeta {
     putIndex(index);
   }
 
-  deleteIndex(IdbDatabaseMeta databaseMeta, String indexName) {
+  void deleteIndex(IdbDatabaseMeta databaseMeta, String indexName) {
     if (databaseMeta.versionChangeTransaction == null) {
       throw StateError("cannot delete index outside of a versionChangedEvent");
     }
@@ -323,7 +325,7 @@ class IdbObjectStoreMeta {
   int get hashCode => const MapEquality().hash(toMap());
 
   @override
-  operator ==(o) {
+  bool operator ==(o) {
     if (o is IdbObjectStoreMeta) {
       return const DeepCollectionEquality().equals(toMap(), o.toMap());
     }
@@ -333,6 +335,7 @@ class IdbObjectStoreMeta {
 
 class IdbCursorMeta {
   var key;
+
   bool get ascending => _ascending;
   final bool autoAdvance;
 
@@ -460,7 +463,7 @@ class IdbIndexMeta {
   int get hashCode => const MapEquality().hash(toMap());
 
   @override
-  operator ==(o) {
+  bool operator ==(o) {
     if (o is IdbIndexMeta) {
       return const MapEquality().equals(toMap(), o.toMap());
     }

@@ -1,9 +1,9 @@
-import 'package:idb_shim/idb.dart';
-import 'package:idb_shim/idb_client_native.dart';
 import 'dart:async';
 import 'dart:html_common' as html_common;
 import 'dart:indexed_db' as idb;
 
+import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/idb_client_native.dart';
 import 'package:idb_shim/src/common/common_database.dart';
 import 'package:idb_shim/src/native/native_error.dart';
 import 'package:idb_shim/src/native/native_object_store.dart';
@@ -19,13 +19,16 @@ class VersionChangeEventNative extends IdbVersionChangeEventBase {
   @override
   int get newVersion => idbVersionChangeEvent.newVersion;
   Request request;
+
   @override
   Object get target => request;
+
   @override
   Transaction get transaction => request.transaction;
 
   @override
   Database database;
+
   VersionChangeEventNative(this.idbVersionChangeEvent) {
     // This is null for onChangeEvent on Database
     // but ok when opening the database
@@ -43,6 +46,7 @@ class VersionChangeEventNative extends IdbVersionChangeEventBase {
 
 class DatabaseNative extends IdbDatabaseBase {
   idb.Database idbDatabase;
+
   DatabaseNative(this.idbDatabase) : super(idbNativeFactory);
 
   @override
@@ -58,7 +62,7 @@ class DatabaseNative extends IdbDatabaseBase {
   }
 
   @override
-  TransactionNativeBase transaction(storeName_OR_storeNames, String mode) {
+  TransactionNativeBase transaction(storeNameOrStoreNames, String mode) {
     // bug in 1.13
     // It only happens in dart for list
     // https://github.com/dart-lang/sdk/issues/25013
@@ -68,15 +72,15 @@ class DatabaseNative extends IdbDatabaseBase {
     try {
       return catchNativeError(() {
         idb.Transaction idbTransaction =
-            idbDatabase.transaction(storeName_OR_storeNames, mode);
+            idbDatabase.transaction(storeNameOrStoreNames, mode);
         return TransactionNative(this, idbTransaction);
       });
     } catch (e) {
       // Only handle the issue for non empty list returning a NotFoundError
-      if ((storeName_OR_storeNames is List) &&
-          (storeName_OR_storeNames.isNotEmpty) &&
+      if ((storeNameOrStoreNames is List) &&
+          (storeNameOrStoreNames.isNotEmpty) &&
           (_isNotFoundError(e))) {
-        List<String> stores = storeName_OR_storeNames;
+        List<String> stores = storeNameOrStoreNames;
 
         // Make sure they indeed exists
         bool allFound = true;
@@ -97,11 +101,11 @@ class DatabaseNative extends IdbDatabaseBase {
               return catchNativeError(() {
                 idb.Transaction idbTransaction = idbDatabase.transaction(
                     html_common.convertDartToNative_SerializedScriptValue(
-                        storeName_OR_storeNames),
+                        storeNameOrStoreNames),
                     mode);
                 return TransactionNative(this, idbTransaction);
               });
-            } catch (e2) {}
+            } catch (_) {}
           }
         }
       }

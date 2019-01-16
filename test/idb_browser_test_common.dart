@@ -3,6 +3,7 @@ library idb_shim.idb_io_test_common;
 import 'dart:html';
 
 bool _isIe;
+
 bool get isIe {
   if (_isIe == null) {
     _isIe = isUserAgentIe(window.navigator.userAgent);
@@ -11,6 +12,7 @@ bool get isIe {
 }
 
 bool _isEdge;
+
 bool get isEdge {
   if (_isEdge == null) {
     _isEdge = isUserAgentEdge(window.navigator.userAgent);
@@ -19,6 +21,7 @@ bool get isEdge {
 }
 
 bool _isSafari;
+
 bool get isSafari {
   if (_isSafari == null) {
     _isSafari = isUserAgentSafari(window.navigator.userAgent);

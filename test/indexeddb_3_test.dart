@@ -1,8 +1,10 @@
-library IndexedDB3Test;
+library idb_shim.test.indexeddb_3_test;
+
+import 'dart:async';
+
+import 'package:idb_shim/idb_client.dart';
 
 import 'idb_test_common.dart';
-import 'dart:async';
-import 'package:idb_shim/idb_client.dart';
 
 // Read with cursor.
 const String DB_NAME = 'Test3';

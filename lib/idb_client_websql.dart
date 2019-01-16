@@ -1,7 +1,9 @@
 library idb_shim_websql;
 
 import 'dart:async';
+
 import 'package:idb_shim/src/common/common_factory.dart';
+
 import 'idb_client.dart';
 import "src/utils/core_imports.dart";
 
@@ -49,8 +51,8 @@ class IdbWebSqlFactory extends IdbFactoryBase {
     throw 'WebSQL no longer supported';
   }
 
-  /**
-   * Check if WebSQL is supported on this platform
-   */
-  static bool get supported => false;
+  /// Check if WebSQL is supported on this platform
+  static bool get supported {
+    return false;
+  }
 }

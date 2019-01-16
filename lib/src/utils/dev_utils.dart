@@ -1,6 +1,4 @@
-/**
- * Development helpers to generate warning in code
- */
+/// Development helpers to generate warning in code
 library idb_shim_dev_utils;
 
 void _devPrint(Object object) {
@@ -33,7 +31,7 @@ void _devError([Object msg]) {
       print("# ERROR $msg");
       print(st);
     }
-    throw e;
+    rethrow;
   }
 }
 
@@ -42,5 +40,7 @@ void devError([String msg]) => _devError(msg);
 
 // exported for testing
 void tekartikDevPrint(Object object) => _devPrint(object);
+
 void tekartikDevError(Object object) => _devError(object);
+
 set tekartikDevPrintEnabled(bool enabled) => _devPrintEnabled = enabled;

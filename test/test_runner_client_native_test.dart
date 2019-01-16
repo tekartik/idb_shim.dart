@@ -9,7 +9,7 @@ import 'idb_browser_test_common.dart';
 import 'idb_test_common.dart';
 import 'test_runner.dart';
 
-main() {
+void main() {
   group('native', () {
     if (IdbNativeFactory.supported) {
       IdbFactory idbFactory = IdbNativeFactory();
@@ -105,7 +105,7 @@ main() {
 
           await transaction.completed;
 
-          await db.close();
+          db.close();
         },
             // keyPath as array not supported on IE
             skip: isEdge || isIe);

@@ -1,14 +1,15 @@
-import 'package:idb_shim/idb.dart';
-import 'package:idb_shim/src/native/native_cursor.dart';
-import 'package:idb_shim/src/native/native_error.dart';
 import 'dart:async';
 import 'dart:indexed_db' as idb;
 
+import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/src/native/native_cursor.dart';
+import 'package:idb_shim/src/native/native_error.dart';
 import 'package:idb_shim/src/native/native_index.dart';
 import 'package:idb_shim/src/native/native_key_range.dart';
 
 class ObjectStoreNative extends ObjectStore {
   idb.ObjectStore idbObjectStore;
+
   ObjectStoreNative(this.idbObjectStore);
 
   @override
@@ -127,10 +128,10 @@ class ObjectStoreNative extends ObjectStore {
   */
 
   @override
-  Future<int> count([dynamic key_OR_range]) {
+  Future<int> count([dynamic keyOrRange]) {
     return catchAsyncNativeError(() {
       Future<int> countFuture;
-      if (key_OR_range == null) {
+      if (keyOrRange == null) {
         countFuture = idbObjectStore.count();
 
         /*  .catchError((e) {
@@ -147,11 +148,11 @@ class ObjectStoreNative extends ObjectStore {
           }
           });
           */
-      } else if (key_OR_range is KeyRange) {
-        idb.KeyRange idbKeyRange = toNativeKeyRange(key_OR_range);
+      } else if (keyOrRange is KeyRange) {
+        idb.KeyRange idbKeyRange = toNativeKeyRange(keyOrRange);
         countFuture = idbObjectStore.count(idbKeyRange);
       } else {
-        countFuture = idbObjectStore.count(key_OR_range);
+        countFuture = idbObjectStore.count(keyOrRange);
       }
       return countFuture;
     });

@@ -40,7 +40,7 @@ List _cloneList(List original) {
   if (original == null) {
     return null;
   }
-  List list = List();
+  List list = [];
   original.forEach((value) {
     list.add(_cloneValue(value));
   });
@@ -48,7 +48,7 @@ List _cloneList(List original) {
 }
 
 Map _cloneMap(Map original) {
-  Map map = Map();
+  Map map = {};
   original.forEach((key, value) {
     map[key] = _cloneValue(value);
   });
@@ -97,7 +97,7 @@ int compareKeys<T>(T first, T second) {
 // when keyPath is an array
 // Return the relevant keyPath at index
 KeyRange keyArrayRangeAt(KeyRange keyRange, int index) {
-  _valueAt(List value, int index) {
+  dynamic _valueAt(List value, int index) {
     return value == null ? null : value[index];
   }
 

@@ -1,9 +1,11 @@
 library store_test_common;
 
-import 'package:idb_shim/idb_client.dart';
-import 'simple_provider.dart';
 import 'dart:async';
+
+import 'package:idb_shim/idb_client.dart';
+
 import 'idb_test_common.dart' hide testNameIndex, testNameField;
+import 'simple_provider.dart';
 
 // so that this can be run directly
 void main() {
@@ -61,7 +63,7 @@ void defineTests(TestContext ctx) {
             .objectStore(testStoreName);
         Stream<CursorWithValue> stream = store.openCursor();
         Completer completer = Completer();
-        List<SimpleRow> list = List();
+        List<SimpleRow> list = [];
         stream.listen((CursorWithValue cwv) {
           expect(cwv.direction, "next");
           list.add(SimpleRow(cwv));

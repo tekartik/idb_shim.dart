@@ -145,14 +145,14 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     });
   }
 
-  sdb.Filter _storeKeyOrRangeFilter([key_OR_range]) {
-    return keyOrRangeFilter(sdb.Field.key, key_OR_range);
+  sdb.Filter _storeKeyOrRangeFilter([keyOrRange]) {
+    return keyOrRangeFilter(sdb.Field.key, keyOrRange);
   }
 
   @override
-  Future<int> count([key_OR_range]) {
+  Future<int> count([keyOrRange]) {
     return inTransaction(() {
-      return sdbStore.count(_storeKeyOrRangeFilter(key_OR_range));
+      return sdbStore.count(_storeKeyOrRangeFilter(keyOrRange));
     });
   }
 

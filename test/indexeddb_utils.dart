@@ -1,13 +1,12 @@
 // https://dart.googlecode.com/svn/branches/bleeding_edge/dart/tests/html/utils.dart
-library TestUtils;
+library idb_shim.test.indexeddb_utils;
 
 import 'dart:typed_data';
+
 import 'package:dev_test/test.dart';
 
-/**
- * Verifies that [actual] has the same graph structure as [expected].
- * Detects cycles and DAG structure in Maps and Lists.
- */
+/// Verifies that [actual] has the same graph structure as [expected].
+/// Detects cycles and DAG structure in Maps and Lists.
 void verifyGraph(expected, actual) {
   var eItems = [];
   var aItems = [];
@@ -16,7 +15,7 @@ void verifyGraph(expected, actual) {
       ? reason
       : reason == null ? "path: $path" : "path: $path, $reason";
 
-  walk(String path, expected, actual) {
+  void walk(String path, expected, actual) {
     if (expected is String || expected is num || expected == null) {
       expect(actual, equals(expected), reason: message(path, 'not equal'));
       return;

@@ -8,6 +8,7 @@ import 'package:sembast/sembast_memory.dart';
 IdbFactory get idbMemoryFactory => idbSembastMemoryFactory;
 
 IdbFactory _idbSembastMemoryFactory;
+
 IdbFactory get idbSembastMemoryFactory {
   if (_idbSembastMemoryFactory == null) {
     _idbSembastMemoryFactory = IdbFactorySembast(memoryDatabaseFactory, null);
@@ -34,8 +35,6 @@ IdbFactory getIdbFactory({String name, String path}) {
       return getIdbSembastIoFactory(path);
     case idbFactoryPersistent:
       return getIdbPersistentFactory(path);
-    case idbFactoryMemory:
-      return idbMemoryFactory;
     default:
       throw UnsupportedError("Factory '$name' not supported");
   }

@@ -17,22 +17,22 @@ class IndexSembast extends Index with IndexWithMetaMixin {
     return store.inTransaction(computation);
   }
 
-  sdb.Filter _indexKeyOrRangeFilter([key_OR_range]) {
+  sdb.Filter _indexKeyOrRangeFilter([keyOrRange]) {
     // null means all entry without null value
-    if (key_OR_range == null) {
+    if (keyOrRange == null) {
       if (meta.keyPath is String) {
         return sdb.Filter.notEqual(meta.keyPath as String, null);
       } else {
         throw 'key_OR_range is null, keyPath must not be an array';
       }
     }
-    return keyOrRangeFilter(meta.keyPath, key_OR_range);
+    return keyOrRangeFilter(meta.keyPath, keyOrRange);
   }
 
   @override
-  Future<int> count([key_OR_range]) {
+  Future<int> count([keyOrRange]) {
     return inTransaction(() {
-      return store.sdbStore.count(_indexKeyOrRangeFilter(key_OR_range));
+      return store.sdbStore.count(_indexKeyOrRangeFilter(keyOrRange));
     });
   }
 

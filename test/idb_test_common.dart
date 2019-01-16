@@ -1,26 +1,30 @@
 library idb_shim.idb_test_common;
 
-import 'package:logging/logging.dart';
-//import 'package:unittest/unittest.dart';
-import 'package:idb_shim/idb_client.dart';
-import 'package:idb_shim/src/common/common_meta.dart';
-import 'package:idb_shim/idb_client_sembast.dart';
-import 'package:idb_shim/idb_client_memory.dart';
-import 'package:sembast/sembast.dart' as sdb;
-import 'package:sembast/src/sembast_fs.dart' as sdb_fs;
-import 'package:sembast/sembast_memory.dart' as sdb;
-export 'package:idb_shim/idb_client_memory.dart';
 import 'dart:async';
 
+import 'package:dev_test/test.dart';
+import 'package:idb_shim/idb_client.dart';
+import 'package:idb_shim/idb_client_memory.dart';
+import 'package:idb_shim/idb_client_sembast.dart';
+import 'package:idb_shim/src/common/common_meta.dart';
+import 'package:logging/logging.dart';
+import 'package:path/path.dart';
+import 'package:sembast/sembast.dart' as sdb;
+import 'package:sembast/sembast_memory.dart' as sdb;
+import 'package:sembast/src/sembast_fs.dart' as sdb_fs;
+
 import 'common_meta_test.dart';
-//export 'common_meta_test.dart' hide main;
+
+export 'dart:async';
+
+export 'package:dev_test/test.dart';
+export 'package:idb_shim/idb_client_memory.dart';
 export 'package:idb_shim/src/common/common_meta.dart';
 export 'package:idb_shim/src/utils/dev_utils.dart';
+
+//import 'package:unittest/unittest.dart';
+//export 'common_meta_test.dart' hide main;
 //export 'package:tekartik_test/test_utils.dart';
-import 'package:dev_test/test.dart';
-export 'package:dev_test/test.dart';
-export 'dart:async';
-import 'package:path/path.dart';
 
 // only for test - INFO - basic output, FINE - show test name before/after - FINEST - samething for console test also
 const Level debugLevel = Level.FINE;
@@ -64,6 +68,7 @@ void dbTest(String description, body, [_test = test]) {
 
 class TestContext {
   IdbFactory factory;
+
   String get dbName => testDescriptions.join('-') + ".db";
 
   // special internet explorer handling
@@ -83,6 +88,7 @@ class SembastTestContext extends TestContext {
   bool get isIdbSembast => true;
 
   sdb.DatabaseFactory sdbFactory;
+
   @override
   IdbFactorySembast get factory => super.factory as IdbFactorySembast;
 
@@ -94,6 +100,7 @@ class SembastMemoryTestContext extends SembastTestContext {
   SembastMemoryTestContext() {
     factory = idbMemoryFactory;
   }
+
   @override
   bool get isInMemory => true;
 }
@@ -104,6 +111,7 @@ class SembastFsTestContext extends SembastTestContext {
   @override
   sdb_fs.DatabaseFactoryFs get sdbFactory =>
       factory.sdbFactory as sdb_fs.DatabaseFactoryFs;
+
   @override
   IdbFactorySembast get factory => super.factory;
 }

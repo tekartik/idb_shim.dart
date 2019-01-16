@@ -6,9 +6,11 @@ import 'dart:html';
 // Dart vs Javascript detection
 //
 bool get _isDartVm => !_isJavascriptVm;
+
 bool get _isJavascriptVm => identical(1.0, 1);
 
 bool __isDartVm;
+
 bool get isDartVm {
   if (__isDartVm == null) {
     __isDartVm = _isDartVm;
@@ -27,7 +29,9 @@ bool isUserAgentEdge(String userAgent) {
 }
 
 bool _isEdge;
+
 bool get isEdge => _isEdge ?? isUserAgentEdge(window.navigator.userAgent);
 
 bool _isIe;
+
 bool get isIe => _isIe ?? isUserAgentIe(window.navigator.userAgent);

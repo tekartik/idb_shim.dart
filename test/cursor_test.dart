@@ -1,7 +1,9 @@
 library cursor_test;
 
 import 'dart:async';
+
 import 'package:idb_shim/idb_client.dart';
+
 import 'idb_test_common.dart';
 
 class TestIdNameRow {
@@ -10,12 +12,13 @@ class TestIdNameRow {
     name = (value as Map)[testNameField] as String;
     id = cwv.primaryKey as int;
   }
+
   int id;
   String name;
 }
 
 // so that this can be run directly
-main() {
+void main() {
   defineTests(idbMemoryContext);
 }
 
@@ -34,7 +37,7 @@ void defineTests(TestContext ctx) {
     await idbFactory.deleteDatabase(_dbName);
   }
 
-  _tearDown() async {
+  Future _tearDown() async {
     if (transaction != null) {
       await transaction.completed;
       transaction = null;
@@ -71,7 +74,7 @@ void defineTests(TestContext ctx) {
 //    }
 
     Future<List<TestIdNameRow>> cursorToList(Stream<CursorWithValue> stream) {
-      List<TestIdNameRow> list = List();
+      List<TestIdNameRow> list = [];
       return stream.listen((CursorWithValue cwv) {
         list.add(TestIdNameRow(cwv));
       }).asFuture(list);
@@ -79,7 +82,7 @@ void defineTests(TestContext ctx) {
 
     Future<List<TestIdNameRow>> manualCursorToList(
         Stream<CursorWithValue> stream) {
-      List<TestIdNameRow> list = List();
+      List<TestIdNameRow> list = [];
       return stream.listen((CursorWithValue cwv) {
         list.add(TestIdNameRow(cwv));
         cwv.next();
@@ -89,7 +92,7 @@ void defineTests(TestContext ctx) {
     group('auto', () {
       tearDown(_tearDown);
 
-      _createTransaction() {
+      void _createTransaction() {
         transaction = db.transaction(testStoreName, idbModeReadWrite);
         objectStore = transaction.objectStore(testStoreName);
       }

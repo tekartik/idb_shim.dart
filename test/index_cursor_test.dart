@@ -1,8 +1,10 @@
 library index_cursor_test;
 
 import 'dart:async';
+
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/utils/idb_utils.dart';
+
 import 'idb_test_common.dart';
 
 class TestIdNameRow {
@@ -11,6 +13,7 @@ class TestIdNameRow {
     name = (value as Map)[testNameField] as String;
     id = cwv.primaryKey as int;
   }
+
   int id;
   String name;
 }
@@ -49,7 +52,7 @@ void defineTests(TestContext ctx) {
     }
 
     // generic tearDown
-    _tearDown() async {
+    Future _tearDown() async {
       if (transaction != null) {
         await transaction.completed;
         transaction = null;
@@ -74,7 +77,7 @@ void defineTests(TestContext ctx) {
     */
 
     group('with_null_key', () {
-      _createTransaction() {
+      void _createTransaction() {
         transaction = db.transaction(testStoreName, idbModeReadWrite);
         objectStore = transaction.objectStore(testStoreName);
         index = objectStore.index(testNameIndex);
@@ -137,13 +140,13 @@ void defineTests(TestContext ctx) {
     });
 
     group('auto', () {
-      _createTransaction() {
+      void _createTransaction() {
         transaction = db.transaction(testStoreName, idbModeReadWrite);
         objectStore = transaction.objectStore(testStoreName);
         index = objectStore.index(testNameIndex);
       }
 
-      _setUp() async {
+      Future _setUp() async {
         await _setupDeleteDb();
 
         void _initializeDatabase(VersionChangeEvent e) {
@@ -391,14 +394,14 @@ void defineTests(TestContext ctx) {
       Index nameIndex;
       Index valueIndex;
 
-      _createTransaction() {
+      void _createTransaction() {
         transaction = db.transaction(testStoreName, idbModeReadWrite);
         objectStore = transaction.objectStore(testStoreName);
         nameIndex = objectStore.index(testNameIndex);
         valueIndex = objectStore.index(testValueIndex);
       }
 
-      _setUp() async {
+      Future _setUp() async {
         await _setupDeleteDb();
         void _initializeDatabase(VersionChangeEvent e) {
           Database db = e.database;
@@ -491,7 +494,8 @@ void defineTests(TestContext ctx) {
         int record1Key = await objectStore.put({'year': 2018, 'name': 'John'});
         int record2Key = await objectStore.put({'year': 2018, 'name': 'Jack'});
         int record3Key = await objectStore.put({'year': 2017, 'name': 'John'});
-        /*int record4Key = */ await objectStore.put({'name': 'John'});
+        /*int record4Key = */
+        await objectStore.put({'name': 'John'});
         expect(index.keyPath, ['year', 'name']);
         expect(await index.getKey([2018, 'Jack']), record2Key);
         expect(await index.getKey([2018, 'John']), record1Key);
@@ -509,7 +513,7 @@ void defineTests(TestContext ctx) {
           await transaction.completed;
         }
 
-        initTransaction() {
+        void initTransaction() {
           transaction = db.transaction(testStoreName, idbModeReadWrite);
           objectStore = transaction.objectStore(testStoreName);
           index = objectStore.index('test');
@@ -566,7 +570,7 @@ void defineTests(TestContext ctx) {
         expect(list[1].primaryKey, record1Key);
         */
 
-        await db.close();
+        db.close();
       });
     },
         // keyPath as array not supported on IE

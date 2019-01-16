@@ -1,7 +1,8 @@
 library idb_shim.utils.idb_utils;
 
-import '../idb_client.dart';
 import 'dart:async';
+
+import '../idb_client.dart';
 import '../src/common/common_meta.dart';
 
 class _SchemaMeta {
@@ -123,7 +124,7 @@ class KeyCursorRow {
 
 Future<List<CursorRow>> cursorToList(Stream<CursorWithValue> stream) {
   var completer = Completer<List<CursorRow>>.sync();
-  List<CursorRow> list = List();
+  List<CursorRow> list = [];
   stream.listen((CursorWithValue cwv) {
     list.add(CursorRow(cwv.key, cwv.primaryKey, cwv.value));
   }).onDone(() {
@@ -134,7 +135,7 @@ Future<List<CursorRow>> cursorToList(Stream<CursorWithValue> stream) {
 
 Future<List<KeyCursorRow>> keyCursorToList(Stream<Cursor> stream) {
   var completer = Completer<List<KeyCursorRow>>.sync();
-  List<KeyCursorRow> list = List();
+  List<KeyCursorRow> list = [];
   stream.listen((Cursor cursor) {
     list.add(KeyCursorRow(cursor.key, cursor.primaryKey));
   }).onDone(() {

@@ -1,6 +1,7 @@
 library simple_provider;
 
 import 'dart:async';
+
 import 'package:idb_shim/idb_client.dart';
 
 const String dbName = 'com.tekartik.simple_provider';
@@ -16,6 +17,7 @@ class SimpleRow {
     name = map[nameField] as String;
     id = cwv.primaryKey as int;
   }
+
   int id;
   String name;
 }
@@ -46,7 +48,7 @@ class SimpleProvider {
 
   Future<List<SimpleRow>> cursorToList(Stream<CursorWithValue> stream) {
     var completer = Completer<List<SimpleRow>>();
-    List<SimpleRow> list = List();
+    List<SimpleRow> list = [];
     stream.listen((CursorWithValue cwv) {
       SimpleRow row = SimpleRow(cwv);
 

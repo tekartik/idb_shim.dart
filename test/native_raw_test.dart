@@ -1,12 +1,13 @@
 @TestOn("browser")
 library idb_shim.test_runner_client_native_test;
 
-import 'idb_test_common.dart';
-import 'idb_browser_test_common.dart';
-import 'dart:indexed_db' as idb;
 import 'dart:html';
+import 'dart:indexed_db' as idb;
 
-main() {
+import 'idb_browser_test_common.dart';
+import 'idb_test_common.dart';
+
+void main() {
   group('raw', () {
     test('simple_readwrite_transaction', () async {
       String dbName = testDescriptions.join('_');
@@ -89,7 +90,7 @@ main() {
         objectStore = transaction.objectStore("store");
       }
 
-      _createTransaction() async {
+      Future _createTransaction() async {
         await Future.delayed(Duration(milliseconds: 1));
         _createTransactionSync();
       }
@@ -120,14 +121,14 @@ main() {
 
       idb.Transaction transaction;
       idb.ObjectStore objectStore;
-      _createTransactionSync() {
+      void _createTransactionSync() {
         transaction = db.transaction("store", "readonly");
         objectStore = transaction.objectStore("store");
       }
 
       _createTransactionSync();
       await objectStore.getObject(0);
-      _get() async {
+      Future _get() async {
         await objectStore.getObject(0);
       }
 
@@ -147,13 +148,13 @@ main() {
 
       idb.Transaction transaction;
       idb.ObjectStore objectStore;
-      _createTransactionSync() {
+      void _createTransactionSync() {
         transaction = db.transaction("store", "readonly");
         objectStore = transaction.objectStore("store");
       }
 
       _createTransactionSync();
-      _get() async {
+      Future _get() async {
         await objectStore.getObject(0);
       }
 

@@ -1,10 +1,11 @@
-library IndexedDB4Test;
+library idb_shim.test.indexeddb_4_test;
 
 import 'dart:async';
+
 import 'package:idb_shim/idb_client.dart';
 
-// so that this can be run directly
 import 'idb_test_common.dart';
+// so that this can be run directly
 
 // Test for KeyRange and Cursor.
 const String DB_NAME = 'Test4';
@@ -60,7 +61,7 @@ Future<Database> setupDb(IdbFactory idbFactory) {
   return createAndOpenDb(idbFactory).then(writeItems);
 }
 
-testRange(db, range, expectedFirst, expectedLast) {
+Future testRange(db, range, expectedFirst, expectedLast) {
   //var done = expectAsync0(() {});
 
   Transaction txn = db.transaction(STORE_NAME, 'readonly');

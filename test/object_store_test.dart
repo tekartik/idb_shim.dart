@@ -1,10 +1,11 @@
 library object_store_test;
 
 import 'package:idb_shim/idb_client.dart';
-import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
-import 'idb_test_common.dart';
+import 'package:idb_shim/src/common/common_value.dart';
+
 import 'common_meta_test.dart';
+import 'idb_test_common.dart';
 
 // so that this can be run directly
 void main() {
@@ -18,7 +19,7 @@ void defineTests(TestContext ctx) {
   Transaction transaction;
   ObjectStore objectStore;
 
-  _createTransaction() {
+  void _createTransaction() {
     transaction = db.transaction(testStoreName, idbModeReadWrite);
     objectStore = transaction.objectStore(testStoreName);
   }
@@ -32,7 +33,7 @@ void defineTests(TestContext ctx) {
   }
 
   // generic tearDown
-  _tearDown() async {
+  Future _tearDown() async {
     if (transaction != null) {
       await transaction.completed;
       transaction = null;
@@ -113,7 +114,7 @@ void defineTests(TestContext ctx) {
     group('non_auto', () {
       tearDown(_tearDown);
 
-      _setUp() async {
+      Future _setUp() async {
         await _setupDeleteDb();
 
         void _initializeDatabase(VersionChangeEvent e) {
@@ -219,7 +220,7 @@ void defineTests(TestContext ctx) {
     });
 
     group('auto', () {
-      _setUp() async {
+      Future _setUp() async {
         await _setupDeleteDb();
 
         void _initializeDatabase(VersionChangeEvent e) {
@@ -478,7 +479,7 @@ void defineTests(TestContext ctx) {
         _createTransaction();
         Map value = {'test': 'test_value'};
         return objectStore.add(value).then((key) {
-          return objectStore.delete(key + 1).then((delete_result) {
+          return objectStore.delete(key + 1).then((deleteResult) {
             // check fist one still here
             return objectStore.getObject(key).then((valueRead) {
               expect(value, valueRead);
@@ -522,7 +523,7 @@ void defineTests(TestContext ctx) {
         return objectStore.add(value).then((key) {
           Map newValue = cloneValue(value);
           newValue['test'] = 'new_value';
-          return objectStore.put(newValue, key + 1).then((delete_result) {
+          return objectStore.put(newValue, key + 1).then((deleteResult) {
             // check fist one still here
             return objectStore.getObject(key).then((valueRead) {
               expect(value, valueRead);
@@ -557,12 +558,12 @@ void defineTests(TestContext ctx) {
 
     // skipped for firefox
     group('readonly', () {
-      _createTransaction() {
+      void _createTransaction() {
         transaction = db.transaction(testStoreName, idbModeReadOnly);
         objectStore = transaction.objectStore(testStoreName);
       }
 
-      _setUp() async {
+      Future _setUp() async {
         await _setupDeleteDb();
 
         void _initializeDatabase(VersionChangeEvent e) {
@@ -743,7 +744,7 @@ void defineTests(TestContext ctx) {
     group('key_path_non_auto', () {
       const String keyPath = "my_key";
 
-      _setUp() async {
+      Future _setUp() async {
         await _setupDeleteDb();
 
         void _initializeDatabase(VersionChangeEvent e) {
@@ -918,7 +919,7 @@ void defineTests(TestContext ctx) {
     }
 
     group('various', () {
-      _setUp() async {
+      Future _setUp() async {
         await _setupDeleteDb();
         db = await setUpSimpleStore(idbFactory, dbName: _dbName);
       }
@@ -937,7 +938,7 @@ void defineTests(TestContext ctx) {
     });
 
     group('multi_store', () {
-      _setUp() async {
+      Future _setUp() async {
         await _setupDeleteDb();
 
         void _initializeDatabase(VersionChangeEvent e) {

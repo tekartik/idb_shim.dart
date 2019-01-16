@@ -5,26 +5,26 @@
 */
 
 body {
-  color: #222;
-  font: 14px Arial;
+    color: #222;
+    font: 14px Arial;
 }
 
 #idb {
-  background-color: #EEE;
-  padding: 5px;
-  margin-bottom: 5px;
+    background-color: #EEE;
+    padding: 5px;
+    margin-bottom: 5px;
 }
 
 a {
-  color: #3D5C9D;
-  cursor: pointer;
-  text-decoration: none;
+    color: #3D5C9D;
+    cursor: pointer;
+    text-decoration: none;
 }
 
 li a {
-  margin-left: 8px;
+    margin-left: 8px;
 }
 
 #todo {
-  width: 200px;
+    width: 200px;
 }

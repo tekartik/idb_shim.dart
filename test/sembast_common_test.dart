@@ -3,6 +3,7 @@ library index_cursor_test;
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/sembast/sembast_cursor.dart';
 import 'package:sembast/sembast.dart' as sdb;
+
 import 'idb_test_common.dart';
 
 void main() {

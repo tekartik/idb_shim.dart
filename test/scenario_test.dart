@@ -1,12 +1,13 @@
 library idb_shim.scenario_test;
 
 import 'package:idb_shim/idb_client.dart';
+
 import 'idb_test_common.dart';
 
 // File created to reproduce bugs
 
 // so that this can be run directly
-main() {
+void main() {
   defineTests(idbMemoryContext);
 }
 

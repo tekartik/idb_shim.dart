@@ -1,14 +1,16 @@
 library idb_shim.test_runner_client_sembast_fs_test;
 
-import 'test_runner.dart' as test_runner;
-import 'idb_test_common.dart';
+import 'dart:convert';
+
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/idb_client_sembast.dart';
+import 'package:sembast/sembast.dart' as sdb;
+import 'package:sembast/sembast_memory.dart' as sdb;
 import 'package:sembast/src/file_system.dart';
 import 'package:sembast/src/sembast_fs.dart' as sdb;
-import 'package:sembast/sembast_memory.dart' as sdb;
-import 'package:sembast/sembast.dart' as sdb;
-import 'dart:convert';
+
+import 'idb_test_common.dart';
+import 'test_runner.dart' as test_runner;
 
 void main() {
   group('memory_fs', () {
@@ -16,7 +18,7 @@ void main() {
   });
 }
 
-defineTests(SembastFsTestContext ctx) {
+void defineTests(SembastFsTestContext ctx) {
   IdbFactorySembast idbFactory = ctx.factory;
 
   group('simple', () {
@@ -38,7 +40,7 @@ defineTests(SembastFsTestContext ctx) {
     sdb.Database memSdb;
 
     // generic tearDown
-    _tearDown() async {
+    Future _tearDown() async {
       if (db != null) {
         db.close();
         db = null;
@@ -73,7 +75,7 @@ defineTests(SembastFsTestContext ctx) {
       return db;
     }
 
-    _checkExport() async {
+    Future _checkExport() async {
       expect(await getStorageContent(), await getSdbStorageContext());
     }
 

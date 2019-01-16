@@ -20,6 +20,7 @@ class TransactionSembast extends IdbTransactionBase
     with TransactionWithMetaMixin {
   @override
   DatabaseSembast get database => super.database as DatabaseSembast;
+
   sdb.Database get sdbDatabase => database.db;
   sdb.Transaction sdbTransaction;
 
@@ -166,6 +167,7 @@ class TransactionSembast extends IdbTransactionBase
 
   @override
   final IdbTransactionMeta meta;
+
   TransactionSembast(DatabaseSembast database, this.meta) : super(database) {
     if (_debugTransaction) {
       _debugId = ++debugAllIds;

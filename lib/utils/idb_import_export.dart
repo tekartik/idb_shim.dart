@@ -1,13 +1,15 @@
 library idb_shim.utils.idb_import_export;
 
-import '../idb_client.dart';
-import '../idb_client_sembast.dart';
-import '../idb_client_memory.dart';
+import 'dart:async';
+
+import 'package:sembast/sembast.dart' as sdb;
 import 'package:sembast/sembast_memory.dart' as sdb;
 import 'package:sembast/utils/sembast_import_export.dart';
-import 'package:sembast/sembast.dart' as sdb;
+
+import '../idb_client.dart';
+import '../idb_client_memory.dart';
+import '../idb_client_sembast.dart';
 import 'idb_utils.dart';
-import 'dart:async';
 
 ///
 /// export a database in a sdb export format

@@ -1,10 +1,11 @@
 library idb_shim.utils_test;
 
 import 'package:idb_shim/idb_client.dart';
-import 'package:idb_shim/utils/idb_utils.dart';
 import 'package:idb_shim/utils/idb_import_export.dart';
-import 'idb_test_common.dart';
+import 'package:idb_shim/utils/idb_utils.dart';
 import 'package:path/path.dart';
+
+import 'idb_test_common.dart';
 //import 'idb_test_factory.dart';
 
 void main() {
@@ -324,7 +325,7 @@ void defineTests(TestContext ctx) {
         await _setupDeleteDb();
         db = await idbFactory.open(_srcDbName);
 
-        _check(Database db) async {
+        Future _check(Database db) async {
           expect(db.factory, idbFactory);
           expect(db.objectStoreNames.isEmpty, true);
           expect(basename(db.name).endsWith(basename(_srcDbName)), isTrue);
