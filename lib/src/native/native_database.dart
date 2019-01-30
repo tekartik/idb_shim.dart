@@ -80,7 +80,7 @@ class DatabaseNative extends IdbDatabaseBase {
       if ((storeNameOrStoreNames is List) &&
           (storeNameOrStoreNames.isNotEmpty) &&
           (_isNotFoundError(e))) {
-        List<String> stores = storeNameOrStoreNames;
+        List<String> stores = storeNameOrStoreNames?.cast<String>();
 
         // Make sure they indeed exists
         bool allFound = true;

@@ -64,7 +64,7 @@ Future<Database> setupDb(IdbFactory idbFactory) {
 Future testRange(db, range, expectedFirst, expectedLast) {
   //var done = expectAsync0(() {});
 
-  Transaction txn = db.transaction(STORE_NAME, 'readonly');
+  Transaction txn = db.transaction(STORE_NAME, 'readonly') as Transaction;
   ObjectStore objectStore = txn.objectStore(STORE_NAME);
   var cursors = objectStore
       .openCursor(range: range as KeyRange, autoAdvance: true)

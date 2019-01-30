@@ -491,9 +491,12 @@ void defineTests(TestContext ctx) {
         transaction = db.transaction(testStoreName, idbModeReadWrite);
         objectStore = transaction.objectStore(testStoreName);
         var index = objectStore.index('test');
-        int record1Key = await objectStore.put({'year': 2018, 'name': 'John'});
-        int record2Key = await objectStore.put({'year': 2018, 'name': 'Jack'});
-        int record3Key = await objectStore.put({'year': 2017, 'name': 'John'});
+        int record1Key =
+            await objectStore.put({'year': 2018, 'name': 'John'}) as int;
+        int record2Key =
+            await objectStore.put({'year': 2018, 'name': 'Jack'}) as int;
+        int record3Key =
+            await objectStore.put({'year': 2017, 'name': 'John'}) as int;
         /*int record4Key = */
         await objectStore.put({'name': 'John'});
         expect(index.keyPath, ['year', 'name']);

@@ -170,7 +170,7 @@ sdb.Filter keyFilter(dynamic keyPath, var key) {
       return sdb.Filter.and(
           List.generate(keyList.length, (i) => keyFilter(keyList[i], null)));
     } else {
-      List valueList = key;
+      final valueList = key as List;
       return sdb.Filter.and(List.generate(
           keyList.length, (i) => keyFilter(keyList[i], valueList[i])));
     }

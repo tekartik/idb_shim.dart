@@ -137,7 +137,9 @@ class IdbDatabaseMeta {
         throw DatabaseError(
             "InvalidAccessError: The storeNames parameter is empty");
       }
-      for (String storeName in storeNameOrStoreNames) {
+      final list = storeNameOrStoreNames?.cast<String>();
+
+      for (String storeName in list) {
         if (!_containsStore(storeName)) {
           throw DatabaseStoreNotFoundError(
               DatabaseStoreNotFoundError.storeMessage(storeNameOrStoreNames));

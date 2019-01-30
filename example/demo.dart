@@ -24,7 +24,7 @@ void main() async {
   // read some data
   txn = db.transaction(storeName, "readonly");
   store = txn.objectStore(storeName);
-  Map value = await store.getObject(key);
+  final value = await store.getObject(key) as Map;
   await txn.completed;
 
   print(value);

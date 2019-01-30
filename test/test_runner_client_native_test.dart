@@ -55,11 +55,11 @@ void main() {
           objectStore = transaction.objectStore(testStoreName);
           var index = objectStore.index('test');
           int record1Key =
-              await objectStore.put({'year': 2018, 'name': 'John'});
+              await objectStore.put({'year': 2018, 'name': 'John'}) as int;
           int record2Key =
-              await objectStore.put({'year': 2018, 'name': 'Jack'});
+              await objectStore.put({'year': 2018, 'name': 'Jack'}) as int;
           int record3Key =
-              await objectStore.put({'year': 2017, 'name': 'John'});
+              await objectStore.put({'year': 2017, 'name': 'John'}) as int;
           expect(index.keyPath, ['year', 'name']);
           expect(await index.getKey([2018, 'Jack']), record2Key);
           expect(await index.getKey([2018, 'John']), record1Key);

@@ -213,7 +213,7 @@ void defineTests(TestContext ctx) {
         String value = "test";
         expect(await objectStore.getObject(1.2), isNull);
         double key = 0.001;
-        double keyAdded = await objectStore.add(value, key);
+        double keyAdded = await objectStore.add(value, key) as double;
         expect(keyAdded, key);
         expect(await objectStore.getObject(key), value);
       });
@@ -290,7 +290,7 @@ void defineTests(TestContext ctx) {
         await _setUp();
         _createTransaction();
         Map value = {};
-        int key = await objectStore.add(value, 1234);
+        int key = await objectStore.add(value, 1234) as int;
         expect(key, 1234);
         try {
           await objectStore.add(value, 1234);
@@ -329,9 +329,9 @@ void defineTests(TestContext ctx) {
         await _setUp();
         _createTransaction();
         Map value = {};
-        String key2 = await objectStore.add(value, "2");
+        String key2 = await objectStore.add(value, "2") as String;
         expect(key2, "2");
-        int key1 = await objectStore.add(value);
+        int key1 = await objectStore.add(value) as int;
         expect(key1 == 1 || key1 == 3, isTrue);
       });
 
@@ -342,12 +342,12 @@ void defineTests(TestContext ctx) {
         _createTransaction();
         Map value1 = {'test': 1};
         Map value2 = {'test': 2};
-        String keyTest = await objectStore.add(value1, "test");
+        String keyTest = await objectStore.add(value1, "test") as String;
         expect(keyTest, "test");
-        int key1 = await objectStore.add(value2);
+        int key1 = await objectStore.add(value2) as int;
         expect(key1, 1);
 
-        Map valueRead = await objectStore.getObject(1);
+        Map valueRead = await objectStore.getObject(1) as Map;
         valueRead = await objectStore.getObject('test') as Map;
         expect(valueRead, value1);
       }, skip: true);
@@ -521,7 +521,7 @@ void defineTests(TestContext ctx) {
         _createTransaction();
         Map value = {'test': 'test_value'};
         return objectStore.add(value).then((key) {
-          Map newValue = cloneValue(value);
+          Map newValue = cloneValue(value) as Map;
           newValue['test'] = 'new_value';
           return objectStore.put(newValue, key + 1).then((deleteResult) {
             // check fist one still here
@@ -671,7 +671,7 @@ void defineTests(TestContext ctx) {
         return objectStore.add(value).then((key) {
           expect(key, 1);
           return objectStore.getObject(key).then((valueRead) {
-            Map expectedValue = cloneValue(value);
+            Map expectedValue = cloneValue(value) as Map;
             expectedValue[keyPath] = 1;
             expect(valueRead, expectedValue);
           });
@@ -856,7 +856,7 @@ void defineTests(TestContext ctx) {
         await _setUp();
         _createTransaction();
         Map value = {keyPath: 'test_value'};
-        String key = await objectStore.put(value);
+        String key = await objectStore.put(value) as String;
         expect(key, 'test_value');
         key = await objectStore.put(value) as String;
 

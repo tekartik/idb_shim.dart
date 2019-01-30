@@ -107,7 +107,7 @@ void defineTests(TestContext ctx) {
         ObjectStore objectStore = transaction.objectStore(testStoreName);
         Map object = {nameField: "test"};
         objectStore.add(object).then((r) {
-          int key = r;
+          int key = r as int;
           expect(key, equals(1));
           //print('added $r');
           objectStore.getObject(r).then((newObject) {
@@ -116,7 +116,7 @@ void defineTests(TestContext ctx) {
             expect(newObject[nameField], equals('test'));
 
             objectStore.put(newObject, r).then((newR) {
-              int key = newR;
+              int key = newR as int;
               expect(key, equals(1));
               //print(newObject);
               expect(newObject.length, equals(1));

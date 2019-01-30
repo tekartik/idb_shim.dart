@@ -35,7 +35,7 @@ class TransactionSembast extends IdbTransactionBase
       print("exec $i");
     }
     Completer completer = completers[i];
-    Action action = actions[i];
+    Action action = actions[i] as Action;
     return Future.sync(action).then((result) {
       if (_debugTransaction) {
         print("done $i");

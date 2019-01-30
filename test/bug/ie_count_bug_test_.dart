@@ -9,7 +9,7 @@ void main() {
       String dbName = "com.tekartik.ie_count_bug.test";
       await window.indexedDB.deleteDatabase(dbName);
       void _setupDb(e) {
-        Database db = e.target.result;
+        final db = e.target.result as Database;
         db.createObjectStore("store", autoIncrement: true);
       }
 
@@ -19,7 +19,7 @@ void main() {
       Transaction transaction = db.transaction("store", "readwrite");
       var objectStore = transaction.objectStore("store");
       Map value = {'sample': 'value'};
-      int key = await objectStore.add(value);
+      final key = await objectStore.add(value) as int;
       print('added $key $value');
       int count = await objectStore.count(key);
       print('count_by_key: $count');
