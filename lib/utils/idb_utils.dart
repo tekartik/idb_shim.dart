@@ -84,6 +84,7 @@ Future copyStore(Database srcDatabase, String srcStoreName,
   // clear the existing records
   await store.clear();
   for (_Record record in records) {
+    // ignore: unawaited_futures
     store.put(record.value, record.key);
   }
   await dstTransaction.completed;

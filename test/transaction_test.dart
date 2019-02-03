@@ -53,6 +53,7 @@ void defineTests(TestContext ctx) {
             db.transaction(testStoreName, idbModeReadWrite);
         ObjectStore objectStore = transaction.objectStore(testStoreName);
         bool putDone = false;
+        // ignore: unawaited_futures
         objectStore.put(1).then((_) {
           putDone = true;
         });
@@ -274,6 +275,7 @@ void defineTests(TestContext ctx) {
             Transaction transaction =
                 db.transaction(testStoreName, idbModeReadWrite);
             ObjectStore objectStore = transaction.objectStore(testStoreName);
+            // ignore: unawaited_futures
             objectStore.add("value1").then((key1) {
               done = true;
             });
@@ -301,6 +303,7 @@ void defineTests(TestContext ctx) {
               //db.close();
               // done();
             });
+            // ignore: unawaited_futures
             objectStore.add("value1").then((key1) {
               done = true;
             });
@@ -335,6 +338,7 @@ void defineTests(TestContext ctx) {
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadWrite);
         ObjectStore objectStore = transaction.objectStore(testStoreName);
+        // ignore: unawaited_futures
         objectStore.add("value1").then((key1) {
           done = true;
         });
@@ -351,6 +355,7 @@ void defineTests(TestContext ctx) {
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadWrite);
         ObjectStore objectStore = transaction.objectStore(testStoreName);
+        // ignore: unawaited_futures
         objectStore.add("value1").then((key1) {
           objectStore.add("value1").then((key1) {
             done = true;
@@ -570,6 +575,7 @@ void defineTests(TestContext ctx) {
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadWrite);
         ObjectStore objectStore = transaction.objectStore(testStoreName);
+        // ignore: unawaited_futures
         objectStore.add("value1").then((key1) {
           objectStore.add("value1").then((key1) {
             objectStore.add("value1").then((key1) {
@@ -590,6 +596,7 @@ void defineTests(TestContext ctx) {
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadWrite);
         ObjectStore objectStore = transaction.objectStore(testStoreName);
+        // ignore: unawaited_futures
         objectStore.add("value1").then((key1) {
           objectStore.add("value1").then((key1) {
             objectStore.add("value1").then((key1) {
@@ -621,6 +628,7 @@ void defineTests(TestContext ctx) {
             //db.close();
             // done();
           });
+          // ignore: unawaited_futures
           objectStore.add("value1").then((key1) {
             done = true;
           });
@@ -635,10 +643,12 @@ void defineTests(TestContext ctx) {
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadWrite);
         ObjectStore objectStore = transaction.objectStore(testStoreName);
+        // ignore: unawaited_futures
         objectStore.add("value1").then((key1) {
           expect(done1, isFalse);
           done1 = true;
         });
+        // ignore: unawaited_futures
         objectStore.add("value2").then((key2) {
           expect(done2, isFalse);
           done2 = true;
@@ -657,6 +667,7 @@ void defineTests(TestContext ctx) {
           Transaction transaction =
               db.transaction(testStoreName, idbModeReadWrite);
           ObjectStore objectStore = transaction.objectStore(testStoreName);
+          // ignore: unawaited_futures
           objectStore.add("value1").then((key1) {
             objectStore.put("value1", key1).then((key2) {
               done = true;
@@ -676,6 +687,7 @@ void defineTests(TestContext ctx) {
         Transaction transaction =
             db.transaction(testStoreName, idbModeReadWrite);
         ObjectStore objectStore = transaction.objectStore(testStoreName);
+        // ignore: unawaited_futures
         objectStore.add("value1").then((key1) {
           expect(key1, equals(1));
 
@@ -713,11 +725,13 @@ void defineTests(TestContext ctx) {
             db.transaction(testStoreName, idbModeReadWrite);
         Transaction transaction2 =
             db.transaction(testStoreName, idbModeReadWrite);
+        // ignore: unawaited_futures
         transaction1.objectStore(testStoreName).put("test").then((key) {
           expect(key, 1);
         });
         // This somehow ones failed on ie 11 but works on edge
         // bah ugly bug for ie then...
+        // ignore: unawaited_futures
         transaction2.objectStore(testStoreName).put("test").then((key) {
           expect(key, 2);
         });
