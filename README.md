@@ -70,7 +70,7 @@ await txn.completed;
 #### Memory/Io/WebSql implementation
 
 * For autoincrement, if key is set, it cannot be set as a different type than int
-* Nextunique and prevunique not support (for now)
+* Nextunique and prevunique not supported (for now)
 * No support for Cursor.source
 * No generic support for blocked. It is always possible to upgrade the database, however other tabs will get blocked in their future calls
 * Blocked and onVersionChange event support, this is actually tricky for websql, actually the new db won't be blocked but the old one will!

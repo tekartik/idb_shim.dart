@@ -30,16 +30,17 @@ class IdbTransactionMeta {
 }
 
 class IdbVersionChangeTransactionMeta extends IdbTransactionMeta {
-  Map<String, List<IdbIndexMeta>> createdIndexes =
-      {}; // index deleted during onUpgradeNeeded
-  Map<String, List<IdbIndexMeta>> deletedIndexes =
-      {}; // index deleted during onUpgradeNeeded
-  Set<IdbObjectStoreMeta> createdStores =
-      Set(); // store deleted during onUpgradeNeeded
-  Set<IdbObjectStoreMeta> deletedStores =
-      Set(); // store deleted during onUpgradeNeeded
-  Set<IdbObjectStoreMeta> updatedStores =
-      Set(); // store modified during onUpgradeNeeded
+  // index deleted during onUpgradeNeeded
+  final createdIndexes = <String, List<IdbIndexMeta>>{};
+  // index deleted during onUpgradeNeeded
+  final deletedIndexes = <String, List<IdbIndexMeta>>{};
+
+  // stores created during onUpgradeNeeded
+  final createdStores = <IdbObjectStoreMeta>{};
+  // stores deleted during onUpgradeNeeded
+  final deletedStores = <IdbObjectStoreMeta>{};
+  // stores modified during onUpgradeNeeded
+  final updatedStores = <IdbObjectStoreMeta>{};
 
   IdbVersionChangeTransactionMeta() : super(null, idbModeReadWrite);
 
