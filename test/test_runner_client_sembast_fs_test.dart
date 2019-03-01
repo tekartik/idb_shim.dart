@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/idb_client_sembast.dart';
+import 'package:idb_shim/src/sembast/sembast_database.dart' as idb_sdb;
 import 'package:sembast/sembast.dart' as sdb;
 import 'package:sembast/sembast_memory.dart' as sdb;
 import 'package:sembast/src/file_system.dart';
@@ -86,6 +87,8 @@ void defineTests(SembastFsTestContext ctx) {
       memSdb = await openTmpDatabase(1);
       await memSdb.put(1, "version");
       await _checkExport();
+      db.close();
+      await memSdb.close();
     });
 
     dbTest('one_store', () async {
@@ -105,6 +108,10 @@ void defineTests(SembastFsTestContext ctx) {
       await memSdb.put(2, "version");
       await memSdb.put([storeMeta.name], "stores");
       await memSdb.put(storeMeta.toMap(), "store_${storeMeta.name}");
+      db.close();
+      await memSdb.close();
+      // Make sure the db is flushed
+      await (db as idb_sdb.DatabaseSembast).db.close();
       await _checkExport();
     });
 
@@ -129,6 +136,10 @@ void defineTests(SembastFsTestContext ctx) {
       await memSdb.put(3, "version");
       await memSdb.put([storeMeta.name], "stores");
       await memSdb.put(storeMeta.toMap(), "store_${storeMeta.name}");
+      db.close();
+      await memSdb.close();
+      // Make sure the db is flushed
+      await (db as idb_sdb.DatabaseSembast).db.close();
       await _checkExport();
     });
   });

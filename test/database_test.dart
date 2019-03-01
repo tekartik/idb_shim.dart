@@ -168,6 +168,7 @@ void defineTests(TestContext ctx) {
           expect(store.indexNames, []);
         });
         db.close();
+        //await Future.delayed(Duration(milliseconds: 1));
         // check that the index is indeed gone
         db = await idbFactory.open(_dbName, version: 3,
             onUpgradeNeeded: (VersionChangeEvent e) {
@@ -177,6 +178,7 @@ void defineTests(TestContext ctx) {
         db.close();
       }
     });
+
     test('delete_non_existing_index', () async {
       await _setupDeleteDb();
 

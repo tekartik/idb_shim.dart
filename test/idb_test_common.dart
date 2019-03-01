@@ -3,6 +3,7 @@ library idb_shim.idb_test_common;
 import 'dart:async';
 
 import 'package:dev_test/test.dart';
+import 'package:dev_test/test.dart' as dev_test;
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/idb_client_memory.dart';
 import 'package:idb_shim/idb_client_sembast.dart';
@@ -55,15 +56,18 @@ void dbGroup(TestContext ctx, String description, body, [_group = group]) {
   });
 }
 
-void dbTest(String description, body, [_test = test]) {
+void dbTest(String description, body,
+    {void Function(String name, Function() body, {bool solo}) test,
+    @deprecated bool solo}) {
+  test ??= dev_test.test;
   // We save it for later
   // only valid during definition
   TestContext ctx = _dbTestContext;
-  _test(description, () async {
+  test(description, () async {
     dbTestName = ctx.dbName;
     await ctx.factory.deleteDatabase(dbTestName);
     await Future.value(body());
-  });
+  }, solo: solo == true);
 }
 
 class TestContext {
