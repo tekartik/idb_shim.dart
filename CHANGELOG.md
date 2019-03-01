@@ -1,3 +1,7 @@
+## 1.7.2
+
+* Dart 2.2 support
+
 ## 1.7.0
 
 * remove websql support
