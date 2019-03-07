@@ -1,6 +1,6 @@
 ## 1.7.2
 
-* Dart 2.2 support
+* Dart 2.2 support, Dart 2.1 compatible
 
 ## 1.7.0
 
