@@ -38,8 +38,8 @@ void main() {
       testMain(ctx);
     } else {
       test("not supported", () {
-        return Future.error("not supported");
-      });
+        // return Future.error("not supported");
+      }, skip: 'websql not supported');
     }
   });
   group('memory', () {
