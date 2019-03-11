@@ -18,14 +18,19 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   DatabaseSembast get database => transaction.database;
 
   sdb.Database get sdbDatabase => database.db;
-  sdb.StoreExecutor _sdbStore;
+  sdb.Transaction get sdbTransaction => transaction.sdbTransaction;
+
+  sdb.DatabaseClient _sdbClient;
+  sdb.StoreRef<dynamic, dynamic> _sdbStore;
+
+  // Lazy computat
+  sdb.StoreRef<dynamic, dynamic> get sdbStore =>
+      _sdbStore ??= sdb.StoreRef<dynamic, dynamic>(name);
 
   // lazy creation
   // If we are not in a transaction that's likely during open
-  sdb.StoreExecutor get sdbStore =>
-      _sdbStore ??= transaction.sdbTransaction == null
-          ? sdbDatabase.getStore(name)
-          : transaction.sdbTransaction.getStore(name);
+  sdb.DatabaseClient get sdbClient =>
+      _sdbClient ??= (sdbTransaction ?? sdbDatabase) as sdb.DatabaseClient;
 
   ObjectStoreSembast(this.transaction, this.meta) {
     // Don't compute sdbStore yet we don't have the transaction
@@ -99,7 +104,8 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
         if (fieldValue != null) {
           sdb.Finder finder = sdb.Finder(
               filter: keyFilter(indexMeta.keyPath, fieldValue), limit: 1);
-          futures.add(sdbStore.findRecord(finder).then((sdb.Record record) {
+          futures
+              .add(sdbStore.findFirst(sdbClient, finder: finder).then((record) {
             // not ourself
             if ((record != null) &&
                 (record.key != key) //
@@ -113,7 +119,11 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
       });
     }
     return Future.wait(futures).then((_) {
-      return sdbStore.put(value, key);
+      if (key == null) {
+        return sdbStore.add(sdbClient, value);
+      } else {
+        return sdbStore.record(key).put(sdbClient, value);
+      }
     });
   }
 
@@ -123,7 +133,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
       key = _getKey(value, key);
 
       if (key != null) {
-        return sdbStore.get(key).then((existingValue) {
+        return sdbStore.record(key).get(sdbClient).then((existingValue) {
           if (existingValue != null) {
             throw DatabaseError(
                 'Key ${key} already exists in the object store');
@@ -139,7 +149,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   @override
   Future clear() {
     return inWritableTransaction(() {
-      return sdbStore.clear();
+      return sdbStore.clear(sdbClient);
     }).then((_) {
       return null;
     });
@@ -152,7 +162,8 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   @override
   Future<int> count([keyOrRange]) {
     return inTransaction(() {
-      return sdbStore.count(_storeKeyOrRangeFilter(keyOrRange));
+      return sdbStore.count(sdbClient,
+          filter: _storeKeyOrRangeFilter(keyOrRange));
     });
   }
 
@@ -171,21 +182,21 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   @override
   Future delete(key) {
     return inWritableTransaction(() {
-      return sdbStore.delete(key).then((_) {
+      return sdbStore.record(key).delete(sdbClient).then((_) {
         // delete returns null
         return null;
       });
     });
   }
 
-  dynamic _recordToValue(sdb.Record record) {
+  dynamic _recordToValue(sdb.RecordSnapshot record) {
     if (record == null) {
       return null;
     }
     var value = record.value;
     // Add key if _keyPath is not null
     if ((keyPath != null) && (value is Map)) {
-      value[keyPath] = record.key;
+      value = cloneValue(value, keyPath as String, record.key);
     }
 
     return value;
@@ -195,7 +206,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   Future getObject(key) {
     checkKeyParam(key);
     return inTransaction(() {
-      return sdbStore.getRecord(key).then((sdb.Record record) {
+      return sdbStore.record(key).getSnapshot(sdbClient).then((record) {
         return _recordToValue(record);
       });
     });

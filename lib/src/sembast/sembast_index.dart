@@ -32,7 +32,8 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   @override
   Future<int> count([keyOrRange]) {
     return inTransaction(() {
-      return store.sdbStore.count(_indexKeyOrRangeFilter(keyOrRange));
+      return store.sdbStore
+          .count(store.sdbClient, filter: _indexKeyOrRangeFilter(keyOrRange));
     });
   }
 
@@ -43,8 +44,8 @@ class IndexSembast extends Index with IndexWithMetaMixin {
       sdb.Finder finder =
           sdb.Finder(filter: _indexKeyOrRangeFilter(key), limit: 1);
       return store.sdbStore
-          .findRecords(finder)
-          .then((List<sdb.Record> records) {
+          .find(store.sdbClient, finder: finder)
+          .then((records) {
         if (records.isNotEmpty) {
           return records.first.value;
         }
@@ -59,8 +60,8 @@ class IndexSembast extends Index with IndexWithMetaMixin {
       sdb.Finder finder =
           sdb.Finder(filter: _indexKeyOrRangeFilter(key), limit: 1);
       return store.sdbStore
-          .findRecords(finder)
-          .then((List<sdb.Record> records) {
+          .find(store.sdbClient, finder: finder)
+          .then((records) {
         if (records.isNotEmpty) {
           return records.first.key;
         }

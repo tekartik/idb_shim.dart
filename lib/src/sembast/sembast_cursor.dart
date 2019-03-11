@@ -5,7 +5,7 @@ import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/sembast/sembast_index.dart';
 import 'package:idb_shim/src/sembast/sembast_object_store.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
-import 'package:sembast/sembast.dart' as sdb;
+import 'package:idb_shim/src/sembast/sembast_import.dart' as sdb;
 import 'package:sembast/utils/value_utils.dart' as utils;
 
 sdb.Filter keyCursorFilter(dynamic keyPath, key, KeyRange range) {
@@ -209,7 +209,7 @@ abstract class KeyCursorSembastMixin implements Cursor {
 
   IdbCursorMeta get meta => ctlr.meta;
 
-  sdb.Record get record => ctlr.records[recordIndex];
+  sdb.RecordSnapshot get record => ctlr.records[recordIndex];
 
   //
   // Idb
@@ -246,7 +246,7 @@ abstract class IndexCursorSembastMixin implements Cursor {
 
   IndexSembast get index => indexCtlr.index;
 
-  sdb.Record get record;
+  sdb.RecordSnapshot get record;
 
   ///
   /// Return the index key of the record
@@ -258,7 +258,7 @@ abstract class IndexCursorSembastMixin implements Cursor {
 }
 
 abstract class CursorWithValueSembastMixin implements CursorWithValue {
-  sdb.Record get record;
+  sdb.RecordSnapshot get record;
 
   @override
   Object get value => record.value;
@@ -379,7 +379,7 @@ abstract class BaseCursorControllerSembastMixin<T extends Cursor>
 // To implement for KeyCursor vs CursorWithValue
   T nextEvent(int index);
 
-  List<sdb.Record> records;
+  List<sdb.RecordSnapshot> records;
 
   bool get done => currentIndex == null;
   int currentIndex = -1;
@@ -413,7 +413,7 @@ abstract class BaseCursorControllerSembastMixin<T extends Cursor>
     sdb.Filter filter = this.filter;
     List<sdb.SortOrder> sortOrders = this.sortOrders;
     sdb.Finder finder = sdb.Finder(filter: filter, sortOrders: sortOrders);
-    return store.sdbStore.findRecords(finder).then((List<sdb.Record> records) {
+    return store.sdbStore.find(store.sdbClient, finder: finder).then((records) {
       this.records = records;
       return autoNext();
     });

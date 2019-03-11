@@ -61,6 +61,8 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
 
   DatabaseSembast._(IdbFactory factory) : super(factory);
 
+  final mainStore = sdb.StoreRef<String, dynamic>.main();
+
   static Future<DatabaseSembast> fromDatabase(
       IdbFactory factory, sdb.Database db) async {
     DatabaseSembast idbDb = DatabaseSembast._(factory);
@@ -81,9 +83,9 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
       keys.add("store_${storeName}");
     });
 
-    return db.mainStore.getRecords(keys).then((List<sdb.Record> records) {
+    return mainStore.records(keys).getSnapshots(db).then((records) {
       List<IdbObjectStoreMeta> list = [];
-      records.forEach((sdb.Record record) {
+      records.forEach((record) {
         var map = (record.value as Map)?.cast<String, dynamic>();
         IdbObjectStoreMeta store = IdbObjectStoreMeta.fromMap(map);
         list.add(store);
@@ -96,13 +98,13 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
   Future<int> _readMeta() async {
     return db.transaction((txn) async {
       // read version
-      meta.version = await txn.mainStore.get("version") as int;
+      meta.version = await mainStore.record("version").get(txn) as int;
       //devPrint("meta version :${meta.version})
       // read store meta
-      sdb.Record record = await txn.mainStore.getRecord("stores");
-      if (record != null) {
+      var storeList = await mainStore.record("stores").get(txn);
+      if (storeList != null) {
         // for now load all at once
-        List<String> storeNames = (record.value as List)?.cast<String>();
+        List<String> storeNames = (storeList as List)?.cast<String>();
         await _loadStoresMeta(storeNames)
             .then((List<IdbObjectStoreMeta> storeMetas) {
           storeMetas.forEach((IdbObjectStoreMeta store) {
@@ -144,19 +146,23 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
       });
 
       await db.transaction((txn) async {
-        await txn.put(newVersion, "version");
+        await mainStore.record('version').put(txn, newVersion);
 
         // First delete everything from deleted stores
         for (IdbObjectStoreMeta storeMeta in deletedStores) {
-          await txn.deleteStore(storeMeta.name);
+          await sdb.StoreRef(storeMeta.name).delete(txn);
         }
 
         if (changedStores.isNotEmpty) {
-          await txn.put(List.from(objectStoreNames), "stores");
+          await mainStore
+              .record('stores')
+              .put(txn, List.from(objectStoreNames));
         }
 
         for (IdbObjectStoreMeta storeMeta in changedStores) {
-          await txn.put(storeMeta.toMap(), "store_${storeMeta.name}");
+          await mainStore
+              .record("store_${storeMeta.name}")
+              .put(txn, storeMeta.toMap());
         }
       }).then((_) {
         // considered as opened
