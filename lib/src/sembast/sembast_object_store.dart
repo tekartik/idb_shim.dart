@@ -149,7 +149,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   @override
   Future clear() {
     return inWritableTransaction(() {
-      return sdbStore.clear(sdbClient);
+      return sdbStore.delete(sdbClient);
     }).then((_) {
       return null;
     });
