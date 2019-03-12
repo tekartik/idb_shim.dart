@@ -20,71 +20,64 @@ sdb.Filter keyCursorFilter(dynamic keyPath, key, KeyRange range) {
   // return null;
 }
 
-class KeyArrayRangeFilter implements sdb.Filter {
-  final List keyList;
-  final KeyRange range;
+bool matchesKeyArrayRangeFilter(
+    sdb.RecordSnapshot record, List keyList, KeyRange range) {
+  List values =
+      List.generate(keyList.length, (i) => record[keyList[i] as String]);
 
-  KeyArrayRangeFilter(this.keyList, this.range);
-
-  @override
-  bool match(sdb.Record record) {
-    List values =
-        List.generate(keyList.length, (i) => record[keyList[i] as String]);
-
-    // no null accepted
-    for (var value in values) {
-      if (value == null) {
-        return false;
-      }
+  // no null accepted
+  for (var value in values) {
+    if (value == null) {
+      return false;
     }
-
-    if (range.lower != null) {
-      List boundValues = range.lower as List;
-      bool equals = true;
-      for (int i = 0; i < keyList.length; i++) {
-        var boundValue = boundValues[i];
-        if (boundValue == null) {
-          continue;
-        }
-        var value = values[i];
-        if (utils.greaterThan(value, boundValue)) {
-          return true;
-        } else if (value == boundValue) {
-          continue;
-        } else {
-          return false;
-        }
-      }
-
-      if (range.lowerOpen == true && equals) {
-        return false;
-      }
-    }
-    if (range.upper != null) {
-      List boundValues = range.upper as List;
-      bool equals = true;
-      for (int i = 0; i < keyList.length; i++) {
-        var boundValue = boundValues[i];
-        if (boundValue == null) {
-          continue;
-        }
-        var value = values[i];
-        if (utils.lessThan(value, boundValue)) {
-          return true;
-        } else if (value == boundValue) {
-          continue;
-        } else {
-          return false;
-        }
-      }
-
-      if (range.lowerOpen == true && equals) {
-        return false;
-      }
-    }
-
-    return true;
   }
+
+  if (range.lower != null) {
+    List boundValues = range.lower as List;
+    bool equals = true;
+    for (int i = 0; i < keyList.length; i++) {
+      var boundValue = boundValues[i];
+      if (boundValue == null) {
+        continue;
+      }
+      var value = values[i];
+      if (utils.greaterThan(value, boundValue)) {
+        return true;
+      } else if (value == boundValue) {
+        continue;
+      } else {
+        return false;
+      }
+    }
+
+    if (range.lowerOpen == true && equals) {
+      return false;
+    }
+  }
+  if (range.upper != null) {
+    List boundValues = range.upper as List;
+    bool equals = true;
+    for (int i = 0; i < keyList.length; i++) {
+      var boundValue = boundValues[i];
+      if (boundValue == null) {
+        continue;
+      }
+      var value = values[i];
+      if (utils.lessThan(value, boundValue)) {
+        return true;
+      } else if (value == boundValue) {
+        continue;
+      } else {
+        return false;
+      }
+    }
+
+    if (range.lowerOpen == true && equals) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range) {
@@ -149,7 +142,8 @@ sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range) {
       }
     }
 
-    return KeyArrayRangeFilter(keyList, range);
+    return sdb.Filter.custom(
+        (record) => matchesKeyArrayRangeFilter(record, keyList, range));
   }
   throw 'keyPath $keyPath not supported';
 }

@@ -86,9 +86,10 @@ void defineTests(SembastFsTestContext ctx) {
       db = await idbFactory.open(dbTestName);
       memSdb = await openTmpDatabase(1);
       await memSdb.put(1, "version");
-      await _checkExport();
       db.close();
       await memSdb.close();
+      // Make sure the db is flushed
+      await (db as idb_sdb.DatabaseSembast).db.close();
     });
 
     dbTest('one_store', () async {
