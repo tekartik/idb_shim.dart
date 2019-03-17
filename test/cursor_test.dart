@@ -31,6 +31,11 @@ void defineTests(TestContext ctx) {
 
   String _dbName;
 
+  void _createTransaction() {
+    transaction = db.transaction(testStoreName, idbModeReadWrite);
+    objectStore = transaction.objectStore(testStoreName);
+  }
+
   // prepare for test
   Future _setupDeleteDb() async {
     _dbName = ctx.dbName;
@@ -88,6 +93,43 @@ void defineTests(TestContext ctx) {
         cwv.next();
       }).asFuture(list);
     }
+
+    group('key_path_with_dot', () {
+      const String keyPath = "my.key";
+
+      Future _setUp() async {
+        await _setupDeleteDb();
+
+        void _initializeDatabase(VersionChangeEvent e) {
+          Database db = e.database;
+          db.createObjectStore(testStoreName, keyPath: keyPath);
+        }
+
+        db = await idbFactory.open(_dbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+      }
+
+      tearDown(_tearDown);
+
+      test('one item cursor', () async {
+        await _setUp();
+        _createTransaction();
+        Map value = {keyPath: 'test_value'};
+        await objectStore.add(value);
+        Stream<CursorWithValue> stream =
+            objectStore.openCursor(autoAdvance: true, key: 'test_value');
+        int count = 0;
+        Completer completer = Completer();
+        stream.listen((CursorWithValue cwv) {
+          expect((cwv.value as Map)[keyPath], 'test_value');
+          count++;
+        }).onDone(() {
+          completer.complete();
+        });
+        await completer.future;
+        expect(count, 1);
+      });
+    });
 
     group('auto', () {
       tearDown(_tearDown);

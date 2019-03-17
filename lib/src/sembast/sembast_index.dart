@@ -5,11 +5,14 @@ import 'package:idb_shim/src/sembast/sembast_cursor.dart';
 import 'package:idb_shim/src/sembast/sembast_object_store.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:sembast/sembast.dart' as sdb;
+import 'sembast_utils.dart' as utils;
 
 class IndexSembast extends Index with IndexWithMetaMixin {
   final ObjectStoreSembast store;
   @override
   final IdbIndexMeta meta;
+
+  dynamic get escapedKeyPath => utils.escapeKeyPath(keyPath);
 
   IndexSembast(this.store, this.meta);
 
@@ -100,9 +103,9 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   }
 
   sdb.Filter cursorFilter(key, KeyRange range) {
-    return keyCursorFilter(keyPath, key, range);
+    return keyCursorFilter(escapedKeyPath, key, range);
   }
 
   List<sdb.SortOrder> sortOrders(bool ascending) =>
-      keyPathSortOrders(keyPath, ascending);
+      keyPathSortOrders(escapedKeyPath, ascending);
 }

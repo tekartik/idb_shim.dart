@@ -2,6 +2,7 @@ library index_cursor_test;
 
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/sembast/sembast_cursor.dart';
+import 'package:idb_shim/src/sembast/sembast_utils.dart';
 import 'package:sembast/sembast.dart' as sdb;
 
 import 'idb_test_common.dart';
@@ -14,12 +15,31 @@ void main() {
       expect(filter.match(sdb.Record(null, {'test': 2})), isTrue);
       expect(filter.match(sdb.Record(null, {'name': 0})), isFalse);
     });
-    test('keyFilter', () {
+    test('keyFilterNull', () {
       var filter = keyFilter('name', null);
       expect(filter.match(sdb.Record(null, {'dummy_empty': 1})), isFalse);
       expect(filter.match(sdb.Record(null, {'name': null})), isFalse);
       expect(filter.match(sdb.Record(null, {'name': 1})), isTrue);
-      // keyRangeFilter(['year', 'name'], KeyRange.lowerBound([2018, 'John']));
+    });
+    test('keyFilterValue', () {
+      var filter = keyFilter('name', 1);
+      expect(filter.match(sdb.Record(null, {'dummy_empty': 1})), isFalse);
+      expect(filter.match(sdb.Record(null, {'name': null})), isFalse);
+      expect(filter.match(sdb.Record(null, {'name': 1})), isTrue);
+      expect(filter.match(sdb.Record(null, {'name': 2})), isFalse);
+    });
+    test('keyFilterDotNull', () {
+      var filter = keyFilter(escapeKeyPath('my.name'), null);
+      expect(filter.match(sdb.Record(null, {'dummy_empty': 1})), isFalse);
+      expect(filter.match(sdb.Record(null, {'my.name': null})), isFalse);
+      expect(filter.match(sdb.Record(null, {'my.name': 1})), isTrue);
+    });
+    test('keyFilterDotValue', () {
+      var filter = keyFilter(escapeKeyPath('my.name'), 1);
+      expect(filter.match(sdb.Record(null, {'dummy_empty': 1})), isFalse);
+      expect(filter.match(sdb.Record(null, {'my.name': null})), isFalse);
+      expect(filter.match(sdb.Record(null, {'my.name': 1})), isTrue);
+      expect(filter.match(sdb.Record(null, {'my.name': 2})), isFalse);
     });
     test('keyArrayFilter', () {
       var filter = keyFilter(['year', 'name'], null);

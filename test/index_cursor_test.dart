@@ -63,26 +63,13 @@ void defineTests(TestContext ctx) {
       }
     }
 
-    /*
-    Future<List<TestIdNameRow>> cursorToList(Stream<CursorWithValue> stream) {
-      var completer = Completer<List<TestIdNameRow>>.sync();
-      List<TestIdNameRow> list = List();
-      stream.listen((CursorWithValue cwv) {
-        list.add(TestIdNameRow(cwv));
-      }).onDone(() {
-        completer.complete(list);
-      });
-      return completer.future;
+    void _createTransaction() {
+      transaction = db.transaction(testStoreName, idbModeReadWrite);
+      objectStore = transaction.objectStore(testStoreName);
+      index = objectStore.index(testNameIndex);
     }
-    */
 
     group('with_null_key', () {
-      void _createTransaction() {
-        transaction = db.transaction(testStoreName, idbModeReadWrite);
-        objectStore = transaction.objectStore(testStoreName);
-        index = objectStore.index(testNameIndex);
-      }
-
       Future _openDb() async {
         String _dbName = ctx.dbName;
         await idbFactory.deleteDatabase(_dbName);
@@ -140,12 +127,6 @@ void defineTests(TestContext ctx) {
     });
 
     group('auto', () {
-      void _createTransaction() {
-        transaction = db.transaction(testStoreName, idbModeReadWrite);
-        objectStore = transaction.objectStore(testStoreName);
-        index = objectStore.index(testNameIndex);
-      }
-
       Future _setUp() async {
         await _setupDeleteDb();
 
@@ -578,5 +559,44 @@ void defineTests(TestContext ctx) {
     },
         // keyPath as array not supported on IE
         skip: ctx.isIdbEdge || ctx.isIdbIe);
+
+    group('key_path_with_dot', () {
+      const String keyPath = "my.key";
+
+      Future _setUp() async {
+        await _setupDeleteDb();
+
+        void _initializeDatabase(VersionChangeEvent e) {
+          Database db = e.database;
+          ObjectStore objectStore =
+              db.createObjectStore(testStoreName, autoIncrement: true);
+          objectStore.createIndex(testNameIndex, keyPath);
+        }
+
+        db = await idbFactory.open(_dbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+      }
+
+      tearDown(_tearDown);
+
+      test('one item cursor', () async {
+        await _setUp();
+        _createTransaction();
+        Map value = {keyPath: 'test_value'};
+        await objectStore.add(value);
+        Stream<CursorWithValue> stream =
+            index.openCursor(autoAdvance: true, key: 'test_value');
+        int count = 0;
+        Completer completer = Completer();
+        stream.listen((CursorWithValue cwv) {
+          expect((cwv.value as Map)[keyPath], 'test_value');
+          count++;
+        }).onDone(() {
+          completer.complete();
+        });
+        await completer.future;
+        expect(count, 1);
+      });
+    });
   });
 }

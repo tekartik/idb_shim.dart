@@ -8,6 +8,7 @@ import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:idb_shim/src/sembast/sembast_import.dart' as sdb;
 import 'package:sembast/utils/value_utils.dart' as utils;
 
+/// keyPath must have been escaped before
 sdb.Filter keyCursorFilter(dynamic keyPath, key, KeyRange range) {
   if (range != null) {
     return keyRangeFilter(keyPath, range);
@@ -148,7 +149,8 @@ sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range) {
   throw 'keyPath $keyPath not supported';
 }
 
-// The null value for the key actually means any but null...
+/// The null value for the key actually means any but null...
+/// Key path must have been escaped before
 sdb.Filter keyFilter(dynamic keyPath, var key) {
   if (keyPath is String) {
     if (key == null) {
@@ -276,17 +278,6 @@ class IndexKeyCursorSembast extends Object
   @override
   Object get key => record.value[indexCtlr.index.keyPath];
 }
-
-/*
-class _SdbStoreKeyCursor extends Object
-    with _SdbKeyCursorMixin
-    implements Cursor {
-  _SdbStoreKeyCursor(_SdbBaseCursorControllerMixin ctlr, int index) {
-    this.ctlr = ctlr;
-    this.recordIndex = index;
-  }
-}
-*/
 
 class IndexCursorWithValueSembast extends Object
     with KeyCursorSembastMixin, CursorWithValueSembastMixin {
@@ -510,6 +501,7 @@ class StoreCursorWithValueControllerSembast extends Object
   }
 }
 
+/// Key path must have been escaped before
 List<sdb.SortOrder> keyPathSortOrders(dynamic keyPath, bool ascending) {
   if (keyPath is String) {
     return [sdb.SortOrder(keyPath, ascending)];
