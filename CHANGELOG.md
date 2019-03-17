@@ -1,3 +1,7 @@
+## 1.7.3
+
+* Fix dot support in keyPath to match native behavior
+
 ## 1.7.2
 
 * Dart 2.2 support, Dart 2.1 compatible
