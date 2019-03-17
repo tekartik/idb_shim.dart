@@ -41,12 +41,12 @@ class TransactionSembast extends IdbTransactionBase
         print("done $i");
       }
       completer.complete(result);
-    }).catchError((e) {
+    }).catchError((e, st) {
       //devPrint(" err $i");
       if (_debugTransaction) {
         print("err $i");
       }
-      completer.completeError(e);
+      completer.completeError(e, st as StackTrace);
     });
   }
 

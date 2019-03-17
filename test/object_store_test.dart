@@ -769,6 +769,18 @@ void defineTests(TestContext ctx) {
         }
       });
 
+      test('simple add_without_key_path', () async {
+        await _setUp();
+        _createTransaction();
+        final value = {'non_key_path': 'test_value'};
+        try {
+          await objectStore.add(value);
+          fail('should fail');
+        } catch (e) {
+          expect(e, isNot(const TypeMatcher<TestFailure>()));
+        }
+      });
+
       test('simple add_get', () async {
         await _setUp();
         _createTransaction();
@@ -917,6 +929,46 @@ void defineTests(TestContext ctx) {
         });
       });
     }
+
+    group('dotted_key_path_non_auto', () {
+      const String keyPath = "my.key";
+
+      Future _setUp() async {
+        await _setupDeleteDb();
+
+        void _initializeDatabase(VersionChangeEvent e) {
+          Database db = e.database;
+          db.createObjectStore(testStoreName, keyPath: keyPath);
+        }
+
+        db = await idbFactory.open(_dbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+      }
+
+      tearDown(_tearDown);
+
+      test('simple add_without_key_path', () async {
+        await _setUp();
+        _createTransaction();
+        final value = {'non_key_path': 'test_value'};
+        try {
+          await objectStore.add(value);
+          fail('should fail');
+        } catch (e) {
+          expect(e, isNot(const TypeMatcher<TestFailure>()));
+        }
+      });
+
+      test('add_with_key_path', () async {
+        await _setUp();
+        _createTransaction();
+        final value = {
+          'my': {'key': 'test_value'}
+        };
+        await objectStore.add(value);
+        expect(await objectStore.getObject('test_value'), value);
+      });
+    });
 
     group('various', () {
       Future _setUp() async {

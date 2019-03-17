@@ -582,14 +582,16 @@ void defineTests(TestContext ctx) {
       test('one item cursor', () async {
         await _setUp();
         _createTransaction();
-        Map value = {keyPath: 'test_value'};
+        Map value = {
+          'my': {'key': 'test_value'}
+        };
         await objectStore.add(value);
         Stream<CursorWithValue> stream =
             index.openCursor(autoAdvance: true, key: 'test_value');
         int count = 0;
         Completer completer = Completer();
         stream.listen((CursorWithValue cwv) {
-          expect((cwv.value as Map)[keyPath], 'test_value');
+          expect(cwv.value, value);
           count++;
         }).onDone(() {
           completer.complete();

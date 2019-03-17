@@ -376,6 +376,159 @@ void defineTests(TestContext ctx) {
       });
     });
 
+    group('key_path_with_dot', () {
+      var keyPath = 'my.key';
+
+      Future _setUp() async {
+        await _setupDeleteDb();
+
+        void _initializeDatabase(VersionChangeEvent e) {
+          Database db = e.database;
+          ObjectStore objectStore =
+              db.createObjectStore(testStoreName, autoIncrement: true);
+          objectStore.createIndex(testNameIndex, keyPath);
+        }
+
+        db = await idbFactory.open(_dbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+      }
+
+      tearDown(_tearDown);
+
+      test('store_properties', () async {
+        await _setUp();
+        _createTransaction();
+        expect(objectStore.indexNames, [testNameIndex]);
+      });
+
+      test('count by key', () async {
+        await _setUp();
+        _createTransaction();
+        Map value1 = {
+          'my': {'key': "test1"}
+        };
+        Map value2 = {
+          'my': {'key': "test2"}
+        };
+        Index index = objectStore.index(testNameIndex);
+        return objectStore.add(value1).then((_) {
+          return objectStore.add(value2).then((_) {
+            return index.count("test1").then((int count) {
+              expect(count, 1);
+              return index.count("test2").then((int count) {
+                expect(count, 1);
+              });
+            });
+          });
+        });
+      });
+
+      test('count by range', () async {
+        await _setUp();
+        _createTransaction();
+        Map value1 = {
+          'my': {'key': "test1"}
+        };
+        Map value2 = {
+          'my': {'key': "test2"}
+        };
+        Index index = objectStore.index(testNameIndex);
+        return objectStore.add(value1).then((_) {
+          return objectStore.add(value2).then((_) {
+            return index
+                .count(KeyRange.lowerBound("test1", true))
+                .then((int count) {
+              expect(count, 1);
+              return index
+                  .count(KeyRange.lowerBound("test1"))
+                  .then((int count) {
+                expect(count, 2);
+              });
+            });
+          });
+        });
+      });
+
+      test('WEIRD count by range', () async {
+        await _setUp();
+        _createTransaction();
+        Map value = {};
+        return objectStore.add(value).then((key1) {
+          return objectStore.add(value).then((key2) {
+            return objectStore
+                .count(KeyRange.lowerBound(key1, true))
+                .then((int count) {
+              expect(count, 1);
+              return objectStore
+                  .count(KeyRange.lowerBound(key1))
+                  .then((int count) {
+                expect(count, 2);
+              });
+            });
+          });
+        });
+      }, skip: true);
+
+      test('add/get map', () async {
+        await _setUp();
+        _createTransaction();
+        Map value = {
+          'my': {'key': "test1"}
+        };
+        Index index = objectStore.index(testNameIndex);
+        var key = await objectStore.add(value);
+        expect(key, 1);
+        var readValue = await index.get("test1");
+        expect(readValue, value);
+      });
+
+      test('get key none', () async {
+        await _setUp();
+        _createTransaction();
+        Index index = objectStore.index(testNameIndex);
+        var readKey = await index.getKey("test1");
+        expect(readKey, isNull);
+      });
+
+      test('add/get key', () async {
+        await _setUp();
+        _createTransaction();
+        Map value = {
+          'my': {'key': "test1"}
+        };
+        Index index = objectStore.index(testNameIndex);
+        var key = await objectStore.add(value);
+        var readKey = await index.getKey("test1");
+        expect(readKey, key);
+      });
+
+      test('add/get 2', () async {
+        await _setUp();
+        _createTransaction();
+        Map value1 = {
+          'my': {'key': "test1"}
+        };
+        Map value2 = {
+          'my': {'key': "test2"}
+        };
+        var key = await objectStore.add(value1);
+        expect(key, 1);
+        key = await objectStore.add(value2);
+        expect(key, 2);
+        Index index = objectStore.index(testNameIndex);
+        var readValue = await index.get("test1");
+        expect(readValue, value1);
+        readValue = await index.get("test2");
+        expect(readValue, value2);
+
+        // count() crashes on ie
+        if (!ctx.isIdbIe) {
+          var result = await index.count();
+          expect(result, 2);
+        }
+      });
+    });
+
     group('one_multi_entry', () {
       Future _setUp() async {
         await _setupDeleteDb();

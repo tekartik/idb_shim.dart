@@ -2,7 +2,6 @@ library index_cursor_test;
 
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/sembast/sembast_cursor.dart';
-import 'package:idb_shim/src/sembast/sembast_utils.dart';
 import 'package:sembast/sembast.dart' as sdb;
 
 import 'idb_test_common.dart';
@@ -29,17 +28,31 @@ void main() {
       expect(filter.match(sdb.Record(null, {'name': 2})), isFalse);
     });
     test('keyFilterDotNull', () {
-      var filter = keyFilter(escapeKeyPath('my.name'), null);
+      var filter = keyFilter('my.name', null);
+      expect(
+          filter.match(sdb.Record(null, {
+            'my': {'name': 1}
+          })),
+          isTrue);
       expect(filter.match(sdb.Record(null, {'dummy_empty': 1})), isFalse);
       expect(filter.match(sdb.Record(null, {'my.name': null})), isFalse);
-      expect(filter.match(sdb.Record(null, {'my.name': 1})), isTrue);
+      expect(filter.match(sdb.Record(null, {'my.name': 1})), isFalse);
     });
     test('keyFilterDotValue', () {
-      var filter = keyFilter(escapeKeyPath('my.name'), 1);
+      var filter = keyFilter('my.name', 1);
+      expect(
+          filter.match(sdb.Record(null, {
+            'my': {'name': 1}
+          })),
+          isTrue);
+      expect(
+          filter.match(sdb.Record(null, {
+            'my': {'name': 2}
+          })),
+          isFalse);
       expect(filter.match(sdb.Record(null, {'dummy_empty': 1})), isFalse);
       expect(filter.match(sdb.Record(null, {'my.name': null})), isFalse);
-      expect(filter.match(sdb.Record(null, {'my.name': 1})), isTrue);
-      expect(filter.match(sdb.Record(null, {'my.name': 2})), isFalse);
+      expect(filter.match(sdb.Record(null, {'my.name': 1})), isFalse);
     });
     test('keyArrayFilter', () {
       var filter = keyFilter(['year', 'name'], null);
@@ -50,6 +63,24 @@ void main() {
       expect(
           filter.match(sdb.Record(null, {'name': null, 'year': 1})), isFalse);
       // keyRangeFilter(['year', 'name'], KeyRange.lowerBound([2018, 'John']));
+    });
+    test('keyArrayRangeDottedFilter', () {
+      var filter = keyRangeFilter('my.year', KeyRange.lowerBound(2018));
+      expect(
+          filter.match(sdb.Record(null, {
+            'my': {'year': 2018}
+          })),
+          isTrue);
+      expect(
+          filter.match(sdb.Record(null, {
+            'my': {'year': 2019}
+          })),
+          isTrue);
+      expect(
+          filter.match(sdb.Record(null, {
+            'my': {'year': 2017}
+          })),
+          isFalse);
     });
     test('keyArrayRangeFilter', () {
       var filter =

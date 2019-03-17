@@ -8,7 +8,6 @@ import 'package:idb_shim/src/sembast/sembast_index.dart';
 import 'package:idb_shim/src/sembast/sembast_transaction.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:sembast/sembast.dart' as sdb;
-import 'sembast_utils.dart' as utils;
 
 class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   @override
@@ -77,7 +76,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   /// it is a map and keyPath is not null
   dynamic _getKey(value, [key]) {
     if ((keyPath != null) && (value is Map)) {
-      var keyInValue = value[keyPath];
+      var keyInValue = mapValueAtKeyPath(value, keyPath);
       if (keyInValue != null) {
         if (key != null) {
           throw ArgumentError(
@@ -220,18 +219,18 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   List<sdb.SortOrder> sortOrders(bool ascending) =>
-      keyPathSortOrders(escapedKeyField, ascending);
+      keyPathSortOrders(keyField, ascending);
 
   sdb.Filter cursorFilter(key, KeyRange range) {
     if (range != null) {
-      return keyRangeFilter(escapedKeyField, range);
+      return keyRangeFilter(keyField, range);
     } else {
-      return keyFilter(escapedKeyField, key);
+      return keyFilter(keyField, key);
     }
   }
 
-  dynamic get escapedKeyField =>
-      keyPath != null ? utils.escapeKeyPath(keyPath) : sdb.Field.key;
+  /// Get the keyPath or default sdb key
+  dynamic get keyField => keyPath ?? sdb.Field.key;
 
   @override
   Stream<CursorWithValue> openCursor(

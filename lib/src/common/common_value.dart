@@ -65,11 +65,12 @@ dynamic _cloneValue(dynamic original) {
   return original;
 }
 
+/// Clone and add the key if needed
 dynamic cloneValue(dynamic value, [String keyPath, dynamic key]) {
   dynamic clone = _cloneValue(value);
   if (keyPath != null) {
     // assume map
-    clone[keyPath] = key;
+    setMapFieldValue(clone as Map, keyPath, key);
   }
   return clone;
 }
@@ -111,10 +112,45 @@ KeyRange keyArrayRangeAt(KeyRange keyRange, int index) {
 // return a list if keyPath is an array
 dynamic mapValueAtKeyPath(Map map, keyPath) {
   if (keyPath is String) {
-    return map[keyPath];
+    return getMapFieldValue(map, keyPath);
   } else if (keyPath is List) {
     List keyList = keyPath;
     return List.generate(keyList.length, (i) => map[keyList[i]]);
   }
   throw 'keyPath $keyPath not supported';
+}
+
+List<String> getFieldParts(String field) => field.split('.');
+
+T getMapFieldValue<T>(Map map, String field) {
+  return getPartsMapValue(map, getFieldParts(field));
+}
+
+T getPartsMapValue<T>(Map map, Iterable<String> parts) {
+  dynamic value = map;
+  for (String part in parts) {
+    if (value is Map) {
+      value = value[part];
+    } else {
+      return null;
+    }
+  }
+  return value as T;
+}
+
+void setMapFieldValue<T>(Map map, String field, T value) {
+  setPartsMapValue(map, getFieldParts(field), value);
+}
+
+void setPartsMapValue<T>(Map map, List<String> parts, value) {
+  for (int i = 0; i < parts.length - 1; i++) {
+    String part = parts[i];
+    dynamic sub = map[part];
+    if (!(sub is Map)) {
+      sub = <String, dynamic>{};
+      map[part] = sub;
+    }
+    map = sub as Map;
+  }
+  map[parts.last] = value;
 }
