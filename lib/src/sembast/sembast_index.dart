@@ -2,6 +2,7 @@ import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
 import 'package:idb_shim/src/common/common_validation.dart';
 import 'package:idb_shim/src/sembast/sembast_cursor.dart';
+import 'package:idb_shim/src/sembast/sembast_filter.dart';
 import 'package:idb_shim/src/sembast/sembast_object_store.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:sembast/sembast.dart' as sdb;
@@ -26,7 +27,7 @@ class IndexSembast extends Index with IndexWithMetaMixin {
         throw 'key_OR_range is null, keyPath must not be an array';
       }
     }
-    return keyOrRangeFilter(meta.keyPath, keyOrRange);
+    return keyOrRangeFilter(meta.keyPath, keyOrRange, multiEntry);
   }
 
   @override
@@ -100,7 +101,7 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   }
 
   sdb.Filter cursorFilter(key, KeyRange range) {
-    return keyCursorFilter(keyPath, key, range);
+    return keyCursorFilter(keyPath, key, range, multiEntry);
   }
 
   List<sdb.SortOrder> sortOrders(bool ascending) =>

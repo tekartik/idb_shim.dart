@@ -529,7 +529,7 @@ void defineTests(TestContext ctx) {
       });
     });
 
-    group('one_multi_entry', () {
+    group('multi_entry_true', () {
       Future _setUp() async {
         await _setupDeleteDb();
 
@@ -579,6 +579,81 @@ void defineTests(TestContext ctx) {
         expect(readValue, value);
       });
 
+      test('add_one_array', () async {
+        await _setUp();
+        _createTransaction();
+        Map value = {
+          testNameField: [1, 2]
+        };
+
+        Index index = objectStore.index(testNameIndex);
+        var key = await objectStore.add(value);
+        expect(key, 1);
+        var readValue = await index.get(1);
+        expect(readValue, value);
+      });
+
+      test('add_two_arrays', () async {
+        await _setUp();
+        _createTransaction();
+        Map value1 = {
+          testNameField: [1, 2]
+        };
+        Map value2 = {
+          testNameField: [1, 3]
+        };
+        Index index = objectStore.index(testNameIndex);
+        var key1 = await objectStore.add(value1);
+        var key2 = await objectStore.add(value2);
+        expect(key1, 1);
+        expect(key2, 2);
+        expect(await index.get(1), value1);
+        expect(await index.get(2), value1);
+        expect(await index.get(3), value2);
+      });
+
+      test('issue#2', () async {
+        await _setupDeleteDb();
+
+        // open the database
+        Database db = await idbFactory.open(_dbName, version: 1,
+            onUpgradeNeeded: (VersionChangeEvent event) {
+          Database db = event.database;
+          // create the store
+          final store = db.createObjectStore('test', autoIncrement: true);
+          store.createIndex('index', 'spath', multiEntry: true);
+        });
+
+        // put some data
+        final object = <String, dynamic>{
+          "spath": [1, 2]
+        };
+        var txn = db.transaction('test', "readwrite");
+        var store = txn.objectStore('test');
+        await store.put(object);
+        await txn.completed;
+
+        // read some data
+        txn = db.transaction('test', "readonly");
+        store = txn.objectStore('test');
+        var cursorStream = store
+            .index('index')
+            .openCursor(range: KeyRange.lowerBound(2), autoAdvance: true)
+            .map((cv) => cv.value);
+        expect(cursorStream, emits(object));
+        await txn.completed;
+
+        // read some data
+        txn = db.transaction('test', "readonly");
+        store = txn.objectStore('test');
+        cursorStream = store
+            .index('index')
+            .openCursor(range: KeyRange.lowerBound(3), autoAdvance: true)
+            .map((cv) => cv.value);
+        expect(await cursorStream.toList(), isEmpty);
+        await txn.completed;
+      });
+
       test('add_twice_same_key', () async {
         await _setUp();
         _createTransaction();
@@ -621,6 +696,71 @@ void defineTests(TestContext ctx) {
         await objectStore.add(value);
         var readValue = await index.get("test1");
         expect(readValue, value);
+      });
+    });
+
+    group('multi_entry_false', () {
+      Future _setUp() async {
+        await _setupDeleteDb();
+
+        void _initializeDatabase(VersionChangeEvent e) {
+          Database db = e.database;
+          ObjectStore objectStore =
+              db.createObjectStore(testStoreName, autoIncrement: true);
+          objectStore.createIndex(testNameIndex, testNameField,
+              multiEntry: false);
+        }
+
+        db = await idbFactory.open(_dbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+      }
+
+      tearDown(_tearDown);
+
+      test('store_properties', () async {
+        await _setUp();
+        _createTransaction();
+        expect(objectStore.indexNames, [testNameIndex]);
+      });
+
+      test('properties', () async {
+        await _setUp();
+        _createTransaction();
+        Index index = objectStore.index(testNameIndex);
+        expect(index.name, testNameIndex);
+        expect(index.keyPath, testNameField);
+
+        // multiEntry not supported on ie
+        if (!ctx.isIdbIe) {
+          expect(index.multiEntry, false);
+        }
+        expect(index.unique, false);
+      });
+
+      test('add_one', () async {
+        await _setUp();
+        _createTransaction();
+        Map value = {testNameField: "test1"};
+
+        Index index = objectStore.index(testNameIndex);
+        var key = await objectStore.add(value);
+        expect(key, 1);
+        var readValue = await index.get("test1");
+        expect(readValue, value);
+      });
+
+      test('add_one_array', () async {
+        await _setUp();
+        _createTransaction();
+        Map value = {
+          testNameField: [1, 2]
+        };
+
+        Index index = objectStore.index(testNameIndex);
+        var key = await objectStore.add(value);
+        expect(key, 1);
+        var readValue = await index.get(1);
+        expect(readValue, isNull);
       });
     });
 

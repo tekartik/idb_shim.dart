@@ -527,17 +527,17 @@ class KeyRange {
   KeyRange.only(/*Key*/ value) : this.bound(value, value);
 
   KeyRange.lowerBound(this._lowerBound, [bool open = false]) {
-    _lowerBoundOpen = open;
+    _lowerBoundOpen = open ?? false;
   }
 
   KeyRange.upperBound(this._upperBound, [bool open = false]) {
-    _upperBoundOpen = open;
+    _upperBoundOpen = open ?? false;
   }
 
   KeyRange.bound(this._lowerBound, this._upperBound,
       [bool lowerOpen = false, bool upperOpen = false]) {
-    _lowerBoundOpen = lowerOpen;
-    _upperBoundOpen = upperOpen;
+    _lowerBoundOpen = lowerOpen ?? false;
+    _upperBoundOpen = upperOpen ?? false;
   }
 
   dynamic _lowerBound;
@@ -586,74 +586,10 @@ class KeyRange {
         return cmp >= 0;
       }
     }
-    /*
-      if (_lowerBoundOpen != null && _lowerBoundOpen) {
-        if (key is num) {
-          return (key > (_lowerBound as num));
-        } else if (key is String) {
-          return key.compareTo(_lowerBound as String) > 0;
-        } else if (key is List) {
-          var list = key as List;
-          for (int i = 0; i < list.length; i++) {
-            var diff = compareValue(key, (_lowerBound as List)[i]);
-            if (diff != 0) {
-              return diff > 0;
-            }
-          }
-          return false;
-        } else {
-          throw UnsupportedError(
-              "key '$key' of type ${key.runtimeType} not supported");
-        }
-      } else {
-        if (key is num) {
-          return (key >= (_lowerBound as num));
-        } else if (key is String) {
-          return key.compareTo(_lowerBound as String) >= 0;
-        }  else if (key is List) {
-          var list = key as List;
-          for (int i = 0; i < list.length; i++) {
-            var diff = compareValue(key, (_lowerBound as List)[i]);
-            if (diff != 0) {
-              return diff >= 0;
-            }
-          }
-          return false;
-        } else {
-          throw UnsupportedError(
-              "key '$key' of type ${key.runtimeType} not supported");
-        }
-      }
-
-    }
-    */
     return true;
   }
 
   bool _checkUpperBound(key) {
-    /*
-    if (_upperBound != null) {
-      if (_upperBoundOpen != null && _upperBoundOpen) {
-        if (key is num) {
-          return (key < (_upperBound as num));
-        } else if (key is String) {
-          return key.compareTo(_upperBound as String) < 0;
-        } else {
-          throw UnsupportedError(
-              "key '$key' of type ${key.runtimeType} not supported");
-        }
-      } else {
-        if (key is num) {
-          return (key <= (_upperBound as num));
-        } else if (key is String) {
-          return key.compareTo(_upperBound as String) <= 0;
-        } else {
-          throw UnsupportedError(
-              "key '$key' of type ${key.runtimeType} not supported");
-        }
-      }
-    }
-    */
     if (_upperBound != null) {
       bool exclude = _upperBoundOpen != null && _upperBoundOpen;
       num cmp = _compareValue(key, _upperBound);

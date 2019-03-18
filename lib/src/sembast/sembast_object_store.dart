@@ -4,6 +4,7 @@ import 'package:idb_shim/src/common/common_validation.dart';
 import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/sembast/sembast_cursor.dart';
 import 'package:idb_shim/src/sembast/sembast_database.dart';
+import 'package:idb_shim/src/sembast/sembast_filter.dart';
 import 'package:idb_shim/src/sembast/sembast_index.dart';
 import 'package:idb_shim/src/sembast/sembast_transaction.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
@@ -103,7 +104,8 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
         var fieldValue = mapValueAtKeyPath(value, indexMeta.keyPath);
         if (fieldValue != null) {
           sdb.Finder finder = sdb.Finder(
-              filter: keyFilter(indexMeta.keyPath, fieldValue), limit: 1);
+              filter: keyFilter(indexMeta.keyPath, fieldValue, false),
+              limit: 1);
           futures
               .add(sdbStore.findFirst(sdbClient, finder: finder).then((record) {
             // not ourself
@@ -156,7 +158,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   sdb.Filter _storeKeyOrRangeFilter([keyOrRange]) {
-    return keyOrRangeFilter(sdb.Field.key, keyOrRange);
+    return keyOrRangeFilter(sdb.Field.key, keyOrRange, false);
   }
 
   @override
@@ -223,9 +225,9 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   sdb.Filter cursorFilter(key, KeyRange range) {
     if (range != null) {
-      return keyRangeFilter(keyField, range);
+      return keyRangeFilter(keyField, range, false);
     } else {
-      return keyFilter(keyField, key);
+      return keyFilter(keyField, key, false);
     }
   }
 
