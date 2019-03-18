@@ -1,3 +1,7 @@
+## 1.7.4
+
+* Supports multiEntry for sembast implementation
+
 ## 1.7.3
 
 * Fix dot support in keyPath to match native behavior
