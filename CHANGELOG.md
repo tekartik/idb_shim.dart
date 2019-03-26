@@ -1,6 +1,7 @@
 ## 1.7.4
 
 * Supports multiEntry for sembast implementation
+* Fix cursor update with keyPath for sembast
 
 ## 1.7.3
 
