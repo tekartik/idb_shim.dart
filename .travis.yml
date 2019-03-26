@@ -2,6 +2,8 @@ language: dart
 sudo: required
 dist: trusty
 dart:
+  # to test flutter compat
+  - '2.1.1'
   - stable
   - dev
 before_script:
