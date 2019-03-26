@@ -19,6 +19,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   DatabaseSembast get database => transaction.database;
 
   sdb.Database get sdbDatabase => database.db;
+
   sdb.Transaction get sdbTransaction => transaction.sdbTransaction;
 
   sdb.DatabaseClient _sdbClient;
@@ -75,16 +76,14 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   /// extract the key from the key itself or from the value
   /// it is a map and keyPath is not null
-  dynamic _getKey(value, [key]) {
-    if ((keyPath != null) && (value is Map)) {
-      var keyInValue = mapValueAtKeyPath(value, keyPath);
-      if (keyInValue != null) {
-        if (key != null) {
-          throw ArgumentError(
-              "both key ${key} and inline keyPath ${keyInValue} are specified");
-        } else {
-          return keyInValue;
-        }
+  dynamic getKeyImpl(value, [key]) {
+    if (keyPath != null) {
+      if (key != null) {
+        throw ArgumentError(
+            "The object store uses in-line keys and the key parameter '$key' was provided");
+      }
+      if (value is Map) {
+        key = mapValueAtKeyPath(value, keyPath);
       }
     }
 
@@ -94,6 +93,14 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     }
 
     return key;
+  }
+
+  /// Only key the if key path is null
+  dynamic getUpdateKeyIfNeeded(value, [key]) {
+    if (keyPath == null) {
+      return key;
+    }
+    return null;
   }
 
   Future _put(value, key) {
@@ -132,7 +139,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   @override
   Future add(value, [key]) {
     return inWritableTransaction(() {
-      key = _getKey(value, key);
+      key = getKeyImpl(value, key);
 
       if (key != null) {
         return sdbStore.record(key).get(sdbClient).then((existingValue) {
@@ -252,7 +259,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   @override
   Future put(value, [key]) {
     return inWritableTransaction(() {
-      return _put(value, _getKey(value, key));
+      return _put(value, getKeyImpl(value, key));
     });
   }
 }

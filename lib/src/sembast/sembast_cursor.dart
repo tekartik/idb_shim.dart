@@ -44,7 +44,8 @@ abstract class KeyCursorSembastMixin implements Cursor {
   Object get primaryKey => record.key;
 
   @override
-  Future update(value) => store.put(value, primaryKey);
+  Future update(value) =>
+      store.put(value, store.getUpdateKeyIfNeeded(value, primaryKey));
 }
 
 abstract class IndexCursorSembastMixin implements Cursor {

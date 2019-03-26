@@ -968,6 +968,57 @@ void defineTests(TestContext ctx) {
         await objectStore.add(value);
         expect(await objectStore.getObject('test_value'), value);
       });
+
+      test('add_put_with_key', () async {
+        await _setUp();
+        _createTransaction();
+        final value = {'dummy': 2};
+
+        try {
+          await objectStore.add(value, 'test_value');
+          fail('should fail');
+        } catch (e) {
+          expect(e, isNot(const TypeMatcher<TestFailure>()));
+          // Failed to execute 'add' on 'IDBObjectStore': The object store uses in-line keys and the key parameter was provided.
+          // devPrint(_);
+        }
+
+        try {
+          await objectStore.put(value, 'test_value');
+          fail('should fail');
+        } catch (e) {
+          expect(e, isNot(const TypeMatcher<TestFailure>()));
+          // Failed to execute 'add' on 'IDBObjectStore': The object store uses in-line keys and the key parameter was provided.
+          // devPrint(_);
+        }
+      });
+
+      test('put_with_key_and_key_path', () async {
+        await _setUp();
+        _createTransaction();
+        final value = {
+          'my': {'key': 'test_value'}
+        };
+
+        try {
+          await objectStore.add(value, 'test_value');
+          fail('should fail');
+        } catch (e) {
+          expect(e, isNot(const TypeMatcher<TestFailure>()));
+          // Failed to execute 'add' on 'IDBObjectStore': The object store uses in-line keys and the key parameter was provided.
+          // devPrint(_);
+        }
+
+        try {
+          await objectStore.put(value, 'test_value');
+          fail('should fail');
+        } catch (e) {
+          expect(e, isNot(const TypeMatcher<TestFailure>()));
+          // Failed to execute 'add' on 'IDBObjectStore': The object store uses in-line keys and the key parameter was provided.
+          // devPrint(_);
+        }
+        // expect(await objectStore.getObject('test_value'), result);
+      });
     });
 
     group('various', () {
