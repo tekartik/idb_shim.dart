@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:process_run/shell.dart';
 import 'package:pub_semver/pub_semver.dart';
 
+import 'tool_test.dart';
+
 Future main() async {
   var shell = Shell();
 
@@ -19,7 +21,7 @@ Future main() async {
   ''');
 
   // Fails on Dart 2.1.1
-  var dartVersion = Version.parse(Platform.version);
+  var dartVersion = parsePlatformVersion(Platform.version);
   if (dartVersion >= Version(2, 2, 0, pre: 'dev')) {
     await shell.run('''
     pub run build_runner test -- -p chrome -j 1 test/web test/multiplatform
