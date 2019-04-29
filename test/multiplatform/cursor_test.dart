@@ -20,6 +20,7 @@ class TestIdNameRow {
 
 // so that this can be run directly
 void main() {
+  // devPrint('CURSOR');
   defineTests(idbMemoryContext);
 }
 

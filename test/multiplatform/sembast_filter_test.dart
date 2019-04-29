@@ -4,7 +4,7 @@ import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/sembast/sembast_filter.dart' as sembast_filter;
 import 'package:sembast/sembast.dart' as sdb;
 
-import 'idb_test_common.dart';
+import '../idb_test_common.dart';
 
 sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range,
         [bool multiEntry = false]) =>

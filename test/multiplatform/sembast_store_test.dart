@@ -2,7 +2,7 @@ library idb_shim.sembast_store_test;
 
 import 'package:idb_shim/src/sembast/sembast_object_store.dart' as sembast;
 
-import 'idb_test_common.dart';
+import '../idb_test_common.dart';
 
 void main() {
   group('sembast_object_store', () {
