@@ -76,7 +76,7 @@ dynamic cloneValue(dynamic value, [String keyPath, dynamic key]) {
 }
 
 // handle single object and array!
-int compareKeys<T>(T first, T second) {
+int compareKeys(dynamic first, dynamic second) {
   if (first is num && second is num) {
     return first < second ? -1 : (first == second ? 0 : 1);
   } else if (first is String && second is String) {
