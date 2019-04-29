@@ -1,3 +1,7 @@
+## 1.7.5
+
+* Supports dart 2.3
+
 ## 1.7.4
 
 * Supports multiEntry for sembast implementation
