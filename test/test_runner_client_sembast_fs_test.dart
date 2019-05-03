@@ -62,8 +62,10 @@ void defineTests(SembastFsTestContext ctx) {
     }
 
     Future<List<Map>> getStorageContent() async {
-      return getFileContent(
+      var content = await getFileContent(
           ctx.sdbFactory.fs.file(idbFactory.getDbPath(dbTestName)));
+      // devPrint(content);
+      return content;
     }
 
     Future<List<Map>> getSdbStorageContext() async {
@@ -142,6 +144,18 @@ void defineTests(SembastFsTestContext ctx) {
       // Make sure the db is flushed
       await (db as idb_sdb.DatabaseSembast).db.close();
       await _checkExport();
+    });
+
+    dbTest('dummy_file', () async {
+      var dbName = dbTestName;
+      var file = ctx.sdbFactory.fs.file(idbFactory.getDbPath(dbTestName));
+      await file.create(recursive: true);
+      var sink = file.openWrite(mode: FileMode.write);
+      sink.writeln('test');
+      await sink.close();
+
+      db = await idbFactory.open(dbName);
+      db.close();
     });
   });
 }
