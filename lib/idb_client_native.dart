@@ -7,7 +7,7 @@ import 'dart:indexed_db' as idb;
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/common/common_factory.dart';
 import 'package:idb_shim/src/utils/browser_utils.dart';
-import 'package:sembast/utils/value_utils.dart';
+import 'package:idb_shim/src/utils/value_utils.dart';
 
 import 'src/native/native_database.dart';
 import 'src/native/native_error.dart';

@@ -10,8 +10,8 @@ targets:
         - example/web/**.dart
         - test/web/**.dart
         - test/multiplatform/**.dart
-      build_vm_compilers|entrypoint:
-        generate_for:
-        # - test/multiplatform/**_test.dart
-        - test/vm/**_test.dart
-        - example/multiplatform/**_test.dart
+      # build_vm_compilers|entrypoint:
+      #  generate_for:
+      #  # - test/multiplatform/**_test.dart
+      #  - test/vm/**_test.dart
+      #  - example/multiplatform/**.vm_test.dart
