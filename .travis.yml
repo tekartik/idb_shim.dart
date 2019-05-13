@@ -4,6 +4,7 @@ dist: trusty
 dart:
   # to test flutter compat
   - '2.1.1'
+  - '2.2.0'
   - stable
   - dev
 before_script:
