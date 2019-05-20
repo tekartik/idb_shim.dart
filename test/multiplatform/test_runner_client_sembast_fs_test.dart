@@ -10,8 +10,8 @@ import 'package:sembast/sembast_memory.dart' as sdb;
 import 'package:sembast/src/file_system.dart';
 import 'package:sembast/src/sembast_fs.dart' as sdb;
 
-import 'idb_test_common.dart';
-import 'test_runner.dart' as test_runner;
+import '../idb_test_common.dart';
+import '../test_runner.dart' as test_runner;
 
 void main() {
   group('memory_fs', () {

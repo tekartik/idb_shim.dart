@@ -24,7 +24,9 @@ Future main() async {
   if (dartVersion >= Version(2, 2, 0, pre: 'dev')) {
     await shell.run('''
     # pub run build_runner test -- -p vm -j 1 test/multiplatform test/vm
-    pub run build_runner test -- -p chrome -j 1 test/web test/multiplatform
+    # Currently running as 2 commands
+    pub run build_runner test -- -p chrome -j 1 test/web
+    pub run build_runner test -- -p chrome -j 1 test/multiplatform
   ''');
   }
 

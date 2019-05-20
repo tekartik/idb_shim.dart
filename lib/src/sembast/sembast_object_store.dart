@@ -257,6 +257,20 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   @override
+  Stream<Cursor> openKeyCursor(
+      {key, KeyRange range, String direction, bool autoAdvance}) {
+    IdbCursorMeta cursorMeta =
+        IdbCursorMeta(key, range, direction, autoAdvance);
+    var ctlr = StoreKeyCursorControllerSembast(this, cursorMeta);
+
+    inTransaction(() {
+      return ctlr.openCursor();
+    });
+
+    return ctlr.stream;
+  }
+
+  @override
   Future put(value, [key]) {
     return inWritableTransaction(() {
       return _put(value, getKeyImpl(value, key));

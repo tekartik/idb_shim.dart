@@ -132,6 +132,21 @@ void defineTests(TestContext ctx) {
         });
         await completer.future;
         expect(count, 1);
+
+        // Key cursor
+        {
+          Stream<Cursor> stream =
+              objectStore.openKeyCursor(autoAdvance: true, key: 'test_value');
+          int count = 0;
+          await stream.listen((Cursor cursor) {
+            expect(cursor, isNot(const TypeMatcher<CursorWithValue>()));
+            expect(cursor.key, 'test_value');
+            expect(cursor.primaryKey, 'test_value');
+            count++;
+          }).asFuture();
+
+          expect(count, 1);
+        }
       });
     });
 
@@ -213,11 +228,32 @@ void defineTests(TestContext ctx) {
           }));
           await t2.completed;
 
-          final t3 = db.transaction('store1', idbModeReadWrite);
+          final t3 = db.transaction('store1', idbModeReadOnly);
           final store3 = t3.objectStore('store1');
           final ret = await store3.getObject(1);
 
           expect(ret, equals(obj2));
+
+          // Key cursor
+          {
+            final t = db.transaction('store1', idbModeReadWrite);
+            var store = t.objectStore('store1');
+            await store.openKeyCursor().forEach((cursor) async {
+              expect(cursor.key, 1);
+              expect(cursor.primaryKey, 1);
+
+              /*
+              try {
+                await cursor.update(obj3);
+                fail('should fail - update not supported on key cursor');
+              } catch (e) {
+                expect(e, isNot(const TypeMatcher<TestFailure>()));
+                devPrint('${e.runtimeType}');
+              }
+               */
+              cursor.next();
+            });
+          }
         } finally {
           db.close();
         }
@@ -292,6 +328,23 @@ void defineTests(TestContext ctx) {
             .listen((CursorWithValue cwv) {
           if (++count < limit) {
             cwv.next();
+          }
+        });
+        await transaction.completed;
+        transaction = null;
+        expect(count, limit);
+      });
+
+      test('openKeyCursor_read_2_row', () async {
+        await _setUp();
+        _createTransaction();
+        await fill3SampleRows();
+
+        int count = 0;
+        int limit = 2;
+        objectStore.openKeyCursor(autoAdvance: false).listen((Cursor cursor) {
+          if (++count < limit) {
+            cursor.next();
           }
         });
         await transaction.completed;

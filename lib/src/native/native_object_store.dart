@@ -5,6 +5,7 @@ import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/native/native_cursor.dart';
 import 'package:idb_shim/src/native/native_error.dart';
 import 'package:idb_shim/src/native/native_index.dart';
+import 'package:idb_shim/src/native/native_interop.dart';
 import 'package:idb_shim/src/native/native_key_range.dart';
 
 class ObjectStoreNative extends ObjectStore {
@@ -96,13 +97,10 @@ class ObjectStoreNative extends ObjectStore {
 
     CursorWithValueControllerNative ctlr = CursorWithValueControllerNative(//
         stream);
-    //idbDevPrint("kr2 $range native $idbKeyRange");
     return ctlr.stream;
   }
 
-  //@override
-  // Used for iterating through an object store with a key cursor.
-  /*
+  @override
   Stream<Cursor> openKeyCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
     idb.KeyRange idbKeyRange = toNativeKeyRange(range);
@@ -111,21 +109,16 @@ class ObjectStoreNative extends ObjectStore {
 
     Stream<idb.Cursor> stream;
 
-      stream = idbObjectStore.openKeyCursor(
-      //
-          key: key, //
-          range: idbKeyRange,
-          direction: direction, //
-          autoAdvance: autoAdvance);
+    stream = storeOpenKeyCursor(idbObjectStore,
+        //
+        key: key, //
+        range: idbKeyRange,
+        direction: direction, //
+        autoAdvance: autoAdvance);
 
-
-    CursorWithValueControllerNative ctlr =
-    new CursorWithValueControllerNative(//
-        stream);
-    //idbDevPrint("kr2 $range native $idbKeyRange");
+    CursorControllerNative ctlr = CursorControllerNative(stream);
     return ctlr.stream;
   }
-  */
 
   @override
   Future<int> count([dynamic keyOrRange]) {

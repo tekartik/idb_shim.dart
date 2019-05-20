@@ -232,7 +232,7 @@ abstract class ObjectStore {
   Index index(String name);
 
   ///
-  ///  Used for iterating through an object store with a cursor.
+  /// Used for iterating through an object store with a cursor.
   ///
   Stream<CursorWithValue> openCursor(
       {key, KeyRange range, String direction, bool autoAdvance});
@@ -240,8 +240,8 @@ abstract class ObjectStore {
   ///
   /// Used for iterating through an object store with a key cursor.
   ///
-  /// not supported yet
-  /// Stream<Cursor> openKeyCursor({key, KeyRange range, String direction, bool autoAdvance});
+  Stream<Cursor> openKeyCursor(
+      {key, KeyRange range, String direction, bool autoAdvance});
 
   ///
   /// returns the total number of records that match the provided key or
@@ -504,9 +504,9 @@ abstract class VersionChangeEvent {
 ///
 abstract class Event {}
 
-typedef void OnUpgradeNeededFunction(VersionChangeEvent event);
+typedef OnUpgradeNeededFunction = void Function(VersionChangeEvent event);
 
-typedef void OnBlockedFunction(Event event);
+typedef OnBlockedFunction = void Function(Event event);
 
 ///
 /// represents a continuous interval over some data type that is used for keys.

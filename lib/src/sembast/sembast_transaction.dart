@@ -14,7 +14,7 @@ bool _debugTransaction = false;
 // default is false to matche ie/safari strict behavior
 bool _transactionLazyMode = false;
 
-typedef FutureOr Action();
+typedef Action = FutureOr Function();
 
 class TransactionSembast extends IdbTransactionBase
     with TransactionWithMetaMixin {

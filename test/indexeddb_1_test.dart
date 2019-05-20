@@ -45,9 +45,10 @@ Future testUpgrade(idb.IdbFactory idbFactory) {
   });
 }
 
-typedef dynamic BodyFunc();
+typedef BodyFunc = dynamic Function();
 
-typedef BodyFunc TestFunc(idb.IdbFactory idbFactory, key, value, matcher,
+typedef TestFunc = BodyFunc Function(
+    idb.IdbFactory idbFactory, dynamic key, dynamic value, dynamic matcher,
     [String dbName, String storeName, int version, bool stringifyResult]);
 
 BodyFunc testReadWrite(idb.IdbFactory idbFactory, key, value, matcher,

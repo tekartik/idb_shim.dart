@@ -118,6 +118,12 @@ class StoreCursorWithValueSembast extends Object
   }
 }
 
+class StoreKeyCursorSembast extends Object with KeyCursorSembastMixin {
+  StoreKeyCursorSembast(BaseCursorControllerSembastMixin ctlr, int index) {
+    this.ctlr = ctlr;
+    this.recordIndex = index;
+  }
+}
 /*
 class _SdbCursorWithValue extends Object
     with _SdbKeyCursorMixin, _SdbCursorWithValueMixin {
@@ -287,6 +293,26 @@ class IndexCursorWithValueControllerSembast extends Object
   CursorWithValue nextEvent(int index) {
     IndexCursorWithValueSembast cursor =
         IndexCursorWithValueSembast(this, index);
+    return cursor;
+  }
+}
+
+class StoreKeyCursorControllerSembast extends Object
+    with
+        KeyCursorControllerSembastMixin,
+        BaseCursorControllerSembastMixin<Cursor>,
+        StoreCursorControllerSembastMixin {
+  @override
+  ObjectStoreSembast store;
+
+  StoreKeyCursorControllerSembast(this.store, IdbCursorMeta meta) {
+    this.meta = meta;
+    init();
+  }
+
+  @override
+  Cursor nextEvent(int index) {
+    var cursor = StoreKeyCursorSembast(this, index);
     return cursor;
   }
 }

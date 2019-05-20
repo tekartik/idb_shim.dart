@@ -1,3 +1,7 @@
+## 1.7.6
+
+* add support for `ObjectStore.openKeyCursor`
+
 ## 1.7.5
 
 * Supports dart 2.3
