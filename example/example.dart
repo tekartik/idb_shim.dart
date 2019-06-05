@@ -16,13 +16,13 @@ void main() async {
   });
 
   // put some data
-  var txn = db.transaction(storeName, "readwrite");
+  var txn = db.transaction(storeName, idbModeReadWrite);
   var store = txn.objectStore(storeName);
   var key = await store.put({"some": "data"});
   await txn.completed;
 
   // read some data
-  txn = db.transaction(storeName, "readonly");
+  txn = db.transaction(storeName, idbModeReadOnly);
   store = txn.objectStore(storeName);
   final value = await store.getObject(key) as Map;
   await txn.completed;
