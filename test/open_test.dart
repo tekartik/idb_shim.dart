@@ -102,26 +102,25 @@ void defineTests(TestContext ctx) {
 
     test('default then version 1', () async {
       await _setupDeleteDb();
-      return idbFactory.open(_dbName).then((Database database) {
-        expect(database.version, 1);
-        database.close();
+      var database = await idbFactory.open(_dbName);
+      expect(database.version, 1);
+      database.close();
 
-        // not working in memory since not persistent
-        if (!ctx.isInMemory) {
-          bool initCalled = false;
-          void _initializeDatabase(VersionChangeEvent e) {
-            // should not be called
-            initCalled = true;
-          }
-
-          return idbFactory
-              .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
-              .then((Database database) {
-            expect(initCalled, false);
-            database.close();
-          });
+      // not working in memory since not persistent
+      if (!ctx.isInMemory) {
+        bool initCalled = false;
+        void _initializeDatabase(VersionChangeEvent e) {
+          // should not be called
+          initCalled = true;
         }
-      });
+
+        return idbFactory
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
+            .then((Database database) {
+          expect(initCalled, false);
+          database.close();
+        });
+      }
     });
 
     test('version 1', () async {
@@ -152,30 +151,28 @@ void defineTests(TestContext ctx) {
         initCalled = true;
       }
 
-      return idbFactory
-          .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
-          .then((Database database) {
-        expect(initCalled, true);
-        database.close();
+      var database = await idbFactory.open(_dbName,
+          version: 1, onUpgradeNeeded: _initializeDatabase);
 
-        // not working in memory since not persistent
-        if (!ctx.isInMemory) {
-          bool upgradeCalled = false;
-          void _upgradeDatabase(VersionChangeEvent e) {
-            // should be called
-            expect(e.oldVersion, 1);
-            expect(e.newVersion, 2);
-            upgradeCalled = true;
-          }
+      expect(initCalled, true);
+      database.close();
 
-          return idbFactory
-              .open(_dbName, version: 2, onUpgradeNeeded: _upgradeDatabase)
-              .then((Database database) {
-            expect(upgradeCalled, true);
-            database.close();
-          });
+      // not working in memory since not persistent
+      if (!ctx.isInMemory) {
+        bool upgradeCalled = false;
+        void _upgradeDatabase(VersionChangeEvent e) {
+          // should be called
+          expect(e.oldVersion, 1);
+          expect(e.newVersion, 2);
+          upgradeCalled = true;
         }
-      });
+
+        database = await idbFactory.open(_dbName,
+            version: 2, onUpgradeNeeded: _upgradeDatabase);
+
+        expect(upgradeCalled, true);
+        database.close();
+      }
     });
 
     test('version 2 then downgrade', () async {
@@ -186,30 +183,29 @@ void defineTests(TestContext ctx) {
         initCalled = true;
       }
 
-      return idbFactory
-          .open(_dbName, version: 2, onUpgradeNeeded: _initializeDatabase)
-          .then((Database database) {
-        expect(initCalled, true);
-        database.close();
+      var database = await idbFactory.open(_dbName,
+          version: 2, onUpgradeNeeded: _initializeDatabase);
 
-        // not working in memory since not persistent
-        if (!ctx.isInMemory) {
-          bool downgradeCalled = false;
-          void _downgradeDatabase(VersionChangeEvent e) {
-            // should not be be called
-            downgradeCalled = true;
-          }
+      expect(initCalled, true);
+      database.close();
 
-          return idbFactory
-              .open(_dbName, version: 1, onUpgradeNeeded: _downgradeDatabase)
-              .then((Database database) {
-            fail("should fail");
-          }, onError: (err, st) {
-            // this should fail
-            expect(downgradeCalled, false);
-          });
+      // not working in memory since not persistent
+      if (!ctx.isInMemory) {
+        bool downgradeCalled = false;
+        void _downgradeDatabase(VersionChangeEvent e) {
+          // should not be be called
+          downgradeCalled = true;
         }
-      });
+
+        await idbFactory
+            .open(_dbName, version: 1, onUpgradeNeeded: _downgradeDatabase)
+            .then((Database database) {
+          fail("should fail");
+        }, onError: (err, st) {
+          // this should fail
+          expect(downgradeCalled, false);
+        });
+      }
     });
 
     //    const String MILESTONE_STORE = 'milestoneStore';
