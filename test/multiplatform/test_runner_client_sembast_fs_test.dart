@@ -51,9 +51,8 @@ void defineTests(SembastFsTestContext ctx) {
 
     Future<List<Map>> getFileContent(File file) async {
       List<Map> content = [];
-      await file
-          .openRead()
-          .transform(const Utf8Decoder())
+      await utf8.decoder
+          .bind(file.openRead())
           .transform(const LineSplitter())
           .listen((String line) {
         content.add(json.decode(line) as Map);

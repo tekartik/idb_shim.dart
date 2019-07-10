@@ -1,3 +1,7 @@
+## 1.8.0-dev.1
+
+* Sdk 2.5 support
+
 ## 1.7.6+1
 
 * add support for `ObjectStore.openKeyCursor`
