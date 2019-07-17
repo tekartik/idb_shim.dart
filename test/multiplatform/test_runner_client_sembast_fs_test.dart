@@ -82,11 +82,12 @@ void defineTests(SembastFsTestContext ctx) {
       expect(await getStorageContent(), await getSdbStorageContext());
     }
 
+    var store = sdb.StoreRef<String, dynamic>.main();
     tearDown(_tearDown);
     dbTest('empty', () async {
       db = await idbFactory.open(dbTestName);
       memSdb = await openTmpDatabase(1);
-      await memSdb.put(1, "version");
+      await store.record('version').put(memSdb, 1);
       db.close();
       await memSdb.close();
       // Make sure the db is flushed
@@ -107,9 +108,11 @@ void defineTests(SembastFsTestContext ctx) {
           version: 2, onUpgradeNeeded: _initializeDatabase);
 
       memSdb = await openTmpDatabase(1);
-      await memSdb.put(2, "version");
-      await memSdb.put([storeMeta.name], "stores");
-      await memSdb.put(storeMeta.toMap(), "store_${storeMeta.name}");
+      await store.record('version').put(memSdb, 2);
+      await store.record('stores').put(memSdb, [storeMeta.name]);
+      await store
+          .record('store_${storeMeta.name}')
+          .put(memSdb, storeMeta.toMap());
       db.close();
       await memSdb.close();
       // Make sure the db is flushed
@@ -135,9 +138,11 @@ void defineTests(SembastFsTestContext ctx) {
           version: 3, onUpgradeNeeded: _initializeDatabase);
 
       memSdb = await openTmpDatabase(1);
-      await memSdb.put(3, "version");
-      await memSdb.put([storeMeta.name], "stores");
-      await memSdb.put(storeMeta.toMap(), "store_${storeMeta.name}");
+      await store.record('version').put(memSdb, 3);
+      await store.record('stores').put(memSdb, [storeMeta.name]);
+      await store
+          .record('store_${storeMeta.name}')
+          .put(memSdb, storeMeta.toMap());
       db.close();
       await memSdb.close();
       // Make sure the db is flushed

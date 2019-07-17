@@ -278,9 +278,9 @@ sdb.Filter keyFilter(dynamic keyPath, var key, bool multiEntry) {
     } else {
       if (key == null) {
         // key must not be nulled
-        return sdb.Filter.notEqual(keyPath, null);
+        return sdb.Filter.notEquals(keyPath, null);
       }
-      return sdb.Filter.equal(keyPath, key);
+      return sdb.Filter.equals(keyPath, key);
     }
   } else if (keyPath is List) {
     List keyList = keyPath;

@@ -3,7 +3,8 @@ library idb_shim.sembast_filter_test;
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/sembast/sembast_filter.dart' as sembast_filter;
 import 'package:sembast/sembast.dart' as sdb;
-
+import 'package:sembast/src/filter_impl.dart' as sdb;
+import 'package:sembast/src/record_snapshot_impl.dart' as sdb;
 import '../idb_test_common.dart';
 
 sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range,
@@ -14,7 +15,8 @@ sdb.Filter keyFilter(dynamic keyPath, var key, [bool multiEntry = false]) =>
     sembast_filter.keyFilter(keyPath, key, multiEntry);
 
 bool _fieldMatch(sdb.Filter filter, dynamic value) {
-  return filter.match(sdb.Record(null, value));
+  return sdb.filterMatchesRecord(
+      filter, sdb.SembastRecordSnapshot(null, value));
 }
 
 void main() {
