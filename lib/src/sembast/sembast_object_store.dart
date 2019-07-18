@@ -131,7 +131,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
       if (key == null) {
         return sdbStore.add(sdbClient, value);
       } else {
-        return sdbStore.record(key).put(sdbClient, value);
+        return sdbStore.record(key).put(sdbClient, value).then((_) => key);
       }
     });
   }
