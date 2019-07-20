@@ -10,7 +10,7 @@ Future main() async {
 
   await shell.run('''
 
-  dartanalyzer --fatal-warnings lib test tool example
+  dartanalyzer --fatal-warnings --fatal-infos lib test tool example
   dartfmt -w lib test tool example --set-exit-if-changed
 
   pub run test -p vm -j 1

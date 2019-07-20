@@ -1,5 +1,5 @@
 name: idb_shim
-version: 1.8.0+2
+version: 1.8.0+3
 author: Alexandre Roux Tekartik <alex.tekartik.pub@gmail.com>
 description: indexed_db dart polyfill over native, websql, file io or memory implementation
 homepage: https://github.com/tekartik/idb_shim.dart
@@ -26,7 +26,7 @@ dev_dependencies:
       url: git://github.com/tekartik/chrome_travis.dart
       ref: dart2
     version: '>=0.1.4'
-  build_runner: '>=0.9.0'
+  build_runner: '>=1.5.0'
   build_test: '>=0.10.2'
   build_web_compilers: '>=0.4.0'
   # build_vm_compilers: '>=0.1.2'
