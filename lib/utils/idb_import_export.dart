@@ -49,7 +49,7 @@ Future<Database> sdbImportDatabase(
   } else {
     // import to a memory one
     sdb.Database sdbDb =
-        await importDatabase(data, sdb.memoryDatabaseFactory, null);
+        await importDatabase(data, sdb.databaseFactoryMemory, null);
     Database tmpDb = await (idbMemoryFactory as IdbFactorySembast)
         .openFromSdbDatabase(sdbDb);
     Database db = await copyDatabase(tmpDb, dstFactory, dstDbName);

@@ -26,7 +26,7 @@ class IdbTransactionMeta {
   int refCount;
 
   @override
-  String toString() => "${mode} ${storeNames}";
+  String toString() => "$mode $storeNames";
 }
 
 class IdbVersionChangeTransactionMeta extends IdbTransactionMeta {
@@ -152,7 +152,7 @@ class IdbDatabaseMeta {
       return IdbTransactionMeta(storeNameOrStoreNames.cast<String>(), mode);
     } else if (storeNameOrStoreNames != null) {
       throw DatabaseError(
-          "Invalid store name(s) parameter: ${storeNameOrStoreNames}");
+          "Invalid store name(s) parameter: $storeNameOrStoreNames");
     } else {
       // assume null - it will complain otherwise
       // this is use for transaction created on open
@@ -367,8 +367,7 @@ class IdbCursorMeta {
         throw ArgumentError("direction '$direction' not supported");
     }
     if (key != null && range != null) {
-      throw ArgumentError(
-          "both key '${key}' and range '${range}' are specified");
+      throw ArgumentError("both key '$key' and range '$range' are specified");
     }
   }
 

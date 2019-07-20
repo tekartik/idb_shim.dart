@@ -5,9 +5,9 @@ import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/idb_client_native.dart';
 import 'package:idb_shim/utils/idb_utils.dart';
 
-import '../idb_browser_test_common.dart';
 import '../idb_test_common.dart';
 import '../test_runner.dart';
+import 'idb_browser_test_common.dart';
 
 void main() {
   group('native', () {

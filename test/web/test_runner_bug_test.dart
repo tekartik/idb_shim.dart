@@ -3,7 +3,7 @@ library idb_shim.test_runner_client_sembast_fs_test;
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/sembast/sembast_factory.dart';
 
-import 'idb_test_common.dart';
+import '../idb_test_common.dart';
 
 void main() {
   var idbFactory = idbMemoryFsFactory;
@@ -22,7 +22,7 @@ void main() {
       }
 
       print(
-          " init ${_initializeDatabase} ${_initializeDatabase != null ? "NOT NULL" : "NULL"}");
+          " init $_initializeDatabase ${_initializeDatabase != null ? "NOT NULL" : "NULL"}");
 
       var db = await idbFactory.open(dbName,
           version: 1, onUpgradeNeeded: _initializeDatabase);

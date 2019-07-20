@@ -3,7 +3,7 @@ library websql_raw_test;
 
 import 'package:dev_test/test.dart';
 
-import 'idb_test_common.dart';
+import '../idb_test_common.dart';
 //import 'dart:web_sql';
 
 void main() {

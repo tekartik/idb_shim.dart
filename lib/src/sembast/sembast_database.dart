@@ -31,14 +31,14 @@ class _SdbVersionChangeEvent extends IdbVersionChangeEventBase {
       : oldVersion = oldVersion == null ? 0 : oldVersion {
     // handle = too to catch programatical errors
     if (this.oldVersion >= newVersion) {
-      throw StateError("cannot downgrade from ${oldVersion} to $newVersion");
+      throw StateError("cannot downgrade from $oldVersion to $newVersion");
     }
     request = OpenDBRequest(database, database.versionChangeTransaction);
   }
 
   @override
   String toString() {
-    return "${oldVersion} => ${newVersion}";
+    return "$oldVersion => $newVersion";
   }
 }
 
@@ -80,7 +80,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
   Future<List<IdbObjectStoreMeta>> _loadStoresMeta(List<String> storeNames) {
     List<String> keys = [];
     storeNames.forEach((String storeName) {
-      keys.add("store_${storeName}");
+      keys.add("store_$storeName");
     });
 
     return mainStore.records(keys).getSnapshots(db).then((records) {
@@ -123,7 +123,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
     // devPrint("open ${onUpgradeNeeded} ${onUpgradeNeeded != null ? "NOT NULL": "NULL"}");
     if (sembastDebug) {
       print(
-          "open2 ${onUpgradeNeeded} ${onUpgradeNeeded != null ? "NOT NULL" : "NULL"}");
+          "open2 $onUpgradeNeeded ${onUpgradeNeeded != null ? "NOT NULL" : "NULL"}");
     }
     // Open the sembast database
     db = await sdbFactory.openDatabase(factory.getDbPath(name), version: 1);

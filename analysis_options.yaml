@@ -117,8 +117,7 @@ linter:
     # remove alex:
     # - type_init_formals
     - unawaited_futures
-    # remove alex:
-    # - unnecessary_brace_in_string_interps
+    - unnecessary_brace_in_string_interps
     - unnecessary_const
     # removed alex:
     # - unnecessary_getters_setters

@@ -4,8 +4,8 @@ library idb_shim.test_runner_client_native_test;
 import 'dart:html';
 import 'dart:indexed_db' as idb;
 
+import '../idb_test_common.dart';
 import 'idb_browser_test_common.dart';
-import 'idb_test_common.dart';
 
 void main() {
   group('raw', () {

@@ -274,7 +274,7 @@ abstract class ObjectStore {
   List<String> get indexNames;
 
   @override
-  String toString() => "${name} (key ${keyPath} auto ${autoIncrement})";
+  String toString() => "$name (key $keyPath auto $autoIncrement)";
 }
 
 ///
@@ -449,7 +449,7 @@ abstract class Index {
 
   @override
   String toString() {
-    return 'name:${name} keyPath:${keyPath} unique:${unique} multiEntry:${multiEntry}';
+    return 'name:$name keyPath:$keyPath unique:$unique multiEntry:$multiEntry';
   }
 }
 

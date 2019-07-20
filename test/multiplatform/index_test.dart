@@ -817,7 +817,7 @@ void defineTests(TestContext ctx) {
         int index = 0;
 
         Future testIndex(IdbIndexMeta indexMeta) async {
-          String _dbName = "${dbTestName}-${++index}";
+          String _dbName = "$dbTestName-${++index}";
           await idbFactory.deleteDatabase(_dbName);
           IdbObjectStoreMeta storeMeta = idbSimpleObjectStoreMeta.clone();
           storeMeta.putIndex(indexMeta);

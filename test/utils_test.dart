@@ -23,8 +23,8 @@ void defineTests(TestContext ctx) {
   // prepare for test
   Future _setupDeleteDb() async {
     _srcDbName = ctx.dbName;
-    _dstDbName = "dst_${_srcDbName}";
-    _importedDbName = "imported_${_srcDbName}";
+    _dstDbName = "dst_$_srcDbName";
+    _importedDbName = "imported_$_srcDbName";
     await idbFactory.deleteDatabase(_srcDbName);
   }
 

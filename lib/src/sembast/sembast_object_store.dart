@@ -121,7 +121,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
                 &&
                 ((!indexMeta.multiEntry) && indexMeta.unique)) {
               throw DatabaseError(
-                  "key '${fieldValue}' already exists in ${record} for index ${indexMeta}");
+                  "key '$fieldValue' already exists in $record for index $indexMeta");
             }
           }));
         }
@@ -144,8 +144,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
       if (key != null) {
         return sdbStore.record(key).get(sdbClient).then((existingValue) {
           if (existingValue != null) {
-            throw DatabaseError(
-                'Key ${key} already exists in the object store');
+            throw DatabaseError('Key $key already exists in the object store');
           }
           return _put(value, key);
         });

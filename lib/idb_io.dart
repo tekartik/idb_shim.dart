@@ -11,7 +11,7 @@ IdbFactory _idbSembastMemoryFactory;
 
 IdbFactory get idbSembastMemoryFactory {
   if (_idbSembastMemoryFactory == null) {
-    _idbSembastMemoryFactory = IdbFactorySembast(memoryDatabaseFactory, null);
+    _idbSembastMemoryFactory = IdbFactorySembast(databaseFactoryMemory, null);
   }
   return _idbSembastMemoryFactory;
 }
