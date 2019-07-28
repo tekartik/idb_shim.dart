@@ -5,18 +5,30 @@ import 'package:idb_shim/idb_client_sembast.dart';
 import 'package:sembast/sembast_io.dart';
 import 'package:sembast/sembast_memory.dart';
 
+/// In memory factory
+/// IdbFactory get idbFactoryMemory => idbSembastMemoryFactory;
+
+/// @deprecated v2
 IdbFactory get idbMemoryFactory => idbSembastMemoryFactory;
 
 IdbFactory _idbSembastMemoryFactory;
 
-IdbFactory get idbSembastMemoryFactory {
+/// @deprecated v2
+IdbFactory get idbSembastMemoryFactory => idbFactorySembastMemoryV2;
+
+/// Sembast memory based factory
+IdbFactory get idbFactorySembastMemoryV2 {
   if (_idbSembastMemoryFactory == null) {
     _idbSembastMemoryFactory = IdbFactorySembast(databaseFactoryMemory, null);
   }
   return _idbSembastMemoryFactory;
 }
 
-IdbFactory getIdbSembastIoFactory(String path) =>
+/// @deprecated v2
+IdbFactory getIdbSembastIoFactory(String path) => getIdbFactorySembastIo(path);
+
+/// Get an io base factory from the defined root path
+IdbFactory getIdbFactorySembastIo(String path) =>
     IdbFactorySembast(databaseFactoryIo, path);
 
 /// do no use
@@ -27,13 +39,13 @@ IdbFactory getIdbFactory({String name, String path}) {
     name = idbFactoryPersistent;
   }
   switch (name) {
-    case idbFactorySembastMemory:
-    case idbFactoryMemory:
+    case idbFactoryNameSembastMemory:
+    case idbFactoryNameMemory:
       return idbSembastMemoryFactory;
-    case idbFactorySembastIo:
-    case idbFactoryIo:
+    case idbFactoryNameSembastIo:
+    case idbFactoryNameIo:
       return getIdbSembastIoFactory(path);
-    case idbFactoryPersistent:
+    case idbFactoryNamePersistent:
       return getIdbPersistentFactory(path);
     default:
       throw UnsupportedError("Factory '$name' not supported");
@@ -43,6 +55,12 @@ IdbFactory getIdbFactory({String name, String path}) {
 ///
 /// Only sembast io is persistent
 ///
-IdbFactory getIdbPersistentFactory(String path) {
+IdbFactory getIdbPersistentFactory(String path) =>
+    getIdbFactoryPersistent(path);
+
+///
+/// Only sembast io is persistent
+///
+IdbFactory getIdbFactoryPersistent(String path) {
   return getIdbSembastIoFactory(path);
 }

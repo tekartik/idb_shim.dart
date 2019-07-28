@@ -7,7 +7,7 @@ import 'package:idb_shim/src/native/native_factory.dart';
 ///
 /// @v2 deprecated
 /// will be named idbFactoryNative
-IdbNativeFactory get idbNativeFactory => IdbFactoryNativeImpl();
+IdbFactory get idbNativeFactory => IdbFactoryNativeImpl();
 
 IdbFactory get idbFactoryNativeV2 => IdbFactoryNativeImpl();
 
@@ -22,7 +22,7 @@ abstract class IdbNativeFactory extends IdbFactory {
   }
 
   /// @v2 deprecated, use idbFactoryNative
-  factory IdbNativeFactory() => idbNativeFactory;
+  factory IdbNativeFactory() => IdbFactoryNativeImpl();
 }
 
 /// Indexed db native factory
