@@ -13,7 +13,7 @@ import 'multiplatform/cursor_test.dart' as cursor_test;
 import 'multiplatform/database_test.dart' as database_test;
 import 'multiplatform/factory_test.dart' as factory_test;
 import 'multiplatform/index_test.dart' as index_test;
-import 'object_store_test.dart' as object_store_test;
+import 'multiplatform/object_store_test.dart' as object_store_test;
 import 'open_test.dart' as open_test;
 import 'quick_standalone_test.dart' as quick_standalone_test;
 import 'scenario_test.dart' as scenario_test;

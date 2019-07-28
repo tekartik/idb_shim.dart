@@ -77,7 +77,33 @@ void defineTests(TestContext ctx) {
 
     test('one', () async {
       await _setupDeleteDb();
-      await _openWith1Store();
+      void _initializeDatabase(VersionChangeEvent e) {
+        Database db = e.database;
+        expect(db.objectStoreNames, []);
+        ObjectStore objectStore = db.createObjectStore(testStoreName);
+        expect(db.objectStoreNames, [testStoreName]);
+        expect(objectStore.name, testStoreName);
+      }
+
+      db = await idbFactory.open(_dbName,
+          version: 1, onUpgradeNeeded: _initializeDatabase);
+      expect(db.objectStoreNames, [testStoreName]);
+
+      db.close();
+    });
+
+    test('one_then_check', () async {
+      await _setupDeleteDb();
+      void _initializeDatabase(VersionChangeEvent e) {
+        Database db = e.database;
+        expect(db.objectStoreNames, []);
+        ObjectStore objectStore = db.createObjectStore(testStoreName);
+        expect(db.objectStoreNames, [testStoreName]);
+        expect(objectStore.name, testStoreName);
+      }
+
+      db = await idbFactory.open(_dbName,
+          version: 1, onUpgradeNeeded: _initializeDatabase);
       List<String> storeNames = List.from(db.objectStoreNames);
       expect(storeNames.length, 1);
       expect(storeNames[0], testStoreName);
@@ -110,6 +136,33 @@ void defineTests(TestContext ctx) {
         storeNames = List.from(db.objectStoreNames);
         expect(storeNames.length, 2);
         expect(storeNames, [testStoreName, testStoreName + "_2"]);
+      }
+    });
+
+    test('one_then_delete', () async {
+      await _setupDeleteDb();
+      await _openWith1Store();
+      expect(db.objectStoreNames, [testStoreName]);
+
+      db.close();
+
+      // not working in memory since not persistent
+      if (!ctx.isInMemory) {
+        db = await idbFactory.open(_dbName, version: 2,
+            onUpgradeNeeded: (VersionChangeEvent e) {
+          Database db = e.database;
+
+          expect(db.objectStoreNames, [testStoreName]);
+          db.deleteObjectStore(testStoreName);
+          expect(db.objectStoreNames, []);
+        });
+
+        db.close();
+
+        // re-open
+        db = await idbFactory.open(_dbName,
+            version: 2, onUpgradeNeeded: (VersionChangeEvent e) {});
+        expect(db.objectStoreNames, []);
       }
     });
 

@@ -153,7 +153,8 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
           await sdb.StoreRef(storeMeta.name).drop(txn);
         }
 
-        if (changedStores.isNotEmpty) {
+        // Handle deleted object store
+        if (changedStores.isNotEmpty || deletedStores.isNotEmpty) {
           await mainStore
               .record('stores')
               .put(txn, List.from(objectStoreNames));

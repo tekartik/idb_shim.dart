@@ -14,21 +14,38 @@ const String idbDirectionNext = "next";
 const String idbDirectionPrev = "prev";
 
 // shim using native indexeddb implementation
-const idbFactoryNative = "native";
-// shim using WebSql implementation
-const idbFactoryWebSql = "websql";
+const idbFactoryNameNative = "native";
+@deprecated
+const idbFactoryNative = idbFactoryNameNative;
 // shim using Sembast implementation
-const idbFactorySembastIo = "sembast_io";
+const idbFactoryNameSembastIo = "sembast_io";
 // shim using Sembast io implementation
-const idbFactoryIo = "io";
+const idbFactoryNameIo = "io";
 // shim using Sembast memory implementation
-const idbFactorySembastMemory = "sembast_memory";
+const idbFactoryNameSembastMemory = "sembast_memory";
 // shim using Sembast Memory implementation
-const idbFactoryMemory = "memory";
+const idbFactoryNameMemory = "memory";
 // pseudo - best persistent shim (indexeddb or if not available websql)
-const idbFactoryPersistent = "persistent";
+const idbFactoryNamePersistent = "persistent";
 // pseudo - best browser shim (persistent of it not available memory)
-const idbFactoryBrowser = "browser";
+const idbFactoryNameBrowser = "browser";
+// shim using WebSql implementation
+@deprecated
+const idbFactoryWebSql = "websql";
+// ignore: deprecated_member_use_from_same_package
+const idbFactoryNameWebSql = idbFactoryWebSql;
+@deprecated
+const idbFactorySembastIo = idbFactoryNameSembastIo;
+@deprecated
+const idbFactoryIo = idbFactoryNameIo;
+@deprecated
+const idbFactorySembastMemory = idbFactoryNameSembastMemory;
+@deprecated
+const idbFactoryMemory = idbFactoryNameMemory;
+@deprecated
+const idbFactoryPersistent = idbFactoryNamePersistent;
+@deprecated
+const idbFactoryBrowser = idbFactoryNameBrowser;
 
 ///
 /// represents a cursor for traversing or iterating over multiple records in a

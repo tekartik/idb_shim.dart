@@ -10,7 +10,7 @@ void main() {
     test('native', () {
       IdbFactory native = idbNativeFactory;
       if (native != null) {
-        expect(native.runtimeType.toString(), "IdbNativeFactory");
+        expect(native.runtimeType.toString(), "IdbFactoryNativeImpl");
         expect(native, idbPersistentFactory);
         expect(native, idbBrowserFactory);
       } else {

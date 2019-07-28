@@ -8,20 +8,21 @@ import 'package:sembast/sembast_memory.dart' as sembast;
 
 IdbFactory getIdbFactory([String name]) {
   if (name == null) {
-    name = idbFactoryBrowser;
+    name = idbFactoryNameBrowser;
   }
   switch (name) {
-    case idbFactoryBrowser:
+    case idbFactoryNameBrowser:
       return idbBrowserFactory;
-    case idbFactoryPersistent:
+    case idbFactoryNamePersistent:
       return idbPersistentFactory;
-    case idbFactoryNative:
+    case idbFactoryNameNative:
       return idbNativeFactory;
+    // ignore: deprecated_member_use_from_same_package
     case idbFactoryWebSql:
       return idbWebSqlFactory;
-    case idbFactoryMemory:
+    case idbFactoryNameMemory:
       return idbMemoryFactory;
-    case idbFactorySembastMemory:
+    case idbFactoryNameSembastMemory:
       return idbSembastMemoryFactory;
     default:
       throw UnsupportedError("Factory '$name' not supported");
@@ -37,7 +38,7 @@ IdbFactory get idbWebSqlFactory {
 }
 
 IdbFactory get idbNativeFactory {
-  if (IdbNativeFactory.supported) {
+  if (IdbFactoryNative.supported) {
     return IdbNativeFactory();
   } else {
     return null;

@@ -270,7 +270,7 @@ void defineTests(TestContext ctx) {
           await _setUp();
           // not working in memory
           // devPrint("***** ${idbFactory.name}");
-          if (idbFactory.name != idbFactoryWebSql) {
+          if (idbFactory.name != idbFactoryNameWebSql) {
             bool done = false;
             Transaction transaction =
                 db.transaction(testStoreName, idbModeReadWrite);
@@ -292,7 +292,7 @@ void defineTests(TestContext ctx) {
           await _setUp();
 // not working in memory
           // devPrint("***** ${idbFactory.name}");
-          if (idbFactory.name != idbFactoryWebSql) {
+          if (idbFactory.name != idbFactoryNameWebSql) {
             bool done = false;
             Transaction transaction =
                 db.transaction(testStoreName, idbModeReadWrite);
@@ -617,7 +617,7 @@ void defineTests(TestContext ctx) {
 
       test('immediate completed then add', () async {
         await _setUp();
-        if ((idbFactory.name != idbFactoryWebSql)) {
+        if ((idbFactory.name != idbFactoryNameWebSql)) {
           bool done = false;
           Transaction transaction =
               db.transaction(testStoreName, idbModeReadWrite);
@@ -662,7 +662,7 @@ void defineTests(TestContext ctx) {
 
       test('add/put immediate completed', () async {
         await _setUp();
-        if ((idbFactory.name != idbFactoryWebSql)) {
+        if ((idbFactory.name != idbFactoryNameWebSql)) {
           bool done = false;
           Transaction transaction =
               db.transaction(testStoreName, idbModeReadWrite);
