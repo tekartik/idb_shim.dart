@@ -1,3 +1,7 @@
+## 1.8.1
+
+* Deprecates old names (sorry)
+
 ## 1.8.0+3
 
 * Sdk 2.5 support
