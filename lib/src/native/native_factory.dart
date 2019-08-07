@@ -105,4 +105,7 @@ class IdbFactoryNativeImpl extends IdbFactoryBase
       }
     });
   }
+
+  @override
+  bool get supportsDoubleKey => false;
 }

@@ -79,4 +79,7 @@ class IdbFactorySembastImpl extends IdbFactoryBase
   Future<List<String>> getDatabaseNames() {
     throw DatabaseException('getDatabaseNames not supported');
   }
+
+  @override
+  bool get supportsDoubleKey => true;
 }

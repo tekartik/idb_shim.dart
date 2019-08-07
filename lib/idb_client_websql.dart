@@ -56,4 +56,7 @@ class IdbWebSqlFactory extends IdbFactoryBase {
   static bool get supported {
     return false;
   }
+
+  @override
+  bool get supportsDoubleKey => false;
 }

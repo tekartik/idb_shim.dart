@@ -208,14 +208,16 @@ void defineTests(TestContext ctx) {
       });
 
       test('put/get_key_double', () async {
-        await _setUp();
-        _createTransaction();
-        String value = "test";
-        expect(await objectStore.getObject(1.2), isNull);
-        double key = 0.001;
-        double keyAdded = await objectStore.add(value, key) as double;
-        expect(keyAdded, key);
-        expect(await objectStore.getObject(key), value);
+        if (ctx.supportsDoubleKey) {
+          await _setUp();
+          _createTransaction();
+          String value = "test";
+          expect(await objectStore.getObject(1.2), isNull);
+          double key = 0.001;
+          double keyAdded = await objectStore.add(value, key) as double;
+          expect(keyAdded, key);
+          expect(await objectStore.getObject(key), value);
+        }
       });
     });
 

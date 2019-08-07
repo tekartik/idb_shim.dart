@@ -28,4 +28,7 @@ abstract class IdbFactoryBase implements IdbFactory {
       throw ArgumentError('version cannot be 0');
     }
   }
+
+  /// Whether key as double are supported
+  bool get supportsDoubleKey;
 }

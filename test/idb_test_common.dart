@@ -7,6 +7,7 @@ import 'package:dev_test/test.dart' as dev_test;
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/idb_client_memory.dart';
 import 'package:idb_shim/idb_client_sembast.dart';
+import 'package:idb_shim/src/common/common_factory.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
@@ -85,6 +86,9 @@ class TestContext {
   bool get isIdbNoLazy => isIdbSembast || isIdbIe;
 
   bool get isInMemory => false;
+
+  /// true if double can be used as key
+  bool get supportsDoubleKey => (factory as IdbFactoryBase).supportsDoubleKey;
 }
 
 class SembastTestContext extends TestContext {

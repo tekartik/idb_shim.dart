@@ -1,6 +1,8 @@
 library idb_shim.common_validation;
 
-import '../../idb_client.dart';
+import 'package:idb_shim/idb_client.dart';
+import 'package:idb_shim/src/common/common_error.dart';
+import 'package:idb_shim/src/common/common_value.dart';
 
 void checkKeyParam(var key) {
   if (key == null) {
@@ -18,14 +20,16 @@ void checkKeyParam(var key) {
   }
 }
 
-bool checkKeyValueParam(String keyPath, dynamic key, dynamic value) {
+void checkKeyValueParam(String keyPath, dynamic key, dynamic value) {
   if (key != null) {
     checkKeyParam(key);
     if (keyPath != null) {
-      if (value[keyPath] != null) {
-        return false;
-      }
+      // Cannot have both
+      throw DatabaseNoKeyExpectedError();
+    }
+  } else {
+    if (!(value is Map && mapValueAtKeyPath(value, keyPath) != null)) {
+      throw DatabaseMissingInlineKeyError();
     }
   }
-  return true;
 }
