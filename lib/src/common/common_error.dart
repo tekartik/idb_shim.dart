@@ -12,3 +12,9 @@ class DatabaseMissingInlineKeyError extends DatabaseError {
       : super(
             "DataError: The object store uses in-line keys and its value was not found.");
 }
+
+class DatabaseMissingKeyError extends DatabaseError {
+  DatabaseMissingKeyError()
+      : super(
+            "DataError: neither keyPath nor autoIncrement set and trying to add object without key.");
+}

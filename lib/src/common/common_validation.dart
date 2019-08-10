@@ -20,7 +20,8 @@ void checkKeyParam(var key) {
   }
 }
 
-void checkKeyValueParam(String keyPath, dynamic key, dynamic value) {
+void checkKeyValueParam(
+    {String keyPath, dynamic key, dynamic value, bool autoIncrement}) {
   if (key != null) {
     checkKeyParam(key);
     if (keyPath != null) {
@@ -28,8 +29,16 @@ void checkKeyValueParam(String keyPath, dynamic key, dynamic value) {
       throw DatabaseNoKeyExpectedError();
     }
   } else {
-    if (!(value is Map && mapValueAtKeyPath(value, keyPath) != null)) {
-      throw DatabaseMissingInlineKeyError();
+    if (!(value is Map &&
+        keyPath != null &&
+        mapValueAtKeyPath(value, keyPath) != null)) {
+      if (!(autoIncrement ?? false)) {
+        if (key == null) {
+          throw new DatabaseMissingKeyError();
+        } else {
+          throw DatabaseMissingInlineKeyError();
+        }
+      }
     }
   }
 }

@@ -3,6 +3,7 @@ library common_value_test;
 import 'package:idb_shim/src/common/common_validation.dart';
 
 import 'idb_test_common.dart';
+import 'package:idb_shim/src/common/common_error.dart';
 
 void main() => defineTests();
 
@@ -29,9 +30,14 @@ void defineTests() {
       checkKeyParamFail(DateTime.now());
     });
 
-    void checkKeyValueParamFail(String keyPath, dynamic key, dynamic value) {
+    void checkKeyValueParamFail(
+        {String keyPath, dynamic key, dynamic value, bool autoIncrement}) {
       try {
-        checkKeyValueParam(keyPath, key, value);
+        checkKeyValueParam(
+            keyPath: keyPath,
+            key: key,
+            value: value,
+            autoIncrement: autoIncrement);
       } catch (_) {
         return;
       }
@@ -39,13 +45,22 @@ void defineTests() {
     }
 
     test('checkKeyValueParam', () {
-      checkKeyValueParamFail('keyPath', 'key', {});
-      checkKeyValueParamFail('keyPath', 'key', {'keyPath': 'key'});
-      checkKeyValueParam('keyPath', null, {'keyPath': 'key'});
-      checkKeyValueParamFail('keyPath', null, {'noKeyPath': 'key'});
-      checkKeyValueParamFail('key.path', 'key', {
+      checkKeyValueParamFail(keyPath: 'keyPath', key: 'key', value: {});
+      checkKeyValueParamFail(
+          keyPath: 'keyPath', key: 'key', value: {'keyPath': 'key'});
+      checkKeyValueParam(keyPath: 'keyPath', value: {'keyPath': 'key'});
+      checkKeyValueParamFail(keyPath: 'keyPath', value: {'noKeyPath': 'key'});
+      checkKeyValueParamFail(keyPath: 'key.path', key: 'key', value: {
         'key': {'path': 'key'}
       });
+
+      try {
+        checkKeyValueParam();
+        fail('should fail');
+      } on DatabaseMissingKeyError catch (_) {}
+
+      checkKeyValueParam(autoIncrement: true);
+      checkKeyValueParam(value: {}, autoIncrement: true);
     });
   });
 }
