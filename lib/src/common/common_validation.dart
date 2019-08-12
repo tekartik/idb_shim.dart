@@ -34,7 +34,7 @@ void checkKeyValueParam(
         mapValueAtKeyPath(value, keyPath) != null)) {
       if (!(autoIncrement ?? false)) {
         if (key == null) {
-          throw new DatabaseMissingKeyError();
+          throw DatabaseMissingKeyError();
         } else {
           throw DatabaseMissingInlineKeyError();
         }
