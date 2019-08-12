@@ -2,14 +2,15 @@ syntax: glob
 # Don’t commit the following directories created by pub.
 .dart_tool/
 build/
-.packages
-.buildlog
-.pub/
-.idea/
-.atom/
-tmp/
 packages
-data/out
+.packages
+tmp/
+.idea/
+.pub/
+
+# IDE
+.idea/
+*.iml
 
 # Or the files created by dart2js.
 *.dart.js
@@ -18,12 +19,19 @@ data/out
 *.js.deps
 *.js.map
 
+# out files
+out.js
+out.precompiled.js
+
+# markdown eclipse plugin
+.*.md.html
+
 # Include when developing application packages.
 pubspec.lock
 
-# Build by tests
-test/out
-test_out
+# Test generated file
+test/out/
+test_out/
 
-# Local files
+# Local folder
 .local/
