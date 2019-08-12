@@ -1,5 +1,4 @@
 import 'package:idb_shim/idb_client.dart';
-import 'package:stack_trace/stack_trace.dart';
 
 import 'idb_test_common.dart';
 
@@ -48,6 +47,8 @@ void defineTests(TestContext ctx) {
         await idbFactory.deleteDatabase(testDbName);
       });
 
+      tearDown(_tearDown);
+
       test('create object store not in initialize', () async {
         try {
           await idbFactory.open(testDbName).then((Database database) {
@@ -66,7 +67,9 @@ void defineTests(TestContext ctx) {
         } catch (e, st) {
           expect(isTestFailure(e), isFalse);
           if (!ctx.isIdbEdge) {
-            expect(Trace.format(st), contains("createObjectStore"));
+            // Trace.format crashing on 2.5.0-dev.2.0
+            // devPrint("st: ${Trace.format(st)}");
+            expect(st?.toString(), contains("createObjectStore"));
           } else {
             print("edge error: $e");
           }
@@ -74,10 +77,6 @@ void defineTests(TestContext ctx) {
           //devPrint(Trace.format(st));
         }
       });
-    });
-
-    group('exception', () {
-      tearDown(_tearDown);
 
       test('getObject_null', () async {
         await _setUp();
@@ -86,10 +85,10 @@ void defineTests(TestContext ctx) {
           await objectStore.getObject(null);
         } catch (e, st) {
           //devPrint(e);
-          //devPrint("got: ${Trace.format(st)}");
-          //devPrint("full: ${st}");
-          expect(Trace.format(st), contains("getObject"));
-
+          // Trace.format crashing on 2.5.0-dev.2.0
+          // devPrint("st: ${Trace.format(st)}");
+          // devPrint("full: ${st}");
+          expect(st?.toString(), contains("getObject"));
           expect(e, isNotNull);
         }
       });

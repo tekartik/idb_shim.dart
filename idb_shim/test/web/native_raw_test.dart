@@ -14,7 +14,7 @@ void main() {
       await window.indexedDB.deleteDatabase(dbName);
       idb.Database db =
           await window.indexedDB.open(dbName, version: 1, onUpgradeNeeded: (e) {
-        print(e);
+        // print(e);
         idb.Database db = e.target.result as idb.Database;
         db.createObjectStore("store", autoIncrement: true);
       });
@@ -32,7 +32,7 @@ void main() {
       await window.indexedDB.deleteDatabase(dbName);
       idb.Database db =
           await window.indexedDB.open(dbName, version: 1, onUpgradeNeeded: (e) {
-        print(e);
+        // print(e);
         idb.Database db = e.target.result as idb.Database;
         db.createObjectStore("store", autoIncrement: true);
       });
