@@ -7,8 +7,8 @@ import 'dart:collection';
 
 import 'package:idb_shim/idb_client.dart' as idb;
 
-import 'idb_test_common.dart';
-import 'indexeddb_utils.dart';
+import '../idb_test_common.dart';
+import '../indexeddb_utils.dart';
 // so that this can be run directly
 
 // Write and re-read Maps: simple Maps; Maps with DAGs; Maps with cycles.

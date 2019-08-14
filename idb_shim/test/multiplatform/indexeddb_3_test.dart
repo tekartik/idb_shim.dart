@@ -4,7 +4,7 @@ import 'dart:async';
 
 import 'package:idb_shim/idb_client.dart';
 
-import 'idb_test_common.dart';
+import '../idb_test_common.dart';
 
 // Read with cursor.
 const String DB_NAME = 'Test3';

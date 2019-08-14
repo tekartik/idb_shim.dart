@@ -4,8 +4,8 @@ import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
 import 'package:idb_shim/src/common/common_value.dart';
 
-import '../common_meta_test.dart';
 import '../idb_test_common.dart';
+import 'common_meta_test.dart';
 
 // so that this can be run directly
 void main() {

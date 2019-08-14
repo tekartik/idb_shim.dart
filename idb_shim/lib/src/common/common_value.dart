@@ -120,6 +120,17 @@ dynamic mapValueAtKeyPath(Map map, keyPath) {
   throw 'keyPath $keyPath not supported';
 }
 
+/// Convert a single value or an iterable to a list
+Set valueAsKeySet(dynamic value) {
+  if (value == null) {
+    return null;
+  }
+  if (value is Iterable) {
+    return Set.from(value);
+  }
+  return {value};
+}
+
 List<String> getFieldParts(String field) => field.split('.');
 
 T getMapFieldValue<T>(Map map, String field) {

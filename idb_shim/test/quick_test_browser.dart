@@ -6,11 +6,11 @@ import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/idb_client_native.dart';
 import 'package:idb_shim/idb_client_websql.dart';
 
-import 'exception_test.dart' as exception_test;
 import 'idb_test_common.dart';
+import 'multiplatform/exception_test.dart' as exception_test;
 import 'multiplatform/index_test.dart' as index_test;
-import 'simple_provider_test.dart' as simple_provider_test;
-import 'transaction_test.dart' as transaction_test;
+import 'multiplatform/simple_provider_test.dart' as simple_provider_test;
+import 'multiplatform/transaction_test.dart' as transaction_test;
 
 void testMain(TestContext ctx) {
   simple_provider_test.defineTests(ctx);

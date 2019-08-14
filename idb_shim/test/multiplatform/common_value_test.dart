@@ -3,7 +3,7 @@ library common_value_test;
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/common/common_value.dart';
 
-import 'idb_test_common.dart';
+import '../idb_test_common.dart';
 
 void main() => defineTests();
 

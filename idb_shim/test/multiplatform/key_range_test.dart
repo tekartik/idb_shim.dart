@@ -2,7 +2,7 @@ library key_range_test;
 
 import 'package:idb_shim/idb_client.dart';
 
-import 'idb_test_common.dart';
+import '../idb_test_common.dart';
 
 // so that this can be run directly
 void main() {
