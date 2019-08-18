@@ -4,8 +4,8 @@ import 'dart:async';
 
 import 'package:idb_shim/idb_client.dart';
 
-import 'idb_test_common.dart' hide testNameIndex, testNameField;
-import 'simple_provider.dart';
+import '../idb_test_common.dart' hide testNameIndex, testNameField;
+import '../simple_provider.dart';
 
 // so that this can be run directly
 void main() {

@@ -1,25 +1,25 @@
 library idb_shim.test_runner;
 
-import 'exception_test.dart' as exception_test;
 import 'idb_test_common.dart';
-import 'index_cursor_test.dart' as index_cursor_test;
-import 'indexeddb_1_test.dart' as indexeddb_1_test;
-import 'indexeddb_2_test.dart' as indexeddb_2_test;
-import 'indexeddb_3_test.dart' as indexeddb_3_test;
-import 'indexeddb_4_test.dart' as indexeddb_4_test;
-import 'indexeddb_5_test.dart' as indexeddb_5_test;
-import 'key_range_test.dart' as key_range_test;
 import 'multiplatform/cursor_test.dart' as cursor_test;
 import 'multiplatform/database_test.dart' as database_test;
+import 'multiplatform/exception_test.dart' as exception_test;
 import 'multiplatform/factory_test.dart' as factory_test;
+import 'multiplatform/index_cursor_test.dart' as index_cursor_test;
 import 'multiplatform/index_test.dart' as index_test;
+import 'multiplatform/indexeddb_1_test.dart' as indexeddb_1_test;
+import 'multiplatform/indexeddb_2_test.dart' as indexeddb_2_test;
+import 'multiplatform/indexeddb_3_test.dart' as indexeddb_3_test;
+import 'multiplatform/indexeddb_4_test.dart' as indexeddb_4_test;
+import 'multiplatform/indexeddb_5_test.dart' as indexeddb_5_test;
+import 'multiplatform/key_range_test.dart' as key_range_test;
 import 'multiplatform/object_store_test.dart' as object_store_test;
-import 'open_test.dart' as open_test;
-import 'quick_standalone_test.dart' as quick_standalone_test;
-import 'scenario_test.dart' as scenario_test;
-import 'simple_provider_test.dart' as simple_provider_test;
-import 'transaction_test.dart' as transaction_test;
-import 'utils_test.dart' as utils_test;
+import 'multiplatform/open_test.dart' as open_test;
+import 'multiplatform/quick_standalone_test.dart' as quick_standalone_test;
+import 'multiplatform/scenario_test.dart' as scenario_test;
+import 'multiplatform/simple_provider_test.dart' as simple_provider_test;
+import 'multiplatform/transaction_test.dart' as transaction_test;
+import 'multiplatform/utils_test.dart' as utils_test;
 
 void defineTests(TestContext ctx) {
   database_test.defineTests(ctx);

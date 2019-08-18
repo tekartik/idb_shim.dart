@@ -1,6 +1,8 @@
-## 1.8.1
+## 1.8.1+1
 
 * Deprecates old names (sorry)
+* Fix update/delete in index cursor for sembast
+* Sdk 2.4 min
 
 ## 1.8.0+3
 

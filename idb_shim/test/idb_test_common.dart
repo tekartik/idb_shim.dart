@@ -15,7 +15,7 @@ import 'package:sembast/sembast.dart' as sdb;
 import 'package:sembast/sembast_memory.dart' as sdb;
 import 'package:sembast/src/sembast_fs.dart' as sdb_fs;
 
-import 'common_meta_test.dart';
+import 'multiplatform/common_meta_test.dart';
 
 export 'dart:async';
 

@@ -5,7 +5,7 @@ import 'package:idb_shim/utils/idb_import_export.dart';
 import 'package:idb_shim/utils/idb_utils.dart';
 import 'package:path/path.dart';
 
-import 'idb_test_common.dart';
+import '../idb_test_common.dart';
 //import 'idb_test_factory.dart';
 
 void main() {
