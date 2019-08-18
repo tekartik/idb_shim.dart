@@ -600,5 +600,154 @@ void defineTests(TestContext ctx) {
         expect(count, 1);
       });
     });
+
+    group('multi_entry', () {
+      Future _setUp() async {
+        await _setupDeleteDb();
+
+        void _initializeDatabase(VersionChangeEvent e) {
+          Database db = e.database;
+          ObjectStore objectStore =
+              db.createObjectStore(testStoreName, autoIncrement: true);
+          objectStore.createIndex(testNameIndex, testNameField,
+              multiEntry: true);
+        }
+
+        db = await idbFactory.open(_dbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+      }
+
+      test('one_value', () async {
+        await _setUp();
+        _createTransaction();
+        Map value = {testNameField: "test1"};
+        Index index = objectStore.index(testNameIndex);
+        var key = await objectStore.add(value);
+        expect(key, 1);
+
+        bool gotItem = false;
+        await index.openKeyCursor(autoAdvance: true).listen((cursor) {
+          expect(gotItem, isFalse);
+          gotItem = true;
+          expect(cursor.primaryKey, 1);
+          expect(cursor.key, 'test1');
+        }).asFuture();
+        expect(gotItem, isTrue);
+
+        gotItem = false;
+        await index.openCursor(autoAdvance: true).listen((cwv) {
+          expect(gotItem, isFalse);
+          gotItem = true;
+          expect(cwv.primaryKey, 1);
+          expect(cwv.key, 'test1');
+          expect(cwv.value, value);
+        }).asFuture();
+        expect(gotItem, isTrue);
+      });
+
+      test('one_array', () async {
+        await _setUp();
+        _createTransaction();
+        Map value = {
+          testNameField: [2, 1, 2]
+        };
+
+        Index index = objectStore.index(testNameIndex);
+        var key = await objectStore.add(value);
+        expect(key, 1);
+
+        bool gotItem1 = false;
+        bool gotItem2 = false;
+
+        await index.openKeyCursor(autoAdvance: true).listen((cursor) {
+          if (!gotItem1) {
+            gotItem1 = true;
+            expect(cursor.primaryKey, 1);
+            expect(cursor.key, 1);
+          } else if (!gotItem2) {
+            gotItem2 = true;
+            expect(cursor.primaryKey, 1);
+            expect(cursor.key, 2);
+          } else {
+            fail('should fail');
+          }
+        }).asFuture();
+        expect(gotItem1 && gotItem2, isTrue);
+
+        gotItem1 = false;
+        gotItem2 = false;
+
+        await index.openCursor(autoAdvance: true).listen((cwv) {
+          if (!gotItem1) {
+            gotItem1 = true;
+            expect(cwv.primaryKey, 1);
+            expect(cwv.key, 1);
+            expect(cwv.value, value);
+          } else if (!gotItem2) {
+            gotItem2 = true;
+            expect(cwv.primaryKey, 1);
+            expect(cwv.key, 2);
+            expect(cwv.value, value);
+          } else {
+            fail('should fail');
+          }
+        }).asFuture();
+        expect(gotItem1 && gotItem2, isTrue);
+      });
+
+      test('one_array_update_delete', () async {
+        await _setUp();
+        _createTransaction();
+        Map value = {
+          testNameField: [2, 1]
+        };
+
+        Index index = objectStore.index(testNameIndex);
+        var key = await objectStore.add(value);
+        expect(key, 1);
+
+        bool gotItem1 = false;
+        bool gotItem2 = false;
+
+        // Deleting the first item should remove the next one in the list!
+        await index.openCursor().listen((cwv) {
+          if (!gotItem1) {
+            gotItem1 = true;
+            expect(cwv.primaryKey, 1);
+            expect(cwv.key, 1);
+            cwv.update({
+              testNameField: [2, 1],
+              'other': 'test'
+            }).then((_) => cwv.next());
+          } else if (!gotItem2) {
+            gotItem2 = true;
+            expect(cwv.primaryKey, 1);
+            expect(cwv.key, 2);
+            expect(cwv.value, {
+              testNameField: [2, 1],
+              'other': 'test'
+            });
+            cwv.next();
+          } else {
+            fail('should fail');
+          }
+        }).asFuture();
+        expect(gotItem1, isTrue);
+
+        bool gotItem = false;
+        // Deleting the first item should remove the next one in the list!
+        await index.openCursor().listen((cwv) {
+          if (!gotItem) {
+            gotItem = true;
+            expect(cwv.primaryKey, 1);
+            expect(cwv.key, 1);
+            cwv.delete().then((_) => cwv.next());
+          } else {
+            fail('should fail');
+          }
+        }).asFuture();
+        expect(gotItem, isTrue);
+      });
+    });
   });
 }

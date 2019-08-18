@@ -75,6 +75,14 @@ dynamic cloneValue(dynamic value, [String keyPath, dynamic key]) {
   return clone;
 }
 
+int fixCompareValue(int value, {bool asc = true}) {
+  if (asc ?? true) {
+    return value;
+  } else {
+    return -value;
+  }
+}
+
 // handle single object and array!
 int compareKeys(dynamic first, dynamic second) {
   if (first is num && second is num) {
@@ -109,13 +117,14 @@ KeyRange keyArrayRangeAt(KeyRange keyRange, int index) {
       keyRange.upperOpen);
 }
 
-// return a list if keyPath is an array
+/// return a list if keyPath is an array
 dynamic mapValueAtKeyPath(Map map, keyPath) {
   if (keyPath is String) {
     return getMapFieldValue(map, keyPath);
   } else if (keyPath is List) {
     List keyList = keyPath;
-    return List.generate(keyList.length, (i) => map[keyList[i]]);
+    return List.generate(
+        keyList.length, (i) => getMapFieldValue(map, keyPath[i] as String));
   }
   throw 'keyPath $keyPath not supported';
 }

@@ -19,8 +19,12 @@ void devPrint(Object object) {
   }
 }
 
+/// Deprecated to prevent keeping the code used.
+///
+/// Can be use as a todo for weird code. int value = devWarning(myFunction());
+/// The function is always called
 @deprecated
-int devWarning;
+T devWarning<T>(T value) => value;
 
 void _devError([Object msg]) {
   // one day remove the print however sometimes the error thrown is hidden
