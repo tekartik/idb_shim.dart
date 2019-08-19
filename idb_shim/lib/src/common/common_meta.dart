@@ -196,7 +196,7 @@ abstract class ObjectStoreWithMetaMixin {
   IdbObjectStoreMeta get meta;
 
   //@override
-  dynamic get keyPath => meta.keyPath;
+  String get keyPath => meta.keyPath;
 
   //@override
   bool get autoIncrement => meta.autoIncrement;

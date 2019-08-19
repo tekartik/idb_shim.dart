@@ -200,11 +200,11 @@ abstract class IndexCursorControllerSembastMixin implements _ICursorSembast {
       /// Duplicate some records
       var list = <IndexRecordSnapshotSembast>[];
       for (var record in records) {
-        var keys = valueAsKeySet(
-            mapValueAtKeyPath(record.value as Map, index.keyPath));
+        var keys =
+            valueAsSet(mapValueAtKeyPath(record.value as Map, index.keyPath));
         if (keys != null) {
           for (var key in keys) {
-            list.add(IndexRecordSnapshotSembast(key, record));
+            list.add(IndexRecordSnapshotSembast(decodeKey(key), record));
           }
         }
       }

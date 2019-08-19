@@ -130,7 +130,7 @@ dynamic mapValueAtKeyPath(Map map, keyPath) {
 }
 
 /// Convert a single value or an iterable to a list
-Set valueAsKeySet(dynamic value) {
+Set valueAsSet(dynamic value) {
   if (value == null) {
     return null;
   }
@@ -138,6 +138,23 @@ Set valueAsKeySet(dynamic value) {
     return Set.from(value);
   }
   return {value};
+}
+
+@deprecated
+Set valueAsKeySet(dynamic value) => valueAsSet(value);
+
+/// Convert a single value or an iterable to a list
+List valueAsList(dynamic value) {
+  if (value == null) {
+    return null;
+  }
+  if (value is List) {
+    return value;
+  }
+  if (value is Iterable) {
+    return value.toList();
+  }
+  return [value];
 }
 
 List<String> getFieldParts(String field) => field.split('.');

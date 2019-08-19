@@ -204,7 +204,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     var value = record.value;
     // Add key if _keyPath is not null
     if ((keyPath != null) && (value is Map)) {
-      value = cloneValue(value, keyPath as String, record.key);
+      value = cloneValue(value, keyPath, record.key);
     }
 
     return value;

@@ -1,4 +1,4 @@
-## 1.8.1+1
+## 1.8.1+2
 
 * Deprecates old names (sorry)
 * Fix update/delete in index cursor for sembast
