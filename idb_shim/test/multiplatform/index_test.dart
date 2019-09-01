@@ -811,6 +811,29 @@ void defineTests(TestContext ctx) {
       });
     });
 
+    group('late_index', () {
+      test('create_index', () async {
+        await _setupDeleteDb();
+        db = await idbFactory.open(_dbName, version: 1, onUpgradeNeeded: (e) {
+          e.database.createObjectStore(testStoreName, autoIncrement: true);
+        });
+        _createTransaction();
+        var map = {testNameField: 1234};
+        await objectStore.put(map);
+        await objectStore.put({'dummy': 'value'});
+        db.close();
+        db = await idbFactory.open(_dbName, version: 2, onUpgradeNeeded: (e) {
+          e.transaction
+              .objectStore(testStoreName)
+              .createIndex(testNameIndex, testNameField);
+        });
+        _createTransaction();
+        var index = objectStore.index(testNameIndex);
+        expect(await index.get(1234), map);
+        expect(await index.count(), 1);
+      });
+    });
+
     // not working in memory since not persistent
     if (!ctx.isInMemory) {
       group('create index and re-open', () {
