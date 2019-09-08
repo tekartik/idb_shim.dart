@@ -5,8 +5,6 @@ build/
 .packages
 .buildlog
 .pub/
-.idea/
-.atom/
 tmp/
 packages
 data/out
@@ -27,3 +25,8 @@ test_out
 
 # Local files
 .local/
+
+# IDE
+.idea/
+*.iml
+.vscode/
