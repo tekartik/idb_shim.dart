@@ -1,6 +1,6 @@
-## 1.8.1+2
+## 1.9.0-dev.1
 
-* Deprecates old names (sorry)
+* Deprecates old names (sorry) and websql
 * Fix update/delete in index cursor for sembast
 * Sdk 2.4 min
 
