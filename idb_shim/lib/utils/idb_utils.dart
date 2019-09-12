@@ -2,6 +2,8 @@ library idb_shim.utils.idb_utils;
 
 import 'dart:async';
 
+import 'package:idb_shim/src/utils/core_imports.dart';
+
 import '../idb_client.dart';
 import '../src/common/common_meta.dart';
 
@@ -123,6 +125,7 @@ class KeyCursorRow {
   KeyCursorRow(this.key, this.primaryKey);
 }
 
+/// Convert an openCursor stream to a list
 Future<List<CursorRow>> cursorToList(Stream<CursorWithValue> stream) {
   var completer = Completer<List<CursorRow>>.sync();
   List<CursorRow> list = [];
@@ -134,6 +137,7 @@ Future<List<CursorRow>> cursorToList(Stream<CursorWithValue> stream) {
   return completer.future;
 }
 
+/// Convert an openKeyCursor stream to a list
 Future<List<KeyCursorRow>> keyCursorToList(Stream<Cursor> stream) {
   var completer = Completer<List<KeyCursorRow>>.sync();
   List<KeyCursorRow> list = [];
