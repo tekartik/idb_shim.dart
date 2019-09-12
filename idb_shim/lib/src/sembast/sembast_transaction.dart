@@ -83,7 +83,7 @@ class TransactionSembast extends IdbTransactionBase
       }
 
       if (_transactionLazyMode) {
-        return Future.delayed(Duration(), _checkNextAction);
+        return Future.delayed(const Duration(), _checkNextAction);
       } else {
         //return new Future.sync(new Duration(), _checkNextAction);
         return _checkNextAction();
@@ -179,7 +179,7 @@ class TransactionSembast extends IdbTransactionBase
       // simply call completed
       // completed;
 
-      Future.delayed(Duration(), () {
+      Future.delayed(const Duration(), () {
         completed;
       });
     }

@@ -7,7 +7,7 @@ import 'package:idb_shim/src/common/common_factory.dart';
 import 'idb_client.dart';
 import "src/utils/core_imports.dart";
 
-// @deprecated v2
+@deprecated
 IdbWebSqlFactory get idbWebSqlFactory => IdbWebSqlFactory();
 
 class IdbWebSqlFactory extends IdbFactoryBase {

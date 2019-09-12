@@ -362,7 +362,7 @@ void defineTests(TestContext ctx) {
               .asFuture()
               .then((_) {
             fail('should not complete');
-          }).timeout(Duration(milliseconds: 500), onTimeout: () {
+          }).timeout(const Duration(milliseconds: 500), onTimeout: () {
             // don't wait on the transaction
             transaction = null;
           });
@@ -379,7 +379,7 @@ void defineTests(TestContext ctx) {
               .asFuture()
               .then((_) {
             fail('should not complete');
-          }).timeout(Duration(milliseconds: 500), onTimeout: () {
+          }).timeout(const Duration(milliseconds: 500), onTimeout: () {
             // don't wait on the transaction
             transaction = null;
           });

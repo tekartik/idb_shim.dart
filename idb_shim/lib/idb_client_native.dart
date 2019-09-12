@@ -3,13 +3,17 @@ library idb_shim_native;
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/native/native_factory.dart';
 
+// @deprecated // v3
+IdbFactory get idbNativeFactory => idbFactoryNative;
+
 /// The native factory
 ///
 /// @v2 deprecated
 /// will be named idbFactoryNative
-IdbFactory get idbNativeFactory => IdbFactoryNativeImpl();
+IdbFactory get idbFactoryNative => IdbFactoryNativeImpl();
 
-IdbFactory get idbFactoryNativeV2 => IdbFactoryNativeImpl();
+// @v3 deprecated
+IdbFactory get idbFactoryNativeV2 => idbFactoryNative;
 
 // The native factory
 // IdbFactory get idbFactoryNative => IdbFactoryNativeImpl();

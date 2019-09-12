@@ -17,12 +17,14 @@ IdbFactory _idbSembastMemoryFactory;
 IdbFactory get idbSembastMemoryFactory => idbFactorySembastMemoryV2;
 
 /// Sembast memory based factory
-IdbFactory get idbFactorySembastMemoryV2 {
+IdbFactory get idbFactorySembastMemory {
   if (_idbSembastMemoryFactory == null) {
     _idbSembastMemoryFactory = IdbFactorySembast(databaseFactoryMemory, null);
   }
   return _idbSembastMemoryFactory;
 }
+
+IdbFactory get idbFactorySembastMemoryV2 => idbFactorySembastMemory;
 
 /// @deprecated v2
 IdbFactory getIdbSembastIoFactory(String path) => getIdbFactorySembastIo(path);
@@ -36,7 +38,7 @@ IdbFactory getIdbFactorySembastIo(String path) =>
 @deprecated
 IdbFactory getIdbFactory({String name, String path}) {
   if (name == null) {
-    name = idbFactoryPersistent;
+    name = idbFactoryNamePersistent;
   }
   switch (name) {
     case idbFactoryNameSembastMemory:

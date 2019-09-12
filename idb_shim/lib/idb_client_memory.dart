@@ -10,10 +10,13 @@ import 'package:sembast/sembast_memory.dart';
 /// Special factory in memory but supporting writing on a virtual file system (in memory too)
 IdbFactory get idbFactoryMemoryFs => IdbFactorySembast(databaseFactoryMemoryFs);
 
-/// @deprecated v2
-/// The in-memory factory
-IdbFactory get idbMemoryFactory => IdbFactorySembast(databaseFactoryMemory);
+/// @deprecated v3
+// @deprecated v3
+IdbFactory get idbMemoryFactory => idbFactoryMemory;
 
-/// @deprecated v2
+/// The in-memory factory
+IdbFactory get idbFactoryMemory => IdbFactorySembast(databaseFactoryMemory);
+
+/// @deprecated v3
 /// Special factory in memory but supporting writing on a virtual file system (in memory too)
 IdbFactory get idbMemoryFsFactory => idbFactoryMemoryFs;

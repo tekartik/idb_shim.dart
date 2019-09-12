@@ -91,7 +91,7 @@ void main() {
       }
 
       Future _createTransaction() async {
-        await Future.delayed(Duration(milliseconds: 1));
+        await Future.delayed(const Duration(milliseconds: 1));
         _createTransactionSync();
       }
 
