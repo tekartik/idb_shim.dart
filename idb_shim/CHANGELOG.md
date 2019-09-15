@@ -1,4 +1,4 @@
-## 1.9.0-dev.1
+## 1.9.0
 
 * Deprecates old names (sorry) and websql
 * Fix update/delete in index cursor for sembast
