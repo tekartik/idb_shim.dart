@@ -406,7 +406,7 @@ void defineTests(TestContext ctx) {
         }
 
         Future _createTransaction() async {
-          await Future.delayed(Duration(milliseconds: 1));
+          await Future.delayed(const Duration(milliseconds: 1));
           _createTransactionSync();
         }
 
@@ -523,7 +523,7 @@ void defineTests(TestContext ctx) {
         await objectStore.getObject(0);
 
         // this cause the transaction to terminate on every implementation
-        await Future.delayed(Duration());
+        await Future.delayed(const Duration());
 
         try {
           await objectStore.getObject(0);

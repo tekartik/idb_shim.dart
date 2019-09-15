@@ -47,7 +47,7 @@ class VersionChangeEventNative extends IdbVersionChangeEventBase {
 class DatabaseNative extends IdbDatabaseBase {
   idb.Database idbDatabase;
 
-  DatabaseNative(this.idbDatabase) : super(idbNativeFactory);
+  DatabaseNative(this.idbDatabase) : super(idbFactoryNative);
 
   @override
   int get version => catchNativeError(() => idbDatabase.version);

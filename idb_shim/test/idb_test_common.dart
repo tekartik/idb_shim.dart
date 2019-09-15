@@ -106,7 +106,7 @@ class SembastTestContext extends TestContext {
 
 class SembastMemoryTestContext extends SembastTestContext {
   SembastMemoryTestContext() {
-    factory = idbMemoryFactory;
+    factory = idbFactoryMemory;
   }
 
   @override
@@ -136,7 +136,7 @@ class SembastMemoryFsTestContext extends SembastFsTestContext {
 
 SembastFsTestContext idbMemoryFsContext = SembastMemoryFsTestContext();
 
-IdbFactory idbTestMemoryFactory = idbMemoryFactory;
+IdbFactory idbTestMemoryFactory = idbFactoryMemory;
 
 Future<Database> setUpSimpleStore(IdbFactory idbFactory, //
     {String dbName = _testDbName,

@@ -26,8 +26,8 @@ Future<Map> sdbExportDatabase(Database db) async {
     return exportDatabase(sdbDatabase);
   } else {
     // otherwise copy to a memory one
-    db = await copyDatabase(db, idbMemoryFactory, null);
-    sdbDatabase = (idbMemoryFactory as IdbFactorySembast).getSdbDatabase(db);
+    db = await copyDatabase(db, idbFactoryMemory, null);
+    sdbDatabase = (idbFactoryMemory as IdbFactorySembast).getSdbDatabase(db);
     Map export = await exportDatabase(sdbDatabase);
     db.close();
     return export;
@@ -50,7 +50,7 @@ Future<Database> sdbImportDatabase(
     // import to a memory one
     sdb.Database sdbDb =
         await importDatabase(data, sdb.databaseFactoryMemory, null);
-    Database tmpDb = await (idbMemoryFactory as IdbFactorySembast)
+    Database tmpDb = await (idbFactoryMemory as IdbFactorySembast)
         .openFromSdbDatabase(sdbDb);
     Database db = await copyDatabase(tmpDb, dstFactory, dstDbName);
     tmpDb.close();

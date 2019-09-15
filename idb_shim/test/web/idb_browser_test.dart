@@ -19,14 +19,16 @@ void main() {
     });
 
     test('websql', () {
-      IdbFactory websql = idbWebSqlFactory;
+      // ignore: deprecated_member_use_from_same_package
+      IdbFactory websql = idbFactoryWebSql;
       if (websql != null) {
         expect(websql.runtimeType.toString(), "IdbWebSqlFactory");
         expect(idbPersistentFactory, isNot(isNull));
       } else {
         fail("WebSql not supported");
       }
-    }, skip: idbWebSqlFactory == null ? "WebSql not supported" : false);
+      // ignore: deprecated_member_use_from_same_package
+    }, skip: idbFactoryWebSql == null ? "WebSql not supported" : false);
 
     test('memory', () {
       IdbFactory websql = idbMemoryFactory;
@@ -36,7 +38,8 @@ void main() {
     test('persistent', () {
       if (idbPersistentFactory == null) {
         expect(idbNativeFactory, isNull);
-        expect(idbWebSqlFactory, isNull);
+        // ignore: deprecated_member_use_from_same_package
+        expect(idbFactoryWebSql, isNull);
       }
     });
 
