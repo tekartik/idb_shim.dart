@@ -5,8 +5,21 @@ import 'package:idb_shim/src/sembast/sembast_database.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:path/path.dart';
 import 'package:sembast/sembast.dart' as sdb;
+import 'package:sembast/sembast_memory.dart';
 
 bool sembastDebug = false;
+
+/// Special factory in memory but supporting writing on a virtual file system (in memory too)
+IdbFactory _idbFactorySembastMemoryFsImpl;
+IdbFactory get idbFactorySembastMemoryFsImpl =>
+    _idbFactorySembastMemoryFsImpl ??=
+        IdbFactorySembast(databaseFactoryMemoryFs);
+
+IdbFactory _idbSembastMemoryFactoryImpl;
+
+/// Sembast memory based factory
+IdbFactory get idbFactorySembastMemoryImpl =>
+    _idbSembastMemoryFactoryImpl ??= IdbFactorySembast(databaseFactoryMemory);
 
 class IdbFactorySembastImpl extends IdbFactoryBase
     implements IdbFactorySembast {

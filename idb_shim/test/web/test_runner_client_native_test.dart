@@ -11,8 +11,8 @@ import 'idb_browser_test_common.dart';
 
 void main() {
   group('native', () {
-    if (IdbNativeFactory.supported) {
-      IdbFactory idbFactory = IdbNativeFactory();
+    if (idbFactoryNative != null) {
+      IdbFactory idbFactory = idbFactoryNative;
       TestContext ctx = TestContext()..factory = idbFactory;
 
       // ie and idb special test marker

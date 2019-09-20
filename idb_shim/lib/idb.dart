@@ -15,8 +15,6 @@ const String idbDirectionPrev = "prev";
 
 // shim using native indexeddb implementation
 const idbFactoryNameNative = "native";
-// 1.19.0 removed @deprecated
-// const idbFactoryNative = idbFactoryNameNative;
 // shim using Sembast implementation
 const idbFactoryNameSembastIo = "sembast_io";
 // shim using Sembast io implementation
@@ -29,23 +27,8 @@ const idbFactoryNameMemory = "memory";
 const idbFactoryNamePersistent = "persistent";
 // pseudo - best browser shim (persistent of it not available memory)
 const idbFactoryNameBrowser = "browser";
-// shim using WebSql implementation
-// @deprecated
-// 1.19.0 removed const idbFactoryWebSql = "websql";
-// ignore: deprecated_member_use_from_same_package
+// shim using WebSql implementation - no longer supported
 const idbFactoryNameWebSql = "websql";
-// 1.19.0 removed @deprecated
-// const idbFactorySembastIo = idbFactoryNameSembastIo;
-@deprecated
-const idbFactoryIo = idbFactoryNameIo;
-// // 1.19.0 removed @deprecated
-// const idbFactorySembastMemory = idbFactoryNameSembastMemory;
-// @deprecated
-// const idbFactoryMemory = idbFactoryNameMemory;
-// 1.19.0 removed @deprecated
-// const idbFactoryPersistent = idbFactoryNamePersistent;
-// 1.19.0 removed @deprecated
-// const idbFactoryBrowser = idbFactoryNameBrowser;
 
 ///
 /// represents a cursor for traversing or iterating over multiple records in a
