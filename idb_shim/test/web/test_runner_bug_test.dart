@@ -6,7 +6,7 @@ import 'package:idb_shim/src/sembast/sembast_factory.dart';
 import '../idb_test_common.dart';
 
 void main() {
-  var idbFactory = idbMemoryFsFactory;
+  var idbFactory = idbFactoryMemoryFs;
   test('bug', () async {
     // Turn on dev logs
     sembastDebug = true;

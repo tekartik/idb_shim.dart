@@ -1,22 +1,12 @@
 library idb_shim_memory;
 
 import 'package:idb_shim/idb_client.dart';
-import 'package:idb_shim/idb_client_sembast.dart';
-import 'package:sembast/sembast_memory.dart';
+import 'package:idb_shim/src/sembast/sembast_factory.dart';
 
-/// The in-memory factory
-/// IdbFactory get idbFactoryMemory => IdbFactorySembast(databaseFactoryMemory);
+export 'package:idb_shim/src/sembast/sembast_memory_compat.dart';
 
 /// Special factory in memory but supporting writing on a virtual file system (in memory too)
-IdbFactory get idbFactoryMemoryFs => IdbFactorySembast(databaseFactoryMemoryFs);
-
-/// @deprecated v3
-// @deprecated v3
-IdbFactory get idbMemoryFactory => idbFactoryMemory;
+IdbFactory get idbFactoryMemoryFs => idbFactorySembastMemoryFsImpl;
 
 /// The in-memory factory
-IdbFactory get idbFactoryMemory => IdbFactorySembast(databaseFactoryMemory);
-
-/// @deprecated v3
-/// Special factory in memory but supporting writing on a virtual file system (in memory too)
-IdbFactory get idbMemoryFsFactory => idbFactoryMemoryFs;
+IdbFactory get idbFactoryMemory => idbFactorySembastMemoryImpl;

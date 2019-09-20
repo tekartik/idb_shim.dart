@@ -126,7 +126,7 @@ class SembastFsTestContext extends SembastTestContext {
 
 class SembastMemoryFsTestContext extends SembastFsTestContext {
   SembastMemoryFsTestContext() {
-    factory = idbMemoryFsFactory;
+    factory = idbFactoryMemoryFs;
   }
 
   // It is actually not considerd in memory in our tests

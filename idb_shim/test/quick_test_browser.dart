@@ -4,7 +4,6 @@ import 'dart:async';
 
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/idb_client_native.dart';
-import 'package:idb_shim/idb_client_websql.dart';
 
 import 'idb_test_common.dart';
 import 'multiplatform/exception_test.dart' as exception_test;
@@ -21,8 +20,8 @@ void testMain(TestContext ctx) {
 
 void main() {
   group('native', () {
-    if (IdbNativeFactory.supported) {
-      IdbFactory idbFactory = IdbNativeFactory();
+    if (idbFactoryNative != null) {
+      IdbFactory idbFactory = idbFactoryNative;
       TestContext ctx = TestContext()..factory = idbFactory;
       testMain(ctx);
     } else {
@@ -31,17 +30,7 @@ void main() {
       });
     }
   });
-  group('websql', () {
-    if (IdbWebSqlFactory.supported) {
-      IdbWebSqlFactory idbFactory = IdbWebSqlFactory();
-      TestContext ctx = TestContext()..factory = idbFactory;
-      testMain(ctx);
-    } else {
-      test("not supported", () {
-        // return Future.error("not supported");
-      }, skip: 'websql not supported');
-    }
-  });
+
   group('memory', () {
     testMain(idbMemoryContext);
   });

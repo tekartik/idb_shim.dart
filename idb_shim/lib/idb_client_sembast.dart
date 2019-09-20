@@ -9,6 +9,10 @@ import 'package:sembast/sembast.dart' as sdb;
 
 const idbFactoryNameSembast = "sembast";
 
+/// Sembast memory based factory
+IdbFactory get idbFactorySembastMemory => idbFactorySembastMemoryImpl;
+
+/// IndexedDB factory on top of sembast
 abstract class IdbFactorySembast extends IdbFactoryBase {
   factory IdbFactorySembast(sdb.DatabaseFactory databaseFactory,
           [String path]) =>
