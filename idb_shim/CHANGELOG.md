@@ -1,3 +1,7 @@
+## 1.10.0-dev.1
+
+* Add support for `idb_sqflite`, an implementation for flutter mobile on top of sqflite
+
 ## 1.9.0
 
 * Deprecates old names (sorry) and websql
