@@ -1,4 +1,4 @@
-## 1.10.0-dev.1
+## 1.10.0
 
 * Add support for `idb_sqflite`, an implementation for flutter mobile on top of sqflite
 
