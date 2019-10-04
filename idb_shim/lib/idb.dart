@@ -3,31 +3,46 @@ library idb_shim;
 import 'dart:async';
 
 import 'package:idb_shim/src/common/common_factory.dart';
+import 'package:idb_shim/src/common/common_key_range.dart';
 
 export 'src/client/client.dart';
 export 'src/client/error.dart';
 
+/// Read-write mode for transaction.
 const String idbModeReadWrite = "readwrite";
+
+/// Read-only mode for transaction.
 const String idbModeReadOnly = "readonly";
 
+/// Default forward mode for cursor.
 const String idbDirectionNext = "next";
+
+/// Backward mode for cursor.
 const String idbDirectionPrev = "prev";
 
-// shim using native indexeddb implementation
+/// Factory name using native indexeddb implementation.
 const idbFactoryNameNative = "native";
-// shim using Sembast implementation
+
+/// Factory name using Sembast implementation
 const idbFactoryNameSembastIo = "sembast_io";
-// shim using Sembast io implementation
+
+/// Factory name using Sembast io implementation.
+@Deprecated('Use idbFactoryNameSembastIo instead')
 const idbFactoryNameIo = "io";
-// shim using Sembast memory implementation
+
+/// Factory name using Sembast memory implementation
 const idbFactoryNameSembastMemory = "sembast_memory";
-// shim using Sembast Memory implementation
+
+/// Factory name that could be used to use Sembast Memory implementation.
 const idbFactoryNameMemory = "memory";
-// pseudo - best persistent shim (indexeddb or if not available websql)
+
+/// Pseudo - best persistent shim (indexeddb).
 const idbFactoryNamePersistent = "persistent";
-// pseudo - best browser shim (persistent of it not available memory)
+
+/// Pseudo - best browser shim (persistent of it not available memory).
 const idbFactoryNameBrowser = "browser";
-// shim using WebSql implementation - no longer supported
+
+/// Shim using WebSql implementation - no longer supported.
 const idbFactoryNameWebSql = "websql";
 
 ///
@@ -114,6 +129,7 @@ abstract class Cursor {
 /// performed on the underlying index or object store.
 ///
 abstract class CursorWithValue extends Cursor {
+  /// Returns the value of the current cursor.
   Object get value;
 }
 
@@ -410,9 +426,11 @@ abstract class Index {
   ///
   Future getKey(dynamic key);
 
+  /// Creates a cursor over the specified key range.
   Stream<CursorWithValue> openCursor(
       {key, KeyRange range, String direction, bool autoAdvance});
 
+  /// Creates a key cursor over the specified key range.
   Stream<Cursor> openKeyCursor(
       {key, KeyRange range, String direction, bool autoAdvance});
 
@@ -459,9 +477,13 @@ abstract class Index {
 /// operation on a database is done using a request.
 ///
 abstract class Request {
+  /// The target database.
   Database result;
+
+  /// The associated transaction.
   Transaction transaction;
 
+  /// Create a request on a given database and transaction.
   Request(this.result, this.transaction);
 }
 
@@ -469,6 +491,7 @@ abstract class Request {
 /// provides access to the results of requests to open or delete databases
 ///
 class OpenDBRequest extends Request {
+  /// Create an open request on a given database and transaction.
   OpenDBRequest(Database database, Transaction transaction)
       : super(database, transaction);
 }
@@ -487,9 +510,10 @@ abstract class VersionChangeEvent {
   /// the current transaction
   Transaction get transaction;
 
-  // event target
+  /// Event target.
   Object get target;
 
+  /// Event current target.
   Object get currentTarget;
 
   ///
@@ -521,121 +545,45 @@ typedef OnBlockedFunction = void Function(Event event);
 /// either be open (the endpoints are excluded) or closed (the endpoints are
 /// included)
 ///
-class KeyRange {
-  KeyRange();
+abstract class KeyRange {
+  /// Should not be used.
+  @deprecated
+  // ignore: deprecated_member_use_from_same_package
+  factory KeyRange() => IdbKeyRange();
 
-  KeyRange.only(/*Key*/ value) : this.bound(value, value);
+  /// Creates a new key range containing a single value.
+  factory KeyRange.only(Object /*Key*/ value) => IdbKeyRange.only(value);
 
-  KeyRange.lowerBound(this._lowerBound, [bool open = false]) {
-    _lowerBoundOpen = open ?? false;
-  }
+  /// Creates a new key range with only a lower bound.
+  factory KeyRange.lowerBound(Object lowerBound, [bool open = false]) =>
+      IdbKeyRange.lowerBound(lowerBound, open);
 
-  KeyRange.upperBound(this._upperBound, [bool open = false]) {
-    _upperBoundOpen = open ?? false;
-  }
+  /// Creates a new upper-bound key range.
+  factory KeyRange.upperBound(Object upperBound, [bool open = false]) =>
+      IdbKeyRange.upperBound(upperBound, open);
 
-  KeyRange.bound(this._lowerBound, this._upperBound,
-      [bool lowerOpen = false, bool upperOpen = false]) {
-    _lowerBoundOpen = lowerOpen ?? false;
-    _upperBoundOpen = upperOpen ?? false;
-  }
+  /// Creates a new key range with upper and lower bounds.
+  factory KeyRange.bound(Object lowerBound, Object upperBound,
+          [bool lowerOpen = false, bool upperOpen = false]) =>
+      IdbKeyRange.bound(lowerBound, upperBound, lowerOpen, upperOpen);
 
-  dynamic _lowerBound;
-  bool _lowerBoundOpen = true;
-  dynamic _upperBound;
-  bool _upperBoundOpen = true;
+  /// Lower bound of the key range.
+  Object get lower => null;
 
-  Object get lower => _lowerBound;
+  /// Returns false if the lower-bound value is included in the key range.
+  bool get lowerOpen;
 
-  bool get lowerOpen => _lowerBoundOpen;
+  /// Upper bound of the key range.
+  Object get upper;
 
-  Object get upper => _upperBound;
+  /// Returns false if the upper-bound value is included in the key range.
+  bool get upperOpen;
 
-  bool get upperOpen => _upperBoundOpen;
-
-  num _compareValue(value1, value2) {
-    if (value1 is num) {
-      return value1 - (value2 as num);
-    } else if (value1 is String) {
-      return value1.compareTo(value2 as String);
-    } else if (value1 is List) {
-      List list = value1;
-      for (int i = 0; i < list.length; i++) {
-        var diff = _compareValue(list[i], (value2 as List)[i]);
-        if (diff != 0) {
-          return diff;
-        }
-      }
-      return 0;
-    } else {
-      throw UnsupportedError(
-          "key '$value1' of type ${value1.runtimeType} not supported");
-    }
-  }
-
+  /// Return true if a key range contains a given key.
   ///
-  /// Added method for memory implementation
-  ///
-  bool _checkLowerBound(key) {
-    if (_lowerBound != null) {
-      bool exclude = _lowerBoundOpen != null && _lowerBoundOpen;
-      num cmp = _compareValue(key, _lowerBound);
-      if (cmp == 0 && exclude) {
-        return false;
-      } else {
-        return cmp >= 0;
-      }
-    }
-    return true;
-  }
-
-  bool _checkUpperBound(key) {
-    if (_upperBound != null) {
-      bool exclude = _upperBoundOpen != null && _upperBoundOpen;
-      num cmp = _compareValue(key, _upperBound);
-      if (cmp == 0 && exclude) {
-        return false;
-      } else {
-        return cmp <= 0;
-      }
-    }
-    return true;
-  }
-
-  bool contains(key) {
-    if (!_checkLowerBound(key)) {
-      return false;
-    } else {
-      return _checkUpperBound(key);
-    }
-  }
-
-  @override
-  String toString() {
-    StringBuffer sb = StringBuffer('kr');
-    if (lower == null) {
-      sb.write('...');
-    } else {
-      if (lowerOpen) {
-        sb.write(']');
-      } else {
-        sb.write('[');
-      }
-      sb.write(lower);
-    }
-    sb.write('-');
-    if (upper == null) {
-      sb.write('...');
-    } else {
-      sb.write(upper);
-      if (upperOpen) {
-        sb.write('[');
-      } else {
-        sb.write(']');
-      }
-    }
-    return sb.toString();
-  }
+  /// Used internally, deprecated since 1.10.0+1
+  @deprecated
+  bool contains(key);
 }
 
 ///
@@ -696,9 +644,10 @@ abstract class IdbFactory {
 }
 
 ///
-/// Generic database error
+/// Generic database error.
 ///
 class DatabaseError extends Error {
+  /// Error message.
   String get message => _message;
   String _message;
 
@@ -711,6 +660,7 @@ class DatabaseError extends Error {
     _stackTrace = stackTrace;
   }
 
+  /// Create a database error with a message.
   DatabaseError(this._message);
 
   @override
@@ -718,17 +668,21 @@ class DatabaseError extends Error {
 }
 
 ///
-/// Generic database exception
+/// Generic database exception.
 ///
 class DatabaseException implements Exception {
+  /// Error message.
   String get message => _message;
   String _message;
 
+  /// Create a database exception with a message.
   DatabaseException(this._message);
 
   @override
   String toString() {
-    if (message == null) return "DatabaseException";
+    if (message == null) {
+      return "DatabaseException";
+    }
     return "DatabaseException: $message";
   }
 }

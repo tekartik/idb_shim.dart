@@ -16,26 +16,30 @@ bool _transactionLazyMode = false;
 
 typedef Action = FutureOr Function();
 
+/// Transaction wrapper around a sembast transaction.
 class TransactionSembast extends IdbTransactionBase
     with TransactionWithMetaMixin {
   @override
   DatabaseSembast get database => super.database as DatabaseSembast;
 
+  /// Sembast database.
   sdb.Database get sdbDatabase => database.db;
+
+  /// Sembast transaction.
   sdb.Transaction sdbTransaction;
 
-  static int debugAllIds = 0;
+  static int _debugAllIds = 0;
   int _debugId;
 
-  int index = 0;
+  int _index = 0;
   bool _inactive = false;
 
   Future _execute(int i) {
     if (_debugTransaction) {
       print("exec $i");
     }
-    Completer completer = completers[i];
-    Action action = actions[i] as Action;
+    Completer completer = _completers[i];
+    Action action = _actions[i] as Action;
     return Future.sync(action).then((result) {
       if (_debugTransaction) {
         print("done $i");
@@ -52,9 +56,9 @@ class TransactionSembast extends IdbTransactionBase
 
   Future _next() {
     //print('_next? ${index}/${actions.length}');
-    if (index < actions.length) {
+    if (_index < _actions.length) {
       // Always try more
-      return _execute(index++).then((_) {
+      return _execute(_index++).then((_) {
         return _next();
       });
     } else {
@@ -72,7 +76,7 @@ class TransactionSembast extends IdbTransactionBase
 
       Future _checkNextAction() {
         //return new Future.value().then((_) {
-        if (index < actions.length) {
+        if (_index < _actions.length) {
           return _next();
         }
         if (_debugTransaction) {
@@ -92,19 +96,20 @@ class TransactionSembast extends IdbTransactionBase
   }
 
   // Lazy execution of the first action
-  Future lazyExecution;
+  Future _lazyExecution;
 
-  //
-  // Create or execute the transaction
-  // leaving a time to breath
-  // Since it must run everything in a single call, let all the actions
-  // in the first callback enqueue before running
-  //
+  ///
+  /// Create or execute the transaction.
+  ///
+  /// leaving a time to breath
+  /// Since it must run everything in a single call, let all the actions
+  /// in the first callback enqueue before running
+  ///
   Future<T> execute<T>(FutureOr<T> action()) {
     Future<T> actionFuture = _enqueue(action);
-    futures.add(actionFuture);
+    _futures.add(actionFuture);
 
-    if (lazyExecution == null) {
+    if (_lazyExecution == null) {
       // Short lifecycle experiment
 
       //lazyExecution = new Future.delayed(new Duration(), () {
@@ -118,9 +123,9 @@ class TransactionSembast extends IdbTransactionBase
           sdbTransaction = txn;
           return _next();
         }).whenComplete(() {
-          transactionCompleter.complete();
+          _transactionCompleter.complete();
         }).catchError((e) {
-          transactionCompleter.completeError(e);
+          _transactionCompleter.completeError(e);
         });
       }
       //lazyExecution = new Future.sync(() {
@@ -128,9 +133,9 @@ class TransactionSembast extends IdbTransactionBase
 
       if (_transactionLazyMode) {
         // old lazy mode
-        lazyExecution = Future.microtask(_sdbAction);
+        _lazyExecution = Future.microtask(_sdbAction);
       } else {
-        lazyExecution = Future.sync(_sdbAction);
+        _lazyExecution = Future.sync(_sdbAction);
       }
 
       //return lazyExecution;
@@ -148,8 +153,8 @@ class TransactionSembast extends IdbTransactionBase
     }
 // not lazy
     var completer = Completer<T>.sync();
-    completers.add(completer);
-    actions.add(action);
+    _completers.add(completer);
+    _actions.add(action);
     //devPrint("push ${actions.length}");
     //_next();
     return completer.future.then((result) {
@@ -160,17 +165,17 @@ class TransactionSembast extends IdbTransactionBase
   }
 
   //sdb.Transaction sdbTransaction;
-  var transactionCompleter = Completer();
-  List<Completer> completers = [];
-  List<Function> actions = [];
-  List<Future> futures = [];
+  var _transactionCompleter = Completer();
+  List<Completer> _completers = [];
+  List<Function> _actions = [];
+  List<Future> _futures = [];
 
   @override
   final IdbTransactionMeta meta;
 
   TransactionSembast(DatabaseSembast database, this.meta) : super(database) {
     if (_debugTransaction) {
-      _debugId = ++debugAllIds;
+      _debugId = ++_debugAllIds;
     }
 
     // Trigger a timer to close the transaction if nothing happens
@@ -186,7 +191,7 @@ class TransactionSembast extends IdbTransactionBase
   }
 
   Future<Database> get _completed {
-    if (lazyExecution == null) {
+    if (_lazyExecution == null) {
       if (_debugTransaction) {
         print('no lazy executor $_debugId...');
       }
@@ -197,9 +202,9 @@ class TransactionSembast extends IdbTransactionBase
         print('lazy executor created $_debugId...');
       }
     }
-    return lazyExecution.then((_) {
-      return transactionCompleter.future.then((_) {
-        return Future.wait(futures).then((_) {
+    return _lazyExecution.then((_) {
+      return _transactionCompleter.future.then((_) {
+        return Future.wait(_futures).then((_) {
           return database;
         }).catchError((e, st) {
           // catch any errors

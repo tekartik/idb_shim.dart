@@ -9,6 +9,11 @@ void main() {
   defineTests(idbMemoryContext);
 }
 
+bool keyRangeContains(KeyRange keyRange, Object key) {
+  // ignore: deprecated_member_use_from_same_package
+  return keyRange.contains(key);
+}
+
 void defineTests(TestContext ctx) {
   group('KeyRange', () {
     setUp(() {});
@@ -20,15 +25,18 @@ void defineTests(TestContext ctx) {
       expect(keyRange.upper, equals(1));
       expect(keyRange.upperOpen, isFalse);
       var range = keyRange;
-      expect(range.contains(1), isTrue);
-      expect(range.contains(0), isFalse);
-      expect(range.contains(2), isFalse);
+      // ignore: deprecated_member_use_from_same_package
+      expect(keyRangeContains(range, 1), isTrue);
+      // ignore: deprecated_member_use_from_same_package
+      expect(keyRangeContains(range, 0), isFalse);
+      // ignore: deprecated_member_use_from_same_package
+      expect(keyRangeContains(range, 2), isFalse);
     });
 
     test('array', () {
       var keyRange = KeyRange.only([2018, 'John']);
       expect(keyRange.lower, [2018, 'John']);
-      expect(keyRange.contains([2018, 'John']), isTrue);
+      expect(keyRangeContains(keyRange, [2018, 'John']), isTrue);
     });
 
     test('lowerOpen', () {
@@ -38,25 +46,25 @@ void defineTests(TestContext ctx) {
       //TODO expect(keyRange.upper, isNull);
       expect(keyRange.upperOpen, isTrue);
       var range = keyRange;
-      expect(range.contains(1), isFalse);
-      expect(range.contains(0), isFalse);
-      expect(range.contains(2), isTrue);
+      expect(keyRangeContains(range, 1), isFalse);
+      expect(keyRangeContains(range, 0), isFalse);
+      expect(keyRangeContains(range, 2), isTrue);
     });
 
     test('lowerClose', () {
       KeyRange keyRange = KeyRange.lowerBound(1, false);
       var range = keyRange;
-      expect(range.contains(1), isTrue);
-      expect(range.contains(0), isFalse);
-      expect(range.contains(2), isTrue);
+      expect(keyRangeContains(range, 1), isTrue);
+      expect(keyRangeContains(range, 0), isFalse);
+      expect(keyRangeContains(range, 2), isTrue);
     });
 
     test('upperOpen', () {
       KeyRange keyRange = KeyRange.upperBound(3, true);
       var range = keyRange;
-      expect(range.contains(2), isTrue);
-      expect(range.contains(3), isFalse);
-      expect(range.contains(4), isFalse);
+      expect(keyRangeContains(range, 2), isTrue);
+      expect(keyRangeContains(range, 3), isFalse);
+      expect(keyRangeContains(range, 4), isFalse);
     });
 
     test('upper', () {
@@ -66,18 +74,18 @@ void defineTests(TestContext ctx) {
       expect(keyRange.upper, equals(3));
       expect(keyRange.upperOpen, isFalse);
       var range = keyRange;
-      expect(range.contains(2), isTrue);
-      expect(range.contains(3), isTrue);
-      expect(range.contains(4), isFalse);
+      expect(keyRangeContains(range, 2), isTrue);
+      expect(keyRangeContains(range, 3), isTrue);
+      expect(keyRangeContains(range, 4), isFalse);
     });
 
     test('lower/upper', () {
       KeyRange keyRange = KeyRange.bound(1, 3);
       var range = keyRange;
-      expect(range.contains(1), isTrue);
-      expect(range.contains(3), isTrue);
-      expect(range.contains(4), isFalse);
-      expect(range.contains(0), isFalse);
+      expect(keyRangeContains(range, 1), isTrue);
+      expect(keyRangeContains(range, 3), isTrue);
+      expect(keyRangeContains(range, 4), isFalse);
+      expect(keyRangeContains(range, 0), isFalse);
     });
   });
 }

@@ -65,6 +65,7 @@ class _Record {
   var key;
 }
 
+/// Copy a store from a database to another existing one.
 Future copyStore(Database srcDatabase, String srcStoreName,
     Database dstDatabase, String dstStoreName) async {
   // Copy all in Memory first
@@ -92,6 +93,7 @@ Future copyStore(Database srcDatabase, String srcStoreName,
   await dstTransaction.completed;
 }
 
+/// Copy a database content to a new database.
 Future<Database> copyDatabase(
     Database srcDatabase, IdbFactory dstFactory, String dstDbName) async {
   Database dstDatabase = await copySchema(srcDatabase, dstFactory, dstDbName);
@@ -101,9 +103,12 @@ Future<Database> copyDatabase(
   return dstDatabase;
 }
 
+/// Cursor row.
 class CursorRow extends KeyCursorRow {
+  /// Cursor row value.
   final dynamic value;
 
+  /// Create a cursor row with a [key], [primaryKey] and [value].
   CursorRow(dynamic key, dynamic primaryKey, this.value)
       : super(key, primaryKey);
 
@@ -113,8 +118,15 @@ class CursorRow extends KeyCursorRow {
   }
 }
 
+/// Key cursor row.
 class KeyCursorRow {
+  /// Cursor row key.
+  ///
+  /// This is the index key if the cursor is open on an index. Otherwise, it is
+  /// the primary key.
   final dynamic key;
+
+  /// Cursory row primary key.
   final dynamic primaryKey;
 
   @override
@@ -122,6 +134,7 @@ class KeyCursorRow {
     return '$key $primaryKey';
   }
 
+  /// Create a cursor row with a [key], and [primaryKey].
   KeyCursorRow(this.key, this.primaryKey);
 }
 

@@ -139,3 +139,6 @@ linter:
 
     # === pub rules ===
     - package_names
+
+    # === doc rules ===
+    # (temp) - public_member_api_docs

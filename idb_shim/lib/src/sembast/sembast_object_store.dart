@@ -44,13 +44,14 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
         */
   }
 
-  Future<T> inWritableTransaction<T>(FutureOr<T> computation()) {
+  Future<T> _inWritableTransaction<T>(FutureOr<T> computation()) {
     if (transaction.meta.mode != idbModeReadWrite) {
       return Future.error(DatabaseReadOnlyError());
     }
     return inTransaction(computation);
   }
 
+  /// Run a computation in a transaction.
   Future<T> inTransaction<T>(FutureOr<T> computation()) {
     return transaction.execute(computation);
 //    transaction.txn
@@ -138,7 +139,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   @override
   Future add(value, [key]) {
-    return inWritableTransaction(() {
+    return _inWritableTransaction(() {
       key = getKeyImpl(value, key);
 
       if (key != null) {
@@ -156,7 +157,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   @override
   Future clear() {
-    return inWritableTransaction(() {
+    return _inWritableTransaction(() {
       return sdbStore.delete(sdbClient);
     }).then((_) {
       return null;
@@ -189,7 +190,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   @override
   Future delete(key) {
-    return inWritableTransaction(() {
+    return _inWritableTransaction(() {
       return sdbStore.record(key).delete(sdbClient).then((_) {
         // delete returns null
         return null;
@@ -226,9 +227,11 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     return IndexSembast(this, indexMeta);
   }
 
+  /// Get the sembast sort orders.
   List<sdb.SortOrder> sortOrders(bool ascending) =>
       keyPathSortOrders(keyField, ascending);
 
+  /// Convert to a sembast filter.
   sdb.Filter cursorFilter(key, KeyRange range) {
     if (range != null) {
       return keyRangeFilter(keyField, range, false);
@@ -271,7 +274,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   @override
   Future put(value, [key]) {
-    return inWritableTransaction(() {
+    return _inWritableTransaction(() {
       return _put(value, getKeyImpl(value, key));
     });
   }

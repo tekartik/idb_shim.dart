@@ -7,6 +7,7 @@ import 'package:sembast/sembast_memory.dart' as sembast;
 
 IdbFactory _idbSembastMemoryFactory;
 
+/// Deprecated.
 @deprecated
 IdbFactory get idbSembastMemoryFactory {
   if (_idbSembastMemoryFactory == null) {
@@ -31,5 +32,6 @@ IdbFactory get idbPersistentFactory {
   return idbFactory;
 }
 
+/// Deprecated.
 @Deprecated('Use idbFactoryBrowser')
 IdbFactory get idbBrowserFactory => idbFactoryBrowser;
