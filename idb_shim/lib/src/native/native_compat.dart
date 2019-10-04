@@ -3,15 +3,15 @@ import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/idb_client_native.dart';
 import 'package:idb_shim/src/native/native_factory.dart';
 
+/// deprecated.
 @Deprecated('Use idbFactoryNative instead')
 IdbFactory get idbNativeFactory => idbFactoryNative;
 
+/// deprecated.
 @Deprecated('Use idbFactoryNative instead')
 IdbFactory get idbFactoryNativeV2 => idbFactoryNative;
 
-// The native factory
-// IdbFactory get idbFactoryNative => IdbFactoryNativeImpl();
-
+/// deprecated.
 @Deprecated('Use idbFactoryNative instead')
 abstract class IdbNativeFactory extends IdbFactory {
   /// True if supported
@@ -19,6 +19,7 @@ abstract class IdbNativeFactory extends IdbFactory {
     return IdbFactoryNativeImpl.supported;
   }
 
+  /// deprecated.
   @Deprecated('Use idbFactoryNative instead')
   factory IdbNativeFactory() => IdbFactoryNativeImpl();
 }

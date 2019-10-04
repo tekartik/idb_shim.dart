@@ -18,8 +18,10 @@ bool equals(dynamic value1, dynamic value2) {
   return cmp == 0;
 }
 
-// return <0 if value1 < value2 or >0 if greater
-// returns null if cannot be compared
+/// Compare 2 values.
+///
+/// return <0 if value1 < value2 or >0 if greater
+/// returns null if cannot be compared
 int compareValue(dynamic value1, dynamic value2) {
   try {
     if (value1 is Comparable && value2 is Comparable) {

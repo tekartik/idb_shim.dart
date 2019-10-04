@@ -10,6 +10,9 @@ export 'package:idb_shim/idb_client_native.dart'
     show idbFactoryNative, idbNativeFactory;
 export 'package:idb_shim/src/browser/browser_compat.dart';
 
+/// Get a factory by name.
+///
+/// Not recommended.
 IdbFactory getIdbFactory([String name]) {
   if (name == null) {
     name = idbFactoryNameBrowser;
