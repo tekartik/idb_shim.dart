@@ -57,7 +57,8 @@ await txn.completed;
 
 ### Example
 
-Simple notepad available here.
+Simple notepad available [here](https://github.com/alextekartik/flutter_app_example/tree/master/notepad) running on
+Flutter (iOS/Android/Web).
 
 ### Flutter support
 

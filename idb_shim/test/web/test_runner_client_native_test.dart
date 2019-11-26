@@ -10,6 +10,10 @@ import '../test_runner.dart';
 import 'idb_browser_test_common.dart';
 
 void main() {
+  idbNativeFactoryTests(idbFactoryNative);
+}
+
+void idbNativeFactoryTests(IdbFactory idbFactoryNative) {
   group('native', () {
     if (idbFactoryNative != null) {
       IdbFactory idbFactory = idbFactoryNative;

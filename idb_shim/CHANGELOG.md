@@ -1,6 +1,7 @@
-## 1.10.0
+## 1.10.1
 
 * Add support for `idb_sqflite`, an implementation for flutter mobile on top of sqflite
+* Add support for service worker self.indexedDB
 
 ## 1.9.0
 
