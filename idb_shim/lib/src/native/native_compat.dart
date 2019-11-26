@@ -16,12 +16,12 @@ IdbFactory get idbFactoryNativeV2 => idbFactoryNative;
 abstract class IdbNativeFactory extends IdbFactory {
   /// True if supported
   static bool get supported {
-    return IdbFactoryNativeImpl.supported;
+    return IdbFactoryNativeBrowserWrapperImpl.supported;
   }
 
   /// deprecated.
   @Deprecated('Use idbFactoryNative instead')
-  factory IdbNativeFactory() => IdbFactoryNativeImpl();
+  factory IdbNativeFactory() => nativeIdbFactoryBrowserWrapperImpl;
 }
 
 /// Indexed db native factory
@@ -30,6 +30,6 @@ abstract class IdbFactoryNative implements IdbFactory {
   /// True if supported
   @Deprecated('idbFactoryNative is null if not supported')
   static bool get supported {
-    return IdbFactoryNativeImpl.supported;
+    return IdbFactoryNativeBrowserWrapperImpl.supported;
   }
 }

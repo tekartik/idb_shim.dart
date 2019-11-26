@@ -515,28 +515,32 @@ void defineTests(TestContext ctx) {
       });
 
       test('get_delay_get', () async {
-        await _setUp();
-        // this hangs on ie now
-        Transaction transaction =
-            db.transaction(testStoreName, idbModeReadOnly);
-        ObjectStore objectStore = transaction.objectStore(testStoreName);
-        await objectStore.getObject(0);
-
-        // this cause the transaction to terminate on every implementation
-        await Future.delayed(const Duration());
-
         try {
+          await _setUp();
+          // this hangs on ie now
+          Transaction transaction =
+              db.transaction(testStoreName, idbModeReadOnly);
+          ObjectStore objectStore = transaction.objectStore(testStoreName);
           await objectStore.getObject(0);
-          fail('should fail');
-          //} on DatabaseError catch (e) {
-        } catch (e) {
-          expect(isTestFailure(e), isFalse);
-          expect(isTransactionInactiveError(e), isTrue);
-        }
 
-        // this hangs on idb, chrome ie/safari
-        // if (!(ctx.isIdbIe || ctx.isIdbSafari)) {
-        //  await transaction.completed;
+          // this cause the transaction to terminate on every implementation
+          await Future.delayed(const Duration());
+
+          try {
+            await objectStore.getObject(0);
+            fail('should fail');
+            //} on DatabaseError catch (e) {
+          } catch (e) {
+            expect(isTestFailure(e), isFalse);
+            expect(isTransactionInactiveError(e), isTrue);
+          }
+
+          // this hangs on idb, chrome ie/safari
+          // if (!(ctx.isIdbIe || ctx.isIdbSafari)) {
+          //  await transaction.completed;
+        } catch (e) {
+          print(e);
+        }
       });
 
       test('get_wait_wait_get', () async {

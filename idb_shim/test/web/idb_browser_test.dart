@@ -10,7 +10,8 @@ void main() {
     test('native', () {
       IdbFactory native = idbFactoryNative;
       if (native != null) {
-        expect(native.runtimeType.toString(), "IdbFactoryNativeImpl");
+        expect(native.runtimeType.toString(),
+            "IdbFactoryNativeBrowserWrapperImpl");
         expect(native, idbFactoryBrowser);
       } else {
         fail("Native indexeddb not supported");

@@ -3,7 +3,6 @@ import 'dart:html_common' as html_common;
 import 'dart:indexed_db' as idb;
 
 import 'package:idb_shim/idb.dart';
-import 'package:idb_shim/idb_client_native.dart';
 import 'package:idb_shim/src/common/common_database.dart';
 import 'package:idb_shim/src/native/native_error.dart';
 import 'package:idb_shim/src/native/native_object_store.dart';
@@ -11,6 +10,7 @@ import 'package:idb_shim/src/native/native_transaction.dart';
 import 'package:idb_shim/src/utils/browser_utils.dart';
 
 class VersionChangeEventNative extends IdbVersionChangeEventBase {
+  final IdbFactory factory;
   idb.VersionChangeEvent idbVersionChangeEvent;
 
   @override
@@ -29,14 +29,14 @@ class VersionChangeEventNative extends IdbVersionChangeEventBase {
   @override
   Database database;
 
-  VersionChangeEventNative(this.idbVersionChangeEvent) {
+  VersionChangeEventNative(this.factory, this.idbVersionChangeEvent) {
     // This is null for onChangeEvent on Database
     // but ok when opening the database
     dynamic currentTarget = idbVersionChangeEvent.currentTarget;
     if (currentTarget is idb.Database) {
-      database = DatabaseNative(currentTarget);
+      database = DatabaseNative(factory, currentTarget);
     } else if (currentTarget is idb.Request) {
-      database = DatabaseNative(currentTarget.result as idb.Database);
+      database = DatabaseNative(factory, currentTarget.result as idb.Database);
       TransactionNative transaction =
           TransactionNative(database, currentTarget.transaction);
       request = OpenDBRequest(database, transaction);
@@ -47,7 +47,7 @@ class VersionChangeEventNative extends IdbVersionChangeEventBase {
 class DatabaseNative extends IdbDatabaseBase {
   idb.Database idbDatabase;
 
-  DatabaseNative(this.idbDatabase) : super(idbFactoryNative);
+  DatabaseNative(IdbFactory factory, this.idbDatabase) : super(factory);
 
   @override
   int get version => catchNativeError(() => idbDatabase.version);
@@ -156,7 +156,7 @@ class DatabaseNative extends IdbDatabaseBase {
     StreamController<VersionChangeEvent> ctlr = StreamController();
     idbDatabase.onVersionChange.listen(
         (idb.VersionChangeEvent idbVersionChangeEvent) {
-      ctlr.add(VersionChangeEventNative(idbVersionChangeEvent));
+      ctlr.add(VersionChangeEventNative(factory, idbVersionChangeEvent));
     }, onDone: () {
       ctlr.close();
     }, onError: (error) {
