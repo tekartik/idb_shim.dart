@@ -1,3 +1,7 @@
+## 1.10.2
+
+* Pedantic 1.9
+
 ## 1.10.1
 
 * Add support for `idb_sqflite`, an implementation for flutter mobile on top of sqflite
