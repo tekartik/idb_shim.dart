@@ -22,19 +22,19 @@ Future<Database> copySchema(
     await dstFactory.deleteDatabase(dstDbName);
   }
 
-  int version = srcDatabase.version;
+  final version = srcDatabase.version;
 
-  _SchemaMeta schemaMeta = _SchemaMeta();
+  final schemaMeta = _SchemaMeta();
   // Get schema
-  List<String> storeNames = List.from(srcDatabase.objectStoreNames);
+  final storeNames = List<String>.from(srcDatabase.objectStoreNames);
   if (storeNames.isNotEmpty) {
-    Transaction txn = srcDatabase.transactionList(storeNames, idbModeReadOnly);
-    for (String storeName in storeNames) {
-      ObjectStore store = txn.objectStore(storeName);
-      IdbObjectStoreMeta storeMeta = IdbObjectStoreMeta.fromObjectStore(store);
-      for (String indexName in store.indexNames) {
-        Index index = store.index(indexName);
-        IdbIndexMeta indexMeta = IdbIndexMeta.fromIndex(index);
+    final txn = srcDatabase.transactionList(storeNames, idbModeReadOnly);
+    for (final storeName in storeNames) {
+      final store = txn.objectStore(storeName);
+      final storeMeta = IdbObjectStoreMeta.fromObjectStore(store);
+      for (final indexName in store.indexNames) {
+        final index = store.index(indexName);
+        final indexMeta = IdbIndexMeta.fromIndex(index);
         storeMeta.putIndex(indexMeta);
       }
       schemaMeta.stores.add(storeMeta);
@@ -43,11 +43,11 @@ Future<Database> copySchema(
   }
 
   void _onUpgradeNeeded(VersionChangeEvent event) {
-    Database db = event.database;
-    for (IdbObjectStoreMeta storeMeta in schemaMeta.stores) {
-      ObjectStore store = db.createObjectStore(storeMeta.name,
+    final db = event.database;
+    for (final storeMeta in schemaMeta.stores) {
+      final store = db.createObjectStore(storeMeta.name,
           keyPath: storeMeta.keyPath, autoIncrement: storeMeta.autoIncrement);
-      for (IdbIndexMeta indexMeta in storeMeta.indecies) {
+      for (final indexMeta in storeMeta.indecies) {
         store.createIndex(indexMeta.name, indexMeta.keyPath,
             unique: indexMeta.unique, multiEntry: indexMeta.multiEntry);
       }
@@ -55,7 +55,7 @@ Future<Database> copySchema(
   }
 
   // Open and copy scheme
-  Database dstDatabase = await dstFactory.open(dstDbName,
+  final dstDatabase = await dstFactory.open(dstDbName,
       version: version, onUpgradeNeeded: _onUpgradeNeeded);
   return dstDatabase;
 }
@@ -69,11 +69,10 @@ class _Record {
 Future copyStore(Database srcDatabase, String srcStoreName,
     Database dstDatabase, String dstStoreName) async {
   // Copy all in Memory first
-  List<_Record> records = [];
+  final records = <_Record>[];
 
-  Transaction srcTransaction =
-      srcDatabase.transaction(srcStoreName, idbModeReadOnly);
-  ObjectStore store = srcTransaction.objectStore(srcStoreName);
+  final srcTransaction = srcDatabase.transaction(srcStoreName, idbModeReadOnly);
+  var store = srcTransaction.objectStore(srcStoreName);
   store.openCursor(autoAdvance: true).listen((CursorWithValue cwv) {
     records.add(_Record()
       ..key = cwv.key
@@ -81,12 +80,12 @@ Future copyStore(Database srcDatabase, String srcStoreName,
   });
   await srcTransaction.completed;
 
-  Transaction dstTransaction =
+  final dstTransaction =
       dstDatabase.transaction(dstStoreName, idbModeReadWrite);
   store = dstTransaction.objectStore(dstStoreName);
   // clear the existing records
   await store.clear();
-  for (_Record record in records) {
+  for (final record in records) {
     // ignore: unawaited_futures
     store.put(record.value, record.key);
   }
@@ -96,8 +95,8 @@ Future copyStore(Database srcDatabase, String srcStoreName,
 /// Copy a database content to a new database.
 Future<Database> copyDatabase(
     Database srcDatabase, IdbFactory dstFactory, String dstDbName) async {
-  Database dstDatabase = await copySchema(srcDatabase, dstFactory, dstDbName);
-  for (String storeName in srcDatabase.objectStoreNames) {
+  final dstDatabase = await copySchema(srcDatabase, dstFactory, dstDbName);
+  for (final storeName in srcDatabase.objectStoreNames) {
     await copyStore(srcDatabase, storeName, dstDatabase, storeName);
   }
   return dstDatabase;
@@ -141,7 +140,7 @@ class KeyCursorRow {
 /// Convert an openCursor stream to a list
 Future<List<CursorRow>> cursorToList(Stream<CursorWithValue> stream) {
   var completer = Completer<List<CursorRow>>.sync();
-  List<CursorRow> list = [];
+  final list = <CursorRow>[];
   stream.listen((CursorWithValue cwv) {
     list.add(CursorRow(cwv.key, cwv.primaryKey, cwv.value));
   }).onDone(() {
@@ -153,7 +152,7 @@ Future<List<CursorRow>> cursorToList(Stream<CursorWithValue> stream) {
 /// Convert an openKeyCursor stream to a list
 Future<List<KeyCursorRow>> keyCursorToList(Stream<Cursor> stream) {
   var completer = Completer<List<KeyCursorRow>>.sync();
-  List<KeyCursorRow> list = [];
+  final list = <KeyCursorRow>[];
   stream.listen((Cursor cursor) {
     list.add(KeyCursorRow(cursor.key, cursor.primaryKey));
   }).onDone(() {

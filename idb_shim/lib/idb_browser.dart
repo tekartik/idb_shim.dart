@@ -14,9 +14,8 @@ export 'package:idb_shim/src/browser/browser_compat.dart';
 ///
 /// Not recommended.
 IdbFactory getIdbFactory([String name]) {
-  if (name == null) {
-    name = idbFactoryNameBrowser;
-  }
+  name ??= idbFactoryNameBrowser;
+
   switch (name) {
     case idbFactoryNameBrowser:
       return idbFactoryNative;
@@ -40,8 +39,7 @@ IdbFactory getIdbFactory([String name]) {
 ///
 IdbFactory get idbFactoryBrowser {
   var idbFactory = idbFactoryNative;
-  if (idbFactory == null) {
-    idbFactory = idbFactoryMemory;
-  }
+  idbFactory ??= idbFactoryMemory;
+
   return idbFactory;
 }

@@ -70,7 +70,7 @@ class ObjectStoreNative extends ObjectStore {
   @override
   Stream<CursorWithValue> openCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
-    idb.KeyRange idbKeyRange = toNativeKeyRange(range);
+    final idbKeyRange = toNativeKeyRange(range);
     //idbDevWarning;
     //idbDevPrint("kr1 $range native $idbKeyRange");
 
@@ -95,7 +95,7 @@ class ObjectStoreNative extends ObjectStore {
           autoAdvance: autoAdvance);
     }
 
-    CursorWithValueControllerNative ctlr = CursorWithValueControllerNative(//
+    final ctlr = CursorWithValueControllerNative(//
         stream);
     return ctlr.stream;
   }
@@ -103,7 +103,7 @@ class ObjectStoreNative extends ObjectStore {
   @override
   Stream<Cursor> openKeyCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
-    idb.KeyRange idbKeyRange = toNativeKeyRange(range);
+    final idbKeyRange = toNativeKeyRange(range);
     //idbDevWarning;
     //idbDevPrint("kr1 $range native $idbKeyRange");
 
@@ -116,7 +116,7 @@ class ObjectStoreNative extends ObjectStore {
         direction: direction, //
         autoAdvance: autoAdvance);
 
-    CursorControllerNative ctlr = CursorControllerNative(stream);
+    final ctlr = CursorControllerNative(stream);
     return ctlr.stream;
   }
 
@@ -142,7 +142,7 @@ class ObjectStoreNative extends ObjectStore {
           });
           */
       } else if (keyOrRange is KeyRange) {
-        idb.KeyRange idbKeyRange = toNativeKeyRange(keyOrRange);
+        final idbKeyRange = toNativeKeyRange(keyOrRange);
         countFuture = idbObjectStore.count(idbKeyRange);
       } else {
         countFuture = idbObjectStore.count(keyOrRange);

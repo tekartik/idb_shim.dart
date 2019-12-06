@@ -27,11 +27,11 @@ int compareValue(dynamic value1, dynamic value2) {
     if (value1 is Comparable && value2 is Comparable) {
       return Comparable.compare(value1, value2);
     } else if (value1 is List && value2 is List) {
-      List list1 = value1;
-      List list2 = value2;
+      final list1 = value1;
+      final list2 = value2;
 
-      for (int i = 0; i < min(value1.length, value2.length); i++) {
-        int cmp = compareValue(list1[i], list2[i]);
+      for (var i = 0; i < min(value1.length, value2.length); i++) {
+        final cmp = compareValue(list1[i], list2[i]);
         if (cmp == 0) {
           continue;
         }

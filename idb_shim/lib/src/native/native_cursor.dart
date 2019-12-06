@@ -4,7 +4,7 @@ import 'dart:indexed_db' as idb;
 import 'package:idb_shim/idb.dart';
 
 class _NativeCursor extends Cursor {
-  idb.Cursor _cursor;
+  final idb.Cursor _cursor;
 
   _NativeCursor(this._cursor);
 
@@ -40,7 +40,7 @@ class _NativeCursor extends Cursor {
 
 // native idb cursor with value
 class _NativeCursorWithValue extends CursorWithValue {
-  idb.CursorWithValue _cwv;
+  final idb.CursorWithValue _cwv;
 
   //  Object _value;
   //  Object _key;
@@ -84,7 +84,7 @@ class _NativeCursorWithValue extends CursorWithValue {
 
 class CursorWithValueControllerNative {
   // Sync must be true
-  StreamController<CursorWithValue> _ctlr = StreamController(sync: true);
+  final _ctlr = StreamController<CursorWithValue>(sync: true);
 
   CursorWithValueControllerNative(Stream<idb.CursorWithValue> stream) {
     stream.listen((idb.CursorWithValue cwv) {
@@ -102,7 +102,7 @@ class CursorWithValueControllerNative {
 
 class CursorControllerNative {
   // Sync must be true
-  StreamController<Cursor> _ctlr = StreamController(sync: true);
+  final _ctlr = StreamController<Cursor>(sync: true);
 
   CursorControllerNative(Stream<idb.Cursor> stream) {
     stream.listen((idb.Cursor cursor) {

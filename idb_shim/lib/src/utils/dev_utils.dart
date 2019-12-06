@@ -32,7 +32,7 @@ void _devError([Object msg]) {
     throw UnsupportedError(msg?.toString());
   } catch (e, st) {
     if (_devPrintEnabled) {
-      print("# ERROR $msg");
+      print('# ERROR $msg');
       print(st);
     }
     rethrow;

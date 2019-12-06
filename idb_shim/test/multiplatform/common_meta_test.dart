@@ -9,27 +9,27 @@ final IdbObjectStoreMeta idbSimpleObjectStoreMeta =
     IdbObjectStoreMeta(testStoreName, null, true);
 
 final IdbObjectStoreMeta idbObjectStoreMeta1 =
-    IdbObjectStoreMeta("name", "my_key", true);
+    IdbObjectStoreMeta('name', 'my_key', true);
 final IdbObjectStoreMeta idbObjectStoreMeta1Same =
-    IdbObjectStoreMeta("name", "my_key", true);
+    IdbObjectStoreMeta('name', 'my_key', true);
 final IdbObjectStoreMeta idbObjectStoreMeta2 =
-    IdbObjectStoreMeta("name", "my_key", false);
+    IdbObjectStoreMeta('name', 'my_key', false);
 final IdbObjectStoreMeta idbObjectStoreMeta3 =
-    IdbObjectStoreMeta("name", null, true);
+    IdbObjectStoreMeta('name', null, true);
 final IdbObjectStoreMeta idbObjectStoreMeta4 =
-    IdbObjectStoreMeta("other_name", "my_key", true);
+    IdbObjectStoreMeta('other_name', 'my_key', true);
 final List<IdbObjectStoreMeta> idbObjectStoreMetas = [
   idbObjectStoreMeta1,
   idbObjectStoreMeta2,
   idbObjectStoreMeta3
 ];
 
-IdbIndexMeta idbIndexMeta1 = IdbIndexMeta("name", "my_key", true, true);
-IdbIndexMeta idbIndexMeta1Same = IdbIndexMeta("name", "my_key", true, true);
-IdbIndexMeta idbIndexMeta2 = IdbIndexMeta("name", "my_key", true, false);
-IdbIndexMeta idbIndexMeta3 = IdbIndexMeta("name", "my_key", false, true);
-IdbIndexMeta idbIndexMeta4 = IdbIndexMeta("name", "other_key", true, true);
-IdbIndexMeta idbIndexMeta5 = IdbIndexMeta("other_name", "my_key", true, true);
+IdbIndexMeta idbIndexMeta1 = IdbIndexMeta('name', 'my_key', true, true);
+IdbIndexMeta idbIndexMeta1Same = IdbIndexMeta('name', 'my_key', true, true);
+IdbIndexMeta idbIndexMeta2 = IdbIndexMeta('name', 'my_key', true, false);
+IdbIndexMeta idbIndexMeta3 = IdbIndexMeta('name', 'my_key', false, true);
+IdbIndexMeta idbIndexMeta4 = IdbIndexMeta('name', 'other_key', true, true);
+IdbIndexMeta idbIndexMeta5 = IdbIndexMeta('other_name', 'my_key', true, true);
 final List<IdbIndexMeta> idbIndexMetas = [
   idbIndexMeta1,
   idbIndexMeta2,
@@ -43,10 +43,10 @@ void main() => defineTests();
 void defineTests() {
   group('meta', () {
     test('database', () {
-      IdbDatabaseMeta meta1 = IdbDatabaseMeta(1);
-      IdbDatabaseMeta meta2 = IdbDatabaseMeta(1);
+      final meta1 = IdbDatabaseMeta(1);
+      final meta2 = IdbDatabaseMeta(1);
       expect(meta1, meta2);
-      IdbDatabaseMeta meta3 = IdbDatabaseMeta(2);
+      final meta3 = IdbDatabaseMeta(2);
       expect(meta1, isNot(meta3));
     });
 
@@ -66,24 +66,24 @@ void defineTests() {
     });
 
     test('store with index', () {
-      IdbObjectStoreMeta meta1 = idbSimpleObjectStoreMeta.clone();
+      final meta1 = idbSimpleObjectStoreMeta.clone();
       meta1.putIndex(idbIndexMeta1);
-      IdbObjectStoreMeta meta2 = idbSimpleObjectStoreMeta.clone();
+      final meta2 = idbSimpleObjectStoreMeta.clone();
       meta2.putIndex(idbIndexMeta1);
       expect(meta1, meta2);
-      IdbObjectStoreMeta meta3 = idbSimpleObjectStoreMeta.clone();
+      final meta3 = idbSimpleObjectStoreMeta.clone();
       meta2.putIndex(idbIndexMeta2);
       expect(meta1, isNot(meta3));
     });
 
     void testStoreRoundTrip(IdbObjectStoreMeta meta) {
       var map = meta.toMap();
-      IdbObjectStoreMeta newMeta = IdbObjectStoreMeta.fromMap(map);
+      final newMeta = IdbObjectStoreMeta.fromMap(map);
       expect(newMeta, meta);
     }
 
     test('store to/from map', () {
-      IdbObjectStoreMeta meta1 = idbSimpleObjectStoreMeta.clone();
+      final meta1 = idbSimpleObjectStoreMeta.clone();
       meta1.putIndex(idbIndexMeta1);
       testStoreRoundTrip(meta1);
     });

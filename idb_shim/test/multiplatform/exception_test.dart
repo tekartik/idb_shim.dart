@@ -8,7 +8,7 @@ void main() {
 }
 
 void defineTests(TestContext ctx) {
-  IdbFactory idbFactory = ctx.factory;
+  final idbFactory = ctx.factory;
 
   Database db;
   Transaction transaction;
@@ -40,7 +40,7 @@ void defineTests(TestContext ctx) {
 
   group('exception', () {
     // Make testDbName less bad
-    String testDbName = ctx.dbName;
+    final testDbName = ctx.dbName;
 
     group('error', () {
       setUp(() async {
@@ -61,17 +61,17 @@ void defineTests(TestContext ctx) {
               database.close();
               rethrow;
             }
-            fail("should fail");
+            fail('should fail');
           });
-          fail("should fail");
+          fail('should fail');
         } catch (e, st) {
           expect(isTestFailure(e), isFalse);
           if (!ctx.isIdbEdge) {
             // Trace.format crashing on 2.5.0-dev.2.0
-            // devPrint("st: ${Trace.format(st)}");
-            expect(st?.toString(), contains("createObjectStore"));
+            // devPrint('st: ${Trace.format(st)}');
+            expect(st?.toString(), contains('createObjectStore'));
           } else {
-            print("edge error: $e");
+            print('edge error: $e');
           }
           //devPrint(e);
           //devPrint(Trace.format(st));
@@ -86,9 +86,9 @@ void defineTests(TestContext ctx) {
         } catch (e, st) {
           //devPrint(e);
           // Trace.format crashing on 2.5.0-dev.2.0
-          // devPrint("st: ${Trace.format(st)}");
-          // devPrint("full: ${st}");
-          expect(st?.toString(), contains("getObject"));
+          // devPrint('st: ${Trace.format(st)}');
+          // devPrint('full: ${st}');
+          expect(st?.toString(), contains('getObject'));
           expect(e, isNotNull);
         }
       });

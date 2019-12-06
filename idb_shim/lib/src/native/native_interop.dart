@@ -51,8 +51,8 @@ Stream<idb.Cursor> storeOpenKeyCursor(idb.ObjectStore objectStore,
   }
   idb.Request request;
   if (direction == null) {
-    // FIXME: Passing in "next" should be unnecessary.
-    request = objectStore.openKeyCursor(keyOrRange, "next");
+    // FIXME: Passing in 'next' should be unnecessary.
+    request = objectStore.openKeyCursor(keyOrRange, 'next');
   } else {
     request = objectStore.openKeyCursor(keyOrRange, direction);
   }

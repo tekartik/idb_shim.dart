@@ -52,10 +52,10 @@ Future testReadWrite(idb.IdbFactory idbFactory, key, value, check,
 
 List<String> get nonNativeListData {
   var list = <String>[];
-  list.add("data");
-  list.add("clone");
-  list.add("error");
-  list.add("test");
+  list.add('data');
+  list.add('clone');
+  list.add('error');
+  list.add('test');
   return list;
 }
 
@@ -64,7 +64,7 @@ void main() {
 }
 
 void defineTests(TestContext ctx) {
-  idb.IdbFactory idbFactory = ctx.factory;
+  final idbFactory = ctx.factory;
   //useHtmlConfiguration();
 
   var obj1 = {'a': 100, 'b': 's'};
@@ -78,7 +78,7 @@ void defineTests(TestContext ctx) {
   obj4['a'] = 100;
   obj4['b'] = 's';
 
-  List<Object> cyclicList = [1, 2, 3];
+  final cyclicList = <Object>[1, 2, 3];
   cyclicList[1] = cyclicList;
 
   dynamic skipGo(name, data) => null;

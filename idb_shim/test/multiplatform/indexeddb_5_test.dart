@@ -11,7 +11,7 @@ void main() {
 }
 
 void defineTests(TestContext ctx) {
-  IdbFactory idbFactory = ctx.factory;
+  final idbFactory = ctx.factory;
   group('indexeddb_5', () {
     //useHtmlConfiguration();
 
@@ -46,8 +46,8 @@ void defineTests(TestContext ctx) {
         return idbFactory.getDatabaseNames().then((names) {
           //print(names);
           //print(dbName);
-          bool found = false;
-          for (String name in names) {
+          var found = false;
+          for (final name in names) {
             if (name == dbName) {
               found = true;
             }

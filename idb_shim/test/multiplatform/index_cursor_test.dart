@@ -9,7 +9,7 @@ import '../idb_test_common.dart';
 
 class TestIdNameRow {
   TestIdNameRow(CursorWithValue cwv) {
-    Object value = cwv.value;
+    final value = cwv.value;
     name = (value as Map)[testNameField] as String;
     id = cwv.primaryKey as int;
   }
@@ -23,7 +23,7 @@ void main() {
 }
 
 void defineTests(TestContext ctx) {
-  IdbFactory idbFactory = ctx.factory;
+  final idbFactory = ctx.factory;
   group('index_cursor', () {
     Database db;
     Transaction transaction;
@@ -71,11 +71,11 @@ void defineTests(TestContext ctx) {
 
     group('with_null_key', () {
       Future _openDb() async {
-        String _dbName = ctx.dbName;
+        final _dbName = ctx.dbName;
         await idbFactory.deleteDatabase(_dbName);
         void _initializeDatabase(VersionChangeEvent e) {
-          Database db = e.database;
-          ObjectStore objectStore =
+          final db = e.database;
+          final objectStore =
               db.createObjectStore(testStoreName, autoIncrement: true);
           objectStore.createIndex(testNameIndex, testNameField);
         }
@@ -86,8 +86,8 @@ void defineTests(TestContext ctx) {
 
       // Don't make this function async, crashes on ie
       Future<List<Map>> getIndexRecords() {
-        List<Map> list = [];
-        Stream<CursorWithValue> stream = index.openCursor(autoAdvance: true);
+        final list = <Map>[];
+        final stream = index.openCursor(autoAdvance: true);
         return stream.listen((CursorWithValue cwv) {
           list.add(cwv.value as Map);
         }).asFuture(list);
@@ -95,8 +95,8 @@ void defineTests(TestContext ctx) {
 
       // Don't make this function async, crashes on ie
       Future<List<String>> getIndexKeys() {
-        List<String> list = [];
-        Stream<Cursor> stream = index.openKeyCursor(autoAdvance: true);
+        final list = <String>[];
+        final stream = index.openKeyCursor(autoAdvance: true);
         return stream.listen((Cursor c) {
           list.add(c.key as String);
         }).asFuture(list);
@@ -105,7 +105,7 @@ void defineTests(TestContext ctx) {
       test('one_record', () async {
         await _openDb();
         _createTransaction();
-        await objectStore.put({"dummy": 1});
+        await objectStore.put({'dummy': 1});
 
         expect(await getIndexRecords(), []);
         expect(await getIndexKeys(), []);
@@ -114,13 +114,13 @@ void defineTests(TestContext ctx) {
       test('two_record', () async {
         await _openDb();
         _createTransaction();
-        await objectStore.put({"dummy": 1});
-        await objectStore.put({"dummy": 2, testNameField: "ok"});
+        await objectStore.put({'dummy': 1});
+        await objectStore.put({'dummy': 2, testNameField: 'ok'});
         // must be empy as the key is not specified
         expect(await getIndexRecords(), [
-          {"dummy": 2, testNameField: "ok"}
+          {'dummy': 2, testNameField: 'ok'}
         ]);
-        expect(await getIndexKeys(), ["ok"]);
+        expect(await getIndexKeys(), ['ok']);
       });
 
       tearDown(_tearDown);
@@ -131,8 +131,8 @@ void defineTests(TestContext ctx) {
         await _setupDeleteDb();
 
         void _initializeDatabase(VersionChangeEvent e) {
-          Database db = e.database;
-          ObjectStore objectStore =
+          final db = e.database;
+          final objectStore =
               db.createObjectStore(testStoreName, autoIncrement: true);
           objectStore.createIndex(testNameIndex, testNameField);
         }
@@ -146,9 +146,9 @@ void defineTests(TestContext ctx) {
       test('empty key cursor', () async {
         await _setUp();
         _createTransaction();
-        Stream<Cursor> stream = index.openKeyCursor(autoAdvance: true);
-        int count = 0;
-        Completer completer = Completer();
+        final stream = index.openKeyCursor(autoAdvance: true);
+        var count = 0;
+        final completer = Completer();
         stream.listen((Cursor cwv) {
           count++;
         }).onDone(() {
@@ -162,9 +162,9 @@ void defineTests(TestContext ctx) {
       test('empty key cursor by key', () async {
         await _setUp();
         _createTransaction();
-        Stream<Cursor> stream = index.openKeyCursor(key: 1, autoAdvance: true);
-        int count = 0;
-        Completer completer = Completer();
+        final stream = index.openKeyCursor(key: 1, autoAdvance: true);
+        var count = 0;
+        final completer = Completer();
         stream.listen((Cursor cwv) {
           count++;
         }).onDone(() {
@@ -178,9 +178,9 @@ void defineTests(TestContext ctx) {
       test('empty cursor', () async {
         await _setUp();
         _createTransaction();
-        Stream<CursorWithValue> stream = index.openCursor(autoAdvance: true);
-        int count = 0;
-        Completer completer = Completer();
+        final stream = index.openCursor(autoAdvance: true);
+        var count = 0;
+        final completer = Completer();
         stream.listen((CursorWithValue cwv) {
           count++;
         }).onDone(() {
@@ -194,10 +194,9 @@ void defineTests(TestContext ctx) {
       test('empty cursor by key', () async {
         await _setUp();
         _createTransaction();
-        Stream<CursorWithValue> stream =
-            index.openCursor(key: 1, autoAdvance: true);
-        int count = 0;
-        Completer completer = Completer();
+        final stream = index.openCursor(key: 1, autoAdvance: true);
+        var count = 0;
+        final completer = Completer();
         stream.listen((CursorWithValue cwv) {
           count++;
         }).onDone(() {
@@ -211,14 +210,14 @@ void defineTests(TestContext ctx) {
       test('one item key cursor', () async {
         await _setUp();
         _createTransaction();
-        return add("test1").then((_) {
-          Stream<Cursor> stream = index.openKeyCursor(autoAdvance: true);
-          int count = 0;
-          Completer completer = Completer();
+        return add('test1').then((_) {
+          final stream = index.openKeyCursor(autoAdvance: true);
+          var count = 0;
+          final completer = Completer();
           stream.listen((Cursor cursor) {
             // no value here
             expect(cursor is CursorWithValue, isFalse);
-            expect(cursor.key, "test1");
+            expect(cursor.key, 'test1');
             count++;
           }).onDone(() {
             completer.complete();
@@ -232,13 +231,13 @@ void defineTests(TestContext ctx) {
       test('one item cursor', () async {
         await _setUp();
         _createTransaction();
-        return add("test1").then((_) {
-          Stream<CursorWithValue> stream = index.openCursor(autoAdvance: true);
-          int count = 0;
-          Completer completer = Completer();
+        return add('test1').then((_) {
+          final stream = index.openCursor(autoAdvance: true);
+          var count = 0;
+          final completer = Completer();
           stream.listen((CursorWithValue cwv) {
-            expect((cwv.value as Map)[testNameField], "test1");
-            expect(cwv.key, "test1");
+            expect((cwv.value as Map)[testNameField], 'test1');
+            expect(cwv.key, 'test1');
             count++;
           }).onDone(() {
             completer.complete();
@@ -252,9 +251,9 @@ void defineTests(TestContext ctx) {
       test('index get 1', () async {
         await _setUp();
         _createTransaction();
-        return add("test1").then((key) {
-          return index.get("test1").then((value) {
-            expect(value[testNameField], "test1");
+        return add('test1').then((key) {
+          return index.get('test1').then((value) {
+            expect(value[testNameField], 'test1');
           });
         });
       });
@@ -262,14 +261,14 @@ void defineTests(TestContext ctx) {
       test('cursor non-auto', () async {
         await _setUp();
         _createTransaction();
-        return add("test1").then((key) {
-          int count = 0;
+        return add('test1').then((key) {
+          var count = 0;
           // non auto to control advance
           return index
               .openCursor(autoAdvance: false)
               .listen((CursorWithValue cwv) {
-                expect(cwv.value, {testNameField: "test1"});
-                expect(cwv.key, "test1");
+                expect(cwv.value, {testNameField: 'test1'});
+                expect(cwv.key, 'test1');
                 expect(cwv.primaryKey, key);
                 count++;
                 cwv.next();
@@ -284,7 +283,7 @@ void defineTests(TestContext ctx) {
       test('cursor none auto delete 1', () async {
         await _setUp();
         _createTransaction();
-        return add("test1").then((key) {
+        return add('test1').then((key) {
           // non auto to control advance
           return index
               .openCursor(autoAdvance: false)
@@ -310,14 +309,14 @@ void defineTests(TestContext ctx) {
       test('cursor none auto update 1', () async {
         await _setUp();
         _createTransaction();
-        return add("test1").then((key) {
+        return add('test1').then((key) {
           Map map;
           // non auto to control advance
           return index
               .openCursor(autoAdvance: false)
               .listen((CursorWithValue cwv) {
                 map = Map.from(cwv.value as Map);
-                map["other"] = "too";
+                map['other'] = 'too';
                 cwv.update(map).then((_) {
                   cwv.next();
                 });
@@ -328,7 +327,7 @@ void defineTests(TestContext ctx) {
                   transaction = db.transaction(testStoreName, idbModeReadWrite);
                   objectStore = transaction.objectStore(testStoreName);
                   index = objectStore.index(testNameIndex);
-                  return index.get("test1").then((value) {
+                  return index.get('test1').then((value) {
                     expect(value, map);
                   });
                 });
@@ -385,8 +384,8 @@ void defineTests(TestContext ctx) {
       Future _setUp() async {
         await _setupDeleteDb();
         void _initializeDatabase(VersionChangeEvent e) {
-          Database db = e.database;
-          ObjectStore objectStore =
+          final db = e.database;
+          final objectStore =
               db.createObjectStore(testStoreName, autoIncrement: true);
           objectStore.createIndex(testNameIndex, testNameField);
           objectStore.createIndex(testValueIndex, testValueField);
@@ -406,7 +405,7 @@ void defineTests(TestContext ctx) {
         await _setUp();
         _createTransaction();
         Future<List<int>> getKeys(Stream<Cursor> stream) {
-          List<int> keys = [];
+          final keys = <int>[];
           return stream
               .listen((Cursor cursor) {
                 keys.add(cursor.primaryKey as int);
@@ -425,11 +424,11 @@ void defineTests(TestContext ctx) {
         int key1, key2, key3;
         // order should be key1, key3, key2 for name
         // order should be key2, key1, key3 for value
-        key1 = await add("a", 2) as int;
-        key2 = await add("c", 1) as int;
-        key3 = await add("b", 3) as int;
+        key1 = await add('a', 2) as int;
+        key2 = await add('c', 1) as int;
+        key3 = await add('b', 3) as int;
 
-        Stream<Cursor> stream = nameIndex.openKeyCursor(autoAdvance: true);
+        var stream = nameIndex.openKeyCursor(autoAdvance: true);
         expect(await getKeys(stream), [key1, key3, key2]);
 
         stream = valueIndex.openKeyCursor(autoAdvance: true);
@@ -472,11 +471,11 @@ void defineTests(TestContext ctx) {
         transaction = db.transaction(testStoreName, idbModeReadWrite);
         objectStore = transaction.objectStore(testStoreName);
         var index = objectStore.index('test');
-        int record1Key =
+        final record1Key =
             await objectStore.put({'year': 2018, 'name': 'John'}) as int;
-        int record2Key =
+        final record2Key =
             await objectStore.put({'year': 2018, 'name': 'Jack'}) as int;
-        int record3Key =
+        final record3Key =
             await objectStore.put({'year': 2017, 'name': 'John'}) as int;
         /*int record4Key = */
         await objectStore.put({'name': 'John'});
@@ -561,14 +560,14 @@ void defineTests(TestContext ctx) {
         skip: ctx.isIdbEdge || ctx.isIdbIe);
 
     group('key_path_with_dot', () {
-      const String keyPath = "my.key";
+      const keyPath = 'my.key';
 
       Future _setUp() async {
         await _setupDeleteDb();
 
         void _initializeDatabase(VersionChangeEvent e) {
-          Database db = e.database;
-          ObjectStore objectStore =
+          final db = e.database;
+          final objectStore =
               db.createObjectStore(testStoreName, autoIncrement: true);
           objectStore.createIndex(testNameIndex, keyPath);
         }
@@ -582,14 +581,13 @@ void defineTests(TestContext ctx) {
       test('one item cursor', () async {
         await _setUp();
         _createTransaction();
-        Map value = {
+        final value = {
           'my': {'key': 'test_value'}
         };
         await objectStore.add(value);
-        Stream<CursorWithValue> stream =
-            index.openCursor(autoAdvance: true, key: 'test_value');
-        int count = 0;
-        Completer completer = Completer();
+        final stream = index.openCursor(autoAdvance: true, key: 'test_value');
+        var count = 0;
+        final completer = Completer();
         stream.listen((CursorWithValue cwv) {
           expect(cwv.value, value);
           count++;
@@ -606,8 +604,8 @@ void defineTests(TestContext ctx) {
         await _setupDeleteDb();
 
         void _initializeDatabase(VersionChangeEvent e) {
-          Database db = e.database;
-          ObjectStore objectStore =
+          final db = e.database;
+          final objectStore =
               db.createObjectStore(testStoreName, autoIncrement: true);
           objectStore.createIndex(testNameIndex, testNameField,
               multiEntry: true);
@@ -620,12 +618,12 @@ void defineTests(TestContext ctx) {
       test('one_value', () async {
         await _setUp();
         _createTransaction();
-        Map value = {testNameField: "test1"};
-        Index index = objectStore.index(testNameIndex);
+        final value = {testNameField: 'test1'};
+        final index = objectStore.index(testNameIndex);
         var key = await objectStore.add(value);
         expect(key, 1);
 
-        bool gotItem = false;
+        var gotItem = false;
         await index.openKeyCursor(autoAdvance: true).listen((cursor) {
           expect(gotItem, isFalse);
           gotItem = true;
@@ -648,16 +646,16 @@ void defineTests(TestContext ctx) {
       test('one_array', () async {
         await _setUp();
         _createTransaction();
-        Map value = {
+        final value = {
           testNameField: [2, 1, 2]
         };
 
-        Index index = objectStore.index(testNameIndex);
+        final index = objectStore.index(testNameIndex);
         var key = await objectStore.add(value);
         expect(key, 1);
 
-        bool gotItem1 = false;
-        bool gotItem2 = false;
+        var gotItem1 = false;
+        var gotItem2 = false;
 
         await index.openKeyCursor(autoAdvance: true).listen((cursor) {
           if (!gotItem1) {
@@ -698,16 +696,16 @@ void defineTests(TestContext ctx) {
       test('one_array_update_delete', () async {
         await _setUp();
         _createTransaction();
-        Map value = {
+        final value = {
           testNameField: [2, 1]
         };
 
-        Index index = objectStore.index(testNameIndex);
+        final index = objectStore.index(testNameIndex);
         var key = await objectStore.add(value);
         expect(key, 1);
 
-        bool gotItem1 = false;
-        bool gotItem2 = false;
+        var gotItem1 = false;
+        var gotItem2 = false;
 
         // Deleting the first item should remove the next one in the list!
         await index.openCursor().listen((cwv) {
@@ -734,7 +732,7 @@ void defineTests(TestContext ctx) {
         }).asFuture();
         expect(gotItem1, isTrue);
 
-        bool gotItem = false;
+        var gotItem = false;
         // Deleting the first item should remove the next one in the list!
         await index.openCursor().listen((cwv) {
           if (!gotItem) {

@@ -10,7 +10,7 @@ void main() {
 }
 
 void defineTests(TestContext ctx) {
-  IdbFactory idbFactory = ctx.factory;
+  final idbFactory = ctx.factory;
 
   // new
   String _dbName;
@@ -49,15 +49,15 @@ void defineTests(TestContext ctx) {
     /*
     test('no name', () {
       return idbFactory.open(null).then((Database database) {
-        fail("should fail");
+        fail('should fail');
       }, onError: (e) {});
-    }, testOn: "!js");
+    }, testOn: '!js');
 
     test('no name', () {
       return idbFactory.open(null).then((Database database) {
         database.close();
       });
-    }, testOn: "js");
+    }, testOn: 'js');
     */
 
     test('bad param with onUpgradeNeeded', () async {
@@ -67,10 +67,10 @@ void defineTests(TestContext ctx) {
       return idbFactory
           .open(_dbName, onUpgradeNeeded: _emptyInitializeDatabase)
           .then((_) {
-        fail("shoud not open");
+        fail('shoud not open');
       }).catchError((e) {
         expect(e.message,
-            "version and onUpgradeNeeded must be specified together");
+            'version and onUpgradeNeeded must be specified together');
       }, test: (e) => e is ArgumentError);
     });
 
@@ -78,13 +78,13 @@ void defineTests(TestContext ctx) {
       await _setupDeleteDb();
       return idbFactory.open(_dbName, version: 1).then((_) {}).catchError((e) {
         expect(e.message,
-            "version and onUpgradeNeeded must be specified together");
+            'version and onUpgradeNeeded must be specified together');
       }, test: (e) => e is ArgumentError);
     });
 
     test('open with version 0', () async {
       await _setupDeleteDb();
-      bool initCalled = false;
+      var initCalled = false;
       void _initializeDatabase(VersionChangeEvent e) {
         // should be called
         initCalled = true;
@@ -93,7 +93,7 @@ void defineTests(TestContext ctx) {
       return idbFactory
           .open(_dbName, version: 0, onUpgradeNeeded: _initializeDatabase)
           .then((Database database) {
-        fail("should not open");
+        fail('should not open');
       }, onError: (e) {
         // cannot check type here...
         expect(initCalled, isFalse);
@@ -108,7 +108,7 @@ void defineTests(TestContext ctx) {
 
       // not working in memory since not persistent
       if (!ctx.isInMemory) {
-        bool initCalled = false;
+        var initCalled = false;
         void _initializeDatabase(VersionChangeEvent e) {
           // should not be called
           initCalled = true;
@@ -125,7 +125,7 @@ void defineTests(TestContext ctx) {
 
     test('version 1', () async {
       await _setupDeleteDb();
-      bool initCalled = false;
+      var initCalled = false;
       void _initializeDatabase(VersionChangeEvent e) {
         // should be called
         expect(e.oldVersion, 0);
@@ -143,7 +143,7 @@ void defineTests(TestContext ctx) {
 
     test('version 1 then 2', () async {
       await _setupDeleteDb();
-      bool initCalled = false;
+      var initCalled = false;
       void _initializeDatabase(VersionChangeEvent e) {
         // should be called
         expect(e.oldVersion, 0);
@@ -159,7 +159,7 @@ void defineTests(TestContext ctx) {
 
       // not working in memory since not persistent
       if (!ctx.isInMemory) {
-        bool upgradeCalled = false;
+        var upgradeCalled = false;
         void _upgradeDatabase(VersionChangeEvent e) {
           // should be called
           expect(e.oldVersion, 1);
@@ -177,7 +177,7 @@ void defineTests(TestContext ctx) {
 
     test('version 2 then downgrade', () async {
       await _setupDeleteDb();
-      bool initCalled = false;
+      var initCalled = false;
       void _initializeDatabase(VersionChangeEvent e) {
         // should not be called
         initCalled = true;
@@ -191,7 +191,7 @@ void defineTests(TestContext ctx) {
 
       // not working in memory since not persistent
       if (!ctx.isInMemory) {
-        bool downgradeCalled = false;
+        var downgradeCalled = false;
         void _downgradeDatabase(VersionChangeEvent e) {
           // should not be be called
           downgradeCalled = true;
@@ -200,7 +200,7 @@ void defineTests(TestContext ctx) {
         await idbFactory
             .open(_dbName, version: 1, onUpgradeNeeded: _downgradeDatabase)
             .then((Database database) {
-          fail("should fail");
+          fail('should fail');
         }, onError: (err, st) {
           // this should fail
           expect(downgradeCalled, false);

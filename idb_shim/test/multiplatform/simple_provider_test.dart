@@ -13,7 +13,7 @@ void main() {
 }
 
 void defineTests(TestContext ctx) {
-  IdbFactory idbFactory = ctx.factory;
+  final idbFactory = ctx.factory;
   group('simple provider', () {
     group('with data', () {
       SimpleProvider provider;
@@ -29,10 +29,10 @@ void defineTests(TestContext ctx) {
 
       test('simple cursor auto advance', () {
         // Check ordered by id
-        ObjectStore store = provider.db
+        final store = provider.db
             .transaction(testStoreName, idbModeReadOnly)
             .objectStore(testStoreName);
-        Stream<CursorWithValue> stream = store.openCursor(autoAdvance: true);
+        final stream = store.openCursor(autoAdvance: true);
         return provider.cursorToList(stream).then((List<SimpleRow> list) {
           expect(list[0].name, equals('test2'));
           expect(list[0].id, equals(1));
@@ -41,11 +41,11 @@ void defineTests(TestContext ctx) {
           expect(list[2].id, equals(3));
         }).then((_) {
           // Check ordered by name
-          ObjectStore store = provider.db
+          final store = provider.db
               .transaction(testStoreName, idbModeReadOnly)
               .objectStore(testStoreName);
-          Index index = store.index(nameIndex);
-          Stream<CursorWithValue> stream = index.openCursor(autoAdvance: true);
+          final index = store.index(nameIndex);
+          final stream = index.openCursor(autoAdvance: true);
           return provider.cursorToList(stream).then((List<SimpleRow> list) {
             expect(list[0].name, equals('test1'));
             expect(list[0].id, equals(2));
@@ -58,14 +58,14 @@ void defineTests(TestContext ctx) {
 
       test('simple cursor no auto advance', () {
         // Check ordered by id
-        ObjectStore store = provider.db
+        final store = provider.db
             .transaction(testStoreName, idbModeReadOnly)
             .objectStore(testStoreName);
-        Stream<CursorWithValue> stream = store.openCursor();
-        Completer completer = Completer();
-        List<SimpleRow> list = [];
+        final stream = store.openCursor();
+        final completer = Completer();
+        final list = <SimpleRow>[];
         stream.listen((CursorWithValue cwv) {
-          expect(cwv.direction, "next");
+          expect(cwv.direction, 'next');
           list.add(SimpleRow(cwv));
           cwv.next();
         }).onDone(() {
@@ -82,11 +82,11 @@ void defineTests(TestContext ctx) {
 
       test('simple cursor reverse', () {
         // Check ordered by name reverse
-        ObjectStore store = provider.db
+        final store = provider.db
             .transaction(testStoreName, idbModeReadOnly)
             .objectStore(testStoreName);
-        Index index = store.index(nameIndex);
-        Stream<CursorWithValue> stream =
+        final index = store.index(nameIndex);
+        final stream =
             index.openCursor(direction: idbDirectionPrev, autoAdvance: true);
         return provider.cursorToList(stream).then((List<SimpleRow> list) {
           expect(list[0].name, equals('test3'));
@@ -100,14 +100,14 @@ void defineTests(TestContext ctx) {
 
     test('add/get/put/delete', () {
       //Function done = expectDone();
-      SimpleProvider provider = SimpleProvider(idbFactory);
+      final provider = SimpleProvider(idbFactory);
       return provider.openEmpty().then((_) {
-        Transaction transaction =
+        final transaction =
             provider.db.transaction(testStoreName, idbModeReadWrite);
-        ObjectStore objectStore = transaction.objectStore(testStoreName);
-        Map object = {nameField: "test"};
+        final objectStore = transaction.objectStore(testStoreName);
+        final object = {nameField: 'test'};
         objectStore.add(object).then((r) {
-          int key = r as int;
+          final key = r as int;
           expect(key, equals(1));
           //print('added $r');
           objectStore.getObject(r).then((newObject) {
@@ -116,7 +116,7 @@ void defineTests(TestContext ctx) {
             expect(newObject[nameField], equals('test'));
 
             objectStore.put(newObject, r).then((newR) {
-              int key = newR as int;
+              final key = newR as int;
               expect(key, equals(1));
               //print(newObject);
               expect(newObject.length, equals(1));

@@ -4,10 +4,10 @@ import 'package:idb_shim/idb_client.dart';
 
 import '../idb_test_common.dart';
 
-const STORE_NAME = "quick_store";
-const DB_NAME = "quick_db";
-const NAME_INDEX = "quick_index";
-const NAME_FIELD = "quick_field";
+const STORE_NAME = 'quick_store';
+const DB_NAME = 'quick_db';
+const NAME_INDEX = 'quick_index';
+const NAME_FIELD = 'quick_field';
 
 // so that this can be run directly
 void main() {
@@ -15,7 +15,7 @@ void main() {
 }
 
 void defineTests(TestContext ctx) {
-  IdbFactory idbFactory = ctx.factory;
+  final idbFactory = ctx.factory;
   group('quick_standalone', () {
     Database db;
     Transaction transaction;
@@ -29,8 +29,8 @@ void defineTests(TestContext ctx) {
     setUp(() {
       return idbFactory.deleteDatabase(DB_NAME).then((_) {
         void _initializeDatabase(VersionChangeEvent e) {
-          Database db = e.database;
-          ObjectStore objectStore =
+          final db = e.database;
+          final objectStore =
               db.createObjectStore(STORE_NAME, autoIncrement: true);
           objectStore.createIndex(NAME_INDEX, NAME_FIELD, unique: true);
         }
@@ -56,10 +56,10 @@ void defineTests(TestContext ctx) {
 
     test('add/get map', () {
       _createTransaction();
-      Map value = {NAME_FIELD: "test1"};
-      Index index = objectStore.index(NAME_INDEX);
+      final value = {NAME_FIELD: 'test1'};
+      final index = objectStore.index(NAME_INDEX);
       return objectStore.add(value).then((key) {
-        return index.get("test1").then((readValue) {
+        return index.get('test1').then((readValue) {
           expect(readValue, value);
         });
       });

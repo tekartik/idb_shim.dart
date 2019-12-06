@@ -39,7 +39,7 @@ class IdbFactorySembastImpl extends IdbFactoryBase
   IdbFactorySembastImpl(this._databaseFactory, [this._path]);
 
   @override
-  String get name => "$idbFactoryNameSembast";
+  String get name => '$idbFactoryNameSembast';
 
   // get the underlying sembast database for a given database
   @override
@@ -63,11 +63,11 @@ class IdbFactorySembastImpl extends IdbFactoryBase
     //  return new Future.error(new ArgumentError('name cannot be null'));
     // }
 
-    DatabaseSembast db = DatabaseSembast(this, dbName);
+    final db = DatabaseSembast(this, dbName);
 
     if (sembastDebug) {
       print(
-          "open1 $onUpgradeNeeded ${onUpgradeNeeded != null ? "NOT NULL" : "NULL"}");
+          'open1 $onUpgradeNeeded ${onUpgradeNeeded != null ? 'NOT NULL' : 'NULL'}');
     }
     await db.open(version, onUpgradeNeeded);
     return db;

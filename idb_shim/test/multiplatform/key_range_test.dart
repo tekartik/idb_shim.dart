@@ -19,7 +19,7 @@ void defineTests(TestContext ctx) {
     setUp(() {});
 
     test('only', () {
-      KeyRange keyRange = KeyRange.only(1);
+      final keyRange = KeyRange.only(1);
       expect(keyRange.lower, equals(1));
       expect(keyRange.lowerOpen, isFalse);
       expect(keyRange.upper, equals(1));
@@ -34,13 +34,13 @@ void defineTests(TestContext ctx) {
     });
 
     test('array', () {
-      var keyRange = KeyRange.only([2018, 'John']);
+      final keyRange = KeyRange.only([2018, 'John']);
       expect(keyRange.lower, [2018, 'John']);
       expect(keyRangeContains(keyRange, [2018, 'John']), isTrue);
     });
 
     test('lowerOpen', () {
-      KeyRange keyRange = KeyRange.lowerBound(1, true);
+      final keyRange = KeyRange.lowerBound(1, true);
       expect(keyRange.lower, equals(1));
       expect(keyRange.lowerOpen, isTrue);
       //TODO expect(keyRange.upper, isNull);
@@ -52,7 +52,7 @@ void defineTests(TestContext ctx) {
     });
 
     test('lowerClose', () {
-      KeyRange keyRange = KeyRange.lowerBound(1, false);
+      final keyRange = KeyRange.lowerBound(1, false);
       var range = keyRange;
       expect(keyRangeContains(range, 1), isTrue);
       expect(keyRangeContains(range, 0), isFalse);
@@ -60,7 +60,7 @@ void defineTests(TestContext ctx) {
     });
 
     test('upperOpen', () {
-      KeyRange keyRange = KeyRange.upperBound(3, true);
+      final keyRange = KeyRange.upperBound(3, true);
       var range = keyRange;
       expect(keyRangeContains(range, 2), isTrue);
       expect(keyRangeContains(range, 3), isFalse);
@@ -68,7 +68,7 @@ void defineTests(TestContext ctx) {
     });
 
     test('upper', () {
-      KeyRange keyRange = KeyRange.upperBound(3);
+      final keyRange = KeyRange.upperBound(3);
       //TODO expect(keyRange.lower, isNull);
       expect(keyRange.lowerOpen, isTrue);
       expect(keyRange.upper, equals(3));
@@ -80,7 +80,7 @@ void defineTests(TestContext ctx) {
     });
 
     test('lower/upper', () {
-      KeyRange keyRange = KeyRange.bound(1, 3);
+      final keyRange = KeyRange.bound(1, 3);
       var range = keyRange;
       expect(keyRangeContains(range, 1), isTrue);
       expect(keyRangeContains(range, 3), isTrue);

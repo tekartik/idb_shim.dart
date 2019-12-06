@@ -44,7 +44,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
         */
   }
 
-  Future<T> _inWritableTransaction<T>(FutureOr<T> computation()) {
+  Future<T> _inWritableTransaction<T>(FutureOr<T> Function() computation) {
     if (transaction.meta.mode != idbModeReadWrite) {
       return Future.error(DatabaseReadOnlyError());
     }
@@ -52,7 +52,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   /// Run a computation in a transaction.
-  Future<T> inTransaction<T>(FutureOr<T> computation()) {
+  Future<T> inTransaction<T>(FutureOr<T> Function() computation) {
     return transaction.execute(computation);
 //    transaction.txn
 
@@ -106,12 +106,12 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   Future _put(value, key) {
     // Check all indexes
-    List<Future> futures = [];
+    final futures = <Future>[];
     if (value is Map) {
       meta.indecies.forEach((IdbIndexMeta indexMeta) {
         var fieldValue = mapValueAtKeyPath(value, indexMeta.keyPath);
         if (fieldValue != null) {
-          sdb.Finder finder = sdb.Finder(
+          final finder = sdb.Finder(
               filter: keyFilter(indexMeta.keyPath, fieldValue, false),
               limit: 1);
           futures
@@ -178,7 +178,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   @override
   Index createIndex(String name, keyPath, {bool unique, bool multiEntry}) {
-    IdbIndexMeta indexMeta = IdbIndexMeta(name, keyPath, unique, multiEntry);
+    final indexMeta = IdbIndexMeta(name, keyPath, unique, multiEntry);
     meta.createIndex(database.meta, indexMeta);
     return IndexSembast(this, indexMeta);
   }
@@ -223,7 +223,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   @override
   Index index(String name) {
-    IdbIndexMeta indexMeta = meta.index(name);
+    final indexMeta = meta.index(name);
     return IndexSembast(this, indexMeta);
   }
 
@@ -246,10 +246,8 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   @override
   Stream<CursorWithValue> openCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
-    IdbCursorMeta cursorMeta =
-        IdbCursorMeta(key, range, direction, autoAdvance);
-    StoreCursorWithValueControllerSembast ctlr =
-        StoreCursorWithValueControllerSembast(this, cursorMeta);
+    final cursorMeta = IdbCursorMeta(key, range, direction, autoAdvance);
+    final ctlr = StoreCursorWithValueControllerSembast(this, cursorMeta);
 
     inTransaction(() {
       return ctlr.openCursor();
@@ -261,8 +259,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   @override
   Stream<Cursor> openKeyCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
-    IdbCursorMeta cursorMeta =
-        IdbCursorMeta(key, range, direction, autoAdvance);
+    final cursorMeta = IdbCursorMeta(key, range, direction, autoAdvance);
     var ctlr = StoreKeyCursorControllerSembast(this, cursorMeta);
 
     inTransaction(() {

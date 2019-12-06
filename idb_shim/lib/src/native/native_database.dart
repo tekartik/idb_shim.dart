@@ -37,7 +37,7 @@ class VersionChangeEventNative extends IdbVersionChangeEventBase {
       database = DatabaseNative(factory, currentTarget);
     } else if (currentTarget is idb.Request) {
       database = DatabaseNative(factory, currentTarget.result as idb.Database);
-      TransactionNative transaction =
+      final transaction =
           TransactionNative(database, currentTarget.transaction);
       request = OpenDBRequest(database, transaction);
     }
@@ -71,7 +71,7 @@ class DatabaseNative extends IdbDatabaseBase {
     // simulate them!
     try {
       return catchNativeError(() {
-        idb.Transaction idbTransaction =
+        final idbTransaction =
             idbDatabase.transaction(storeNameOrStoreNames, mode);
         return TransactionNative(this, idbTransaction);
       });
@@ -80,11 +80,11 @@ class DatabaseNative extends IdbDatabaseBase {
       if ((storeNameOrStoreNames is List) &&
           (storeNameOrStoreNames.isNotEmpty) &&
           (_isNotFoundError(e))) {
-        List<String> stores = storeNameOrStoreNames?.cast<String>();
+        final stores = storeNameOrStoreNames?.cast<String>();
 
         // Make sure they indeed exists
-        bool allFound = true;
-        for (String store in stores) {
+        var allFound = true;
+        for (final store in stores) {
           if (!objectStoreNames.contains(store)) {
             allFound = false;
             break;
@@ -99,7 +99,7 @@ class DatabaseNative extends IdbDatabaseBase {
             // This is likely the 1.13 bug
             try {
               return catchNativeError(() {
-                idb.Transaction idbTransaction = idbDatabase.transaction(
+                final idbTransaction = idbDatabase.transaction(
                     html_common.convertDartToNative_SerializedScriptValue(
                         storeNameOrStoreNames),
                     mode);
@@ -115,7 +115,7 @@ class DatabaseNative extends IdbDatabaseBase {
 
   bool _isNotFoundError(e) {
     if (e is DatabaseError) {
-      String message = e.toString().toLowerCase();
+      final message = e.toString().toLowerCase();
       if (message.contains('notfounderror')) {
         return true;
       }
@@ -153,7 +153,7 @@ class DatabaseNative extends IdbDatabaseBase {
 
   @override
   Stream<VersionChangeEvent> get onVersionChange {
-    StreamController<VersionChangeEvent> ctlr = StreamController();
+    final ctlr = StreamController<VersionChangeEvent>();
     idbDatabase.onVersionChange.listen(
         (idb.VersionChangeEvent idbVersionChangeEvent) {
       ctlr.add(VersionChangeEventNative(factory, idbVersionChangeEvent));

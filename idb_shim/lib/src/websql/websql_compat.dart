@@ -26,9 +26,8 @@ class IdbWebSqlFactory extends IdbFactoryBase {
   String get name => idbFactoryNameWebSql;
 
   factory IdbWebSqlFactory() {
-    if (_instance == null) {
-      _instance = IdbWebSqlFactory._();
-    }
+    _instance ??= IdbWebSqlFactory._();
+
     return _instance;
   }
 

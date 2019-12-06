@@ -57,9 +57,8 @@ BodyFunc testReadWrite(idb.IdbFactory idbFactory, key, value, matcher,
         int version = VERSION,
         bool stringifyResult = false]) =>
     () {
-      if (dbName == null) {
-        dbName = nextDatabaseName();
-      }
+      dbName ??= nextDatabaseName();
+
       void createObjectStore(idb.VersionChangeEvent e) {
         var store = e.database.createObjectStore(storeName);
         expect(store, isNotNull);
@@ -102,9 +101,8 @@ BodyFunc testReadWriteTyped(idb.IdbFactory idbFactory, key, value, matcher,
         int version = VERSION,
         bool stringifyResult = false]) =>
     () {
-      if (dbName == null) {
-        dbName = nextDatabaseName();
-      }
+      dbName ??= nextDatabaseName();
+
       void createObjectStore(idb.VersionChangeEvent e) {
         var store = e.database.createObjectStore(storeName);
         expect(store, isNotNull);
@@ -117,13 +115,12 @@ BodyFunc testReadWriteTyped(idb.IdbFactory idbFactory, key, value, matcher,
             version: version, onUpgradeNeeded: createObjectStore);
       }).then((idb.Database result) {
         db = result;
-        idb.Transaction transaction =
-            db.transactionList([storeName], 'readwrite');
+        final transaction = db.transactionList([storeName], 'readwrite');
         transaction.objectStore(storeName).put(value, key);
 
         return transaction.completed;
       }).then((idb.Database result) {
-        idb.Transaction transaction = db.transaction(storeName, 'readonly');
+        final transaction = db.transaction(storeName, 'readonly');
         return transaction.objectStore(storeName).getObject(key);
       }).then((object) {
         db.close();
@@ -151,18 +148,18 @@ void testTypes(TestFunc testFunction, idb.IdbFactory idbFactory) {
       testFunction(idbFactory, 123, [true, false], equals([true, false])));
   test(
       'largeInt',
-      testFunction(idbFactory, 123, 1371854424211, equals("1371854424211"),
+      testFunction(idbFactory, 123, 1371854424211, equals('1371854424211'),
           null, STORE_NAME, VERSION, true));
   //TEKARTIK_IDB_REMOVED
   test(
       'largeDoubleConvertedToInt',
-      testFunction(idbFactory, 123, 1371854424211.0, equals("1371854424211"),
+      testFunction(idbFactory, 123, 1371854424211.0, equals('1371854424211'),
           null, STORE_NAME, VERSION, true),
       skip: true);
   test(
       'largeIntInMap',
       testFunction(idbFactory, 123, {'time': 4503599627370492},
-          equals("{time: 4503599627370492}"), null, STORE_NAME, VERSION, true));
+          equals('{time: 4503599627370492}'), null, STORE_NAME, VERSION, true));
   var now = DateTime.now();
   //TEKARTIK_IDB_REMOVED
   test(
@@ -182,7 +179,7 @@ void main() {
 }
 
 void defineTests(TestContext ctx) {
-  idb.IdbFactory idbFactory = ctx.factory;
+  final idbFactory = ctx.factory;
   //TEKARTIK_IDB_REMOVED useHtmlIndividualConfiguration();
 
   // Test that indexed_db is properly flagged as supported or not.
@@ -202,7 +199,7 @@ void defineTests(TestContext ctx) {
 
   group('functional', () {
     test('throws when unsupported', () async {
-      bool failed = false;
+      var failed = false;
 
       try {
         var db = idbFactory;

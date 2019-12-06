@@ -10,7 +10,7 @@ void checkKeyParam(var key) {
   }
   if (!(key is String || key is num)) {
     if (key is List && key.isNotEmpty) {
-      List keyList = key;
+      final keyList = key;
       for (var item in keyList) {
         checkKeyParam(item);
       }

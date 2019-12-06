@@ -13,7 +13,7 @@ void main() {
 }
 
 void defineTests(TestContext ctx) {
-  IdbFactory idbFactory = ctx.factory;
+  final idbFactory = ctx.factory;
 
   Database db;
   //Database dstDb;
@@ -23,8 +23,8 @@ void defineTests(TestContext ctx) {
   // prepare for test
   Future _setupDeleteDb() async {
     _srcDbName = ctx.dbName;
-    _dstDbName = "dst_$_srcDbName";
-    _importedDbName = "imported_$_srcDbName";
+    _dstDbName = 'dst_$_srcDbName';
+    _importedDbName = 'imported_$_srcDbName';
     await idbFactory.deleteDatabase(_srcDbName);
   }
 
@@ -42,14 +42,14 @@ void defineTests(TestContext ctx) {
   }
 
   group('utils', () {
-    Future _checkExportImport(
-        Database db, Map expectedExport, Future check(Database db)) async {
+    Future _checkExportImport(Database db, Map expectedExport,
+        Future Function(Database db) check) async {
       // export
-      Map export = await sdbExportDatabase(db);
+      final export = await sdbExportDatabase(db);
       expect(export, expectedExport);
 
       // import
-      Database importedDb =
+      final importedDb =
           await sdbImportDatabase(export, idbFactory, _importedDbName);
       // The name might be relative...
       expect(importedDb.name.endsWith(_importedDbName), isTrue);
@@ -65,15 +65,16 @@ void defineTests(TestContext ctx) {
     group('copySchema', () {
       tearDown(_tearDown);
 
-      Future _checkCopySchema(Database db, Future check(Database db)) async {
-        Database dstDb = await copySchema(db, idbFactory, _dstDbName);
+      Future _checkCopySchema(
+          Database db, Future Function(Database db) check) async {
+        final dstDb = await copySchema(db, idbFactory, _dstDbName);
         expect(dstDb.name, _dstDbName);
         await check(dstDb);
         dstDb.close();
       }
 
       Future _checkAll(Database db, Map expectedExport,
-          Future check(Database database)) async {
+          Future Function(Database database) check) async {
         await check(db);
         await _checkCopySchema(db, check);
         await _checkExportImport(db, expectedExport, check);
@@ -110,7 +111,7 @@ void defineTests(TestContext ctx) {
         await _setupDeleteDb();
 
         void _initializeDatabase(VersionChangeEvent e) {
-          Database db = e.database;
+          final db = e.database;
           //ObjectStore objectStore =
           db.createObjectStore(testStoreName,
               keyPath: testNameField, autoIncrement: true);
@@ -124,8 +125,8 @@ void defineTests(TestContext ctx) {
           expect(db.objectStoreNames, [testStoreName]);
           expect(basename(db.name).endsWith(basename(_srcDbName)), isTrue);
           expect(db.version, 2);
-          Transaction txn = db.transaction(testStoreName, idbModeReadOnly);
-          ObjectStore store = txn.objectStore(testStoreName);
+          final txn = db.transaction(testStoreName, idbModeReadOnly);
+          final store = txn.objectStore(testStoreName);
           expect(store.name, testStoreName);
           expect(store.keyPath, testNameField);
 
@@ -137,7 +138,7 @@ void defineTests(TestContext ctx) {
           await txn.completed;
         }
 
-        Map expectedExport = {
+        final expectedExport = <String, dynamic>{
           'sembast_export': 1,
           'version': 1,
           'stores': [
@@ -162,8 +163,8 @@ void defineTests(TestContext ctx) {
         await _setupDeleteDb();
 
         void _initializeDatabase(VersionChangeEvent e) {
-          Database db = e.database;
-          ObjectStore objectStore =
+          final db = e.database;
+          final objectStore =
               db.createObjectStore(testStoreName, autoIncrement: true);
           objectStore.createIndex(testNameIndex, testNameField,
               unique: true, multiEntry: true);
@@ -174,10 +175,10 @@ void defineTests(TestContext ctx) {
 
         Future _check(Database db) async {
           expect(db.version, 3);
-          Transaction txn = db.transaction(testStoreName, idbModeReadOnly);
-          ObjectStore store = txn.objectStore(testStoreName);
+          final txn = db.transaction(testStoreName, idbModeReadOnly);
+          final store = txn.objectStore(testStoreName);
           expect(store.indexNames, [testNameIndex]);
-          Index index = store.index(testNameIndex);
+          final index = store.index(testNameIndex);
           expect(index.name, testNameIndex);
           expect(index.keyPath, testNameField);
           expect(index.unique, isTrue);
@@ -189,7 +190,7 @@ void defineTests(TestContext ctx) {
           await txn.completed;
         }
 
-        Map expectedExport = {
+        final expectedExport = <String, dynamic>{
           'sembast_export': 1,
           'version': 1,
           'stores': [
@@ -232,7 +233,7 @@ void defineTests(TestContext ctx) {
           String srcStoreName,
           Database dstDatabase,
           String dstStoreName,
-          Future check(Database database, String name)) async {
+          Future Function(Database database, String name) check) async {
         await check(srcDatabase, srcStoreName);
         await copyStore(srcDatabase, srcStoreName, dstDatabase, dstStoreName);
         await check(dstDatabase, dstStoreName);
@@ -242,7 +243,7 @@ void defineTests(TestContext ctx) {
         await _setupDeleteDb();
 
         void _initializeDatabase(VersionChangeEvent e) {
-          Database db = e.database;
+          final db = e.database;
           //ObjectStore objectStore =
           db.createObjectStore(testStoreName);
           db.createObjectStore(testStoreName2);
@@ -252,8 +253,8 @@ void defineTests(TestContext ctx) {
             version: 1, onUpgradeNeeded: _initializeDatabase);
 
         Future _check(Database db, String storeName) async {
-          Transaction txn = db.transaction(storeName, idbModeReadOnly);
-          ObjectStore store = txn.objectStore(storeName);
+          final txn = db.transaction(storeName, idbModeReadOnly);
+          final store = txn.objectStore(storeName);
 
           // count() not supported on ie
           if (!ctx.isIdbIe) {
@@ -270,7 +271,7 @@ void defineTests(TestContext ctx) {
         await _setupDeleteDb();
 
         void _initializeDatabase(VersionChangeEvent e) {
-          Database db = e.database;
+          final db = e.database;
           //ObjectStore objectStore =
           db.createObjectStore(testStoreName);
           db.createObjectStore(testStoreName2);
@@ -280,18 +281,18 @@ void defineTests(TestContext ctx) {
             version: 1, onUpgradeNeeded: _initializeDatabase);
 
         // put one in src and one in dst that should get deleted
-        Transaction txn =
+        final txn =
             db.transaction([testStoreName, testStoreName2], idbModeReadWrite);
-        ObjectStore store = txn.objectStore(testStoreName);
-        await (store.put("value1", "key1"));
-        ObjectStore store2 = txn.objectStore(testStoreName2);
-        await (store2.put("value2", "key2"));
+        var store = txn.objectStore(testStoreName);
+        await (store.put('value1', 'key1'));
+        final store2 = txn.objectStore(testStoreName2);
+        await (store2.put('value2', 'key2'));
         await txn.completed;
 
         Future _check(Database db, String storeName) async {
-          Transaction txn = db.transaction(storeName, idbModeReadOnly);
+          final txn = db.transaction(storeName, idbModeReadOnly);
           store = txn.objectStore(storeName);
-          expect(await store.getObject("key1"), "value1");
+          expect(await store.getObject('key1'), 'value1');
           if (!ctx.isIdbIe) {
             expect(await store.count(), 1);
           }
@@ -307,15 +308,15 @@ void defineTests(TestContext ctx) {
       tearDown(_tearDown);
 
       Future _checkCopyDatabase(
-          Database db, Future check(Database database)) async {
-        Database dstDb = await copyDatabase(db, idbFactory, _dstDbName);
+          Database db, Future Function(Database database) check) async {
+        final dstDb = await copyDatabase(db, idbFactory, _dstDbName);
         expect(dstDb.name, _dstDbName);
         await check(dstDb);
         dstDb.close();
       }
 
       Future _checkAll(Database db, Map expectedExport,
-          Future check(Database database)) async {
+          Future Function(Database database) check) async {
         await check(db);
         await _checkCopyDatabase(db, check);
         await _checkExportImport(db, expectedExport, check);
@@ -353,7 +354,7 @@ void defineTests(TestContext ctx) {
         await _setupDeleteDb();
 
         void _initializeDatabase(VersionChangeEvent e) {
-          Database db = e.database;
+          final db = e.database;
           //ObjectStore objectStore =
           db.createObjectStore(testStoreName);
           db.createObjectStore(testStoreName2);
@@ -363,25 +364,25 @@ void defineTests(TestContext ctx) {
             version: 1, onUpgradeNeeded: _initializeDatabase);
 
         // put one in src and one in dst that should get deleted
-        Transaction txn = db.transaction(testStoreName, idbModeReadWrite);
-        ObjectStore store = txn.objectStore(testStoreName);
-        await (store.put("value1", "key1"));
-        await (store.put("value2", "key2"));
+        final txn = db.transaction(testStoreName, idbModeReadWrite);
+        var store = txn.objectStore(testStoreName);
+        await (store.put('value1', 'key1'));
+        await (store.put('value2', 'key2'));
         await txn.completed;
 
         //dstDb = await copyDatabase(db, idbFactory, _dstDbName);
 
         Future _check(Database db) async {
-          Transaction txn =
+          final txn =
               db.transaction([testStoreName, testStoreName2], idbModeReadOnly);
           store = txn.objectStore(testStoreName);
-          expect(await store.getObject("key1"), "value1");
-          expect(await store.getObject("key2"), "value2");
+          expect(await store.getObject('key1'), 'value1');
+          expect(await store.getObject('key2'), 'value2');
 
           if (!ctx.isIdbIe) {
             expect(await store.count(), 2);
           }
-          ObjectStore store2 = txn.objectStore(testStoreName2);
+          var store2 = txn.objectStore(testStoreName2);
 
           if (!ctx.isIdbIe) {
             expect(await store2.count(), 0);

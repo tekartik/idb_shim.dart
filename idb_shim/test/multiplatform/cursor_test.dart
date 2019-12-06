@@ -9,7 +9,7 @@ import '../idb_test_common.dart';
 
 class TestIdNameRow {
   TestIdNameRow(CursorWithValue cwv) {
-    Object value = cwv.value;
+    final value = cwv.value;
     name = (value as Map)[testNameField] as String;
     id = cwv.primaryKey as int;
   }
@@ -25,7 +25,7 @@ void main() {
 }
 
 void defineTests(TestContext ctx) {
-  IdbFactory idbFactory = ctx.factory;
+  final idbFactory = ctx.factory;
 
   Database db;
   Transaction transaction;
@@ -81,7 +81,7 @@ void defineTests(TestContext ctx) {
 //    }
 
     Future<List<TestIdNameRow>> cursorToList(Stream<CursorWithValue> stream) {
-      List<TestIdNameRow> list = [];
+      final list = <TestIdNameRow>[];
       return stream.listen((CursorWithValue cwv) {
         list.add(TestIdNameRow(cwv));
       }).asFuture(list);
@@ -89,7 +89,7 @@ void defineTests(TestContext ctx) {
 
     Future<List<TestIdNameRow>> manualCursorToList(
         Stream<CursorWithValue> stream) {
-      List<TestIdNameRow> list = [];
+      final list = <TestIdNameRow>[];
       return stream.listen((CursorWithValue cwv) {
         list.add(TestIdNameRow(cwv));
         cwv.next();
@@ -97,13 +97,13 @@ void defineTests(TestContext ctx) {
     }
 
     group('key_path_with_dot', () {
-      const String keyPath = "my.key";
+      const keyPath = 'my.key';
 
       Future _setUp() async {
         await _setupDeleteDb();
 
         void _initializeDatabase(VersionChangeEvent e) {
-          Database db = e.database;
+          final db = e.database;
           db.createObjectStore(testStoreName, keyPath: keyPath);
         }
 
@@ -120,10 +120,10 @@ void defineTests(TestContext ctx) {
           'my': {'key': 'test_value'}
         };
         await objectStore.add(value);
-        Stream<CursorWithValue> stream =
+        final stream =
             objectStore.openCursor(autoAdvance: true, key: 'test_value');
-        int count = 0;
-        Completer completer = Completer();
+        var count = 0;
+        final completer = Completer();
         stream.listen((CursorWithValue cwv) {
           expect(cwv.value, value);
           count++;
@@ -135,9 +135,9 @@ void defineTests(TestContext ctx) {
 
         // Key cursor
         {
-          Stream<Cursor> stream =
+          final stream =
               objectStore.openKeyCursor(autoAdvance: true, key: 'test_value');
-          int count = 0;
+          var count = 0;
           await stream.listen((Cursor cursor) {
             expect(cursor, isNot(const TypeMatcher<CursorWithValue>()));
             expect(cursor.key, 'test_value');
@@ -271,7 +271,7 @@ void defineTests(TestContext ctx) {
       Future _setUp() async {
         await _setupDeleteDb();
         void _initializeDatabase(VersionChangeEvent e) {
-          Database db = e.database;
+          final db = e.database;
           //ObjectStore objectStore =
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
@@ -283,9 +283,8 @@ void defineTests(TestContext ctx) {
       test('empty cursor', () async {
         await _setUp();
         _createTransaction();
-        Stream<CursorWithValue> stream =
-            objectStore.openCursor(autoAdvance: true);
-        int count = 0;
+        final stream = objectStore.openCursor(autoAdvance: true);
+        var count = 0;
         return stream
             .listen((CursorWithValue cwv) {
               count++;
@@ -299,13 +298,12 @@ void defineTests(TestContext ctx) {
       test('one item cursor', () async {
         await _setUp();
         _createTransaction();
-        return add("test1").then((_) {
-          Stream<CursorWithValue> stream =
-              objectStore.openCursor(autoAdvance: true);
-          int count = 0;
-          Completer completer = Completer();
+        return add('test1').then((_) {
+          final stream = objectStore.openCursor(autoAdvance: true);
+          var count = 0;
+          final completer = Completer();
           stream.listen((CursorWithValue cwv) {
-            expect((cwv.value as Map)[testNameField], "test1");
+            expect((cwv.value as Map)[testNameField], 'test1');
             count++;
           }).onDone(() {
             completer.complete();
@@ -321,8 +319,8 @@ void defineTests(TestContext ctx) {
         _createTransaction();
         await fill3SampleRows();
 
-        int count = 0;
-        int limit = 2;
+        var count = 0;
+        var limit = 2;
         objectStore
             .openCursor(autoAdvance: false)
             .listen((CursorWithValue cwv) {
@@ -340,8 +338,8 @@ void defineTests(TestContext ctx) {
         _createTransaction();
         await fill3SampleRows();
 
-        int count = 0;
-        int limit = 2;
+        var count = 0;
+        var limit = 2;
         objectStore.openKeyCursor(autoAdvance: false).listen((Cursor cursor) {
           if (++count < limit) {
             cursor.next();

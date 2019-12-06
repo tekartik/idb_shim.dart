@@ -24,11 +24,11 @@ int compareValue(dynamic value1, dynamic value2) {
     if (value1 is Comparable && value2 is Comparable) {
       return Comparable.compare(value1, value2);
     } else if (value1 is List && value2 is List) {
-      List list1 = value1;
-      List list2 = value2;
+      final list1 = value1;
+      final list2 = value2;
 
-      for (int i = 0; i < min(value1.length, value2.length); i++) {
-        int cmp = compareValue(list1[i], list2[i]);
+      for (var i = 0; i < min(value1.length, value2.length); i++) {
+        final cmp = compareValue(list1[i], list2[i]);
         if (cmp == 0) {
           continue;
         }
@@ -55,7 +55,7 @@ int lowerCompareValue(dynamic lower, dynamic value, bool multiEntry) {
   int bestCmp;
   if (multiEntry && value is List) {
     for (var item in value) {
-      int cmp = lowerCompareSingleValue(lower, item);
+      final cmp = lowerCompareSingleValue(lower, item);
       if (cmp < 0) {
         return cmp;
       } else if (cmp == 0) {
@@ -63,7 +63,7 @@ int lowerCompareValue(dynamic lower, dynamic value, bool multiEntry) {
       }
     }
   }
-  int singleCmp = lowerCompareSingleValue(lower, value);
+  final singleCmp = lowerCompareSingleValue(lower, value);
   if (singleCmp != null) {
     if (bestCmp != null) {
       return min(singleCmp, bestCmp);
@@ -76,7 +76,7 @@ int lowerCompareValue(dynamic lower, dynamic value, bool multiEntry) {
 // True if simple value matches lower bound
 bool lowerMatchesSingleValue(dynamic lower, bool lowerOpen, dynamic value) {
   if (value != null) {
-    int cmp = lowerCompareSingleValue(lower, value);
+    final cmp = lowerCompareSingleValue(lower, value);
     if (cmp < 0) {
       return true;
     } else if (!lowerOpen) {
@@ -100,7 +100,7 @@ int upperCompareValue(dynamic lower, dynamic value, bool multiEntry) {
   int bestCmp;
   if (multiEntry && value is List) {
     for (var item in value) {
-      int cmp = upperCompareSingleValue(lower, item);
+      final cmp = upperCompareSingleValue(lower, item);
       if (cmp > 0) {
         return cmp;
       } else if (cmp == 0) {
@@ -108,7 +108,7 @@ int upperCompareValue(dynamic lower, dynamic value, bool multiEntry) {
       }
     }
   }
-  int singleCmp = upperCompareSingleValue(lower, value);
+  final singleCmp = upperCompareSingleValue(lower, value);
   if (singleCmp != null) {
     if (bestCmp != null) {
       return max(singleCmp, bestCmp);
@@ -121,7 +121,7 @@ int upperCompareValue(dynamic lower, dynamic value, bool multiEntry) {
 // True if simple value matches lower bound
 bool upperMatchesSingleValue(dynamic upper, bool upperOpen, dynamic value) {
   if (value != null) {
-    int cmp = upperCompareSingleValue(upper, value);
+    final cmp = upperCompareSingleValue(upper, value);
     if (cmp > 0) {
       return true;
     } else if (!upperOpen) {
@@ -186,7 +186,7 @@ sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range, bool multiEntry) {
           'keyPath and upper bound length must match');
     }
     return sdb.Filter.custom((snapshot) {
-      List values = List.generate(
+      final values = List.generate(
           keyPathList.length, (i) => snapshot[keyPathList[i] as String]);
 
       // no null accepted
@@ -196,11 +196,11 @@ sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range, bool multiEntry) {
         }
       }
 
-      bool lowerOpen = range.lowerOpen;
+      final lowerOpen = range.lowerOpen;
 
       if (lowerList != null) {
         int cmp;
-        for (int i = 0; i < keyPathList.length; i++) {
+        for (var i = 0; i < keyPathList.length; i++) {
           var value = values[i];
           var lower = lowerList[i];
           if (lower == null) {
@@ -221,11 +221,11 @@ sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range, bool multiEntry) {
         }
       }
 
-      bool upperOpen = range.upperOpen;
+      final upperOpen = range.upperOpen;
 
       if (upperList != null) {
         int cmp;
-        for (int i = 0; i < keyPathList.length; i++) {
+        for (var i = 0; i < keyPathList.length; i++) {
           var value = values[i];
           var upper = upperList[i];
           if (upper == null) {
@@ -283,7 +283,7 @@ sdb.Filter keyFilter(dynamic keyPath, var key, bool multiEntry) {
       return sdb.Filter.equals(keyPath, key);
     }
   } else if (keyPath is List) {
-    List keyList = keyPath;
+    final keyList = keyPath;
     // No constraint on the key it just needs to exist
     // so every field must be non-null
     if (key == null) {

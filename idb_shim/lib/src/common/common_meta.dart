@@ -26,7 +26,7 @@ class IdbTransactionMeta {
   int refCount;
 
   @override
-  String toString() => "$mode $storeNames";
+  String toString() => '$mode $storeNames';
 }
 
 class IdbVersionChangeTransactionMeta extends IdbTransactionMeta {
@@ -82,12 +82,12 @@ class IdbDatabaseMeta {
   IdbDatabaseMeta([this.version]);
 
   IdbVersionChangeTransactionMeta _versionChangeTransaction;
-  Map<String, IdbObjectStoreMeta> _stores = {};
+  final _stores = <String, IdbObjectStoreMeta>{};
 
   IdbVersionChangeTransactionMeta get versionChangeTransaction =>
       _versionChangeTransaction;
 
-  Future onUpgradeNeeded(action()) async {
+  Future onUpgradeNeeded(dynamic Function() action) async {
     _versionChangeTransaction = IdbVersionChangeTransactionMeta();
 
     var result = action();
@@ -101,7 +101,7 @@ class IdbDatabaseMeta {
   void createObjectStore(IdbObjectStoreMeta store) {
     if (versionChangeTransaction == null) {
       throw StateError(
-          "cannot create objectStore outside of a versionChangedEvent");
+          'cannot create objectStore outside of a versionChangedEvent');
     }
     versionChangeTransaction.createdStores.add(store);
     putObjectStore(store);
@@ -110,11 +110,11 @@ class IdbDatabaseMeta {
   void deleteObjectStore(String storeName) {
     if (versionChangeTransaction == null) {
       throw StateError(
-          "cannot delete objectStore outside of a versionChangedEvent");
+          'cannot delete objectStore outside of a versionChangedEvent');
     }
     // Get the store and add it to the change list so that
     // we store object store on quit
-    IdbObjectStoreMeta storeMeta = _stores[storeName];
+    final storeMeta = _stores[storeName];
     if (storeMeta != null) {
       versionChangeTransaction.deletedStores.add(storeMeta);
       _stores.remove(storeName);
@@ -139,11 +139,11 @@ class IdbDatabaseMeta {
     } else if (storeNameOrStoreNames is List) {
       if (storeNameOrStoreNames.isEmpty) {
         throw DatabaseError(
-            "InvalidAccessError: The storeNames parameter is empty");
+            'InvalidAccessError: The storeNames parameter is empty');
       }
       final list = storeNameOrStoreNames?.cast<String>();
 
-      for (String storeName in list) {
+      for (final storeName in list) {
         if (!_containsStore(storeName)) {
           throw DatabaseStoreNotFoundError(
               DatabaseStoreNotFoundError.storeMessage(storeNameOrStoreNames));
@@ -152,7 +152,7 @@ class IdbDatabaseMeta {
       return IdbTransactionMeta(storeNameOrStoreNames.cast<String>(), mode);
     } else if (storeNameOrStoreNames != null) {
       throw DatabaseError(
-          "Invalid store name(s) parameter: $storeNameOrStoreNames");
+          'Invalid store name(s) parameter: $storeNameOrStoreNames');
     } else {
       // assume null - it will complain otherwise
       // this is use for transaction created on open
@@ -171,7 +171,7 @@ class IdbDatabaseMeta {
   }
 
   Map<String, dynamic> toDebugMap() {
-    var map = <String, dynamic>{"stores": _stores, "version": version};
+    var map = <String, dynamic>{'stores': _stores, 'version': version};
     return map;
   }
 
@@ -210,10 +210,10 @@ abstract class ObjectStoreWithMetaMixin {
 
 // meta data is loaded only once
 class IdbObjectStoreMeta {
-  static const String nameKey = "name";
-  static const String keyPathKey = "keyPath";
-  static const String autoIncrementKey = "autoIncrement";
-  static const String indeciesKey = "indecies";
+  static const String nameKey = 'name';
+  static const String keyPathKey = 'keyPath';
+  static const String autoIncrementKey = 'autoIncrement';
+  static const String indeciesKey = 'indecies';
 
   final String name;
   final String keyPath;
@@ -221,21 +221,21 @@ class IdbObjectStoreMeta {
 
   Iterable<IdbIndexMeta> get indecies => _indecies.values;
 
-  Map<String, IdbIndexMeta> _indecies = {};
+  final _indecies = <String, IdbIndexMeta>{};
 
   Iterable<String> get indexNames => _indecies.keys;
 
   IdbIndexMeta index(String name) {
-    IdbIndexMeta indexMeta = _indecies[name];
+    final indexMeta = _indecies[name];
     if (indexMeta == null) {
-      throw ArgumentError("index $name not found");
+      throw ArgumentError('index $name not found');
     }
     return indexMeta;
   }
 
   void createIndex(IdbDatabaseMeta databaseMeta, IdbIndexMeta index) {
     if (databaseMeta.versionChangeTransaction == null) {
-      throw StateError("cannot create index outside of a versionChangedEvent");
+      throw StateError('cannot create index outside of a versionChangedEvent');
     }
     databaseMeta.versionChangeTransaction.updatedStores.add(this);
     List list = databaseMeta.versionChangeTransaction.createdIndexes[name];
@@ -249,9 +249,9 @@ class IdbObjectStoreMeta {
 
   void deleteIndex(IdbDatabaseMeta databaseMeta, String indexName) {
     if (databaseMeta.versionChangeTransaction == null) {
-      throw StateError("cannot delete index outside of a versionChangedEvent");
+      throw StateError('cannot delete index outside of a versionChangedEvent');
     }
-    IdbIndexMeta indexMeta = _indecies[indexName];
+    final indexMeta = _indecies[indexName];
     if (indexMeta == null) {
       throw DatabaseIndexNotFoundError(indexName);
     }
@@ -313,7 +313,7 @@ class IdbObjectStoreMeta {
       map[autoIncrementKey] = autoIncrement;
     }
     if (indecies.isNotEmpty) {
-      List<Map> indecies = [];
+      final indecies = <Map>[];
       this.indecies.forEach((IdbIndexMeta indexMeta) {
         indecies.add(indexMeta.toMap());
       });
@@ -352,9 +352,7 @@ class IdbCursorMeta {
 
   IdbCursorMeta(this.key, this.range, String direction, bool autoAdvance)
       : autoAdvance = autoAdvance == true {
-    if (direction == null) {
-      direction = idbDirectionNext;
-    }
+    direction ??= idbDirectionNext;
 
     switch (direction) {
       case idbDirectionPrev:
@@ -371,16 +369,16 @@ class IdbCursorMeta {
     }
   }
 
-  Map toDebugMap() {
-    Map map = {"direction": direction};
+  Map<String, dynamic> toDebugMap() {
+    final map = <String, dynamic>{'direction': direction};
     if (key != null) {
-      map["key"] = key;
+      map['key'] = key;
     }
     if (range != null) {
-      map["range"] = range;
+      map['range'] = range;
     }
     if (autoAdvance) {
-      map["autoAdvance"] = autoAdvance;
+      map['autoAdvance'] = autoAdvance;
     }
     return map;
   }
@@ -435,10 +433,10 @@ class IdbIndexMeta {
 
   IdbIndexMeta.fromMap(Map<String, dynamic> map) //
       : this(
-            map["name"] as String, //
-            map["keyPath"] as String, //
-            map["unique"] as bool, //
-            map["multiEntry"] as bool);
+            map['name'] as String, //
+            map['keyPath'] as String, //
+            map['unique'] as bool, //
+            map['multiEntry'] as bool);
 
   IdbIndexMeta.fromIndex(Index index)
       : this(index.name, index.keyPath as String, index.unique,
@@ -449,12 +447,12 @@ class IdbIndexMeta {
   }
 
   Map<String, dynamic> toMap() {
-    var map = <String, dynamic>{"name": name, "keyPath": keyPath};
+    var map = <String, dynamic>{'name': name, 'keyPath': keyPath};
     if (unique) {
-      map["unique"] = unique;
+      map['unique'] = unique;
     }
     if (multiEntry) {
-      map["multiEntry"] = multiEntry;
+      map['multiEntry'] = multiEntry;
     }
     return map;
   }

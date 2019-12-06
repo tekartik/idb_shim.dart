@@ -62,7 +62,7 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase
       OnUpgradeNeededFunction onUpgradeNeeded,
       OnBlockedFunction onBlocked}) {
     void _onUpgradeNeeded(idb.VersionChangeEvent e) {
-      VersionChangeEventNative event = VersionChangeEventNative(this, e);
+      final event = VersionChangeEventNative(this, e);
       onUpgradeNeeded(event);
     }
 
@@ -71,7 +71,7 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase
         Event event = EventNative(e);
         onBlocked(event);
       } else {
-        print("blocked opening $dbName v $version");
+        print('blocked opening $dbName v $version');
       }
     }
 
@@ -91,7 +91,7 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase
   Future<IdbFactory> deleteDatabase(String dbName,
       {OnBlockedFunction onBlocked}) {
     void _onBlocked(html.Event e) {
-      print("blocked deleting $dbName");
+      print('blocked deleting $dbName');
       Event event = EventNative(e);
       onBlocked(event);
     }

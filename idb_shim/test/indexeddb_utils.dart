@@ -13,7 +13,7 @@ void verifyGraph(expected, actual) {
 
   String message(String path, String reason) => path == ''
       ? reason
-      : reason == null ? "path: $path" : "path: $path, $reason";
+      : reason == null ? 'path: $path' : 'path: $path, $reason';
 
   void walk(String path, expected, actual) {
     if (expected is String || expected is num || expected == null) {
@@ -22,14 +22,14 @@ void verifyGraph(expected, actual) {
     }
 
     // Cycle or DAG?
-    for (int i = 0; i < eItems.length; i++) {
+    for (var i = 0; i < eItems.length; i++) {
       if (identical(expected, eItems[i])) {
         expect(actual, same(aItems[i]),
             reason: message(path, 'missing back or side edge'));
         return;
       }
     }
-    for (int i = 0; i < aItems.length; i++) {
+    for (var i = 0; i < aItems.length; i++) {
       if (identical(actual, aItems[i])) {
         expect(expected, same(eItems[i]),
             reason: message(path, 'extra back or side edge'));
@@ -101,13 +101,13 @@ void verifyGraph(expected, actual) {
       expect(actual, isMap, reason: message(path, '$actual is Map'));
       for (var key in expected.keys) {
         if (!(actual as Map).containsKey(key)) {
-          expect(false, isTrue, reason: message(path, 'missing key "$key"'));
+          expect(false, isTrue, reason: message(path, "missing key '$key'"));
         }
-        walk('$path["$key"]', expected[key], actual[key]);
+        walk("$path['$key']", expected[key], actual[key]);
       }
       for (var key in actual.keys) {
         if (!expected.containsKey(key)) {
-          expect(false, isTrue, reason: message(path, 'extra key "$key"'));
+          expect(false, isTrue, reason: message(path, "extra key '$key'"));
         }
       }
       return;

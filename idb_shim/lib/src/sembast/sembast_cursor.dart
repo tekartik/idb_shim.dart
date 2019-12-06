@@ -103,7 +103,7 @@ class IndexKeyCursorSembast extends Object
 
   IndexKeyCursorSembast(IndexKeyCursorControllerSembast ctlr, int index) {
     this.ctlr = ctlr;
-    this.recordIndex = index;
+    recordIndex = index;
   }
 }
 
@@ -115,7 +115,7 @@ class IndexCursorWithValueSembast extends Object
   IndexCursorWithValueSembast(
       BaseCursorControllerSembastMixin ctlr, int index) {
     this.ctlr = ctlr;
-    this.recordIndex = index;
+    recordIndex = index;
   }
 }
 
@@ -124,14 +124,14 @@ class StoreCursorWithValueSembast extends Object
   StoreCursorWithValueSembast(
       BaseCursorControllerSembastMixin ctlr, int index) {
     this.ctlr = ctlr;
-    this.recordIndex = index;
+    recordIndex = index;
   }
 }
 
 class StoreKeyCursorSembast extends Object with KeyCursorSembastMixin {
   StoreKeyCursorSembast(BaseCursorControllerSembastMixin ctlr, int index) {
     this.ctlr = ctlr;
-    this.recordIndex = index;
+    recordIndex = index;
   }
 }
 /*
@@ -278,9 +278,9 @@ abstract class BaseCursorControllerSembastMixin<T extends Cursor>
   }
 
   Future openCursor() async {
-    sdb.Filter filter = this.filter;
-    List<sdb.SortOrder> sortOrders = this.sortOrders;
-    sdb.Finder finder = sdb.Finder(filter: filter, sortOrders: sortOrders);
+    final filter = this.filter;
+    final sortOrders = this.sortOrders;
+    final finder = sdb.Finder(filter: filter, sortOrders: sortOrders);
     var records = await store.sdbStore.find(store.sdbClient, finder: finder);
     setRecords(records);
 
@@ -343,7 +343,7 @@ class IndexKeyCursorControllerSembast extends Object
 
   @override
   Cursor nextEvent(int index) {
-    IndexKeyCursorSembast cursor = IndexKeyCursorSembast(this, index);
+    final cursor = IndexKeyCursorSembast(this, index);
     return cursor;
   }
 }
@@ -365,8 +365,7 @@ class IndexCursorWithValueControllerSembast extends Object
 
   @override
   CursorWithValue nextEvent(int index) {
-    IndexCursorWithValueSembast cursor =
-        IndexCursorWithValueSembast(this, index);
+    final cursor = IndexCursorWithValueSembast(this, index);
     return cursor;
   }
 }
@@ -406,8 +405,7 @@ class StoreCursorWithValueControllerSembast extends Object
 
   @override
   CursorWithValue nextEvent(int index) {
-    StoreCursorWithValueSembast cursor =
-        StoreCursorWithValueSembast(this, index);
+    final cursor = StoreCursorWithValueSembast(this, index);
     return cursor;
   }
 }
@@ -417,7 +415,7 @@ List<sdb.SortOrder> keyPathSortOrders(dynamic keyPath, bool ascending) {
   if (keyPath is String) {
     return [sdb.SortOrder(keyPath, ascending)];
   } else if (keyPath is List) {
-    List keyList = keyPath;
+    final keyList = keyPath;
     return List.generate(
         keyList.length, (i) => sdb.SortOrder(keyList[i] as String, ascending));
   }

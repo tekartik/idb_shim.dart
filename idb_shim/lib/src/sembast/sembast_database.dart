@@ -28,25 +28,25 @@ class _SdbVersionChangeEvent extends IdbVersionChangeEventBase {
 
   _SdbVersionChangeEvent(
       DatabaseSembast database, int oldVersion, this.newVersion) //
-      : oldVersion = oldVersion == null ? 0 : oldVersion {
+      : oldVersion = oldVersion ?? 0 {
     // handle = too to catch programatical errors
     if (this.oldVersion >= newVersion) {
-      throw StateError("cannot downgrade from $oldVersion to $newVersion");
+      throw StateError('cannot downgrade from $oldVersion to $newVersion');
     }
     request = OpenDBRequest(database, database.versionChangeTransaction);
   }
 
   @override
   String toString() {
-    return "$oldVersion => $newVersion";
+    return '$oldVersion => $newVersion';
   }
 }
 
 ///
 /// meta format
-/// {"key":"version","value":1}
-/// {"key":"stores","value":["test_store"]}
-/// {"key":"store_test_store","value":{"name":"test_store","keyPath":"my_key","autoIncrement":true}}
+/// {'key':'version','value':1}
+/// {'key':'stores','value':['test_store']}
+/// {'key':'store_test_store','value':{'name':'test_store','keyPath':'my_key','autoIncrement':true}}
 
 class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
   TransactionSembast versionChangeTransaction;
@@ -65,7 +65,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
 
   static Future<DatabaseSembast> fromDatabase(
       IdbFactory factory, sdb.Database db) async {
-    DatabaseSembast idbDb = DatabaseSembast._(factory);
+    final idbDb = DatabaseSembast._(factory);
     idbDb.db = db;
     await idbDb._readMeta();
     // Copy name from path
@@ -78,16 +78,16 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
   }
 
   Future<List<IdbObjectStoreMeta>> _loadStoresMeta(List<String> storeNames) {
-    List<String> keys = [];
+    final keys = <String>[];
     storeNames.forEach((String storeName) {
-      keys.add("store_$storeName");
+      keys.add('store_$storeName');
     });
 
     return mainStore.records(keys).getSnapshots(db).then((records) {
-      List<IdbObjectStoreMeta> list = [];
+      final list = <IdbObjectStoreMeta>[];
       records.forEach((record) {
         var map = (record.value as Map)?.cast<String, dynamic>();
-        IdbObjectStoreMeta store = IdbObjectStoreMeta.fromMap(map);
+        final store = IdbObjectStoreMeta.fromMap(map);
         list.add(store);
       });
       return list;
@@ -98,13 +98,13 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
   Future<int> _readMeta() async {
     return db.transaction((txn) async {
       // read version
-      meta.version = await mainStore.record("version").get(txn) as int;
-      //devPrint("meta version :${meta.version})
+      meta.version = await mainStore.record('version').get(txn) as int;
+      //devPrint('meta version :${meta.version})
       // read store meta
-      var storeList = await mainStore.record("stores").get(txn);
+      var storeList = await mainStore.record('stores').get(txn);
       if (storeList != null) {
         // for now load all at once
-        List<String> storeNames = (storeList as List)?.cast<String>();
+        final storeNames = (storeList as List)?.cast<String>();
         await _loadStoresMeta(storeNames)
             .then((List<IdbObjectStoreMeta> storeMetas) {
           storeMetas.forEach((IdbObjectStoreMeta store) {
@@ -120,10 +120,10 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
       int newVersion, OnUpgradeNeededFunction onUpgradeNeeded) async {
     int previousVersion;
 
-    // devPrint("open ${onUpgradeNeeded} ${onUpgradeNeeded != null ? "NOT NULL": "NULL"}");
+    // devPrint('open ${onUpgradeNeeded} ${onUpgradeNeeded != null ? 'NOT NULL': 'NULL'}');
     if (sembastDebug) {
       print(
-          "open2 $onUpgradeNeeded ${onUpgradeNeeded != null ? "NOT NULL" : "NULL"}");
+          'open2 $onUpgradeNeeded ${onUpgradeNeeded != null ? 'NOT NULL' : 'NULL'}');
     }
     // Open the sembast database
     db = await sdbFactory.openDatabase(factory.getDbPath(name), version: 1);
@@ -149,7 +149,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
         await mainStore.record('version').put(txn, newVersion);
 
         // First delete everything from deleted stores
-        for (IdbObjectStoreMeta storeMeta in deletedStores) {
+        for (final storeMeta in deletedStores) {
           await sdb.StoreRef(storeMeta.name).drop(txn);
         }
 
@@ -160,9 +160,9 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
               .put(txn, List.from(objectStoreNames));
         }
 
-        for (IdbObjectStoreMeta storeMeta in changedStores) {
+        for (final storeMeta in changedStores) {
           await mainStore
-              .record("store_${storeMeta.name}")
+              .record('store_${storeMeta.name}')
               .put(txn, storeMeta.toMap());
         }
       }).then((_) {
@@ -181,8 +181,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
   @override
   ObjectStore createObjectStore(String name,
       {String keyPath, bool autoIncrement}) {
-    IdbObjectStoreMeta storeMeta =
-        IdbObjectStoreMeta(name, keyPath, autoIncrement);
+    final storeMeta = IdbObjectStoreMeta(name, keyPath, autoIncrement);
     meta.createObjectStore(storeMeta);
     return ObjectStoreSembast(versionChangeTransaction, storeMeta);
   }
@@ -207,13 +206,13 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
     //if (_debugTransaction) {
     //  print('transaction($storeName_OR_storeNames)');
     // }
-    IdbTransactionMeta txnMeta = meta.transaction(storeNameOrStoreNames, mode);
+    final txnMeta = meta.transaction(storeNameOrStoreNames, mode);
     return TransactionSembast(this, txnMeta);
   }
 
   @override
   Transaction transactionList(List<String> storeNames, String mode) {
-    IdbTransactionMeta txnMeta = meta.transaction(storeNames, mode);
+    final txnMeta = meta.transaction(storeNames, mode);
     return TransactionSembast(this, txnMeta);
   }
 

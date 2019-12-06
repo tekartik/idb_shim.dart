@@ -53,8 +53,8 @@ class IdbKeyRange implements KeyRange {
     } else if (value1 is String) {
       return value1.compareTo(value2 as String);
     } else if (value1 is List) {
-      List list = value1;
-      for (int i = 0; i < list.length; i++) {
+      final list = value1;
+      for (var i = 0; i < list.length; i++) {
         var diff = _compareValue(list[i], (value2 as List)[i]);
         if (diff != 0) {
           return diff;
@@ -72,8 +72,8 @@ class IdbKeyRange implements KeyRange {
   ///
   bool _checkLowerBound(key) {
     if (_lowerBound != null) {
-      bool exclude = _lowerBoundOpen != null && _lowerBoundOpen;
-      num cmp = _compareValue(key, _lowerBound);
+      final exclude = _lowerBoundOpen != null && _lowerBoundOpen;
+      final cmp = _compareValue(key, _lowerBound);
       if (cmp == 0 && exclude) {
         return false;
       } else {
@@ -85,8 +85,8 @@ class IdbKeyRange implements KeyRange {
 
   bool _checkUpperBound(key) {
     if (_upperBound != null) {
-      bool exclude = _upperBoundOpen != null && _upperBoundOpen;
-      num cmp = _compareValue(key, _upperBound);
+      final exclude = _upperBoundOpen != null && _upperBoundOpen;
+      final cmp = _compareValue(key, _upperBound);
       if (cmp == 0 && exclude) {
         return false;
       } else {
@@ -108,7 +108,7 @@ class IdbKeyRange implements KeyRange {
 
   @override
   String toString() {
-    StringBuffer sb = StringBuffer('kr');
+    final sb = StringBuffer('kr');
     if (lower == null) {
       sb.write('...');
     } else {
