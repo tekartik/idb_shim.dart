@@ -13,7 +13,7 @@ const String nameField = 'name';
 
 class SimpleRow {
   SimpleRow(CursorWithValue cwv) {
-    Map map = cwv.value as Map;
+    final map = cwv.value as Map;
     name = map[nameField] as String;
     id = cwv.primaryKey as int;
   }
@@ -29,7 +29,7 @@ class SimpleProvider {
   SimpleProvider(this.idbFactory);
 
   void _initializeDatabase(VersionChangeEvent e) {
-    Database db = (e.target as Request).result;
+    final db = (e.target as Request).result;
 
     var objectStore = db.createObjectStore(storeName, autoIncrement: true);
     objectStore.createIndex(nameIndex, nameField, unique: true);
@@ -48,9 +48,9 @@ class SimpleProvider {
 
   Future<List<SimpleRow>> cursorToList(Stream<CursorWithValue> stream) {
     var completer = Completer<List<SimpleRow>>();
-    List<SimpleRow> list = [];
+    final list = <SimpleRow>[];
     stream.listen((CursorWithValue cwv) {
-      SimpleRow row = SimpleRow(cwv);
+      final row = SimpleRow(cwv);
 
       list.add(row);
       //cwv.advance(1);

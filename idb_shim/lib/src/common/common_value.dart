@@ -40,7 +40,7 @@ List _cloneList(List original) {
   if (original == null) {
     return null;
   }
-  List list = [];
+  final list = [];
   original.forEach((value) {
     list.add(_cloneValue(value));
   });
@@ -48,7 +48,7 @@ List _cloneList(List original) {
 }
 
 Map _cloneMap(Map original) {
-  Map map = {};
+  final map = {};
   original.forEach((key, value) {
     map[key] = _cloneValue(value);
   });
@@ -88,11 +88,11 @@ int compareKeys(dynamic first, dynamic second) {
   if (first is num && second is num) {
     return first < second ? -1 : (first == second ? 0 : 1);
   } else if (first is String && second is String) {
-    int compare = first.compareTo(second);
+    final compare = first.compareTo(second);
     return compare < 0 ? -1 : (compare == 0 ? 0 : 1);
   } else if (first is List && second is List) {
-    for (int i = 0; i < first.length; i++) {
-      int compare = compareKeys(first[i], second[i]);
+    for (var i = 0; i < first.length; i++) {
+      final compare = compareKeys(first[i], second[i]);
       if (compare != 0) {
         return compare;
       }
@@ -122,7 +122,7 @@ dynamic mapValueAtKeyPath(Map map, keyPath) {
   if (keyPath is String) {
     return getMapFieldValue(map, keyPath);
   } else if (keyPath is List) {
-    List keyList = keyPath;
+    final keyList = keyPath;
     return List.generate(
         keyList.length, (i) => getMapFieldValue(map, keyPath[i] as String));
   }
@@ -165,7 +165,7 @@ T getMapFieldValue<T>(Map map, String field) {
 
 T getPartsMapValue<T>(Map map, Iterable<String> parts) {
   dynamic value = map;
-  for (String part in parts) {
+  for (final part in parts) {
     if (value is Map) {
       value = value[part];
     } else {
@@ -180,8 +180,8 @@ void setMapFieldValue<T>(Map map, String field, T value) {
 }
 
 void setPartsMapValue<T>(Map map, List<String> parts, value) {
-  for (int i = 0; i < parts.length - 1; i++) {
-    String part = parts[i];
+  for (var i = 0; i < parts.length - 1; i++) {
+    final part = parts[i];
     dynamic sub = map[part];
     if (!(sub is Map)) {
       sub = <String, dynamic>{};

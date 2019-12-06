@@ -12,7 +12,7 @@ void main() {
 }
 
 void defineTests(TestContext ctx) {
-  IdbFactory idbFactory = ctx.factory;
+  final idbFactory = ctx.factory;
   //debugQuickLogging(Level.ALL);
   group('scenario', () {
     group('bug_put_delete', () {
@@ -34,9 +34,8 @@ void defineTests(TestContext ctx) {
 
       test('put_delete', () async {
         await _setUp();
-        Transaction transaction =
-            db.transaction(testStoreName, idbModeReadWrite);
-        ObjectStore objectStore = transaction.objectStore(testStoreName);
+        final transaction = db.transaction(testStoreName, idbModeReadWrite);
+        final objectStore = transaction.objectStore(testStoreName);
         var key = await objectStore.put({});
         await objectStore.delete(key);
         await transaction.completed;
@@ -44,11 +43,10 @@ void defineTests(TestContext ctx) {
 
       test('get_delete', () async {
         await _setUp();
-        Transaction transaction =
-            db.transaction(testStoreName, idbModeReadWrite);
-        ObjectStore objectStore = transaction.objectStore(testStoreName);
+        var transaction = db.transaction(testStoreName, idbModeReadWrite);
+        var objectStore = transaction.objectStore(testStoreName);
         var key = await objectStore
-            .put({"name": "name", "delete": true, "dirty": false});
+            .put({'name': 'name', 'delete': true, 'dirty': false});
         await transaction.completed;
 
         transaction = db.transaction(testStoreName, idbModeReadWrite);

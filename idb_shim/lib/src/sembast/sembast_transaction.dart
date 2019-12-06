@@ -36,19 +36,19 @@ class TransactionSembast extends IdbTransactionBase
 
   Future _execute(int i) {
     if (_debugTransaction) {
-      print("exec $i");
+      print('exec $i');
     }
-    Completer completer = _completers[i];
-    Action action = _actions[i] as Action;
+    final completer = _completers[i];
+    final action = _actions[i] as Action;
     return Future.sync(action).then((result) {
       if (_debugTransaction) {
-        print("done $i");
+        print('done $i');
       }
       completer.complete(result);
     }).catchError((e, st) {
-      //devPrint(" err $i");
+      //devPrint(' err $i');
       if (_debugTransaction) {
-        print("err $i");
+        print('err $i');
       }
       completer.completeError(e, st as StackTrace);
     });
@@ -105,8 +105,8 @@ class TransactionSembast extends IdbTransactionBase
   /// Since it must run everything in a single call, let all the actions
   /// in the first callback enqueue before running
   ///
-  Future<T> execute<T>(FutureOr<T> action()) {
-    Future<T> actionFuture = _enqueue(action);
+  Future<T> execute<T>(FutureOr<T> Function() action) {
+    final actionFuture = _enqueue(action);
     _futures.add(actionFuture);
 
     if (_lazyExecution == null) {
@@ -144,18 +144,18 @@ class TransactionSembast extends IdbTransactionBase
     return actionFuture;
   }
 
-  Future<T> _enqueue<T>(FutureOr<T> action()) {
+  Future<T> _enqueue<T>(FutureOr<T> Function() action) {
     if (_debugTransaction) {
       print('enqueing');
     }
     if (_inactive) {
-      return Future.error(DatabaseError("TransactionInactiveError"));
+      return Future.error(DatabaseError('TransactionInactiveError'));
     }
 // not lazy
     var completer = Completer<T>.sync();
     _completers.add(completer);
     _actions.add(action);
-    //devPrint("push ${actions.length}");
+    //devPrint('push ${actions.length}');
     //_next();
     return completer.future.then((result) {
       // re-push termination check
@@ -165,10 +165,10 @@ class TransactionSembast extends IdbTransactionBase
   }
 
   //sdb.Transaction sdbTransaction;
-  var _transactionCompleter = Completer();
-  List<Completer> _completers = [];
-  List<Function> _actions = [];
-  List<Future> _futures = [];
+  final _transactionCompleter = Completer();
+  final _completers = <Completer>[];
+  final _actions = <Function>[];
+  final _futures = <Future>[];
 
   @override
   final IdbTransactionMeta meta;

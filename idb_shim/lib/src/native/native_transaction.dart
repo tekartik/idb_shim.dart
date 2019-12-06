@@ -19,7 +19,7 @@ class TransactionNative extends TransactionNativeBase {
   @override
   ObjectStore objectStore(String name) {
     return catchNativeError(() {
-      idb.ObjectStore idbObjectStore = idbTransaction.objectStore(name);
+      final idbObjectStore = idbTransaction.objectStore(name);
       return ObjectStoreNative(idbObjectStore);
     });
   }

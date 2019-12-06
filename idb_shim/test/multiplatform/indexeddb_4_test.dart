@@ -64,8 +64,8 @@ Future<Database> setupDb(IdbFactory idbFactory) {
 Future testRange(db, range, expectedFirst, expectedLast) {
   //var done = expectAsync0(() {});
 
-  Transaction txn = db.transaction(STORE_NAME, 'readonly') as Transaction;
-  ObjectStore objectStore = txn.objectStore(STORE_NAME);
+  final txn = db.transaction(STORE_NAME, 'readonly') as Transaction;
+  final objectStore = txn.objectStore(STORE_NAME);
   var cursors = objectStore
       .openCursor(range: range as KeyRange, autoAdvance: true)
       .asBroadcastStream();
@@ -103,7 +103,7 @@ void main() {
 }
 
 void defineTests(TestContext ctx) {
-  IdbFactory idbFactory = ctx.factory;
+  final idbFactory = ctx.factory;
   //useHtmlConfiguration();
 
   // Don't bother with these tests if it's unsupported.

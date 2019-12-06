@@ -10,10 +10,9 @@ IdbFactory _idbSembastMemoryFactory;
 /// Deprecated.
 @deprecated
 IdbFactory get idbSembastMemoryFactory {
-  if (_idbSembastMemoryFactory == null) {
-    _idbSembastMemoryFactory =
-        IdbFactorySembast(sembast.databaseFactoryMemory, null);
-  }
+  _idbSembastMemoryFactory ??=
+      IdbFactorySembast(sembast.databaseFactoryMemory, null);
+
   return _idbSembastMemoryFactory;
 }
 
@@ -25,10 +24,10 @@ IdbFactory get idbSembastMemoryFactory {
 @deprecated
 IdbFactory get idbPersistentFactory {
   var idbFactory = idbFactoryNative;
-  if (idbFactory == null) {
-    // ignore: deprecated_member_use_from_same_package
-    idbFactory = idbFactoryWebSql;
-  }
+
+  // ignore: deprecated_member_use_from_same_package
+  idbFactory ??= idbFactoryWebSql;
+
   return idbFactory;
 }
 

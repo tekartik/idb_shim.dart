@@ -63,7 +63,7 @@ void dbTest(String description, body,
   test ??= dev_test.test;
   // We save it for later
   // only valid during definition
-  TestContext ctx = _dbTestContext;
+  final ctx = _dbTestContext;
   test(description, () async {
     dbTestName = ctx.dbName;
     await ctx.factory.deleteDatabase(dbTestName);
@@ -74,7 +74,7 @@ void dbTest(String description, body,
 class TestContext {
   IdbFactory factory;
 
-  String get dbName => testDescriptions.join('-') + ".db";
+  String get dbName => testDescriptions.join('-') + '.db';
 
   // special internet explorer handling
   bool isIdbIe = false;
@@ -101,7 +101,7 @@ class SembastTestContext extends TestContext {
   IdbFactorySembast get factory => super.factory as IdbFactorySembast;
 
   @override
-  String get dbName => join(joinAll(testDescriptions), "test.db");
+  String get dbName => join(joinAll(testDescriptions), 'test.db');
 }
 
 class SembastMemoryTestContext extends SembastTestContext {
@@ -141,15 +141,14 @@ IdbFactory idbTestMemoryFactory = idbFactoryMemory;
 Future<Database> setUpSimpleStore(IdbFactory idbFactory, //
     {String dbName = _testDbName,
     IdbObjectStoreMeta meta}) {
-  if (meta == null) {
-    meta = idbSimpleObjectStoreMeta;
-  }
+  meta ??= idbSimpleObjectStoreMeta;
+
   return idbFactory.deleteDatabase(dbName).then((_) {
     void _initializeDatabase(VersionChangeEvent e) {
-      Database db = e.database;
-      ObjectStore objectStore = db.createObjectStore(meta.name,
+      final db = e.database;
+      final objectStore = db.createObjectStore(meta.name,
           keyPath: meta.keyPath, autoIncrement: meta.autoIncrement);
-      for (IdbIndexMeta indexMeta in meta.indecies) {
+      for (final indexMeta in meta.indecies) {
         objectStore.createIndex(indexMeta.name, indexMeta.keyPath,
             unique: indexMeta.unique, multiEntry: indexMeta.multiEntry);
       }
@@ -166,7 +165,7 @@ bool isDatabaseError(e) {
 
 bool isTransactionReadOnlyError(e) {
   // if (e is DatabaseError) {
-  String message = e.toString().toLowerCase();
+  final message = e.toString().toLowerCase();
   if (message.contains('readonly')) {
     return true;
   }
@@ -179,7 +178,7 @@ bool isTransactionReadOnlyError(e) {
 
 bool isTransactionInactiveError(e) {
   // if (e is DatabaseError) {
-  String message = e.toString().toLowerCase();
+  final message = e.toString().toLowerCase();
   if (message.contains('inactive')) {
     return true;
   }
@@ -189,7 +188,7 @@ bool isTransactionInactiveError(e) {
 
 bool isNotFoundError(e) {
   //if (e is DatabaseError) {
-  String message = e.toString().toLowerCase();
+  final message = e.toString().toLowerCase();
   if (message.contains('notfounderror')) {
     return true;
   }

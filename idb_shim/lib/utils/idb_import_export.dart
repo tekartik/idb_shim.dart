@@ -43,16 +43,15 @@ Future<Database> sdbImportDatabase(
   // if it is a sembast factory use it!
   // if (false) {
   if (dstFactory is IdbFactorySembast) {
-    sdb.Database sdbDb = await importDatabase(
+    final sdbDb = await importDatabase(
         data, dstFactory.sdbFactory, dstFactory.getDbPath(dstDbName));
     return dstFactory.openFromSdbDatabase(sdbDb);
   } else {
     // import to a memory one
-    sdb.Database sdbDb =
-        await importDatabase(data, sdb.databaseFactoryMemory, null);
-    Database tmpDb = await (idbFactoryMemory as IdbFactorySembast)
+    final sdbDb = await importDatabase(data, sdb.databaseFactoryMemory, null);
+    final tmpDb = await (idbFactoryMemory as IdbFactorySembast)
         .openFromSdbDatabase(sdbDb);
-    Database db = await copyDatabase(tmpDb, dstFactory, dstDbName);
+    final db = await copyDatabase(tmpDb, dstFactory, dstDbName);
     tmpDb.close();
     return db;
   }

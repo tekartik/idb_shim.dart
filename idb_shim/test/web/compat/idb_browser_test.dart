@@ -1,4 +1,4 @@
-@TestOn("browser")
+@TestOn('browser')
 library idb_browser_test;
 
 // ignore_for_file: deprecated_member_use_from_same_package
@@ -40,7 +40,7 @@ void main() {
         IdbFactory idbFactory =
             // ignore: deprecated_member_use_from_same_package
             IdbNativeFactory();
-        TestContext ctx = TestContext()..factory = idbFactory;
+        final ctx = TestContext()..factory = idbFactory;
         simpleTest(ctx);
       }
     });

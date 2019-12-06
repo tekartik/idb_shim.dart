@@ -9,41 +9,41 @@ export 'src/client/client.dart';
 export 'src/client/error.dart';
 
 /// Read-write mode for transaction.
-const String idbModeReadWrite = "readwrite";
+const String idbModeReadWrite = 'readwrite';
 
 /// Read-only mode for transaction.
-const String idbModeReadOnly = "readonly";
+const String idbModeReadOnly = 'readonly';
 
 /// Default forward mode for cursor.
-const String idbDirectionNext = "next";
+const String idbDirectionNext = 'next';
 
 /// Backward mode for cursor.
-const String idbDirectionPrev = "prev";
+const String idbDirectionPrev = 'prev';
 
 /// Factory name using native indexeddb implementation.
-const idbFactoryNameNative = "native";
+const idbFactoryNameNative = 'native';
 
 /// Factory name using Sembast implementation
-const idbFactoryNameSembastIo = "sembast_io";
+const idbFactoryNameSembastIo = 'sembast_io';
 
 /// Factory name using Sembast io implementation.
 @Deprecated('Use idbFactoryNameSembastIo instead')
-const idbFactoryNameIo = "io";
+const idbFactoryNameIo = 'io';
 
 /// Factory name using Sembast memory implementation
-const idbFactoryNameSembastMemory = "sembast_memory";
+const idbFactoryNameSembastMemory = 'sembast_memory';
 
 /// Factory name that could be used to use Sembast Memory implementation.
-const idbFactoryNameMemory = "memory";
+const idbFactoryNameMemory = 'memory';
 
 /// Pseudo - best persistent shim (indexeddb).
-const idbFactoryNamePersistent = "persistent";
+const idbFactoryNamePersistent = 'persistent';
 
 /// Pseudo - best browser shim (persistent of it not available memory).
-const idbFactoryNameBrowser = "browser";
+const idbFactoryNameBrowser = 'browser';
 
 /// Shim using WebSql implementation - no longer supported.
-const idbFactoryNameWebSql = "websql";
+const idbFactoryNameWebSql = 'websql';
 
 ///
 /// represents a cursor for traversing or iterating over multiple records in a
@@ -290,7 +290,7 @@ abstract class ObjectStore {
   List<String> get indexNames;
 
   @override
-  String toString() => "$name (key $keyPath auto $autoIncrement)";
+  String toString() => '$name (key $keyPath auto $autoIncrement)';
 }
 
 ///
@@ -649,7 +649,7 @@ abstract class IdbFactory {
 class DatabaseError extends Error {
   /// Error message.
   String get message => _message;
-  String _message;
+  final String _message;
 
   StackTrace _stackTrace;
 
@@ -673,7 +673,7 @@ class DatabaseError extends Error {
 class DatabaseException implements Exception {
   /// Error message.
   String get message => _message;
-  String _message;
+  final String _message;
 
   /// Create a database exception with a message.
   DatabaseException(this._message);
@@ -681,8 +681,8 @@ class DatabaseException implements Exception {
   @override
   String toString() {
     if (message == null) {
-      return "DatabaseException";
+      return 'DatabaseException';
     }
-    return "DatabaseException: $message";
+    return 'DatabaseException: $message';
   }
 }

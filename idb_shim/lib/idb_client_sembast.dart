@@ -8,7 +8,7 @@ import 'package:idb_shim/src/sembast/sembast_factory.dart';
 import 'package:sembast/sembast.dart' as sdb;
 
 /// Sembast factory name.
-const idbFactoryNameSembast = "sembast";
+const idbFactoryNameSembast = 'sembast';
 
 /// Sembast memory based factory
 IdbFactory get idbFactorySembastMemory => idbFactorySembastMemoryImpl;

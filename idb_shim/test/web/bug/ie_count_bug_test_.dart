@@ -6,22 +6,22 @@ import 'package:test/test.dart';
 void main() {
   test('count', () async {
     if (IdbFactory.supported) {
-      String dbName = "com.tekartik.ie_count_bug.test";
+      final dbName = 'com.tekartik.ie_count_bug.test';
       await window.indexedDB.deleteDatabase(dbName);
       void _setupDb(e) {
         final db = e.target.result as Database;
-        db.createObjectStore("store", autoIncrement: true);
+        db.createObjectStore('store', autoIncrement: true);
       }
 
-      Database db = await window.indexedDB
+      final db = await window.indexedDB
           .open(dbName, version: 1, onUpgradeNeeded: _setupDb);
 
-      Transaction transaction = db.transaction("store", "readwrite");
-      var objectStore = transaction.objectStore("store");
-      Map value = {'sample': 'value'};
+      final transaction = db.transaction('store', 'readwrite');
+      var objectStore = transaction.objectStore('store');
+      final value = {'sample': 'value'};
       final key = await objectStore.add(value) as int;
       print('added $key $value');
-      int count = await objectStore.count(key);
+      var count = await objectStore.count(key);
       print('count_by_key: $count');
       expect(count, 1);
 

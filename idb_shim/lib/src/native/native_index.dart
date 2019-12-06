@@ -47,7 +47,7 @@ class IndexNative extends Index {
         });
         */
       } else if (keyOrRange is KeyRange) {
-        idb.KeyRange idbKeyRange = toNativeKeyRange(keyOrRange);
+        final idbKeyRange = toNativeKeyRange(keyOrRange);
         countFuture = idbIndex.count(idbKeyRange);
       } else {
         countFuture = idbIndex.count(keyOrRange);
@@ -59,7 +59,7 @@ class IndexNative extends Index {
   @override
   Stream<Cursor> openKeyCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
-    CursorControllerNative ctlr = CursorControllerNative(idbIndex.openKeyCursor(
+    final ctlr = CursorControllerNative(idbIndex.openKeyCursor(
         key: key,
         range: range == null ? null : toNativeKeyRange(range),
         direction: direction,
@@ -71,12 +71,11 @@ class IndexNative extends Index {
   @override
   Stream<CursorWithValue> openCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
-    CursorWithValueControllerNative ctlr = CursorWithValueControllerNative(
-        idbIndex.openCursor(
-            key: key,
-            range: range == null ? null : toNativeKeyRange(range),
-            direction: direction,
-            autoAdvance: autoAdvance));
+    final ctlr = CursorWithValueControllerNative(idbIndex.openCursor(
+        key: key,
+        range: range == null ? null : toNativeKeyRange(range),
+        direction: direction,
+        autoAdvance: autoAdvance));
 
     return ctlr.stream;
   }

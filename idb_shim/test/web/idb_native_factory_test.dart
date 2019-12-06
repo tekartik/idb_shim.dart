@@ -1,4 +1,4 @@
-@TestOn("browser")
+@TestOn('browser')
 library idb_browser_test;
 
 import 'dart:html';

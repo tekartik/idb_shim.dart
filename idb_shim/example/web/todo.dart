@@ -2,7 +2,7 @@
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the COPYING file.
 
-// This is a port of "A Simple ToDo List Using HTML5 IndexedDB" to Dart.
+// This is a port of 'A Simple ToDo List Using HTML5 IndexedDB' to Dart.
 // See: http://www.html5rocks.com/en/tutorials/indexeddb/todo/
 
 import 'dart:async';
@@ -25,11 +25,11 @@ class TodoList {
     querySelector('input#submit').onClick.listen((e) => _onAddTodo());
   }
 
-  static final String _todosDb = "com.tekartik.idb.todo";
-  static final String _todosStore = "todos";
+  static final String _todosDb = 'com.tekartik.idb.todo';
+  static final String _todosStore = 'todos';
 
   idb.Database _db;
-  int _version = 2;
+  final _version = 2;
 
   Future open() async {
     //return window.indexedDB.open(_TODOS_DB, version: _version,
@@ -52,7 +52,7 @@ class TodoList {
   }
 
   void _onUpgradeNeeded(idb.VersionChangeEvent e) {
-    idb.Database db = (e.target as idb.OpenDBRequest).result;
+    final db = (e.target as idb.OpenDBRequest).result;
     if (!db.objectStoreNames.contains(_todosStore)) {
       db.createObjectStore(_todosStore, keyPath: 'timeStamp');
     }
@@ -117,15 +117,15 @@ class TodoList {
 /// Typically the argument is window.location.search
 ///
 Map<String, String> getArguments(String search) {
-  Map<String, String> params = {};
+  final params = <String, String>{};
   if (search != null) {
-    int questionMarkIndex = search.indexOf('?');
+    final questionMarkIndex = search.indexOf('?');
     if (questionMarkIndex != -1) {
       search = search.substring(questionMarkIndex + 1);
     }
-    search.split("&").forEach((e) {
-      if (e.contains("=")) {
-        List<String> split = e.split("=");
+    search.split('&').forEach((e) {
+      if (e.contains('=')) {
+        final split = e.split('=');
         params[split[0]] = split[1];
       } else {
         if (e.isNotEmpty) {
@@ -139,14 +139,14 @@ Map<String, String> getArguments(String search) {
 
 Future main() async {
   var urlArgs = getArguments(window.location.search);
-  String idbFactoryName = urlArgs['idb_factory'];
+  final idbFactoryName = urlArgs['idb_factory'];
   // init factory from url
   idbFactory = idb.getIdbFactory(idbFactoryName);
   if (idbFactory == null) {
     window.alert(
         "No idbFactory of type '$idbFactoryName' supported on this browser");
   } else {
-    querySelector("#idb span").innerHtml = "Using '${idbFactory.name}'";
+    querySelector('#idb span').innerHtml = "Using '${idbFactory.name}'";
     await TodoList().open();
   }
 }

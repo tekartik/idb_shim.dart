@@ -1,4 +1,4 @@
-@TestOn("vm")
+@TestOn('vm')
 library all_test_console;
 
 import 'package:dev_test/test.dart';

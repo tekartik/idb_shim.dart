@@ -10,19 +10,19 @@ void main() {
   test('bug', () async {
     // Turn on dev logs
     sembastDebug = true;
-    var dbName = "bug.db";
+    var dbName = 'bug.db';
     try {
       try {
         await idbFactory.deleteDatabase(dbName);
       } catch (_) {}
 
       void _initializeDatabase(VersionChangeEvent e) {
-        Database db = e.database;
+        final db = e.database;
         db.createObjectStore(testStoreName);
       }
 
       print(
-          " init $_initializeDatabase ${_initializeDatabase != null ? "NOT NULL" : "NULL"}");
+          ' init $_initializeDatabase ${_initializeDatabase != null ? 'NOT NULL' : 'NULL'}');
 
       var db = await idbFactory.open(dbName,
           version: 1, onUpgradeNeeded: _initializeDatabase);

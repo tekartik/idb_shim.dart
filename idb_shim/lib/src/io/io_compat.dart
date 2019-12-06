@@ -8,9 +8,8 @@ IdbFactory get idbSembastMemoryFactory => idbFactorySembastMemory;
 /// choose manually
 @deprecated
 IdbFactory getIdbFactory({String name, String path}) {
-  if (name == null) {
-    name = idbFactoryNamePersistent;
-  }
+  name ??= idbFactoryNamePersistent;
+
   switch (name) {
     case idbFactoryNameSembastMemory:
     case idbFactoryNameMemory:

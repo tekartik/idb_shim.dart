@@ -1,4 +1,4 @@
-@TestOn("browser")
+@TestOn('browser')
 library idb_shim.test_runner_client_native_test;
 
 import 'package:idb_shim/idb_client.dart';
@@ -16,8 +16,8 @@ void main() {
 void idbNativeFactoryTests(IdbFactory idbFactoryNative) {
   group('native', () {
     if (idbFactoryNative != null) {
-      IdbFactory idbFactory = idbFactoryNative;
-      TestContext ctx = TestContext()..factory = idbFactory;
+      final idbFactory = idbFactoryNative;
+      final ctx = TestContext()..factory = idbFactory;
 
       // ie and idb special test marker
       ctx.isIdbIe = isIe;
@@ -58,11 +58,11 @@ void idbNativeFactoryTests(IdbFactory idbFactoryNative) {
           transaction = db.transaction(testStoreName, idbModeReadWrite);
           objectStore = transaction.objectStore(testStoreName);
           var index = objectStore.index('test');
-          int record1Key =
+          final record1Key =
               await objectStore.put({'year': 2018, 'name': 'John'}) as int;
-          int record2Key =
+          final record2Key =
               await objectStore.put({'year': 2018, 'name': 'Jack'}) as int;
-          int record3Key =
+          final record3Key =
               await objectStore.put({'year': 2017, 'name': 'John'}) as int;
           expect(index.keyPath, ['year', 'name']);
           expect(await index.getKey([2018, 'Jack']), record2Key);
@@ -115,7 +115,7 @@ void idbNativeFactoryTests(IdbFactory idbFactoryNative) {
             skip: isEdge || isIe);
       });
     } else {
-      test("idb native not supported", null, skip: "idb native not supported");
+      test('idb native not supported', null, skip: 'idb native not supported');
     }
   });
 }

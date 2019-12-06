@@ -5,14 +5,14 @@ import '../../idb.dart';
 // native exception won't be of this type
 // the text here has been copied to match the DomException message
 class DatabaseReadOnlyError extends DatabaseError {
-  static String _errorMessage = "ReadOnlyError: The transaction is read-only.";
+  static final _errorMessage = 'ReadOnlyError: The transaction is read-only.';
 
   DatabaseReadOnlyError() : super(_errorMessage);
 }
 
 class DatabaseStoreNotFoundError extends DatabaseError {
   static const String _errorMessage =
-      "NotFoundError: One of the specified object stores was not found.";
+      'NotFoundError: One of the specified object stores was not found.';
 
   static String storeMessage(var storeOrStores) =>
       "NotFoundError: One of the specified object stores '$storeOrStores' was not found.";
@@ -33,8 +33,8 @@ class DatabaseTransactionStoreNotFoundError extends DatabaseError {
 }
 
 class DatabaseNoKeyError extends DatabaseError {
-  static String _errorMessage =
-      "DataError: The data provided does not meet requirements. No key or key range specified.";
+  static final String _errorMessage =
+      'DataError: The data provided does not meet requirements. No key or key range specified.';
 
   DatabaseNoKeyError() : super(_errorMessage);
 }

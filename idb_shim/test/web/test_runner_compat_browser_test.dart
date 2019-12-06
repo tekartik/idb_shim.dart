@@ -1,4 +1,4 @@
-@TestOn("browser")
+@TestOn('browser')
 library idb_shim.test_runner_all_browser_test;
 
 import 'package:dev_test/test.dart';

@@ -3,7 +3,6 @@ library idb_shim.test_runner_client_sembast_fs_test;
 import 'dart:convert';
 
 import 'package:idb_shim/idb_client.dart';
-import 'package:idb_shim/idb_client_sembast.dart';
 import 'package:idb_shim/src/sembast/sembast_database.dart' as idb_sdb;
 import 'package:sembast/sembast.dart' as sdb;
 import 'package:sembast/sembast_memory.dart' as sdb;
@@ -20,7 +19,7 @@ void main() {
 }
 
 void defineTests(SembastFsTestContext ctx) {
-  IdbFactorySembast idbFactory = ctx.factory;
+  final idbFactory = ctx.factory;
 
   group('simple', () {
     test('open', () async {
@@ -33,10 +32,7 @@ void defineTests(SembastFsTestContext ctx) {
   test_runner.defineTests(ctx);
 
   dbGroup(ctx, 'format', () {
-    // to compare
-    //sdb.FsDatabaseFactory tmpSdbFactory = sdb.ioDatabaseFactory; //memoryFsDatabaseFactory;
-    sdb.DatabaseFactoryFs tmpSdbFactory =
-        sdb.databaseFactoryMemoryFs as sdb.DatabaseFactoryFs;
+    final tmpSdbFactory = sdb.databaseFactoryMemoryFs as sdb.DatabaseFactoryFs;
 
     Database db;
     sdb.Database memSdb;
@@ -50,7 +46,7 @@ void defineTests(SembastFsTestContext ctx) {
     }
 
     Future<List<Map>> getFileContent(File file) async {
-      List<Map> content = [];
+      final content = <Map>[];
       await utf8.decoder
           .bind(file.openRead())
           .transform(const LineSplitter())
@@ -72,8 +68,8 @@ void defineTests(SembastFsTestContext ctx) {
     }
 
     Future<sdb.Database> openTmpDatabase([int version = 1]) async {
-      String sdbName = "${dbTestName}_mem";
-      sdb.Database db = await tmpSdbFactory.openDatabase(sdbName,
+      final sdbName = '${dbTestName}_mem';
+      final db = await tmpSdbFactory.openDatabase(sdbName,
           version: version, mode: sdb.DatabaseMode.empty);
       return db;
     }
@@ -98,8 +94,8 @@ void defineTests(SembastFsTestContext ctx) {
       IdbObjectStoreMeta storeMeta;
 
       void _initializeDatabase(VersionChangeEvent e) {
-        Database db = e.database;
-        ObjectStore store = db.createObjectStore(testStoreName,
+        final db = e.database;
+        final store = db.createObjectStore(testStoreName,
             keyPath: testNameField, autoIncrement: true);
         storeMeta = IdbObjectStoreMeta.fromObjectStore(store);
       }
@@ -124,13 +120,12 @@ void defineTests(SembastFsTestContext ctx) {
       IdbObjectStoreMeta storeMeta;
 
       void _initializeDatabase(VersionChangeEvent e) {
-        Database db = e.database;
-        ObjectStore store =
-            db.createObjectStore(testStoreName, autoIncrement: true);
+        final db = e.database;
+        final store = db.createObjectStore(testStoreName, autoIncrement: true);
         storeMeta = IdbObjectStoreMeta.fromObjectStore(store);
-        Index index = store.createIndex(testNameIndex, testNameField,
+        final index = store.createIndex(testNameIndex, testNameField,
             unique: true, multiEntry: true);
-        IdbIndexMeta indexMeta = IdbIndexMeta.fromIndex(index);
+        final indexMeta = IdbIndexMeta.fromIndex(index);
         storeMeta.putIndex(indexMeta);
       }
 

@@ -4,30 +4,16 @@ import 'dart:html';
 
 bool _isIe;
 
-bool get isIe {
-  if (_isIe == null) {
-    _isIe = isUserAgentIe(window.navigator.userAgent);
-  }
-  return _isIe;
-}
+bool get isIe => _isIe ??= isUserAgentIe(window.navigator.userAgent);
 
 bool _isEdge;
 
-bool get isEdge {
-  if (_isEdge == null) {
-    _isEdge = isUserAgentEdge(window.navigator.userAgent);
-  }
-  return _isEdge;
-}
+bool get isEdge => _isEdge ??= isUserAgentEdge(window.navigator.userAgent);
 
 bool _isSafari;
 
-bool get isSafari {
-  if (_isSafari == null) {
-    _isSafari = isUserAgentSafari(window.navigator.userAgent);
-  }
-  return _isSafari;
-}
+bool get isSafari =>
+    _isSafari ??= isUserAgentSafari(window.navigator.userAgent);
 
 bool isUserAgentIe(String userAgent) {
   // Yoga IE 11: Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; Touch; .NET4.0C; .NET4.0E; .NET CLR 2.0.50727; .NET CLR 3.0.30729; .NET CLR 3.5.30729; Tablet PC 2.0; MALNJS; rv:11.0) like Gecko

@@ -10,22 +10,24 @@ void main() => defineTests();
 void defineTests() {
   group('value', () {
     test('Map', () {
-      expect(encodeValue({}), "{}");
+      expect(encodeValue({}), '{}');
     });
 
     test('String', () {
-      expect(encodeValue("test"), '"test"');
+      expect(encodeValue('test'), '"test"');
+      expect(encodeValue("'test'"), '"\'test\'"');
+      expect(encodeValue('"test"'), '"\\"test\\""');
     });
 
     test('int', () {
-      expect(encodeValue(1), "1");
+      expect(encodeValue(1), '1');
     });
 
     // not supported
     test('DateTime', () {
       try {
-        expect(encodeValue(DateTime.now()), "xxxx");
-        fail("should fail");
+        expect(encodeValue(DateTime.now()), 'xxxx');
+        fail('should fail');
       } catch (e) {
         //devPrint(e);
       }
@@ -38,9 +40,9 @@ void defineTests() {
       keyRange = keyArrayRangeAt(KeyRange.lowerBound([1], false), 0);
       expect(keyRange.lower, 1);
       expect(keyRange.upper, null);
-      keyRange = keyArrayRangeAt(KeyRange.upperBound(["John"], false), 0);
+      keyRange = keyArrayRangeAt(KeyRange.upperBound(['John'], false), 0);
       expect(keyRange.lower, null);
-      expect(keyRange.upper, "John");
+      expect(keyRange.upper, 'John');
     });
   });
 }

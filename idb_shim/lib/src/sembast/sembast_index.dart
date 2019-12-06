@@ -14,7 +14,7 @@ class IndexSembast extends Index with IndexWithMetaMixin {
 
   IndexSembast(this.store, this.meta);
 
-  Future<T> inTransaction<T>(FutureOr<T> computation()) {
+  Future<T> inTransaction<T>(FutureOr<T> Function() computation) {
     return store.inTransaction(computation);
   }
 
@@ -42,8 +42,7 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   Future get(key) {
     checkKeyParam(key);
     return inTransaction(() {
-      sdb.Finder finder =
-          sdb.Finder(filter: _indexKeyOrRangeFilter(key), limit: 1);
+      final finder = sdb.Finder(filter: _indexKeyOrRangeFilter(key), limit: 1);
       return store.sdbStore
           .find(store.sdbClient, finder: finder)
           .then((records) {
@@ -58,8 +57,7 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   Future getKey(key) {
     checkKeyParam(key);
     return inTransaction(() {
-      sdb.Finder finder =
-          sdb.Finder(filter: _indexKeyOrRangeFilter(key), limit: 1);
+      final finder = sdb.Finder(filter: _indexKeyOrRangeFilter(key), limit: 1);
       return store.sdbStore
           .find(store.sdbClient, finder: finder)
           .then((records) {
@@ -73,10 +71,8 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   @override
   Stream<CursorWithValue> openCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
-    IdbCursorMeta cursorMeta =
-        IdbCursorMeta(key, range, direction, autoAdvance);
-    IndexCursorWithValueControllerSembast ctlr =
-        IndexCursorWithValueControllerSembast(this, cursorMeta);
+    final cursorMeta = IdbCursorMeta(key, range, direction, autoAdvance);
+    final ctlr = IndexCursorWithValueControllerSembast(this, cursorMeta);
 
     inTransaction(() {
       return ctlr.openCursor();
@@ -88,10 +84,8 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   @override
   Stream<Cursor> openKeyCursor(
       {key, KeyRange range, String direction, bool autoAdvance}) {
-    IdbCursorMeta cursorMeta =
-        IdbCursorMeta(key, range, direction, autoAdvance);
-    IndexKeyCursorControllerSembast ctlr =
-        IndexKeyCursorControllerSembast(this, cursorMeta);
+    final cursorMeta = IdbCursorMeta(key, range, direction, autoAdvance);
+    final ctlr = IndexKeyCursorControllerSembast(this, cursorMeta);
 
     inTransaction(() {
       return ctlr.openCursor();

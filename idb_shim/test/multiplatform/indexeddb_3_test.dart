@@ -61,10 +61,10 @@ Future<Database> setupDb(IdbFactory idbFactory) {
 }
 
 Future<Database> readAllViaCursor(Database db) {
-  Transaction txn = db.transaction(STORE_NAME, 'readonly');
-  ObjectStore objectStore = txn.objectStore(STORE_NAME);
-  int itemCount = 0;
-  int sumKeys = 0;
+  final txn = db.transaction(STORE_NAME, 'readonly');
+  final objectStore = txn.objectStore(STORE_NAME);
+  var itemCount = 0;
+  var sumKeys = 0;
   int lastKey;
 
   var cursors = objectStore.openCursor().asBroadcastStream();
@@ -86,10 +86,10 @@ Future<Database> readAllViaCursor(Database db) {
 }
 
 Future<Database> readAllReversedViaCursor(Database db) {
-  Transaction txn = db.transaction(STORE_NAME, 'readonly');
-  ObjectStore objectStore = txn.objectStore(STORE_NAME);
-  int itemCount = 0;
-  int sumKeys = 0;
+  final txn = db.transaction(STORE_NAME, 'readonly');
+  final objectStore = txn.objectStore(STORE_NAME);
+  var itemCount = 0;
+  var sumKeys = 0;
   int lastKey;
 
   var cursors = objectStore.openCursor(direction: 'prev').asBroadcastStream();
@@ -113,7 +113,7 @@ void main() {
 }
 
 void defineTests(TestContext ctx) {
-  IdbFactory idbFactory = ctx.factory;
+  final idbFactory = ctx.factory;
   //useHtmlConfiguration();
 
   // Don't bother with these tests if it's unsupported.
