@@ -35,7 +35,34 @@ void defineTests(TestContext ctx) {
       expect(idbFactory.cmp(3.14, 3.45), -1);
       expect(idbFactory.cmp(3.14, 3.14), 0);
       expect(idbFactory.cmp(3.64, 3.45), 1);
-      //expect(idbFactory.cmp(1, '0'), -1);
+
+      var hasFailed = false;
+      try {
+        idbFactory.cmp(null, 1);
+      } catch (_) {
+        // DataError: Failed to execute 'cmp' on 'IDBFactory': The parameter is not a valid key
+        hasFailed = true;
+      }
+      expect(hasFailed, isTrue);
+
+      hasFailed = false;
+      try {
+        idbFactory.cmp(1, null);
+      } catch (_) {
+        // DataError: Failed to execute 'cmp' on 'IDBFactory': The parameter is not a valid key
+        hasFailed = true;
+      }
+      expect(hasFailed, isTrue);
+
+      // Fail to compare bool
+      hasFailed = false;
+      try {
+        idbFactory.cmp(false, true);
+      } catch (_) {
+        // DataError: Failed to execute 'cmp' on 'IDBFactory': The parameter is not a valid key
+        hasFailed = true;
+      }
+      expect(hasFailed, isTrue);
     });
 
     test('cmp array', () {
