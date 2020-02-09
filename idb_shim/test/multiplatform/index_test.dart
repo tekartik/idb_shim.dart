@@ -873,47 +873,61 @@ void defineTests(TestContext ctx) {
             await testIndex(indexMeta);
           }
         });
+
+        test('one', () async {
+          await testIndex(idbIndexMeta6);
+        });
       });
     }
 
-    /*
     group('one index array not unique', () {
-      _setUp() async {
+      Future _setUp() async {
         await _setupDeleteDb();
 
         void _initializeDatabase(VersionChangeEvent e) {
-          Database db = e.database;
-          ObjectStore objectStore =
-          db.createObjectStore(testStoreName, autoIncrement: true);
-          objectStore.createIndex(testNameIndex, [testNameField, testNameField2], unique: false);
+          var db = e.database;
+          var objectStore =
+              db.createObjectStore(testStoreName, autoIncrement: true);
+          objectStore.createIndex(
+              testNameIndex, [testNameField, testNameField2],
+              unique: false);
         }
+
         db = await idbFactory.open(_dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
 
-      solo_test('add_twice_same_key', () async {
+      test('add_twice_same_key', () async {
         await _setUp();
         _createTransaction();
-        Map value1 = {testNameField: 'test1', testNameField2: 456};
-        Index index = objectStore.index(testNameIndex);
-        await objectStore.add(value1);
+        var value1 = {testNameField: 'test1', testNameField2: 456};
+        var index = objectStore.index(testNameIndex);
+        var key1 = await objectStore.add(value1);
         await objectStore.add(value1);
         index = objectStore.index(testNameIndex);
-        int count = await index.count([new KeyRange.only(['test1', 456])]); //, new KeyRange.only(456)]);
-        print('6');
+        var count = await index.count(KeyRange.only(['test1', 456]));
         expect(count, 2);
+        count = await index.count(['test1', 456]);
+        expect(count, 2);
+
+        expect(await index.get(['test1', 456]), value1);
+        expect(await index.getKey(['test1', 456]), key1);
+
+        expect(await index.get(['test1', 4567]), isNull);
+        expect(await index.getKey(['test1', 4567]), isNull);
       });
 
       test('get_null', () async {
         await _setUp();
         _createTransaction();
-        Index index = objectStore.index(testNameIndex);
+        var index = objectStore.index(testNameIndex);
         try {
           await index.get(null);
           fail('error');
         } on DatabaseError catch (e) {
+          // DataError: Failed to execute 'get' on 'IDBIndex': No key or key range specified.
           expect(e, isNotNull);
         }
       });
@@ -921,7 +935,7 @@ void defineTests(TestContext ctx) {
       test('get_boolean', () async {
         await _setUp();
         _createTransaction();
-        Index index = objectStore.index(testNameIndex);
+        var index = objectStore.index(testNameIndex);
         try {
           await index.get(null);
           fail('error');
@@ -932,7 +946,7 @@ void defineTests(TestContext ctx) {
       test('getKey_null', () async {
         await _setUp();
         _createTransaction();
-        Index index = objectStore.index(testNameIndex);
+        var index = objectStore.index(testNameIndex);
         try {
           await index.getKey(null);
           fail('error');
@@ -944,7 +958,7 @@ void defineTests(TestContext ctx) {
       test('getKey_boolean', () async {
         await _setUp();
         _createTransaction();
-        Index index = objectStore.index(testNameIndex);
+        var index = objectStore.index(testNameIndex);
         try {
           await index.getKey(true);
           fail('error');
@@ -972,6 +986,5 @@ void defineTests(TestContext ctx) {
 //        });
 //      });
     });
-    */
   });
 }

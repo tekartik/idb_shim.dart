@@ -30,12 +30,15 @@ IdbIndexMeta idbIndexMeta2 = IdbIndexMeta('name', 'my_key', true, false);
 IdbIndexMeta idbIndexMeta3 = IdbIndexMeta('name', 'my_key', false, true);
 IdbIndexMeta idbIndexMeta4 = IdbIndexMeta('name', 'other_key', true, true);
 IdbIndexMeta idbIndexMeta5 = IdbIndexMeta('other_name', 'my_key', true, true);
+IdbIndexMeta idbIndexMeta6 =
+    IdbIndexMeta('path_array', ['my_key', 'other_key'], true, true);
 final List<IdbIndexMeta> idbIndexMetas = [
   idbIndexMeta1,
   idbIndexMeta2,
   idbIndexMeta3,
   idbIndexMeta4,
-  idbIndexMeta5
+  idbIndexMeta5,
+  idbIndexMeta6
 ];
 
 void main() => defineTests();

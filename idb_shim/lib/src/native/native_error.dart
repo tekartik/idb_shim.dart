@@ -7,20 +7,22 @@ import 'package:idb_shim/idb.dart';
 T catchNativeError<T>(T Function() action) {
   try {
     return action();
-  } on Error catch (e) {
-    if (e is DatabaseError) {
-      rethrow;
-    } else {
-      throw DatabaseError(e.toString());
-    }
   } catch (e) {
-    if (e is DatabaseError) {
+    if (!_handleError(e)) {
       rethrow;
-    } else {
-      //devPrint(e);
-      //devPrint(e.runtimeType);
-      throw DatabaseError(e.toString());
     }
+    // We should never get there
+    return null;
+  }
+}
+
+bool _handleError(dynamic e) {
+  if (e is DatabaseError) {
+    return false;
+  } else if (e is DatabaseException) {
+    return false;
+  } else {
+    throw DatabaseError(e.toString());
   }
 }
 
@@ -28,7 +30,14 @@ T catchNativeError<T>(T Function() action) {
 // We no longer catch the native exception asynchronously
 // as it makes the stack trace lost...
 //
-Future<T> catchAsyncNativeError<T>(Future<T> Function() action) {
-  var result = catchNativeError(action);
-  return result;
+Future<T> catchAsyncNativeError<T>(Future<T> Function() action) async {
+  try {
+    return await action();
+  } catch (e) {
+    if (!_handleError(e)) {
+      rethrow;
+    }
+    // We should never get there
+    return null;
+  }
 }

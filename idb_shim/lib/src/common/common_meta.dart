@@ -328,7 +328,7 @@ class IdbObjectStoreMeta {
   }
 
   @override
-  int get hashCode => const MapEquality().hash(toMap());
+  int get hashCode => name.hashCode;
 
   @override
   bool operator ==(o) {
@@ -434,19 +434,24 @@ class IdbIndexMeta {
   IdbIndexMeta.fromMap(Map<String, dynamic> map) //
       : this(
             map['name'] as String, //
-            map['keyPath'] as String, //
+            map['keyPath'],
             map['unique'] as bool, //
             map['multiEntry'] as bool);
 
   IdbIndexMeta.fromIndex(Index index)
-      : this(index.name, index.keyPath as String, index.unique,
-            index.multiEntry);
+      : this(index.name, index.keyPath, index.unique, index.multiEntry);
 
   Map toDebugMap() {
     return toMap();
   }
 
   Map<String, dynamic> toMap() {
+    dynamic keyPath;
+    if (this.keyPath is Iterable) {
+      keyPath = this.keyPath?.cast<String>();
+    } else {
+      keyPath = this.keyPath?.toString();
+    }
     var map = <String, dynamic>{'name': name, 'keyPath': keyPath};
     if (unique) {
       map['unique'] = unique;
@@ -463,12 +468,12 @@ class IdbIndexMeta {
   }
 
   @override
-  int get hashCode => const MapEquality().hash(toMap());
+  int get hashCode => name.hashCode; //const MapEquality().hash(toMap());
 
   @override
   bool operator ==(o) {
     if (o is IdbIndexMeta) {
-      return const MapEquality().equals(toMap(), o.toMap());
+      return const DeepCollectionEquality().equals(toMap(), o.toMap());
     }
     return false;
   }
