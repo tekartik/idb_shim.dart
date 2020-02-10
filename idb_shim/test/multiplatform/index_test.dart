@@ -840,30 +840,30 @@ void defineTests(TestContext ctx) {
         var index = 0;
 
         Future testIndex(IdbIndexMeta indexMeta) async {
-          final _dbName = '$dbTestName-${++index}';
-          await idbFactory.deleteDatabase(_dbName);
-          final storeMeta = idbSimpleObjectStoreMeta.clone();
-          storeMeta.putIndex(indexMeta);
-          return setUpSimpleStore(idbFactory, meta: storeMeta, dbName: _dbName)
-              .then((Database db) {
+          try {
+            final _dbName = '$dbTestName-${++index}';
+            await idbFactory.deleteDatabase(_dbName);
+            final storeMeta = idbSimpleObjectStoreMeta.clone();
+            storeMeta.putIndex(indexMeta);
+            var db = await setUpSimpleStore(idbFactory,
+                meta: storeMeta, dbName: _dbName);
             db.close();
-          }).then((_) {
-            return idbFactory.open(_dbName).then((Database db) {
-              final transaction =
-                  db.transaction(storeMeta.name, idbModeReadOnly);
-              final objectStore = transaction.objectStore(storeMeta.name);
-              final index = objectStore.index(indexMeta.name);
-              var readMeta = IdbIndexMeta.fromIndex(index);
+            db = await idbFactory.open(_dbName);
 
-              // multi entry not supported on ie
-              if (ctx.isIdbIe) {
-                readMeta = IdbIndexMeta(readMeta.name, readMeta.keyPath,
-                    readMeta.unique, indexMeta.multiEntry);
-              }
-              expect(readMeta, indexMeta);
-              db.close();
-            });
-          });
+            final transaction = db.transaction(storeMeta.name, idbModeReadOnly);
+            final objectStore = transaction.objectStore(storeMeta.name);
+            final storeIndex = objectStore.index(indexMeta.name);
+            var readMeta = IdbIndexMeta.fromIndex(storeIndex);
+
+            // multi entry not supported on ie
+            if (ctx.isIdbIe) {
+              readMeta = IdbIndexMeta(readMeta.name, readMeta.keyPath,
+                  readMeta.unique, indexMeta.multiEntry);
+            }
+            expect(readMeta, indexMeta);
+          } finally {
+            db.close();
+          }
         }
 
         test('all', () async {
@@ -877,6 +877,18 @@ void defineTests(TestContext ctx) {
         test('one', () async {
           await testIndex(idbIndexMeta6);
         });
+
+        /*
+        test('index key path array, multiEntryone', () async {
+          try {
+            await testIndex(idbIndexMeta7);
+            fail('should fail');
+          } catch (e) {
+            expect(e, isNot(const TypeMatcher<TestFailure>()));
+            print(e);
+          }
+        });
+         */
       });
     }
 
@@ -985,6 +997,10 @@ void defineTests(TestContext ctx) {
 //          // });
 //        });
 //      });
+    });
+    group('other', () {
+      // InvalidAccessError: Failed to execute 'createIndex' on 'IDBObjectStore': The keyPath argument was an array and the multiEntry option is true.
+      // nvalidAccessError: A parameter or an operation is not supported by the underlying object
     });
   });
 }

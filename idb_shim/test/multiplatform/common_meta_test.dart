@@ -31,6 +31,10 @@ IdbIndexMeta idbIndexMeta3 = IdbIndexMeta('name', 'my_key', false, true);
 IdbIndexMeta idbIndexMeta4 = IdbIndexMeta('name', 'other_key', true, true);
 IdbIndexMeta idbIndexMeta5 = IdbIndexMeta('other_name', 'my_key', true, true);
 IdbIndexMeta idbIndexMeta6 =
+    IdbIndexMeta('path_array', ['my_key', 'other_key'], true, false);
+
+// Bad cannot bet array and multi-entry
+IdbIndexMeta idbIndexMeta7 =
     IdbIndexMeta('path_array', ['my_key', 'other_key'], true, true);
 final List<IdbIndexMeta> idbIndexMetas = [
   idbIndexMeta1,
