@@ -463,6 +463,22 @@ void defineTests(TestContext ctx) {
           });
         });
       });
+      test('key args as Range', () async {
+        await _setUp();
+        _createTransaction();
+        try {
+          await objectStore
+              .openCursor(autoAdvance: false, key: KeyRange.only(1))
+              .toList();
+          fail('should fail');
+        } catch (e) {
+          // DomException
+          // DataError: Failed to execute 'openCursor' on 'IDBObjectStore': The parameter is not a valid key.
+          // print(e.runtimeType);
+          // print(e);
+          expect(e, isNot(const TypeMatcher<TestFailure>()));
+        }
+      });
     });
   });
 }

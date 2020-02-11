@@ -367,6 +367,10 @@ class IdbCursorMeta {
     if (key != null && range != null) {
       throw ArgumentError("both key '$key' and range '$range' are specified");
     }
+    if (key is KeyRange) {
+      throw ArgumentError(
+          'Invalid keyRange $key as key argument, use the range argument');
+    }
   }
 
   Map<String, dynamic> toDebugMap() {
