@@ -253,6 +253,30 @@ sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range, bool multiEntry) {
   }
 }
 
+sdb.Filter _singleFieldKeyNotNullFilter(String keyPath) =>
+    sdb.Filter.notEquals(keyPath, null);
+
+sdb.Filter _singleFieldKeyEqualsFilter(String keyPath, dynamic key) =>
+    sdb.Filter.equals(keyPath, key);
+
+@deprecated
+// ignore: unused_element
+sdb.Filter _debugSingleFieldNotNullFilter(String keyPath) => sdb.Filter.and([
+      sdb.Filter.notEquals(keyPath, true),
+      sdb.Filter.notEquals(keyPath, false),
+      _singleFieldKeyNotNullFilter(keyPath)
+    ]);
+
+@deprecated
+// ignore: unused_element
+sdb.Filter _debugSingleFieldKeyEqualsFilter(String keyPath, dynamic key) =>
+    sdb.Filter.equals(keyPath, key);
+
+final singleFieldKeyEqualsFilter = _singleFieldKeyEqualsFilter;
+final singleFieldKeyNotNullFilter = _singleFieldKeyNotNullFilter;
+// final singleFieldKeyEqualsFilter = _debugSingleFieldKeyEqualsFilter;
+// final singleFieldKeyNotNullFilter = _debugSingleFieldNotNullFilter;
+
 /// The null value for the key actually means any but null...
 /// Key path must have been escaped before
 sdb.Filter keyFilter(dynamic keyPath, var key, bool multiEntry) {
@@ -278,9 +302,9 @@ sdb.Filter keyFilter(dynamic keyPath, var key, bool multiEntry) {
     } else {
       if (key == null) {
         // key must not be nulled
-        return sdb.Filter.notEquals(keyPath, null);
+        return singleFieldKeyNotNullFilter(keyPath);
       }
-      return sdb.Filter.equals(keyPath, key);
+      return singleFieldKeyEqualsFilter(keyPath, key);
     }
   } else if (keyPath is List) {
     final keyList = keyPath;

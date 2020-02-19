@@ -43,12 +43,10 @@ void defineTests(TestContext ctx) {
       return objectStore.put(obj);
     }
 
-    Future fill3SampleRows() {
-      return add('test2').then((_) {
-        return add('test1');
-      }).then((_) {
-        return add('test3');
-      });
+    Future fill3SampleRows() async {
+      await add('test2');
+      await add('test1');
+      await add('test3');
     }
 
     // generic tearDown
@@ -124,6 +122,70 @@ void defineTests(TestContext ctx) {
       });
 
       tearDown(_tearDown);
+    });
+
+    Future testKey(dynamic value) async {
+      final _dbName = ctx.dbName;
+      await idbFactory.deleteDatabase(_dbName);
+      void _initializeDatabase(VersionChangeEvent e) {
+        final db = e.database;
+        final objectStore = db.createObjectStore(testStoreName);
+        objectStore.createIndex(testNameIndex, testNameField);
+      }
+
+      db = await idbFactory.open(_dbName,
+          version: 1, onUpgradeNeeded: _initializeDatabase);
+      var txn = db.transaction(testStoreName, idbModeReadWrite);
+      await txn.objectStore(testStoreName).put({testNameField: value}, 1);
+      // await txn.objectStore(testStoreName).put({testNameField: 'other'}, 2);
+      var values = [];
+      await txn
+          .objectStore(testStoreName)
+          .index(testNameIndex)
+          .openCursor(autoAdvance: true)
+          .listen((cwv) {
+        values.add(cwv.value);
+      }).asFuture();
+      if (value is bool) {
+        // TO FIX for sembast, bool are not allowed
+        try {
+          expect(values, isEmpty);
+        } catch (e) {
+          expect(ctx.factory.name, contains('sembast'));
+          expect(values, [
+            {'name': true}
+          ]);
+        }
+      } else {
+        expect(values, [
+          {'name': value}
+        ]);
+      }
+      if (value is bool) {
+        try {
+          await txn.objectStore(testStoreName).index(testNameIndex).get(value);
+          fail('should fail');
+        } on DatabaseError catch (e) {
+          print(e);
+          // DataError: Failed to execute 'get' on 'IDBIndex': The parameter is not a valid key.
+
+        }
+      } else {
+        var recordValue = await txn
+            .objectStore(testStoreName)
+            .index(testNameIndex)
+            .get(value);
+        expect(recordValue, isNotNull);
+      }
+      await txn.completed;
+      db.close();
+    }
+
+    test('any_key', () async {
+      await testKey(true);
+      await testKey(1234);
+      await testKey('text');
+      await testKey(1.234);
     });
 
     group('auto', () {

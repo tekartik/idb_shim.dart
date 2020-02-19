@@ -61,12 +61,10 @@ void defineTests(TestContext ctx) {
       return objectStore.put(obj);
     }
 
-    Future fill3SampleRows() {
-      return add('test2').then((_) {
-        return add('test1');
-      }).then((_) {
-        return add('test3');
-      });
+    Future fill3SampleRows() async {
+      await add('test2');
+      await add('test1');
+      await add('test3');
     }
 
 //    Future<List<TestIdNameRow>> _cursorToList(Stream<CursorWithValue> stream) {

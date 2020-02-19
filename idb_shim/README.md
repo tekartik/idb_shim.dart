@@ -90,6 +90,7 @@ While idb_shim over sembast is a solution on Flutter, there is an implementation
 * DateTime is not supported, it should be converted to string using toIso8601String or int as milliseconds since epoch
 * Cyclic dependecy are not supported (per JSON serialization)
 * Large float are not converted to int (native indexeddb implementation does this)
+* Don't create an index on boolean value. IndexedDB does not support that, however sembast implementation allows it (this could change). This will only be prevented in debug.
 
 ##### Type of key
 
