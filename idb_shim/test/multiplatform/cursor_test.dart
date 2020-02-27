@@ -61,12 +61,10 @@ void defineTests(TestContext ctx) {
       return objectStore.put(obj);
     }
 
-    Future fill3SampleRows() {
-      return add('test2').then((_) {
-        return add('test1');
-      }).then((_) {
-        return add('test3');
-      });
+    Future fill3SampleRows() async {
+      await add('test2');
+      await add('test1');
+      await add('test3');
     }
 
 //    Future<List<TestIdNameRow>> _cursorToList(Stream<CursorWithValue> stream) {
@@ -462,6 +460,22 @@ void defineTests(TestContext ctx) {
             });
           });
         });
+      });
+      test('key args as Range', () async {
+        await _setUp();
+        _createTransaction();
+        try {
+          await objectStore
+              .openCursor(autoAdvance: false, key: KeyRange.only(1))
+              .toList();
+          fail('should fail');
+        } catch (e) {
+          // DomException
+          // DataError: Failed to execute 'openCursor' on 'IDBObjectStore': The parameter is not a valid key.
+          // print(e.runtimeType);
+          // print(e);
+          expect(e, isNot(const TypeMatcher<TestFailure>()));
+        }
       });
     });
   });

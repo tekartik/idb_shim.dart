@@ -144,11 +144,15 @@ void defineTests(TestContext ctx) {
           'stores': [
             {
               'name': '_main',
-              'keys': ['version', 'stores', 'store_test_store'],
+              'keys': ['store_test_store', 'stores', 'version'],
               'values': [
-                2,
+                {
+                  'name': 'test_store',
+                  'keyPath': 'name',
+                  'autoIncrement': true
+                },
                 ['test_store'],
-                {'name': 'test_store', 'keyPath': 'name', 'autoIncrement': true}
+                2
               ]
             }
           ]
@@ -196,10 +200,8 @@ void defineTests(TestContext ctx) {
           'stores': [
             {
               'name': '_main',
-              'keys': ['version', 'stores', 'store_test_store'],
+              'keys': ['store_test_store', 'stores', 'version'],
               'values': [
-                3,
-                ['test_store'],
                 {
                   'name': 'test_store',
                   'autoIncrement': true,
@@ -211,7 +213,9 @@ void defineTests(TestContext ctx) {
                       'multiEntry': true
                     }
                   ]
-                }
+                },
+                ['test_store'],
+                3
               ]
             }
           ]
@@ -399,16 +403,16 @@ void defineTests(TestContext ctx) {
                 {
                   'name': '_main',
                   'keys': [
-                    'version',
-                    'stores',
                     'store_test_store',
-                    'store_test_store_2'
+                    'store_test_store_2',
+                    'stores',
+                    'version'
                   ],
                   'values': [
-                    1,
-                    ['test_store', 'test_store_2'],
                     {'name': 'test_store'},
-                    {'name': 'test_store_2'}
+                    {'name': 'test_store_2'},
+                    ['test_store', 'test_store_2'],
+                    1
                   ]
                 },
                 {

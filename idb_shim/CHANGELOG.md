@@ -1,3 +1,7 @@
+## 1.10.3-dev.2
+
+* Support keyPath array for index
+
 ## 1.10.2
 
 * Pedantic 1.9

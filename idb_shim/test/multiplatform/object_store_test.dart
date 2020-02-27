@@ -297,7 +297,7 @@ void defineTests(TestContext ctx) {
         try {
           await objectStore.add(value, 1234);
           fail('should fail');
-        } catch (e) {
+        } on DatabaseError catch (e) {
           expect(isTestFailure(e), isFalse);
         }
         // cancel transaction
