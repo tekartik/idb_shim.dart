@@ -1,4 +1,4 @@
-## 1.10.3-dev.2
+## 1.10.3
 
 * Support keyPath array for index
 
