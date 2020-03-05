@@ -32,7 +32,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   // lazy creation
   // If we are not in a transaction that's likely during open
   sdb.DatabaseClient get sdbClient =>
-      _sdbClient ??= (sdbTransaction ?? sdbDatabase) as sdb.DatabaseClient;
+      _sdbClient ??= (sdbTransaction ?? sdbDatabase);
 
   ObjectStoreSembast(this.transaction, this.meta) {
     // Don't compute sdbStore yet we don't have the transaction
