@@ -18,8 +18,8 @@ void main() {
     });
 
     test('memory', () {
-      final websql = idbFactoryMemory;
-      expect(websql.runtimeType.toString(), 'IdbFactorySembastImpl');
+      final memory = idbFactoryMemory;
+      expect(memory.runtimeType.toString(), 'IdbFactorySembastImpl');
     });
 
     test('browser', () {
