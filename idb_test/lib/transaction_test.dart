@@ -474,24 +474,23 @@ void defineTests(TestContext ctx) {
         final transaction = db.transaction(testStoreName, idbModeReadOnly);
         final objectStore = transaction.objectStore(testStoreName);
 
-        await objectStore.getObject(0).then((_) {
-          // this cause the transaction to terminate on ie
-          // and so on sembast
-          Future.value().then((_) {
-            objectStore.getObject(0).then((_) {
-              if (ctx.isIdbSembast || ctx.isIdbIe) {
-                fail('should fail');
-              }
-            }).catchError((e) {
-              // Transaction inactive
-              // print('edge error :$e');
-              expect(isTestFailure(e), isFalse);
-              expect(isTransactionInactiveError(e), isTrue);
-            }).then((_) {
-              return transaction.completed;
-            });
-          });
-        });
+        await objectStore.getObject(0);
+        // this cause the transaction to terminate on ie
+        // and so on sembast
+        await Future.value();
+        try {
+          await objectStore.getObject(0);
+          if (ctx.isIdbSembast || ctx.isIdbIe) {
+            fail('should fail');
+          }
+        } catch (e) {
+          // Transaction inactive
+          // devPrint('error :$e');
+          expect(isTestFailure(e), isFalse);
+          expect(isTransactionInactiveError(e), isTrue);
+        } finally {
+          await transaction.completed;
+        }
       });
 
       test('get_delay_get', () async {
