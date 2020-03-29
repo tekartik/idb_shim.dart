@@ -1,3 +1,7 @@
+## 1.10.4-dev.1
+
+* fix meta export to always the same order for indecies.
+
 ## 1.10.3+1
 
 * Support keyPath array for index

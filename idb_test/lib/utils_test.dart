@@ -1,5 +1,6 @@
 library idb_shim.utils_test;
 
+import 'package:collection/collection.dart';
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/utils/idb_import_export.dart';
 import 'package:idb_shim/utils/idb_utils.dart';
@@ -248,7 +249,12 @@ void defineTests(TestContext ctx) {
           expect(db.version, 4);
           final txn = db.transaction(testStoreName, idbModeReadOnly);
           final store = txn.objectStore(testStoreName);
-          expect(store.indexNames, [testNameIndex]);
+          expect(
+              const UnorderedIterableEquality()
+                  .equals(store.indexNames, [testNameIndex2, testNameIndex]),
+              isTrue,
+              reason:
+                  '${store.indexNames} vs ${[testNameIndex2, testNameIndex]}');
           final index = store.index(testNameIndex);
           expect(index.name, testNameIndex);
           expect(index.keyPath, testNameField);
@@ -278,11 +284,16 @@ void defineTests(TestContext ctx) {
                       'keyPath': 'name',
                       'unique': true,
                       'multiEntry': true
+                    },
+                    {
+                      'name': 'name_index_2',
+                      'keyPath': 'name_2',
+                      'multiEntry': true
                     }
                   ]
                 },
                 ['test_store'],
-                3
+                4
               ]
             }
           ]

@@ -1,4 +1,4 @@
-library tekartik_iodb.idb_meta;
+library tekartik_idb.idb_meta;
 
 import 'dart:async';
 
