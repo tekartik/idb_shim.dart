@@ -227,6 +227,73 @@ void defineTests(TestContext ctx) {
         }
         await _checkAll(db, expectedExport, _check);
       });
+
+      test('two_indecies', () async {
+        await _setupDeleteDb();
+
+        void _initializeDatabase(VersionChangeEvent e) {
+          final db = e.database;
+          final objectStore =
+              db.createObjectStore(testStoreName, autoIncrement: true);
+          objectStore.createIndex(testNameIndex2, testNameField2,
+              unique: false, multiEntry: true);
+          objectStore.createIndex(testNameIndex, testNameField,
+              unique: true, multiEntry: true);
+        }
+
+        db = await idbFactory.open(_srcDbName,
+            version: 4, onUpgradeNeeded: _initializeDatabase);
+
+        Future _check(Database db) async {
+          expect(db.version, 4);
+          final txn = db.transaction(testStoreName, idbModeReadOnly);
+          final store = txn.objectStore(testStoreName);
+          expect(store.indexNames, [testNameIndex]);
+          final index = store.index(testNameIndex);
+          expect(index.name, testNameIndex);
+          expect(index.keyPath, testNameField);
+          expect(index.unique, isTrue);
+
+          // multiEntry not supported on ie
+          if (!ctx.isIdbIe) {
+            expect(index.multiEntry, isTrue);
+          }
+          await txn.completed;
+        }
+
+        final expectedExport = <String, dynamic>{
+          'sembast_export': 1,
+          'version': 1,
+          'stores': [
+            {
+              'name': '_main',
+              'keys': ['store_test_store', 'stores', 'version'],
+              'values': [
+                {
+                  'name': 'test_store',
+                  'autoIncrement': true,
+                  'indecies': [
+                    {
+                      'name': 'name_index',
+                      'keyPath': 'name',
+                      'unique': true,
+                      'multiEntry': true
+                    }
+                  ]
+                },
+                ['test_store'],
+                3
+              ]
+            }
+          ]
+        };
+        if (ctx.isIdbIe) {
+          expectedExport['stores'][0]['values'][2].remove('autoIncrement');
+          expectedExport['stores'][0]['values'][2]['indecies'][0]
+              .remove('multiEntry');
+        }
+        await _checkAll(db, expectedExport, _check);
+      });
     });
 
     group('copyStore', () {
@@ -370,8 +437,10 @@ void defineTests(TestContext ctx) {
         // put one in src and one in dst that should get deleted
         final txn = db.transaction(testStoreName, idbModeReadWrite);
         var store = txn.objectStore(testStoreName);
-        await (store.put('value1', 'key1'));
+        // Put 2 before to check the order
         await (store.put('value2', 'key2'));
+        await (store.put('value1', 'key1'));
+
         await txn.completed;
 
         //dstDb = await copyDatabase(db, idbFactory, _dstDbName);

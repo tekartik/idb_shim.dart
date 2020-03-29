@@ -32,15 +32,18 @@ class IdbTransactionMeta {
 class IdbVersionChangeTransactionMeta extends IdbTransactionMeta {
   // index deleted during onUpgradeNeeded
   final createdIndexes = <String, List<IdbIndexMeta>>{};
+
   // index deleted during onUpgradeNeeded
   final deletedIndexes = <String, List<IdbIndexMeta>>{};
 
   // stores created during onUpgradeNeeded
   // ignore: prefer_collection_literals
   final createdStores = Set<IdbObjectStoreMeta>();
+
   // stores deleted during onUpgradeNeeded
   // ignore: prefer_collection_literals
   final deletedStores = Set<IdbObjectStoreMeta>();
+
   // stores modified during onUpgradeNeeded
   // ignore: prefer_collection_literals
   final updatedStores = Set<IdbObjectStoreMeta>();
@@ -314,7 +317,10 @@ class IdbObjectStoreMeta {
     }
     if (indecies.isNotEmpty) {
       final indecies = <Map>[];
-      this.indecies.forEach((IdbIndexMeta indexMeta) {
+      // Sort to always have the same export format
+      var indexMetas = List<IdbIndexMeta>.from(this.indecies)
+        ..sort((meta1, meta2) => meta1.name.compareTo(meta2.name));
+      indexMetas.forEach((IdbIndexMeta indexMeta) {
         indecies.add(indexMeta.toMap());
       });
       map[indeciesKey] = indecies;
