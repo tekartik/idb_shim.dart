@@ -163,6 +163,57 @@ void defineTests(TestContext ctx) {
         }
         await _checkAll(db, expectedExport, _check);
       });
+      test('three_stores', () async {
+        await _setupDeleteDb();
+
+        void _initializeDatabase(VersionChangeEvent e) {
+          final db = e.database;
+          //ObjectStore objectStore =
+          db.createObjectStore('store3');
+          db.createObjectStore('store1');
+          db.createObjectStore('store2');
+        }
+
+        db = await idbFactory.open(_srcDbName,
+            version: 2, onUpgradeNeeded: _initializeDatabase);
+
+        Future _check(Database db) async {
+          expect(db.factory, idbFactory);
+          expect(
+              const UnorderedIterableEquality()
+                  .equals(db.objectStoreNames, ['store1', 'store2', 'store3']),
+              isTrue,
+              reason: '${db.objectStoreNames}');
+        }
+
+        final expectedExport = <String, dynamic>{
+          'sembast_export': 1,
+          'version': 1,
+          'stores': [
+            {
+              'name': '_main',
+              'keys': [
+                'store_store1',
+                'store_store2',
+                'store_store3',
+                'stores',
+                'version'
+              ],
+              'values': [
+                {'name': 'store1'},
+                {'name': 'store2'},
+                {'name': 'store3'},
+                ['store1', 'store2', 'store3'],
+                2
+              ]
+            }
+          ]
+        };
+        if (ctx.isIdbIe) {
+          expectedExport['stores'][0]['values'][2].remove('autoIncrement');
+        }
+        await _checkAll(db, expectedExport, _check);
+      });
 
       test('one_index', () async {
         await _setupDeleteDb();

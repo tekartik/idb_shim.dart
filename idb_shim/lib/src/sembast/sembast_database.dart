@@ -155,9 +155,10 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
 
         // Handle deleted object store
         if (changedStores.isNotEmpty || deletedStores.isNotEmpty) {
-          await mainStore
-              .record('stores')
-              .put(txn, List.from(objectStoreNames));
+          await mainStore.record('stores').put(
+              txn,
+              List.from(objectStoreNames)
+                ..sort()); // Sort the names to always have the same export
         }
 
         for (final storeMeta in changedStores) {

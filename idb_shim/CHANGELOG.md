@@ -1,6 +1,6 @@
-## 1.10.4-dev.1
+## 1.10.4-dev.2
 
-* fix meta export to always the same order for indecies.
+* fix meta export to always save the same order for stores and indecies
 
 ## 1.10.3+1
 
