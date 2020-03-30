@@ -69,10 +69,26 @@ void defineTests(TestContext ctx) {
         expect(await completer.future, value);
       }
 
+      Future _testUpdateValue(int key, dynamic value) async {
+        var completer = Completer.sync();
+        objectStore.openCursor(key: key).listen((cvw) {
+          // Update with the same value
+          cvw.update(value);
+          // devPrint('update: $value ${value.runtimeType}');
+          completer.complete();
+        });
+        await completer.future;
+      }
+
       Future _testValue(dynamic value) async {
         _createTransaction();
         // Write
         var key = await objectStore.add(value) as int;
+        // Read
+        await _testReadValue(key, value);
+        // Update
+        await _testUpdateValue(key, value);
+        // Read
         await _testReadValue(key, value);
 
         await transaction.completed;

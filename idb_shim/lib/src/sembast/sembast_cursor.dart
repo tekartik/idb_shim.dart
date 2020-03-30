@@ -4,6 +4,7 @@ import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/sembast/sembast_import.dart' as sdb;
 import 'package:idb_shim/src/sembast/sembast_index.dart';
 import 'package:idb_shim/src/sembast/sembast_object_store.dart';
+import 'package:idb_shim/src/sembast/sembast_value.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 
 abstract class KeyCursorSembastMixin implements Cursor {
@@ -56,8 +57,9 @@ abstract class KeyCursorSembastMixin implements Cursor {
   Future update(value) async {
     // Keep the transaction alive
 
-    await store.put(value, store.getUpdateKeyIfNeeded(value, primaryKey));
+    value = toSembastValue(value);
     await store.transaction.execute(() async {
+      await store.putImpl(value, store.getUpdateKeyIfNeeded(value, primaryKey));
       var sdbSnapshot =
           await store.sdbStore.record(primaryKey).getSnapshot(store.sdbClient);
       // Also update all records in the current list...

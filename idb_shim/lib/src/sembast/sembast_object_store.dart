@@ -55,25 +55,6 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   /// Run a computation in a transaction.
   Future<T> inTransaction<T>(FutureOr<T> Function() computation) {
     return transaction.execute(computation);
-//    transaction.txn
-
-//    // create the transaction if needed
-//    // make it async so that we get the result of the action before transaction completion
-//    Completer completer = new Completer();
-//    transaction._completed = completer.future;
-//
-//    return sdbStore.inTransaction(() {
-//      return computation();
-//    }).then((result) {
-//      completer.complete();
-//      return result;
-//
-//    })
-//    return sdbStore.inTransaction(() {
-//      return new Future.sync(computation).then((result) {
-//
-//      });
-//    });
   }
 
   /// extract the key from the key itself or from the value
@@ -105,7 +86,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     return null;
   }
 
-  Future _put(value, key) {
+  Future putImpl(value, key) {
     // Check all indexes
     final futures = <Future>[];
     if (value is Map) {
@@ -149,10 +130,10 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
           if (existingValue != null) {
             throw DatabaseError('Key $key already exists in the object store');
           }
-          return _put(value, key);
+          return putImpl(value, key);
         });
       } else {
-        return _put(value, key);
+        return putImpl(value, key);
       }
     });
   }
@@ -276,7 +257,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   Future put(value, [key]) {
     value = toSembastValue(value);
     return _inWritableTransaction(() {
-      return _put(value, getKeyImpl(value, key));
+      return putImpl(value, getKeyImpl(value, key));
     });
   }
 }
