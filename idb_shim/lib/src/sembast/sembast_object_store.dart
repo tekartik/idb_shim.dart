@@ -7,6 +7,7 @@ import 'package:idb_shim/src/sembast/sembast_database.dart';
 import 'package:idb_shim/src/sembast/sembast_filter.dart';
 import 'package:idb_shim/src/sembast/sembast_index.dart';
 import 'package:idb_shim/src/sembast/sembast_transaction.dart';
+import 'package:idb_shim/src/sembast/sembast_value.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:sembast/sembast.dart' as sdb;
 
@@ -139,6 +140,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   @override
   Future add(value, [key]) {
+    value = toSembastValue(value);
     return _inWritableTransaction(() {
       key = getKeyImpl(value, key);
 
@@ -198,7 +200,8 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     });
   }
 
-  dynamic _recordToValue(sdb.RecordSnapshot record) {
+  /// Clone and convert
+  dynamic recordToValue(sdb.RecordSnapshot record) {
     if (record == null) {
       return null;
     }
@@ -208,7 +211,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
       value = cloneValue(value, keyPath, record.key);
     }
 
-    return value;
+    return fromSembastValue(value);
   }
 
   @override
@@ -216,7 +219,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     checkKeyParam(key);
     return inTransaction(() {
       return sdbStore.record(key).getSnapshot(sdbClient).then((record) {
-        return _recordToValue(record);
+        return recordToValue(record);
       });
     });
   }
@@ -271,6 +274,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   @override
   Future put(value, [key]) {
+    value = toSembastValue(value);
     return _inWritableTransaction(() {
       return _put(value, getKeyImpl(value, key));
     });

@@ -19,6 +19,7 @@ import 'quick_standalone_test.dart' as quick_standalone_test;
 import 'scenario_test.dart' as scenario_test;
 import 'simple_provider_test.dart' as simple_provider_test;
 import 'transaction_test.dart' as transaction_test;
+import 'type_test.dart' as type_test;
 import 'utils_test.dart' as utils_test;
 
 void defineAllTests(TestContext ctx) {
@@ -36,6 +37,7 @@ void defineAllTests(TestContext ctx) {
   scenario_test.defineTests(ctx);
   utils_test.defineTests(ctx);
   exception_test.defineTests(ctx);
+  type_test.defineTests(ctx);
 
   group('indexeddb_1', () {
     indexeddb_1_test.defineTests(ctx);

@@ -88,10 +88,11 @@ abstract class IndexCursorSembastMixin implements Cursor {
 }
 
 abstract class CursorWithValueSembastMixin implements CursorWithValue {
+  ObjectStoreSembast get store;
   RecordSnapshotSembast get record;
 
   @override
-  Object get value => record.value;
+  Object get value => store.recordToValue(record.snapshot);
 }
 
 class IndexKeyCursorSembast extends Object
@@ -160,7 +161,6 @@ class RecordSnapshotSembast {
   final sdb.RecordSnapshot snapshot;
   dynamic get primaryKey => snapshot.key;
   dynamic get key => primaryKey;
-  dynamic get value => snapshot.value;
 
   RecordSnapshotSembast(this.snapshot);
 

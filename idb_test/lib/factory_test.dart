@@ -1,6 +1,7 @@
 library factory_test;
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'idb_test_common.dart';
 
@@ -36,6 +37,15 @@ void defineTests(TestContext ctx) {
       expect(idbFactory.cmp(3.14, 3.14), 0);
       expect(idbFactory.cmp(3.64, 3.45), 1);
 
+      expect(
+          idbFactory.cmp(
+              Uint8List.fromList([1, 2]), Uint8List.fromList([1, 3])),
+          -1);
+      expect(
+          idbFactory.cmp(
+              Uint8List.fromList([1, 3]), Uint8List.fromList([1, 2])),
+          1);
+
       var hasFailed = false;
       try {
         idbFactory.cmp(null, 1);
@@ -63,19 +73,23 @@ void defineTests(TestContext ctx) {
         hasFailed = true;
       }
       expect(hasFailed, isTrue);
+
+      // Fail to compare DateTime
+      hasFailed = false;
+      try {
+        idbFactory.cmp(DateTime.fromMillisecondsSinceEpoch(1),
+            DateTime.fromMillisecondsSinceEpoch(2));
+      } catch (_) {
+        // DataError: Failed to execute 'cmp' on 'IDBFactory': The parameter is not a valid key
+        hasFailed = true;
+      }
+      expect(hasFailed, isTrue);
     });
 
     test('cmp array', () {
       expect(idbFactory.cmp([1, 2], [1, 3]), -1);
       expect(idbFactory.cmp([1, 2], [1, 2]), 0);
       expect(idbFactory.cmp([1, 2], [1, 1]), 1);
-    }, onPlatform: {
-      /*
-      'content-shell': new Skip(
-          'cmp expect single argument (not array) in content_shell 1.23.0'),
-      'dartium':
-          new Skip('cmp expect single argument (not array) in dartium 45')
-          */
     });
 
     /*

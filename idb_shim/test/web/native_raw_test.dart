@@ -3,6 +3,9 @@ library idb_shim.test_runner_client_native_test;
 
 import 'dart:html';
 import 'dart:indexed_db' as idb;
+import 'dart:typed_data';
+
+import 'package:idb_shim/idb.dart';
 
 import '../idb_test_common.dart';
 import 'idb_browser_test_common.dart';
@@ -197,6 +200,33 @@ void main() {
         // Transaction inactive
         expect(e.message.contains('TransactionInactiveError'), isTrue);
       }
+      return transaction.completed;
+    });
+    test('date_time', () async {
+      final dbName = 'native_raw/date_time.db';
+      await window.indexedDB.deleteDatabase(dbName);
+      final db =
+          await window.indexedDB.open(dbName, version: 1, onUpgradeNeeded: (e) {
+        final db = e.target.result as idb.Database;
+        db.createObjectStore('store', autoIncrement: true);
+      });
+
+      idb.Transaction transaction;
+      idb.ObjectStore objectStore;
+      void _createTransactionSync() {
+        transaction = db.transaction('store', idbModeReadWrite);
+        objectStore = transaction.objectStore('store');
+      }
+
+      _createTransactionSync();
+      var key = await objectStore.add(DateTime.fromMillisecondsSinceEpoch(1));
+      var keyBlob = await objectStore.add(Uint8List.fromList([1, 2, 3]));
+      expect(
+          (await objectStore.getObject(key) as DateTime).millisecondsSinceEpoch,
+          1);
+      expect((await objectStore.getObject(keyBlob) as Uint8List).length, 3);
+      expect(
+          await objectStore.getObject(keyBlob), const TypeMatcher<Uint8List>());
       return transaction.completed;
     });
   });
