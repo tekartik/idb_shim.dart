@@ -1,6 +1,6 @@
 ## 1.11.0-dev.1
 
-* Add support for `DateTime` and `UInt8List`,
+* Add support for `DateTime` and `Uint8List`,
 * fix meta export to always save the same order for stores and indecies
 
 ## 1.10.3+1

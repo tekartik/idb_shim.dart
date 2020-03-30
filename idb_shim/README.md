@@ -89,7 +89,7 @@ While idb_shim over sembast is a solution on Flutter, there is an implementation
 Supported types:
 * Stuff that can be JSON serialized/deserialized (`num`, `String`, `bool`, `null`, `List` & `Map`)
 * `DateTime` is supported as of 1.11
-* `UInt8List` is supported as of 1.11
+* `Uint8List` is supported as of 1.11
 
 Limitations
 * Cyclic dependecy are not supported (per JSON serialization)
