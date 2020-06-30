@@ -1,6 +1,6 @@
 name: idb_test
 description: idb testing
-version: 0.1.3
+version: 0.1.4
 homepage: https://github.com/tekartik/idb_shim.dart/tree/master/idb_test
 author: alex <alex@tekartik.com>
 publish_to: none
