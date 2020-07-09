@@ -83,6 +83,27 @@ void defineTests() {
       expect(meta1, isNot(meta3));
     });
 
+    test('store with three indecies', () {
+      final meta = idbSimpleObjectStoreMeta.clone();
+      meta.putIndex(IdbIndexMeta('index3', 'keyA', true, false));
+      meta.putIndex(IdbIndexMeta('index1', 'keyB', true, true));
+      meta.putIndex(IdbIndexMeta('index2', 'keyC', false, true));
+      expect(meta.toMap(), {
+        'name': 'test_store',
+        'autoIncrement': true,
+        'indecies': [
+          {
+            'name': 'index1',
+            'keyPath': 'keyB',
+            'unique': true,
+            'multiEntry': true
+          },
+          {'name': 'index2', 'keyPath': 'keyC', 'multiEntry': true},
+          {'name': 'index3', 'keyPath': 'keyA', 'unique': true}
+        ]
+      });
+    });
+
     void testStoreRoundTrip(IdbObjectStoreMeta meta) {
       var map = meta.toMap();
       final newMeta = IdbObjectStoreMeta.fromMap(map);

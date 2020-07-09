@@ -7,6 +7,7 @@ import 'package:idb_shim/src/sembast/sembast_database.dart';
 import 'package:idb_shim/src/sembast/sembast_filter.dart';
 import 'package:idb_shim/src/sembast/sembast_index.dart';
 import 'package:idb_shim/src/sembast/sembast_transaction.dart';
+import 'package:idb_shim/src/sembast/sembast_value.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:sembast/sembast.dart' as sdb;
 
@@ -54,25 +55,6 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   /// Run a computation in a transaction.
   Future<T> inTransaction<T>(FutureOr<T> Function() computation) {
     return transaction.execute(computation);
-//    transaction.txn
-
-//    // create the transaction if needed
-//    // make it async so that we get the result of the action before transaction completion
-//    Completer completer = new Completer();
-//    transaction._completed = completer.future;
-//
-//    return sdbStore.inTransaction(() {
-//      return computation();
-//    }).then((result) {
-//      completer.complete();
-//      return result;
-//
-//    })
-//    return sdbStore.inTransaction(() {
-//      return new Future.sync(computation).then((result) {
-//
-//      });
-//    });
   }
 
   /// extract the key from the key itself or from the value
@@ -104,7 +86,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     return null;
   }
 
-  Future _put(value, key) {
+  Future putImpl(value, key) {
     // Check all indexes
     final futures = <Future>[];
     if (value is Map) {
@@ -139,6 +121,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   @override
   Future add(value, [key]) {
+    value = toSembastValue(value);
     return _inWritableTransaction(() {
       key = getKeyImpl(value, key);
 
@@ -147,10 +130,10 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
           if (existingValue != null) {
             throw DatabaseError('Key $key already exists in the object store');
           }
-          return _put(value, key);
+          return putImpl(value, key);
         });
       } else {
-        return _put(value, key);
+        return putImpl(value, key);
       }
     });
   }
@@ -198,7 +181,8 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     });
   }
 
-  dynamic _recordToValue(sdb.RecordSnapshot record) {
+  /// Clone and convert
+  dynamic recordToValue(sdb.RecordSnapshot record) {
     if (record == null) {
       return null;
     }
@@ -208,7 +192,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
       value = cloneValue(value, keyPath, record.key);
     }
 
-    return value;
+    return fromSembastValue(value);
   }
 
   @override
@@ -216,7 +200,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     checkKeyParam(key);
     return inTransaction(() {
       return sdbStore.record(key).getSnapshot(sdbClient).then((record) {
-        return _recordToValue(record);
+        return recordToValue(record);
       });
     });
   }
@@ -271,8 +255,9 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   @override
   Future put(value, [key]) {
+    value = toSembastValue(value);
     return _inWritableTransaction(() {
-      return _put(value, getKeyImpl(value, key));
+      return putImpl(value, getKeyImpl(value, key));
     });
   }
 }

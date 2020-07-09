@@ -47,7 +47,7 @@ class IndexSembast extends Index with IndexWithMetaMixin {
           .find(store.sdbClient, finder: finder)
           .then((records) {
         if (records.isNotEmpty) {
-          return records.first.value;
+          return store.recordToValue(records.first);
         }
       });
     });

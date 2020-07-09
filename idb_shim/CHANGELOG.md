@@ -1,3 +1,8 @@
+## 1.11.0
+
+* Add support for `DateTime` and `Uint8List`,
+* fix meta export to always save the same order for stores and indecies
+
 ## 1.10.3+1
 
 * Support keyPath array for index
