@@ -23,6 +23,7 @@ export 'package:dev_test/test.dart';
 export 'package:idb_shim/idb_client_memory.dart';
 export 'package:idb_shim/src/common/common_meta.dart';
 export 'package:idb_shim/src/utils/dev_utils.dart';
+export 'package:idb_shim/src/utils/env_utils.dart';
 
 //import 'package:unittest/unittest.dart';
 //export 'common_meta_test.dart' hide main;
