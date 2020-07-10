@@ -1,3 +1,8 @@
+## 1.11.1
+
+* Export `idbFactoryNative`, `idbFactoryMemory` and `idbFactoryMemoryFs` in `idb_shim.dart`
+* Allow safe import of `idb_shim.dart` on web and io.
+
 ## 1.11.0
 
 * Add support for `DateTime` and `Uint8List`,
