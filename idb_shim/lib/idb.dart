@@ -1,11 +1,10 @@
-library idb_shim;
+library idb_shim.idb;
 
 import 'dart:async';
 
 import 'package:idb_shim/src/common/common_factory.dart';
 import 'package:idb_shim/src/common/common_key_range.dart';
 
-export 'src/client/client.dart';
 export 'src/client/error.dart';
 
 /// Read-write mode for transaction.
