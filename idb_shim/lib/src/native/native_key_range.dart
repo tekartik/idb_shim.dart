@@ -18,3 +18,11 @@ idb.KeyRange toNativeKeyRange(KeyRange common) {
     return idb.KeyRange.upperBound(common.upper, common.upperOpen == true);
   }
 }
+
+/// Convert a query (key range or key to a native object)
+dynamic toNativeQuery(dynamic query) {
+  if (query is KeyRange) {
+    return toNativeKeyRange(query);
+  }
+  return query;
+}

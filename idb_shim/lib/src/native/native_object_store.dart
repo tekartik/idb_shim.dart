@@ -152,6 +152,15 @@ class ObjectStoreNative extends ObjectStore {
   }
 
   @override
+  Future<List<dynamic>> getAll([dynamic keyOrRange, int count]) {
+    return catchAsyncNativeError(() {
+      final nativeQuery = toNativeQuery(keyOrRange);
+      var results = storeGetAll(idbObjectStore, nativeQuery, count);
+      return results;
+    });
+  }
+
+  @override
   String get keyPath => idbObjectStore.keyPath as String;
 
   // ie return null so make sure it is a bool

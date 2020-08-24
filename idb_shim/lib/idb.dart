@@ -266,6 +266,12 @@ abstract class ObjectStore {
   Future<int> count([dynamic keyOrRange]);
 
   ///
+  /// returns all objects in the object store matching the specified parameter
+  /// or all objects in the store if no parameters are given..
+  ///
+  Future<List<dynamic>> getAll([dynamic query, int count]);
+
+  ///
   /// Returns the key path of this object store.
   ///
   /// If this property is null, the application must provide a key for each
