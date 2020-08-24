@@ -244,6 +244,8 @@ void defineTests(TestContext ctx) {
         expect(await objectStore.getAllKeys(KeyRange.bound(1, 2), 1), [1]);
         expect(await objectStore.getAll(KeyRange.bound(2, 3)), ['test2']);
         expect(await objectStore.getAllKeys(KeyRange.bound(2, 3)), [2]);
+        expect(await objectStore.getAll(), ['test', 'test2']);
+        expect(await objectStore.getAllKeys(), [1, 2]);
       });
     });
 

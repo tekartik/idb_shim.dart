@@ -92,7 +92,6 @@ Future<List<dynamic>> storeGetAll(idb.ObjectStore objectStore,
   }
 }
 
-
 ///
 /// [query] is a native query
 ///
