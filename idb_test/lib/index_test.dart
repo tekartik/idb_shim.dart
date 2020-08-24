@@ -168,6 +168,43 @@ void defineTests(TestContext ctx) {
           expect(e, isNotNull);
         }
       });
+
+      test('getAll', () async {
+        await _setUp();
+        _createTransaction();
+        final value1 = {testNameField: 'test1'};
+        final value2 = {testNameField: 'test2'};
+        final value3 = {testNameField: 'test1'};
+
+        final index = objectStore.index(testNameIndex);
+        expect(await index.getAll(), isEmpty);
+        expect(await index.getAll(null, 1), isEmpty);
+        expect(await index.getAll(1, 1), isEmpty);
+        expect(await index.getAllKeys(), isEmpty);
+        expect(await index.getAllKeys(null, 1), isEmpty);
+        expect(await index.getAllKeys(1, 1), isEmpty);
+        var key = await objectStore.put(value1, 1);
+        expect(key, 1);
+        key = await objectStore.add(value2, 2);
+        expect(key, 2);
+        await objectStore.add(value3, 3);
+
+        expect(await index.getAll('test1'), [
+          {'name': 'test1'},
+          {'name': 'test1'}
+        ]);
+        expect(await index.getAllKeys('test1'), [1, 3]);
+        expect(await index.getAll('test1', 1), [
+          {'name': 'test1'}
+        ]);
+        expect(await index.getAllKeys('test1', 1), [1]);
+        expect(await index.getAll(), [
+          {'name': 'test1'},
+          {'name': 'test1'},
+          {'name': 'test2'},
+        ]);
+        expect(await index.getAllKeys(), [1, 3, 2]);
+      }, solo: true);
 //
 //      solo_test('add_twice_same_key', () {
 //        Map value1 = {

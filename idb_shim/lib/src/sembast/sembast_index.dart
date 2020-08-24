@@ -100,4 +100,28 @@ class IndexSembast extends Index with IndexWithMetaMixin {
 
   List<sdb.SortOrder> sortOrders(bool ascending) =>
       keyPathSortOrders(keyPath, ascending);
+
+  @override
+  Future<List<dynamic>> getAll([query, int count]) {
+    return inTransaction(() async {
+      final finder = sdb.Finder(
+          filter: _indexKeyOrRangeFilter(query),
+          limit: count,
+          sortOrders: sortOrders(true));
+      return (await store.sdbStore.find(store.sdbClient, finder: finder))
+          .map(store.recordToValue)
+          .toList(growable: false);
+    });
+  }
+
+  @override
+  Future<List<dynamic>> getAllKeys([query, int count]) {
+    return inTransaction(() async {
+      final finder = sdb.Finder(
+          filter: _indexKeyOrRangeFilter(query),
+          limit: count,
+          sortOrders: sortOrders(true));
+      return store.sdbStore.findKeys(store.sdbClient, finder: finder);
+    });
+  }
 }

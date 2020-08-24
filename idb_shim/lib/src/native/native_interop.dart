@@ -109,3 +109,39 @@ Future<List<dynamic>> storeGetAllKeys(idb.ObjectStore objectStore,
     return Future.error(e, stacktrace);
   }
 }
+
+///
+/// [query] is a native query
+///
+Future<List<dynamic>> indexGetAll(idb.Index index,
+    [dynamic query, int count]) async {
+  try {
+    idb.Request request;
+    if (count != null) {
+      request = index.getAll(query, count);
+    } else {
+      request = index.getAll(query);
+    }
+    return _completeRequest(request);
+  } catch (e, stacktrace) {
+    return Future.error(e, stacktrace);
+  }
+}
+
+///
+/// [query] is a native query
+///
+Future<List<dynamic>> indexGetAllKeys(idb.Index index,
+    [dynamic query, int count]) async {
+  try {
+    idb.Request request;
+    if (count != null) {
+      request = index.getAllKeys(query, count);
+    } else {
+      request = index.getAllKeys(query);
+    }
+    return _completeRequest(request);
+  } catch (e, stacktrace) {
+    return Future.error(e, stacktrace);
+  }
+}

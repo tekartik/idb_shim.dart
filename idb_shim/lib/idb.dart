@@ -446,6 +446,18 @@ abstract class Index {
       {key, KeyRange range, String direction, bool autoAdvance});
 
   ///
+  /// returns all objects in the index matching the specified parameter
+  /// or all objects in the index if no parameters are given.
+  ///
+  Future<List<dynamic>> getAll([dynamic query, int count]);
+
+  ///
+  /// returns record primary keys for all objects in the index store matching the
+  /// specified parameter or all objects in the index if no parameters are given.
+  ///
+  Future<List<dynamic>> getAllKeys([dynamic query, int count]);
+
+  ///
   /// returns the key path of the current index. If null, this index is not
   /// auto-populated.
   ///

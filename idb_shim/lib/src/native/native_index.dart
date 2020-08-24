@@ -4,6 +4,7 @@ import 'dart:indexed_db' as idb;
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/native/native_cursor.dart';
 import 'package:idb_shim/src/native/native_error.dart';
+import 'package:idb_shim/src/native/native_interop.dart';
 import 'package:idb_shim/src/native/native_key_range.dart';
 
 class IndexNative extends Index {
@@ -78,6 +79,24 @@ class IndexNative extends Index {
         autoAdvance: autoAdvance));
 
     return ctlr.stream;
+  }
+
+  @override
+  Future<List<dynamic>> getAll([dynamic keyOrRange, int count]) {
+    return catchAsyncNativeError(() {
+      final nativeQuery = toNativeQuery(keyOrRange);
+      var results = indexGetAll(idbIndex, nativeQuery, count);
+      return results;
+    });
+  }
+
+  @override
+  Future<List<dynamic>> getAllKeys([dynamic keyOrRange, int count]) {
+    return catchAsyncNativeError(() {
+      final nativeQuery = toNativeQuery(keyOrRange);
+      var results = indexGetAllKeys(idbIndex, nativeQuery, count);
+      return results;
+    });
   }
 
   @override
