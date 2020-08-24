@@ -227,6 +227,9 @@ void defineTests(TestContext ctx) {
         expect(await objectStore.getAll(), isEmpty);
         expect(await objectStore.getAll(null, 1), isEmpty);
         expect(await objectStore.getAll(1, 1), isEmpty);
+        expect(await objectStore.getAllKeys(), isEmpty);
+        expect(await objectStore.getAllKeys(null, 1), isEmpty);
+        expect(await objectStore.getAllKeys(1, 1), isEmpty);
         expect(await objectStore.put('test', 1), 1);
         expect(await objectStore.getAll(1, 1), ['test']);
         expect(await objectStore.getAll(1, null), ['test']);
@@ -236,8 +239,11 @@ void defineTests(TestContext ctx) {
         expect(await objectStore.put('test2', 2), 2);
         expect(
             await objectStore.getAll(KeyRange.bound(1, 2)), ['test', 'test2']);
+        expect(await objectStore.getAllKeys(KeyRange.bound(1, 2)), [1, 2]);
         expect(await objectStore.getAll(KeyRange.bound(1, 2), 1), ['test']);
+        expect(await objectStore.getAllKeys(KeyRange.bound(1, 2), 1), [1]);
         expect(await objectStore.getAll(KeyRange.bound(2, 3)), ['test2']);
+        expect(await objectStore.getAllKeys(KeyRange.bound(2, 3)), [2]);
       });
     });
 

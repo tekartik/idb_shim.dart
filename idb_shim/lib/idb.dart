@@ -267,9 +267,15 @@ abstract class ObjectStore {
 
   ///
   /// returns all objects in the object store matching the specified parameter
-  /// or all objects in the store if no parameters are given..
+  /// or all objects in the store if no parameters are given.
   ///
   Future<List<dynamic>> getAll([dynamic query, int count]);
+
+  ///
+  /// returns record keys for all objects in the object store matching the
+  /// specified parameter or all objects in the store if no parameters are given.
+  ///
+  Future<List<dynamic>> getAllKeys([dynamic query, int count]);
 
   ///
   /// Returns the key path of this object store.

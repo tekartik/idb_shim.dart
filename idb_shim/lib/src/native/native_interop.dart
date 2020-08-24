@@ -91,3 +91,22 @@ Future<List<dynamic>> storeGetAll(idb.ObjectStore objectStore,
     return Future.error(e, stacktrace);
   }
 }
+
+
+///
+/// [query] is a native query
+///
+Future<List<dynamic>> storeGetAllKeys(idb.ObjectStore objectStore,
+    [dynamic query, int count]) async {
+  try {
+    idb.Request request;
+    if (count != null) {
+      request = objectStore.getAllKeys(query, count);
+    } else {
+      request = objectStore.getAllKeys(query);
+    }
+    return _completeRequest(request);
+  } catch (e, stacktrace) {
+    return Future.error(e, stacktrace);
+  }
+}
