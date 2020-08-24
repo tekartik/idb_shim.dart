@@ -204,7 +204,7 @@ void defineTests(TestContext ctx) {
           {'name': 'test2'},
         ]);
         expect(await index.getAllKeys(), [1, 3, 2]);
-      }, solo: true);
+      });
 //
 //      solo_test('add_twice_same_key', () {
 //        Map value1 = {
