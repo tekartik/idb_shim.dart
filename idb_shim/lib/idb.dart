@@ -1,11 +1,10 @@
-library idb_shim;
+library idb_shim.idb;
 
 import 'dart:async';
 
 import 'package:idb_shim/src/common/common_factory.dart';
 import 'package:idb_shim/src/common/common_key_range.dart';
 
-export 'src/client/client.dart';
 export 'src/client/error.dart';
 
 /// Read-write mode for transaction.
@@ -267,6 +266,18 @@ abstract class ObjectStore {
   Future<int> count([dynamic keyOrRange]);
 
   ///
+  /// returns all objects in the object store matching the specified parameter
+  /// or all objects in the store if no parameters are given.
+  ///
+  Future<List<dynamic>> getAll([dynamic query, int count]);
+
+  ///
+  /// returns record keys for all objects in the object store matching the
+  /// specified parameter or all objects in the store if no parameters are given.
+  ///
+  Future<List<dynamic>> getAllKeys([dynamic query, int count]);
+
+  ///
   /// Returns the key path of this object store.
   ///
   /// If this property is null, the application must provide a key for each
@@ -433,6 +444,18 @@ abstract class Index {
   /// Creates a key cursor over the specified key range.
   Stream<Cursor> openKeyCursor(
       {key, KeyRange range, String direction, bool autoAdvance});
+
+  ///
+  /// returns all objects in the index matching the specified parameter
+  /// or all objects in the index if no parameters are given.
+  ///
+  Future<List<dynamic>> getAll([dynamic query, int count]);
+
+  ///
+  /// returns record primary keys for all objects in the index store matching the
+  /// specified parameter or all objects in the index if no parameters are given.
+  ///
+  Future<List<dynamic>> getAllKeys([dynamic query, int count]);
 
   ///
   /// returns the key path of the current index. If null, this index is not

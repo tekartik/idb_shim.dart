@@ -1,6 +1,7 @@
 library transaction_test_common;
 
 import 'package:idb_shim/idb_client.dart';
+import 'package:pedantic/pedantic.dart';
 
 import 'idb_test_common.dart';
 
@@ -300,6 +301,30 @@ void defineTests(TestContext ctx) {
             });
             return completed;
           }
+        });
+
+        test('complete previous transaction', () async {
+          void _initializeDatabase(VersionChangeEvent e) {
+            var db = e.database;
+            db.createObjectStore(testStoreName);
+          }
+
+          var name = 'complete_previous_transaction.db';
+          await idbFactory.deleteDatabase(name);
+          var db = await idbFactory.open(name,
+              version: 1, onUpgradeNeeded: _initializeDatabase);
+
+          var txn1 = db.transaction(testStoreName, idbModeReadWrite);
+          var txn2 = db.transaction(testStoreName, idbModeReadWrite);
+
+          var store1 = txn1.objectStore(testStoreName);
+          var store2 = txn2.objectStore(testStoreName);
+          unawaited(store1.put({'value': 1}, 1));
+          var future2 = store2.put({'value': 2}, 2);
+          await txn1.completed;
+          await future2;
+          await txn2.completed;
+          db.close();
         });
       });
     });

@@ -21,11 +21,7 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   sdb.Filter _indexKeyOrRangeFilter([keyOrRange]) {
     // null means all entry without null value
     if (keyOrRange == null) {
-      if (meta.keyPath is String) {
-        return sdb.Filter.notEquals(meta.keyPath as String, null);
-      } else {
-        throw 'key_OR_range is null, keyPath must not be an array';
-      }
+      return keyNotNullFilter(meta.keyPath);
     }
     return keyOrRangeFilter(meta.keyPath, keyOrRange, multiEntry);
   }
@@ -100,4 +96,28 @@ class IndexSembast extends Index with IndexWithMetaMixin {
 
   List<sdb.SortOrder> sortOrders(bool ascending) =>
       keyPathSortOrders(keyPath, ascending);
+
+  @override
+  Future<List<dynamic>> getAll([query, int count]) {
+    return inTransaction(() async {
+      final finder = sdb.Finder(
+          filter: _indexKeyOrRangeFilter(query),
+          limit: count,
+          sortOrders: sortOrders(true));
+      return (await store.sdbStore.find(store.sdbClient, finder: finder))
+          .map(store.recordToValue)
+          .toList(growable: false);
+    });
+  }
+
+  @override
+  Future<List<dynamic>> getAllKeys([query, int count]) {
+    return inTransaction(() async {
+      final finder = sdb.Finder(
+          filter: _indexKeyOrRangeFilter(query),
+          limit: count,
+          sortOrders: sortOrders(true));
+      return store.sdbStore.findKeys(store.sdbClient, finder: finder);
+    });
+  }
 }

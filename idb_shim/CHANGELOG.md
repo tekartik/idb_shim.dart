@@ -1,4 +1,8 @@
-## 1.11.1
+## 1.12.0
+
+* Add `ObjectStore.getAll/getAllKeys` and `Index.getAll/getAllKeys`
+
+## 1.11.1+1
 
 * Export `idbFactoryNative`, `idbFactoryMemory` and `idbFactoryMemoryFs` in `idb_shim.dart`
 * Allow safe import of `idb_shim.dart` on web and io.

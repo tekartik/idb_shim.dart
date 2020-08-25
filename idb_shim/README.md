@@ -5,7 +5,7 @@ not support the indexed_db api with very few changes as well as setting the base
 
 It also  allows to test your database schema and access in vm unit tests.
 
-* Project [home page](http://tekartik.github.io/idb_shim.dart/)
+* Project [home page](https://tekartik.github.io/idb_shim.dart/)
 * Project [source code](https://github.com/tekartik/idb_shim.dart)
 * [Samples](https://tekartik.github.io/idb_shim_samples.dart) (code and live demo)
 
@@ -64,9 +64,6 @@ Flutter (iOS/Android/Web).
 
 While idb_shim over sembast is a solution on Flutter, there is an implementation [idb_sqflite](https://pub.dev/packages/idb_sqflite) based on sqflite for mobile (iOS and Android)
 
-### Author
- * [Alexandre Roux Tekartik](https://github.com/alextekartik) ([+Alexandre Roux Tekartik](https://plus.google.com/+AlexandreRouxTekartik/about))
- 
 ### Testing
 
 #### Testing with dartdevc

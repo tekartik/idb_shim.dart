@@ -160,6 +160,30 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   @override
+  Future<List<dynamic>> getAll([dynamic keyOrRange, int count]) {
+    return inTransaction(() async {
+      return (await sdbStore.find(
+        sdbClient,
+        finder: sdb.Finder(
+            filter: _storeKeyOrRangeFilter(keyOrRange), limit: count),
+      ))
+          .map(recordToValue)
+          .toList(growable: false);
+    });
+  }
+
+  @override
+  Future<List<dynamic>> getAllKeys([dynamic keyOrRange, int count]) {
+    return inTransaction(() async {
+      return (await sdbStore.findKeys(
+        sdbClient,
+        finder: sdb.Finder(
+            filter: _storeKeyOrRangeFilter(keyOrRange), limit: count),
+      ));
+    });
+  }
+
+  @override
   Index createIndex(String name, keyPath, {bool unique, bool multiEntry}) {
     final indexMeta = IdbIndexMeta(name, keyPath, unique, multiEntry);
     meta.createIndex(database.meta, indexMeta);

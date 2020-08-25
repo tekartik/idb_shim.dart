@@ -1,4 +1,4 @@
-library idb_shim_native;
+library idb_shim.src.native.idb_native_web;
 
 import 'dart:indexed_db' as native;
 import 'package:idb_shim/idb_client.dart';
