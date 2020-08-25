@@ -735,6 +735,75 @@ void defineTests(TestContext ctx) {
         var readValue = await index.get('test1');
         expect(readValue, value);
       });
+
+      test('getAll', () async {
+        await _setUp();
+        _createTransaction();
+        final value1 = {testNameField: 1};
+        final value2 = {
+          testNameField: [2, 3]
+        };
+        final value3 = {
+          testNameField: [1, 2]
+        };
+
+        final index = objectStore.index(testNameIndex);
+        expect(await index.getAll(), isEmpty);
+        expect(await index.getAll(null, 1), isEmpty);
+        expect(await index.getAll(1, 1), isEmpty);
+        expect(await index.getAllKeys(), isEmpty);
+        expect(await index.getAllKeys(null, 1), isEmpty);
+        expect(await index.getAllKeys(1, 1), isEmpty);
+        var key = await objectStore.put(value1, 1);
+        expect(key, 1);
+        key = await objectStore.add(value2, 2);
+        expect(key, 2);
+        await objectStore.add(value3, 3);
+
+        expect(await index.getAll(1), [
+          {'name': 1},
+          {
+            'name': [1, 2]
+          }
+        ]);
+        expect(await index.getAllKeys(1), [1, 3]);
+        expect(await index.getAll(1, 1), [
+          {'name': 1}
+        ]);
+        expect(await index.getAllKeys(1, 1), [1]);
+
+        try {
+//        only work on native
+          expect(await index.getAll(), [
+            {'name': 1},
+            {
+              'name': [1, 2]
+            },
+            {
+              'name': [2, 3]
+            },
+            {
+              'name': [1, 2]
+            },
+            {
+              'name': [2, 3]
+            }
+          ]);
+          expect(await index.getAllKeys(), [1, 3, 2, 3, 2]);
+        } on TestFailure catch (e) {
+          print('Index.getAll multi entry allow failure $e');
+          expect(await index.getAll(), [
+            {'name': 1},
+            {
+              'name': [1, 2]
+            },
+            {
+              'name': [2, 3]
+            },
+          ]);
+          expect(await index.getAllKeys(), [1, 3, 2]);
+        }
+      });
     });
 
     group('multi_entry_false', () {
@@ -805,6 +874,45 @@ void defineTests(TestContext ctx) {
         }
         var readValue = await index.get(1);
         expect(readValue, isNull);
+      });
+      test('getAll', () async {
+        await _setUp();
+        _createTransaction();
+        final value1 = {testNameField: 1};
+        final value2 = {
+          testNameField: [2, 3]
+        };
+        final value3 = {
+          testNameField: [1, 2]
+        };
+
+        final index = objectStore.index(testNameIndex);
+        expect(await index.getAll(), isEmpty);
+        expect(await index.getAll(null, 1), isEmpty);
+        expect(await index.getAll(1, 1), isEmpty);
+        expect(await index.getAllKeys(), isEmpty);
+        expect(await index.getAllKeys(null, 1), isEmpty);
+        expect(await index.getAllKeys(1, 1), isEmpty);
+        var key = await objectStore.put(value1, 1);
+        expect(key, 1);
+        key = await objectStore.add(value2, 2);
+        expect(key, 2);
+        await objectStore.add(value3, 3);
+
+        expect(await index.getAll(1), [
+          {'name': 1},
+        ]);
+        expect(await index.getAllKeys(1), [1]);
+        expect(await index.getAll(), [
+          {'name': 1},
+          {
+            'name': [1, 2]
+          },
+          {
+            'name': [2, 3]
+          }
+        ]);
+        expect(await index.getAllKeys(), [1, 3, 2]);
       });
     });
 
