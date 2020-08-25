@@ -314,9 +314,15 @@ sdb.Filter keyFilter(dynamic keyPath, var key, bool multiEntry) {
       return sdb.Filter.and(List.generate(
           keyList.length, (i) => keyFilter(keyList[i], null, multiEntry)));
     } else {
-      final valueList = key as List;
-      return sdb.Filter.and(List.generate(keyList.length,
-          (i) => keyFilter(keyList[i], valueList[i], multiEntry)));
+      // The key must be a list too...
+      if (key is List) {
+        final valueList = key;
+        return sdb.Filter.and(List.generate(keyList.length,
+            (i) => keyFilter(keyList[i], valueList[i], multiEntry)));
+      } else {
+        // Always false
+        return sdb.Filter.custom((record) => false);
+      }
     }
   }
   throw 'keyPath $keyPath not supported';
@@ -329,4 +335,15 @@ sdb.Filter keyOrRangeFilter(
   } else {
     return keyFilter(keyPath, keyOrRange, multiEntry);
   }
+}
+
+sdb.Filter keyNotNullFilter(dynamic keyPath) {
+  if (keyPath is String) {
+    return sdb.Filter.notEquals(keyPath, null);
+  } else if (keyPath is List) {
+    final keyList = keyPath;
+    return sdb.Filter.and(List.generate(keyList.length,
+        (i) => sdb.Filter.notEquals(keyList[i] as String, null)));
+  }
+  throw 'keyPath $keyPath not supported';
 }

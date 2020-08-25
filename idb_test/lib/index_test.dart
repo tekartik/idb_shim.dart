@@ -1022,6 +1022,74 @@ void defineTests(TestContext ctx) {
           expect(e, isNotNull);
         }
       });
+
+      test('getAll', () async {
+        await _setUp();
+        _createTransaction();
+        final value1 = {testNameField: 'test1', testNameField2: 456};
+        final value2 = {testNameField: 'test2'};
+        final value3 = {testNameField: 'test1', testNameField2: 456};
+        final value4 = {testNameField: 'test1', testNameField2: 123};
+        final value5 = {testNameField: 'test1', testNameField2: 789};
+
+        final index = objectStore.index(testNameIndex);
+        expect(await index.getAll(), isEmpty);
+        expect(await index.getAll(null, 1), isEmpty);
+        expect(await index.getAll(1, 1), isEmpty);
+        expect(await index.getAllKeys(), isEmpty);
+        expect(await index.getAllKeys(null, 1), isEmpty);
+        expect(await index.getAllKeys(1, 1), isEmpty);
+        var key = await objectStore.put(value1, 1);
+        expect(key, 1);
+        key = await objectStore.add(value2, 2);
+        expect(key, 2);
+        await objectStore.add(value3, 3);
+        await objectStore.add(value4, 4);
+        await objectStore.add(value5, 5);
+
+        expect(await index.getAll('test1'), isEmpty); // Bad key
+        expect(await index.getAll(['test1', 456]), [
+          {testNameField: 'test1', testNameField2: 456},
+          {testNameField: 'test1', testNameField2: 456}
+        ]);
+        expect(await index.getAllKeys('test1'), isEmpty);
+        // Bad key
+        expect(await index.getAllKeys(['test1', 456]), [1, 3]);
+        expect(await index.getAll(['test1', 456], 1), [
+          {testNameField: 'test1', testNameField2: 456},
+        ]);
+        expect(await index.getAllKeys(['test1', 456], 1), [1]);
+        expect(await index.getAll(), [
+          {'name': 'test1', 'name_2': 123},
+          {'name': 'test1', 'name_2': 456},
+          {'name': 'test1', 'name_2': 456},
+          {'name': 'test1', 'name_2': 789}
+        ]);
+        expect(await index.getAllKeys(), [4, 1, 3, 5]);
+
+        expect(
+            await index
+                .getAllKeys(KeyRange.bound(['test1', 456], ['test1', 790])),
+            [1, 3, 5]);
+        expect(
+            await index.getAllKeys(
+                KeyRange.bound(['test1', 456], ['test1', 790]), 2),
+            [1, 3]);
+        expect(
+            await index.getAll(KeyRange.bound(['test1', 456], ['test1', 790])),
+            [
+              {'name': 'test1', 'name_2': 456},
+              {'name': 'test1', 'name_2': 456},
+              {'name': 'test1', 'name_2': 789}
+            ]);
+        expect(
+            await index.getAll(
+                KeyRange.bound(['test1', 456], ['test1', 790]), 2),
+            [
+              {'name': 'test1', 'name_2': 456},
+              {'name': 'test1', 'name_2': 456},
+            ]);
+      });
 //
 //      solo_test('add_twice_same_key', () {
 //        Map value1 = {

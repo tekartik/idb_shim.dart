@@ -21,11 +21,7 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   sdb.Filter _indexKeyOrRangeFilter([keyOrRange]) {
     // null means all entry without null value
     if (keyOrRange == null) {
-      if (meta.keyPath is String) {
-        return sdb.Filter.notEquals(meta.keyPath as String, null);
-      } else {
-        throw 'key_OR_range is null, keyPath must not be an array';
-      }
+      return keyNotNullFilter(meta.keyPath);
     }
     return keyOrRangeFilter(meta.keyPath, keyOrRange, multiEntry);
   }
