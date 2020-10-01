@@ -13,7 +13,7 @@ void verifyGraph(expected, actual) {
 
   String message(String path, String reason) => path == ''
       ? reason
-      : reason == null ? 'path: $path' : 'path: $path, $reason';
+      : (reason == null ? 'path: $path' : 'path: $path, $reason');
 
   void walk(String path, expected, actual) {
     if (expected is String || expected is num || expected == null) {
