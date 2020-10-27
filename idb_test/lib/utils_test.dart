@@ -1,5 +1,7 @@
 library idb_shim.utils_test;
 
+import 'dart:typed_data';
+
 import 'package:collection/collection.dart';
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/utils/idb_import_export.dart';
@@ -163,6 +165,7 @@ void defineTests(TestContext ctx) {
         }
         await _checkAll(db, expectedExport, _check);
       });
+
       test('three_stores', () async {
         await _setupDeleteDb();
 
@@ -480,6 +483,97 @@ void defineTests(TestContext ctx) {
               ]
             },
             _check);
+      });
+
+      test('all_types', () async {
+        await _setupDeleteDb();
+
+        void _initializeDatabase(VersionChangeEvent e) {
+          final db = e.database;
+          db.createObjectStore(testStoreName);
+        }
+
+        db = await idbFactory.open(_srcDbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+        final txn = db.transaction(testStoreName, idbModeReadWrite);
+        final store = txn.objectStore(testStoreName);
+        var map = {
+          'my_bool': true,
+          'my_date': DateTime.utc(2020, DateTime.october, 27, 13, 14, 15, 999),
+          'my_int': 1,
+          'my_double': 1.5,
+          'my_blob': Uint8List.fromList([1, 2, 3]),
+          'my_string': 'some text',
+          'my_list': [4, 5, 6],
+          'my_map': {'sub': 73},
+          'my_complex': [
+            {
+              'sub': [
+                {
+                  'inner': [7, 8, 9]
+                }
+              ]
+            }
+          ],
+        };
+        await store.put(map, 'my_key');
+        await txn.completed;
+        Future _check(Database db) async {
+          expect(db.factory, idbFactory);
+          expect(db.objectStoreNames, [testStoreName]);
+          expect(basename(db.name).endsWith(basename(_srcDbName)), isTrue);
+          expect(db.version, 1);
+          final txn = db.transaction(testStoreName, idbModeReadOnly);
+          final store = txn.objectStore(testStoreName);
+          expect(store.name, testStoreName);
+          expect(store.keyPath, isNull);
+
+          expect(store.indexNames, []);
+          expect(await store.getObject('my_key'), map);
+          await txn.completed;
+        }
+
+        final expectedExport = <String, dynamic>{
+          'sembast_export': 1,
+          'version': 1,
+          'stores': [
+            {
+              'name': '_main',
+              'keys': ['store_test_store', 'stores', 'version'],
+              'values': [
+                {'name': 'test_store'},
+                ['test_store'],
+                1
+              ]
+            },
+            {
+              'name': 'test_store',
+              'keys': ['my_key'],
+              'values': [
+                {
+                  'my_bool': true,
+                  'my_date': {'@Timestamp': '2020-10-27T13:14:15.999Z'},
+                  'my_int': 1,
+                  'my_double': 1.5,
+                  'my_blob': {'@Blob': 'AQID'},
+                  'my_string': 'some text',
+                  'my_list': [4, 5, 6],
+                  'my_map': {'sub': 73},
+                  'my_complex': [
+                    {
+                      'sub': [
+                        {
+                          'inner': [7, 8, 9]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        };
+        await _checkExportImport(db, expectedExport, _check);
       });
 
       // safari does not support multiple stores - fakes
