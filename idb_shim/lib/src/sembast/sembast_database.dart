@@ -132,7 +132,9 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
     // Open the sembast database
     db = await sdbFactory.openDatabase(factory.getDbPath(name), version: 1,
         onVersionChanged: (db, oldVersion, newVersion) {
-      print('changing ${db.path} $oldVersion -> $newVersion');
+      if (sembastDebug) {
+        print('changing ${db.path} $oldVersion -> $newVersion');
+      }
     });
     previousVersion = await _readMeta();
     // devPrint('Opening $name previous $previousVersion new $newVersion version $version');
