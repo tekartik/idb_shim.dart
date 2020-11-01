@@ -1,6 +1,7 @@
-## 1.12.1-dev.1
+## 1.12.1
 
 * Add `ObjectStore.getAll/getAllKeys` and `Index.getAll/getAllKeys`
+* Fix import/export through sembast
 
 ## 1.11.1+1
 
