@@ -15,7 +15,7 @@ void defineTests(TestContext ctx) {
   // new
   String _dbName;
   // prepare for test
-  Future _setupDeleteDb() async {
+  Future<void> _setupDeleteDb() async {
     _dbName = ctx.dbName;
     await idbFactory.deleteDatabase(_dbName);
   }
@@ -106,20 +106,21 @@ void defineTests(TestContext ctx) {
       expect(database.version, 1);
       database.close();
 
+      // devPrint('#1');
       // not working in memory since not persistent
       if (!ctx.isInMemory) {
+        // devPrint('#2');
         var initCalled = false;
         void _initializeDatabase(VersionChangeEvent e) {
           // should not be called
+          // devPrint('previous ${e.oldVersion} new ${e.newVersion}');
           initCalled = true;
         }
 
-        return idbFactory
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
-            .then((Database database) {
-          expect(initCalled, false);
-          database.close();
-        });
+        database = await idbFactory.open(_dbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+        expect(initCalled, false);
+        database.close();
       }
     });
 
@@ -155,6 +156,7 @@ void defineTests(TestContext ctx) {
           version: 1, onUpgradeNeeded: _initializeDatabase);
 
       expect(initCalled, true);
+      expect(database.version, 1);
       database.close();
 
       // not working in memory since not persistent
@@ -171,6 +173,11 @@ void defineTests(TestContext ctx) {
             version: 2, onUpgradeNeeded: _upgradeDatabase);
 
         expect(upgradeCalled, true);
+        expect(database.version, 2);
+        database.close();
+
+        database = await idbFactory.open(_dbName);
+        expect(database.version, 2);
         database.close();
       }
     });

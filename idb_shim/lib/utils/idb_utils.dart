@@ -54,6 +54,7 @@ Future<Database> copySchema(
     }
   }
 
+  // devPrint('Open $dstDbName version $version');
   // Open and copy scheme
   final dstDatabase = await dstFactory.open(dstDbName,
       version: version, onUpgradeNeeded: _onUpgradeNeeded);

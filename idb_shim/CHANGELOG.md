@@ -1,4 +1,4 @@
-## 1.12.0
+## 1.12.1-dev.1
 
 * Add `ObjectStore.getAll/getAllKeys` and `Index.getAll/getAllKeys`
 

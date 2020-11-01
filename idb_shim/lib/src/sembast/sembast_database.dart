@@ -67,9 +67,11 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
       IdbFactory factory, sdb.Database db) async {
     final idbDb = DatabaseSembast._(factory);
     idbDb.db = db;
-    await idbDb._readMeta();
+    var version = await idbDb._readMeta();
     // Copy name from path
     idbDb.meta.name = db.path;
+    // devPrint('fromDatabase version $version meta ${idbDb.meta.version}');
+    idbDb.meta.version = version ?? 1;
     return idbDb;
   }
 
@@ -97,9 +99,11 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
   // return the previous version
   Future<int> _readMeta() async {
     return db.transaction((txn) async {
+      // devPrint(await mainStore.find(txn));
+
       // read version
       meta.version = await mainStore.record('version').get(txn) as int;
-      //devPrint('meta version :${meta.version})
+      // devPrint('read meta version ${meta.version} ${db.path}');
       // read store meta
       var storeList = await mainStore.record('stores').get(txn);
       if (storeList != null) {
@@ -126,9 +130,17 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
           'open2 $onUpgradeNeeded ${onUpgradeNeeded != null ? 'NOT NULL' : 'NULL'}');
     }
     // Open the sembast database
-    db = await sdbFactory.openDatabase(factory.getDbPath(name), version: 1);
+    db = await sdbFactory.openDatabase(factory.getDbPath(name), version: 1,
+        onVersionChanged: (db, oldVersion, newVersion) {
+      print('changing ${db.path} $oldVersion -> $newVersion');
+    });
     previousVersion = await _readMeta();
-    if (newVersion != previousVersion) {
+    // devPrint('Opening $name previous $previousVersion new $newVersion version $version');
+    // If not specify and previous version is null, force new version to 1
+    if (previousVersion == null) {
+      newVersion ??= 1;
+    }
+    if (newVersion != null && newVersion != previousVersion) {
       Set<IdbObjectStoreMeta> changedStores;
       Set<IdbObjectStoreMeta> deletedStores;
 
@@ -170,6 +182,9 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
         // considered as opened
         meta.version = newVersion;
       });
+    } else {
+      // Keep existing meta
+      meta.version = previousVersion ?? 1;
     }
     return db;
   }

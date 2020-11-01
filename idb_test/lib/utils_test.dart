@@ -52,7 +52,7 @@ void defineTests(TestContext ctx) {
       expect(export, expectedExport);
 
       // import
-      final importedDb =
+      var importedDb =
           await sdbImportDatabase(export, idbFactory, _importedDbName);
       // The name might be relative...
       expect(importedDb.name.endsWith(_importedDbName), isTrue);
@@ -62,6 +62,11 @@ void defineTests(TestContext ctx) {
       // re-export
       expect(await sdbExportDatabase(importedDb), expectedExport);
 
+      importedDb.close();
+
+      // re open
+      importedDb = await idbFactory.open(_importedDbName);
+      await check(importedDb);
       importedDb.close();
     }
 
@@ -104,6 +109,55 @@ void defineTests(TestContext ctx) {
                   'name': '_main',
                   'keys': ['version'],
                   'values': [1]
+                }
+              ]
+            },
+            _check);
+      });
+
+      test('import version 2 and reopen', () async {
+        await _setupDeleteDb();
+        db = await idbFactory.open(_srcDbName,
+            version: 2, onUpgradeNeeded: (_) {});
+        expect(db.version, 2);
+        final export = await sdbExportDatabase(db);
+        db.close();
+
+        // import
+        var importedDb =
+            await sdbImportDatabase(export, idbFactory, _importedDbName);
+        expect(importedDb.version, 2);
+        //devPrint()
+        final newExport = await sdbExportDatabase(db);
+        expect(newExport, export);
+        importedDb.close();
+
+        db = await idbFactory.open(_importedDbName);
+        expect(db.version, 2);
+      });
+
+      test('empty idbVersion 2', () async {
+        await _setupDeleteDb();
+        db = await idbFactory.open(_srcDbName,
+            version: 2, onUpgradeNeeded: (_) {});
+
+        Future _check(Database db) async {
+          expect(db.factory, idbFactory);
+          expect(db.objectStoreNames.isEmpty, true);
+          expect(basename(db.name).endsWith(basename(_srcDbName)), isTrue);
+          expect(db.version, 2);
+        }
+
+        await _checkAll(
+            db,
+            {
+              'sembast_export': 1,
+              'version': 1,
+              'stores': [
+                {
+                  'name': '_main',
+                  'keys': ['version'],
+                  'values': [2]
                 }
               ]
             },
