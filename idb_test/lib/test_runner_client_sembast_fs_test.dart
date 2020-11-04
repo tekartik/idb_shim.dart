@@ -21,7 +21,7 @@ void main() {
 }
 
 void defineTests(SembastFsTestContext ctx) {
-  final idbFactory = ctx.factory;
+  final idbFactory = ctx.idbFactorySembast;
 
   group('simple', () {
     test('open', () async {

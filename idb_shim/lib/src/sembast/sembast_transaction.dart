@@ -7,7 +7,7 @@ import 'package:idb_shim/src/sembast/sembast_object_store.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:sembast/sembast.dart' as sdb;
 
-bool _debugTransaction = false;
+bool _debugTransaction = false; // devWarning(true); // false;
 
 // _lazyMode is what indexeddb on chrome supports
 // supporting wait between calls
@@ -34,6 +34,21 @@ class TransactionSembast extends IdbTransactionBase
   int _index = 0;
   bool _inactive = false;
 
+  var _aborted = false;
+
+  final _completedCompleter = Completer<Database>();
+  void _complete() {
+    if (!_completedCompleter.isCompleted) {
+      _completedCompleter.complete(database);
+    }
+  }
+
+  void _completeError(e, [StackTrace st]) {
+    if (!_completedCompleter.isCompleted) {
+      _completedCompleter.completeError(e, st);
+    }
+  }
+
   Future _execute(int i) {
     if (_debugTransaction) {
       print('exec $i');
@@ -45,16 +60,19 @@ class TransactionSembast extends IdbTransactionBase
         print('done $i');
       }
       completer.complete(result);
-    }).catchError((e, st) {
+    }).catchError((e, StackTrace st) {
       //devPrint(' err $i');
       if (_debugTransaction) {
         print('err $i');
       }
-      completer.completeError(e, st as StackTrace);
+      completer.completeError(e, st);
     });
   }
 
   Future _next() {
+    if (_aborted) {
+      throw DatabaseException('Transaction aborted');
+    }
     //print('_next? ${index}/${actions.length}');
     if (_index < _actions.length) {
       // Always try more
@@ -123,9 +141,13 @@ class TransactionSembast extends IdbTransactionBase
           sdbTransaction = txn;
           return _next();
         }).whenComplete(() {
-          _transactionCompleter.complete();
+          if (!_transactionCompleter.isCompleted) {
+            _transactionCompleter.complete();
+          }
         }).catchError((e) {
-          _transactionCompleter.completeError(e);
+          if (!_transactionCompleter.isCompleted) {
+            _transactionCompleter.completeError(e);
+          }
         });
       }
       //lazyExecution = new Future.sync(() {
@@ -196,23 +218,44 @@ class TransactionSembast extends IdbTransactionBase
         print('no lazy executor $_debugId...');
       }
       _inactive = true;
-      return Future.value(database);
+      _complete();
     } else {
       if (_debugTransaction) {
         print('lazy executor created $_debugId...');
       }
-    }
-    return _lazyExecution.then((_) {
-      return _transactionCompleter.future.then((_) {
-        return Future.wait(_futures).then((_) {
-          return database;
-        }).catchError((e, st) {
-          // catch any errors
-          // this is needed so that completed always complete
-          // without error
+
+      // Old and new code
+
+      // Time is super important here
+      // The code here does not give the same result in 'get_wait_get' test
+      // than the code below
+      return _lazyExecution.then((_) {
+        return _transactionCompleter.future.then((_) {
+          return Future.wait(_futures).then((_) {
+            return database;
+          }).catchError((e, st) {
+            // catch any errors
+            // this is needed so that completed always complete
+            // without error
+          });
         });
       });
-    });
+
+      /*
+      // Tricky part experimented on 2020-11-01 below with failure
+      _lazyExecution.then((_) async {
+        try {
+          await _transactionCompleter.future;
+          await Future.wait(_futures);
+          _complete();
+        } catch (e) {
+          _completeError(e);
+        }
+      });
+
+       */
+    }
+    return _completedCompleter.future;
   }
 
   @override
@@ -243,6 +286,11 @@ class TransactionSembast extends IdbTransactionBase
   ObjectStore objectStore(String name) {
     meta.checkObjectStore(name);
     return ObjectStoreSembast(this, database.meta.getObjectStore(name));
+  }
+
+  @override
+  void abort() {
+    _aborted = true;
   }
 
 //  @override

@@ -1,7 +1,6 @@
-library idb_shim.idb_test_common;
-
 import 'dart:async';
 
+import 'package:idb_shim/idb_client_logger.dart';
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/idb_client_memory.dart';
 import 'package:idb_shim/idb_client_sembast.dart';
@@ -64,6 +63,22 @@ class TestContext {
 
   /// true if double can be used as key
   bool get supportsDoubleKey => (factory as IdbFactoryBase).supportsDoubleKey;
+
+  void wrapInLogger({IdbFactoryLoggerType type = IdbFactoryLoggerType.all}) {
+    factory = getIdbFactoryLogger(factory, type: type);
+  }
+
+  /// Get inner factory implementation
+  T getFactory<T>() {
+    dynamic idbFactory = factory;
+    if (idbFactory is T) {
+      return idbFactory;
+    }
+    if (idbFactory is IdbFactoryLogger) {
+      return idbFactory.factory as T;
+    }
+    throw 'no factory of type $T found';
+  }
 }
 
 class SembastTestContext extends TestContext {
@@ -72,11 +87,11 @@ class SembastTestContext extends TestContext {
 
   sdb.DatabaseFactory sdbFactory;
 
-  @override
-  IdbFactorySembast get factory => super.factory as IdbFactorySembast;
+  // IdbFactorySembast get idbFactorySembast =>      super.getWrappedFactory<IdbFactorySembast>();
 }
 
 class SembastMemoryTestContext extends SembastTestContext {
+  /// Optional factory
   SembastMemoryTestContext() {
     factory = idbFactoryMemory;
   }
@@ -90,10 +105,10 @@ TestContext idbMemoryContext = SembastMemoryTestContext();
 class SembastFsTestContext extends SembastTestContext {
   @override
   sdb_fs.DatabaseFactoryFs get sdbFactory =>
-      factory.sdbFactory as sdb_fs.DatabaseFactoryFs;
+      idbFactorySembast.sdbFactory as sdb_fs.DatabaseFactoryFs;
 
-  @override
-  IdbFactorySembast get factory => super.factory;
+  IdbFactorySembast get idbFactorySembast =>
+      super.getFactory<IdbFactorySembast>();
 }
 
 class SembastMemoryFsTestContext extends SembastFsTestContext {

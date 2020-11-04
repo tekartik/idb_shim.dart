@@ -22,6 +22,9 @@ const String idbDirectionPrev = 'prev';
 /// Factory name using native indexeddb implementation.
 const idbFactoryNameNative = 'native';
 
+/// Factory name logger (wrapping another factory).
+const idbFactoryNameLogger = 'logger';
+
 /// Factory name using Sembast implementation
 const idbFactoryNameSembastIo = 'sembast_io';
 
@@ -160,6 +163,10 @@ abstract class Transaction {
   /// complete when the transaction is done
   ///
   Future<Database> get completed;
+
+  /// Rolls back all the changes to objects in the database associated
+  /// with this transaction.
+  void abort();
 }
 
 ///
@@ -551,7 +558,8 @@ abstract class VersionChangeEvent {
 ///
 abstract class Event {}
 
-typedef OnUpgradeNeededFunction = void Function(VersionChangeEvent event);
+typedef OnUpgradeNeededFunction = FutureOr<void> Function(
+    VersionChangeEvent event);
 
 typedef OnBlockedFunction = void Function(Event event);
 

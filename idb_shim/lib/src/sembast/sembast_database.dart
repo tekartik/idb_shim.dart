@@ -154,6 +154,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
           onUpgradeNeeded(
               _SdbVersionChangeEvent(this, previousVersion, newVersion));
         }
+        await versionChangeTransaction.completed;
         changedStores = Set.from(meta.versionChangeTransaction.createdStores);
         changedStores.addAll(meta.versionChangeTransaction.updatedStores);
         deletedStores = meta.versionChangeTransaction.deletedStores;
