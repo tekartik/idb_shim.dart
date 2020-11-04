@@ -8,11 +8,14 @@ import 'package:idb_shim/src/utils/core_imports.dart';
 
 class TransactionLogger extends IdbTransactionBase {
   Transaction idbTransaction;
+  static int _id = 0;
+  final id;
 
   DatabaseLogger get idbDatabaseLogger => database as DatabaseLogger;
 
   TransactionLogger(DatabaseLogger database, this.idbTransaction)
-      : super(database);
+      : id = ++_id,
+        super(database);
 
   @override
   ObjectStore objectStore(String name) =>
@@ -22,28 +25,28 @@ class TransactionLogger extends IdbTransactionBase {
   Future<Database> get completed {
     try {
       idbTransaction.completed.catchError((e) {
-        idbDatabaseLogger.err('completed error $e');
+        err('completed error $e');
       }).whenComplete(() {
-        idbDatabaseLogger.log('completed');
+        log('completed');
       });
       return idbTransaction.completed;
     } catch (e) {
-      idbDatabaseLogger.err('completed sync error $e');
+      err('completed sync error $e');
       rethrow;
     }
   }
 
   @override
   void abort() {
-    idbDatabaseLogger.log('abort');
+    log('abort');
     idbTransaction.abort();
   }
 
   void log(String message) {
-    idbDatabaseLogger.log(message);
+    idbDatabaseLogger.log('t$id $message');
   }
 
   void err(String message) {
-    idbDatabaseLogger.err(message);
+    idbDatabaseLogger.err('t$id $message');
   }
 }

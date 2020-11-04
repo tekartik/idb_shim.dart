@@ -136,60 +136,67 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
         print('changing ${db.path} $oldVersion -> $newVersion');
       }
     });
-    previousVersion = await _readMeta();
-    // devPrint('Opening $name previous $previousVersion new $newVersion version $version');
-    // If not specify and previous version is null, force new version to 1
-    if (previousVersion == null) {
-      newVersion ??= 1;
-    }
-    if (newVersion != null && newVersion != previousVersion) {
-      Set<IdbObjectStoreMeta> changedStores;
-      Set<IdbObjectStoreMeta> deletedStores;
+    try {
+      previousVersion = await _readMeta();
+      // devPrint('Opening $name previous $previousVersion new $newVersion version $version');
+      // If not specify and previous version is null, force new version to 1
+      if (previousVersion == null) {
+        newVersion ??= 1;
+      }
+      if (newVersion != null && newVersion != previousVersion) {
+        Set<IdbObjectStoreMeta> changedStores;
+        Set<IdbObjectStoreMeta> deletedStores;
 
-      await meta.onUpgradeNeeded(() async {
-        versionChangeTransaction =
-            TransactionSembast(this, meta.versionChangeTransaction);
-        // could be null when opening an empty database
-        if (onUpgradeNeeded != null) {
-          onUpgradeNeeded(
-              _SdbVersionChangeEvent(this, previousVersion, newVersion));
-        }
-        await versionChangeTransaction.completed;
-        changedStores = Set.from(meta.versionChangeTransaction.createdStores);
-        changedStores.addAll(meta.versionChangeTransaction.updatedStores);
-        deletedStores = meta.versionChangeTransaction.deletedStores;
-      });
+        await meta.onUpgradeNeeded(() async {
+          versionChangeTransaction =
+              TransactionSembast(this, meta.versionChangeTransaction);
+          // could be null when opening an empty database
+          if (onUpgradeNeeded != null) {
+            await onUpgradeNeeded(
+                _SdbVersionChangeEvent(this, previousVersion, newVersion));
+          }
 
-      await db.transaction((txn) async {
-        await mainStore.record('version').put(txn, newVersion);
+          await versionChangeTransaction.completed;
+          changedStores = Set.from(meta.versionChangeTransaction.createdStores);
+          changedStores.addAll(meta.versionChangeTransaction.updatedStores);
+          deletedStores = meta.versionChangeTransaction.deletedStores;
+        });
 
-        // First delete everything from deleted stores
-        for (final storeMeta in deletedStores) {
-          await sdb.StoreRef(storeMeta.name).drop(txn);
-        }
+        await db.transaction((txn) async {
+          await mainStore.record('version').put(txn, newVersion);
 
-        // Handle deleted object store
-        if (changedStores.isNotEmpty || deletedStores.isNotEmpty) {
-          await mainStore.record('stores').put(
-              txn,
-              List.from(objectStoreNames)
-                ..sort()); // Sort the names to always have the same export
-        }
+          // First delete everything from deleted stores
+          for (final storeMeta in deletedStores) {
+            await sdb.StoreRef(storeMeta.name).drop(txn);
+          }
 
-        for (final storeMeta in changedStores) {
-          await mainStore
-              .record('store_${storeMeta.name}')
-              .put(txn, storeMeta.toMap());
-        }
-      }).then((_) {
+          // Handle deleted object store
+          if (changedStores.isNotEmpty || deletedStores.isNotEmpty) {
+            await mainStore.record('stores').put(
+                txn,
+                List.from(objectStoreNames)
+                  ..sort()); // Sort the names to always have the same export
+          }
+
+          for (final storeMeta in changedStores) {
+            await mainStore
+                .record('store_${storeMeta.name}')
+                .put(txn, storeMeta.toMap());
+          }
+        });
         // considered as opened
         meta.version = newVersion;
-      });
-    } else {
-      // Keep existing meta
-      meta.version = previousVersion ?? 1;
+      } else {
+        // Keep existing meta
+        meta.version = previousVersion ?? 1;
+      }
+      return db;
+    } catch (e) {
+      try {
+        await db?.close();
+      } catch (_) {}
+      rethrow;
     }
-    return db;
   }
 
   @override

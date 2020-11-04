@@ -1,5 +1,6 @@
 // set to true to debug transaction life cycle
 import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/src/common/common_exception.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
 import 'package:idb_shim/src/common/common_transaction.dart';
 import 'package:idb_shim/src/sembast/sembast_database.dart';
@@ -15,6 +16,13 @@ bool _debugTransaction = false; // devWarning(true); // false;
 bool _transactionLazyMode = false;
 
 typedef Action = FutureOr Function();
+
+// Failing
+bool newTransaction = false;
+
+Future<void> _delayedInit() async {
+  await Future.delayed(const Duration());
+}
 
 /// Transaction wrapper around a sembast transaction.
 class TransactionSembast extends IdbTransactionBase
@@ -35,14 +43,24 @@ class TransactionSembast extends IdbTransactionBase
   bool _inactive = false;
 
   var _aborted = false;
+  Exception _endException;
+  // In case of an error it must be cancelled
 
-  final _completedCompleter = Completer<Database>();
+  // The outer result
+  final _completedCompleter = Completer<Database>.sync();
+
+  @deprecated
   void _complete() {
     if (!_completedCompleter.isCompleted) {
-      _completedCompleter.complete(database);
+      if (_aborted) {
+        _completeError(newAbortException());
+      } else {
+        _completedCompleter.complete(database);
+      }
     }
   }
 
+  @deprecated
   void _completeError(e, [StackTrace st]) {
     if (!_completedCompleter.isCompleted) {
       _completedCompleter.completeError(e, st);
@@ -55,23 +73,50 @@ class TransactionSembast extends IdbTransactionBase
     }
     final completer = _completers[i];
     final action = _actions[i] as Action;
-    return Future.sync(action).then((result) {
-      if (_debugTransaction) {
-        print('done $i');
-      }
-      completer.complete(result);
-    }).catchError((e, StackTrace st) {
-      //devPrint(' err $i');
-      if (_debugTransaction) {
-        print('err $i');
-      }
-      completer.completeError(e, st);
-    });
+
+    // Time very important here
+    if (newTransaction) {
+      // Not working
+      return () async {
+        try {
+          dynamic result = action();
+          if (result is Future) {
+            result = await result;
+          }
+          if (_debugTransaction) {
+            print('done $i');
+          }
+          completer.complete(result);
+        } catch (e, st) {
+          if (_debugTransaction) {
+            print('err $i $e');
+          }
+          completer.completeError(e, st);
+        }
+      }();
+    } else {
+      // Yes!
+      return Future.sync(action).then((result) {
+        if (_debugTransaction) {
+          print('done $i');
+        }
+        completer.complete(result);
+      }).catchError((e, StackTrace st) {
+        //devPrint(' err $i');
+        if (_debugTransaction) {
+          print('err $i $e');
+        }
+        completer.completeError(e, st);
+      });
+    }
   }
 
   Future _next() {
     if (_aborted) {
-      throw DatabaseException('Transaction aborted');
+      if (_debugTransaction) {
+        print('throwing abort exception');
+      }
+      throw newAbortException('Transaction aborted');
     }
     //print('_next? ${index}/${actions.length}');
     if (_index < _actions.length) {
@@ -136,13 +181,25 @@ class TransactionSembast extends IdbTransactionBase
         //assert(sdbDatabase.transaction == null);
 
         // No return value here
-        return sdbDatabase.transaction((txn) {
+        return sdbDatabase.transaction((txn) async {
           // assign right away as this is tested
           sdbTransaction = txn;
-          return _next();
+          // Do we care about the type here?
+          var result = await _next();
+
+          // If aborted throw an error exception so that saves are
+          // cancelled
+          if (_endException != null) {
+            throw _endException;
+          }
+
+          return result;
         }).whenComplete(() {
           if (!_transactionCompleter.isCompleted) {
             _transactionCompleter.complete();
+          }
+          if (_debugTransaction) {
+            print('txn end of sembast transaction');
           }
         }).catchError((e) {
           if (!_transactionCompleter.isCompleted) {
@@ -195,6 +252,8 @@ class TransactionSembast extends IdbTransactionBase
   @override
   final IdbTransactionMeta meta;
 
+  ///
+  /// Constructor.
   TransactionSembast(DatabaseSembast database, this.meta) : super(database) {
     if (_debugTransaction) {
       _debugId = ++_debugAllIds;
@@ -206,29 +265,50 @@ class TransactionSembast extends IdbTransactionBase
       // simply call completed
       // completed;
 
-      Future.delayed(const Duration(), () {
-        completed;
+      _delayedInit().then((_) async {
+        if (_debugTransaction) {
+          print('Delayed init triggered');
+        }
+        // Lazy trigger completed.
+        try {
+          await _completed;
+        } catch (e) {
+          if (_debugTransaction) {
+            print(
+                'Handle TransactionSembast constructor async completed error $e');
+          }
+        }
+        if (_debugTransaction) {
+          print('completed aborted: $_aborted');
+        }
+        _inactive = true;
+
+        // Try a simple await to postpone the completed
+        await Future.value();
+        // The only place to call it
+        // ignore: deprecated_member_use_from_same_package
+        _complete();
       });
     }
   }
 
-  Future<Database> get _completed {
-    if (_lazyExecution == null) {
-      if (_debugTransaction) {
-        print('no lazy executor $_debugId...');
-      }
-      _inactive = true;
-      _complete();
-    } else {
-      if (_debugTransaction) {
-        print('lazy executor created $_debugId...');
-      }
+  Future<void> get _completed async {
+    try {
+      if (_lazyExecution == null) {
+        if (_debugTransaction) {
+          print('no lazy executor $_debugId...');
+        }
+        _inactive = true;
+      } else {
+        if (_debugTransaction) {
+          print('lazy executor created $_debugId...');
+        }
 
-      // Old and new code
+        // Old and new code
 
-      // Time is super important here
-      // The code here does not give the same result in 'get_wait_get' test
-      // than the code below
+        /*
+      // Timing is super important here
+
       return _lazyExecution.then((_) {
         return _transactionCompleter.future.then((_) {
           return Future.wait(_futures).then((_) {
@@ -237,44 +317,64 @@ class TransactionSembast extends IdbTransactionBase
             // catch any errors
             // this is needed so that completed always complete
             // without error
+            devPrint('_execute error $e');
           });
         });
       });
+      */
 
-      /*
-      // Tricky part experimented on 2020-11-01 below with failure
-      _lazyExecution.then((_) async {
-        try {
-          await _transactionCompleter.future;
-          await Future.wait(_futures);
-          _complete();
-        } catch (e) {
-          _completeError(e);
-        }
-      });
-
-       */
+        // Tricky part experimented on 2020-11-01 with success
+        // with a sync completer
+        await _lazyExecution.then((_) async {
+          try {
+            await Future.wait(
+                <Future>[_transactionCompleter.future, ..._futures]);
+          } catch (e) {
+            if (_debugTransaction) {
+              print('Handling transaction error $e');
+            }
+            _endException = DatabaseException(e.toString());
+          }
+        });
+      }
+    } catch (e) {
+      if (_debugTransaction) {
+        print('Catch _completed exception $e');
+      }
+      rethrow;
     }
-    return _completedCompleter.future;
   }
 
   @override
-  Future<Database> get completed {
+  Future<Database> get completed async {
+    /*
     if (_debugTransaction) {
       print('completed $_debugId...');
     }
-    Future<Database> _completed() => this._completed.then((Database db) {
+    Future<Database> _completed() => this._completed.whenComplete(() {
           if (_debugTransaction) {
-            print('completed');
+            print(
+                'completed ${_completedCompleter.isCompleted}, aborted: $_aborted');
           }
           _inactive = true;
-          return db;
         });
-
+    if (_isCompletedOrAborted) {
+      _complete();
+      return _completedCompleter.future;
+    }
     // postpone to next 2 cycles to allow enqueing
     // actions after completed has been called
     //if (_transactionLazyMode) {
-    return Future.value().then((_) => _completed());
+    await Future.value();
+    await _completed();
+
+     */
+    // postpone to next cycle to allow enqueing
+    await Future.value();
+    try {
+      await _completed;
+    } catch (_) {}
+    return _completedCompleter.future;
   }
 
 //    sdbTransaction == null ? new Future.value(database) : sdbTransaction.completed.then((_) {
@@ -290,7 +390,11 @@ class TransactionSembast extends IdbTransactionBase
 
   @override
   void abort() {
+    if (_debugTransaction) {
+      print('abort');
+    }
     _aborted = true;
+    _endException = newAbortException();
   }
 
 //  @override
