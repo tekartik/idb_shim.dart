@@ -7,7 +7,7 @@ import 'package:path/path.dart';
 import 'package:sembast/sembast.dart' as sdb;
 import 'package:sembast/sembast_memory.dart';
 
-bool sembastDebug = false;
+bool sembastDebug = false; // devWarning(true);
 
 /// Special factory in memory but supporting writing on a virtual file system (in memory too)
 IdbFactory _idbFactorySembastMemoryFsImpl;
@@ -56,7 +56,8 @@ class IdbFactorySembastImpl extends IdbFactoryBase
       OnBlockedFunction onBlocked}) async {
     checkOpenArguments(version: version, onUpgradeNeeded: onUpgradeNeeded);
 
-    version ??= 1;
+    // 2020-10-31 try no setting the version here
+    // version ??= 1;
 
     // name null ok for in memory
     // if (dbName == null) {
@@ -67,7 +68,7 @@ class IdbFactorySembastImpl extends IdbFactoryBase
 
     if (sembastDebug) {
       print(
-          'open1 $onUpgradeNeeded ${onUpgradeNeeded != null ? 'NOT NULL' : 'NULL'}');
+          'open1 onUpgradeNeeded ${onUpgradeNeeded != null ? 'NOT NULL' : 'NULL'}');
     }
     await db.open(version, onUpgradeNeeded);
     return db;
@@ -95,4 +96,7 @@ class IdbFactorySembastImpl extends IdbFactoryBase
 
   @override
   bool get supportsDoubleKey => true;
+
+  @override
+  String toString() => 'IdbFactorySembast($_databaseFactory)';
 }

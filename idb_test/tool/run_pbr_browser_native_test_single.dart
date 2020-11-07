@@ -6,7 +6,7 @@ Future main() async {
   await shell.run('''
 
   # pub run build_runner test -- -p chrome -j 1 test/multiplatform/idb_shim_import_test.dart
-  pub run build_runner test -- -p chrome -j 1 test/web/idb_native_factory_test.dart -r json
+  pub run build_runner test -- -p chrome -j 1 test/web/test_runner_client_native_test.dart
   
 
 ''');

@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:idb_shim/idb_client.dart';
+import 'package:idb_shim/src/utils/core_imports.dart';
 
 abstract class TransactionWithMetaMixin {
   IdbTransactionMeta get meta;
@@ -92,13 +93,18 @@ class IdbDatabaseMeta {
 
   Future onUpgradeNeeded(dynamic Function() action) async {
     _versionChangeTransaction = IdbVersionChangeTransactionMeta();
+    try {
+      var result = action();
 
-    var result = action();
-
-    if (result is Future) {
-      await result;
+      if (result is Future) {
+        await result;
+      }
+    } catch (e) {
+      // devPrint('onUpgradeNeeded error $e');
+      rethrow;
+    } finally {
+      _versionChangeTransaction = null;
     }
-    _versionChangeTransaction = null;
   }
 
   void createObjectStore(IdbObjectStoreMeta store) {

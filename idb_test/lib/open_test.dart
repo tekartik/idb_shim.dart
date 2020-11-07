@@ -15,7 +15,7 @@ void defineTests(TestContext ctx) {
   // new
   String _dbName;
   // prepare for test
-  Future _setupDeleteDb() async {
+  Future<void> _setupDeleteDb() async {
     _dbName = ctx.dbName;
     await idbFactory.deleteDatabase(_dbName);
   }
@@ -106,20 +106,21 @@ void defineTests(TestContext ctx) {
       expect(database.version, 1);
       database.close();
 
+      // devPrint('#1');
       // not working in memory since not persistent
       if (!ctx.isInMemory) {
+        // devPrint('#2');
         var initCalled = false;
         void _initializeDatabase(VersionChangeEvent e) {
           // should not be called
+          // devPrint('previous ${e.oldVersion} new ${e.newVersion}');
           initCalled = true;
         }
 
-        return idbFactory
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
-            .then((Database database) {
-          expect(initCalled, false);
-          database.close();
-        });
+        database = await idbFactory.open(_dbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+        expect(initCalled, false);
+        database.close();
       }
     });
 
@@ -155,6 +156,7 @@ void defineTests(TestContext ctx) {
           version: 1, onUpgradeNeeded: _initializeDatabase);
 
       expect(initCalled, true);
+      expect(database.version, 1);
       database.close();
 
       // not working in memory since not persistent
@@ -171,6 +173,11 @@ void defineTests(TestContext ctx) {
             version: 2, onUpgradeNeeded: _upgradeDatabase);
 
         expect(upgradeCalled, true);
+        expect(database.version, 2);
+        database.close();
+
+        database = await idbFactory.open(_dbName);
+        expect(database.version, 2);
         database.close();
       }
     });
@@ -205,6 +212,78 @@ void defineTests(TestContext ctx) {
           // this should fail
           expect(downgradeCalled, false);
         });
+      }
+    });
+
+    test('abort', () async {
+      var initCalled = false;
+      await _setupDeleteDb();
+      try {
+        await idbFactory.open(_dbName, version: 2, onUpgradeNeeded: (event) {
+          initCalled = true;
+          event.transaction.abort();
+        });
+        fail('should fail');
+      } catch (e) {
+        expect(e, isNot(const TypeMatcher<TestFailure>()));
+      }
+      expect(initCalled, true);
+
+      initCalled = false;
+
+      var db =
+          await idbFactory.open(_dbName, version: 3, onUpgradeNeeded: (event) {
+        expect(event.oldVersion, 0);
+        expect(event.newVersion, 3);
+        initCalled = true;
+      });
+
+      expect(initCalled, true);
+      db.close();
+    });
+
+    test('put_read_in_open_transaction', () async {
+      await _setupDeleteDb();
+      var db = await idbFactory.open(_dbName, version: 1,
+          onUpgradeNeeded: (event) async {
+        var store = event.database.createObjectStore('note');
+        await store.put('my_value', 'my_key').then((key) async {
+          expect(key, 'my_key');
+          expect(await store.getObject('my_key'), 'my_value');
+        });
+      });
+      try {
+        var txn = db.transaction('note', idbModeReadOnly);
+        var store = txn.objectStore('note');
+        expect(await store.getObject('my_key'), 'my_value');
+        await txn.completed;
+      } finally {
+        db.close();
+      }
+      db = await idbFactory.open(_dbName, version: 2,
+          onUpgradeNeeded: (event) async {
+        var store = event.transaction.objectStore('note');
+        expect(await store.getObject('my_key'), 'my_value');
+        await store.put('value2', 'key2');
+        store = event.database.createObjectStore('note2');
+        await store.put('value3', 'key3');
+      });
+      try {
+        var txn = db.transaction(['note'], idbModeReadOnly);
+        var store = txn.objectStore('note');
+        expect(await store.getObject('my_key'), 'my_value');
+        expect(await store.getObject('key2'), 'value2');
+        await txn.completed;
+
+        txn = db.transaction(['note', 'note2'], idbModeReadOnly);
+        store = txn.objectStore('note');
+        expect(await store.getObject('my_key'), 'my_value');
+        expect(await store.getObject('key2'), 'value2');
+        store = txn.objectStore('note2');
+        expect(await store.getObject('key3'), 'value3');
+        await txn.completed;
+      } finally {
+        db.close();
       }
     });
 

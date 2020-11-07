@@ -26,7 +26,11 @@ void defineTests(TestContext ctx) {
 
   Future _tearDown() async {
     if (transaction != null) {
-      await transaction.completed;
+      try {
+        await transaction.completed;
+      } catch (e) {
+        print('error waiting on transaction.completed $e');
+      }
       transaction = null;
     }
     if (db != null) {
@@ -457,7 +461,6 @@ void defineTests(TestContext ctx) {
         // this cause the transaction to terminate on ie
         // and so on sembast
         await Future.value();
-
         try {
           await objectStore.getObject(0);
           if (ctx.isIdbNoLazy) {
@@ -468,6 +471,8 @@ void defineTests(TestContext ctx) {
           // Transaction inactive
           expect(isTestFailure(e), isFalse);
           expect(isTransactionInactiveError(e), isTrue);
+        } finally {
+          await transaction.completed;
         }
       });
 
@@ -491,6 +496,8 @@ void defineTests(TestContext ctx) {
         } catch (e) {
           expect(isTestFailure(e), isFalse, reason: e.toString());
           expect(isTransactionInactiveError(e), isTrue, reason: e.toString());
+        } finally {
+          await transaction.completed;
         }
       }, skip: 'TODO');
 
@@ -501,6 +508,7 @@ void defineTests(TestContext ctx) {
 
         await objectStore.getObject(0);
         // this cause the transaction to terminate on ie
+
         // and so on sembast
         await Future.value();
         try {
@@ -571,6 +579,64 @@ void defineTests(TestContext ctx) {
           await Future.value();
         }
         await objectStore.put({});
+        await transaction.completed;
+      });
+
+      test('put_abort_min_steps', () async {
+        await _setUp();
+        transaction = db.transaction(testStoreName, idbModeReadWrite);
+        var objectStore = transaction.objectStore(testStoreName);
+        await objectStore.put({'test': 1}, 'key1');
+        transaction.abort();
+        try {
+          await transaction.completed;
+          fail('should fail');
+        } catch (e) {
+          // devPrint(e.runtimeType);
+          // devPrint(e);
+        }
+        db.close();
+        // devPrint('closed');
+
+        await _setUp();
+        transaction = db.transaction(testStoreName, idbModeReadWrite);
+        objectStore = transaction.objectStore(testStoreName);
+        await objectStore.put({'test': 1}, 'key1');
+        transaction.abort();
+        try {
+          await transaction.completed;
+          fail('should fail');
+        } catch (e) {
+          //devPrint(e.runtimeType);
+          //devPrint(e);
+        }
+      }, skip: 'io experiment');
+
+      test('put_abort', () async {
+        await _setUp();
+        transaction = db.transaction(testStoreName, idbModeReadWrite);
+        var objectStore = transaction.objectStore(testStoreName);
+        // TEST to make this fail on sembase, the index is a primary key
+        // We should not support mix match in keys
+        // await objectStore.put({'test': 1}, 'key1');
+        var key = await objectStore.add({'test': 1});
+        transaction.abort();
+        try {
+          await transaction.completed;
+          fail('should fail');
+        } catch (e) {
+          // devPrint(e.runtimeType);
+          // devPrint(e);
+        }
+        /*
+        // this cause the transaction to terminate on ie
+        if (!ctx.isIdbNoLazy) {
+          await Future.value();
+          await Future.value();
+        }*/
+        transaction = db.transaction(testStoreName, idbModeReadOnly);
+        objectStore = transaction.objectStore(testStoreName);
+        expect(await objectStore.getObject(key), isNull);
         await transaction.completed;
       });
 

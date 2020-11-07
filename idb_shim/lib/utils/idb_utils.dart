@@ -3,6 +3,7 @@ library idb_shim.utils.idb_utils;
 import 'dart:async';
 
 import 'package:idb_shim/src/utils/core_imports.dart';
+import 'package:sembast/utils/value_utils.dart';
 
 import '../idb_client.dart';
 import '../src/common/common_meta.dart';
@@ -54,6 +55,7 @@ Future<Database> copySchema(
     }
   }
 
+  // devPrint('Open $dstDbName version $version');
   // Open and copy scheme
   final dstDatabase = await dstFactory.open(dstDbName,
       version: version, onUpgradeNeeded: _onUpgradeNeeded);
@@ -142,7 +144,8 @@ Future<List<CursorRow>> cursorToList(Stream<CursorWithValue> stream) {
   var completer = Completer<List<CursorRow>>.sync();
   final list = <CursorRow>[];
   stream.listen((CursorWithValue cwv) {
-    list.add(CursorRow(cwv.key, cwv.primaryKey, cwv.value));
+    // Clone value in case it is reused
+    list.add(CursorRow(cwv.key, cwv.primaryKey, cloneValue(cwv.value)));
   }).onDone(() {
     completer.complete(list);
   });
