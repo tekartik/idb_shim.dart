@@ -1,3 +1,8 @@
+## 1.12.2
+
+* Add support for `Transaction.abort`
+* Allow read/write during open transaction.
+
 ## 1.12.1+1
 
 * Add `ObjectStore.getAll/getAllKeys` and `Index.getAll/getAllKeys`

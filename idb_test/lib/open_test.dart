@@ -244,10 +244,10 @@ void defineTests(TestContext ctx) {
 
     test('put_read_in_open_transaction', () async {
       await _setupDeleteDb();
-      var db =
-          await idbFactory.open(_dbName, version: 1, onUpgradeNeeded: (event) {
+      var db = await idbFactory.open(_dbName, version: 1,
+          onUpgradeNeeded: (event) async {
         var store = event.database.createObjectStore('note');
-        store.put('my_value', 'my_key').then((key) async {
+        await store.put('my_value', 'my_key').then((key) async {
           expect(key, 'my_key');
           expect(await store.getObject('my_key'), 'my_value');
         });
@@ -260,14 +260,13 @@ void defineTests(TestContext ctx) {
       } finally {
         db.close();
       }
-      db = await idbFactory.open(_dbName, version: 2, onUpgradeNeeded: (event) {
-        () async {
-          var store = event.transaction.objectStore('note');
-          expect(await store.getObject('my_key'), 'my_value');
-          await store.put('value2', 'key2');
-          store = event.database.createObjectStore('note2');
-          await store.put('value3', 'key3');
-        }();
+      db = await idbFactory.open(_dbName, version: 2,
+          onUpgradeNeeded: (event) async {
+        var store = event.transaction.objectStore('note');
+        expect(await store.getObject('my_key'), 'my_value');
+        await store.put('value2', 'key2');
+        store = event.database.createObjectStore('note2');
+        await store.put('value3', 'key3');
       });
       try {
         var txn = db.transaction(['note'], idbModeReadOnly);

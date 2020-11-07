@@ -616,7 +616,10 @@ void defineTests(TestContext ctx) {
         await _setUp();
         transaction = db.transaction(testStoreName, idbModeReadWrite);
         var objectStore = transaction.objectStore(testStoreName);
-        await objectStore.put({'test': 1}, 'key1');
+        // TEST to make this fail on sembase, the index is a primary key
+        // We should not support mix match in keys
+        // await objectStore.put({'test': 1}, 'key1');
+        var key = await objectStore.add({'test': 1});
         transaction.abort();
         try {
           await transaction.completed;
@@ -633,7 +636,7 @@ void defineTests(TestContext ctx) {
         }*/
         transaction = db.transaction(testStoreName, idbModeReadOnly);
         objectStore = transaction.objectStore(testStoreName);
-        expect(await objectStore.getObject('key1'), isNull);
+        expect(await objectStore.getObject(key), isNull);
         await transaction.completed;
       });
 

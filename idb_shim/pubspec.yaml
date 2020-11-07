@@ -1,10 +1,10 @@
 name: idb_shim
-version: 1.12.1+1
+version: 1.12.2
 description: indexed_db dart base interface with implementation for native (browser), file (io) and in memory.
 homepage: https://github.com/tekartik/idb_shim.dart/tree/master/idb_shim
 
 environment:
-  sdk: '>=2.9.0 <3.0.0'
+  sdk: '>=2.10.0-0 <3.0.0'
 
 dependencies:
   sembast: '>=2.4.8 <3.0.0'
