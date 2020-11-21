@@ -34,8 +34,8 @@ void defineTests(TestContext ctx) {
         db.createObjectStore(testStoreName);
       }
 
-      db = await idbFactory!.open(_dbName!,
-          version: 1, onUpgradeNeeded: _initializeDatabase);
+      db = await idbFactory!
+          .open(_dbName!, version: 1, onUpgradeNeeded: _initializeDatabase);
     }
 
     void _onBlocked(Event event) {
@@ -85,8 +85,8 @@ void defineTests(TestContext ctx) {
         expect(objectStore.name, testStoreName);
       }
 
-      db = await idbFactory!.open(_dbName!,
-          version: 1, onUpgradeNeeded: _initializeDatabase);
+      db = await idbFactory!
+          .open(_dbName!, version: 1, onUpgradeNeeded: _initializeDatabase);
       expect(db!.objectStoreNames, [testStoreName]);
 
       db!.close();
@@ -102,8 +102,8 @@ void defineTests(TestContext ctx) {
         expect(objectStore.name, testStoreName);
       }
 
-      db = await idbFactory!.open(_dbName!,
-          version: 1, onUpgradeNeeded: _initializeDatabase);
+      db = await idbFactory!
+          .open(_dbName!, version: 1, onUpgradeNeeded: _initializeDatabase);
       var storeNames = List<String>.from(db!.objectStoreNames);
       expect(storeNames.length, 1);
       expect(storeNames[0], testStoreName);
@@ -330,7 +330,8 @@ void defineTests(TestContext ctx) {
 
       // at this point native db should be close already
       if (!db1Closed) {
-        final transaction = firstDb!.transaction(testStoreName, idbModeReadOnly);
+        final transaction =
+            firstDb!.transaction(testStoreName, idbModeReadOnly);
         final store = transaction.objectStore(testStoreName);
         return store.clear().then((_) {
           fail('should not succeed');
