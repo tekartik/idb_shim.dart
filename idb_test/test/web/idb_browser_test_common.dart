@@ -2,15 +2,15 @@ library idb_shim.idb_io_test_common;
 
 import 'dart:html';
 
-bool _isIe;
+bool? _isIe;
 
 bool get isIe => _isIe ??= isUserAgentIe(window.navigator.userAgent);
 
-bool _isEdge;
+bool? _isEdge;
 
 bool get isEdge => _isEdge ??= isUserAgentEdge(window.navigator.userAgent);
 
-bool _isSafari;
+bool? _isSafari;
 
 bool get isSafari =>
     _isSafari ??= isUserAgentSafari(window.navigator.userAgent);

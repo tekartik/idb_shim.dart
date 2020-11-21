@@ -22,10 +22,10 @@ void defineTests(TestContext ctx) {
     var dbName = 'test_db_5';
     var storeName = 'test_store';
     var indexName = 'name_index';
-    Database db;
+    late Database db;
 
     setUp(() {
-      return idbFactory.deleteDatabase(dbName).then((_) {
+      return idbFactory!.deleteDatabase(dbName).then((_) {
         return idbFactory.open(dbName, version: 1, onUpgradeNeeded: (e) {
           var db = e.database;
           var objectStore =
@@ -41,7 +41,7 @@ void defineTests(TestContext ctx) {
       db.close();
     });
 
-    if (idbFactory.supportsDatabaseNames) {
+    if (idbFactory!.supportsDatabaseNames) {
       test('getDatabaseNames', () {
         return idbFactory.getDatabaseNames().then((names) {
           //print(names);
@@ -59,77 +59,51 @@ void defineTests(TestContext ctx) {
     }
 
     var value = {'name_index': 'one', 'value': 'add_value'};
-    test('add/delete', () {
-      //var done = expectAsync0(() {});
-      var done = () {};
+    test('add/delete', () async {
       var transaction = db.transaction(storeName, 'readwrite');
-      var key;
-      return transaction.objectStore(storeName).add(value).then((addedKey) {
-        key = addedKey;
-      }).then((_) {
-        return transaction.completed;
-      }).then((_) {
-        transaction = db.transaction(storeName, 'readonly');
-        return transaction.objectStore(storeName).getObject(key);
-      }).then((readValue) {
-        expect(readValue['value'], value['value']);
-        return transaction.completed;
-      }).then((_) {
-        transaction = db.transactionList([storeName], 'readwrite');
-        return transaction.objectStore(storeName).delete(key);
-      }).then((_) {
-        return transaction.completed;
-      }).then((_) {
-        var transaction = db.transactionList([storeName], 'readonly');
 
-        // count() crashes on ie
-        if (!ctx.isIdbIe) {
-          return transaction.objectStore(storeName).count();
-        } else {
-          return 0;
-        }
-      }).then((count) {
+      var key = await transaction.objectStore(storeName).add(value);
+      await transaction.completed;
+      transaction = db.transaction(storeName, 'readonly');
+      var readValue = await transaction.objectStore(storeName).getObject(key);
+      expect((readValue as Map)['value'], value['value']);
+      await transaction.completed;
+
+      transaction = db.transactionList([storeName], 'readwrite');
+      await transaction.objectStore(storeName).delete(key);
+      await transaction.completed;
+      transaction = db.transactionList([storeName], 'readonly');
+
+      // count() crashes on ie
+      if (!ctx.isIdbIe) {
+        var count = await transaction.objectStore(storeName).count();
         expect(count, 0);
-      }).then((_) {
-        done();
-      });
+      }
     });
 
-    test('clear/count', () {
-      //var done = expectAsync0(() {});
-      var done = () {};
+    test('clear/count', () async {
       var transaction = db.transaction(storeName, 'readwrite');
+      // ignore: unawaited_futures
       transaction.objectStore(storeName).add(value);
 
-      return transaction.completed.then((_) {
-        transaction = db.transaction(storeName, 'readonly');
-        // count() crashes on ie
-        if (!ctx.isIdbIe) {
-          return transaction.objectStore(storeName).count();
-        } else {
-          return 1;
-        }
-      }).then((count) {
-        expect(count, 1);
-      }).then((_) {
-        return transaction.completed;
-      }).then((_) {
-        transaction = db.transactionList([storeName], 'readwrite');
-        transaction.objectStore(storeName).clear();
-        return transaction.completed;
-      }).then((_) {
-        var transaction = db.transactionList([storeName], 'readonly');
-        // count() crashes on ie
-        if (!ctx.isIdbIe) {
-          return transaction.objectStore(storeName).count();
-        } else {
-          return 0;
-        }
-      }).then((count) {
-        expect(count, 0);
-      }).then((_) {
-        done();
-      });
+      await transaction.completed;
+      transaction = db.transaction(storeName, 'readonly');
+
+      if (!ctx.isIdbIe) {
+        expect(await transaction.objectStore(storeName).count(), 1);
+      }
+      await transaction.completed;
+
+      transaction = db.transactionList([storeName], 'readwrite');
+      // ignore: unawaited_futures
+      transaction.objectStore(storeName).clear();
+      await transaction.completed;
+
+      transaction = db.transactionList([storeName], 'readonly');
+      // count() crashes on ie
+      if (!ctx.isIdbIe) {
+        expect(await transaction.objectStore(storeName).count(), 0);
+      }
     });
 
     test('index', () {
@@ -174,7 +148,7 @@ void defineTests(TestContext ctx) {
         var index = transaction.objectStore(storeName).index(indexName);
         return index.get('one');
       }).then((readValue) {
-        expect(readValue['value'], value['value']);
+        expect((readValue as Map)['value'], value['value']);
         return transaction.completed;
       }).then((_) {
         transaction = db.transaction(storeName, 'readwrite');
@@ -225,7 +199,7 @@ void defineTests(TestContext ctx) {
         var index = transaction.objectStore(storeName).index(indexName);
         return index.get('three');
       }).then((readValue) {
-        expect(readValue['value'], 'updated_value');
+        expect((readValue as Map)['value'], 'updated_value');
         return transaction.completed;
       }).then((_) {
         transaction = db.transaction(storeName, 'readonly');

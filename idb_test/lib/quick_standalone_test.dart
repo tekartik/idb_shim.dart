@@ -17,17 +17,17 @@ void main() {
 void defineTests(TestContext ctx) {
   final idbFactory = ctx.factory;
   group('quick_standalone', () {
-    Database db;
-    Transaction transaction;
-    ObjectStore objectStore;
+    late Database db;
+    Transaction? transaction;
+    late ObjectStore objectStore;
 
     void _createTransaction() {
       transaction = db.transaction(STORE_NAME, idbModeReadWrite);
-      objectStore = transaction.objectStore(STORE_NAME);
+      objectStore = transaction!.objectStore(STORE_NAME);
     }
 
     setUp(() {
-      return idbFactory.deleteDatabase(DB_NAME).then((_) {
+      return idbFactory!.deleteDatabase(DB_NAME).then((_) {
         void _initializeDatabase(VersionChangeEvent e) {
           final db = e.database;
           final objectStore =
@@ -45,7 +45,7 @@ void defineTests(TestContext ctx) {
 
     tearDown(() {
       if (transaction != null) {
-        return transaction.completed.then((_) {
+        return transaction!.completed.then((_) {
           db.close();
         });
       } else {

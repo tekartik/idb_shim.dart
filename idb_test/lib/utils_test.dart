@@ -18,22 +18,22 @@ void main() {
 void defineTests(TestContext ctx) {
   final idbFactory = ctx.factory;
 
-  Database db;
+  Database? db;
   //Database dstDb;
-  String _srcDbName;
-  String _dstDbName;
-  String _importedDbName;
+  late String _srcDbName;
+  String? _dstDbName;
+  late String _importedDbName;
   // prepare for test
   Future _setupDeleteDb() async {
     _srcDbName = ctx.dbName;
     _dstDbName = 'dst_$_srcDbName';
     _importedDbName = 'imported_$_srcDbName';
-    await idbFactory.deleteDatabase(_srcDbName);
+    await idbFactory!.deleteDatabase(_srcDbName);
   }
 
   void _tearDown() {
     if (db != null) {
-      db.close();
+      db!.close();
       db = null;
     }
     /*
@@ -53,7 +53,7 @@ void defineTests(TestContext ctx) {
 
       // import
       var importedDb =
-          await sdbImportDatabase(export, idbFactory, _importedDbName);
+          await sdbImportDatabase(export, idbFactory!, _importedDbName);
       // The name might be relative...
       expect(importedDb.name.endsWith(_importedDbName), isTrue);
 
@@ -75,7 +75,7 @@ void defineTests(TestContext ctx) {
 
       Future _checkCopySchema(
           Database db, Future Function(Database db) check) async {
-        final dstDb = await copySchema(db, idbFactory, _dstDbName);
+        final dstDb = await copySchema(db, idbFactory!, _dstDbName!);
         expect(dstDb.name, _dstDbName);
         await check(dstDb);
         dstDb.close();
@@ -90,7 +90,7 @@ void defineTests(TestContext ctx) {
 
       test('empty', () async {
         await _setupDeleteDb();
-        db = await idbFactory.open(_srcDbName);
+        db = await idbFactory!.open(_srcDbName);
 
         Future _check(Database db) async {
           expect(db.factory, idbFactory);
@@ -100,7 +100,7 @@ void defineTests(TestContext ctx) {
         }
 
         await _checkAll(
-            db,
+            db!,
             {
               'sembast_export': 1,
               'version': 1,
@@ -117,28 +117,28 @@ void defineTests(TestContext ctx) {
 
       test('import version 2 and reopen', () async {
         await _setupDeleteDb();
-        db = await idbFactory.open(_srcDbName,
+        db = await idbFactory!.open(_srcDbName,
             version: 2, onUpgradeNeeded: (_) {});
-        expect(db.version, 2);
-        final export = await sdbExportDatabase(db);
-        db.close();
+        expect(db!.version, 2);
+        final export = await sdbExportDatabase(db!);
+        db!.close();
 
         // import
         var importedDb =
             await sdbImportDatabase(export, idbFactory, _importedDbName);
         expect(importedDb.version, 2);
         //devPrint()
-        final newExport = await sdbExportDatabase(db);
+        final newExport = await sdbExportDatabase(db!);
         expect(newExport, export);
         importedDb.close();
 
         db = await idbFactory.open(_importedDbName);
-        expect(db.version, 2);
+        expect(db!.version, 2);
       });
 
       test('empty idbVersion 2', () async {
         await _setupDeleteDb();
-        db = await idbFactory.open(_srcDbName,
+        db = await idbFactory!.open(_srcDbName,
             version: 2, onUpgradeNeeded: (_) {});
 
         Future _check(Database db) async {
@@ -149,7 +149,7 @@ void defineTests(TestContext ctx) {
         }
 
         await _checkAll(
-            db,
+            db!,
             {
               'sembast_export': 1,
               'version': 1,
@@ -174,7 +174,7 @@ void defineTests(TestContext ctx) {
               keyPath: testNameField, autoIncrement: true);
         }
 
-        db = await idbFactory.open(_srcDbName,
+        db = await idbFactory!.open(_srcDbName,
             version: 2, onUpgradeNeeded: _initializeDatabase);
 
         Future _check(Database db) async {
@@ -217,7 +217,7 @@ void defineTests(TestContext ctx) {
         if (ctx.isIdbIe) {
           expectedExport['stores'][0]['values'][2].remove('autoIncrement');
         }
-        await _checkAll(db, expectedExport, _check);
+        await _checkAll(db!, expectedExport, _check);
       });
 
       test('three_stores', () async {
@@ -231,7 +231,7 @@ void defineTests(TestContext ctx) {
           db.createObjectStore('store2');
         }
 
-        db = await idbFactory.open(_srcDbName,
+        db = await idbFactory!.open(_srcDbName,
             version: 2, onUpgradeNeeded: _initializeDatabase);
 
         Future _check(Database db) async {
@@ -269,7 +269,7 @@ void defineTests(TestContext ctx) {
         if (ctx.isIdbIe) {
           expectedExport['stores'][0]['values'][2].remove('autoIncrement');
         }
-        await _checkAll(db, expectedExport, _check);
+        await _checkAll(db!, expectedExport, _check);
       });
 
       test('one_index', () async {
@@ -283,7 +283,7 @@ void defineTests(TestContext ctx) {
               unique: true, multiEntry: true);
         }
 
-        db = await idbFactory.open(_srcDbName,
+        db = await idbFactory!.open(_srcDbName,
             version: 3, onUpgradeNeeded: _initializeDatabase);
 
         Future _check(Database db) async {
@@ -334,7 +334,7 @@ void defineTests(TestContext ctx) {
           expectedExport['stores'][0]['values'][2]['indecies'][0]
               .remove('multiEntry');
         }
-        await _checkAll(db, expectedExport, _check);
+        await _checkAll(db!, expectedExport, _check);
       });
 
       test('two_indecies', () async {
@@ -350,7 +350,7 @@ void defineTests(TestContext ctx) {
               unique: true, multiEntry: true);
         }
 
-        db = await idbFactory.open(_srcDbName,
+        db = await idbFactory!.open(_srcDbName,
             version: 4, onUpgradeNeeded: _initializeDatabase);
 
         Future _check(Database db) async {
@@ -411,7 +411,7 @@ void defineTests(TestContext ctx) {
           expectedExport['stores'][0]['values'][2]['indecies'][0]
               .remove('multiEntry');
         }
-        await _checkAll(db, expectedExport, _check);
+        await _checkAll(db!, expectedExport, _check);
       });
     });
 
@@ -439,7 +439,7 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName2);
         }
 
-        db = await idbFactory.open(_srcDbName,
+        db = await idbFactory!.open(_srcDbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
 
         Future _check(Database db, String storeName) async {
@@ -453,7 +453,7 @@ void defineTests(TestContext ctx) {
           await txn.completed;
         }
 
-        await _checkCopyStore(db, testStoreName, db, testStoreName2, _check);
+        await _checkCopyStore(db!, testStoreName, db!, testStoreName2, _check);
       });
 
       test('two_stores_one_record_each', () async {
@@ -467,12 +467,12 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName2);
         }
 
-        db = await idbFactory.open(_srcDbName,
+        db = await idbFactory!.open(_srcDbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
 
         // put one in src and one in dst that should get deleted
         final txn =
-            db.transaction([testStoreName, testStoreName2], idbModeReadWrite);
+            db!.transaction([testStoreName, testStoreName2], idbModeReadWrite);
         var store = txn.objectStore(testStoreName);
         await (store.put('value1', 'key1'));
         final store2 = txn.objectStore(testStoreName2);
@@ -490,7 +490,7 @@ void defineTests(TestContext ctx) {
           await txn.completed;
         }
 
-        await _checkCopyStore(db, testStoreName, db, testStoreName2, _check);
+        await _checkCopyStore(db!, testStoreName, db!, testStoreName2, _check);
       });
     });
 
@@ -499,7 +499,7 @@ void defineTests(TestContext ctx) {
 
       Future _checkCopyDatabase(
           Database db, Future Function(Database database) check) async {
-        final dstDb = await copyDatabase(db, idbFactory, _dstDbName);
+        final dstDb = await copyDatabase(db, idbFactory!, _dstDbName!);
         expect(dstDb.name, _dstDbName);
         await check(dstDb);
         dstDb.close();
@@ -514,7 +514,7 @@ void defineTests(TestContext ctx) {
 
       test('empty', () async {
         await _setupDeleteDb();
-        db = await idbFactory.open(_srcDbName);
+        db = await idbFactory!.open(_srcDbName);
 
         Future _check(Database db) async {
           expect(db.factory, idbFactory);
@@ -524,7 +524,7 @@ void defineTests(TestContext ctx) {
         }
 
         await _checkAll(
-            db,
+            db!,
             {
               'sembast_export': 1,
               'version': 1,
@@ -547,9 +547,9 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName);
         }
 
-        db = await idbFactory.open(_srcDbName,
+        db = await idbFactory!.open(_srcDbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
-        final txn = db.transaction(testStoreName, idbModeReadWrite);
+        final txn = db!.transaction(testStoreName, idbModeReadWrite);
         final store = txn.objectStore(testStoreName);
         var map = {
           'my_bool': true,
@@ -627,7 +627,7 @@ void defineTests(TestContext ctx) {
             }
           ]
         };
-        await _checkExportImport(db, expectedExport, _check);
+        await _checkExportImport(db!, expectedExport, _check);
       });
 
       // safari does not support multiple stores - fakes
@@ -641,11 +641,11 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName2);
         }
 
-        db = await idbFactory.open(_srcDbName,
+        db = await idbFactory!.open(_srcDbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
 
         // put one in src and one in dst that should get deleted
-        final txn = db.transaction(testStoreName, idbModeReadWrite);
+        final txn = db!.transaction(testStoreName, idbModeReadWrite);
         var store = txn.objectStore(testStoreName);
         // Put 2 before to check the order
         await (store.put('value2', 'key2'));
@@ -674,7 +674,7 @@ void defineTests(TestContext ctx) {
         }
 
         await _checkAll(
-            db,
+            db!,
             {
               'sembast_export': 1,
               'version': 1,

@@ -14,17 +14,17 @@ const String nameField = 'name';
 class SimpleRow {
   SimpleRow(CursorWithValue cwv) {
     final map = cwv.value as Map;
-    name = map[nameField] as String;
+    name = map[nameField] as String?;
     id = cwv.primaryKey as int;
   }
 
-  int id;
-  String name;
+  int? id;
+  String? name;
 }
 
 class SimpleProvider {
-  IdbFactory idbFactory;
-  Database db;
+  IdbFactory? idbFactory;
+  Database? db;
 
   SimpleProvider(this.idbFactory);
 
@@ -36,7 +36,7 @@ class SimpleProvider {
   }
 
   Future add(String name) {
-    var trans = db.transaction(storeName, idbModeReadWrite);
+    var trans = db!.transaction(storeName, idbModeReadWrite);
     var store = trans.objectStore(storeName);
 
     var obj = {nameField: name};
@@ -61,14 +61,14 @@ class SimpleProvider {
   }
 
   void close() {
-    db.close();
+    db!.close();
     db = null;
   }
 
   Future openEmpty() {
-    return idbFactory.deleteDatabase(dbName).then((_) {
+    return idbFactory!.deleteDatabase(dbName).then((_) {
       //done();
-      return idbFactory
+      return idbFactory!
           .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
           .then((Database db) {
         this.db = db;

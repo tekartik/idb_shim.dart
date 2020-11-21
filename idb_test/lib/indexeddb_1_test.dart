@@ -22,53 +22,48 @@ String nextDatabaseName() {
   return 'Test1_${databaseNameIndex++}';
 }
 
-Future testUpgrade(idb.IdbFactory idbFactory) {
+Future<void> testUpgrade(idb.IdbFactory idbFactory) async {
   var dbName = nextDatabaseName();
   var upgraded = false;
 
   // Delete any existing DBs.
   //TEKARTIK_IDB_REMOVED return _idbFactory.deleteDatabase(dbName).then((_) {
-  return idbFactory.deleteDatabase(dbName).then((_) {
-    //TEKARTIK_IDB_REMOVED return _idbFactory.open(dbName, version: 1,
-    return idbFactory.open(dbName, version: 1, onUpgradeNeeded: (e) {});
-  }).then((db) {
-    db.close();
-  }).then((_) {
-    //TEKARTIK_IDB_REMOVED return _idbFactory.open(dbName, version: 2,
-    return idbFactory.open(dbName, version: 2, onUpgradeNeeded: (e) {
-      expect(e.oldVersion, 1);
-      expect(e.newVersion, 2);
-      upgraded = true;
-    });
-  }).then((_) {
-    expect(upgraded, isTrue);
+  await idbFactory.deleteDatabase(dbName);
+  var db = await idbFactory.open(dbName, version: 1, onUpgradeNeeded: (e) {});
+  db.close();
+  db = await idbFactory.open(dbName, version: 2, onUpgradeNeeded: (e) {
+    expect(e.oldVersion, 1);
+    expect(e.newVersion, 2);
+    upgraded = true;
   });
+  expect(upgraded, isTrue);
+  db.close();
 }
 
 typedef BodyFunc = dynamic Function();
 
 typedef TestFunc = BodyFunc Function(
-    idb.IdbFactory idbFactory, dynamic key, dynamic value, dynamic matcher,
-    [String dbName, String storeName, int version, bool stringifyResult]);
+    idb.IdbFactory? idbFactory, Object key, Object value, dynamic matcher,
+    [String? dbName, String? storeName, int? version, bool? stringifyResult]);
 
-BodyFunc testReadWrite(idb.IdbFactory idbFactory, key, value, matcher,
-        [String dbName,
-        String storeName = STORE_NAME,
-        int version = VERSION,
-        bool stringifyResult = false]) =>
+BodyFunc testReadWrite(idb.IdbFactory? idbFactory, key, value, matcher,
+        [String? dbName,
+        String? storeName = STORE_NAME,
+        int? version = VERSION,
+        bool? stringifyResult = false]) =>
     () {
       dbName ??= nextDatabaseName();
 
       void createObjectStore(idb.VersionChangeEvent e) {
-        var store = e.database.createObjectStore(storeName);
+        var store = e.database.createObjectStore(storeName!);
         expect(store, isNotNull);
       }
 
       var db;
       //TEKARTIK_IDB_REMOVED return _idbFactory.deleteDatabase(dbName).then((_) {
-      return idbFactory.deleteDatabase(dbName).then((_) {
+      return idbFactory!.deleteDatabase(dbName!).then((_) {
         //TEKARTIK_IDB_REMOVED return _idbFactory.open(dbName, version: version,
-        return idbFactory.open(dbName,
+        return idbFactory.open(dbName!,
             version: version, onUpgradeNeeded: createObjectStore);
       }).then((result) {
         db = result;
@@ -80,7 +75,7 @@ BodyFunc testReadWrite(idb.IdbFactory idbFactory, key, value, matcher,
         return transaction.objectStore(storeName).getObject(key);
       }).then((object) {
         db.close();
-        if (stringifyResult) {
+        if (stringifyResult!) {
           // Stringify the numbers to verify that we're correctly returning ints
           // as ints vs doubles.
           expect(object.toString(), matcher);
@@ -91,40 +86,41 @@ BodyFunc testReadWrite(idb.IdbFactory idbFactory, key, value, matcher,
         if (db != null) {
           db.close();
         }
-        return idbFactory.deleteDatabase(dbName);
+        return idbFactory.deleteDatabase(dbName!);
       });
     };
 
-BodyFunc testReadWriteTyped(idb.IdbFactory idbFactory, key, value, matcher,
-        [String dbName,
-        String storeName = STORE_NAME,
-        int version = VERSION,
-        bool stringifyResult = false]) =>
+BodyFunc testReadWriteTyped(
+        idb.IdbFactory? idbFactory, Object key, Object value, matcher,
+        [String? dbName,
+        String? storeName = STORE_NAME,
+        int? version = VERSION,
+        bool? stringifyResult = false]) =>
     () {
       dbName ??= nextDatabaseName();
 
       void createObjectStore(idb.VersionChangeEvent e) {
-        var store = e.database.createObjectStore(storeName);
+        var store = e.database.createObjectStore(storeName!);
         expect(store, isNotNull);
       }
 
-      idb.Database db;
+      idb.Database? db;
       // Delete any existing DBs.
-      return idbFactory.deleteDatabase(dbName).then((_) {
-        return idbFactory.open(dbName,
+      return idbFactory!.deleteDatabase(dbName!).then((_) {
+        return idbFactory.open(dbName!,
             version: version, onUpgradeNeeded: createObjectStore);
       }).then((idb.Database result) {
         db = result;
-        final transaction = db.transactionList([storeName], 'readwrite');
+        final transaction = db!.transactionList([storeName!], 'readwrite');
         transaction.objectStore(storeName).put(value, key);
 
         return transaction.completed;
       }).then((idb.Database result) {
-        final transaction = db.transaction(storeName, 'readonly');
-        return transaction.objectStore(storeName).getObject(key);
+        final transaction = db!.transaction(storeName, 'readonly');
+        return transaction.objectStore(storeName!).getObject(key);
       }).then((object) {
-        db.close();
-        if (stringifyResult) {
+        db!.close();
+        if (stringifyResult!) {
           // Stringify the numbers to verify that we're correctly returning ints
           // as ints vs doubles.
           expect(object.toString(), matcher);
@@ -133,13 +129,13 @@ BodyFunc testReadWriteTyped(idb.IdbFactory idbFactory, key, value, matcher,
         }
       }).whenComplete(() {
         if (db != null) {
-          db.close();
+          db!.close();
         }
-        return idbFactory.deleteDatabase(dbName);
+        return idbFactory.deleteDatabase(dbName!);
       });
     };
 
-void testTypes(TestFunc testFunction, idb.IdbFactory idbFactory) {
+void testTypes(TestFunc testFunction, idb.IdbFactory? idbFactory) {
   test('String', testFunction(idbFactory, 123, 'Hoot!', equals('Hoot!')));
   test('int', testFunction(idbFactory, 123, 12345, equals(12345)));
   test('List', testFunction(idbFactory, 123, [1, 2, 3], equals([1, 2, 3])));
@@ -168,7 +164,7 @@ void testTypes(TestFunc testFunction, idb.IdbFactory idbFactory) {
           idbFactory,
           123,
           now,
-          predicate((date) =>
+          predicate((dynamic date) =>
               date.millisecondsSinceEpoch == now.millisecondsSinceEpoch)),
       skip: true);
 }
@@ -193,7 +189,7 @@ void defineTests(TestContext ctx) {
 
   group('supportsDatabaseNames', () {
     test('supported', () {
-      expect(idbFactory.supportsDatabaseNames, isTrue);
+      expect(idbFactory!.supportsDatabaseNames, isTrue);
     });
   }, skip: true);
 
@@ -202,7 +198,7 @@ void defineTests(TestContext ctx) {
       var failed = false;
 
       try {
-        var db = idbFactory;
+        var db = idbFactory!;
         await db.open('random_db');
       } catch (_) {
         failed = true;
@@ -214,7 +210,7 @@ void defineTests(TestContext ctx) {
     if (idb.IdbFactory.supported) {
       // not working in memory since not persistent
       if (!ctx.isInMemory) {
-        test('upgrade', () => testUpgrade(idbFactory));
+        test('upgrade', () => testUpgrade(idbFactory!));
       }
       // temp skip
       group('dynamic', () {

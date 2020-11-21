@@ -16,9 +16,9 @@ void defineTests(TestContext ctx) {
   //debugQuickLogging(Level.ALL);
   group('scenario', () {
     group('bug_put_delete', () {
-      Database db;
+      late Database db;
       Future _setUp() async {
-        await idbFactory.deleteDatabase(ctx.dbName);
+        await idbFactory!.deleteDatabase(ctx.dbName);
         void _initializeDatabase(VersionChangeEvent e) {
           db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);

@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:idb_shim/idb_client_logger.dart';
 import 'package:idb_shim/idb_client.dart';
+import 'package:idb_shim/idb_client_logger.dart';
 import 'package:idb_shim/idb_client_memory.dart';
 import 'package:idb_shim/idb_client_sembast.dart';
 import 'package:idb_shim/src/common/common_factory.dart'; // ignore: implementation_imports
@@ -11,7 +11,6 @@ import 'package:sembast/sembast_memory.dart' as sdb;
 import 'package:sembast/src/sembast_fs.dart' // ignore: implementation_imports
     as sdb_fs;
 import 'package:test/test.dart';
-import 'package:test/test.dart' as test_pkg;
 
 import 'idb_test_common_meta.dart';
 
@@ -41,12 +40,12 @@ const String testNameIndex2 = 'name_index_2';
 const String testNameField2 = 'name_2';
 
 // current dbName valid during test execution
-String dbTestName;
+late String dbTestName;
 // current dbContext
-TestContext _dbTestContext;
+TestContext? _dbTestContext;
 
 class TestContext {
-  IdbFactory factory;
+  IdbFactory? factory;
 
   String get dbName => 'test.db';
 
@@ -65,7 +64,7 @@ class TestContext {
   bool get supportsDoubleKey => (factory as IdbFactoryBase).supportsDoubleKey;
 
   void wrapInLogger({IdbFactoryLoggerType type = IdbFactoryLoggerType.all}) {
-    factory = getIdbFactoryLogger(factory, type: type);
+    factory = getIdbFactoryLogger(factory!, type: type);
   }
 
   /// Get inner factory implementation
@@ -85,9 +84,9 @@ class SembastTestContext extends TestContext {
   @override
   bool get isIdbSembast => true;
 
-  sdb.DatabaseFactory sdbFactory;
+  sdb.DatabaseFactory? sdbFactory;
 
-  // IdbFactorySembast get idbFactorySembast =>      super.getWrappedFactory<IdbFactorySembast>();
+// IdbFactorySembast get idbFactorySembast =>      super.getWrappedFactory<IdbFactorySembast>();
 }
 
 class SembastMemoryTestContext extends SembastTestContext {
@@ -127,16 +126,16 @@ IdbFactory idbTestMemoryFactory = idbFactoryMemory;
 
 Future<Database> setUpSimpleStore(IdbFactory idbFactory, //
     {String dbName = _testDbName,
-    IdbObjectStoreMeta meta}) {
+    IdbObjectStoreMeta? meta}) {
   meta ??= idbSimpleObjectStoreMeta;
 
   return idbFactory.deleteDatabase(dbName).then((_) {
     void _initializeDatabase(VersionChangeEvent e) {
       final db = e.database;
-      final objectStore = db.createObjectStore(meta.name,
+      final objectStore = db.createObjectStore(meta!.name,
           keyPath: meta.keyPath, autoIncrement: meta.autoIncrement);
       for (final indexMeta in meta.indecies) {
-        objectStore.createIndex(indexMeta.name, indexMeta.keyPath,
+        objectStore.createIndex(indexMeta.name!, indexMeta.keyPath,
             unique: indexMeta.unique, multiEntry: indexMeta.multiEntry);
       }
     }
@@ -196,15 +195,18 @@ void dbGroup(TestContext ctx, String description, body, [_group = group]) {
 }
 
 void dbTest(String description, body,
-    {void Function(String name, Function() body, {bool solo}) test,
-    @deprecated bool solo}) {
-  test ??= test_pkg.test;
+    {
+    // void Function(String name, Function() body, {bool? solo})? test,
+    @deprecated bool? solo}) {
+  //test ??= test_pkg.test as void Function(String, dynamic Function(), {bool? solo})?;
   // We save it for later
   // only valid during definition
   final ctx = _dbTestContext;
   test(description, () async {
-    dbTestName = ctx.dbName;
-    await ctx.factory.deleteDatabase(dbTestName);
+    dbTestName = ctx!.dbName;
+    await ctx.factory!.deleteDatabase(dbTestName);
     await Future.value(body());
-  }, solo: solo == true);
+  },
+      // ignore: deprecated_member_use
+      solo: solo == true);
 }

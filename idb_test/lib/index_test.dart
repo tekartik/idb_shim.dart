@@ -14,31 +14,31 @@ void main() {
 void defineTests(TestContext ctx) {
   final idbFactory = ctx.factory;
   group('index', () {
-    Database db;
-    Transaction transaction;
-    ObjectStore objectStore;
+    Database? db;
+    Transaction? transaction;
+    late ObjectStore objectStore;
 
     void _createTransaction() {
-      transaction = db.transaction(testStoreName, idbModeReadWrite);
-      objectStore = transaction.objectStore(testStoreName);
+      transaction = db!.transaction(testStoreName, idbModeReadWrite);
+      objectStore = transaction!.objectStore(testStoreName);
     }
 
     // new
-    String _dbName;
+    late String _dbName;
     // prepare for test
     Future _setupDeleteDb() async {
       _dbName = ctx.dbName;
-      await idbFactory.deleteDatabase(_dbName);
+      await idbFactory!.deleteDatabase(_dbName);
     }
 
     // generic tearDown
     Future _tearDown() async {
       if (transaction != null) {
-        await transaction.completed;
+        await transaction!.completed;
         transaction = null;
       }
       if (db != null) {
-        db.close();
+        db!.close();
         db = null;
       }
     }
@@ -52,8 +52,8 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
 
-        db = await idbFactory.open(_dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+        db = await idbFactory!
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
@@ -62,17 +62,6 @@ void defineTests(TestContext ctx) {
         await _setUp();
         _createTransaction();
         expect(objectStore.indexNames, isEmpty);
-      });
-
-      test('primary', () async {
-        await _setUp();
-        _createTransaction();
-        try {
-          objectStore.index(null);
-          fail('should fail');
-        } catch (e) {
-          expect(isTestFailure(e), isFalse);
-        }
       });
 
       test('dummy', () async {
@@ -98,8 +87,8 @@ void defineTests(TestContext ctx) {
           objectStore.createIndex(testNameIndex, testNameField, unique: false);
         }
 
-        db = await idbFactory.open(_dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+        db = await idbFactory!
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
@@ -116,44 +105,6 @@ void defineTests(TestContext ctx) {
         index = objectStore.index(testNameIndex);
         final count = await index.count(KeyRange.only('test1'));
         expect(count, 2);
-      });
-
-      test('get_null', () async {
-        await _setUp();
-        _createTransaction();
-        final index = objectStore.index(testNameIndex);
-        try {
-          await index.get(null);
-          fail('error');
-        } catch (e) {
-          expect(isTestFailure(e), isFalse);
-          expect(e, isNotNull);
-        }
-      });
-
-      test('get_boolean', () async {
-        await _setUp();
-        _createTransaction();
-        final index = objectStore.index(testNameIndex);
-        try {
-          await index.get(null);
-          fail('error');
-        } catch (e) {
-          expect(isTestFailure(e), isFalse);
-          expect(e, isNotNull);
-        }
-      });
-      test('getKey_null', () async {
-        await _setUp();
-        _createTransaction();
-        final index = objectStore.index(testNameIndex);
-        try {
-          await index.getKey(null);
-          fail('error');
-        } catch (e) {
-          expect(isTestFailure(e), isFalse);
-          expect(e, isNotNull);
-        }
       });
 
       test('getKey_boolean', () async {
@@ -237,8 +188,8 @@ void defineTests(TestContext ctx) {
           objectStore.createIndex(testNameIndex, testNameField, unique: true);
         }
 
-        db = await idbFactory.open(_dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+        db = await idbFactory!
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
@@ -374,7 +325,7 @@ void defineTests(TestContext ctx) {
         } catch (_) {}
         // indexed db throw the exception during completed...
         try {
-          await transaction.completed;
+          await transaction!.completed;
         } catch (_) {}
         // create new transaction;
         _createTransaction();
@@ -427,8 +378,8 @@ void defineTests(TestContext ctx) {
           objectStore.createIndex(testNameIndex, keyPath);
         }
 
-        db = await idbFactory.open(_dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+        db = await idbFactory!
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
@@ -579,8 +530,8 @@ void defineTests(TestContext ctx) {
               multiEntry: true);
         }
 
-        db = await idbFactory.open(_dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+        db = await idbFactory!
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
@@ -654,7 +605,7 @@ void defineTests(TestContext ctx) {
         await _setupDeleteDb();
 
         // open the database
-        db = await idbFactory.open(_dbName, version: 1,
+        db = await idbFactory!.open(_dbName, version: 1,
             onUpgradeNeeded: (VersionChangeEvent event) {
           final db = event.database;
           // create the store
@@ -666,13 +617,13 @@ void defineTests(TestContext ctx) {
         final object = <String, dynamic>{
           'spath': [1, 2]
         };
-        var txn = db.transaction('test', 'readwrite');
+        var txn = db!.transaction('test', 'readwrite');
         var store = txn.objectStore('test');
         await store.put(object);
         await txn.completed;
 
         // read some data
-        txn = db.transaction('test', 'readonly');
+        txn = db!.transaction('test', 'readonly');
         store = txn.objectStore('test');
         var cursorStream = store
             .index('index')
@@ -682,7 +633,7 @@ void defineTests(TestContext ctx) {
         await txn.completed;
 
         // read some data
-        txn = db.transaction('test', 'readonly');
+        txn = db!.transaction('test', 'readonly');
         store = txn.objectStore('test');
         cursorStream = store
             .index('index')
@@ -710,16 +661,13 @@ void defineTests(TestContext ctx) {
 
         // There was a bug in memory implementation when a key was null
         final index = objectStore.index(testNameIndex);
-        return objectStore.add(value).then((key) {
+        await objectStore.add(value).then((key) async {
           // get(null) does not work
 
           // count() crashes on ie
           if (!ctx.isIdbIe) {
-            return index.count().then((int count) {
-              expect(count, 0);
-            });
+            expect(await index.count(), 0);
           }
-          return null;
         });
       });
 
@@ -818,8 +766,8 @@ void defineTests(TestContext ctx) {
               multiEntry: false);
         }
 
-        db = await idbFactory.open(_dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+        db = await idbFactory!
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
@@ -929,8 +877,8 @@ void defineTests(TestContext ctx) {
           objectStore.createIndex(testNameIndex2, testNameField2, unique: true);
         }
 
-        db = await idbFactory.open(_dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+        db = await idbFactory!
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
         _createTransaction();
       }
 
@@ -966,14 +914,14 @@ void defineTests(TestContext ctx) {
     group('late_index', () {
       test('create_index', () async {
         await _setupDeleteDb();
-        db = await idbFactory.open(_dbName, version: 1, onUpgradeNeeded: (e) {
+        db = await idbFactory!.open(_dbName, version: 1, onUpgradeNeeded: (e) {
           e.database.createObjectStore(testStoreName, autoIncrement: true);
         });
         _createTransaction();
         var map = {testNameField: 1234};
         await objectStore.put(map);
         await objectStore.put({'dummy': 'value'});
-        db.close();
+        db!.close();
         db = await idbFactory.open(_dbName, version: 2, onUpgradeNeeded: (e) {
           e.transaction
               .objectStore(testStoreName)
@@ -994,7 +942,7 @@ void defineTests(TestContext ctx) {
         Future testIndex(IdbIndexMeta indexMeta) async {
           try {
             final _dbName = '$dbTestName-${++index}';
-            await idbFactory.deleteDatabase(_dbName);
+            await idbFactory!.deleteDatabase(_dbName);
             final storeMeta = idbSimpleObjectStoreMeta.clone();
             storeMeta.putIndex(indexMeta);
             var db = await setUpSimpleStore(idbFactory,
@@ -1004,7 +952,7 @@ void defineTests(TestContext ctx) {
 
             final transaction = db.transaction(storeMeta.name, idbModeReadOnly);
             final objectStore = transaction.objectStore(storeMeta.name);
-            final storeIndex = objectStore.index(indexMeta.name);
+            final storeIndex = objectStore.index(indexMeta.name!);
             var readMeta = IdbIndexMeta.fromIndex(storeIndex);
 
             // multi entry not supported on ie
@@ -1014,7 +962,7 @@ void defineTests(TestContext ctx) {
             }
             expect(readMeta, indexMeta);
           } finally {
-            db.close();
+            db!.close();
           }
         }
 
@@ -1057,8 +1005,8 @@ void defineTests(TestContext ctx) {
               unique: false);
         }
 
-        db = await idbFactory.open(_dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+        db = await idbFactory!
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
@@ -1081,42 +1029,6 @@ void defineTests(TestContext ctx) {
 
         expect(await index.get(['test1', 4567]), isNull);
         expect(await index.getKey(['test1', 4567]), isNull);
-      });
-
-      test('get_null', () async {
-        await _setUp();
-        _createTransaction();
-        var index = objectStore.index(testNameIndex);
-        try {
-          await index.get(null);
-          fail('error');
-        } on DatabaseError catch (e) {
-          // DataError: Failed to execute 'get' on 'IDBIndex': No key or key range specified.
-          expect(e, isNotNull);
-        }
-      });
-
-      test('get_boolean', () async {
-        await _setUp();
-        _createTransaction();
-        var index = objectStore.index(testNameIndex);
-        try {
-          await index.get(null);
-          fail('error');
-        } on DatabaseError catch (e) {
-          expect(e, isNotNull);
-        }
-      });
-      test('getKey_null', () async {
-        await _setUp();
-        _createTransaction();
-        var index = objectStore.index(testNameIndex);
-        try {
-          await index.getKey(null);
-          fail('error');
-        } on DatabaseError catch (e) {
-          expect(e, isNotNull);
-        }
       });
 
       test('getKey_boolean', () async {

@@ -41,7 +41,7 @@ Future<Database> writeItems(Database db) {
 Future<Database> writeItems(Database db) {
   var transaction = db.transaction(STORE_NAME, 'readwrite');
 
-  Future<Object> write(index) {
+  Future<Object?> write(index) {
     return transaction.objectStore(STORE_NAME).put('Item $index', index);
   }
 
@@ -65,14 +65,14 @@ Future<Database> readAllViaCursor(Database db) {
   final objectStore = txn.objectStore(STORE_NAME);
   var itemCount = 0;
   var sumKeys = 0;
-  int lastKey;
+  int? lastKey;
 
   var cursors = objectStore.openCursor().asBroadcastStream();
   cursors.listen((CursorWithValue cursor) {
     //print(cursor);
     ++itemCount;
     lastKey = cursor.key as int;
-    sumKeys += lastKey;
+    sumKeys += lastKey!;
     expect(cursor.value, 'Item ${cursor.key}');
     cursor.next();
   });
@@ -90,13 +90,13 @@ Future<Database> readAllReversedViaCursor(Database db) {
   final objectStore = txn.objectStore(STORE_NAME);
   var itemCount = 0;
   var sumKeys = 0;
-  int lastKey;
+  int? lastKey;
 
   var cursors = objectStore.openCursor(direction: 'prev').asBroadcastStream();
   cursors.listen((cursor) {
     ++itemCount;
     lastKey = cursor.key as int;
-    sumKeys += lastKey;
+    sumKeys += lastKey!;
     expect(cursor.value, 'Item ${cursor.key}');
     cursor.next();
   });
@@ -119,14 +119,14 @@ void defineTests(TestContext ctx) {
   // Don't bother with these tests if it's unsupported.
   // Support is tested in indexeddb_1_test
   if (IdbFactory.supported) {
-    Database db;
+    late Database db;
     //var oldTimeout;
 
     group('indexeddb_3', () {
       setUp(() {
         //oldTimeout = unittestConfiguration.timeout;
         //unittestConfiguration.timeout = new Duration(seconds: 30);
-        return setupDb(idbFactory).then((result) {
+        return setupDb(idbFactory!).then((result) {
           db = result;
         });
       });

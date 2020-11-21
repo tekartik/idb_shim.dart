@@ -10,12 +10,12 @@ import 'idb_test_common.dart';
 class TestIdNameRow {
   TestIdNameRow(CursorWithValue cwv) {
     final value = cwv.value;
-    name = (value as Map)[testNameField] as String;
+    name = (value as Map)[testNameField] as String?;
     id = cwv.primaryKey as int;
   }
 
-  int id;
-  String name;
+  int? id;
+  String? name;
 }
 
 // so that this can be run directly
@@ -27,30 +27,30 @@ void main() {
 void defineTests(TestContext ctx) {
   final idbFactory = ctx.factory;
 
-  Database db;
-  Transaction transaction;
-  ObjectStore objectStore;
+  Database? db;
+  Transaction? transaction;
+  late ObjectStore objectStore;
 
-  String _dbName;
+  late String _dbName;
 
   void _createTransaction() {
-    transaction = db.transaction(testStoreName, idbModeReadWrite);
-    objectStore = transaction.objectStore(testStoreName);
+    transaction = db!.transaction(testStoreName, idbModeReadWrite);
+    objectStore = transaction!.objectStore(testStoreName);
   }
 
   // prepare for test
   Future _setupDeleteDb() async {
     _dbName = ctx.dbName;
-    await idbFactory.deleteDatabase(_dbName);
+    await idbFactory!.deleteDatabase(_dbName);
   }
 
   Future _tearDown() async {
     if (transaction != null) {
-      await transaction.completed;
+      await transaction!.completed;
       transaction = null;
     }
     if (db != null) {
-      db.close();
+      db!.close();
       db = null;
     }
   }
@@ -105,8 +105,8 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, keyPath: keyPath);
         }
 
-        db = await idbFactory.open(_dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+        db = await idbFactory!
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
@@ -151,7 +151,7 @@ void defineTests(TestContext ctx) {
     group('update', () {
       test('key_path_cursor_update', () async {
         var dbName = 'key_path_cursor_update.db';
-        await idbFactory.deleteDatabase(dbName);
+        await idbFactory!.deleteDatabase(dbName);
 
         final db = await idbFactory.open(dbName, version: 1,
             onUpgradeNeeded: (VersionChangeEvent change) {
@@ -194,7 +194,7 @@ void defineTests(TestContext ctx) {
 
       test('key_path_auto_cursor_update', () async {
         var dbName = 'key_path_auto_cursor_update.db';
-        await idbFactory.deleteDatabase(dbName);
+        await idbFactory!.deleteDatabase(dbName);
 
         final db = await idbFactory.open(dbName, version: 1,
             onUpgradeNeeded: (VersionChangeEvent change) {
@@ -262,8 +262,8 @@ void defineTests(TestContext ctx) {
       tearDown(_tearDown);
 
       void _createTransaction() {
-        transaction = db.transaction(testStoreName, idbModeReadWrite);
-        objectStore = transaction.objectStore(testStoreName);
+        transaction = db!.transaction(testStoreName, idbModeReadWrite);
+        objectStore = transaction!.objectStore(testStoreName);
       }
 
       Future _setUp() async {
@@ -274,8 +274,8 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
 
-        db = await idbFactory.open(_dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+        db = await idbFactory!
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       test('empty cursor', () async {
@@ -326,7 +326,7 @@ void defineTests(TestContext ctx) {
             cwv.next();
           }
         });
-        await transaction.completed;
+        await transaction!.completed;
         transaction = null;
         expect(count, limit);
       });
@@ -343,7 +343,7 @@ void defineTests(TestContext ctx) {
             cursor.next();
           }
         });
-        await transaction.completed;
+        await transaction!.completed;
         transaction = null;
         expect(count, limit);
       });
@@ -351,34 +351,33 @@ void defineTests(TestContext ctx) {
       test('openCursor no auto advance timeout', () async {
         await _setUp();
         _createTransaction();
-        return fill3SampleRows().then((_) {
-          return objectStore
+        await fill3SampleRows().then((_) async {
+          await objectStore
               .openCursor(autoAdvance: false)
               .listen((CursorWithValue cwv) {})
               .asFuture()
-              .then((_) {
-            fail('should not complete');
-          }).timeout(const Duration(milliseconds: 500), onTimeout: () {
+              .timeout(const Duration(milliseconds: 500), onTimeout: () {
             // don't wait on the transaction
             transaction = null;
+            return null;
           });
+          expect(transaction, isNull);
         });
       });
 
       test('openCursor null auto advance timeout', () async {
         await _setUp();
         _createTransaction();
-        return fill3SampleRows().then((_) {
-          return objectStore
+        await fill3SampleRows().then((_) async {
+          await objectStore
               .openCursor(autoAdvance: null)
               .listen((CursorWithValue cwv) {})
               .asFuture()
-              .then((_) {
-            fail('should not complete');
-          }).timeout(const Duration(milliseconds: 500), onTimeout: () {
+              .timeout(const Duration(milliseconds: 500), onTimeout: () {
             // don't wait on the transaction
             transaction = null;
           });
+          expect(transaction, isNull);
         });
       });
       test('3 item cursor no auto advance', () async {
@@ -450,7 +449,7 @@ void defineTests(TestContext ctx) {
                       expect(list[0].name, equals('test1'));
                       expect(list[0].id, equals(2));
 
-                      return transaction.completed.then((_) {
+                      return transaction!.completed.then((_) {
                         transaction = null;
                       });
                     });

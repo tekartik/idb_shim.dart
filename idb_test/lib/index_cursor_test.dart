@@ -10,12 +10,12 @@ import 'idb_test_common.dart';
 class TestIdNameRow {
   TestIdNameRow(CursorWithValue cwv) {
     final value = cwv.value;
-    name = (value as Map)[testNameField] as String;
+    name = (value as Map)[testNameField] as String?;
     id = cwv.primaryKey as int;
   }
 
-  int id;
-  String name;
+  int? id;
+  String? name;
 }
 
 void main() {
@@ -25,20 +25,20 @@ void main() {
 void defineTests(TestContext ctx) {
   final idbFactory = ctx.factory;
   group('index_cursor', () {
-    Database db;
-    Transaction transaction;
-    ObjectStore objectStore;
-    Index index;
+    Database? db;
+    Transaction? transaction;
+    late ObjectStore objectStore;
+    late Index index;
 
     // new
-    String _dbName;
+    late String _dbName;
     // prepare for test
     Future _setupDeleteDb() async {
       _dbName = ctx.dbName;
-      await idbFactory.deleteDatabase(_dbName);
+      await idbFactory!.deleteDatabase(_dbName);
     }
 
-    Future add(String name) {
+    Future<Object> add(String name) {
       var obj = {testNameField: name};
       return objectStore.put(obj);
     }
@@ -52,25 +52,25 @@ void defineTests(TestContext ctx) {
     // generic tearDown
     Future _tearDown() async {
       if (transaction != null) {
-        await transaction.completed;
+        await transaction!.completed;
         transaction = null;
       }
       if (db != null) {
-        db.close();
+        db!.close();
         db = null;
       }
     }
 
     void _createTransaction() {
-      transaction = db.transaction(testStoreName, idbModeReadWrite);
-      objectStore = transaction.objectStore(testStoreName);
+      transaction = db!.transaction(testStoreName, idbModeReadWrite);
+      objectStore = transaction!.objectStore(testStoreName);
       index = objectStore.index(testNameIndex);
     }
 
     group('with_null_key', () {
       Future _openDb() async {
         final _dbName = ctx.dbName;
-        await idbFactory.deleteDatabase(_dbName);
+        await idbFactory!.deleteDatabase(_dbName);
         void _initializeDatabase(VersionChangeEvent e) {
           final db = e.database;
           final objectStore =
@@ -83,11 +83,11 @@ void defineTests(TestContext ctx) {
       }
 
       // Don't make this function async, crashes on ie
-      Future<List<Map>> getIndexRecords() {
-        final list = <Map>[];
+      Future<List<Map?>> getIndexRecords() {
+        final list = <Map?>[];
         final stream = index.openCursor(autoAdvance: true);
         return stream.listen((CursorWithValue cwv) {
-          list.add(cwv.value as Map);
+          list.add(cwv.value as Map?);
         }).asFuture(list);
       }
 
@@ -124,9 +124,9 @@ void defineTests(TestContext ctx) {
       tearDown(_tearDown);
     });
 
-    Future testKey(dynamic value) async {
+    Future testKey(Object value) async {
       final _dbName = ctx.dbName;
-      await idbFactory.deleteDatabase(_dbName);
+      await idbFactory!.deleteDatabase(_dbName);
       void _initializeDatabase(VersionChangeEvent e) {
         final db = e.database;
         final objectStore = db.createObjectStore(testStoreName);
@@ -136,7 +136,7 @@ void defineTests(TestContext ctx) {
       db = await idbFactory.open(_dbName,
           version: 1, onUpgradeNeeded: _initializeDatabase);
       try {
-        var txn = db.transaction(testStoreName, idbModeReadWrite);
+        var txn = db!.transaction(testStoreName, idbModeReadWrite);
         await txn.objectStore(testStoreName).put({testNameField: value}, 1);
         // await txn.objectStore(testStoreName).put({testNameField: 'other'}, 2);
         var values = [];
@@ -152,7 +152,7 @@ void defineTests(TestContext ctx) {
           try {
             expect(values, isEmpty);
           } catch (e) {
-            expect(ctx.factory.name, contains('sembast'));
+            expect(ctx.factory!.name, contains('sembast'));
             expect(values, [
               {'name': true}
             ]);
@@ -183,7 +183,7 @@ void defineTests(TestContext ctx) {
         }
         await txn.completed;
       } finally {
-        db.close();
+        db!.close();
       }
     }
 
@@ -210,8 +210,8 @@ void defineTests(TestContext ctx) {
           objectStore.createIndex(testNameIndex, testNameField);
         }
 
-        db = await idbFactory.open(_dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+        db = await idbFactory!
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
@@ -326,7 +326,7 @@ void defineTests(TestContext ctx) {
         _createTransaction();
         return add('test1').then((key) {
           return index.get('test1').then((value) {
-            expect(value[testNameField], 'test1');
+            expect((value as Map)[testNameField], 'test1');
           });
         });
       });
@@ -367,9 +367,10 @@ void defineTests(TestContext ctx) {
               })
               .asFuture()
               .then((_) {
-                return transaction.completed.then((_) {
-                  transaction = db.transaction(testStoreName, idbModeReadWrite);
-                  objectStore = transaction.objectStore(testStoreName);
+                return transaction!.completed.then((_) {
+                  transaction =
+                      db!.transaction(testStoreName, idbModeReadWrite);
+                  objectStore = transaction!.objectStore(testStoreName);
                   index = objectStore.index(testNameIndex);
                   return index.get(key).then((value) {
                     expect(value, isNull);
@@ -383,7 +384,7 @@ void defineTests(TestContext ctx) {
         await _setUp();
         _createTransaction();
         return add('test1').then((key) {
-          Map map;
+          late Map map;
           // non auto to control advance
           return index
               .openCursor(autoAdvance: false)
@@ -396,9 +397,10 @@ void defineTests(TestContext ctx) {
               })
               .asFuture()
               .then((_) {
-                return transaction.completed.then((_) {
-                  transaction = db.transaction(testStoreName, idbModeReadWrite);
-                  objectStore = transaction.objectStore(testStoreName);
+                return transaction!.completed.then((_) {
+                  transaction =
+                      db!.transaction(testStoreName, idbModeReadWrite);
+                  objectStore = transaction!.objectStore(testStoreName);
                   index = objectStore.index(testNameIndex);
                   return index.get('test1').then((value) {
                     expect(value, map);
@@ -444,12 +446,12 @@ void defineTests(TestContext ctx) {
     });
 
     group('multiple', () {
-      Index nameIndex;
-      Index valueIndex;
+      late Index nameIndex;
+      late Index valueIndex;
 
       void _createTransaction() {
-        transaction = db.transaction(testStoreName, idbModeReadWrite);
-        objectStore = transaction.objectStore(testStoreName);
+        transaction = db!.transaction(testStoreName, idbModeReadWrite);
+        objectStore = transaction!.objectStore(testStoreName);
         nameIndex = objectStore.index(testNameIndex);
         valueIndex = objectStore.index(testValueIndex);
       }
@@ -464,7 +466,7 @@ void defineTests(TestContext ctx) {
           objectStore.createIndex(testValueIndex, testValueField);
         }
 
-        return idbFactory
+        return idbFactory!
             .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
             .then((Database database) {
           db = database;
@@ -494,12 +496,12 @@ void defineTests(TestContext ctx) {
           return objectStore.put(obj);
         }
 
-        int key1, key2, key3;
+        int? key1, key2, key3;
         // order should be key1, key3, key2 for name
         // order should be key2, key1, key3 for value
-        key1 = await add('a', 2) as int;
-        key2 = await add('c', 1) as int;
-        key3 = await add('b', 3) as int;
+        key1 = await add('a', 2) as int?;
+        key2 = await add('c', 1) as int?;
+        key3 = await add('b', 3) as int?;
 
         var stream = nameIndex.openKeyCursor(autoAdvance: true);
         expect(await getKeys(stream), [key1, key3, key2]);
@@ -519,11 +521,11 @@ void defineTests(TestContext ctx) {
 
     group('keyPath', () {
       // new
-      String _dbName;
+      late String _dbName;
       // prepare for test
       Future _setupDeleteDb() async {
         _dbName = ctx.dbName;
-        await idbFactory.deleteDatabase(_dbName);
+        await idbFactory!.deleteDatabase(_dbName);
       }
 
       test('multi', () async {
@@ -535,8 +537,8 @@ void defineTests(TestContext ctx) {
           expect(index.keyPath, ['year', 'name']);
         }
 
-        var db = await idbFactory.open(_dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+        var db = await idbFactory!
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
 
         Transaction transaction;
         ObjectStore objectStore;
@@ -545,11 +547,11 @@ void defineTests(TestContext ctx) {
         objectStore = transaction.objectStore(testStoreName);
         var index = objectStore.index('test');
         final record1Key =
-            await objectStore.put({'year': 2018, 'name': 'John'}) as int;
+            await objectStore.put({'year': 2018, 'name': 'John'}) as int?;
         final record2Key =
-            await objectStore.put({'year': 2018, 'name': 'Jack'}) as int;
+            await objectStore.put({'year': 2018, 'name': 'Jack'}) as int?;
         final record3Key =
-            await objectStore.put({'year': 2017, 'name': 'John'}) as int;
+            await objectStore.put({'year': 2017, 'name': 'John'}) as int?;
         /*int record4Key = */
         await objectStore.put({'name': 'John'});
         expect(index.keyPath, ['year', 'name']);
@@ -645,8 +647,8 @@ void defineTests(TestContext ctx) {
           objectStore.createIndex(testNameIndex, keyPath);
         }
 
-        db = await idbFactory.open(_dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+        db = await idbFactory!
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
@@ -684,8 +686,8 @@ void defineTests(TestContext ctx) {
               multiEntry: true);
         }
 
-        db = await idbFactory.open(_dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+        db = await idbFactory!
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);

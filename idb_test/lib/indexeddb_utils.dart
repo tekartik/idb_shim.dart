@@ -11,9 +11,8 @@ void verifyGraph(expected, actual) {
   var eItems = [];
   var aItems = [];
 
-  String message(String path, String reason) => path == ''
-      ? reason
-      : (reason == null ? 'path: $path' : 'path: $path, $reason');
+  String message(String path, String reason) =>
+      path == '' ? reason : 'path: $path, $reason';
 
   void walk(String path, expected, actual) {
     if (expected is String || expected is num || expected == null) {

@@ -16,31 +16,31 @@ void main() {
 void defineTests(TestContext ctx) {
   final idbFactory = ctx.factory;
 
-  Database db;
-  Transaction transaction;
-  ObjectStore objectStore;
+  Database? db;
+  Transaction? transaction;
+  late ObjectStore objectStore;
 
   void _createTransaction() {
-    transaction = db.transaction(testStoreName, idbModeReadWrite);
-    objectStore = transaction.objectStore(testStoreName);
+    transaction = db!.transaction(testStoreName, idbModeReadWrite);
+    objectStore = transaction!.objectStore(testStoreName);
   }
 
   // new
-  String _dbName;
+  late String _dbName;
   // prepare for test
   Future _setupDeleteDb() async {
     _dbName = ctx.dbName;
-    await idbFactory.deleteDatabase(_dbName);
+    await idbFactory!.deleteDatabase(_dbName);
   }
 
   // generic tearDown
   Future _tearDown() async {
     if (transaction != null) {
-      await transaction.completed;
+      await transaction!.completed;
       transaction = null;
     }
     if (db != null) {
-      db.close();
+      db!.close();
       db = null;
     }
   }
@@ -51,11 +51,11 @@ void defineTests(TestContext ctx) {
 
     group('failure', () {
       setUp(() async {
-        await idbFactory.deleteDatabase(testDbName);
+        await idbFactory!.deleteDatabase(testDbName);
       });
 
       test('create object store not in initialize', () {
-        return idbFactory.open(testDbName).then((Database database) {
+        return idbFactory!.open(testDbName).then((Database database) {
           try {
             database.createObjectStore(testStoreName, autoIncrement: true);
           } catch (e) {
@@ -80,8 +80,8 @@ void defineTests(TestContext ctx) {
             db.createObjectStore(testStoreName);
           }
 
-          var db = await idbFactory.open(_dbName,
-              version: 1, onUpgradeNeeded: _createStore);
+          var db = await idbFactory!
+              .open(_dbName, version: 1, onUpgradeNeeded: _createStore);
           var txn = db.transaction(testStoreName, idbModeReadWrite);
           var store = txn.objectStore(testStoreName);
           await store.put('value', 'key');
@@ -123,8 +123,8 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName);
         }
 
-        db = await idbFactory.open(_dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+        db = await idbFactory!
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       test('properties', () async {
@@ -159,9 +159,9 @@ void defineTests(TestContext ctx) {
         await _setUp();
         _createTransaction();
         final value = {};
-        return objectStore.add(value, 123).then((key) {
+        await objectStore.add(value, 123).then((key) {
           expect(key, 123);
-          return transaction.completed.then((_) {
+          return transaction!.completed.then((_) {
             _createTransaction();
             return objectStore.add(value, 123).then((_) {}, onError: (e) {
               transaction = null;
@@ -184,18 +184,6 @@ void defineTests(TestContext ctx) {
         });
       });
 
-      test('getObject_null', () async {
-        await _setUp();
-        _createTransaction();
-        try {
-          await objectStore.getObject(null);
-          fail('error');
-        } catch (e) {
-          expect(isTestFailure(e), isFalse);
-          expect(e, isNotNull);
-        }
-      });
-
       test('getObject_boolean', () async {
         await _setUp();
         _createTransaction();
@@ -215,7 +203,7 @@ void defineTests(TestContext ctx) {
           final value = 'test';
           expect(await objectStore.getObject(1.2), isNull);
           final key = 0.001;
-          final keyAdded = await objectStore.add(value, key) as double;
+          final keyAdded = await objectStore.add(value, key) as double?;
           expect(keyAdded, key);
           expect(await objectStore.getObject(key), value);
         }
@@ -258,8 +246,8 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
 
-        db = await idbFactory.open(_dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+        db = await idbFactory!
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
@@ -320,7 +308,7 @@ void defineTests(TestContext ctx) {
         await _setUp();
         _createTransaction();
         final value = {};
-        final key = await objectStore.add(value, 1234) as int;
+        final key = await objectStore.add(value, 1234) as int?;
         expect(key, 1234);
         try {
           await objectStore.add(value, 1234);
@@ -359,9 +347,9 @@ void defineTests(TestContext ctx) {
         await _setUp();
         _createTransaction();
         final value = {};
-        final key2 = await objectStore.add(value, '2') as String;
+        final key2 = await objectStore.add(value, '2') as String?;
         expect(key2, '2');
-        final key1 = await objectStore.add(value) as int;
+        final key1 = await objectStore.add(value) as int?;
         expect(key1 == 1 || key1 == 3, isTrue);
       });
 
@@ -372,13 +360,13 @@ void defineTests(TestContext ctx) {
         _createTransaction();
         final value1 = {'test': 1};
         final value2 = {'test': 2};
-        final keyTest = await objectStore.add(value1, 'test') as String;
+        final keyTest = await objectStore.add(value1, 'test') as String?;
         expect(keyTest, 'test');
-        final key1 = await objectStore.add(value2) as int;
+        final key1 = await objectStore.add(value2) as int?;
         expect(key1, 1);
 
-        var valueRead = await objectStore.getObject(1) as Map;
-        valueRead = await objectStore.getObject('test') as Map;
+        var valueRead = await objectStore.getObject(1) as Map?;
+        valueRead = await objectStore.getObject('test') as Map?;
         expect(valueRead, value1);
       }, skip: true);
 
@@ -388,7 +376,7 @@ void defineTests(TestContext ctx) {
         final value = {};
         return objectStore.add(value).then((key) {
           return objectStore.getObject(key).then((value) {
-            expect(value.length, 0);
+            expect((value as Map).length, 0);
           });
         });
       });
@@ -409,7 +397,7 @@ void defineTests(TestContext ctx) {
         _createTransaction();
         final value = {};
         return objectStore.add(value).then((key) {
-          return objectStore.getObject(key + 1).then((value) {
+          return objectStore.getObject((key as int) + 1).then((value) {
             expect(value, null);
           });
         });
@@ -509,7 +497,7 @@ void defineTests(TestContext ctx) {
         _createTransaction();
         final value = {'test': 'test_value'};
         return objectStore.add(value).then((key) {
-          return objectStore.delete(key + 1).then((deleteResult) {
+          return objectStore.delete((key as int) + 1).then((deleteResult) {
             // check fist one still here
             return objectStore.getObject(key).then((valueRead) {
               expect(value, valueRead);
@@ -553,7 +541,9 @@ void defineTests(TestContext ctx) {
         return objectStore.add(value).then((key) {
           final newValue = cloneValue(value) as Map;
           newValue['test'] = 'new_value';
-          return objectStore.put(newValue, key + 1).then((deleteResult) {
+          return objectStore
+              .put(newValue, (key as int) + 1)
+              .then((deleteResult) {
             // check fist one still here
             return objectStore.getObject(key).then((valueRead) {
               expect(value, valueRead);
@@ -589,8 +579,8 @@ void defineTests(TestContext ctx) {
     // skipped for firefox
     group('readonly', () {
       void _createTransaction() {
-        transaction = db.transaction(testStoreName, idbModeReadOnly);
-        objectStore = transaction.objectStore(testStoreName);
+        transaction = db!.transaction(testStoreName, idbModeReadOnly);
+        objectStore = transaction!.objectStore(testStoreName);
       }
 
       Future _setUp() async {
@@ -601,8 +591,8 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
 
-        db = await idbFactory.open(_dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+        db = await idbFactory!
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
@@ -652,15 +642,15 @@ void defineTests(TestContext ctx) {
       test('delete', () async {
         await _setUp();
         _createTransaction();
-        return objectStore.delete(1).catchError((e) {
-          // There must be an error!
-          return e;
-        }).then((e) {
+        try {
+          await objectStore.delete(1);
+          fail('should fail');
+        } catch (e) {
           expect(isTestFailure(e), isFalse);
           expect(isTransactionReadOnlyError(e), isTrue);
           // don't wait for transaction
           transaction = null;
-        });
+        }
       });
     });
 
@@ -676,8 +666,8 @@ void defineTests(TestContext ctx) {
               keyPath: keyPath, autoIncrement: true);
         }
 
-        db = await idbFactory.open(_dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+        db = await idbFactory!
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
@@ -782,8 +772,8 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, keyPath: keyPath);
         }
 
-        db = await idbFactory.open(_dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+        db = await idbFactory!
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
@@ -898,9 +888,9 @@ void defineTests(TestContext ctx) {
         await _setUp();
         _createTransaction();
         final value = {keyPath: 'test_value'};
-        var key = await objectStore.put(value) as String;
+        var key = await objectStore.put(value) as String?;
         expect(key, 'test_value');
-        key = await objectStore.put(value) as String;
+        key = await objectStore.put(value) as String?;
 
         // There must be only one item
         expect(await objectStore.count(key), 1);
@@ -916,11 +906,11 @@ void defineTests(TestContext ctx) {
     if (!ctx.isInMemory) {
       group('create store and re-open', () {
         setUp(() {
-          return idbFactory.deleteDatabase(testDbName);
+          return idbFactory!.deleteDatabase(testDbName);
         });
 
         Future testStore(IdbObjectStoreMeta storeMeta) {
-          return setUpSimpleStore(idbFactory,
+          return setUpSimpleStore(idbFactory!,
                   meta: storeMeta, dbName: testDbName)
               .then((Database db) {
             db.close();
@@ -969,8 +959,8 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, keyPath: keyPath);
         }
 
-        db = await idbFactory.open(_dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+        db = await idbFactory!
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
@@ -1052,7 +1042,7 @@ void defineTests(TestContext ctx) {
     group('various', () {
       Future _setUp() async {
         await _setupDeleteDb();
-        db = await setUpSimpleStore(idbFactory, dbName: _dbName);
+        db = await setUpSimpleStore(idbFactory!, dbName: _dbName);
       }
 
       tearDown(_tearDown);
@@ -1060,10 +1050,8 @@ void defineTests(TestContext ctx) {
       test('delete', () async {
         await _setUp();
         _createTransaction();
-        return objectStore.add('test').then((key) {
-          return objectStore.delete(key).then((result) {
-            expect(result, isNull);
-          });
+        return objectStore.add('test').then((key) async {
+          await objectStore.delete(key);
         });
       });
     });
@@ -1078,8 +1066,8 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName2, autoIncrement: true);
         }
 
-        db = await idbFactory.open(_dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+        db = await idbFactory!
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
@@ -1087,76 +1075,76 @@ void defineTests(TestContext ctx) {
       test('simple add_get', () async {
         await _setUp();
         transaction =
-            db.transaction([testStoreName, testStoreName2], idbModeReadWrite);
-        var objectStore1 = transaction.objectStore(testStoreName);
+            db!.transaction([testStoreName, testStoreName2], idbModeReadWrite);
+        var objectStore1 = transaction!.objectStore(testStoreName);
         var key1 = await objectStore1.add('test_value1');
         expect(key1, 1);
-        var objectStore2 = transaction.objectStore(testStoreName2);
+        var objectStore2 = transaction!.objectStore(testStoreName2);
         var key2 = await objectStore2.add('test_value2');
         expect(key2, 1);
-        await transaction.completed;
+        await transaction!.completed;
 
         transaction =
-            db.transaction([testStoreName, testStoreName2], idbModeReadOnly);
-        objectStore1 = transaction.objectStore(testStoreName);
+            db!.transaction([testStoreName, testStoreName2], idbModeReadOnly);
+        objectStore1 = transaction!.objectStore(testStoreName);
         expect(await objectStore1.getObject(key1), 'test_value1');
-        objectStore2 = transaction.objectStore(testStoreName2);
+        objectStore2 = transaction!.objectStore(testStoreName2);
         expect(await objectStore2.getObject(key2), 'test_value2');
       });
 
       test('simple add_put_get', () async {
         await _setUp();
         transaction =
-            db.transaction([testStoreName, testStoreName2], idbModeReadWrite);
-        var objectStore1 = transaction.objectStore(testStoreName);
+            db!.transaction([testStoreName, testStoreName2], idbModeReadWrite);
+        var objectStore1 = transaction!.objectStore(testStoreName);
         var key1 = await objectStore1.add('test_value1');
         expect(key1, 1);
-        var objectStore2 = transaction.objectStore(testStoreName2);
+        var objectStore2 = transaction!.objectStore(testStoreName2);
         var key2 = await objectStore2.add('test_value2');
         expect(key2, 1);
-        await transaction.completed;
+        await transaction!.completed;
 
         transaction =
-            db.transaction([testStoreName, testStoreName2], idbModeReadWrite);
-        objectStore1 = transaction.objectStore(testStoreName);
+            db!.transaction([testStoreName, testStoreName2], idbModeReadWrite);
+        objectStore1 = transaction!.objectStore(testStoreName);
         await objectStore1.put('update_value1', key1);
-        objectStore2 = transaction.objectStore(testStoreName2);
+        objectStore2 = transaction!.objectStore(testStoreName2);
         await objectStore2.put('update_value2', key2);
-        await transaction.completed;
+        await transaction!.completed;
 
         transaction =
-            db.transaction([testStoreName, testStoreName2], idbModeReadOnly);
-        objectStore1 = transaction.objectStore(testStoreName);
+            db!.transaction([testStoreName, testStoreName2], idbModeReadOnly);
+        objectStore1 = transaction!.objectStore(testStoreName);
         expect(await objectStore1.getObject(key1), 'update_value1');
-        objectStore2 = transaction.objectStore(testStoreName2);
+        objectStore2 = transaction!.objectStore(testStoreName2);
         expect(await objectStore2.getObject(key2), 'update_value2');
       });
 
       test('order_add_get', () async {
         await _setUp();
         transaction =
-            db.transaction([testStoreName, testStoreName2], idbModeReadWrite);
-        var objectStore1 = transaction.objectStore(testStoreName);
+            db!.transaction([testStoreName, testStoreName2], idbModeReadWrite);
+        var objectStore1 = transaction!.objectStore(testStoreName);
         var key1 = await objectStore1.add('test_value1');
         expect(key1, 1);
-        objectStore1 = transaction.objectStore(testStoreName);
+        objectStore1 = transaction!.objectStore(testStoreName);
         var key1_1 = await objectStore1.add('test_value1_1');
         expect(key1_1, 2);
-        var objectStore2 = transaction.objectStore(testStoreName2);
+        var objectStore2 = transaction!.objectStore(testStoreName2);
         var key2 = await objectStore2.add('test_value2');
         expect(key2, 1);
-        objectStore1 = transaction.objectStore(testStoreName);
+        objectStore1 = transaction!.objectStore(testStoreName);
         var key1_2 = await objectStore1.add('test_value1_2');
         expect(key1_2, 3);
-        await transaction.completed;
+        await transaction!.completed;
 
         transaction =
-            db.transaction([testStoreName, testStoreName2], idbModeReadOnly);
-        objectStore1 = transaction.objectStore(testStoreName);
+            db!.transaction([testStoreName, testStoreName2], idbModeReadOnly);
+        objectStore1 = transaction!.objectStore(testStoreName);
         expect(await objectStore1.getObject(key1), 'test_value1');
         expect(await objectStore1.getObject(key1_1), 'test_value1_1');
         expect(await objectStore1.getObject(key1_2), 'test_value1_2');
-        objectStore2 = transaction.objectStore(testStoreName2);
+        objectStore2 = transaction!.objectStore(testStoreName2);
         expect(await objectStore2.getObject(key2), 'test_value2');
       });
     });

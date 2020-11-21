@@ -36,36 +36,36 @@ void defineTests(SembastFsTestContext ctx) {
   dbGroup(ctx, 'format', () {
     final tmpSdbFactory = sdb.databaseFactoryMemoryFs as sdb.DatabaseFactoryFs;
 
-    Database db;
-    sdb.Database memSdb;
+    Database? db;
+    late sdb.Database memSdb;
 
     // generic tearDown
     Future _tearDown() async {
       if (db != null) {
-        db.close();
+        db!.close();
         db = null;
       }
     }
 
-    Future<List<Map>> getFileContent(File file) async {
-      final content = <Map>[];
+    Future<List<Map?>> getFileContent(File file) async {
+      final content = <Map?>[];
       await utf8.decoder
           .bind(file.openRead())
           .transform(const LineSplitter())
           .listen((String line) {
-        content.add(json.decode(line) as Map);
+        content.add(json.decode(line) as Map?);
       }).asFuture();
       return content;
     }
 
-    Future<List<Map>> getStorageContent() async {
+    Future<List<Map?>> getStorageContent() async {
       var content = await getFileContent(
           ctx.sdbFactory.fs.file(idbFactory.getDbPath(dbTestName)));
       // devPrint(content);
       return content;
     }
 
-    Future<List<Map>> getSdbStorageContext() async {
+    Future<List<Map?>> getSdbStorageContext() async {
       return getFileContent(tmpSdbFactory.fs.file(memSdb.path));
     }
 
@@ -86,14 +86,14 @@ void defineTests(SembastFsTestContext ctx) {
       db = await idbFactory.open(dbTestName);
       memSdb = await openTmpDatabase(1);
       await store.record('version').put(memSdb, 1);
-      db.close();
+      db!.close();
       await memSdb.close();
       // Make sure the db is flushed
-      await (db as idb_sdb.DatabaseSembast).db.close();
+      await (db as idb_sdb.DatabaseSembast).db!.close();
     });
 
     dbTest('one_store', () async {
-      IdbObjectStoreMeta storeMeta;
+      late IdbObjectStoreMeta storeMeta;
 
       void _initializeDatabase(VersionChangeEvent e) {
         final db = e.database;
@@ -111,15 +111,15 @@ void defineTests(SembastFsTestContext ctx) {
       await store
           .record('store_${storeMeta.name}')
           .put(memSdb, storeMeta.toMap());
-      db.close();
+      db!.close();
       await memSdb.close();
       // Make sure the db is flushed
-      await (db as idb_sdb.DatabaseSembast).db.close();
+      await (db as idb_sdb.DatabaseSembast).db!.close();
       await _checkExport();
     });
 
     dbTest('one_index', () async {
-      IdbObjectStoreMeta storeMeta;
+      late IdbObjectStoreMeta storeMeta;
 
       void _initializeDatabase(VersionChangeEvent e) {
         final db = e.database;
@@ -140,10 +140,10 @@ void defineTests(SembastFsTestContext ctx) {
       await store
           .record('store_${storeMeta.name}')
           .put(memSdb, storeMeta.toMap());
-      db.close();
+      db!.close();
       await memSdb.close();
       // Make sure the db is flushed
-      await (db as idb_sdb.DatabaseSembast).db.close();
+      await (db as idb_sdb.DatabaseSembast).db!.close();
       await _checkExport();
     });
 
@@ -156,7 +156,7 @@ void defineTests(SembastFsTestContext ctx) {
       await sink.close();
 
       db = await idbFactory.open(dbName);
-      db.close();
+      db!.close();
     });
   });
 }

@@ -13,21 +13,21 @@ void main() {
 void defineTests(TestContext ctx) {
   final idbFactory = ctx.factory;
   group('factory', () {
-    String _dbName;
+    String? _dbName;
 
     // prepare for test
     Future _setupDeleteDb() async {
       _dbName = ctx.dbName;
-      await idbFactory.deleteDatabase(_dbName);
+      await idbFactory!.deleteDatabase(_dbName!);
     }
 
     test('delete database', () async {
       await _setupDeleteDb();
-      await idbFactory.deleteDatabase(_dbName);
+      await idbFactory!.deleteDatabase(_dbName!);
     });
 
     test('cmp', () {
-      expect(idbFactory.cmp(1, 2), -1);
+      expect(idbFactory!.cmp(1, 2), -1);
       expect(idbFactory.cmp(1, 1), 0);
       expect(idbFactory.cmp(2, 1), 1);
       expect(idbFactory.cmp('a', 'b'), -1);
@@ -47,22 +47,6 @@ void defineTests(TestContext ctx) {
           1);
 
       var hasFailed = false;
-      try {
-        idbFactory.cmp(null, 1);
-      } catch (_) {
-        // DataError: Failed to execute 'cmp' on 'IDBFactory': The parameter is not a valid key
-        hasFailed = true;
-      }
-      expect(hasFailed, isTrue);
-
-      hasFailed = false;
-      try {
-        idbFactory.cmp(1, null);
-      } catch (_) {
-        // DataError: Failed to execute 'cmp' on 'IDBFactory': The parameter is not a valid key
-        hasFailed = true;
-      }
-      expect(hasFailed, isTrue);
 
       // Fail to compare bool
       hasFailed = false;
@@ -87,7 +71,7 @@ void defineTests(TestContext ctx) {
     });
 
     test('cmp array', () {
-      expect(idbFactory.cmp([1, 2], [1, 3]), -1);
+      expect(idbFactory!.cmp([1, 2], [1, 3]), -1);
       expect(idbFactory.cmp([1, 2], [1, 2]), 0);
       expect(idbFactory.cmp([1, 2], [1, 1]), 1);
     });
@@ -106,7 +90,7 @@ void defineTests(TestContext ctx) {
     }, testOn: 'js');
     */
 
-    if (idbFactory.supportsDatabaseNames) {
+    if (idbFactory!.supportsDatabaseNames) {
       test('supportsDatabaseNames', () {
         expect(idbFactory.supportsDatabaseNames, true);
       });
@@ -132,7 +116,7 @@ void defineTests(TestContext ctx) {
 
         test('open find', () async {
           await _setupDeleteDb();
-          final db = await idbFactory.open(_dbName);
+          final db = await idbFactory.open(_dbName!);
           db.close();
 
           final names = await idbFactory.getDatabaseNames();
@@ -141,12 +125,12 @@ void defineTests(TestContext ctx) {
 
         test('open delete', () async {
           await _setupDeleteDb();
-          final db = await idbFactory.open(_dbName);
+          final db = await idbFactory.open(_dbName!);
           db.close();
 
           var names = await idbFactory.getDatabaseNames();
           expect(names, contains(_dbName));
-          await idbFactory.deleteDatabase(_dbName);
+          await idbFactory.deleteDatabase(_dbName!);
           names = await idbFactory.getDatabaseNames();
           expect(names, isNot(contains(_dbName)));
         });

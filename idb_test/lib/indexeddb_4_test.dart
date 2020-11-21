@@ -42,7 +42,7 @@ Future<Database> writeItems(Database db) {
 Future<Database> writeItems(Database db) {
   var transaction = db.transaction(STORE_NAME, 'readwrite');
 
-  Future<Object> write(index) {
+  Future<Object?> write(index) {
     return transaction
         .objectStore(STORE_NAME)
         .put({'content': 'Item $index'}, index);
@@ -70,7 +70,7 @@ Future testRange(db, range, expectedFirst, expectedLast) {
       .openCursor(range: range as KeyRange, autoAdvance: true)
       .asBroadcastStream();
 
-  int lastKey;
+  int? lastKey;
   cursors.listen((cursor) {
     lastKey = cursor.key as int;
     var value = cursor.value as Map;
@@ -109,9 +109,9 @@ void defineTests(TestContext ctx) {
   // Don't bother with these tests if it's unsupported.
   // Support is tested in indexeddb_1_test
   if (IdbFactory.supported) {
-    var db;
+    late var db;
     setUp(() {
-      return setupDb(idbFactory).then((result) {
+      return setupDb(idbFactory!).then((result) {
         db = result;
       });
     });

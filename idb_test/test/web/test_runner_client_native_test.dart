@@ -16,7 +16,7 @@ void main() {
 
 void idbNativeFactoryTests(IdbFactory idbFactoryNative) {
   group('native', () {
-    if (idbFactoryNative != null) {
+    if (idbFactoryNativeSupported) {
       final idbFactory = idbFactoryNative;
       final ctx = TestContext()..factory = idbFactory;
 
@@ -33,7 +33,7 @@ void idbNativeFactoryTests(IdbFactory idbFactoryNative) {
 
       group('keyPath', () {
         // new
-        String _dbName;
+        late String _dbName;
         // prepare for test
         Future _setupDeleteDb() async {
           _dbName = ctx.dbName;
@@ -60,11 +60,11 @@ void idbNativeFactoryTests(IdbFactory idbFactoryNative) {
           objectStore = transaction.objectStore(testStoreName);
           var index = objectStore.index('test');
           final record1Key =
-              await objectStore.put({'year': 2018, 'name': 'John'}) as int;
+              await objectStore.put({'year': 2018, 'name': 'John'}) as int?;
           final record2Key =
-              await objectStore.put({'year': 2018, 'name': 'Jack'}) as int;
+              await objectStore.put({'year': 2018, 'name': 'Jack'}) as int?;
           final record3Key =
-              await objectStore.put({'year': 2017, 'name': 'John'}) as int;
+              await objectStore.put({'year': 2017, 'name': 'John'}) as int?;
           expect(index.keyPath, ['year', 'name']);
           expect(await index.getKey([2018, 'Jack']), record2Key);
           expect(await index.getKey([2018, 'John']), record1Key);
@@ -116,7 +116,7 @@ void idbNativeFactoryTests(IdbFactory idbFactoryNative) {
             skip: isEdge || isIe);
       });
     } else {
-      test('idb native not supported', null, skip: 'idb native not supported');
+      test('idb native not supported', () {}, skip: 'idb native not supported');
     }
   });
 }

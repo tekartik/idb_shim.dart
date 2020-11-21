@@ -16,7 +16,7 @@ void defineTests(TestContext ctx) {
   final idbFactory = ctx.factory;
   group('simple provider', () {
     group('with data', () {
-      SimpleProvider provider;
+      late SimpleProvider provider;
 
       setUp(() {
         provider = SimpleProvider(idbFactory);
@@ -29,7 +29,7 @@ void defineTests(TestContext ctx) {
 
       test('simple cursor auto advance', () {
         // Check ordered by id
-        final store = provider.db
+        final store = provider.db!
             .transaction(testStoreName, idbModeReadOnly)
             .objectStore(testStoreName);
         final stream = store.openCursor(autoAdvance: true);
@@ -41,7 +41,7 @@ void defineTests(TestContext ctx) {
           expect(list[2].id, equals(3));
         }).then((_) {
           // Check ordered by name
-          final store = provider.db
+          final store = provider.db!
               .transaction(testStoreName, idbModeReadOnly)
               .objectStore(testStoreName);
           final index = store.index(nameIndex);
@@ -58,7 +58,7 @@ void defineTests(TestContext ctx) {
 
       test('simple cursor no auto advance', () {
         // Check ordered by id
-        final store = provider.db
+        final store = provider.db!
             .transaction(testStoreName, idbModeReadOnly)
             .objectStore(testStoreName);
         final stream = store.openCursor();
@@ -82,7 +82,7 @@ void defineTests(TestContext ctx) {
 
       test('simple cursor reverse', () {
         // Check ordered by name reverse
-        final store = provider.db
+        final store = provider.db!
             .transaction(testStoreName, idbModeReadOnly)
             .objectStore(testStoreName);
         final index = store.index(nameIndex);
@@ -103,31 +103,30 @@ void defineTests(TestContext ctx) {
       final provider = SimpleProvider(idbFactory);
       return provider.openEmpty().then((_) {
         final transaction =
-            provider.db.transaction(testStoreName, idbModeReadWrite);
+            provider.db!.transaction(testStoreName, idbModeReadWrite);
         final objectStore = transaction.objectStore(testStoreName);
         final object = {nameField: 'test'};
         objectStore.add(object).then((r) {
-          final key = r as int;
+          final key = r as int?;
           expect(key, equals(1));
           //print('added $r');
           objectStore.getObject(r).then((newObject) {
             //print(newObject);
-            expect(newObject.length, equals(1));
+            expect((newObject as Map).length, equals(1));
             expect(newObject[nameField], equals('test'));
 
             objectStore.put(newObject, r).then((newR) {
-              final key = newR as int;
+              final key = newR as int?;
               expect(key, equals(1));
               //print(newObject);
               expect(newObject.length, equals(1));
               expect(newObject[nameField], equals('test'));
 
-              objectStore.delete(r).then((nullValue) {
-                expect(nullValue, isNull);
-              });
+              return objectStore.delete(r);
             });
           });
         });
+
         return transaction.completed.then((_) {
           provider.close();
           // done();
