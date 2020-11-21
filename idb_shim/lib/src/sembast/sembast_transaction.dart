@@ -55,6 +55,7 @@ class TransactionSembast extends IdbTransactionBase
       if (_aborted) {
         _completeError(newAbortException());
       } else {
+        devPrint('Completing $database');
         _completedCompleter.complete(database);
       }
     }

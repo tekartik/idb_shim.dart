@@ -20,16 +20,26 @@ class TransactionLogger extends IdbTransactionBase {
   @override
   ObjectStore objectStore(String name) =>
       ObjectStoreLogger(this, idbTransaction.objectStore(name));
-
+/*
+  @override
+  Future<Database> get completed async {
+    try {
+      return await idbTransaction.completed;
+    } catch (e) {
+      err('completed sync error $e');
+      rethrow;
+    }
+  }
+  */
   @override
   Future<Database> get completed {
     try {
-      idbTransaction.completed.catchError((e) {
+      return idbTransaction.completed.catchError((Object e) {
         err('completed error $e');
+        throw e;
       }).whenComplete(() {
         log('completed');
       });
-      return idbTransaction.completed;
     } catch (e) {
       err('completed sync error $e');
       rethrow;
