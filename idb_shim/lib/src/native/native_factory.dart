@@ -13,8 +13,8 @@ import 'package:idb_shim/src/native/native_event.dart';
 import 'package:idb_shim/src/utils/browser_utils.dart';
 import 'package:idb_shim/src/utils/value_utils.dart';
 
-IdbFactory _idbFactoryNativeBrowserImpl;
-IdbFactory get idbFactoryNativeBrowserImpl =>
+IdbFactory? _idbFactoryNativeBrowserImpl;
+IdbFactory? get idbFactoryNativeBrowserImpl =>
     _idbFactoryNativeBrowserImpl ??= () {
       if (!IdbFactoryNativeBrowserWrapperImpl.supported) {
         return null;
@@ -22,17 +22,17 @@ IdbFactory get idbFactoryNativeBrowserImpl =>
       return nativeIdbFactoryBrowserWrapperImpl;
     }();
 
-native.IdbFactory get nativeBrowserIdbFactory => html.window.indexedDB;
+native.IdbFactory? get nativeBrowserIdbFactory => html.window.indexedDB;
 
 // Single instance
-IdbFactoryNativeBrowserWrapperImpl _nativeIdbFactoryBrowserWrapperImpl;
+IdbFactoryNativeBrowserWrapperImpl? _nativeIdbFactoryBrowserWrapperImpl;
 IdbFactoryNativeBrowserWrapperImpl get nativeIdbFactoryBrowserWrapperImpl =>
     _nativeIdbFactoryBrowserWrapperImpl ??=
         IdbFactoryNativeBrowserWrapperImpl._();
 
 /// Browser only
 class IdbFactoryNativeBrowserWrapperImpl extends IdbFactoryNativeWrapperImpl {
-  IdbFactoryNativeBrowserWrapperImpl._() : super(nativeBrowserIdbFactory);
+  IdbFactoryNativeBrowserWrapperImpl._() : super(nativeBrowserIdbFactory!);
 
   static bool get supported {
     return idb.IdbFactory.supported;
@@ -58,12 +58,12 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase
 
   @override
   Future<Database> open(String dbName,
-      {int version,
-      OnUpgradeNeededFunction onUpgradeNeeded,
-      OnBlockedFunction onBlocked}) {
+      {int? version,
+      OnUpgradeNeededFunction? onUpgradeNeeded,
+      OnBlockedFunction? onBlocked}) {
     void _onUpgradeNeeded(idb.VersionChangeEvent e) {
       final event = VersionChangeEventNative(this, e);
-      onUpgradeNeeded(event);
+      onUpgradeNeeded!(event);
     }
 
     void _onBlocked(html.Event e) {
@@ -89,11 +89,11 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase
 
   @override
   Future<IdbFactory> deleteDatabase(String dbName,
-      {OnBlockedFunction onBlocked}) {
+      {OnBlockedFunction? onBlocked}) {
     void _onBlocked(html.Event e) {
       print('blocked deleting $dbName');
       Event event = EventNative(e);
-      onBlocked(event);
+      onBlocked!(event);
     }
 
     return nativeFactory
@@ -125,7 +125,7 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase
       } else {
         return nativeFactory.cmp(first, second);
       }
-    });
+    })!;
   }
 
   @override

@@ -17,7 +17,7 @@ abstract class IdbFactoryBase implements IdbFactory {
 
   /// Check open arguments
   void checkOpenArguments(
-      {int version, OnUpgradeNeededFunction onUpgradeNeeded}) {
+      {int? version, OnUpgradeNeededFunction? onUpgradeNeeded}) {
     // check params
     if (((version != null) || (onUpgradeNeeded != null)) &&
         ((version == null) || (onUpgradeNeeded == null))) {

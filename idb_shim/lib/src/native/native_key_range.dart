@@ -2,7 +2,7 @@ import 'dart:indexed_db' as idb;
 
 import 'package:idb_shim/idb.dart';
 
-idb.KeyRange toNativeKeyRange(KeyRange common) {
+idb.KeyRange? toNativeKeyRange(KeyRange? common) {
   //print(common);
   if (common == null) {
     return null;

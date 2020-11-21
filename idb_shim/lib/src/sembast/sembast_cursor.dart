@@ -9,13 +9,13 @@ import 'package:idb_shim/src/utils/core_imports.dart';
 abstract class KeyCursorSembastMixin implements Cursor {
   // set upon creation
   int recordIndex;
-  BaseCursorControllerSembastMixin ctlr;
+  late BaseCursorControllerSembastMixin ctlr;
 
   ObjectStoreSembast get store => ctlr.store;
 
   IdbCursorMeta get meta => ctlr.meta;
 
-  RecordSnapshotSembast get record => ctlr.records[recordIndex];
+  RecordSnapshotSembast get record => ctlr.records![recordIndex];
 
   //
   // Idb
@@ -31,15 +31,15 @@ abstract class KeyCursorSembastMixin implements Cursor {
 
   // Make sure advance does not pause the transaction
   @override
-  void next() => store.transaction.execute(() => advance(1));
+  void next() => store.transaction!.execute(() => advance(1));
 
   @override
   Future delete() async {
     await store.delete(record.primaryKey);
     var i = recordIndex + 1;
-    while (i < ctlr.records.length) {
-      if (ctlr.records[i].primaryKey == record.primaryKey) {
-        ctlr.records.removeAt(i);
+    while (i < ctlr.records!.length) {
+      if (ctlr.records![i].primaryKey == record.primaryKey) {
+        ctlr.records!.removeAt(i);
       } else {
         i++;
       }
@@ -57,18 +57,18 @@ abstract class KeyCursorSembastMixin implements Cursor {
     // Keep the transaction alive
     // value is converted in put
     await store.put(value, store.getUpdateKeyIfNeeded(value, primaryKey));
-    await store.transaction.execute(() async {
+    await store.transaction!.execute(() async {
       var sdbSnapshot =
           await store.sdbStore.record(primaryKey).getSnapshot(store.sdbClient);
       // Also update all records in the current list...
       var i = recordIndex + 1;
-      while (i < ctlr.records.length) {
-        if (ctlr.records[i].primaryKey == record.primaryKey) {
+      while (i < ctlr.records!.length) {
+        if (ctlr.records![i].primaryKey == record.primaryKey) {
           if (sdbSnapshot == null) {
-            ctlr.records.removeAt(i);
+            ctlr.records!.removeAt(i);
           } else {
-            ctlr.records[i] =
-                IndexRecordSnapshotSembast(ctlr.records[i].key, sdbSnapshot);
+            ctlr.records![i] =
+                IndexRecordSnapshotSembast(ctlr.records![i].key, sdbSnapshot);
             i++;
           }
         } else {
@@ -92,7 +92,7 @@ abstract class CursorWithValueSembastMixin implements CursorWithValue {
   RecordSnapshotSembast get record;
 
   @override
-  Object get value => store.recordToValue(record.snapshot);
+  Object? get value => store.recordToValue(record.snapshot);
 }
 
 class IndexKeyCursorSembast extends Object
@@ -151,7 +151,7 @@ abstract class _ICursorSembast {
   List<sdb.SortOrder> get sortOrders;
 
   /// The list of snapshot
-  List<RecordSnapshotSembast> records;
+  List<RecordSnapshotSembast>? records;
 
   /// Set the resulting records, special handling needed for multiEntry index
   void setRecords(List<sdb.RecordSnapshot> records);
@@ -201,7 +201,7 @@ abstract class IndexCursorControllerSembastMixin implements _ICursorSembast {
       var list = <IndexRecordSnapshotSembast>[];
       for (var record in records) {
         var keys =
-            valueAsSet(mapValueAtKeyPath(record.value as Map, index.keyPath));
+            valueAsSet(mapValueAtKeyPath(record.value as Map?, index.keyPath));
         if (keys != null) {
           for (var key in keys) {
             list.add(IndexRecordSnapshotSembast(decodeKey(key), record));
@@ -214,7 +214,7 @@ abstract class IndexCursorControllerSembastMixin implements _ICursorSembast {
     } else {
       this.records = records
           .map((snapshot) => IndexRecordSnapshotSembast(
-              mapValueAtKeyPath(snapshot.value as Map, index.keyPath),
+              mapValueAtKeyPath(snapshot.value as Map?, index.keyPath),
               snapshot))
           .toList(growable: false);
     }
@@ -247,11 +247,11 @@ abstract class BaseCursorControllerSembastMixin<T extends Cursor>
   T nextEvent(int index);
 
   @override
-  List<RecordSnapshotSembast> records;
+  List<RecordSnapshotSembast>? records;
 
   bool get done => currentIndex == null;
-  int currentIndex = -1;
-  StreamController<T> ctlr;
+  int/*?*/ currentIndex = -1;
+  late StreamController<T> ctlr;
 
   void init() {
     ctlr = StreamController(sync: true);
@@ -268,7 +268,7 @@ abstract class BaseCursorControllerSembastMixin<T extends Cursor>
 
   Future advance(int count) {
     currentIndex += count;
-    if (currentIndex >= records.length) {
+    if (currentIndex >= records!.length) {
       currentIndex = null;
       return ctlr.close();
     }

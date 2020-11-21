@@ -7,19 +7,19 @@ void main() {
   test('count', () async {
     if (IdbFactory.supported) {
       final dbName = 'com.tekartik.ie_count_bug.test';
-      await window.indexedDB.deleteDatabase(dbName);
+      await window.indexedDB!.deleteDatabase(dbName);
       void _setupDb(e) {
         final db = e.target.result as Database;
         db.createObjectStore('store', autoIncrement: true);
       }
 
-      final db = await window.indexedDB
+      final db = await window.indexedDB!
           .open(dbName, version: 1, onUpgradeNeeded: _setupDb);
 
       final transaction = db.transaction('store', 'readwrite');
       var objectStore = transaction.objectStore('store');
       final value = {'sample': 'value'};
-      final key = await objectStore.add(value) as int;
+      final key = await objectStore.add(value) as int?;
       print('added $key $value');
       var count = await objectStore.count(key);
       print('count_by_key: $count');

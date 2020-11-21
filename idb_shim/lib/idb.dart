@@ -109,7 +109,7 @@ abstract class Cursor {
 ///
 abstract class CursorWithValue extends Cursor {
   /// Returns the value of the current cursor.
-  Object get value;
+  Object? get value;
 }
 
 ///
@@ -168,7 +168,7 @@ abstract class ObjectStore {
   /// Note that this method must be called only from a VersionChange transaction
   /// mode callback.
   ///
-  Index createIndex(String name, keyPath, {bool unique, bool multiEntry});
+  Index createIndex(String name, keyPath, {required bool unique, required bool multiEntry});
 
   ///
   /// Creates a structured clone of the value, and stores the cloned value in
@@ -234,13 +234,13 @@ abstract class ObjectStore {
   /// Used for iterating through an object store with a cursor.
   ///
   Stream<CursorWithValue> openCursor(
-      {key, KeyRange range, String direction, bool autoAdvance});
+      {key, KeyRange? range, required String direction, required bool autoAdvance});
 
   ///
   /// Used for iterating through an object store with a key cursor.
   ///
   Stream<Cursor> openKeyCursor(
-      {key, KeyRange range, String direction, bool autoAdvance});
+      {key, KeyRange? range, required String direction, required bool autoAdvance});
 
   ///
   /// returns the total number of records that match the provided key or
@@ -253,13 +253,13 @@ abstract class ObjectStore {
   /// returns all objects in the object store matching the specified parameter
   /// or all objects in the store if no parameters are given.
   ///
-  Future<List<dynamic>> getAll([dynamic query, int count]);
+  Future<List<dynamic>> getAll([dynamic query, int? count]);
 
   ///
   /// returns record keys for all objects in the object store matching the
   /// specified parameter or all objects in the store if no parameters are given.
   ///
-  Future<List<dynamic>> getAllKeys([dynamic query, int count]);
+  Future<List<dynamic>> getAllKeys([dynamic query, int? count]);
 
   ///
   /// Returns the key path of this object store.
@@ -310,7 +310,7 @@ abstract class Database {
   /// This method can be called only within a versionchange transaction.
   ///
   ObjectStore createObjectStore(String name,
-      {String keyPath, bool autoIncrement});
+      {required String keyPath, required bool autoIncrement});
 
   ///
   /// returns a transaction object (Transaction) containing the
@@ -357,7 +357,7 @@ abstract class Database {
   ///
   /// When a database is first created, this attribute is null.
   ///
-  int get version;
+  int? get version;
 
   ///
   /// listen for onVersionChange event
@@ -423,23 +423,23 @@ abstract class Index {
 
   /// Creates a cursor over the specified key range.
   Stream<CursorWithValue> openCursor(
-      {key, KeyRange range, String direction, bool autoAdvance});
+      {key, KeyRange? range, String? direction, bool? autoAdvance});
 
   /// Creates a key cursor over the specified key range.
   Stream<Cursor> openKeyCursor(
-      {key, KeyRange range, String direction, bool autoAdvance});
+      {key, KeyRange? range, String? direction, bool? autoAdvance});
 
   ///
   /// returns all objects in the index matching the specified parameter
   /// or all objects in the index if no parameters are given.
   ///
-  Future<List<dynamic>> getAll([dynamic query, int count]);
+  Future<List<dynamic>> getAll([dynamic query, int? count]);
 
   ///
   /// returns record primary keys for all objects in the index store matching the
   /// specified parameter or all objects in the index if no parameters are given.
   ///
-  Future<List<dynamic>> getAllKeys([dynamic query, int count]);
+  Future<List<dynamic>> getAllKeys([dynamic query, int? count]);
 
   ///
   /// returns the key path of the current index. If null, this index is not
@@ -576,13 +576,13 @@ abstract class KeyRange {
       IdbKeyRange.bound(lowerBound, upperBound, lowerOpen, upperOpen);
 
   /// Lower bound of the key range.
-  Object get lower => null;
+  Object? get lower => null;
 
   /// Returns false if the lower-bound value is included in the key range.
   bool get lowerOpen;
 
   /// Upper bound of the key range.
-  Object get upper;
+  Object? get upper;
 
   /// Returns false if the upper-bound value is included in the key range.
   bool get upperOpen;
@@ -611,9 +611,9 @@ abstract class IdbFactory {
   /// May trigger upgradeneeded, blocked or versionchange events.
   ///
   Future<Database> open(String dbName,
-      {int version,
-      OnUpgradeNeededFunction onUpgradeNeeded,
-      OnBlockedFunction onBlocked});
+      {int? version,
+      OnUpgradeNeededFunction? onUpgradeNeeded,
+      OnBlockedFunction? onBlocked});
 
   ///
   /// compares two values as keys to determine equality and ordering for
@@ -627,7 +627,7 @@ abstract class IdbFactory {
   ///  Will trigger an upgradedneeded event and, if any other tabs have open
   ///  connections to the database, a blocked event.
   ///
-  Future<IdbFactory> deleteDatabase(String name, {OnBlockedFunction onBlocked});
+  Future<IdbFactory> deleteDatabase(String name, {OnBlockedFunction? onBlocked});
 
   ///
   /// if getDatabaseNames can be called
@@ -659,12 +659,12 @@ class DatabaseError extends Error {
   String get message => _message;
   final String _message;
 
-  StackTrace _stackTrace;
+  StackTrace? _stackTrace;
 
   @override
-  StackTrace get stackTrace => _stackTrace ?? super.stackTrace;
+  StackTrace? get stackTrace => _stackTrace ?? super.stackTrace;
 
-  set stackTrace(StackTrace stackTrace) {
+  set stackTrace(StackTrace? stackTrace) {
     _stackTrace = stackTrace;
   }
 

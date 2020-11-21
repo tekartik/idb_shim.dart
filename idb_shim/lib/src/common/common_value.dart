@@ -66,7 +66,7 @@ dynamic _cloneValue(dynamic original) {
 }
 
 /// Clone and add the key if needed
-dynamic cloneValue(dynamic value, [String keyPath, dynamic key]) {
+dynamic cloneValue(dynamic value, [String? keyPath, dynamic key]) {
   dynamic clone = _cloneValue(value);
   if (keyPath != null) {
     // assume map
@@ -106,19 +106,19 @@ int compareKeys(dynamic first, dynamic second) {
 // when keyPath is an array
 // Return the relevant keyPath at index
 KeyRange keyArrayRangeAt(KeyRange keyRange, int index) {
-  dynamic _valueAt(List value, int index) {
+  dynamic _valueAt(List? value, int index) {
     return value == null ? null : value[index];
   }
 
   return KeyRange.bound(
-      _valueAt(keyRange.lower as List, index),
-      _valueAt(keyRange.upper as List, index),
+      _valueAt(keyRange.lower as List?, index),
+      _valueAt(keyRange.upper as List?, index),
       keyRange.lowerOpen,
       keyRange.upperOpen);
 }
 
 /// return a list if keyPath is an array
-dynamic mapValueAtKeyPath(Map map, keyPath) {
+dynamic mapValueAtKeyPath(Map? map, keyPath) {
   if (keyPath is String) {
     return getMapFieldValue(map, keyPath);
   } else if (keyPath is List) {
@@ -130,7 +130,7 @@ dynamic mapValueAtKeyPath(Map map, keyPath) {
 }
 
 /// Convert a single value or an iterable to a list
-Set valueAsSet(dynamic value) {
+Set? valueAsSet(dynamic value) {
   if (value == null) {
     return null;
   }
@@ -141,7 +141,7 @@ Set valueAsSet(dynamic value) {
 }
 
 @deprecated
-Set valueAsKeySet(dynamic value) => valueAsSet(value);
+Set? valueAsKeySet(dynamic value) => valueAsSet(value);
 
 /// Convert a single value or an iterable to a list
 List valueAsList(dynamic value) {
@@ -159,11 +159,11 @@ List valueAsList(dynamic value) {
 
 List<String> getFieldParts(String field) => field.split('.');
 
-T getMapFieldValue<T>(Map map, String field) {
+T? getMapFieldValue<T>(Map? map, String field) {
   return getPartsMapValue(map, getFieldParts(field));
 }
 
-T getPartsMapValue<T>(Map map, Iterable<String> parts) {
+T? getPartsMapValue<T>(Map? map, Iterable<String> parts) {
   dynamic value = map;
   for (final part in parts) {
     if (value is Map) {
@@ -172,7 +172,7 @@ T getPartsMapValue<T>(Map map, Iterable<String> parts) {
       return null;
     }
   }
-  return value as T;
+  return value as T?;
 }
 
 void setMapFieldValue<T>(Map map, String field, T value) {
@@ -187,7 +187,7 @@ void setPartsMapValue<T>(Map map, List<String> parts, value) {
       sub = <String, dynamic>{};
       map[part] = sub;
     }
-    map = sub as Map;
+    map = sub;
   }
   map[parts.last] = value;
 }

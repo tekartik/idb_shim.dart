@@ -5,7 +5,7 @@ import 'package:idb_shim/idb_client_sembast.dart';
 import 'package:idb_shim/src/websql/websql_compat.dart';
 import 'package:sembast/sembast_memory.dart' as sembast;
 
-IdbFactory _idbSembastMemoryFactory;
+IdbFactory? _idbSembastMemoryFactory;
 
 /// Deprecated.
 @deprecated
@@ -13,7 +13,7 @@ IdbFactory get idbSembastMemoryFactory {
   _idbSembastMemoryFactory ??=
       IdbFactorySembast(sembast.databaseFactoryMemory, null);
 
-  return _idbSembastMemoryFactory;
+  return _idbSembastMemoryFactory!;
 }
 
 ///
@@ -26,7 +26,7 @@ IdbFactory get idbPersistentFactory {
   var idbFactory = idbFactoryNative;
 
   // ignore: deprecated_member_use_from_same_package
-  idbFactory ??= idbFactoryWebSql;
+  idbFactory ??= idbFactoryWebSql!;
 
   return idbFactory;
 }

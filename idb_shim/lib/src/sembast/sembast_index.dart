@@ -66,7 +66,7 @@ class IndexSembast extends Index with IndexWithMetaMixin {
 
   @override
   Stream<CursorWithValue> openCursor(
-      {key, KeyRange range, String direction, bool autoAdvance}) {
+      {key, KeyRange? range, String? direction, bool? autoAdvance}) {
     final cursorMeta = IdbCursorMeta(key, range, direction, autoAdvance);
     final ctlr = IndexCursorWithValueControllerSembast(this, cursorMeta);
 
@@ -79,7 +79,7 @@ class IndexSembast extends Index with IndexWithMetaMixin {
 
   @override
   Stream<Cursor> openKeyCursor(
-      {key, KeyRange range, String direction, bool autoAdvance}) {
+      {key, KeyRange? range, String? direction, bool? autoAdvance}) {
     final cursorMeta = IdbCursorMeta(key, range, direction, autoAdvance);
     final ctlr = IndexKeyCursorControllerSembast(this, cursorMeta);
 
@@ -90,7 +90,7 @@ class IndexSembast extends Index with IndexWithMetaMixin {
     return ctlr.stream;
   }
 
-  sdb.Filter cursorFilter(key, KeyRange range) {
+  sdb.Filter cursorFilter(key, KeyRange? range) {
     return keyCursorFilter(keyPath, key, range, multiEntry);
   }
 
@@ -98,7 +98,7 @@ class IndexSembast extends Index with IndexWithMetaMixin {
       keyPathSortOrders(keyPath, ascending);
 
   @override
-  Future<List<dynamic>> getAll([query, int count]) {
+  Future<List<dynamic>> getAll([query, int? count]) {
     return inTransaction(() async {
       final finder = sdb.Finder(
           filter: _indexKeyOrRangeFilter(query),
@@ -111,7 +111,7 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   }
 
   @override
-  Future<List<dynamic>> getAllKeys([query, int count]) {
+  Future<List<dynamic>> getAllKeys([query, int? count]) {
     return inTransaction(() async {
       final finder = sdb.Finder(
           filter: _indexKeyOrRangeFilter(query),

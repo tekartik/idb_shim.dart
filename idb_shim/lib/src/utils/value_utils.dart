@@ -22,7 +22,7 @@ bool equals(dynamic value1, dynamic value2) {
 ///
 /// return <0 if value1 < value2 or >0 if greater
 /// returns null if cannot be compared
-int compareValue(dynamic value1, dynamic value2) {
+int? compareValue(dynamic value1, dynamic value2) {
   try {
     if (value1 is Comparable && value2 is Comparable) {
       return Comparable.compare(value1, value2);

@@ -14,9 +14,9 @@ void main() {
   group('raw', () {
     test('simple_readwrite_transaction', () async {
       final dbName = testDescriptions.join('_');
-      await window.indexedDB.deleteDatabase(dbName);
+      await window.indexedDB!.deleteDatabase(dbName);
       final db =
-          await window.indexedDB.open(dbName, version: 1, onUpgradeNeeded: (e) {
+          await window.indexedDB!.open(dbName, version: 1, onUpgradeNeeded: (e) {
         // print(e);
         final db = e.target.result as idb.Database;
         db.createObjectStore('store', autoIncrement: true);
@@ -32,9 +32,9 @@ void main() {
 
     test('simple_readonly_transaction', () async {
       final dbName = testDescriptions.join('_');
-      await window.indexedDB.deleteDatabase(dbName);
+      await window.indexedDB!.deleteDatabase(dbName);
       final db =
-          await window.indexedDB.open(dbName, version: 1, onUpgradeNeeded: (e) {
+          await window.indexedDB!.open(dbName, version: 1, onUpgradeNeeded: (e) {
         // print(e);
         final db = e.target.result as idb.Database;
         db.createObjectStore('store', autoIncrement: true);
@@ -52,9 +52,9 @@ void main() {
       final dbName = testDescriptions.join('_');
 
       // This test now fails on dart 1.13
-      await window.indexedDB.deleteDatabase(dbName);
+      await window.indexedDB!.deleteDatabase(dbName);
       final db =
-          await window.indexedDB.open(dbName, version: 1, onUpgradeNeeded: (e) {
+          await window.indexedDB!.open(dbName, version: 1, onUpgradeNeeded: (e) {
         final db = e.target.result as idb.Database;
         db.createObjectStore('store1', autoIncrement: true);
         db.createObjectStore('store2', autoIncrement: true);
@@ -79,9 +79,9 @@ void main() {
     // not anymore on dart version 1.13
     test('pause_after_transaction', () async {
       final dbName = testDescriptions.join('_');
-      await window.indexedDB.deleteDatabase(dbName);
+      await window.indexedDB!.deleteDatabase(dbName);
       final db =
-          await window.indexedDB.open(dbName, version: 1, onUpgradeNeeded: (e) {
+          await window.indexedDB!.open(dbName, version: 1, onUpgradeNeeded: (e) {
         final db = e.target.result as idb.Database;
         db.createObjectStore('store', autoIncrement: true);
       });
@@ -115,15 +115,15 @@ void main() {
     // ie has issue with timing
     test('async_timing', () async {
       final dbName = testDescriptions.join('_');
-      await window.indexedDB.deleteDatabase(dbName);
+      await window.indexedDB!.deleteDatabase(dbName);
       final db =
-          await window.indexedDB.open(dbName, version: 1, onUpgradeNeeded: (e) {
+          await window.indexedDB!.open(dbName, version: 1, onUpgradeNeeded: (e) {
         final db = e.target.result as idb.Database;
         db.createObjectStore('store', autoIncrement: true);
       });
 
-      idb.Transaction transaction;
-      idb.ObjectStore objectStore;
+      late idb.Transaction transaction;
+      late idb.ObjectStore objectStore;
       void _createTransactionSync() {
         transaction = db.transaction('store', 'readonly');
         objectStore = transaction.objectStore('store');
@@ -142,15 +142,15 @@ void main() {
 
     test('future_timing', () async {
       final dbName = testDescriptions.join('_');
-      await window.indexedDB.deleteDatabase(dbName);
+      await window.indexedDB!.deleteDatabase(dbName);
       final db =
-          await window.indexedDB.open(dbName, version: 1, onUpgradeNeeded: (e) {
+          await window.indexedDB!.open(dbName, version: 1, onUpgradeNeeded: (e) {
         final db = e.target.result as idb.Database;
         db.createObjectStore('store', autoIncrement: true);
       });
 
-      idb.Transaction transaction;
-      idb.ObjectStore objectStore;
+      late idb.Transaction transaction;
+      late idb.ObjectStore objectStore;
       void _createTransactionSync() {
         transaction = db.transaction('store', 'readonly');
         objectStore = transaction.objectStore('store');
@@ -172,15 +172,15 @@ void main() {
     // after the transaction creation
     test('pause_between_calls', () async {
       final dbName = testDescriptions.join('_');
-      await window.indexedDB.deleteDatabase(dbName);
+      await window.indexedDB!.deleteDatabase(dbName);
       final db =
-          await window.indexedDB.open(dbName, version: 1, onUpgradeNeeded: (e) {
+          await window.indexedDB!.open(dbName, version: 1, onUpgradeNeeded: (e) {
         final db = e.target.result as idb.Database;
         db.createObjectStore('store', autoIncrement: true);
       });
 
-      idb.Transaction transaction;
-      idb.ObjectStore objectStore;
+      late idb.Transaction transaction;
+      late idb.ObjectStore objectStore;
       void _createTransactionSync() {
         transaction = db.transaction('store', 'readonly');
         objectStore = transaction.objectStore('store');
@@ -204,15 +204,15 @@ void main() {
     });
     test('date_time', () async {
       final dbName = 'native_raw/date_time.db';
-      await window.indexedDB.deleteDatabase(dbName);
+      await window.indexedDB!.deleteDatabase(dbName);
       final db =
-          await window.indexedDB.open(dbName, version: 1, onUpgradeNeeded: (e) {
+          await window.indexedDB!.open(dbName, version: 1, onUpgradeNeeded: (e) {
         final db = e.target.result as idb.Database;
         db.createObjectStore('store', autoIncrement: true);
       });
 
-      idb.Transaction transaction;
-      idb.ObjectStore objectStore;
+      late idb.Transaction transaction;
+      late idb.ObjectStore objectStore;
       void _createTransactionSync() {
         transaction = db.transaction('store', idbModeReadWrite);
         objectStore = transaction.objectStore('store');

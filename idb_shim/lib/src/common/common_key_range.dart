@@ -33,7 +33,7 @@ class IdbKeyRange implements KeyRange {
 
   /// Lower bound of the key range.
   @override
-  Object get lower => _lowerBound;
+  Object? get lower => _lowerBound;
 
   /// Returns false if the lower-bound value is included in the key range.
   @override
@@ -41,7 +41,7 @@ class IdbKeyRange implements KeyRange {
 
   /// Upper bound of the key range.
   @override
-  Object get upper => _upperBound;
+  Object? get upper => _upperBound;
 
   /// Returns false if the upper-bound value is included in the key range.
   @override

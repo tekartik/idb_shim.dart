@@ -13,18 +13,18 @@ import 'package:sembast/sembast.dart' as sdb;
 
 class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   @override
-  final IdbObjectStoreMeta meta;
+  final IdbObjectStoreMeta? meta;
 
-  final TransactionSembast transaction;
+  final TransactionSembast? transaction;
 
-  DatabaseSembast get database => transaction.database;
+  DatabaseSembast get database => transaction!.database;
 
-  sdb.Database get sdbDatabase => database.db;
+  sdb.Database? get sdbDatabase => database.db;
 
-  sdb.Transaction get sdbTransaction => transaction.sdbTransaction;
+  sdb.Transaction get sdbTransaction => transaction!.sdbTransaction;
 
-  sdb.DatabaseClient _sdbClient;
-  sdb.StoreRef<dynamic, dynamic> _sdbStore;
+  sdb.DatabaseClient? _sdbClient;
+  sdb.StoreRef<dynamic, dynamic>? _sdbStore;
 
   // Lazy computat
   sdb.StoreRef<dynamic, dynamic> get sdbStore =>
@@ -33,7 +33,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   // lazy creation
   // If we are not in a transaction that's likely during open
   sdb.DatabaseClient get sdbClient =>
-      _sdbClient ??= (sdbTransaction ?? sdbDatabase);
+      (_sdbClient ??= (sdbTransaction ?? sdbDatabase))!;
 
   ObjectStoreSembast(this.transaction, this.meta) {
     // Don't compute sdbStore yet we don't have the transaction
@@ -46,7 +46,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   Future<T> _inWritableTransaction<T>(FutureOr<T> Function() computation) {
-    if (transaction.meta.mode != idbModeReadWrite) {
+    if (transaction!.meta!.mode != idbModeReadWrite) {
       return Future.error(DatabaseReadOnlyError());
     }
     return inTransaction(computation);
@@ -54,7 +54,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   /// Run a computation in a transaction.
   Future<T> inTransaction<T>(FutureOr<T> Function() computation) {
-    return transaction.execute(computation);
+    return transaction!.execute(computation);
   }
 
   /// extract the key from the key itself or from the value
@@ -90,7 +90,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     // Check all indexes
     final futures = <Future>[];
     if (value is Map) {
-      meta.indecies.forEach((IdbIndexMeta indexMeta) {
+      meta!.indecies.forEach((IdbIndexMeta indexMeta) {
         var fieldValue = mapValueAtKeyPath(value, indexMeta.keyPath);
         if (fieldValue != null) {
           final finder = sdb.Finder(
@@ -160,7 +160,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   @override
-  Future<List<dynamic>> getAll([dynamic keyOrRange, int count]) {
+  Future<List<dynamic>> getAll([dynamic keyOrRange, int? count]) {
     return inTransaction(() async {
       return (await sdbStore.find(
         sdbClient,
@@ -173,7 +173,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   @override
-  Future<List<dynamic>> getAllKeys([dynamic keyOrRange, int count]) {
+  Future<List<dynamic>> getAllKeys([dynamic keyOrRange, int? count]) {
     return inTransaction(() async {
       return (await sdbStore.findKeys(
         sdbClient,
@@ -184,15 +184,15 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   @override
-  Index createIndex(String name, keyPath, {bool unique, bool multiEntry}) {
+  Index createIndex(String name, keyPath, {bool? unique, bool? multiEntry}) {
     final indexMeta = IdbIndexMeta(name, keyPath, unique, multiEntry);
-    meta.createIndex(database.meta, indexMeta);
+    meta!.createIndex(database.meta, indexMeta);
     return IndexSembast(this, indexMeta);
   }
 
   @override
   void deleteIndex(String name) {
-    meta.deleteIndex(database.meta, name);
+    meta!.deleteIndex(database.meta, name);
   }
 
   @override
@@ -206,7 +206,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   /// Clone and convert
-  dynamic recordToValue(sdb.RecordSnapshot record) {
+  dynamic recordToValue(sdb.RecordSnapshot? record) {
     if (record == null) {
       return null;
     }
@@ -231,7 +231,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   @override
   Index index(String name) {
-    final indexMeta = meta.index(name);
+    final indexMeta = meta!.index(name);
     return IndexSembast(this, indexMeta);
   }
 
@@ -240,7 +240,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
       keyPathSortOrders(keyField, ascending);
 
   /// Convert to a sembast filter.
-  sdb.Filter cursorFilter(key, KeyRange range) {
+  sdb.Filter cursorFilter(key, KeyRange? range) {
     if (range != null) {
       return keyRangeFilter(keyField, range, false);
     } else {
@@ -253,7 +253,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   @override
   Stream<CursorWithValue> openCursor(
-      {key, KeyRange range, String direction, bool autoAdvance}) {
+      {key, KeyRange? range, String? direction, bool? autoAdvance}) {
     final cursorMeta = IdbCursorMeta(key, range, direction, autoAdvance);
     final ctlr = StoreCursorWithValueControllerSembast(this, cursorMeta);
 
@@ -266,7 +266,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   @override
   Stream<Cursor> openKeyCursor(
-      {key, KeyRange range, String direction, bool autoAdvance}) {
+      {key, KeyRange? range, String? direction, bool? autoAdvance}) {
     final cursorMeta = IdbCursorMeta(key, range, direction, autoAdvance);
     var ctlr = StoreKeyCursorControllerSembast(this, cursorMeta);
 

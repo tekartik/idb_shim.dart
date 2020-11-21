@@ -7,7 +7,7 @@ IdbFactory get idbSembastMemoryFactory => idbFactorySembastMemory;
 /// do not use
 /// choose manually
 @deprecated
-IdbFactory getIdbFactory({String name, String path}) {
+IdbFactory getIdbFactory({String? name, String? path}) {
   name ??= idbFactoryNamePersistent;
 
   switch (name) {
@@ -16,9 +16,9 @@ IdbFactory getIdbFactory({String name, String path}) {
       return idbSembastMemoryFactory;
     case idbFactoryNameSembastIo:
     case idbFactoryNameIo:
-      return getIdbSembastIoFactory(path);
+      return getIdbSembastIoFactory(path!);
     case idbFactoryNamePersistent:
-      return getIdbPersistentFactory(path);
+      return getIdbPersistentFactory(path!);
     default:
       throw UnsupportedError("Factory '$name' not supported");
   }

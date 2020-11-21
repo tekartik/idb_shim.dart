@@ -93,7 +93,7 @@ void main() {
         }
       ];
       for (var value in notIdenticals) {
-        var encoded = value;
+        Object? encoded = value;
         encoded = toSembastValue(value);
         expect(fromSembastValue(encoded), value);
         expect(!identical(encoded, value), isTrue,

@@ -14,7 +14,7 @@ class ObjectStoreNative extends ObjectStore {
   ObjectStoreNative(this.idbObjectStore);
 
   @override
-  Index createIndex(String name, keyPath, {bool unique, bool multiEntry}) {
+  Index createIndex(String name, keyPath, {bool? unique, bool? multiEntry}) {
     return IndexNative(idbObjectStore.createIndex(name, keyPath,
         unique: unique, multiEntry: multiEntry));
   }
@@ -69,7 +69,7 @@ class ObjectStoreNative extends ObjectStore {
 
   @override
   Stream<CursorWithValue> openCursor(
-      {key, KeyRange range, String direction, bool autoAdvance}) {
+      {key, KeyRange? range, String? direction, bool? autoAdvance}) {
     final idbKeyRange = toNativeKeyRange(range);
     //idbDevWarning;
     //idbDevPrint("kr1 $range native $idbKeyRange");
@@ -102,7 +102,7 @@ class ObjectStoreNative extends ObjectStore {
 
   @override
   Stream<Cursor> openKeyCursor(
-      {key, KeyRange range, String direction, bool autoAdvance}) {
+      {key, KeyRange? range, String? direction, bool? autoAdvance}) {
     final idbKeyRange = toNativeKeyRange(range);
     //idbDevWarning;
     //idbDevPrint("kr1 $range native $idbKeyRange");
@@ -121,7 +121,7 @@ class ObjectStoreNative extends ObjectStore {
   }
 
   @override
-  Future<int> count([dynamic keyOrRange]) {
+  Future<int?> count([dynamic keyOrRange]) {
     return catchAsyncNativeError(() {
       Future<int> countFuture;
       if (keyOrRange == null) {
@@ -152,33 +152,33 @@ class ObjectStoreNative extends ObjectStore {
   }
 
   @override
-  Future<List<dynamic>> getAll([dynamic keyOrRange, int count]) {
+  Future<List<dynamic>> getAll([dynamic keyOrRange, int? count]) {
     return catchAsyncNativeError(() {
       final nativeQuery = toNativeQuery(keyOrRange);
       var results = storeGetAll(idbObjectStore, nativeQuery, count);
       return results;
-    });
+    }) as Future<List<dynamic>>;
   }
 
   @override
-  Future<List<dynamic>> getAllKeys([dynamic keyOrRange, int count]) {
+  Future<List<dynamic>> getAllKeys([dynamic keyOrRange, int? count]) {
     return catchAsyncNativeError(() {
       final nativeQuery = toNativeQuery(keyOrRange);
       var results = storeGetAllKeys(idbObjectStore, nativeQuery, count);
       return results;
-    });
+    }) as Future<List<dynamic>>;
   }
 
   @override
-  String get keyPath => idbObjectStore.keyPath as String;
+  String? get keyPath => idbObjectStore.keyPath as String?;
 
   // ie return null so make sure it is a bool
   @override
-  bool get autoIncrement => idbObjectStore.autoIncrement;
+  bool get autoIncrement => idbObjectStore.autoIncrement!;
 
   @override
-  String get name => idbObjectStore.name;
+  String get name => idbObjectStore.name!;
 
   @override
-  List<String> get indexNames => idbObjectStore.indexNames;
+  List<String> get indexNames => idbObjectStore.indexNames!;
 }

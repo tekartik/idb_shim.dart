@@ -17,18 +17,18 @@ import 'idb_utils.dart';
 Future<Map> sdbExportDatabase(Database db) async {
   var srcIdbFactory = db.factory;
 
-  sdb.Database sdbDatabase;
+  sdb.Database? sdbDatabase;
 
   // if already a sembast database use it
   // if (false) {
   if (srcIdbFactory is IdbFactorySembast) {
     sdbDatabase = srcIdbFactory.getSdbDatabase(db);
-    return exportDatabase(sdbDatabase);
+    return exportDatabase(sdbDatabase!);
   } else {
     // otherwise copy to a memory one
     db = await copyDatabase(db, idbFactoryMemory, null);
     sdbDatabase = (idbFactoryMemory as IdbFactorySembast).getSdbDatabase(db);
-    Map export = await exportDatabase(sdbDatabase);
+    Map export = await exportDatabase(sdbDatabase!);
     db.close();
     return export;
   }

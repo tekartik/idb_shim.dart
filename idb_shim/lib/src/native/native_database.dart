@@ -14,11 +14,11 @@ class VersionChangeEventNative extends IdbVersionChangeEventBase {
   idb.VersionChangeEvent idbVersionChangeEvent;
 
   @override
-  int get oldVersion => idbVersionChangeEvent.oldVersion;
+  int get oldVersion => idbVersionChangeEvent.oldVersion!;
 
   @override
-  int get newVersion => idbVersionChangeEvent.newVersion;
-  Request request;
+  int get newVersion => idbVersionChangeEvent.newVersion!;
+  late Request request;
 
   @override
   Object get target => request;
@@ -36,29 +36,29 @@ class VersionChangeEventNative extends IdbVersionChangeEventBase {
     if (currentTarget is idb.Database) {
       database = DatabaseNative(factory, currentTarget);
     } else if (currentTarget is idb.Request) {
-      database = DatabaseNative(factory, currentTarget.result as idb.Database);
+      database = DatabaseNative(factory, currentTarget.result as idb.Database?);
       final transaction =
-          TransactionNative(database, currentTarget.transaction);
+          TransactionNative(database, currentTarget.transaction!);
       request = OpenDBRequest(database, transaction);
     }
   }
 }
 
 class DatabaseNative extends IdbDatabaseBase {
-  idb.Database idbDatabase;
+  idb.Database? idbDatabase;
 
   DatabaseNative(IdbFactory factory, this.idbDatabase) : super(factory);
 
   @override
-  int get version => catchNativeError(() => idbDatabase.version);
+  int? get version => catchNativeError((() => idbDatabase!.version!) as int Function());
 
   @override
   ObjectStore createObjectStore(String name,
-      {String keyPath, bool autoIncrement}) {
+      {String? keyPath, bool? autoIncrement}) {
     return catchNativeError(() {
-      return ObjectStoreNative(idbDatabase.createObjectStore(name,
+      return ObjectStoreNative(idbDatabase!.createObjectStore(name,
           keyPath: keyPath, autoIncrement: autoIncrement));
-    });
+    })!;
   }
 
   @override
@@ -72,9 +72,9 @@ class DatabaseNative extends IdbDatabaseBase {
     try {
       return catchNativeError(() {
         final idbTransaction =
-            idbDatabase.transaction(storeNameOrStoreNames, mode);
+            idbDatabase!.transaction(storeNameOrStoreNames, mode);
         return TransactionNative(this, idbTransaction);
-      });
+      })!;
     } catch (e) {
       // Only handle the issue for non empty list returning a NotFoundError
       if ((storeNameOrStoreNames is List) &&
@@ -99,12 +99,12 @@ class DatabaseNative extends IdbDatabaseBase {
             // This is likely the 1.13 bug
             try {
               return catchNativeError(() {
-                final idbTransaction = idbDatabase.transaction(
+                final idbTransaction = idbDatabase!.transaction(
                     html_common.convertDartToNative_SerializedScriptValue(
                         storeNameOrStoreNames),
                     mode);
                 return TransactionNative(this, idbTransaction);
-              });
+              })!;
             } catch (_) {}
           }
         }
@@ -130,31 +130,31 @@ class DatabaseNative extends IdbDatabaseBase {
   @override
   void close() {
     return catchNativeError(() {
-      idbDatabase.close();
+      idbDatabase!.close();
     });
   }
 
   @override
   void deleteObjectStore(String name) {
     return catchNativeError(() {
-      idbDatabase.deleteObjectStore(name);
+      idbDatabase!.deleteObjectStore(name);
     });
   }
 
   @override
   Iterable<String> get objectStoreNames {
     return catchNativeError(() {
-      return idbDatabase.objectStoreNames;
-    });
+      return idbDatabase!.objectStoreNames;
+    })!;
   }
 
   @override
-  String get name => catchNativeError(() => idbDatabase.name);
+  String get name => catchNativeError(() => idbDatabase!.name)!;
 
   @override
   Stream<VersionChangeEvent> get onVersionChange {
     final ctlr = StreamController<VersionChangeEvent>();
-    idbDatabase.onVersionChange.listen(
+    idbDatabase!.onVersionChange.listen(
         (idb.VersionChangeEvent idbVersionChangeEvent) {
       ctlr.add(VersionChangeEventNative(factory, idbVersionChangeEvent));
     }, onDone: () {

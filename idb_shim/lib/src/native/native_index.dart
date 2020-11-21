@@ -54,12 +54,12 @@ class IndexNative extends Index {
         countFuture = idbIndex.count(keyOrRange);
       }
       return countFuture;
-    });
+    }) as Future<int>;
   }
 
   @override
   Stream<Cursor> openKeyCursor(
-      {key, KeyRange range, String direction, bool autoAdvance}) {
+      {key, KeyRange? range, String? direction, bool? autoAdvance}) {
     final ctlr = CursorControllerNative(idbIndex.openKeyCursor(
         key: key,
         range: range == null ? null : toNativeKeyRange(range),
@@ -71,7 +71,7 @@ class IndexNative extends Index {
   /// Same implementation than for the Store
   @override
   Stream<CursorWithValue> openCursor(
-      {key, KeyRange range, String direction, bool autoAdvance}) {
+      {key, KeyRange? range, String? direction, bool? autoAdvance}) {
     final ctlr = CursorWithValueControllerNative(idbIndex.openCursor(
         key: key,
         range: range == null ? null : toNativeKeyRange(range),
@@ -82,7 +82,7 @@ class IndexNative extends Index {
   }
 
   @override
-  Future<List<dynamic>> getAll([dynamic keyOrRange, int count]) {
+  Future<List<dynamic>?> getAll([dynamic keyOrRange, int? count]) {
     return catchAsyncNativeError(() {
       final nativeQuery = toNativeQuery(keyOrRange);
       var results = indexGetAll(idbIndex, nativeQuery, count);
@@ -91,7 +91,7 @@ class IndexNative extends Index {
   }
 
   @override
-  Future<List<dynamic>> getAllKeys([dynamic keyOrRange, int count]) {
+  Future<List<dynamic>?> getAllKeys([dynamic keyOrRange, int? count]) {
     return catchAsyncNativeError(() {
       final nativeQuery = toNativeQuery(keyOrRange);
       var results = indexGetAllKeys(idbIndex, nativeQuery, count);
@@ -103,16 +103,16 @@ class IndexNative extends Index {
   dynamic get keyPath => idbIndex.keyPath;
 
   @override
-  bool get unique => idbIndex.unique;
+  bool get unique => idbIndex.unique!;
 
   @override
-  bool get multiEntry => idbIndex.multiEntry;
+  bool get multiEntry => idbIndex.multiEntry!;
 
   @override
   int get hashCode => idbIndex.hashCode;
 
   @override
-  String get name => idbIndex.name;
+  String get name => idbIndex.name!;
 
   @override
   bool operator ==(other) {

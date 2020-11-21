@@ -20,14 +20,14 @@ abstract class IdbFactorySembast extends IdbFactoryBase {
   ///
   /// If [path] is null, path are relative to the root.
   factory IdbFactorySembast(sdb.DatabaseFactory databaseFactory,
-          [String path]) =>
+          [String? path]) =>
       IdbFactorySembastImpl(databaseFactory, path);
 
   /// The underlying factory.
   sdb.DatabaseFactory get sdbFactory;
 
   /// Get the underlying sembast database for a given database
-  sdb.Database getSdbDatabase(Database db);
+  sdb.Database? getSdbDatabase(Database db);
 
   /// Create a database from an existing sembast database.
   Future<Database> openFromSdbDatabase(sdb.Database sdbDb);

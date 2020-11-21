@@ -13,7 +13,7 @@ export 'package:idb_shim/src/browser/browser_compat.dart';
 /// Get a factory by name.
 ///
 /// Not recommended.
-IdbFactory getIdbFactory([String name]) {
+IdbFactory? getIdbFactory([String? name]) {
   name ??= idbFactoryNameBrowser;
 
   switch (name) {

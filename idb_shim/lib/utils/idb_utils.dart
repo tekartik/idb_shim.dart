@@ -47,9 +47,9 @@ Future<Database> copySchema(
     final db = event.database;
     for (final storeMeta in schemaMeta.stores) {
       final store = db.createObjectStore(storeMeta.name,
-          keyPath: storeMeta.keyPath, autoIncrement: storeMeta.autoIncrement);
+          keyPath: storeMeta.keyPath!, autoIncrement: storeMeta.autoIncrement);
       for (final indexMeta in storeMeta.indecies) {
-        store.createIndex(indexMeta.name, indexMeta.keyPath,
+        store.createIndex(indexMeta.name!, indexMeta.keyPath,
             unique: indexMeta.unique, multiEntry: indexMeta.multiEntry);
       }
     }

@@ -11,10 +11,10 @@ enum IdbFactoryLoggerType {
 abstract class IdbFactoryLogger extends IdbFactory {
   IdbFactory get factory;
 
-  IdbFactoryLoggerType type;
+  IdbFactoryLoggerType? type;
 
-  void log(String message, {int id});
-  void err(String message, {int id});
+  void log(String message, {int? id});
+  void err(String message, {int? id});
 }
 
 /// Get or create new logger
@@ -33,12 +33,12 @@ class IdbFactoryWrapperImpl extends IdbFactoryBase implements IdbFactoryLogger {
   static int _id = 0;
 
   @override
-  void log(String message, {int id}) {
+  void log(String message, {int? id}) {
     print('[idb${id != null ? '-$id' : ''}]: $message');
   }
 
   @override
-  void err(String message, {int id}) {
+  void err(String message, {int? id}) {
     log('!!! $message', id: id);
   }
 
@@ -54,9 +54,9 @@ class IdbFactoryWrapperImpl extends IdbFactoryBase implements IdbFactoryLogger {
 
   @override
   Future<Database> open(String dbName,
-      {int version,
-      OnUpgradeNeededFunction onUpgradeNeeded,
-      OnBlockedFunction onBlocked}) async {
+      {int? version,
+      OnUpgradeNeededFunction? onUpgradeNeeded,
+      OnBlockedFunction? onBlocked}) async {
     var id = ++_id;
     log('opening $dbName${version != null ? ', version: $version' : ''}',
         id: id);
@@ -75,7 +75,7 @@ class IdbFactoryWrapperImpl extends IdbFactoryBase implements IdbFactoryLogger {
 
   @override
   Future<IdbFactory> deleteDatabase(String dbName,
-      {OnBlockedFunction onBlocked}) async {
+      {OnBlockedFunction? onBlocked}) async {
     log('deleting $dbName');
     try {
       var result =
@@ -104,7 +104,7 @@ class IdbFactoryWrapperImpl extends IdbFactoryBase implements IdbFactoryLogger {
       (nativeFactory as IdbFactoryBase).supportsDoubleKey;
 
   @override
-  IdbFactoryLoggerType type;
+  IdbFactoryLoggerType? type;
 
   @override
   IdbFactory get factory => nativeFactory;

@@ -21,7 +21,7 @@ class IndexLogger extends Index {
 
   @override
   Stream<Cursor> openKeyCursor(
-          {key, KeyRange range, String direction, bool autoAdvance}) =>
+          {key, KeyRange? range, String? direction, bool? autoAdvance}) =>
       idbIndex.openKeyCursor(
           key: key,
           range: range,
@@ -31,7 +31,7 @@ class IndexLogger extends Index {
   /// Same implementation than for the Store
   @override
   Stream<CursorWithValue> openCursor(
-          {key, KeyRange range, String direction, bool autoAdvance}) =>
+          {key, KeyRange? range, String? direction, bool? autoAdvance}) =>
       idbIndex.openCursor(
           key: key,
           range: range,
@@ -39,11 +39,11 @@ class IndexLogger extends Index {
           autoAdvance: autoAdvance);
 
   @override
-  Future<List<dynamic>> getAll([dynamic keyOrRange, int count]) =>
+  Future<List<dynamic>> getAll([dynamic keyOrRange, int? count]) =>
       idbIndex.getAll(keyOrRange, count);
 
   @override
-  Future<List<dynamic>> getAllKeys([dynamic keyOrRange, int count]) =>
+  Future<List<dynamic>> getAllKeys([dynamic keyOrRange, int? count]) =>
       idbIndex.getAllKeys(keyOrRange, count);
 
   @override

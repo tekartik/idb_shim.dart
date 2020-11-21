@@ -5,7 +5,7 @@ import 'package:idb_shim/src/sembast/sembast_import.dart' as sdb;
 
 /// keyPath must have been escaped before
 sdb.Filter keyCursorFilter(
-    dynamic keyPath, key, KeyRange range, bool multiEntry) {
+    dynamic keyPath, key, KeyRange? range, bool multiEntry) {
   if (range != null) {
     return keyRangeFilter(keyPath, range, multiEntry);
   } else
@@ -19,7 +19,7 @@ sdb.Filter keyCursorFilter(
 
 // return <0 if value1 < value2 or >0 if greater
 // returns null if cannot be compared
-int compareValue(dynamic value1, dynamic value2) {
+int/*?*/ compareValue(dynamic value1, dynamic value2) {
   try {
     if (value1 is Comparable && value2 is Comparable) {
       return Comparable.compare(value1, value2);
@@ -51,8 +51,8 @@ int lowerCompareSingleValue(dynamic lower, dynamic value) {
 }
 
 // Matches if <0
-int lowerCompareValue(dynamic lower, dynamic value, bool multiEntry) {
-  int bestCmp;
+int? lowerCompareValue(dynamic lower, dynamic value, bool multiEntry) {
+  int? bestCmp;
   if (multiEntry && value is List) {
     for (var item in value) {
       final cmp = lowerCompareSingleValue(lower, item);
@@ -96,8 +96,8 @@ int upperCompareSingleValue(dynamic upper, dynamic value) {
 }
 
 // Matches if >0
-int upperCompareValue(dynamic lower, dynamic value, bool multiEntry) {
-  int bestCmp;
+int? upperCompareValue(dynamic lower, dynamic value, bool multiEntry) {
+  int? bestCmp;
   if (multiEntry && value is List) {
     for (var item in value) {
       final cmp = upperCompareSingleValue(lower, item);
@@ -175,8 +175,8 @@ sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range, bool multiEntry) {
     });
   } else if (keyPath is List) {
     var keyPathList = keyPath;
-    var lowerList = range.lower as List;
-    var upperList = range.upper as List;
+    var lowerList = range.lower as List?;
+    var upperList = range.upper as List?;
     if (lowerList != null) {
       assert(lowerList.length == keyPathList.length,
           'keyPath and lower bound length must match');
@@ -199,7 +199,7 @@ sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range, bool multiEntry) {
       final lowerOpen = range.lowerOpen;
 
       if (lowerList != null) {
-        int cmp;
+        int? cmp;
         for (var i = 0; i < keyPathList.length; i++) {
           var value = values[i];
           var lower = lowerList[i];
@@ -208,7 +208,7 @@ sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range, bool multiEntry) {
             continue;
           } else {
             cmp = lowerCompareValue(lower, value, multiEntry);
-            if (cmp > 0) {
+            if (cmp! > 0) {
               return false;
             } else if (cmp < 0) {
               break;
@@ -224,7 +224,7 @@ sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range, bool multiEntry) {
       final upperOpen = range.upperOpen;
 
       if (upperList != null) {
-        int cmp;
+        int? cmp;
         for (var i = 0; i < keyPathList.length; i++) {
           var value = values[i];
           var upper = upperList[i];
@@ -233,7 +233,7 @@ sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range, bool multiEntry) {
             continue;
           } else {
             cmp = upperCompareValue(upper, value, multiEntry);
-            if (cmp < 0) {
+            if (cmp! < 0) {
               return false;
             } else if (cmp > 0) {
               break;

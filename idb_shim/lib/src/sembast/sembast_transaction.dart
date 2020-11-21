@@ -31,19 +31,19 @@ class TransactionSembast extends IdbTransactionBase
   DatabaseSembast get database => super.database as DatabaseSembast;
 
   /// Sembast database.
-  sdb.Database get sdbDatabase => database.db;
+  sdb.Database get sdbDatabase => database.db!;
 
   /// Sembast transaction.
   sdb.Transaction sdbTransaction;
 
   static int _debugAllIds = 0;
-  int _debugId;
+  int? _debugId;
 
   int _index = 0;
   bool _inactive = false;
 
   var _aborted = false;
-  Exception _endException;
+  Exception? _endException;
   // In case of an error it must be cancelled
 
   // The outer result
@@ -61,7 +61,7 @@ class TransactionSembast extends IdbTransactionBase
   }
 
   @deprecated
-  void _completeError(e, [StackTrace st]) {
+  void _completeError(e, [StackTrace? st]) {
     if (!_completedCompleter.isCompleted) {
       _completedCompleter.completeError(e, st);
     }
@@ -159,7 +159,7 @@ class TransactionSembast extends IdbTransactionBase
   }
 
   // Lazy execution of the first action
-  Future _lazyExecution;
+  Future? _lazyExecution;
 
   ///
   /// Create or execute the transaction.
@@ -190,7 +190,7 @@ class TransactionSembast extends IdbTransactionBase
           // If aborted throw an error exception so that saves are
           // cancelled
           if (_endException != null) {
-            throw _endException;
+            throw _endException!;
           }
 
           return result;
@@ -250,7 +250,7 @@ class TransactionSembast extends IdbTransactionBase
   final _futures = <Future>[];
 
   @override
-  final IdbTransactionMeta meta;
+  final IdbTransactionMeta? meta;
 
   ///
   /// Constructor.
@@ -325,7 +325,7 @@ class TransactionSembast extends IdbTransactionBase
 
         // Tricky part experimented on 2020-11-01 with success
         // with a sync completer
-        await _lazyExecution.then((_) async {
+        await _lazyExecution!.then((_) async {
           try {
             await Future.wait(
                 <Future>[_transactionCompleter.future, ..._futures]);
@@ -384,7 +384,7 @@ class TransactionSembast extends IdbTransactionBase
 
   @override
   ObjectStore objectStore(String name) {
-    meta.checkObjectStore(name);
+    meta!.checkObjectStore(name);
     return ObjectStoreSembast(this, database.meta.getObjectStore(name));
   }
 

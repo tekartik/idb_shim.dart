@@ -9,7 +9,7 @@ import 'package:idb_shim/idb_client_native.dart';
 void main() {
   group('idb_native_factory', () {
     test('idbFactoryFromIndexedDB', () async {
-      var factory1 = idbFactoryFromIndexedDB(window.indexedDB);
+      var factory1 = idbFactoryFromIndexedDB(window.indexedDB!);
       var factory2 = idbFactoryNative;
       var dbName = 'idbFactoryFromIndexedDB.db';
       var version = 1234;

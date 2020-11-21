@@ -8,7 +8,7 @@ export 'package:idb_shim/src/io/io_compat.dart';
 
 export 'idb_client_sembast.dart' show idbFactorySembastMemory;
 
-IdbFactory _idbFactorySembastIo;
+IdbFactory? _idbFactorySembastIo;
 
 /// An io based factory based on sembast.
 IdbFactory get idbFactorySembastIo =>

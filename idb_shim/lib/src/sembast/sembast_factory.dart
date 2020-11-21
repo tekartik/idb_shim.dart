@@ -10,12 +10,12 @@ import 'package:sembast/sembast_memory.dart';
 bool sembastDebug = false; // devWarning(true);
 
 /// Special factory in memory but supporting writing on a virtual file system (in memory too)
-IdbFactory _idbFactorySembastMemoryFsImpl;
+IdbFactory? _idbFactorySembastMemoryFsImpl;
 IdbFactory get idbFactorySembastMemoryFsImpl =>
     _idbFactorySembastMemoryFsImpl ??=
         IdbFactorySembast(databaseFactoryMemoryFs);
 
-IdbFactory _idbSembastMemoryFactoryImpl;
+IdbFactory? _idbSembastMemoryFactoryImpl;
 
 /// Sembast memory based factory
 IdbFactory get idbFactorySembastMemoryImpl =>
@@ -24,11 +24,11 @@ IdbFactory get idbFactorySembastMemoryImpl =>
 class IdbFactorySembastImpl extends IdbFactoryBase
     implements IdbFactorySembast {
   final sdb.DatabaseFactory _databaseFactory;
-  final String _path;
+  final String? _path;
 
   @override
   String getDbPath(String dbName) =>
-      _path == null ? dbName : join(_path, dbName);
+      _path == null ? dbName : join(_path!, dbName);
 
   @override
   sdb.DatabaseFactory get sdbFactory => _databaseFactory;
@@ -43,7 +43,7 @@ class IdbFactorySembastImpl extends IdbFactoryBase
 
   // get the underlying sembast database for a given database
   @override
-  sdb.Database getSdbDatabase(Database db) => (db as DatabaseSembast).db;
+  sdb.Database? getSdbDatabase(Database db) => (db as DatabaseSembast).db;
 
   @override
   Future<Database> openFromSdbDatabase(sdb.Database sdbDb) =>
@@ -51,9 +51,9 @@ class IdbFactorySembastImpl extends IdbFactoryBase
 
   @override
   Future<Database> open(String dbName,
-      {int version,
-      OnUpgradeNeededFunction onUpgradeNeeded,
-      OnBlockedFunction onBlocked}) async {
+      {int? version,
+      OnUpgradeNeededFunction? onUpgradeNeeded,
+      OnBlockedFunction? onBlocked}) async {
     checkOpenArguments(version: version, onUpgradeNeeded: onUpgradeNeeded);
 
     // 2020-10-31 try no setting the version here
@@ -76,7 +76,7 @@ class IdbFactorySembastImpl extends IdbFactoryBase
 
   @override
   Future<IdbFactory> deleteDatabase(String dbName,
-      {OnBlockedFunction onBlocked}) async {
+      {OnBlockedFunction? onBlocked}) async {
     if (dbName == null) {
       return Future.error(ArgumentError('dbName cannot be null'));
     }

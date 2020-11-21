@@ -16,7 +16,7 @@ class ObjectStoreLogger extends ObjectStore {
   void err(String message) => idbTransactionLogger.err(message);
 
   @override
-  Index createIndex(String name, keyPath, {bool unique, bool multiEntry}) {
+  Index createIndex(String name, keyPath, {required bool unique, required bool multiEntry}) {
     return idbObjectStore.createIndex(name, keyPath,
         unique: unique, multiEntry: multiEntry);
   }
@@ -75,7 +75,7 @@ class ObjectStoreLogger extends ObjectStore {
 
   @override
   Stream<CursorWithValue> openCursor(
-          {key, KeyRange range, String direction, bool autoAdvance}) =>
+          {key, KeyRange? range, required String direction, required bool autoAdvance}) =>
       idbObjectStore.openCursor(
           key: key,
           range: range,
@@ -84,7 +84,7 @@ class ObjectStoreLogger extends ObjectStore {
 
   @override
   Stream<Cursor> openKeyCursor(
-          {key, KeyRange range, String direction, bool autoAdvance}) =>
+          {key, KeyRange? range, required String direction, required bool autoAdvance}) =>
       idbObjectStore.openKeyCursor(
           key: key,
           range: range,
@@ -95,11 +95,11 @@ class ObjectStoreLogger extends ObjectStore {
   Future<int> count([dynamic keyOrRange]) => idbObjectStore.count(keyOrRange);
 
   @override
-  Future<List<dynamic>> getAll([dynamic keyOrRange, int count]) =>
+  Future<List<dynamic>> getAll([dynamic keyOrRange, int? count]) =>
       idbObjectStore.getAll(keyOrRange, count);
 
   @override
-  Future<List<dynamic>> getAllKeys([dynamic keyOrRange, int count]) =>
+  Future<List<dynamic>> getAllKeys([dynamic keyOrRange, int? count]) =>
       idbObjectStore.getAllKeys(keyOrRange, count);
 
   @override

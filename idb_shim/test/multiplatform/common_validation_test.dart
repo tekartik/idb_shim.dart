@@ -31,7 +31,7 @@ void defineTests() {
     });
 
     void checkKeyValueParamFail(
-        {String keyPath, dynamic key, dynamic value, bool autoIncrement}) {
+        {String? keyPath, dynamic key, dynamic value, required bool autoIncrement}) {
       try {
         checkKeyValueParam(
             keyPath: keyPath,

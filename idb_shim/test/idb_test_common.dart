@@ -46,9 +46,9 @@ const String testNameIndex2 = 'name_index_2';
 const String testNameField2 = 'name_2';
 
 // current dbName valid during test execution
-String dbTestName;
+late String dbTestName;
 // current dbContext
-TestContext _dbTestContext;
+TestContext? _dbTestContext;
 
 void dbGroup(TestContext ctx, String description, body, [_group = group]) {
   _group(description, () {
@@ -59,21 +59,21 @@ void dbGroup(TestContext ctx, String description, body, [_group = group]) {
 }
 
 void dbTest(String description, body,
-    {void Function(String name, Function() body, {bool solo}) test,
-    @deprecated bool solo}) {
-  test ??= dev_test.test;
+    {void Function(String name, Function() body, {bool? solo})? test,
+    @deprecated bool? solo}) {
+  test ??= dev_test.test as void Function(String, dynamic Function(), {bool? solo})?;
   // We save it for later
   // only valid during definition
   final ctx = _dbTestContext;
-  test(description, () async {
-    dbTestName = ctx.dbName;
-    await ctx.factory.deleteDatabase(dbTestName);
+  test!(description, () async {
+    dbTestName = ctx!.dbName;
+    await ctx.factory!.deleteDatabase(dbTestName);
     await Future.value(body());
   }, solo: solo == true);
 }
 
 class TestContext {
-  IdbFactory factory;
+  IdbFactory? factory;
 
   String get dbName => testDescriptions.join('-') + '.db';
 
@@ -96,10 +96,10 @@ class SembastTestContext extends TestContext {
   @override
   bool get isIdbSembast => true;
 
-  sdb.DatabaseFactory sdbFactory;
+  sdb.DatabaseFactory? sdbFactory;
 
   @override
-  IdbFactorySembast get factory => super.factory as IdbFactorySembast;
+  IdbFactorySembast? get factory => super.factory as IdbFactorySembast?;
 
   @override
   String get dbName => join(joinAll(testDescriptions), 'test.db');
@@ -119,10 +119,10 @@ TestContext idbMemoryContext = SembastMemoryTestContext();
 class SembastFsTestContext extends SembastTestContext {
   @override
   sdb_fs.DatabaseFactoryFs get sdbFactory =>
-      factory.sdbFactory as sdb_fs.DatabaseFactoryFs;
+      factory!.sdbFactory as sdb_fs.DatabaseFactoryFs;
 
   @override
-  IdbFactorySembast get factory => super.factory;
+  IdbFactorySembast? get factory => super.factory;
 }
 
 class SembastMemoryFsTestContext extends SembastFsTestContext {
@@ -141,16 +141,16 @@ IdbFactory idbTestMemoryFactory = idbFactoryMemory;
 
 Future<Database> setUpSimpleStore(IdbFactory idbFactory, //
     {String dbName = _testDbName,
-    IdbObjectStoreMeta meta}) {
+    IdbObjectStoreMeta? meta}) {
   meta ??= idbSimpleObjectStoreMeta;
 
   return idbFactory.deleteDatabase(dbName).then((_) {
     void _initializeDatabase(VersionChangeEvent e) {
       final db = e.database;
-      final objectStore = db.createObjectStore(meta.name,
-          keyPath: meta.keyPath, autoIncrement: meta.autoIncrement);
+      final objectStore = db.createObjectStore(meta!.name,
+          keyPath: meta.keyPath!, autoIncrement: meta.autoIncrement);
       for (final indexMeta in meta.indecies) {
-        objectStore.createIndex(indexMeta.name, indexMeta.keyPath,
+        objectStore.createIndex(indexMeta.name!, indexMeta.keyPath,
             unique: indexMeta.unique, multiEntry: indexMeta.multiEntry);
       }
     }

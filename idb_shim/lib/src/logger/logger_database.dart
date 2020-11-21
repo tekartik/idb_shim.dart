@@ -14,11 +14,11 @@ class DatabaseLogger extends IdbDatabaseBase {
 
   IdbFactoryLogger get logger => factory as IdbFactoryLogger;
 
-  DatabaseLogger({IdbFactoryLogger factory, this.idbDatabase, this.id})
+  DatabaseLogger({required IdbFactoryLogger factory, required this.idbDatabase, required this.id})
       : super(factory);
 
   @override
-  int get version => idbDatabase.version;
+  int? get version => idbDatabase.version;
 
   void log(String message) {
     logger.log(message, id: id);
@@ -30,7 +30,7 @@ class DatabaseLogger extends IdbDatabaseBase {
 
   @override
   ObjectStore createObjectStore(String name,
-      {String keyPath, bool autoIncrement}) {
+      {required String keyPath, required bool autoIncrement}) {
     log('createObjectStore($name${getPropertyMapText({
       'keyPath': keyPath,
       'autoIncrement': autoIncrement

@@ -13,27 +13,27 @@ import 'package:idb_shim/idb_browser.dart' as idb;
 //import 'dart:indexed_db' as idb;
 
 //idb.IdbFactory idbFactory = window.indexedDB;
-idb.IdbFactory idbFactory;
+idb.IdbFactory? idbFactory;
 
 class TodoList {
   InputElement _input;
   Element _todoItems;
 
   TodoList() {
-    _todoItems = querySelector('#todo-items');
+    _todoItems = querySelector('#todo-items')!;
     _input = querySelector('#todo') as InputElement;
-    querySelector('input#submit').onClick.listen((e) => _onAddTodo());
+    querySelector('input#submit')!.onClick.listen((e) => _onAddTodo());
   }
 
   static final String _todosDb = 'com.tekartik.idb.todo';
   static final String _todosStore = 'todos';
 
-  idb.Database _db;
+  late idb.Database _db;
   final _version = 2;
 
   Future open() async {
     //return window.indexedDB.open(_TODOS_DB, version: _version,
-    return idbFactory
+    return idbFactory!
         .open(_todosDb, version: _version, onUpgradeNeeded: _onUpgradeNeeded)
         .then(_onDbOpened)
         .catchError(_onError);
@@ -59,7 +59,7 @@ class TodoList {
   }
 
   void _onAddTodo() {
-    var value = _input.value.trim();
+    var value = _input.value!.trim();
     if (value.isNotEmpty) {
       _addTodo(value);
     }
@@ -99,7 +99,7 @@ class TodoList {
 
   void _renderTodo(Map todoItem) {
     var textDisplay = Element.tag('span');
-    textDisplay.text = todoItem['text'] as String;
+    textDisplay.text = todoItem['text'] as String?;
 
     var deleteControl = Element.tag('a');
     deleteControl.text = '[Delete]';
@@ -116,7 +116,7 @@ class TodoList {
 ///
 /// Typically the argument is window.location.search
 ///
-Map<String, String> getArguments(String search) {
+Map<String, String> getArguments(String? search) {
   final params = <String, String>{};
   if (search != null) {
     final questionMarkIndex = search.indexOf('?');
@@ -146,7 +146,7 @@ Future main() async {
     window.alert(
         "No idbFactory of type '$idbFactoryName' supported on this browser");
   } else {
-    querySelector('#idb span').innerHtml = "Using '${idbFactory.name}'";
+    querySelector('#idb span')!.innerHtml = "Using '${idbFactory!.name}'";
     await TodoList().open();
   }
 }

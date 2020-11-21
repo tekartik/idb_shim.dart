@@ -35,7 +35,7 @@ class TransactionNative extends TransactionNativeBase {
     return catchNativeError(() {
       final idbObjectStore = idbTransaction.objectStore(name);
       return ObjectStoreNative(idbObjectStore);
-    });
+    })!;
   }
 
   @override
@@ -67,10 +67,10 @@ class FakeMultiStoreTransactionNative extends TransactionNativeBase {
   //List<_NativeTransaction> transactions = [];
   // We sequencialize the transactions
   DatabaseNative get _nativeDatabase => (database as DatabaseNative);
-  TransactionNative lastTransaction;
-  ObjectStore lastStore;
+  TransactionNative? lastTransaction;
+  late ObjectStore lastStore;
 
-  idb.Database get idbDatabase => _nativeDatabase.idbDatabase;
+  idb.Database get idbDatabase => _nativeDatabase.idbDatabase!;
   String mode;
 
   FakeMultiStoreTransactionNative(Database database, this.mode)
@@ -86,11 +86,11 @@ class FakeMultiStoreTransactionNative extends TransactionNativeBase {
 
       // will wait for the previous transaction to be completed
       // so that it wannot be re-used
-      lastTransaction.completed;
+      lastTransaction!.completed;
     }
     lastTransaction =
         _nativeDatabase.transaction(name, mode) as TransactionNative;
-    lastStore = lastTransaction.objectStore(name);
+    lastStore = lastTransaction!.objectStore(name);
     return lastStore;
   }
 
@@ -101,7 +101,7 @@ class FakeMultiStoreTransactionNative extends TransactionNativeBase {
     } else {
       // Somehow waiting for all transaction hangs
       // just wait for the last one created!
-      return lastTransaction.completed;
+      return lastTransaction!.completed;
     }
   }
 

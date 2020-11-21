@@ -2,7 +2,7 @@ import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/common/common_factory.dart';
 
 @deprecated
-IdbFactory get idbFactoryWebSql {
+IdbFactory? get idbFactoryWebSql {
   if (IdbWebSqlFactory.supported) {
     return IdbWebSqlFactory();
   } else {
@@ -11,14 +11,14 @@ IdbFactory get idbFactoryWebSql {
 }
 
 @deprecated
-IdbFactory get idbWebSqlFactory => idbFactoryWebSql;
+IdbFactory? get idbWebSqlFactory => idbFactoryWebSql;
 
 @deprecated
 class IdbWebSqlFactory extends IdbFactoryBase {
   @override
   bool get persistent => false;
 
-  static IdbWebSqlFactory _instance;
+  static IdbWebSqlFactory? _instance;
 
   IdbWebSqlFactory._();
 
@@ -28,20 +28,20 @@ class IdbWebSqlFactory extends IdbFactoryBase {
   factory IdbWebSqlFactory() {
     _instance ??= IdbWebSqlFactory._();
 
-    return _instance;
+    return _instance!;
   }
 
   @override
   Future<Database> open(String dbName,
-      {int version,
-      OnUpgradeNeededFunction onUpgradeNeeded,
-      OnBlockedFunction onBlocked}) async {
+      {int? version,
+      OnUpgradeNeededFunction? onUpgradeNeeded,
+      OnBlockedFunction? onBlocked}) async {
     throw 'WebSQL no longer supported';
   }
 
   @override
   Future<IdbFactory> deleteDatabase(String dbName,
-      {OnBlockedFunction onBlocked}) async {
+      {OnBlockedFunction? onBlocked}) async {
     throw 'WebSQL no longer supported';
   }
 

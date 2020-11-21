@@ -9,13 +9,13 @@ class _NativeCursor extends Cursor {
   _NativeCursor(this._cursor);
 
   @override
-  Object get key => _cursor.key;
+  Object get key => _cursor.key!;
 
   @override
-  Object get primaryKey => _cursor.primaryKey;
+  Object get primaryKey => _cursor.primaryKey!;
 
   @override
-  String get direction => _cursor.direction;
+  String get direction => _cursor.direction!;
 
   @override
   void advance(int count) {
@@ -23,7 +23,7 @@ class _NativeCursor extends Cursor {
   }
 
   @override
-  void next([Object key]) {
+  void next([Object? key]) {
     _cursor.next(key);
   }
 
@@ -50,16 +50,16 @@ class _NativeCursorWithValue extends CursorWithValue {
   //    _key = _cwv.key;
   //  }
   @override
-  Object get value => _cwv.value;
+  Object? get value => _cwv.value;
 
   @override
-  Object get key => _cwv.key;
+  Object get key => _cwv.key!;
 
   @override
-  Object get primaryKey => _cwv.primaryKey;
+  Object get primaryKey => _cwv.primaryKey!;
 
   @override
-  String get direction => _cwv.direction;
+  String get direction => _cwv.direction!;
 
   @override
   void advance(int count) {
@@ -67,7 +67,7 @@ class _NativeCursorWithValue extends CursorWithValue {
   }
 
   @override
-  void next([Object key]) {
+  void next([Object? key]) {
     _cwv.next(key);
   }
 
