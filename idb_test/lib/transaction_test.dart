@@ -268,21 +268,19 @@ void defineTests(TestContext ctx) {
           await _setUp();
           // not working in memory
           // devPrint('***** ${idbFactory.name}');
-          if (idbFactory!.name != idbFactoryNameWebSql) {
-            var done = false;
-            final transaction =
-                db!.transaction(testStoreName, idbModeReadWrite);
-            final objectStore = transaction.objectStore(testStoreName);
-            // ignore: unawaited_futures
-            objectStore.add('value1').then((key1) {
-              done = true;
-            });
-            return transaction.completed.then((_) {
-              expect(done, isTrue);
-              //db.close();
-              // done();
-            });
-          }
+
+          var done = false;
+          final transaction = db!.transaction(testStoreName, idbModeReadWrite);
+          final objectStore = transaction.objectStore(testStoreName);
+          // ignore: unawaited_futures
+          objectStore.add('value1').then((key1) {
+            done = true;
+          });
+          return transaction.completed.then((_) {
+            expect(done, isTrue);
+            //db.close();
+            // done();
+          });
         });
 
         // not working in memory
@@ -290,23 +288,21 @@ void defineTests(TestContext ctx) {
           await _setUp();
 // not working in memory
           // devPrint('***** ${idbFactory.name}');
-          if (idbFactory!.name != idbFactoryNameWebSql) {
-            var done = false;
-            final transaction =
-                db!.transaction(testStoreName, idbModeReadWrite);
-            final objectStore = transaction.objectStore(testStoreName);
 
-            var completed = transaction.completed.then((_) {
-              expect(done, isTrue);
-              //db.close();
-              // done();
-            });
-            // ignore: unawaited_futures
-            objectStore.add('value1').then((key1) {
-              done = true;
-            });
-            return completed;
-          }
+          var done = false;
+          final transaction = db!.transaction(testStoreName, idbModeReadWrite);
+          final objectStore = transaction.objectStore(testStoreName);
+
+          var completed = transaction.completed.then((_) {
+            expect(done, isTrue);
+            //db.close();
+            // done();
+          });
+          // ignore: unawaited_futures
+          objectStore.add('value1').then((key1) {
+            done = true;
+          });
+          return completed;
         });
 
         test('complete previous transaction', () async {
@@ -688,22 +684,21 @@ void defineTests(TestContext ctx) {
 
       test('immediate completed then add', () async {
         await _setUp();
-        if ((idbFactory!.name != idbFactoryNameWebSql)) {
-          var done = false;
-          final transaction = db!.transaction(testStoreName, idbModeReadWrite);
-          final objectStore = transaction.objectStore(testStoreName);
 
-          var completed = transaction.completed.then((_) {
-            expect(done, isTrue);
-            //db.close();
-            // done();
-          });
-          // ignore: unawaited_futures
-          objectStore.add('value1').then((key1) {
-            done = true;
-          });
-          return completed;
-        }
+        var done = false;
+        final transaction = db!.transaction(testStoreName, idbModeReadWrite);
+        final objectStore = transaction.objectStore(testStoreName);
+
+        var completed = transaction.completed.then((_) {
+          expect(done, isTrue);
+          //db.close();
+          // done();
+        });
+        // ignore: unawaited_futures
+        objectStore.add('value1').then((key1) {
+          done = true;
+        });
+        return completed;
       });
 
       test('add 2 immediate completed', () async {
@@ -731,22 +726,21 @@ void defineTests(TestContext ctx) {
 
       test('add/put immediate completed', () async {
         await _setUp();
-        if ((idbFactory!.name != idbFactoryNameWebSql)) {
-          var done = false;
-          final transaction = db!.transaction(testStoreName, idbModeReadWrite);
-          final objectStore = transaction.objectStore(testStoreName);
-          // ignore: unawaited_futures
-          objectStore.add('value1').then((key1) {
-            objectStore.put('value1', key1).then((key2) {
-              done = true;
-            });
+
+        var done = false;
+        final transaction = db!.transaction(testStoreName, idbModeReadWrite);
+        final objectStore = transaction.objectStore(testStoreName);
+        // ignore: unawaited_futures
+        objectStore.add('value1').then((key1) {
+          objectStore.put('value1', key1).then((key2) {
+            done = true;
           });
-          return transaction.completed.then((_) {
-            expect(done, isTrue);
-            //db.close();
-            // done();
-          });
-        }
+        });
+        return transaction.completed.then((_) {
+          expect(done, isTrue);
+          //db.close();
+          // done();
+        });
       });
 
       test('add/put/get/delete', () async {

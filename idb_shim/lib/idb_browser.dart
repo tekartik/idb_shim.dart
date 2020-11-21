@@ -4,11 +4,8 @@ import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/idb_client_memory.dart';
 import 'package:idb_shim/idb_client_native.dart';
 
-export 'package:idb_shim/idb_client_memory.dart'
-    show idbFactoryMemory, idbMemoryFactory;
-export 'package:idb_shim/idb_client_native.dart'
-    show idbFactoryNative, idbNativeFactory;
-export 'package:idb_shim/src/browser/browser_compat.dart';
+export 'package:idb_shim/idb_client_memory.dart' show idbFactoryMemory;
+export 'package:idb_shim/idb_client_native.dart' show idbFactoryNative;
 
 /// Get a factory by name.
 ///
@@ -23,8 +20,6 @@ IdbFactory? getIdbFactory([String? name]) {
       return idbFactoryNative;
     case idbFactoryNameNative:
       return idbFactoryNative;
-    case idbFactoryNameWebSql:
-      return null;
     case idbFactoryNameMemory:
     case idbFactoryNameSembastMemory:
       return idbFactoryMemory;

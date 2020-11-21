@@ -4,8 +4,6 @@ import 'dart:indexed_db' as native;
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/native/native_factory.dart';
 
-export 'package:idb_shim/src/native/native_compat.dart';
-
 /// True if native factory is supported
 ///
 /// To use instead of html.window.indexedDB but provides the same API.

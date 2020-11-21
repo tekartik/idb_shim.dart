@@ -18,10 +18,8 @@ export 'src/constant.dart'
         idbFactoryNameNative,
         idbFactoryNamePersistent,
         idbFactoryNameSembastIo,
-        idbFactoryNameSembastMemory,
-        idbFactoryNameWebSql,
-        // ignore: deprecated_member_use_from_same_package
-        idbFactoryNameIo;
+        idbFactoryNameSembastMemory;
+
 export 'src/database_exception.dart' show DatabaseException;
 
 ///

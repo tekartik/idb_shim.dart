@@ -4,9 +4,7 @@ import 'dart:indexed_db' as idb;
 import 'dart:indexed_db' as native;
 
 import 'package:idb_shim/idb_client.dart';
-import 'package:idb_shim/idb_client_native.dart';
 import 'package:idb_shim/src/common/common_factory.dart';
-import 'package:idb_shim/src/native/native_compat.dart';
 import 'package:idb_shim/src/native/native_database.dart';
 import 'package:idb_shim/src/native/native_error.dart';
 import 'package:idb_shim/src/native/native_event.dart';
@@ -14,6 +12,7 @@ import 'package:idb_shim/src/utils/browser_utils.dart';
 import 'package:idb_shim/src/utils/value_utils.dart';
 
 IdbFactory? _idbFactoryNativeBrowserImpl;
+
 IdbFactory get idbFactoryNativeBrowserImpl =>
     _idbFactoryNativeBrowserImpl ??= () {
       return nativeIdbFactoryBrowserWrapperImpl;
@@ -23,6 +22,7 @@ native.IdbFactory? get nativeBrowserIdbFactory => html.window.indexedDB;
 
 // Single instance
 IdbFactoryNativeBrowserWrapperImpl? _nativeIdbFactoryBrowserWrapperImpl;
+
 IdbFactoryNativeBrowserWrapperImpl get nativeIdbFactoryBrowserWrapperImpl =>
     _nativeIdbFactoryBrowserWrapperImpl ??=
         IdbFactoryNativeBrowserWrapperImpl._();
@@ -37,12 +37,7 @@ class IdbFactoryNativeBrowserWrapperImpl extends IdbFactoryNativeWrapperImpl {
 }
 
 /// Wrapper for window.indexedDB and worker self.indexedDB
-class IdbFactoryNativeWrapperImpl extends IdbFactoryBase
-    implements
-        // ignore: deprecated_member_use_from_same_package
-        IdbNativeFactory,
-        // ignore: deprecated_member_use_from_same_package
-        IdbFactoryNative {
+class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
   final native.IdbFactory nativeFactory;
 
   @override

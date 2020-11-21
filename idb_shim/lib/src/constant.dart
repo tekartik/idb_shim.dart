@@ -19,10 +19,6 @@ const idbFactoryNameLogger = 'logger';
 /// Factory name using Sembast implementation
 const idbFactoryNameSembastIo = 'sembast_io';
 
-/// Factory name using Sembast io implementation.
-@Deprecated('Use idbFactoryNameSembastIo instead')
-const idbFactoryNameIo = 'io';
-
 /// Factory name using Sembast memory implementation
 const idbFactoryNameSembastMemory = 'sembast_memory';
 
@@ -34,6 +30,3 @@ const idbFactoryNamePersistent = 'persistent';
 
 /// Pseudo - best browser shim (persistent of it not available memory).
 const idbFactoryNameBrowser = 'browser';
-
-/// Shim using WebSql implementation - no longer supported.
-const idbFactoryNameWebSql = 'websql';

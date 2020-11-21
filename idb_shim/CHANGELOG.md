@@ -1,7 +1,8 @@
-## 2.0.0-nullsafety.1
+## 2.0.0-nullsafety.2
 
 * `nnbd` supports, breaking change.
 * No longer supports `null` for record value.
+* Remove deprecated methods.
 
 ## 1.12.2
 
