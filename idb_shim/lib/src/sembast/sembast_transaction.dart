@@ -34,7 +34,7 @@ class TransactionSembast extends IdbTransactionBase
   sdb.Database get sdbDatabase => database.db!;
 
   /// Sembast transaction.
-  sdb.Transaction sdbTransaction;
+  sdb.Transaction? sdbTransaction;
 
   static int _debugAllIds = 0;
   int? _debugId;
@@ -61,7 +61,7 @@ class TransactionSembast extends IdbTransactionBase
   }
 
   @deprecated
-  void _completeError(e, [StackTrace? st]) {
+  void _completeError(Object e, [StackTrace? st]) {
     if (!_completedCompleter.isCompleted) {
       _completedCompleter.completeError(e, st);
     }
@@ -101,7 +101,7 @@ class TransactionSembast extends IdbTransactionBase
           print('done $i');
         }
         completer.complete(result);
-      }).catchError((e, StackTrace st) {
+      }).catchError((Object e, StackTrace st) {
         //devPrint(' err $i');
         if (_debugTransaction) {
           print('err $i $e');
@@ -201,7 +201,7 @@ class TransactionSembast extends IdbTransactionBase
           if (_debugTransaction) {
             print('txn end of sembast transaction');
           }
-        }).catchError((e) {
+        }).catchError((Object e) {
           if (!_transactionCompleter.isCompleted) {
             _transactionCompleter.completeError(e);
           }

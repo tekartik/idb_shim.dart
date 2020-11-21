@@ -21,25 +21,22 @@ dynamic encodeValue(dynamic value) {
 //  });
 }
 
-dynamic decodeValue(dynamic value) {
+Object? decodeValue(Object? value) {
   if (value == null) {
     return null;
   }
   return json.decode(value as String);
 }
 
-dynamic encodeKey(dynamic key) {
+Object encodeKey(Object key) {
   return key;
 }
 
-dynamic decodeKey(dynamic key) {
+Object decodeKey(Object key) {
   return key;
 }
 
 List _cloneList(List original) {
-  if (original == null) {
-    return null;
-  }
   final list = [];
   original.forEach((value) {
     list.add(_cloneValue(value));
@@ -55,7 +52,7 @@ Map _cloneMap(Map original) {
   return map;
 }
 
-dynamic _cloneValue(dynamic original) {
+Object? _cloneValue(Object? original) {
   if (original is Map) {
     return _cloneMap(original);
   } else if (original is List) {
@@ -66,8 +63,8 @@ dynamic _cloneValue(dynamic original) {
 }
 
 /// Clone and add the key if needed
-dynamic cloneValue(dynamic value, [String? keyPath, dynamic key]) {
-  dynamic clone = _cloneValue(value);
+Object cloneValue(Object value, [String? keyPath, dynamic key]) {
+  var clone = _cloneValue(value)!;
   if (keyPath != null) {
     // assume map
     setMapFieldValue(clone as Map, keyPath, key);
@@ -76,7 +73,7 @@ dynamic cloneValue(dynamic value, [String? keyPath, dynamic key]) {
 }
 
 int fixCompareValue(int value, {bool asc = true}) {
-  if (asc ?? true) {
+  if (asc) {
     return value;
   } else {
     return -value;
@@ -106,7 +103,7 @@ int compareKeys(dynamic first, dynamic second) {
 // when keyPath is an array
 // Return the relevant keyPath at index
 KeyRange keyArrayRangeAt(KeyRange keyRange, int index) {
-  dynamic _valueAt(List? value, int index) {
+  Object? _valueAt(List? value, int index) {
     return value == null ? null : value[index];
   }
 
@@ -118,7 +115,7 @@ KeyRange keyArrayRangeAt(KeyRange keyRange, int index) {
 }
 
 /// return a list if keyPath is an array
-dynamic mapValueAtKeyPath(Map? map, keyPath) {
+Object? mapValueAtKeyPath(Map? map, keyPath) {
   if (keyPath is String) {
     return getMapFieldValue(map, keyPath);
   } else if (keyPath is List) {
@@ -130,7 +127,7 @@ dynamic mapValueAtKeyPath(Map? map, keyPath) {
 }
 
 /// Convert a single value or an iterable to a list
-Set? valueAsSet(dynamic value) {
+Set<Object?>? valueAsSet(dynamic value) {
   if (value == null) {
     return null;
   }
@@ -144,7 +141,7 @@ Set? valueAsSet(dynamic value) {
 Set? valueAsKeySet(dynamic value) => valueAsSet(value);
 
 /// Convert a single value or an iterable to a list
-List valueAsList(dynamic value) {
+List? valueAsList(dynamic value) {
   if (value == null) {
     return null;
   }
@@ -184,7 +181,7 @@ void setPartsMapValue<T>(Map map, List<String> parts, value) {
     final part = parts[i];
     dynamic sub = map[part];
     if (!(sub is Map)) {
-      sub = <String, dynamic>{};
+      sub = <String, Object?>{};
       map[part] = sub;
     }
     map = sub;

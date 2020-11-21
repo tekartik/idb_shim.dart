@@ -38,8 +38,9 @@ IdbFactory? getIdbFactory([String? name]) {
 /// defaulting to memory
 ///
 IdbFactory get idbFactoryBrowser {
-  var idbFactory = idbFactoryNative;
-  idbFactory ??= idbFactoryMemory;
-
-  return idbFactory;
+  try {
+    return idbFactoryNative;
+  } catch (_) {
+    return idbFactoryMemory;
+  }
 }

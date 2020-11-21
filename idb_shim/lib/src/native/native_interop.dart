@@ -62,22 +62,25 @@ Stream<idb.Cursor> storeOpenKeyCursor(idb.ObjectStore objectStore,
 // Ties a request to a completer, so the completer is completed when it succeeds
 // and errors out when the request errors.
 
-Future<T> _completeRequest<T>(idb.Request request) {
-  var completer = Completer<T>.sync();
+Future<Object?> _completeRequest(idb.Request request) {
+  var completer = Completer<Object?>.sync();
   // TODO: make sure that completer.complete is synchronous as transactions
   // may be committed if the result is not processed immediately.
   request.onSuccess.listen((e) {
-    var result = request.result as T?;
+    var result = request.result as Object?;
     completer.complete(result);
   });
   request.onError.listen(completer.completeError);
   return completer.future;
 }
 
+Future<List<Object>> _completeObjectListRequest(idb.Request request) =>
+    _completeRequest(request).then((value) => (value as List).cast<Object>());
+
 ///
 /// [query] is a native query
 ///
-Future<List<dynamic>> storeGetAll(idb.ObjectStore objectStore,
+Future<List<Object>> storeGetAll(idb.ObjectStore objectStore,
     [dynamic query, int? count]) async {
   try {
     idb.Request request;
@@ -86,7 +89,7 @@ Future<List<dynamic>> storeGetAll(idb.ObjectStore objectStore,
     } else {
       request = objectStore.getAll(query);
     }
-    return _completeRequest(request);
+    return _completeObjectListRequest(request);
   } catch (e, stacktrace) {
     return Future.error(e, stacktrace);
   }
@@ -95,7 +98,7 @@ Future<List<dynamic>> storeGetAll(idb.ObjectStore objectStore,
 ///
 /// [query] is a native query
 ///
-Future<List<dynamic>> storeGetAllKeys(idb.ObjectStore objectStore,
+Future<List<Object>> storeGetAllKeys(idb.ObjectStore objectStore,
     [dynamic query, int? count]) async {
   try {
     idb.Request request;
@@ -104,7 +107,7 @@ Future<List<dynamic>> storeGetAllKeys(idb.ObjectStore objectStore,
     } else {
       request = objectStore.getAllKeys(query);
     }
-    return _completeRequest(request);
+    return _completeObjectListRequest(request);
   } catch (e, stacktrace) {
     return Future.error(e, stacktrace);
   }
@@ -113,7 +116,7 @@ Future<List<dynamic>> storeGetAllKeys(idb.ObjectStore objectStore,
 ///
 /// [query] is a native query
 ///
-Future<List<dynamic>> indexGetAll(idb.Index index,
+Future<List<Object>> indexGetAll(idb.Index index,
     [dynamic query, int? count]) async {
   try {
     idb.Request request;
@@ -122,7 +125,7 @@ Future<List<dynamic>> indexGetAll(idb.Index index,
     } else {
       request = index.getAll(query);
     }
-    return _completeRequest(request);
+    return _completeObjectListRequest(request);
   } catch (e, stacktrace) {
     return Future.error(e, stacktrace);
   }
@@ -131,7 +134,7 @@ Future<List<dynamic>> indexGetAll(idb.Index index,
 ///
 /// [query] is a native query
 ///
-Future<List<dynamic>> indexGetAllKeys(idb.Index index,
+Future<List<Object>> indexGetAllKeys(idb.Index index,
     [dynamic query, int? count]) async {
   try {
     idb.Request request;
@@ -140,7 +143,7 @@ Future<List<dynamic>> indexGetAllKeys(idb.Index index,
     } else {
       request = index.getAllKeys(query);
     }
-    return _completeRequest(request);
+    return _completeObjectListRequest(request);
   } catch (e, stacktrace) {
     return Future.error(e, stacktrace);
   }

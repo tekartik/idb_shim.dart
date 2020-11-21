@@ -24,7 +24,7 @@ class IdbTransactionMeta {
 
   // ref counting
   // start on 0
-  int refCount;
+  int refCount = 0;
 
   @override
   String toString() => '$mode $storeNames';
@@ -49,7 +49,7 @@ class IdbVersionChangeTransactionMeta extends IdbTransactionMeta {
   // ignore: prefer_collection_literals
   final updatedStores = Set<IdbObjectStoreMeta>();
 
-  IdbVersionChangeTransactionMeta() : super(null, idbModeReadWrite);
+  IdbVersionChangeTransactionMeta() : super([], idbModeReadWrite);
 
   // don't check for versionChangeTransaction
   @override
@@ -63,7 +63,7 @@ abstract class DatabaseWithMetaMixin {
   String get name => meta.name;
 
   //@implement
-  int? get version => meta.version;
+  int get version => meta.version ?? 0;
 
   //@override
   void deleteObjectStore(String name) {
@@ -150,7 +150,7 @@ class IdbDatabaseMeta {
         throw DatabaseError(
             'InvalidAccessError: The storeNames parameter is empty');
       }
-      final list = storeNameOrStoreNames?.cast<String>();
+      final list = storeNameOrStoreNames.cast<String>();
 
       for (final storeName in list) {
         if (!_containsStore(storeName)) {
@@ -165,7 +165,7 @@ class IdbDatabaseMeta {
     } else {
       // assume null - it will complain otherwise
       // this is use for transaction created on open
-      return IdbTransactionMeta(null, mode);
+      return IdbTransactionMeta([], mode);
     }
   }
 
@@ -179,8 +179,8 @@ class IdbDatabaseMeta {
     return _stores[name];
   }
 
-  Map<String, dynamic> toDebugMap() {
-    var map = <String, dynamic>{'stores': _stores, 'version': version};
+  Map<String, Object?> toDebugMap() {
+    var map = <String, Object?>{'stores': _stores, 'version': version};
     return map;
   }
 
@@ -205,13 +205,13 @@ abstract class ObjectStoreWithMetaMixin {
   IdbObjectStoreMeta? get meta;
 
   //@override
-  String get keyPath => meta!.keyPath!;
+  String? get keyPath => meta!.keyPath;
 
   //@override
   bool get autoIncrement => meta!.autoIncrement;
 
   //@override
-  String/*!*/ get name => meta!.name;
+  String /*!*/ get name => meta!.name;
 
   //@override
   List<String> get indexNames => meta!.indexNames.toList();
@@ -232,7 +232,7 @@ class IdbObjectStoreMeta {
 
   final _indecies = <String?, IdbIndexMeta>{};
 
-  Iterable<String> get indexNames => _indecies.keys as Iterable<String>;
+  Iterable<String> get indexNames => _indecies.keys.cast<String>();
 
   IdbIndexMeta index(String name) {
     final indexMeta = _indecies[name];
@@ -278,7 +278,7 @@ class IdbObjectStoreMeta {
       : this(objectStore.name, objectStore.keyPath as String?,
             objectStore.autoIncrement);
 
-  IdbObjectStoreMeta(this.name, this.keyPath, bool autoIncrement,
+  IdbObjectStoreMeta(this.name, this.keyPath, bool? autoIncrement,
       [List<IdbIndexMeta>? indecies])
       : autoIncrement = (autoIncrement == true) {
     if (indecies != null) {
@@ -288,12 +288,12 @@ class IdbObjectStoreMeta {
     }
   }
 
-  IdbObjectStoreMeta.fromMap(Map<String, dynamic> map) //
+  IdbObjectStoreMeta.fromMap(Map<String, Object?> map) //
       : this(
             //
             map[nameKey] as String, //
             map[keyPathKey] as String?, //
-            map[autoIncrementKey] as bool,
+            map[autoIncrementKey] as bool?,
             IdbIndexMeta.fromMapList(
                 ((map[indeciesKey]) as List?)?.cast<Map>()));
 
@@ -309,12 +309,12 @@ class IdbObjectStoreMeta {
     _indecies.remove(index.name);
   }
 
-  Map<String, dynamic> toDebugMap() {
+  Map<String, Object?> toDebugMap() {
     return toMap();
   }
 
-  Map<String, dynamic> toMap() {
-    var map = <String, dynamic>{nameKey: name};
+  Map<String, Object?> toMap() {
+    var map = <String, Object?>{nameKey: name};
     if (keyPath != null) {
       map[keyPathKey] = keyPath;
     }
@@ -358,12 +358,12 @@ class IdbCursorMeta {
   final bool autoAdvance;
 
   KeyRange? range;
-  bool _ascending;
+  late bool _ascending;
 
   String get direction => _ascending ? idbDirectionNext : idbDirectionPrev;
 
   IdbCursorMeta(this.key, this.range, String? direction, bool? autoAdvance)
-      : autoAdvance = autoAdvance == true {
+      : autoAdvance = autoAdvance ?? false {
     direction ??= idbDirectionNext;
 
     switch (direction) {
@@ -385,8 +385,8 @@ class IdbCursorMeta {
     }
   }
 
-  Map<String, dynamic> toDebugMap() {
-    final map = <String, dynamic>{'direction': direction};
+  Map<String, Object?> toDebugMap() {
+    final map = <String, Object?>{'direction': direction};
     if (key != null) {
       map['key'] = key;
     }
@@ -442,12 +442,12 @@ class IdbIndexMeta {
     }
     var metas = <IdbIndexMeta>[];
     list.forEach((map) {
-      metas.add(IdbIndexMeta.fromMap(map?.cast<String, dynamic>()));
+      metas.add(IdbIndexMeta.fromMap(map.cast<String, Object?>()));
     });
     return metas;
   }
 
-  IdbIndexMeta.fromMap(Map<String, dynamic> map) //
+  IdbIndexMeta.fromMap(Map<String, Object?> map) //
       : this(
             map['name'] as String?, //
             map['keyPath'],
@@ -461,14 +461,14 @@ class IdbIndexMeta {
     return toMap();
   }
 
-  Map<String, dynamic> toMap() {
+  Map<String, Object?> toMap() {
     dynamic keyPath;
     if (this.keyPath is Iterable) {
       keyPath = this.keyPath?.cast<String>();
     } else {
       keyPath = this.keyPath?.toString();
     }
-    var map = <String, dynamic>{'name': name, 'keyPath': keyPath};
+    var map = <String, Object?>{'name': name, 'keyPath': keyPath};
     if (unique) {
       map['unique'] = unique;
     }

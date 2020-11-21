@@ -21,7 +21,7 @@ void checkKeyParam(var key) {
 }
 
 void checkKeyValueParam(
-    {String? keyPath, dynamic key, dynamic value, required bool autoIncrement}) {
+    {String? keyPath, dynamic key, dynamic value, bool? autoIncrement}) {
   if (key != null) {
     checkKeyParam(key);
     if (keyPath != null) {

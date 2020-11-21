@@ -6,12 +6,20 @@ import 'package:idb_shim/src/native/native_factory.dart';
 
 export 'package:idb_shim/src/native/native_compat.dart';
 
+/// True if native factory is supported
+///
+/// To use instead of html.window.indexedDB but provides the same API.
+///
+/// Is false if IndexedDB is not supported
+bool get idbFactoryNativeSupported =>
+    IdbFactoryNativeBrowserWrapperImpl.supported;
+
 /// The native factory
 ///
 /// To use instead of html.window.indexedDB but provides the same API.
 ///
-/// Is null if IndexedDB is not supported
-IdbFactory? get idbFactoryNative => idbFactoryNativeBrowserImpl;
+/// throw if IndexedDB is not supported
+IdbFactory get idbFactoryNative => idbFactoryNativeBrowserImpl;
 
 /// Wrap the window/service worker implementation
 ///

@@ -14,11 +14,8 @@ import 'package:idb_shim/src/utils/browser_utils.dart';
 import 'package:idb_shim/src/utils/value_utils.dart';
 
 IdbFactory? _idbFactoryNativeBrowserImpl;
-IdbFactory? get idbFactoryNativeBrowserImpl =>
+IdbFactory get idbFactoryNativeBrowserImpl =>
     _idbFactoryNativeBrowserImpl ??= () {
-      if (!IdbFactoryNativeBrowserWrapperImpl.supported) {
-        return null;
-      }
       return nativeIdbFactoryBrowserWrapperImpl;
     }();
 
@@ -79,7 +76,7 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase
         .open(dbName,
             version: version,
             onUpgradeNeeded: onUpgradeNeeded == null ? null : _onUpgradeNeeded,
-            onBlocked: onBlocked == null && _onUpgradeNeeded == null
+            onBlocked: onBlocked == null && onUpgradeNeeded == null
                 ? null
                 : _onBlocked)
         .then((idb.Database database) {

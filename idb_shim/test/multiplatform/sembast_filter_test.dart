@@ -7,6 +7,7 @@ import 'package:sembast/src/filter_impl.dart' as sdb;
 import 'package:sembast/src/record_snapshot_impl.dart' as sdb;
 import '../idb_test_common.dart';
 
+var _record = sdb.StoreRef.main().record(1);
 sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range,
         [bool multiEntry = false]) =>
     sembast_filter.keyRangeFilter(keyPath, range, multiEntry);
@@ -16,16 +17,29 @@ sdb.Filter keyFilter(dynamic keyPath, var key, [bool multiEntry = false]) =>
 
 bool _fieldMatch(sdb.Filter filter, dynamic value) {
   return sdb.filterMatchesRecord(
-      filter, sdb.SembastRecordSnapshot(null, value));
+      filter, sdb.SembastRecordSnapshot(_record, value));
 }
 
 void main() {
   group('sembast_common', () {
-    test('keyRangeFilter', () {
+    test('keyRangeFilter_lower', () {
       var filter = keyRangeFilter('test', KeyRange.lowerBound(1));
       expect(_fieldMatch(filter, {'test': 1}), isTrue);
       expect(_fieldMatch(filter, {'test': 2}), isTrue);
       expect(_fieldMatch(filter, {'name': 0}), isFalse);
+      filter = keyRangeFilter('test', KeyRange.lowerBound(1, true));
+      expect(_fieldMatch(filter, {'test': 1}), isFalse);
+      expect(_fieldMatch(filter, {'test': 2}), isTrue);
+    });
+    test('keyRangeFilter_upper', () {
+      var filter = keyRangeFilter('test', KeyRange.upperBound(2));
+
+      expect(_fieldMatch(filter, {'test': 2}), isTrue);
+      expect(_fieldMatch(filter, {'test': 3}), isFalse);
+
+      filter = keyRangeFilter('test', KeyRange.upperBound(2, true));
+      expect(_fieldMatch(filter, {'test': 1}), isTrue);
+      expect(_fieldMatch(filter, {'test': 2}), isFalse);
     });
     test('keyFilterNull', () {
       var filter = keyFilter('name', null);
@@ -154,6 +168,7 @@ void main() {
 
       test('keyFilterRange', () {
         var filter = keyRangeFilter('value', KeyRange.lowerBound(2), true);
+
         expect(
             _fieldMatch(filter, {
               'value': [1, 2]
@@ -171,7 +186,7 @@ void main() {
         expect(_fieldMatch(filter, 1), isFalse);
         expect(_fieldMatch(filter, {'name': 'dummy'}), isFalse);
 
-        filter = keyRangeFilter('value', KeyRange.lowerBound(2, null), true);
+        filter = keyRangeFilter('value', KeyRange.lowerBound(2, false), true);
         expect(
             _fieldMatch(filter, {
               'value': [1, 2]
@@ -226,7 +241,7 @@ void main() {
               'year': [2018, 2019],
               'name': 'John'
             }),
-            isTrue);
+            isFalse);
         expect(
             _fieldMatch(filter, {
               'year': [2019],

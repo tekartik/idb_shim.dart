@@ -11,19 +11,19 @@ class IdbKeyRange implements KeyRange {
 
   /// Creates a new key range with only a lower bound.
   IdbKeyRange.lowerBound(this._lowerBound, [bool open = false]) {
-    _lowerBoundOpen = open ?? false;
+    _lowerBoundOpen = open;
   }
 
   /// Creates a new upper-bound key range.
   IdbKeyRange.upperBound(this._upperBound, [bool open = false]) {
-    _upperBoundOpen = open ?? false;
+    _upperBoundOpen = open;
   }
 
   /// Creates a new key range with upper and lower bounds.
   IdbKeyRange.bound(this._lowerBound, this._upperBound,
       [bool lowerOpen = false, bool upperOpen = false]) {
-    _lowerBoundOpen = lowerOpen ?? false;
-    _upperBoundOpen = upperOpen ?? false;
+    _lowerBoundOpen = lowerOpen;
+    _upperBoundOpen = upperOpen;
   }
 
   dynamic _lowerBound;
@@ -72,7 +72,7 @@ class IdbKeyRange implements KeyRange {
   ///
   bool _checkLowerBound(key) {
     if (_lowerBound != null) {
-      final exclude = _lowerBoundOpen != null && _lowerBoundOpen;
+      final exclude = _lowerBoundOpen;
       final cmp = _compareValue(key, _lowerBound);
       if (cmp == 0 && exclude) {
         return false;
@@ -85,7 +85,7 @@ class IdbKeyRange implements KeyRange {
 
   bool _checkUpperBound(key) {
     if (_upperBound != null) {
-      final exclude = _upperBoundOpen != null && _upperBoundOpen;
+      final exclude = _upperBoundOpen;
       final cmp = _compareValue(key, _upperBound);
       if (cmp == 0 && exclude) {
         return false;

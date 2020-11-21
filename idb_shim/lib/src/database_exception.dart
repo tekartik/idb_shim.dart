@@ -11,9 +11,6 @@ class DatabaseException implements Exception {
 
   @override
   String toString() {
-    if (message == null) {
-      return 'DatabaseException';
-    }
     return 'DatabaseException: $message';
   }
 }

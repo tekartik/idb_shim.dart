@@ -13,10 +13,10 @@ import 'idb_browser_test_common.dart';
 void main() {
   group('raw', () {
     test('simple_readwrite_transaction', () async {
-      final dbName = testDescriptions.join('_');
+      final dbName = 'simple_readwrite_transaction.db';
       await window.indexedDB!.deleteDatabase(dbName);
-      final db =
-          await window.indexedDB!.open(dbName, version: 1, onUpgradeNeeded: (e) {
+      final db = await window.indexedDB!.open(dbName, version: 1,
+          onUpgradeNeeded: (e) {
         // print(e);
         final db = e.target.result as idb.Database;
         db.createObjectStore('store', autoIncrement: true);
@@ -31,10 +31,10 @@ void main() {
     });
 
     test('simple_readonly_transaction', () async {
-      final dbName = testDescriptions.join('_');
+      final dbName = 'simple_readonly_transaction.db';
       await window.indexedDB!.deleteDatabase(dbName);
-      final db =
-          await window.indexedDB!.open(dbName, version: 1, onUpgradeNeeded: (e) {
+      final db = await window.indexedDB!.open(dbName, version: 1,
+          onUpgradeNeeded: (e) {
         // print(e);
         final db = e.target.result as idb.Database;
         db.createObjectStore('store', autoIncrement: true);
@@ -49,12 +49,12 @@ void main() {
     });
 
     test('transaction_multi_store', () async {
-      final dbName = testDescriptions.join('_');
+      final dbName = 'transaction_multi_store';
 
       // This test now fails on dart 1.13
       await window.indexedDB!.deleteDatabase(dbName);
-      final db =
-          await window.indexedDB!.open(dbName, version: 1, onUpgradeNeeded: (e) {
+      final db = await window.indexedDB!.open(dbName, version: 1,
+          onUpgradeNeeded: (e) {
         final db = e.target.result as idb.Database;
         db.createObjectStore('store1', autoIncrement: true);
         db.createObjectStore('store2', autoIncrement: true);
@@ -78,10 +78,10 @@ void main() {
     // true on dart version 1.12
     // not anymore on dart version 1.13
     test('pause_after_transaction', () async {
-      final dbName = testDescriptions.join('_');
+      final dbName = 'pause_after_transaction.db';
       await window.indexedDB!.deleteDatabase(dbName);
-      final db =
-          await window.indexedDB!.open(dbName, version: 1, onUpgradeNeeded: (e) {
+      final db = await window.indexedDB!.open(dbName, version: 1,
+          onUpgradeNeeded: (e) {
         final db = e.target.result as idb.Database;
         db.createObjectStore('store', autoIncrement: true);
       });
@@ -114,10 +114,10 @@ void main() {
 
     // ie has issue with timing
     test('async_timing', () async {
-      final dbName = testDescriptions.join('_');
+      final dbName = 'async_timing';
       await window.indexedDB!.deleteDatabase(dbName);
-      final db =
-          await window.indexedDB!.open(dbName, version: 1, onUpgradeNeeded: (e) {
+      final db = await window.indexedDB!.open(dbName, version: 1,
+          onUpgradeNeeded: (e) {
         final db = e.target.result as idb.Database;
         db.createObjectStore('store', autoIncrement: true);
       });
@@ -141,10 +141,10 @@ void main() {
     }, skip: 'crashing on ie');
 
     test('future_timing', () async {
-      final dbName = testDescriptions.join('_');
+      final dbName = 'future_timing.db';
       await window.indexedDB!.deleteDatabase(dbName);
-      final db =
-          await window.indexedDB!.open(dbName, version: 1, onUpgradeNeeded: (e) {
+      final db = await window.indexedDB!.open(dbName, version: 1,
+          onUpgradeNeeded: (e) {
         final db = e.target.result as idb.Database;
         db.createObjectStore('store', autoIncrement: true);
       });
@@ -171,10 +171,10 @@ void main() {
     // ie crashes if there is a pause between 2 calls
     // after the transaction creation
     test('pause_between_calls', () async {
-      final dbName = testDescriptions.join('_');
+      final dbName = 'pause_between_calls.db';
       await window.indexedDB!.deleteDatabase(dbName);
-      final db =
-          await window.indexedDB!.open(dbName, version: 1, onUpgradeNeeded: (e) {
+      final db = await window.indexedDB!.open(dbName, version: 1,
+          onUpgradeNeeded: (e) {
         final db = e.target.result as idb.Database;
         db.createObjectStore('store', autoIncrement: true);
       });
@@ -198,15 +198,15 @@ void main() {
         }
       } catch (e) {
         // Transaction inactive
-        expect(e.message.contains('TransactionInactiveError'), isTrue);
+        expect(e.toString().contains('TransactionInactiveError'), isTrue);
       }
       return transaction.completed;
     });
     test('date_time', () async {
       final dbName = 'native_raw/date_time.db';
       await window.indexedDB!.deleteDatabase(dbName);
-      final db =
-          await window.indexedDB!.open(dbName, version: 1, onUpgradeNeeded: (e) {
+      final db = await window.indexedDB!.open(dbName, version: 1,
+          onUpgradeNeeded: (e) {
         final db = e.target.result as idb.Database;
         db.createObjectStore('store', autoIncrement: true);
       });

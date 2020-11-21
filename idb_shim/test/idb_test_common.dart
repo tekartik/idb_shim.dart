@@ -2,35 +2,26 @@ library idb_shim.idb_test_common;
 
 import 'dart:async';
 
-import 'package:dev_test/test.dart';
-import 'package:dev_test/test.dart' as dev_test;
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/idb_client_memory.dart';
 import 'package:idb_shim/idb_client_sembast.dart';
 import 'package:idb_shim/src/common/common_factory.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
-import 'package:logging/logging.dart';
-import 'package:path/path.dart';
 import 'package:sembast/sembast.dart' as sdb;
 import 'package:sembast/sembast_memory.dart' as sdb;
 import 'package:sembast/src/sembast_fs.dart' as sdb_fs;
+import 'package:test/test.dart';
 
 import 'multiplatform/common_meta_test.dart';
 
 export 'dart:async';
 
-export 'package:dev_test/test.dart';
 export 'package:idb_shim/idb_client_memory.dart';
 export 'package:idb_shim/src/common/common_meta.dart';
 export 'package:idb_shim/src/utils/dev_utils.dart';
 export 'package:idb_shim/src/utils/env_utils.dart';
+export 'package:test/test.dart';
 
-//import 'package:unittest/unittest.dart';
-//export 'common_meta_test.dart' hide main;
-//export 'package:tekartik_test/test_utils.dart';
-
-// only for test - INFO - basic output, FINE - show test name before/after - FINEST - samething for console test also
-const Level debugLevel = Level.FINE;
 @deprecated
 const String testDbName = 'test.db';
 const String _testDbName = 'test.db';
@@ -47,35 +38,9 @@ const String testNameField2 = 'name_2';
 
 // current dbName valid during test execution
 late String dbTestName;
-// current dbContext
-TestContext? _dbTestContext;
-
-void dbGroup(TestContext ctx, String description, body, [_group = group]) {
-  _group(description, () {
-    _dbTestContext = ctx;
-    body();
-    _dbTestContext = null;
-  });
-}
-
-void dbTest(String description, body,
-    {void Function(String name, Function() body, {bool? solo})? test,
-    @deprecated bool? solo}) {
-  test ??= dev_test.test as void Function(String, dynamic Function(), {bool? solo})?;
-  // We save it for later
-  // only valid during definition
-  final ctx = _dbTestContext;
-  test!(description, () async {
-    dbTestName = ctx!.dbName;
-    await ctx.factory!.deleteDatabase(dbTestName);
-    await Future.value(body());
-  }, solo: solo == true);
-}
 
 class TestContext {
   IdbFactory? factory;
-
-  String get dbName => testDescriptions.join('-') + '.db';
 
   // special internet explorer handling
   bool isIdbIe = false;
@@ -100,9 +65,6 @@ class SembastTestContext extends TestContext {
 
   @override
   IdbFactorySembast? get factory => super.factory as IdbFactorySembast?;
-
-  @override
-  String get dbName => join(joinAll(testDescriptions), 'test.db');
 }
 
 class SembastMemoryTestContext extends SembastTestContext {

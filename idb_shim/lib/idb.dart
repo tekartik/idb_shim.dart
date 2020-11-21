@@ -83,7 +83,7 @@ abstract class Cursor {
   /// store. If the cursor points to a record that has just been deleted,
   /// a new record is created.
   ///
-  Future update(value);
+  Future update(Object value);
 
   ///
   /// deletes the record at the cursor's position, without changing the cursor's
@@ -109,7 +109,7 @@ abstract class Cursor {
 ///
 abstract class CursorWithValue extends Cursor {
   /// Returns the value of the current cursor.
-  Object? get value;
+  Object get value;
 }
 
 ///
@@ -168,7 +168,7 @@ abstract class ObjectStore {
   /// Note that this method must be called only from a VersionChange transaction
   /// mode callback.
   ///
-  Index createIndex(String name, keyPath, {required bool unique, required bool multiEntry});
+  Index createIndex(String name, keyPath, {bool? unique, bool? multiEntry});
 
   ///
   /// Creates a structured clone of the value, and stores the cloned value in
@@ -181,8 +181,8 @@ abstract class ObjectStore {
   /// For updating existing records, you should use the [ObjectStore.put]
   /// method instead.
   ///
-  ///
-  Future add(dynamic value, [dynamic key]);
+  /// null value are no longer allowed.
+  Future<Object> add(Object value, [Object? key]);
 
   ///
   /// creates a structured clone of the value and stores the cloned value in the
@@ -197,7 +197,8 @@ abstract class ObjectStore {
   /// The put method is an update or insert method. See the [ObjectStore.add]
   /// method for an insert only method.
   ///
-  Future put(dynamic value, [dynamic key]);
+  /// null value are no longer allowed.
+  Future<Object> put(Object value, [Object? key]);
 
   ///
   /// returns the object selected by the specified key. This is for
@@ -206,13 +207,13 @@ abstract class ObjectStore {
   /// If a value is successfully found, then a structured clone of it is created
   /// and set as the result of the request object.
   ///
-  Future getObject(dynamic key);
+  Future<Object?> getObject(Object key);
 
   ///
   /// deletes the current object store. This is for deleting individual records
   /// out of an object store.
   ///
-  Future delete(dynamic key);
+  Future<void> delete(Object key);
 
   ///
   /// clears this object store in a separate thread.
@@ -234,32 +235,32 @@ abstract class ObjectStore {
   /// Used for iterating through an object store with a cursor.
   ///
   Stream<CursorWithValue> openCursor(
-      {key, KeyRange? range, required String direction, required bool autoAdvance});
+      {key, KeyRange? range, String? direction, bool? autoAdvance});
 
   ///
   /// Used for iterating through an object store with a key cursor.
   ///
   Stream<Cursor> openKeyCursor(
-      {key, KeyRange? range, required String direction, required bool autoAdvance});
+      {key, KeyRange? range, String? direction, bool? autoAdvance});
 
   ///
   /// returns the total number of records that match the provided key or
   /// IDBKeyRange. If no arguments are provided, it returns the total number of
   /// records in the store.
   ///
-  Future<int> count([dynamic keyOrRange]);
+  Future<int> count([Object? keyOrRange]);
 
   ///
   /// returns all objects in the object store matching the specified parameter
   /// or all objects in the store if no parameters are given.
   ///
-  Future<List<dynamic>> getAll([dynamic query, int? count]);
+  Future<List<Object>> getAll([Object? query, int? count]);
 
   ///
   /// returns record keys for all objects in the object store matching the
   /// specified parameter or all objects in the store if no parameters are given.
   ///
-  Future<List<dynamic>> getAllKeys([dynamic query, int? count]);
+  Future<List<Object>> getAllKeys([Object? query, int? count]);
 
   ///
   /// Returns the key path of this object store.
@@ -267,7 +268,7 @@ abstract class ObjectStore {
   /// If this property is null, the application must provide a key for each
   /// modification operation.
   ///
-  dynamic get keyPath;
+  Object? get keyPath;
 
   ///
   /// returns the value of the auto increment flag for this object store.
@@ -310,7 +311,7 @@ abstract class Database {
   /// This method can be called only within a versionchange transaction.
   ///
   ObjectStore createObjectStore(String name,
-      {required String keyPath, required bool autoIncrement});
+      {String? keyPath, bool? autoIncrement});
 
   ///
   /// returns a transaction object (Transaction) containing the
@@ -355,9 +356,9 @@ abstract class Database {
   ///
   /// A 64-bit integer that contains the version of the connected database.
   ///
-  /// When a database is first created, this attribute is null.
+  /// When a database is first created, this attribute is 0.
   ///
-  int? get version;
+  int get version;
 
   ///
   /// listen for onVersionChange event
@@ -410,7 +411,7 @@ abstract class Index {
   /// the given key or the first corresponding value, if key is set to
   /// a [KeyRange]
   ///
-  Future get(dynamic key);
+  Future<Object?> get(Object key);
 
   ///
   /// finds either the given key or the primary key, if key is set to a
@@ -419,7 +420,7 @@ abstract class Index {
   /// this returns the primary key of the record the key is associated with, not
   /// the whole record as [Index.get] does.
   ///
-  Future getKey(dynamic key);
+  Future<Object?> getKey(Object key);
 
   /// Creates a cursor over the specified key range.
   Stream<CursorWithValue> openCursor(
@@ -433,13 +434,13 @@ abstract class Index {
   /// returns all objects in the index matching the specified parameter
   /// or all objects in the index if no parameters are given.
   ///
-  Future<List<dynamic>> getAll([dynamic query, int? count]);
+  Future<List<Object>> getAll([Object? query, int? count]);
 
   ///
   /// returns record primary keys for all objects in the index store matching the
   /// specified parameter or all objects in the index if no parameters are given.
   ///
-  Future<List<dynamic>> getAllKeys([dynamic query, int? count]);
+  Future<List<Object>> getAllKeys([Object? query, int? count]);
 
   ///
   /// returns the key path of the current index. If null, this index is not
@@ -508,7 +509,7 @@ class OpenDBRequest extends Request {
 /// of an onupgradeneeded event handler function.
 ///
 abstract class VersionChangeEvent {
-  /// returns the old version number of the database.
+  /// returns the old version number of the database. 0 if created
   int get oldVersion;
 
   /// returns the new version number of the database.
@@ -562,7 +563,7 @@ abstract class KeyRange {
   /// Creates a new key range containing a single value.
   factory KeyRange.only(Object /*Key*/ value) => IdbKeyRange.only(value);
 
-  /// Creates a new key range with only a lower bound.
+  /// Creates a new key range with only a lower bound, open false means included.
   factory KeyRange.lowerBound(Object lowerBound, [bool open = false]) =>
       IdbKeyRange.lowerBound(lowerBound, open);
 
@@ -571,7 +572,7 @@ abstract class KeyRange {
       IdbKeyRange.upperBound(upperBound, open);
 
   /// Creates a new key range with upper and lower bounds.
-  factory KeyRange.bound(Object lowerBound, Object upperBound,
+  factory KeyRange.bound(Object? lowerBound, Object? upperBound,
           [bool lowerOpen = false, bool upperOpen = false]) =>
       IdbKeyRange.bound(lowerBound, upperBound, lowerOpen, upperOpen);
 
@@ -627,7 +628,8 @@ abstract class IdbFactory {
   ///  Will trigger an upgradedneeded event and, if any other tabs have open
   ///  connections to the database, a blocked event.
   ///
-  Future<IdbFactory> deleteDatabase(String name, {OnBlockedFunction? onBlocked});
+  Future<IdbFactory> deleteDatabase(String name,
+      {OnBlockedFunction? onBlocked});
 
   ///
   /// if getDatabaseNames can be called

@@ -77,9 +77,6 @@ class IdbFactorySembastImpl extends IdbFactoryBase
   @override
   Future<IdbFactory> deleteDatabase(String dbName,
       {OnBlockedFunction? onBlocked}) async {
-    if (dbName == null) {
-      return Future.error(ArgumentError('dbName cannot be null'));
-    }
     await _databaseFactory.deleteDatabase(getDbPath(dbName));
     return this;
   }

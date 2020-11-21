@@ -3,7 +3,7 @@ library idb_browser_test;
 
 import 'dart:html';
 
-import 'package:dev_test/test.dart';
+import 'package:test/test.dart';
 import 'package:idb_shim/idb_client_native.dart';
 
 void main() {

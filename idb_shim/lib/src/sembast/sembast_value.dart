@@ -4,7 +4,7 @@ import 'package:sembast/blob.dart';
 import 'package:sembast/timestamp.dart';
 
 /// True for null, num, String, bool
-bool isBasicTypeOrNull(dynamic value) {
+bool isBasicTypeOrNull(Object? value) {
   if (value == null) {
     return true;
   } else if (value is num || value is String || value is bool) {
@@ -13,7 +13,7 @@ bool isBasicTypeOrNull(dynamic value) {
   return false;
 }
 
-dynamic _toSembastValue(dynamic value) {
+Object? _toSembastValue(Object? value) {
   if (isBasicTypeOrNull(value)) {
     return value;
   } else if (value is Map) {
@@ -22,7 +22,7 @@ dynamic _toSembastValue(dynamic value) {
     map.forEach((key, item) {
       var converted = _toSembastValue(item);
       if (!identical(converted, item)) {
-        clone ??= Map<String, dynamic>.from(map);
+        clone ??= Map<String, Object?>.from(map);
         clone[key] = converted;
       }
     });
@@ -49,23 +49,23 @@ dynamic _toSembastValue(dynamic value) {
 }
 
 /// Convert a value to a sembast compatible value
-dynamic toSembastValue(dynamic value) {
-  dynamic converted;
+Object toSembastValue(Object value) {
+  Object converted;
   try {
-    converted = _toSembastValue(value);
+    converted = _toSembastValue(value)!;
   } on ArgumentError catch (e) {
     throw ArgumentError.value(e.invalidValue,
         '${e.invalidValue.runtimeType} in $value', 'not supported');
   }
 
-  /// Ensure root is Map<String, dynamic> if only Map
-  if (converted is Map && !(converted is Map<String, dynamic>)) {
-    converted = converted.cast<String, dynamic>();
+  /// Ensure root is Map<String, Object?> if only Map
+  if (converted is Map && !(converted is Map<String, Object?>)) {
+    converted = converted.cast<String, Object?>();
   }
   return converted;
 }
 
-dynamic _fromSembastValue(dynamic value) {
+Object? _fromSembastValue(Object? value) {
   if (isBasicTypeOrNull(value)) {
     return value;
   } else if (value is Map) {
@@ -74,7 +74,7 @@ dynamic _fromSembastValue(dynamic value) {
     map.forEach((key, item) {
       var converted = _fromSembastValue(item);
       if (!identical(converted, item)) {
-        clone ??= Map<String, dynamic>.from(map);
+        clone ??= Map<String, Object?>.from(map);
         clone[key] = converted;
       }
     });
@@ -101,18 +101,18 @@ dynamic _fromSembastValue(dynamic value) {
 }
 
 /// Convert a value from a sembast value
-dynamic fromSembastValue(dynamic value) {
-  dynamic converted;
+Object fromSembastValue(Object value) {
+  Object converted;
   try {
-    converted = _fromSembastValue(value);
+    converted = _fromSembastValue(value)!;
   } on ArgumentError catch (e) {
     throw ArgumentError.value(e.invalidValue,
         '${e.invalidValue.runtimeType} in $value', 'not supported');
   }
 
-  /// Ensure root is Map<String, dynamic> if only Map
-  if (converted is Map && !(converted is Map<String, dynamic>)) {
-    converted = converted.cast<String, dynamic>();
+  /// Ensure root is Map<String, Object?> if only Map
+  if (converted is Map && !(converted is Map<String, Object?>)) {
+    converted = converted.cast<String, Object?>();
   }
   return converted;
 }

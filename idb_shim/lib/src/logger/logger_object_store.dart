@@ -16,7 +16,7 @@ class ObjectStoreLogger extends ObjectStore {
   void err(String message) => idbTransactionLogger.err(message);
 
   @override
-  Index createIndex(String name, keyPath, {required bool unique, required bool multiEntry}) {
+  Index createIndex(String name, keyPath, {bool? unique, bool? multiEntry}) {
     return idbObjectStore.createIndex(name, keyPath,
         unique: unique, multiEntry: multiEntry);
   }
@@ -29,7 +29,7 @@ class ObjectStoreLogger extends ObjectStore {
   }
 
   @override
-  Future add(dynamic value, [dynamic key]) async {
+  Future<Object> add(Object value, [Object? key]) async {
     try {
       var result = await idbObjectStore.add(value, key);
       log('add($value${key != null ? ', $key' : ''}): $result');
@@ -42,7 +42,7 @@ class ObjectStoreLogger extends ObjectStore {
 
   // Not async please for ie!
   @override
-  Future getObject(dynamic key) {
+  Future<Object?> getObject(Object key) {
     return idbObjectStore.getObject(key);
   }
 
@@ -52,7 +52,7 @@ class ObjectStoreLogger extends ObjectStore {
   }
 
   @override
-  Future put(dynamic value, [dynamic key]) async {
+  Future<Object> put(Object value, [Object? key]) async {
     try {
       var result = await idbObjectStore.put(value, key);
       log('put($value${key != null ? ', $key' : ''}): $result');
@@ -75,7 +75,7 @@ class ObjectStoreLogger extends ObjectStore {
 
   @override
   Stream<CursorWithValue> openCursor(
-          {key, KeyRange? range, required String direction, required bool autoAdvance}) =>
+          {key, KeyRange? range, String? direction, bool? autoAdvance}) =>
       idbObjectStore.openCursor(
           key: key,
           range: range,
@@ -84,7 +84,7 @@ class ObjectStoreLogger extends ObjectStore {
 
   @override
   Stream<Cursor> openKeyCursor(
-          {key, KeyRange? range, required String direction, required bool autoAdvance}) =>
+          {key, KeyRange? range, String? direction, bool? autoAdvance}) =>
       idbObjectStore.openKeyCursor(
           key: key,
           range: range,
@@ -95,11 +95,11 @@ class ObjectStoreLogger extends ObjectStore {
   Future<int> count([dynamic keyOrRange]) => idbObjectStore.count(keyOrRange);
 
   @override
-  Future<List<dynamic>> getAll([dynamic keyOrRange, int? count]) =>
+  Future<List<Object>> getAll([Object? keyOrRange, int? count]) =>
       idbObjectStore.getAll(keyOrRange, count);
 
   @override
-  Future<List<dynamic>> getAllKeys([dynamic keyOrRange, int? count]) =>
+  Future<List<Object>> getAllKeys([Object? keyOrRange, int? count]) =>
       idbObjectStore.getAllKeys(keyOrRange, count);
 
   @override

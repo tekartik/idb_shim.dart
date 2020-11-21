@@ -87,6 +87,7 @@ Supported types:
 * Stuff that can be JSON serialized/deserialized (`num`, `String`, `bool`, `null`, `List` & `Map`)
 * `DateTime` is supported as of 1.11
 * `Uint8List` is supported as of 1.11
+* `null` is no longer supported as a document value (although map field can be null though).
 
 Limitations
 * Cyclic dependecy are not supported (per JSON serialization)

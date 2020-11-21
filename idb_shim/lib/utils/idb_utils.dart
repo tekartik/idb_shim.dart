@@ -19,10 +19,7 @@ class _SchemaMeta {
 Future<Database> copySchema(
     Database srcDatabase, IdbFactory dstFactory, String dstDbName) async {
   // Delete the existing
-  if (dstDbName != null) {
-    await dstFactory.deleteDatabase(dstDbName);
-  }
-
+  await dstFactory.deleteDatabase(dstDbName);
   final version = srcDatabase.version;
 
   final schemaMeta = _SchemaMeta();
@@ -47,7 +44,7 @@ Future<Database> copySchema(
     final db = event.database;
     for (final storeMeta in schemaMeta.stores) {
       final store = db.createObjectStore(storeMeta.name,
-          keyPath: storeMeta.keyPath!, autoIncrement: storeMeta.autoIncrement);
+          keyPath: storeMeta.keyPath, autoIncrement: storeMeta.autoIncrement);
       for (final indexMeta in storeMeta.indecies) {
         store.createIndex(indexMeta.name!, indexMeta.keyPath,
             unique: indexMeta.unique, multiEntry: indexMeta.multiEntry);
@@ -63,8 +60,8 @@ Future<Database> copySchema(
 }
 
 class _Record {
-  var value;
-  var key;
+  late Object value;
+  late Object key;
 }
 
 /// Copy a store from a database to another existing one.

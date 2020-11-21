@@ -6,4 +6,5 @@ DatabaseException newAbortException([String message = 'Aborted']) =>
 
 /// New abort exception to avoid creating them everywhere
 DatabaseException wrapException(Exception e, [String? message]) =>
-    DatabaseException('${e.runtimeType}: message');
+    DatabaseException(
+        '${e.runtimeType}: $e${message != null ? ' ($message)' : ''}');

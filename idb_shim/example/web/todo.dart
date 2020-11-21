@@ -16,8 +16,8 @@ import 'package:idb_shim/idb_browser.dart' as idb;
 idb.IdbFactory? idbFactory;
 
 class TodoList {
-  InputElement _input;
-  Element _todoItems;
+  late InputElement _input;
+  late Element _todoItems;
 
   TodoList() {
     _todoItems = querySelector('#todo-items')!;

@@ -50,7 +50,7 @@ class _NativeCursorWithValue extends CursorWithValue {
   //    _key = _cwv.key;
   //  }
   @override
-  Object? get value => _cwv.value;
+  Object get value => _cwv.value as Object;
 
   @override
   Object get key => _cwv.key!;
@@ -93,7 +93,7 @@ class CursorWithValueControllerNative {
     }, onDone: () {
       _ctlr.close();
     }, onError: (error) {
-      _ctlr.addError(error);
+      _ctlr.addError(error as Object);
     });
   }
 
@@ -110,7 +110,7 @@ class CursorControllerNative {
     }, onDone: () {
       _ctlr.close();
     }, onError: (error) {
-      _ctlr.addError(error);
+      _ctlr.addError(error as Object);
     });
   }
 

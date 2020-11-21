@@ -18,8 +18,8 @@ sdb.Filter keyCursorFilter(
 }
 
 // return <0 if value1 < value2 or >0 if greater
-// returns null if cannot be compared
-int/*?*/ compareValue(dynamic value1, dynamic value2) {
+// returns 0 if cannot be compared or equals
+int compareValue(dynamic value1, dynamic value2) {
   try {
     if (value1 is Comparable && value2 is Comparable) {
       return Comparable.compare(value1, value2);
@@ -38,7 +38,7 @@ int/*?*/ compareValue(dynamic value1, dynamic value2) {
       return compareValue(list1.length, list2.length);
     }
   } catch (_) {}
-  return null;
+  return 0;
 }
 
 // Matches if <0
@@ -64,13 +64,11 @@ int? lowerCompareValue(dynamic lower, dynamic value, bool multiEntry) {
     }
   }
   final singleCmp = lowerCompareSingleValue(lower, value);
-  if (singleCmp != null) {
-    if (bestCmp != null) {
-      return min(singleCmp, bestCmp);
-    }
-    return singleCmp;
+
+  if (bestCmp != null) {
+    return min(singleCmp, bestCmp);
   }
-  return bestCmp;
+  return singleCmp;
 }
 
 // True if simple value matches lower bound
@@ -101,7 +99,7 @@ int? upperCompareValue(dynamic lower, dynamic value, bool multiEntry) {
   if (multiEntry && value is List) {
     for (var item in value) {
       final cmp = upperCompareSingleValue(lower, item);
-      if (cmp > 0) {
+      if (cmp != 0) {
         return cmp;
       } else if (cmp == 0) {
         bestCmp = 0;
@@ -109,13 +107,11 @@ int? upperCompareValue(dynamic lower, dynamic value, bool multiEntry) {
     }
   }
   final singleCmp = upperCompareSingleValue(lower, value);
-  if (singleCmp != null) {
-    if (bestCmp != null) {
-      return max(singleCmp, bestCmp);
-    }
-    return singleCmp;
+
+  if (bestCmp != null) {
+    return max(singleCmp, bestCmp);
   }
-  return bestCmp;
+  return singleCmp;
 }
 
 // True if simple value matches lower bound
@@ -139,6 +135,7 @@ bool lowerMatchesValue(
         return true;
       }
     }
+    return false;
   }
   return lowerMatchesSingleValue(lower, lowerOpen, value);
 }

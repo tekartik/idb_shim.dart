@@ -27,9 +27,9 @@ class ObjectStoreNative extends ObjectStore {
   }
 
   @override
-  Future add(dynamic value, [dynamic key]) {
+  Future<Object> add(Object value, [Object? key]) {
     return catchAsyncNativeError(() {
-      return idbObjectStore.add(value, key);
+      return idbObjectStore.add(value, key).then((key) => key as Object);
     });
   }
 
@@ -49,9 +49,9 @@ class ObjectStoreNative extends ObjectStore {
   }
 
   @override
-  Future put(dynamic value, [dynamic key]) {
+  Future<Object> put(Object value, [Object? key]) {
     return catchAsyncNativeError(() {
-      return idbObjectStore.put(value, key);
+      return idbObjectStore.put(value, key).then((value) => value as Object);
     });
   }
 
@@ -121,7 +121,7 @@ class ObjectStoreNative extends ObjectStore {
   }
 
   @override
-  Future<int?> count([dynamic keyOrRange]) {
+  Future<int> count([dynamic keyOrRange]) {
     return catchAsyncNativeError(() {
       Future<int> countFuture;
       if (keyOrRange == null) {
@@ -152,21 +152,21 @@ class ObjectStoreNative extends ObjectStore {
   }
 
   @override
-  Future<List<dynamic>> getAll([dynamic keyOrRange, int? count]) {
+  Future<List<Object>> getAll([dynamic keyOrRange, int? count]) {
     return catchAsyncNativeError(() {
       final nativeQuery = toNativeQuery(keyOrRange);
       var results = storeGetAll(idbObjectStore, nativeQuery, count);
       return results;
-    }) as Future<List<dynamic>>;
+    });
   }
 
   @override
-  Future<List<dynamic>> getAllKeys([dynamic keyOrRange, int? count]) {
+  Future<List<Object>> getAllKeys([dynamic keyOrRange, int? count]) {
     return catchAsyncNativeError(() {
       final nativeQuery = toNativeQuery(keyOrRange);
       var results = storeGetAllKeys(idbObjectStore, nativeQuery, count);
       return results;
-    }) as Future<List<dynamic>>;
+    });
   }
 
   @override

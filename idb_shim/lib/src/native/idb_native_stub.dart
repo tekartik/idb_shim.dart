@@ -5,3 +5,5 @@ export 'package:idb_shim/src/native/native_compat.dart';
 
 /// The native factory
 IdbFactory get idbFactoryNative => idbUnimplementedStub('idbFactoryNative');
+bool get idbFactoryNativeSupported =>
+    idbUnimplementedStub('idbFactoryNativeSupported');

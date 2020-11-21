@@ -29,7 +29,7 @@ T devWarning<T>(T value) => value;
 void _devError([Object? msg]) {
   // one day remove the print however sometimes the error thrown is hidden
   try {
-    throw UnsupportedError(msg?.toString());
+    throw UnsupportedError(msg?.toString() ?? 'devError');
   } catch (e, st) {
     if (_devPrintEnabled) {
       print('# ERROR $msg');

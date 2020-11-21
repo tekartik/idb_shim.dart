@@ -21,9 +21,6 @@ void main() {
         db.createObjectStore(testStoreName);
       }
 
-      print(
-          ' init $_initializeDatabase ${_initializeDatabase != null ? 'NOT NULL' : 'NULL'}');
-
       var db = await idbFactory.open(dbName,
           version: 1, onUpgradeNeeded: _initializeDatabase);
 

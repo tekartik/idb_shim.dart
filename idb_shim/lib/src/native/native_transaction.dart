@@ -24,7 +24,7 @@ class TransactionNative extends TransactionNativeBase {
     }
   }
 
-  void _completeError(e) {
+  void _completeError(Object e) {
     if (!_completed.isCompleted) {
       _completed.completeError(e);
     }

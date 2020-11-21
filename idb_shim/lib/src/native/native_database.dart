@@ -27,7 +27,7 @@ class VersionChangeEventNative extends IdbVersionChangeEventBase {
   Transaction get transaction => request.transaction;
 
   @override
-  Database database;
+  late Database database;
 
   VersionChangeEventNative(this.factory, this.idbVersionChangeEvent) {
     // This is null for onChangeEvent on Database
@@ -50,7 +50,7 @@ class DatabaseNative extends IdbDatabaseBase {
   DatabaseNative(IdbFactory factory, this.idbDatabase) : super(factory);
 
   @override
-  int? get version => catchNativeError((() => idbDatabase!.version!) as int Function());
+  int get version => catchNativeError((() => idbDatabase!.version ?? 0));
 
   @override
   ObjectStore createObjectStore(String name,
@@ -80,7 +80,7 @@ class DatabaseNative extends IdbDatabaseBase {
       if ((storeNameOrStoreNames is List) &&
           (storeNameOrStoreNames.isNotEmpty) &&
           (_isNotFoundError(e))) {
-        final stores = storeNameOrStoreNames?.cast<String>();
+        final stores = storeNameOrStoreNames.cast<String>();
 
         // Make sure they indeed exists
         var allFound = true;
@@ -144,12 +144,12 @@ class DatabaseNative extends IdbDatabaseBase {
   @override
   Iterable<String> get objectStoreNames {
     return catchNativeError(() {
-      return idbDatabase!.objectStoreNames;
+      return idbDatabase!.objectStoreNames ?? <String>[];
     })!;
   }
 
   @override
-  String get name => catchNativeError(() => idbDatabase!.name)!;
+  String get name => catchNativeError(() => idbDatabase!.name!)!;
 
   @override
   Stream<VersionChangeEvent> get onVersionChange {
@@ -160,7 +160,7 @@ class DatabaseNative extends IdbDatabaseBase {
     }, onDone: () {
       ctlr.close();
     }, onError: (error) {
-      ctlr.addError(error);
+      ctlr.addError(error as Object);
     });
     return ctlr.stream;
   }

@@ -54,7 +54,7 @@ class IndexNative extends Index {
         countFuture = idbIndex.count(keyOrRange);
       }
       return countFuture;
-    }) as Future<int>;
+    });
   }
 
   @override
@@ -82,7 +82,7 @@ class IndexNative extends Index {
   }
 
   @override
-  Future<List<dynamic>?> getAll([dynamic keyOrRange, int? count]) {
+  Future<List<Object>> getAll([Object? keyOrRange, int? count]) {
     return catchAsyncNativeError(() {
       final nativeQuery = toNativeQuery(keyOrRange);
       var results = indexGetAll(idbIndex, nativeQuery, count);
@@ -91,7 +91,7 @@ class IndexNative extends Index {
   }
 
   @override
-  Future<List<dynamic>?> getAllKeys([dynamic keyOrRange, int? count]) {
+  Future<List<Object>> getAllKeys([Object? keyOrRange, int? count]) {
     return catchAsyncNativeError(() {
       final nativeQuery = toNativeQuery(keyOrRange);
       var results = indexGetAllKeys(idbIndex, nativeQuery, count);

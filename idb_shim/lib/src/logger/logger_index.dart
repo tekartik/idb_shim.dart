@@ -11,13 +11,13 @@ class IndexLogger extends Index {
   IndexLogger(this.idbObjectStoreLogger, this.idbIndex);
 
   @override
-  Future get(dynamic key) => idbIndex.get(key);
+  Future get(Object key) => idbIndex.get(key);
 
   @override
-  Future getKey(dynamic key) => idbIndex.getKey(key);
+  Future getKey(Object key) => idbIndex.getKey(key);
 
   @override
-  Future<int> count([keyOrRange]) => idbIndex.count(keyOrRange);
+  Future<int> count([Object? keyOrRange]) => idbIndex.count(keyOrRange);
 
   @override
   Stream<Cursor> openKeyCursor(
@@ -39,11 +39,11 @@ class IndexLogger extends Index {
           autoAdvance: autoAdvance);
 
   @override
-  Future<List<dynamic>> getAll([dynamic keyOrRange, int? count]) =>
+  Future<List<Object>> getAll([dynamic keyOrRange, int? count]) =>
       idbIndex.getAll(keyOrRange, count);
 
   @override
-  Future<List<dynamic>> getAllKeys([dynamic keyOrRange, int? count]) =>
+  Future<List<Object>> getAllKeys([dynamic keyOrRange, int? count]) =>
       idbIndex.getAllKeys(keyOrRange, count);
 
   @override

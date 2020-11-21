@@ -21,14 +21,14 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   sdb.Database? get sdbDatabase => database.db;
 
-  sdb.Transaction get sdbTransaction => transaction!.sdbTransaction;
+  sdb.Transaction? get sdbTransaction => transaction!.sdbTransaction;
 
   sdb.DatabaseClient? _sdbClient;
-  sdb.StoreRef<dynamic, dynamic>? _sdbStore;
+  sdb.StoreRef<Object, Object>? _sdbStore;
 
   // Lazy computat
-  sdb.StoreRef<dynamic, dynamic> get sdbStore =>
-      _sdbStore ??= sdb.StoreRef<dynamic, dynamic>(name);
+  sdb.StoreRef<Object, Object> get sdbStore =>
+      _sdbStore ??= sdb.StoreRef<Object, Object>(name);
 
   // lazy creation
   // If we are not in a transaction that's likely during open
@@ -59,7 +59,9 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   /// extract the key from the key itself or from the value
   /// it is a map and keyPath is not null
-  dynamic getKeyImpl(value, [key]) {
+  ///
+  /// returns null for autoincrement
+  Object? getKeyImpl(Object value, [Object? key]) {
     if (keyPath != null) {
       if (key != null) {
         throw ArgumentError(
@@ -86,7 +88,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     return null;
   }
 
-  Future putImpl(value, key) {
+  Future<Object> putImpl(Object? value, Object? key) {
     // Check all indexes
     final futures = <Future>[];
     if (value is Map) {
@@ -112,28 +114,31 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     }
     return Future.wait(futures).then((_) {
       if (key == null) {
-        return sdbStore.add(sdbClient, value);
+        return sdbStore.add(sdbClient, value as Object);
       } else {
-        return sdbStore.record(key).put(sdbClient, value).then((_) => key);
+        return sdbStore
+            .record(key)
+            .put(sdbClient, value as Object)
+            .then((_) => key);
       }
     });
   }
 
   @override
-  Future add(value, [key]) {
+  Future<Object> add(Object value, [Object? key]) {
     value = toSembastValue(value);
     return _inWritableTransaction(() {
       key = getKeyImpl(value, key);
 
       if (key != null) {
-        return sdbStore.record(key).get(sdbClient).then((existingValue) {
+        return sdbStore.record(key!).get(sdbClient).then((existingValue) {
           if (existingValue != null) {
             throw DatabaseError('Key $key already exists in the object store');
           }
-          return putImpl(value, key);
+          return putImpl(value, key!);
         });
       } else {
-        return putImpl(value, key);
+        return putImpl(value, null);
       }
     });
   }
@@ -160,20 +165,20 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   @override
-  Future<List<dynamic>> getAll([dynamic keyOrRange, int? count]) {
+  Future<List<Object>> getAll([Object? keyOrRange, int? count]) {
     return inTransaction(() async {
       return (await sdbStore.find(
         sdbClient,
         finder: sdb.Finder(
             filter: _storeKeyOrRangeFilter(keyOrRange), limit: count),
       ))
-          .map(recordToValue)
+          .map((r) => recordToValue(r)!)
           .toList(growable: false);
     });
   }
 
   @override
-  Future<List<dynamic>> getAllKeys([dynamic keyOrRange, int? count]) {
+  Future<List<Object>> getAllKeys([Object? keyOrRange, int? count]) {
     return inTransaction(() async {
       return (await sdbStore.findKeys(
         sdbClient,
@@ -196,7 +201,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   @override
-  Future delete(key) {
+  Future<void> delete(Object key) {
     return _inWritableTransaction(() {
       return sdbStore.record(key).delete(sdbClient).then((_) {
         // delete returns null
@@ -206,21 +211,22 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   /// Clone and convert
-  dynamic recordToValue(sdb.RecordSnapshot? record) {
+  Object? recordToValue(sdb.RecordSnapshot<Object, Object>? record) {
     if (record == null) {
       return null;
-    }
-    var value = record.value;
-    // Add key if _keyPath is not null
-    if ((keyPath != null) && (value is Map)) {
-      value = cloneValue(value, keyPath, record.key);
-    }
+    } else {
+      var value = record.value;
+      // Add key if _keyPath is not null
+      if ((keyPath != null) && (value is Map)) {
+        value = cloneValue(value, keyPath, record.key);
+      }
 
-    return fromSembastValue(value);
+      return fromSembastValue(value);
+    }
   }
 
   @override
-  Future getObject(key) {
+  Future<Object?> getObject(key) {
     checkKeyParam(key);
     return inTransaction(() {
       return sdbStore.record(key).getSnapshot(sdbClient).then((record) {
@@ -278,7 +284,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   @override
-  Future put(value, [key]) {
+  Future<Object> put(Object value, [Object? key]) {
     value = toSembastValue(value);
     return _inWritableTransaction(() {
       return putImpl(value, getKeyImpl(value, key));

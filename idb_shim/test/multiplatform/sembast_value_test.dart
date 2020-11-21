@@ -41,12 +41,12 @@ void main() {
 
     test('modified', () {
       var identicals = [
-        <String, dynamic>{},
+        <String, Object?>{},
         1,
         2.5,
         'text',
         true,
-        null,
+        // null, no longer supported with nnbd
         //<dynamic, dynamic>{},
         [],
         [
@@ -58,7 +58,7 @@ void main() {
             ]
           }
         ],
-        <String, dynamic>{
+        <String, Object?>{
           'test': [
             1,
             true,
@@ -83,10 +83,10 @@ void main() {
         Uint8List.fromList([1, 2, 3]),
         DateTime.fromMillisecondsSinceEpoch(1, isUtc: true),
         [DateTime.fromMillisecondsSinceEpoch(1, isUtc: true)],
-        <String, dynamic>{
+        <String, Object?>{
           'test': DateTime.fromMillisecondsSinceEpoch(1, isUtc: true)
         },
-        <String, dynamic>{
+        <String, Object?>{
           'test': [
             DateTime.fromMillisecondsSinceEpoch(1, isUtc: true),
           ]
