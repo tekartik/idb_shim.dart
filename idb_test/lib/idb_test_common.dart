@@ -45,9 +45,11 @@ late String dbTestName;
 TestContext? _dbTestContext;
 
 class TestContext {
+  static var _id = 0;
   IdbFactory? factory;
 
-  String get dbName => 'test.db';
+  // Each time you call dbName, it generates one
+  String get dbName => 'test${++_id}.db';
 
   // special internet explorer handling
   bool isIdbIe = false;
@@ -67,15 +69,18 @@ class TestContext {
     factory = getIdbFactoryLogger(factory!, type: type);
   }
 
-  /// Get inner factory implementation
+  /// Get inner factory implementation (somehow not working...)
   T getFactory<T>() {
-    dynamic idbFactory = factory;
+    var idbFactory = factory;
     if (idbFactory is T) {
-      return idbFactory;
+      return idbFactory as T;
     }
     if (idbFactory is IdbFactoryLogger) {
       return idbFactory.factory as T;
     }
+    print(idbFactory!.name);
+    print(T);
+    print(idbFactory.runtimeType);
     throw 'no factory of type $T found';
   }
 }
@@ -106,8 +111,22 @@ class SembastFsTestContext extends SembastTestContext {
   sdb_fs.DatabaseFactoryFs get sdbFactory =>
       idbFactorySembast.sdbFactory as sdb_fs.DatabaseFactoryFs;
 
-  IdbFactorySembast get idbFactorySembast =>
+  IdbFactorySembast get idbFactorySembastFailed =>
       super.getFactory<IdbFactorySembast>();
+
+  /// Get inner factory implementation
+  IdbFactorySembast get idbFactorySembast {
+    var idbFactory = factory;
+    if (idbFactory is IdbFactorySembast) {
+      return idbFactory;
+    }
+    if (idbFactory is IdbFactoryLogger) {
+      return idbFactory.factory as IdbFactorySembast;
+    }
+    print(idbFactory!.name);
+    print(idbFactory.runtimeType);
+    throw 'no factory of type IdbFactorySembast found';
+  }
 }
 
 class SembastMemoryFsTestContext extends SembastFsTestContext {
