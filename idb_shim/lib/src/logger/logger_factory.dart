@@ -9,6 +9,9 @@ enum IdbFactoryLoggerType {
 }
 
 abstract class IdbFactoryLogger extends IdbFactory {
+  /// Allow setting a max number of logs
+  static int? debugMaxLogCount;
+
   IdbFactory get factory;
 
   IdbFactoryLoggerType? type;
@@ -27,6 +30,15 @@ IdbFactoryLogger getIdbFactoryLogger(IdbFactory factory,
   return IdbFactoryWrapperImpl(factory);
 }
 
+int _logCount = 0;
+bool get _incrementAndShouldLog {
+  ++_logCount;
+  if (IdbFactoryLogger.debugMaxLogCount != null) {
+    return _logCount <= IdbFactoryLogger.debugMaxLogCount!;
+  }
+  return false;
+}
+
 /// Wrapper for window.indexedDB and worker self.indexedDB
 class IdbFactoryWrapperImpl extends IdbFactoryBase implements IdbFactoryLogger {
   final IdbFactory nativeFactory;
@@ -34,12 +46,16 @@ class IdbFactoryWrapperImpl extends IdbFactoryBase implements IdbFactoryLogger {
 
   @override
   void log(String message, {int? id}) {
-    print('[idb${id != null ? '-$id' : ''}]: $message');
+    if (_incrementAndShouldLog) {
+      print('[idb${id != null ? '-$id' : ''}]: $message');
+    }
   }
 
   @override
   void err(String message, {int? id}) {
-    log('!!! $message', id: id);
+    if (_incrementAndShouldLog) {
+      log('!!! $message', id: id);
+    }
   }
 
   @override

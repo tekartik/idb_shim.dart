@@ -739,7 +739,7 @@ void defineTests(TestContext ctx) {
           ]);
           expect(await index.getAllKeys(), [1, 3, 2, 3, 2]);
         } on TestFailure catch (e) {
-          print('Index.getAll multi entry allow failure $e');
+          // print('Index.getAll multi entry allow failure $e');
           expect(await index.getAll(), [
             {'name': 1},
             {
