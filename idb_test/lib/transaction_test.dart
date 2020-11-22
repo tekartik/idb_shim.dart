@@ -682,6 +682,19 @@ void defineTests(TestContext ctx) {
         });
       });
 
+      test('multiple await operation', () async {
+        await _setUp();
+        final transaction = db!.transaction(testStoreName, idbModeReadWrite);
+        final objectStore = transaction.objectStore(testStoreName);
+        // ignore: unawaited_futures
+        var count = 12;
+        for (var i = 0; i < count; i++) {
+          var key = await objectStore.add('value1');
+          expect(await objectStore.getObject(key), 'value1');
+        }
+        await transaction.completed;
+      });
+
       test('immediate completed then add', () async {
         await _setUp();
 

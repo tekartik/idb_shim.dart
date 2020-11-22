@@ -1,7 +1,9 @@
 /// Development helpers to generate warning in code
 library idb_shim_dev_utils;
 
-void _devPrint(Object object) {
+import 'package:meta/meta.dart';
+
+void _devPrint(Object? object) {
   if (_devPrintEnabled) {
     print(object);
   }
@@ -13,7 +15,7 @@ bool _devPrintEnabled = true;
 set devPrintEnabled(bool enabled) => _devPrintEnabled = enabled;
 
 @deprecated
-void devPrint(Object object) {
+void devPrint(Object? object) {
   if (_devPrintEnabled) {
     print(object);
   }
@@ -42,9 +44,11 @@ void _devError([Object? msg]) {
 @deprecated
 void devError([String? msg]) => _devError(msg);
 
-// exported for testing
-void tekartikDevPrint(Object object) => _devPrint(object);
+@visibleForTesting
+void tekartikDevPrint(Object? object) => _devPrint(object);
 
-void tekartikDevError(Object object) => _devError(object);
+@visibleForTesting
+void tekartikDevError(Object? object) => _devError(object);
 
+@visibleForTesting
 set tekartikDevPrintEnabled(bool enabled) => _devPrintEnabled = enabled;
