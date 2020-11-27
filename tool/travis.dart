@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:process_run/shell.dart';
 import 'package:pub_semver/pub_semver.dart';
 
@@ -16,5 +18,7 @@ dart tool/travis.dart
     ''');
       shell = shell.popd();
     }
+  } else {
+    stderr.writeln('ci test skipped for $dartVersion');
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dev_test/package.dart';
 import 'package:process_run/shell.dart';
 import 'package:pub_semver/pub_semver.dart';
@@ -13,5 +15,7 @@ Future main() async {
     ]) {
       await packageRunCi(dir);
     }
+  } else {
+    stderr.writeln('ci test skipped for $dartVersion');
   }
 }

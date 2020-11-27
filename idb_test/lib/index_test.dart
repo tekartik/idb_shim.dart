@@ -322,8 +322,11 @@ void defineTests(TestContext ctx) {
         await objectStore.add(value1);
         try {
           await objectStore.add(value1);
-        } catch (_) {}
-        // indexed db throw the exception during completed...
+          fail('should fail');
+        } catch (e) {
+          expect(e, isNot(const TypeMatcher<TestFailure>()));
+        }
+        // indexed db throw the exception during completed too...
         try {
           await transaction!.completed;
         } catch (_) {}
@@ -802,6 +805,10 @@ void defineTests(TestContext ctx) {
         expect(key, 1);
         var readValue = await index.get('test1');
         expect(readValue, value);
+
+        // Add again
+        key = await objectStore.add(value);
+        expect(key, 2);
       });
 
       test('add_one_array', () async {
