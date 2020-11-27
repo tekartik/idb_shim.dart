@@ -21,6 +21,10 @@ IdbFactory _idbSembastMemoryFactoryImpl;
 IdbFactory get idbFactorySembastMemoryImpl =>
     _idbSembastMemoryFactoryImpl ??= IdbFactorySembast(databaseFactoryMemory);
 
+/// New Sembast memory based factory
+IdbFactory newIdbFactorySembastMemoryImpl() =>
+    IdbFactorySembast(newDatabaseFactoryMemory());
+
 class IdbFactorySembastImpl extends IdbFactoryBase
     implements IdbFactorySembast {
   final sdb.DatabaseFactory _databaseFactory;
