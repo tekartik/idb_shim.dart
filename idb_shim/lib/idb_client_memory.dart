@@ -11,5 +11,5 @@ IdbFactory get idbFactoryMemoryFs => idbFactorySembastMemoryFsImpl;
 /// The in-memory factory
 IdbFactory get idbFactoryMemory => idbFactorySembastMemoryImpl;
 
-/// An empty in-memory factory, good for unit test?
+/// An empty in-memory factory, good for unit test.
 IdbFactory newIdbFactoryMemory() => newIdbFactorySembastMemoryImpl();
