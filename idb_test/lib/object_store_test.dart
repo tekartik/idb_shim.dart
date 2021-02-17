@@ -558,8 +558,7 @@ void defineTests(TestContext ctx) {
         final value = {};
         return objectStore.add(value).then((key) {
           return objectStore.clear().then((clearResult) {
-            expect(clearResult, null);
-
+            // expect(clearResult, null); ! void
             return objectStore.getObject(key).then((value) {
               expect(value, null);
             });
@@ -571,7 +570,7 @@ void defineTests(TestContext ctx) {
         await _setUp();
         _createTransaction();
         return objectStore.clear().then((clearResult) {
-          expect(clearResult, null);
+          // expect(clearResult, null); ! void
         });
       });
     });
@@ -600,12 +599,14 @@ void defineTests(TestContext ctx) {
       test('add', () async {
         await _setUp();
         _createTransaction();
+        dynamic exception;
         return objectStore.add({}, 1).catchError((e) {
           // There must be an error!
-          return e;
-        }).then((e) {
-          expect(isTestFailure(e), isFalse);
-          expect(isTransactionReadOnlyError(e), isTrue);
+          exception = e;
+          return Object();
+        }).then((_) {
+          expect(isTestFailure(exception), isFalse);
+          expect(isTransactionReadOnlyError(exception), isTrue);
           // don't wait for transaction
           transaction = null;
         });
@@ -614,12 +615,14 @@ void defineTests(TestContext ctx) {
       test('put', () async {
         await _setUp();
         _createTransaction();
+        dynamic exception;
         return objectStore.put({}, 1).catchError((e) {
           // There must be an error!
-          return e;
-        }).then((e) {
-          expect(isTestFailure(e), isFalse);
-          expect(isTransactionReadOnlyError(e), isTrue);
+          exception = e;
+          return Object();
+        }).then((_) {
+          expect(isTestFailure(exception), isFalse);
+          expect(isTransactionReadOnlyError(exception), isTrue);
           // don't wait for transaction
           transaction = null;
         });
@@ -628,12 +631,13 @@ void defineTests(TestContext ctx) {
       test('clear', () async {
         await _setUp();
         _createTransaction();
+        dynamic exception;
         return objectStore.clear().catchError((e) {
           // There must be an error!
-          return e;
-        }).then((e) {
-          expect(isTestFailure(e), isFalse);
-          expect(isTransactionReadOnlyError(e), isTrue);
+          exception = e;
+        }).then((_) {
+          expect(isTestFailure(exception), isFalse);
+          expect(isTransactionReadOnlyError(exception), isTrue);
           // don't wait for transaction
           transaction = null;
         });
@@ -833,14 +837,16 @@ void defineTests(TestContext ctx) {
         await _setUp();
         _createTransaction();
         final value = {'dummy': 'test_value'};
+        dynamic exception;
         return objectStore.add(value).catchError((e) {
           // There must be an error!
-          return e;
-        }).then((e) {
+          exception = e;
+          return Object();
+        }).then((_) {
           //expect(isTransactionReadOnlyError(e), isTrue);
           //devPrint(e);
           // IdbMemoryError(3): neither keyPath nor autoIncrement set and trying to add object without key
-          expect(isTestFailure(e), isFalse);
+          expect(isTestFailure(exception), isFalse);
           //expect(e is DatabaseError, isTrue);
           transaction = null;
         });
@@ -850,13 +856,16 @@ void defineTests(TestContext ctx) {
         await _setUp();
         _createTransaction();
         final value = {'dummy': 'test_value'};
+        dynamic exception;
         return objectStore.put(value).catchError((e) {
           // There must be an error!
-          return e;
-        }).then((e) {
+
+          exception = e;
+          return Object();
+        }).then((_) {
           //expect(isTransactionReadOnlyError(e), isTrue);
           //devPrint(e);
-          expect(isTestFailure(e), isFalse);
+          expect(isTestFailure(exception), isFalse);
           //expect(e is DatabaseError, isTrue);
           transaction = null;
         });
@@ -866,16 +875,18 @@ void defineTests(TestContext ctx) {
         await _setUp();
         _createTransaction();
         final value = {keyPath: 'test_value'};
+        dynamic exception;
         return objectStore.add(value).then((key) {
           expect(key, 'test_value');
           return objectStore.add(value).catchError((e) {
             // There must be an error!
-            return e;
-          }).then((e) {
+            exception = e;
+            return Object();
+          }).then((_) {
             //expect(isTransactionReadOnlyError(e), isTrue);
             //devPrint(e);
             // expect(e is DatabaseError, isTrue);
-            expect(isTestFailure(e), isFalse);
+            expect(isTestFailure(exception), isFalse);
 
             // in native completed will never succeed so remove it
             transaction = null;

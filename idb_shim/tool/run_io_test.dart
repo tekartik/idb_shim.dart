@@ -1,4 +1,3 @@
-// @dart=2.9
 import 'package:process_run/shell.dart';
 
 Future main() async {
@@ -6,7 +5,7 @@ Future main() async {
 
   await shell.run('''
 
-  pub run test -p vm
+  dart test
 
 ''');
 }

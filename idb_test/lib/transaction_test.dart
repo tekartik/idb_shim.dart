@@ -157,17 +157,19 @@ void defineTests(TestContext ctx) {
         final transaction = db!.transaction(testStoreName, idbModeReadOnly);
 
         final store = transaction.objectStore(testStoreName);
-
+        dynamic exception;
         await store.put({}).catchError((e) {
           expect(e is TestFailure, isFalse);
           // There must be an error!
-          //print(e);
-          //print(e.runtimeType);
-          return e;
-        }).then((e) {
+          // print(e);
+          // print(e.runtimeType);
+          // There must be an error!
+          exception = e;
+          return Object();
+        }).then((_) {
           // there must be an error
-          expect(e is TestFailure, isFalse);
-          expect(isTransactionReadOnlyError(e), isTrue);
+          expect(exception is TestFailure, isFalse);
+          expect(isTransactionReadOnlyError(exception), isTrue);
         });
         //database.close();
         await transaction.completed;

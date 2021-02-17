@@ -31,7 +31,7 @@ class TodoList {
   late idb.Database _db;
   final _version = 2;
 
-  Future open() async {
+  Future<void> open() async {
     //return window.indexedDB.open(_TODOS_DB, version: _version,
     return idbFactory!
         .open(_todosDb, version: _version, onUpgradeNeeded: _onUpgradeNeeded)
@@ -66,7 +66,7 @@ class TodoList {
     _input.value = '';
   }
 
-  Future _addTodo(String text) {
+  Future<void> _addTodo(String text) {
     var trans = _db.transaction(_todosStore, 'readwrite');
     var store = trans.objectStore(_todosStore);
     return store
@@ -137,7 +137,7 @@ Map<String, String> getArguments(String? search) {
   return params;
 }
 
-Future main() async {
+Future<void> main() async {
   var urlArgs = getArguments(window.location.search);
   final idbFactoryName = urlArgs['idb_factory'];
   // init factory from url

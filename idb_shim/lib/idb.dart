@@ -81,13 +81,13 @@ abstract class Cursor {
   /// store. If the cursor points to a record that has just been deleted,
   /// a new record is created.
   ///
-  Future update(Object value);
+  Future<void> update(Object value);
 
   ///
   /// deletes the record at the cursor's position, without changing the cursor's
   /// position. Once the record is deleted, the cursor's value is set to null.
   ///
-  Future delete();
+  Future<void> delete();
 }
 
 ///
@@ -220,7 +220,7 @@ abstract class ObjectStore {
   /// Clearing an object store consists of removing all records from the object
   /// store and removing all records in indexes that reference the object store.
   ///
-  Future clear();
+  Future<void> clear();
 
   ///
   /// opens a named index in the current object store, after which it can be

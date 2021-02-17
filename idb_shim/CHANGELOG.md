@@ -1,4 +1,4 @@
-## 2.0.0-nullsafety.5
+## 2.0.0
 
 * `nnbd` supports, breaking change.
 * No longer supports `null` for record value.
