@@ -83,18 +83,26 @@ class _NativeCursorWithValue extends CursorWithValue {
 }
 
 class CursorWithValueControllerNative {
-  // Sync must be true
-  final _ctlr = StreamController<CursorWithValue>(sync: true);
+  StreamController<CursorWithValue> _ctlr;
 
   CursorWithValueControllerNative(Stream<idb.CursorWithValue> stream) {
-    stream.listen((idb.CursorWithValue cwv) {
-      // idbDevPrint("adding ${cwv.key} ${cwv.value} ${cwv.primaryKey}");
-      _ctlr.add(_NativeCursorWithValue(cwv));
-    }, onDone: () {
-      _ctlr.close();
-    }, onError: (error) {
-      _ctlr.addError(error);
-    });
+    StreamSubscription streamSubscription;
+    _ctlr = StreamController<CursorWithValue>(
+        // Sync must be true
+        sync: true,
+        onListen: () {
+          streamSubscription = stream.listen((idb.CursorWithValue cwv) {
+            // idbDevPrint("adding ${cwv.key} ${cwv.value} ${cwv.primaryKey}");
+            _ctlr.add(_NativeCursorWithValue(cwv));
+          }, onDone: () {
+            _ctlr.close();
+          }, onError: (error) {
+            _ctlr.addError(error);
+          });
+        },
+        onCancel: () {
+          streamSubscription?.cancel();
+        });
   }
 
   Stream<CursorWithValue> get stream => _ctlr.stream;
@@ -102,16 +110,25 @@ class CursorWithValueControllerNative {
 
 class CursorControllerNative {
   // Sync must be true
-  final _ctlr = StreamController<Cursor>(sync: true);
+  StreamController<Cursor> _ctlr;
 
   CursorControllerNative(Stream<idb.Cursor> stream) {
-    stream.listen((idb.Cursor cursor) {
-      _ctlr.add(_NativeCursor(cursor));
-    }, onDone: () {
-      _ctlr.close();
-    }, onError: (error) {
-      _ctlr.addError(error);
-    });
+    StreamSubscription streamSubscription;
+    _ctlr = StreamController<Cursor>(
+        // Sync must be true
+        sync: true,
+        onListen: () {
+          streamSubscription = stream.listen((idb.Cursor cursor) {
+            _ctlr.add(_NativeCursor(cursor));
+          }, onDone: () {
+            _ctlr.close();
+          }, onError: (error) {
+            _ctlr.addError(error);
+          });
+        },
+        onCancel: () {
+          streamSubscription?.cancel();
+        });
   }
 
   Stream<Cursor> get stream => _ctlr.stream;

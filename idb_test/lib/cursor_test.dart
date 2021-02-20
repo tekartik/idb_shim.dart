@@ -145,6 +145,33 @@ void defineTests(TestContext ctx) {
 
           expect(count, 1);
         }
+
+        var valueRead = false;
+
+        // Cancel subscription
+        {
+          final stream =
+              objectStore.openCursor(autoAdvance: true, key: 'test_value');
+
+          var subscription = stream.listen((cwv) {
+            valueRead = true;
+          });
+          unawaited(subscription?.cancel());
+        }
+
+        // Cancel subscription no auto advance
+        {
+          final stream =
+              objectStore.openCursor(autoAdvance: false, key: 'test_value');
+
+          var subscription = stream.listen((cwv) {
+            valueRead = true;
+          });
+          unawaited(subscription?.cancel());
+        }
+
+        await transaction.completed;
+        expect(valueRead, isFalse);
       });
     });
 
