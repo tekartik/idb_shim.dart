@@ -156,7 +156,7 @@ void defineTests(TestContext ctx) {
           var subscription = stream.listen((cwv) {
             valueRead = true;
           });
-          unawaited(subscription?.cancel());
+          unawaited(subscription.cancel());
         }
 
         // Cancel subscription no auto advance
@@ -167,7 +167,7 @@ void defineTests(TestContext ctx) {
           var subscription = stream.listen((cwv) {
             valueRead = true;
           });
-          unawaited(subscription?.cancel());
+          unawaited(subscription.cancel());
         }
 
         await objectStore
@@ -177,7 +177,7 @@ void defineTests(TestContext ctx) {
             .openCursor(autoAdvance: false, key: 'test_value')
             .first;
 
-        await transaction.completed;
+        await transaction?.completed;
         expect(valueRead, isFalse);
       });
     });

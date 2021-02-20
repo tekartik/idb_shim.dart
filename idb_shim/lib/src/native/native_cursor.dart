@@ -83,10 +83,10 @@ class _NativeCursorWithValue extends CursorWithValue {
 }
 
 class CursorWithValueControllerNative {
-  StreamController<CursorWithValue> _ctlr;
+  late StreamController<CursorWithValue> _ctlr;
 
   CursorWithValueControllerNative(Stream<idb.CursorWithValue> stream) {
-    StreamSubscription streamSubscription;
+    StreamSubscription? streamSubscription;
     _ctlr = StreamController<CursorWithValue>(
         // Sync must be true
         sync: true,
@@ -96,7 +96,7 @@ class CursorWithValueControllerNative {
             _ctlr.add(_NativeCursorWithValue(cwv));
           }, onDone: () {
             _ctlr.close();
-          }, onError: (error) {
+          }, onError: (Object error) {
             _ctlr.addError(error);
           });
         },
@@ -110,10 +110,10 @@ class CursorWithValueControllerNative {
 
 class CursorControllerNative {
   // Sync must be true
-  StreamController<Cursor> _ctlr;
+  late StreamController<Cursor> _ctlr;
 
   CursorControllerNative(Stream<idb.Cursor> stream) {
-    StreamSubscription streamSubscription;
+    StreamSubscription? streamSubscription;
     _ctlr = StreamController<Cursor>(
         // Sync must be true
         sync: true,
@@ -122,7 +122,7 @@ class CursorControllerNative {
             _ctlr.add(_NativeCursor(cursor));
           }, onDone: () {
             _ctlr.close();
-          }, onError: (error) {
+          }, onError: (Object error) {
             _ctlr.addError(error);
           });
         },
