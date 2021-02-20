@@ -1,4 +1,4 @@
-## 1.12.2+2
+## 1.12.2+3
 
 * Add support for `Transaction.abort`
 * Allow read/write during open transaction.
