@@ -4,7 +4,7 @@
 * No longer supports `null` for record value.
 * Remove deprecated methods.
 
-## 1.12.2+1
+## 1.12.2+3
 
 * Add support for `Transaction.abort`
 * Allow read/write during open transaction.

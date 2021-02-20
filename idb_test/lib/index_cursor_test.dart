@@ -824,5 +824,37 @@ void defineTests(TestContext ctx) {
         expect(gotItem, isTrue);
       });
     });
+
+    group('with_3_keys', () {
+      Future _openDb() async {
+        final _dbName = ctx.dbName;
+        await idbFactory.deleteDatabase(_dbName);
+        void _initializeDatabase(VersionChangeEvent e) {
+          final db = e.database;
+          final objectStore =
+              db.createObjectStore(testStoreName, autoIncrement: true);
+          objectStore.createIndex(testNameIndex, ['f1', 'f2', 'f3']);
+        }
+
+        db = await idbFactory.open(_dbName,
+            version: 1, onUpgradeNeeded: _initializeDatabase);
+      }
+
+      test('one_record', () async {
+        await _openDb();
+        _createTransaction();
+
+        var key = await objectStore.put({'f1': 1, 'f2': 2, 'f3': 3});
+        final index = objectStore.index(testNameIndex);
+        var first = await index
+            .openCursor(
+                range: KeyRange.bound([1, 2, 0], [1, 2, 4.5]),
+                direction: idbDirectionPrev)
+            .first;
+        expect(first.primaryKey, key);
+      });
+
+      tearDown(_tearDown);
+    });
   });
 }
