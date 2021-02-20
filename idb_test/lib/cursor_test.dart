@@ -170,6 +170,13 @@ void defineTests(TestContext ctx) {
           unawaited(subscription?.cancel());
         }
 
+        await objectStore
+            .openCursor(autoAdvance: true, key: 'test_value')
+            .first;
+        await objectStore
+            .openCursor(autoAdvance: false, key: 'test_value')
+            .first;
+
         await transaction.completed;
         expect(valueRead, isFalse);
       });
