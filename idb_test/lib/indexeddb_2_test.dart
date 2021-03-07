@@ -74,7 +74,7 @@ void defineTests(TestContext ctx) {
   obj3['a'] = 100;
   obj3['b'] = obj3; // Cycle.
 
-  var obj4 = SplayTreeMap<String, dynamic>(); // Different implementation.
+  var obj4 = SplayTreeMap<String, Object?>(); // Different implementation.
   obj4['a'] = 100;
   obj4['b'] = 's';
 

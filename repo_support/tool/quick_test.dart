@@ -1,9 +1,10 @@
 import 'package:process_run/shell.dart';
+import 'package:path/path.dart';
 
 Future main() async {
   var shell = Shell();
 
-  shell = shell.pushd('idb_shim');
+  shell = shell.pushd(join('..', 'idb_shim'));
   await shell.run('''
 
 pub get

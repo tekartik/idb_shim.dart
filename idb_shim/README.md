@@ -11,6 +11,13 @@ It also  allows to test your database schema and access in vm unit tests.
 
 [![Build Status](https://travis-ci.org/tekartik/idb_shim.dart.svg?branch=master)](https://travis-ci.org/tekartik/idb_shim.dart)
 
+Usage example:
+* [notepad_idb](https://github.com/alextekartik/flutter_app_example/tree/master/notepad_idb): Simple flutter notepad working on all platforms (web/mobile/desktop)
+  ([online demo](https://alextekartik.github.io/flutter_app_example/notepad_idb/))
+* [demo_idb](https://github.com/alextekartik/flutter_app_example/tree/master/demo_idb): Simplest counter persistent app working on all platforms (web/mobile/desktop)
+  ([online demo](https://alextekartik.github.io/flutter_app_example/demo_idb/))
+  
+
 ### Usage
 
 Assume you have the existing:

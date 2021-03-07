@@ -47,7 +47,7 @@ void main() {
         'text',
         true,
         // null, no longer supported with nnbd
-        //<dynamic, dynamic>{},
+        //<Object?, Object?>{},
         [],
         [
           {
@@ -79,7 +79,7 @@ void main() {
                 '$value ${identityHashCode(value)} vs ${identityHashCode(encoded)}');
       }
       var notIdenticals = [
-        <dynamic, dynamic>{}, // being cast
+        <Object?, Object?>{}, // being cast
         Uint8List.fromList([1, 2, 3]),
         DateTime.fromMillisecondsSinceEpoch(1, isUtc: true),
         [DateTime.fromMillisecondsSinceEpoch(1, isUtc: true)],
