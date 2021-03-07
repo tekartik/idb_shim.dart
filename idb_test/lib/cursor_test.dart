@@ -192,11 +192,11 @@ void defineTests(TestContext ctx) {
           change.database.createObjectStore('store1', keyPath: 'key');
         });
         try {
-          final obj = <String, dynamic>{
+          final obj = <String, Object?>{
             'key': 1,
             'someval': 'lorem',
           };
-          final obj2 = <String, dynamic>{
+          final obj2 = <String, Object?>{
             'key': 1,
             'someval': 'ipsem',
           };
@@ -236,11 +236,11 @@ void defineTests(TestContext ctx) {
               .createObjectStore('store1', keyPath: 'key', autoIncrement: true);
         });
         try {
-          final obj = <String, dynamic>{
+          final obj = <String, Object?>{
             'key': 1,
             'someval': 'lorem',
           };
-          final obj2 = <String, dynamic>{
+          final obj2 = <String, Object?>{
             'key': 1,
             'someval': 'ipsem',
           };

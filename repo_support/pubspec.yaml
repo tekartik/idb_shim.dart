@@ -1,0 +1,14 @@
+name: idb_shim_repo_support
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: '>=2.10.0-0 <4.0.0'
+
+dependencies:
+  process_run: '>=0.10.0'
+
+dev_dependencies:
+  test: '>=1.0.0'
+  dev_test: '>=0.13.4-dev.1'
+

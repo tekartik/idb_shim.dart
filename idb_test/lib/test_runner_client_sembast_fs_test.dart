@@ -80,7 +80,7 @@ void defineTests(SembastFsTestContext ctx) {
       expect(await getStorageContent(), await getSdbStorageContext());
     }
 
-    var store = sdb.StoreRef<String, dynamic>.main();
+    var store = sdb.StoreRef<String, Object?>.main();
     tearDown(_tearDown);
     dbTest('empty', () async {
       db = await idbFactory.open(dbTestName);

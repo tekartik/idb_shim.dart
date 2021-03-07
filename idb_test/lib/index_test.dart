@@ -617,7 +617,7 @@ void defineTests(TestContext ctx) {
         });
 
         // put some data
-        final object = <String, dynamic>{
+        final object = <String, Object?>{
           'spath': [1, 2]
         };
         var txn = db!.transaction('test', 'readwrite');
