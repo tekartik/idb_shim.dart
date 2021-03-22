@@ -1,12 +1,13 @@
-import 'package:dev_test/package.dart';
 import 'package:process_run/shell.dart';
+import 'package:dev_test/package.dart';
 
 Future main() async {
   var shell = Shell();
   await packageRunCi('.',
       options: PackageRunCiOptions(noTest: true, noOverride: true));
+
   await shell.run('''
-  dart test -p chrome,vm,firefox -j 1
+  dart test -p vm,chrome -j 1
 
   # Currently running as 2 commands
   dart pub run build_runner test -- -p chrome -j 1 test/web
