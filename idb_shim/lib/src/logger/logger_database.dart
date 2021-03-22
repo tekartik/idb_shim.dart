@@ -35,9 +35,9 @@ class DatabaseLogger extends IdbDatabaseBase {
   ObjectStore createObjectStore(String name,
       {String? keyPath, bool? autoIncrement}) {
     log('createObjectStore($name${getPropertyMapText({
-      'keyPath': keyPath,
-      'autoIncrement': autoIncrement
-    })})');
+          'keyPath': keyPath,
+          'autoIncrement': autoIncrement
+        })})');
     try {
       var store = idbDatabase.createObjectStore(name,
           keyPath: keyPath, autoIncrement: autoIncrement);
