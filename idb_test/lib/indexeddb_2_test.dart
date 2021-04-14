@@ -13,20 +13,21 @@ import 'indexeddb_utils.dart';
 
 // Write and re-read Maps: simple Maps; Maps with DAGs; Maps with cycles.
 
-const String DB_NAME = 'Test2';
-const String STORE_NAME = 'TEST';
-const int VERSION = 1;
+const String _dbName = 'Test2';
+const String _storeName = 'TEST';
+const int _version = 1;
 
-Future testReadWrite(idb.IdbFactory idbFactory, key, value, check,
-    [String dbName = DB_NAME,
-    String storeName = STORE_NAME,
-    int version = VERSION]) async {
+Future testReadWrite(idb.IdbFactory idbFactory, Object key, Object value,
+    Function(dynamic expected, dynamic actual) check,
+    [String dbName = _dbName,
+    String storeName = _storeName,
+    int version = _version]) async {
   void createObjectStore(idb.VersionChangeEvent e) {
     var store = e.database.createObjectStore(storeName);
     expect(store, isNotNull);
   }
 
-  var db;
+  idb.Database? db;
   // Delete any existing DBs.
   await idbFactory.deleteDatabase(dbName);
 
@@ -34,6 +35,7 @@ Future testReadWrite(idb.IdbFactory idbFactory, key, value, check,
     db = await idbFactory.open(dbName,
         version: version, onUpgradeNeeded: createObjectStore);
     var transaction = db.transactionList([storeName], 'readwrite');
+    // ignore: unawaited_futures
     transaction.objectStore(storeName).put(value, key);
 
     await transaction.completed;
@@ -82,7 +84,7 @@ void defineTests(TestContext ctx) {
   cyclicList[1] = cyclicList;
 
   dynamic skipGo(name, data) => null;
-  void go(String name, data) =>
+  void go(String name, Object data) =>
       test(name, () => testReadWrite(idbFactory!, 123, data, verifyGraph));
 
   test('test_verifyGraph', () {

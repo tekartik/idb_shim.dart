@@ -8,15 +8,15 @@ import 'idb_test_common.dart';
 // so that this can be run directly
 
 // Test for KeyRange and Cursor.
-const String DB_NAME = 'Test4';
-const String STORE_NAME = 'TEST';
-const int VERSION = 1;
+const String _dbName = 'Test4';
+const String _storeName = 'TEST';
+const int _version = 1;
 
 Future<Database> createAndOpenDb(IdbFactory idbFactory) {
-  return idbFactory.deleteDatabase(DB_NAME).then((_) {
-    return idbFactory.open(DB_NAME, version: VERSION, onUpgradeNeeded: (e) {
+  return idbFactory.deleteDatabase(_dbName).then((_) {
+    return idbFactory.open(_dbName, version: _version, onUpgradeNeeded: (e) {
       var db = e.database;
-      db.createObjectStore(STORE_NAME);
+      db.createObjectStore(_storeName);
     });
   });
 }
@@ -40,11 +40,11 @@ Future<Database> writeItems(Database db) {
 }
 */
 Future<Database> writeItems(Database db) {
-  var transaction = db.transaction(STORE_NAME, 'readwrite');
+  var transaction = db.transaction(_storeName, 'readwrite');
 
   Future<Object?> write(index) {
     return transaction
-        .objectStore(STORE_NAME)
+        .objectStore(_storeName)
         .put({'content': 'Item $index'}, index);
   }
 
@@ -61,11 +61,11 @@ Future<Database> setupDb(IdbFactory idbFactory) {
   return createAndOpenDb(idbFactory).then(writeItems);
 }
 
-Future testRange(db, range, expectedFirst, expectedLast) {
+Future testRange(Database db, range, int? expectedFirst, int? expectedLast) {
   //var done = expectAsync0(() {});
 
-  final txn = db.transaction(STORE_NAME, 'readonly') as Transaction;
-  final objectStore = txn.objectStore(STORE_NAME);
+  final txn = db.transaction(_storeName, 'readonly');
+  final objectStore = txn.objectStore(_storeName);
   var cursors = objectStore
       .openCursor(range: range as KeyRange, autoAdvance: true)
       .asBroadcastStream();
@@ -92,7 +92,7 @@ Future testRange(db, range, expectedFirst, expectedLast) {
     if (expectedFirst == null) {
       expect(length, isZero);
     } else {
-      expect(length, expectedLast - expectedFirst + 1);
+      expect(length, expectedLast! - expectedFirst + 1);
     }
     return txn.completed;
   });
@@ -109,7 +109,7 @@ void defineTests(TestContext ctx) {
   // Don't bother with these tests if it's unsupported.
   // Support is tested in indexeddb_1_test
   if (IdbFactory.supported) {
-    late var db;
+    late Database db;
     setUp(() {
       return setupDb(idbFactory!).then((result) {
         db = result;

@@ -40,7 +40,7 @@ Stream<idb.Cursor> cursorStreamFromResult(
 ///
 Stream<idb.Cursor> storeOpenKeyCursor(idb.ObjectStore objectStore,
     {dynamic key, idb.KeyRange? range, String? direction, bool? autoAdvance}) {
-  var keyOrRange;
+  dynamic keyOrRange;
   if (key != null) {
     if (range != null) {
       throw ArgumentError('Cannot specify both key and range.');

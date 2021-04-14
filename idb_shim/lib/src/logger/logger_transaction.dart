@@ -9,7 +9,7 @@ import 'package:idb_shim/src/utils/core_imports.dart';
 class TransactionLogger extends IdbTransactionBase {
   Transaction idbTransaction;
   static int _id = 0;
-  final id;
+  final int id;
 
   DatabaseLogger get idbDatabaseLogger => database as DatabaseLogger;
 

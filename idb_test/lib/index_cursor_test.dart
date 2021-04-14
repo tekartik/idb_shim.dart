@@ -414,10 +414,10 @@ void defineTests(TestContext ctx) {
         _createTransaction();
         return fill3SampleRows().then((_) {
           return cursorToList(index.openCursor(autoAdvance: true)).then((list) {
-            expect(list[0].value['name'], equals('test1'));
+            expect((list[0].value as Map)['name'], equals('test1'));
             expect(list[0].primaryKey, equals(2));
-            expect(list[1].value['name'], equals('test2'));
-            expect(list[2].value['name'], equals('test3'));
+            expect((list[1].value as Map)['name'], equals('test2'));
+            expect((list[2].value as Map)['name'], equals('test3'));
             expect(list[2].primaryKey, equals(3));
             expect(list.length, 3);
 
@@ -425,16 +425,16 @@ void defineTests(TestContext ctx) {
                     range: KeyRange.bound('test2', 'test3'), autoAdvance: true))
                 .then((list) {
               expect(list.length, 2);
-              expect(list[0].value['name'], equals('test2'));
+              expect((list[0].value as Map)['name'], equals('test2'));
               expect(list[0].primaryKey, equals(1));
-              expect(list[1].value['name'], equals('test3'));
+              expect((list[1].value as Map)['name'], equals('test3'));
               expect(list[1].primaryKey, equals(3));
 
               return cursorToList(
                       index.openCursor(key: 'test1', autoAdvance: true))
                   .then((list) {
                 expect(list.length, 1);
-                expect(list[0].value['name'], equals('test1'));
+                expect((list[0].value as Map)['name'], equals('test1'));
                 expect(list[0].primaryKey, equals(2));
 
                 //return transaction.completed;

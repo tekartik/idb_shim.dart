@@ -13,8 +13,8 @@ import 'idb_test_common.dart';
 //TEKARTIK_IDB_REMOVED import 'dart:indexed_db' as idb;
 // so that this can be run directly
 
-const String STORE_NAME = 'TEST';
-const int VERSION = 1;
+const String _storeName = 'TEST';
+const int _version = 1;
 
 var databaseNameIndex = 0;
 
@@ -44,22 +44,23 @@ typedef BodyFunc = dynamic Function();
 
 typedef TestFunc = BodyFunc Function(
     idb.IdbFactory? idbFactory, Object key, Object value, dynamic matcher,
-    [String? dbName, String? storeName, int? version, bool? stringifyResult]);
+    [String? dbName, String storeName, int? version, bool? stringifyResult]);
 
-BodyFunc testReadWrite(idb.IdbFactory? idbFactory, key, value, matcher,
+BodyFunc testReadWrite(
+        idb.IdbFactory? idbFactory, Object key, Object value, matcher,
         [String? dbName,
-        String? storeName = STORE_NAME,
-        int? version = VERSION,
+        String storeName = _storeName,
+        int? version = _version,
         bool? stringifyResult = false]) =>
     () {
       dbName ??= nextDatabaseName();
 
       void createObjectStore(idb.VersionChangeEvent e) {
-        var store = e.database.createObjectStore(storeName!);
+        var store = e.database.createObjectStore(storeName);
         expect(store, isNotNull);
       }
 
-      var db;
+      idb.Database? db;
       //TEKARTIK_IDB_REMOVED return _idbFactory.deleteDatabase(dbName).then((_) {
       return idbFactory!.deleteDatabase(dbName!).then((_) {
         //TEKARTIK_IDB_REMOVED return _idbFactory.open(dbName, version: version,
@@ -67,14 +68,14 @@ BodyFunc testReadWrite(idb.IdbFactory? idbFactory, key, value, matcher,
             version: version, onUpgradeNeeded: createObjectStore);
       }).then((result) {
         db = result;
-        var transaction = db.transactionList([storeName], 'readwrite');
+        var transaction = db!.transactionList([storeName], 'readwrite');
         transaction.objectStore(storeName).put(value, key);
         return transaction.completed;
       }).then((_) {
-        var transaction = db.transaction(storeName, 'readonly');
+        var transaction = db!.transaction(storeName, 'readonly');
         return transaction.objectStore(storeName).getObject(key);
       }).then((object) {
-        db.close();
+        db!.close();
         if (stringifyResult!) {
           // Stringify the numbers to verify that we're correctly returning ints
           // as ints vs doubles.
@@ -84,7 +85,7 @@ BodyFunc testReadWrite(idb.IdbFactory? idbFactory, key, value, matcher,
         }
       }).whenComplete(() {
         if (db != null) {
-          db.close();
+          db!.close();
         }
         return idbFactory.deleteDatabase(dbName!);
       });
@@ -93,8 +94,8 @@ BodyFunc testReadWrite(idb.IdbFactory? idbFactory, key, value, matcher,
 BodyFunc testReadWriteTyped(
         idb.IdbFactory? idbFactory, Object key, Object value, matcher,
         [String? dbName,
-        String? storeName = STORE_NAME,
-        int? version = VERSION,
+        String? storeName = _storeName,
+        int? version = _version,
         bool? stringifyResult = false]) =>
     () {
       dbName ??= nextDatabaseName();
@@ -145,17 +146,24 @@ void testTypes(TestFunc testFunction, idb.IdbFactory? idbFactory) {
   test(
       'largeInt',
       testFunction(idbFactory, 123, 1371854424211, equals('1371854424211'),
-          null, STORE_NAME, VERSION, true));
+          null, _storeName, _version, true));
   //TEKARTIK_IDB_REMOVED
   test(
       'largeDoubleConvertedToInt',
       testFunction(idbFactory, 123, 1371854424211.0, equals('1371854424211'),
-          null, STORE_NAME, VERSION, true),
+          null, _storeName, _version, true),
       skip: true);
   test(
       'largeIntInMap',
-      testFunction(idbFactory, 123, {'time': 4503599627370492},
-          equals('{time: 4503599627370492}'), null, STORE_NAME, VERSION, true));
+      testFunction(
+          idbFactory,
+          123,
+          {'time': 4503599627370492},
+          equals('{time: 4503599627370492}'),
+          null,
+          _storeName,
+          _version,
+          true));
   var now = DateTime.now();
   //TEKARTIK_IDB_REMOVED
   test(
@@ -164,7 +172,7 @@ void testTypes(TestFunc testFunction, idb.IdbFactory? idbFactory) {
           idbFactory,
           123,
           now,
-          predicate((dynamic date) =>
+          predicate((DateTime date) =>
               date.millisecondsSinceEpoch == now.millisecondsSinceEpoch)),
       skip: true);
 }

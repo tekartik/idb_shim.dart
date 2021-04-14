@@ -215,7 +215,8 @@ void defineTests(TestContext ctx) {
           ]
         };
         if (ctx.isIdbIe) {
-          (expectedExport['stores'] as List)[0]['values'][2]
+          ((((expectedExport['stores'] as List)[0] as Map)['values'] as List)[2]
+                  as Map)
               .remove('autoIncrement');
         }
         await _checkAll(db!, expectedExport, _check);
@@ -268,7 +269,8 @@ void defineTests(TestContext ctx) {
           ]
         };
         if (ctx.isIdbIe) {
-          (expectedExport['stores'] as List)[0]['values'][2]
+          ((((expectedExport['stores'] as List)[0] as Map)['values'] as List)[2]
+                  as Map)
               .remove('autoIncrement');
         }
         await _checkAll(db!, expectedExport, _check);
@@ -332,9 +334,11 @@ void defineTests(TestContext ctx) {
           ]
         };
         if (ctx.isIdbIe) {
-          (expectedExport['stores'] as List)[0]['values'][2]
+          ((((expectedExport['stores'] as List)[0] as Map)['values'] as List)[2]
+                  as Map)
               .remove('autoIncrement');
-          (expectedExport['stores'] as List)[0]['values'][2]['indecies'][0]
+          ((((((expectedExport['stores'] as List)[0] as Map)['values']
+                  as List)[2] as Map)['indecies'] as List)[0] as Map)
               .remove('multiEntry');
         }
         await _checkAll(db!, expectedExport, _check);
@@ -410,9 +414,11 @@ void defineTests(TestContext ctx) {
           ]
         };
         if (ctx.isIdbIe) {
-          (expectedExport['stores'] as List)[0]['values'][2]
+          ((((expectedExport['stores'] as List)[0] as Map)['values'] as List)[2]
+                  as Map)
               .remove('autoIncrement');
-          (expectedExport['stores'] as List)[0]['values'][2]['indecies'][0]
+          ((((((expectedExport['stores'] as List)[0] as Map)['values']
+                  as List)[2] as Map)['indecies'] as List)[0] as Map)
               .remove('multiEntry');
         }
         await _checkAll(db!, expectedExport, _check);
