@@ -352,7 +352,7 @@ class IdbObjectStoreMeta {
 }
 
 class IdbCursorMeta {
-  var key;
+  dynamic key;
 
   bool get ascending => _ascending;
   final bool autoAdvance;
@@ -464,7 +464,7 @@ class IdbIndexMeta {
   Map<String, Object?> toMap() {
     dynamic keyPath;
     if (this.keyPath is Iterable) {
-      keyPath = this.keyPath?.cast<String>();
+      keyPath = (this.keyPath as Iterable).cast<String>();
     } else {
       keyPath = this.keyPath?.toString();
     }

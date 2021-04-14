@@ -7,16 +7,16 @@ import 'package:idb_shim/idb_client.dart';
 import 'idb_test_common.dart';
 
 // Read with cursor.
-const String DB_NAME = 'Test3';
-const String STORE_NAME = 'TEST';
-const int VERSION = 1;
+const String _dbName = 'Test3';
+const String _storeName = 'TEST';
+const int _version = 1;
 
 Future<Database> createAndOpenDb(IdbFactory idbFactory) {
-  return idbFactory.deleteDatabase(DB_NAME).then((_) {
-    return idbFactory.open(DB_NAME, version: VERSION, onUpgradeNeeded: (e) {
+  return idbFactory.deleteDatabase(_dbName).then((_) {
+    return idbFactory.open(_dbName, version: _version, onUpgradeNeeded: (e) {
       // ignore: undefined_getter
       var db = e.database;
-      db.createObjectStore(STORE_NAME);
+      db.createObjectStore(_storeName);
     });
   });
 }
@@ -39,10 +39,10 @@ Future<Database> writeItems(Database db) {
 }
 */
 Future<Database> writeItems(Database db) {
-  var transaction = db.transaction(STORE_NAME, 'readwrite');
+  var transaction = db.transaction(_storeName, 'readwrite');
 
   Future<Object?> write(index) {
-    return transaction.objectStore(STORE_NAME).put('Item $index', index);
+    return transaction.objectStore(_storeName).put('Item $index', index);
   }
 
   var future = write(0);
@@ -61,8 +61,8 @@ Future<Database> setupDb(IdbFactory idbFactory) {
 }
 
 Future<Database> readAllViaCursor(Database db) {
-  final txn = db.transaction(STORE_NAME, 'readonly');
-  final objectStore = txn.objectStore(STORE_NAME);
+  final txn = db.transaction(_storeName, 'readonly');
+  final objectStore = txn.objectStore(_storeName);
   var itemCount = 0;
   var sumKeys = 0;
   int? lastKey;
@@ -86,8 +86,8 @@ Future<Database> readAllViaCursor(Database db) {
 }
 
 Future<Database> readAllReversedViaCursor(Database db) {
-  final txn = db.transaction(STORE_NAME, 'readonly');
-  final objectStore = txn.objectStore(STORE_NAME);
+  final txn = db.transaction(_storeName, 'readonly');
+  final objectStore = txn.objectStore(_storeName);
   var itemCount = 0;
   var sumKeys = 0;
   int? lastKey;

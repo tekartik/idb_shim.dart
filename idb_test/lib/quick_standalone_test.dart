@@ -4,10 +4,10 @@ import 'package:idb_shim/idb_client.dart';
 
 import 'idb_test_common.dart';
 
-const STORE_NAME = 'quick_store';
-const DB_NAME = 'quick_db';
-const NAME_INDEX = 'quick_index';
-const NAME_FIELD = 'quick_field';
+const _storeName = 'quick_store';
+const _dbName = 'quick_db';
+const _nameIndex = 'quick_index';
+const _nameField = 'quick_field';
 
 // so that this can be run directly
 void main() {
@@ -22,21 +22,21 @@ void defineTests(TestContext ctx) {
     late ObjectStore objectStore;
 
     void _createTransaction() {
-      transaction = db.transaction(STORE_NAME, idbModeReadWrite);
-      objectStore = transaction!.objectStore(STORE_NAME);
+      transaction = db.transaction(_storeName, idbModeReadWrite);
+      objectStore = transaction!.objectStore(_storeName);
     }
 
     setUp(() {
-      return idbFactory!.deleteDatabase(DB_NAME).then((_) {
+      return idbFactory!.deleteDatabase(_dbName).then((_) {
         void _initializeDatabase(VersionChangeEvent e) {
           final db = e.database;
           final objectStore =
-              db.createObjectStore(STORE_NAME, autoIncrement: true);
-          objectStore.createIndex(NAME_INDEX, NAME_FIELD, unique: true);
+              db.createObjectStore(_storeName, autoIncrement: true);
+          objectStore.createIndex(_nameIndex, _nameField, unique: true);
         }
 
         return idbFactory
-            .open(DB_NAME, version: 1, onUpgradeNeeded: _initializeDatabase)
+            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
             .then((Database database) {
           db = database;
         });
@@ -56,8 +56,8 @@ void defineTests(TestContext ctx) {
 
     test('add/get map', () {
       _createTransaction();
-      final value = {NAME_FIELD: 'test1'};
-      final index = objectStore.index(NAME_INDEX);
+      final value = {_nameField: 'test1'};
+      final index = objectStore.index(_nameIndex);
       return objectStore.add(value).then((key) {
         return index.get('test1').then((readValue) {
           expect(readValue, value);

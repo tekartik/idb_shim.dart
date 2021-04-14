@@ -8,7 +8,7 @@ void main() {
     if (IdbFactory.supported) {
       final dbName = 'com.tekartik.ie_count_bug.test';
       await window.indexedDB!.deleteDatabase(dbName);
-      void _setupDb(e) {
+      void _setupDb(VersionChangeEvent e) {
         final db = e.target.result as Database;
         db.createObjectStore('store', autoIncrement: true);
       }

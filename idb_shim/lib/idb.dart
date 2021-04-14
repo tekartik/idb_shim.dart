@@ -534,9 +534,11 @@ abstract class VersionChangeEvent {
 ///
 abstract class Event {}
 
+/// OnUpgrade function.
 typedef OnUpgradeNeededFunction = FutureOr<void> Function(
     VersionChangeEvent event);
 
+/// OnBlocked function.
 typedef OnBlockedFunction = void Function(Event event);
 
 ///

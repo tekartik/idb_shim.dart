@@ -204,7 +204,8 @@ bool isTestFailure(e) {
   return e is TestFailure;
 }
 
-void dbGroup(TestContext ctx, String description, body, [_group = group]) {
+void dbGroup(TestContext ctx, String description, dynamic Function() body,
+    [void Function(String description, void Function() body) _group = group]) {
   _group(description, () {
     _dbTestContext = ctx;
     body();
@@ -212,7 +213,7 @@ void dbGroup(TestContext ctx, String description, body, [_group = group]) {
   });
 }
 
-void dbTest(String description, body,
+void dbTest(String description, dynamic Function() body,
     {
     // void Function(String name, Function() body, {bool? solo})? test,
     @deprecated bool? solo}) {

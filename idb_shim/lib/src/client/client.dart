@@ -7,4 +7,6 @@ library idb_shim.src.client.client;
 dynamic get idbDevWarning => null;
 
 @deprecated
+
+/// Dev print (deprecated on purpose)
 void idbDevPrint(msg) => print(msg);

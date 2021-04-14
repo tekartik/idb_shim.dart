@@ -18,12 +18,12 @@ Object? _toSembastValue(Object? value) {
     return value;
   } else if (value is Map) {
     var map = value;
-    var clone;
+    Map? clone;
     map.forEach((key, item) {
       var converted = _toSembastValue(item);
       if (!identical(converted, item)) {
         clone ??= Map<String, Object?>.from(map);
-        clone[key] = converted;
+        clone![key] = converted;
       }
     });
     return clone ?? map;
@@ -31,7 +31,7 @@ Object? _toSembastValue(Object? value) {
     return Blob(value);
   } else if (value is List) {
     var list = value;
-    var clone;
+    List? clone;
     for (var i = 0; i < list.length; i++) {
       var item = list[i];
       var converted = _toSembastValue(item);
@@ -55,7 +55,7 @@ Object toSembastValue(Object value) {
     converted = _toSembastValue(value)!;
   } on ArgumentError catch (e) {
     throw ArgumentError.value(e.invalidValue,
-        '${e.invalidValue.runtimeType} in $value', 'not supported');
+        '${(e.invalidValue as Object).runtimeType} in $value', 'not supported');
   }
 
   /// Ensure root is Map<String, Object?> if only Map
@@ -70,18 +70,18 @@ Object? _fromSembastValue(Object? value) {
     return value;
   } else if (value is Map) {
     var map = value;
-    var clone;
+    Map? clone;
     map.forEach((key, item) {
       var converted = _fromSembastValue(item);
       if (!identical(converted, item)) {
         clone ??= Map<String, Object?>.from(map);
-        clone[key] = converted;
+        clone![key] = converted;
       }
     });
     return clone ?? map;
   } else if (value is List) {
     var list = value;
-    var clone;
+    List? clone;
     for (var i = 0; i < list.length; i++) {
       var item = list[i];
       var converted = _fromSembastValue(item);
@@ -107,7 +107,7 @@ Object fromSembastValue(Object value) {
     converted = _fromSembastValue(value)!;
   } on ArgumentError catch (e) {
     throw ArgumentError.value(e.invalidValue,
-        '${e.invalidValue.runtimeType} in $value', 'not supported');
+        '${(e.invalidValue as Object).runtimeType} in $value', 'not supported');
   }
 
   /// Ensure root is Map<String, Object?> if only Map

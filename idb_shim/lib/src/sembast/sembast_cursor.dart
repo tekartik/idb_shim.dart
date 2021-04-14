@@ -170,7 +170,7 @@ class RecordSnapshotSembast {
 
 class IndexRecordSnapshotSembast extends RecordSnapshotSembast {
   @override
-  final key;
+  final Object key;
   IndexRecordSnapshotSembast(
       this.key, sdb.RecordSnapshot<Object, Object> snapshot)
       : super(snapshot);

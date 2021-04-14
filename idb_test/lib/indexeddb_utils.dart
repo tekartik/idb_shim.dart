@@ -50,7 +50,8 @@ void verifyGraph(expected, actual) {
 
     if (expected is ByteBuffer) {
       expect(actual is ByteBuffer, isTrue, reason: '$actual is ByteBuffer');
-      expect(expected.lengthInBytes, equals(actual.lengthInBytes),
+      expect(
+          expected.lengthInBytes, equals((actual as ByteBuffer).lengthInBytes),
           reason: message(path, '.lengthInBytes'));
       // TODO(antonm): one can create a view on top of those
       // and check if contents identical.  Let's do it later.
@@ -60,7 +61,7 @@ void verifyGraph(expected, actual) {
     if (expected is DateTime) {
       expect(actual is DateTime, isTrue, reason: '$actual is DateTime');
       expect(expected.millisecondsSinceEpoch,
-          equals(actual.millisecondsSinceEpoch),
+          equals((actual as DateTime).millisecondsSinceEpoch),
           reason: message(path, '.millisecondsSinceEpoch'));
       return;
     }
@@ -78,7 +79,7 @@ void verifyGraph(expected, actual) {
 
     if (expected is TypedData) {
       expect(actual is TypedData, isTrue, reason: '$actual is TypedData');
-      walk('$path/.buffer', expected.buffer, actual.buffer);
+      walk('$path/.buffer', expected.buffer, (actual as TypedData).buffer);
       expect(expected.offsetInBytes, equals(actual.offsetInBytes),
           reason: message(path, '.offsetInBytes'));
       expect(expected.lengthInBytes, equals(actual.lengthInBytes),
@@ -88,7 +89,7 @@ void verifyGraph(expected, actual) {
 
     if (expected is List) {
       expect(actual, isList, reason: message(path, '$actual is List'));
-      expect(actual.length, expected.length,
+      expect((actual as List).length, expected.length,
           reason: message(path, 'different list lengths'));
       for (var i = 0; i < expected.length; i++) {
         walk('$path[$i]', expected[i], actual[i]);
@@ -104,7 +105,7 @@ void verifyGraph(expected, actual) {
         }
         walk("$path['$key']", expected[key], actual[key]);
       }
-      for (var key in actual.keys) {
+      for (var key in (actual as Map).keys) {
         if (!expected.containsKey(key)) {
           expect(false, isTrue, reason: message(path, "extra key '$key'"));
         }
