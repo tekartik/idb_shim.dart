@@ -1,16 +1,15 @@
 import 'dart:io';
 
-import 'package:process_run/shell.dart';
-import 'package:yaml/yaml.dart';
-import 'package:pub_semver/pub_semver.dart';
 import 'package:path/path.dart';
+import 'package:process_run/shell.dart';
+import 'package:pub_semver/pub_semver.dart';
+import 'package:yaml/yaml.dart';
 
 Future main() async {
   var shell = Shell();
   var version = Version.parse((loadYaml(
-              await File(join('..', 'idb_shim', 'pubspec.yaml')).readAsString())
-          as Map)['version']
-      ?.toString());
+          await File(join('..', 'idb_shim', 'pubspec.yaml')).readAsString())
+      as Map)['version'] as String);
   print('Version $version');
   print('Tap anything or CTRL-C: $version');
 

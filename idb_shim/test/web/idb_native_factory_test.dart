@@ -3,8 +3,8 @@ library idb_browser_test;
 
 import 'dart:html';
 
-import 'package:test/test.dart';
 import 'package:idb_shim/idb_client_native.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('idb_native_factory', () {
