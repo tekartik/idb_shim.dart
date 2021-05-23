@@ -2,9 +2,6 @@
 // replace _idbFactory with _idbFactory
 library idb_shim.test.indexeddb_1_test;
 
-//TEKARTIK_IDB_REMOVED import 'package:unittest/html_individual_config.dart';
-import 'dart:async';
-
 import 'package:idb_shim/idb_client.dart' as idb;
 
 import 'idb_test_common.dart';

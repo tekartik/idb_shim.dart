@@ -1,5 +1,3 @@
-import 'package:idb_shim/src/common/common_meta.dart'; // ignore: implementation_imports
-
 import 'idb_test_common.dart';
 
 // auto-increment, no key path
