@@ -1,6 +1,5 @@
 library factory_test;
 
-import 'dart:async';
 import 'dart:typed_data';
 
 import 'idb_test_common.dart';

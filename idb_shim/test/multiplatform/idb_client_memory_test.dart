@@ -1,5 +1,4 @@
 import 'package:idb_shim/idb.dart';
-import 'package:test/test.dart';
 
 import '../idb_test_common.dart';
 

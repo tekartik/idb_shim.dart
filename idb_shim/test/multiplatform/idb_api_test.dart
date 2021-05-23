@@ -1,9 +1,5 @@
-import 'package:idb_shim/idb_client_native.dart';
 import 'package:idb_shim/idb_io.dart';
 import 'package:idb_shim/idb_shim.dart';
-import 'package:idb_shim/src/utils/env_utils.dart'
-    show idbIsRunningAsJavascript;
-import 'package:test/test.dart';
 
 import '../idb_test_common.dart';
 //import 'package:idb_shim/idb_io.dart';

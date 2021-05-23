@@ -4,8 +4,6 @@ import 'dart:convert';
 
 import 'package:idb_shim/idb.dart';
 
-import '../client/error.dart';
-
 // for now use JSON
 dynamic encodeValue(dynamic value) {
   if (value == null) {

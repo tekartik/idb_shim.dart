@@ -6,7 +6,6 @@ import 'package:idb_shim/idb_client_native.dart';
 import 'package:idb_shim/utils/idb_utils.dart';
 import 'package:idb_test/idb_test_common.dart';
 import 'package:idb_test/test_runner.dart';
-import 'package:test/test.dart';
 
 import 'idb_browser_test_common.dart';
 

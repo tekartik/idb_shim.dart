@@ -1,7 +1,5 @@
 library idb_shim.test.indexeddb_3_test;
 
-import 'dart:async';
-
 import 'package:idb_shim/idb_client.dart';
 
 import 'idb_test_common.dart';
