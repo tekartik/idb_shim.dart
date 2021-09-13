@@ -107,8 +107,6 @@ void defineTests(TestContext ctx) {
     });
 
     test('index', () {
-      //var done = expectAsync0(() {});
-      var done = () {};
       var transaction = db.transaction(storeName, 'readwrite');
       //transaction.objectStore(storeName).index(indexName);
       transaction.objectStore(storeName).add(value);
@@ -154,8 +152,6 @@ void defineTests(TestContext ctx) {
         transaction = db.transaction(storeName, 'readwrite');
         transaction.objectStore(storeName).clear();
         return transaction.completed;
-      }).then((_) {
-        done();
       });
     });
 
@@ -164,8 +160,6 @@ void defineTests(TestContext ctx) {
     var updatedValue = {'name_index': 'three', 'value': 'updated_value'};
 
     test('cursor', () {
-      //var done = expectAsync0(() {});
-      var done = () {};
       var transaction = db.transaction(storeName, 'readwrite');
       transaction.objectStore(storeName).add(value);
       transaction.objectStore(storeName).add(deleteValue);
@@ -208,8 +202,6 @@ void defineTests(TestContext ctx) {
       }).then((readValue) {
         expect(readValue, isNull);
         return transaction.completed;
-      }).then((_) {
-        done();
       });
     });
   });

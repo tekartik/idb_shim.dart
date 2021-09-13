@@ -80,11 +80,11 @@ BodyFunc testReadWrite(
         } else {
           expect(object, matcher);
         }
-      }).whenComplete(() {
+      }).whenComplete(() async {
         if (db != null) {
           db!.close();
         }
-        return idbFactory.deleteDatabase(dbName!);
+        await idbFactory.deleteDatabase(dbName!);
       });
     };
 
@@ -125,11 +125,11 @@ BodyFunc testReadWriteTyped(
         } else {
           expect(object, matcher);
         }
-      }).whenComplete(() {
+      }).whenComplete(() async {
         if (db != null) {
           db!.close();
         }
-        return idbFactory.deleteDatabase(dbName!);
+        await idbFactory.deleteDatabase(dbName!);
       });
     };
 

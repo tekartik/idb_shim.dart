@@ -24,8 +24,6 @@ export 'package:test/test.dart';
 //export 'common_meta_test.dart' hide main;
 //export 'package:tekartik_test/test_utils.dart';
 
-@deprecated
-const String testDbName = 'test.db';
 const String _testDbName = 'test.db';
 const String testStoreName = 'test_store';
 const String testStoreName2 = 'test_store_2';
@@ -216,7 +214,7 @@ void dbGroup(TestContext ctx, String description, dynamic Function() body,
 void dbTest(String description, dynamic Function() body,
     {
     // void Function(String name, Function() body, {bool? solo})? test,
-    @deprecated bool? solo}) {
+    @Deprecated('Dev only') bool? solo}) {
   //test ??= test_pkg.test as void Function(String, dynamic Function(), {bool? solo})?;
   // We save it for later
   // only valid during definition
