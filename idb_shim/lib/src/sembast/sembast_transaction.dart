@@ -1,4 +1,6 @@
 // set to true to debug transaction life cycle
+// ignore_for_file: public_member_api_docs
+
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/common/common_exception.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
@@ -49,7 +51,7 @@ class TransactionSembast extends IdbTransactionBase
   // The outer result
   final _completedCompleter = Completer<Database>.sync();
 
-  @deprecated
+  @Deprecated('Use only in one place')
   void _complete() {
     if (!_completedCompleter.isCompleted) {
       if (_aborted) {
@@ -60,7 +62,7 @@ class TransactionSembast extends IdbTransactionBase
     }
   }
 
-  @deprecated
+  @Deprecated('Use only in one place')
   void _completeError(Object e, [StackTrace? st]) {
     if (!_completedCompleter.isCompleted) {
       _completedCompleter.completeError(e, st);

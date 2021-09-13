@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_is_not_operator
+
 import 'dart:typed_data';
 
 import 'package:sembast/blob.dart';

@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
 import 'package:idb_shim/src/common/common_validation.dart';
@@ -92,7 +94,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     // Check all indexes
     final futures = <Future>[];
     if (value is Map) {
-      meta!.indecies.forEach((IdbIndexMeta indexMeta) {
+      for (var indexMeta in meta!.indecies) {
         var fieldValue = mapValueAtKeyPath(value, indexMeta.keyPath);
         if (fieldValue != null) {
           final finder = sdb.Finder(
@@ -110,7 +112,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
             }
           }));
         }
-      });
+      }
     }
     return Future.wait(futures).then((_) {
       if (key == null) {
@@ -165,12 +167,11 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   @override
-  Future<List<Object>> getAll([Object? keyOrRange, int? count]) {
+  Future<List<Object>> getAll([Object? query, int? count]) {
     return inTransaction(() async {
       return (await sdbStore.find(
         sdbClient,
-        finder: sdb.Finder(
-            filter: _storeKeyOrRangeFilter(keyOrRange), limit: count),
+        finder: sdb.Finder(filter: _storeKeyOrRangeFilter(query), limit: count),
       ))
           .map((r) => recordToValue(r)!)
           .toList(growable: false);
@@ -178,12 +179,11 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   @override
-  Future<List<Object>> getAllKeys([Object? keyOrRange, int? count]) {
+  Future<List<Object>> getAllKeys([Object? query, int? count]) {
     return inTransaction(() async {
       return (await sdbStore.findKeys(
         sdbClient,
-        finder: sdb.Finder(
-            filter: _storeKeyOrRangeFilter(keyOrRange), limit: count),
+        finder: sdb.Finder(filter: _storeKeyOrRangeFilter(query), limit: count),
       ));
     });
   }

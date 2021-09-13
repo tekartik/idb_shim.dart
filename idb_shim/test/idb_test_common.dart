@@ -21,8 +21,6 @@ export 'package:idb_shim/src/utils/dev_utils.dart';
 export 'package:idb_shim/src/utils/env_utils.dart';
 export 'package:test/test.dart';
 
-@deprecated
-const String testDbName = 'test.db';
 const String _testDbName = 'test.db';
 const String testStoreName = 'test_store';
 const String testStoreName2 = 'test_store_2';
@@ -81,9 +79,6 @@ class SembastFsTestContext extends SembastTestContext {
   @override
   sdb_fs.DatabaseFactoryFs get sdbFactory =>
       factory!.sdbFactory as sdb_fs.DatabaseFactoryFs;
-
-  @override
-  IdbFactorySembast? get factory => super.factory;
 }
 
 class SembastMemoryFsTestContext extends SembastFsTestContext {

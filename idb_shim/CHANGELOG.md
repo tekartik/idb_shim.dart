@@ -1,3 +1,8 @@
+## 2.0.1
+
+* New lint supports
+* Requires dart 2.14+
+
 ## 2.0.0+2
 
 * `nnbd` supports, breaking change.

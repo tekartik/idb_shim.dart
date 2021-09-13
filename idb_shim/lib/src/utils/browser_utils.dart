@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 library idb_shim.src.utils.browser_utils;
 
 import 'dart:html';

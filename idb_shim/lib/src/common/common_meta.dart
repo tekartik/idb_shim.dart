@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 library tekartik_idb.idb_meta;
 
 import 'dart:async';
@@ -193,9 +195,9 @@ class IdbDatabaseMeta {
   int get hashCode => version!;
 
   @override
-  bool operator ==(o) {
-    if (o is IdbDatabaseMeta) {
-      return version == o.version;
+  bool operator ==(Object other) {
+    if (other is IdbDatabaseMeta) {
+      return version == other.version;
     }
     return false;
   }
@@ -217,8 +219,9 @@ abstract class ObjectStoreWithMetaMixin {
   List<String> get indexNames => meta!.indexNames.toList();
 }
 
-// meta data is loaded only once
+/// IndexedDB object store meta data is loaded only once
 class IdbObjectStoreMeta {
+  /// Name key.
   static const String nameKey = 'name';
   static const String keyPathKey = 'keyPath';
   static const String autoIncrementKey = 'autoIncrement';
@@ -282,9 +285,9 @@ class IdbObjectStoreMeta {
       [List<IdbIndexMeta>? indecies])
       : autoIncrement = (autoIncrement == true) {
     if (indecies != null) {
-      indecies.forEach((IdbIndexMeta indexMeta) {
+      for (var indexMeta in indecies) {
         putIndex(indexMeta);
-      });
+      }
     }
   }
 
@@ -326,9 +329,9 @@ class IdbObjectStoreMeta {
       // Sort to always have the same export format
       var indexMetas = List<IdbIndexMeta>.from(this.indecies)
         ..sort((meta1, meta2) => meta1.name!.compareTo(meta2.name!));
-      indexMetas.forEach((IdbIndexMeta indexMeta) {
+      for (var indexMeta in indexMetas) {
         indecies.add(indexMeta.toMap());
-      });
+      }
       map[indeciesKey] = indecies;
     }
     return map;
@@ -343,9 +346,9 @@ class IdbObjectStoreMeta {
   int get hashCode => name.hashCode;
 
   @override
-  bool operator ==(o) {
-    if (o is IdbObjectStoreMeta) {
-      return const DeepCollectionEquality().equals(toMap(), o.toMap());
+  bool operator ==(Object other) {
+    if (other is IdbObjectStoreMeta) {
+      return const DeepCollectionEquality().equals(toMap(), other.toMap());
     }
     return false;
   }
@@ -441,9 +444,9 @@ class IdbIndexMeta {
       return null;
     }
     var metas = <IdbIndexMeta>[];
-    list.forEach((map) {
+    for (var map in list) {
       metas.add(IdbIndexMeta.fromMap(map.cast<String, Object?>()));
-    });
+    }
     return metas;
   }
 
@@ -487,9 +490,9 @@ class IdbIndexMeta {
   int get hashCode => name.hashCode; //const MapEquality().hash(toMap());
 
   @override
-  bool operator ==(o) {
-    if (o is IdbIndexMeta) {
-      return const DeepCollectionEquality().equals(toMap(), o.toMap());
+  bool operator ==(Object other) {
+    if (other is IdbIndexMeta) {
+      return const DeepCollectionEquality().equals(toMap(), other.toMap());
     }
     return false;
   }

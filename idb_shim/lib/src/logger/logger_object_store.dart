@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:async';
 
 import 'package:idb_shim/idb.dart';
@@ -95,12 +97,12 @@ class ObjectStoreLogger extends ObjectStore {
   Future<int> count([dynamic keyOrRange]) => idbObjectStore.count(keyOrRange);
 
   @override
-  Future<List<Object>> getAll([Object? keyOrRange, int? count]) =>
-      idbObjectStore.getAll(keyOrRange, count);
+  Future<List<Object>> getAll([Object? query, int? count]) =>
+      idbObjectStore.getAll(query, count);
 
   @override
-  Future<List<Object>> getAllKeys([Object? keyOrRange, int? count]) =>
-      idbObjectStore.getAllKeys(keyOrRange, count);
+  Future<List<Object>> getAllKeys([Object? query, int? count]) =>
+      idbObjectStore.getAllKeys(query, count);
 
   @override
   dynamic get keyPath => idbObjectStore.keyPath;

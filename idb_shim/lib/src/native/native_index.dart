@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:async';
 import 'dart:indexed_db' as idb;
 
@@ -82,18 +84,18 @@ class IndexNative extends Index {
   }
 
   @override
-  Future<List<Object>> getAll([Object? keyOrRange, int? count]) {
+  Future<List<Object>> getAll([Object? query, int? count]) {
     return catchAsyncNativeError(() {
-      final nativeQuery = toNativeQuery(keyOrRange);
+      final nativeQuery = toNativeQuery(query);
       var results = indexGetAll(idbIndex, nativeQuery, count);
       return results;
     });
   }
 
   @override
-  Future<List<Object>> getAllKeys([Object? keyOrRange, int? count]) {
+  Future<List<Object>> getAllKeys([Object? query, int? count]) {
     return catchAsyncNativeError(() {
-      final nativeQuery = toNativeQuery(keyOrRange);
+      final nativeQuery = toNativeQuery(query);
       var results = indexGetAllKeys(idbIndex, nativeQuery, count);
       return results;
     });

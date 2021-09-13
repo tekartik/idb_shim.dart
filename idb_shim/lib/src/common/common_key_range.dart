@@ -3,7 +3,7 @@ import 'package:idb_shim/idb.dart';
 /// See [KeyRange] for information
 class IdbKeyRange implements KeyRange {
   /// Should not be used.
-  @deprecated
+  @Deprecated('Use other constructors')
   IdbKeyRange();
 
   /// Creates a new key range containing a single value.

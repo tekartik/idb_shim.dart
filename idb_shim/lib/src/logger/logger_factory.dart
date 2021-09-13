@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:async';
 
 import 'package:idb_shim/idb_client.dart';
@@ -62,7 +64,7 @@ class IdbFactoryWrapperImpl extends IdbFactoryBase implements IdbFactoryLogger {
   bool get persistent => true;
 
   IdbFactoryWrapperImpl(this.nativeFactory) {
-    assert(!(nativeFactory is IdbFactoryWrapperImpl));
+    assert(nativeFactory is! IdbFactoryWrapperImpl);
   }
 
   @override

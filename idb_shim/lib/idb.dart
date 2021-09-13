@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:idb_shim/src/common/common_factory.dart';
 import 'package:idb_shim/src/common/common_key_range.dart';
+import 'package:meta/meta.dart';
 
 export 'src/client/error.dart';
 export 'src/constant.dart'
@@ -19,7 +20,6 @@ export 'src/constant.dart'
         idbFactoryNamePersistent,
         idbFactoryNameSembastIo,
         idbFactoryNameSembastMemory;
-
 export 'src/database_exception.dart' show DatabaseException;
 
 ///
@@ -556,7 +556,7 @@ typedef OnBlockedFunction = void Function(Event event);
 ///
 abstract class KeyRange {
   /// Should not be used.
-  @deprecated
+  @Deprecated('User other constructors.')
   // ignore: deprecated_member_use_from_same_package
   factory KeyRange() => IdbKeyRange();
 
@@ -591,7 +591,7 @@ abstract class KeyRange {
   /// Return true if a key range contains a given key.
   ///
   /// Used internally, deprecated since 1.10.0+1
-  @deprecated
+  @protected
   bool contains(key);
 }
 
