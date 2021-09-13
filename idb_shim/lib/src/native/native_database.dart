@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:async';
 import 'dart:html_common' as html_common;
 import 'dart:indexed_db' as idb;

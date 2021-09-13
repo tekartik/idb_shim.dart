@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:async';
 
 import 'package:idb_shim/idb.dart';
@@ -39,12 +41,12 @@ class IndexLogger extends Index {
           autoAdvance: autoAdvance);
 
   @override
-  Future<List<Object>> getAll([dynamic keyOrRange, int? count]) =>
-      idbIndex.getAll(keyOrRange, count);
+  Future<List<Object>> getAll([Object? query, int? count]) =>
+      idbIndex.getAll(query, count);
 
   @override
-  Future<List<Object>> getAllKeys([dynamic keyOrRange, int? count]) =>
-      idbIndex.getAllKeys(keyOrRange, count);
+  Future<List<Object>> getAllKeys([Object? query, int? count]) =>
+      idbIndex.getAllKeys(query, count);
 
   @override
   dynamic get keyPath => idbIndex.keyPath;

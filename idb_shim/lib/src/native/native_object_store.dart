@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:async';
 import 'dart:indexed_db' as idb;
 
@@ -152,18 +154,18 @@ class ObjectStoreNative extends ObjectStore {
   }
 
   @override
-  Future<List<Object>> getAll([dynamic keyOrRange, int? count]) {
+  Future<List<Object>> getAll([dynamic query, int? count]) {
     return catchAsyncNativeError(() {
-      final nativeQuery = toNativeQuery(keyOrRange);
+      final nativeQuery = toNativeQuery(query);
       var results = storeGetAll(idbObjectStore, nativeQuery, count);
       return results;
     });
   }
 
   @override
-  Future<List<Object>> getAllKeys([dynamic keyOrRange, int? count]) {
+  Future<List<Object>> getAllKeys([dynamic query, int? count]) {
     return catchAsyncNativeError(() {
-      final nativeQuery = toNativeQuery(keyOrRange);
+      final nativeQuery = toNativeQuery(query);
       var results = storeGetAllKeys(idbObjectStore, nativeQuery, count);
       return results;
     });

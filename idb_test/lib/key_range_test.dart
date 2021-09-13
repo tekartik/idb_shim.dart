@@ -10,7 +10,7 @@ void main() {
 }
 
 bool keyRangeContains(KeyRange keyRange, Object key) {
-  // ignore: deprecated_member_use_from_same_package, deprecated_member_use
+  // ignore: invalid_use_of_protected_member
   return keyRange.contains(key);
 }
 

@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
 import 'package:idb_shim/src/common/common_validation.dart';

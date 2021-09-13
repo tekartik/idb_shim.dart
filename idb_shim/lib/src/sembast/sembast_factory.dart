@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/idb_client_sembast.dart';
 import 'package:idb_shim/src/common/common_factory.dart';
@@ -43,7 +45,7 @@ class IdbFactorySembastImpl extends IdbFactoryBase
   IdbFactorySembastImpl(this._databaseFactory, [this._path]);
 
   @override
-  String get name => '$idbFactoryNameSembast';
+  String get name => idbFactoryNameSembast;
 
   // get the underlying sembast database for a given database
   @override

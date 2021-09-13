@@ -1,4 +1,6 @@
 // Not exported
+// ignore_for_file: public_member_api_docs
+
 import 'package:idb_shim/idb_client.dart';
 
 class DatabaseNoKeyExpectedError extends DatabaseError {

@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs
+
 import 'dart:math';
 
 import 'package:idb_shim/idb.dart';
@@ -256,7 +258,7 @@ sdb.Filter _singleFieldKeyNotNullFilter(String keyPath) =>
 sdb.Filter _singleFieldKeyEqualsFilter(String keyPath, dynamic key) =>
     sdb.Filter.equals(keyPath, key);
 
-@deprecated
+@Deprecated('Dev only')
 // ignore: unused_element
 sdb.Filter _debugSingleFieldNotNullFilter(String keyPath) => sdb.Filter.and([
       sdb.Filter.notEquals(keyPath, true),
@@ -264,7 +266,7 @@ sdb.Filter _debugSingleFieldNotNullFilter(String keyPath) => sdb.Filter.and([
       _singleFieldKeyNotNullFilter(keyPath)
     ]);
 
-@deprecated
+@Deprecated('Dev only')
 // ignore: unused_element
 sdb.Filter _debugSingleFieldKeyEqualsFilter(String keyPath, dynamic key) =>
     sdb.Filter.equals(keyPath, key);

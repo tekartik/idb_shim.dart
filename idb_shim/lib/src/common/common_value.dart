@@ -4,7 +4,7 @@ import 'dart:convert';
 
 import 'package:idb_shim/idb.dart';
 
-// for now use JSON
+/// encode a value using JSON.
 dynamic encodeValue(dynamic value) {
   if (value == null) {
     return null;
@@ -19,6 +19,7 @@ dynamic encodeValue(dynamic value) {
 //  });
 }
 
+/// decode a value from JSON.
 Object? decodeValue(Object? value) {
   if (value == null) {
     return null;
@@ -26,19 +27,21 @@ Object? decodeValue(Object? value) {
   return json.decode(value as String);
 }
 
+/// Encode a key.
 Object encodeKey(Object key) {
   return key;
 }
 
+/// Decode a key.
 Object decodeKey(Object key) {
   return key;
 }
 
 List _cloneList(List original) {
   final list = [];
-  original.forEach((value) {
+  for (var value in original) {
     list.add(_cloneValue(value));
-  });
+  }
   return list;
 }
 
@@ -70,6 +73,7 @@ Object cloneValue(Object value, [String? keyPath, dynamic key]) {
   return clone;
 }
 
+/// Fix compare value according to sign
 int fixCompareValue(int value, {bool asc = true}) {
   if (asc) {
     return value;
@@ -78,7 +82,7 @@ int fixCompareValue(int value, {bool asc = true}) {
   }
 }
 
-// handle single object and array!
+/// Compare keys, handle single object and array!
 int compareKeys(dynamic first, dynamic second) {
   if (first is num && second is num) {
     return first < second ? -1 : (first == second ? 0 : 1);
@@ -98,8 +102,8 @@ int compareKeys(dynamic first, dynamic second) {
   throw DatabaseInvalidKeyError(first);
 }
 
-// when keyPath is an array
-// Return the relevant keyPath at index
+/// when keyPath is an array
+/// Return the relevant keyPath at index
 KeyRange keyArrayRangeAt(KeyRange keyRange, int index) {
   Object? _valueAt(List? value, int index) {
     return value == null ? null : value[index];
@@ -135,7 +139,9 @@ Set<Object?>? valueAsSet(dynamic value) {
   return {value};
 }
 
-@deprecated
+@Deprecated('Use valueAsSet')
+
+/// Deprecated: Use valueAsSet
 Set? valueAsKeySet(dynamic value) => valueAsSet(value);
 
 /// Convert a single value or an iterable to a list
@@ -152,12 +158,15 @@ List? valueAsList(dynamic value) {
   return [value];
 }
 
+/// Split a filed by its dot (.) to get a part
 List<String> getFieldParts(String field) => field.split('.');
 
+/// Get map field helper.
 T? getMapFieldValue<T>(Map? map, String field) {
   return getPartsMapValue(map, getFieldParts(field));
 }
 
+/// Get deep map member value.
 T? getPartsMapValue<T>(Map? map, Iterable<String> parts) {
   dynamic value = map;
   for (final part in parts) {
@@ -170,15 +179,17 @@ T? getPartsMapValue<T>(Map? map, Iterable<String> parts) {
   return value as T?;
 }
 
+/// Set a field value.
 void setMapFieldValue<T>(Map map, String field, T value) {
   setPartsMapValue(map, getFieldParts(field), value);
 }
 
+/// Set a a deep map member value
 void setPartsMapValue<T>(Map map, List<String> parts, value) {
   for (var i = 0; i < parts.length - 1; i++) {
     final part = parts[i];
     dynamic sub = map[part];
-    if (!(sub is Map)) {
+    if (sub is! Map) {
       sub = <String, Object?>{};
       map[part] = sub;
     }

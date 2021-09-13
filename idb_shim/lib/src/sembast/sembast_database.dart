@@ -1,3 +1,5 @@
+// ignore_for_file: public_member_api_docs, avoid_function_literals_in_foreach_calls
+
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/idb_client_sembast.dart';
 import 'package:idb_shim/src/common/common_database.dart';
