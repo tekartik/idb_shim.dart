@@ -1,7 +1,6 @@
 library cursor_test;
 
 import 'package:idb_shim/idb_client.dart';
-import 'package:pedantic/pedantic.dart';
 
 import 'idb_test_common.dart';
 
