@@ -89,11 +89,14 @@ void defineTests(TestContext ctx) {
     }, testOn: 'js');
     */
 
+    // ignore: deprecated_member_use
     if (idbFactory!.supportsDatabaseNames) {
       test('supportsDatabaseNames', () {
+        // ignore: deprecated_member_use
         expect(idbFactory.supportsDatabaseNames, true);
       });
       test('database names', () {
+        // ignore: deprecated_member_use
         return idbFactory.getDatabaseNames().then((List<String> names) {
           expect(names, isNotNull);
         });
@@ -118,6 +121,7 @@ void defineTests(TestContext ctx) {
           final db = await idbFactory.open(_dbName!);
           db.close();
 
+          // ignore: deprecated_member_use
           final names = await idbFactory.getDatabaseNames();
           expect(names, contains(_dbName));
         });
@@ -126,10 +130,11 @@ void defineTests(TestContext ctx) {
           await _setupDeleteDb();
           final db = await idbFactory.open(_dbName!);
           db.close();
-
+          // ignore: deprecated_member_use
           var names = await idbFactory.getDatabaseNames();
           expect(names, contains(_dbName));
           await idbFactory.deleteDatabase(_dbName!);
+          // ignore: deprecated_member_use
           names = await idbFactory.getDatabaseNames();
           expect(names, isNot(contains(_dbName)));
         });
@@ -141,7 +146,7 @@ void defineTests(TestContext ctx) {
           await idbFactory.deleteDatabase(dbName2);
           (await idbFactory.open(dbName1)).close();
           (await idbFactory.open(dbName2)).close();
-
+          // ignore: deprecated_member_use
           final names = await idbFactory.getDatabaseNames();
           expect(names, contains(dbName1));
           expect(names, contains(dbName2));
@@ -155,11 +160,13 @@ void defineTests(TestContext ctx) {
           (await idbFactory.open(dbName1)).close();
           (await idbFactory.open(dbName2)).close();
 
+          // ignore: deprecated_member_use
           var names = await idbFactory.getDatabaseNames();
           final length = names.length;
           expect(names, contains(dbName1));
           expect(names, contains(dbName2));
 
+          // ignore: deprecated_member_use
           names = await idbFactory.getDatabaseNames();
           expect(names.length, length);
         });

@@ -41,8 +41,10 @@ void defineTests(TestContext ctx) {
       db.close();
     });
 
+    // ignore: deprecated_member_use
     if (idbFactory!.supportsDatabaseNames) {
       test('getDatabaseNames', () {
+        // ignore: deprecated_member_use
         return idbFactory.getDatabaseNames().then((names) {
           //print(names);
           //print(dbName);

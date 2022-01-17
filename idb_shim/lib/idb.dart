@@ -634,11 +634,18 @@ abstract class IdbFactory {
   ///
   /// if getDatabaseNames can be called
   ///
+  /// No longer supported on modern browsers. Always returns false
+  @Deprecated('No longer supported, always returns false')
   bool get supportsDatabaseNames;
 
   ///
-  /// list of databases
+  /// list of database names (only available if supportsDatabaseNames returns
+  /// true).
   ///
+  /// No longer supported on modern browsers. Could be implemented on top of
+  /// `databases` once available or deprecated in the future...you'd better
+  /// not start using it for now.
+  @Deprecated('No longer supported')
   Future<List<String>> getDatabaseNames();
 
   /// Changed to true when a factory is created

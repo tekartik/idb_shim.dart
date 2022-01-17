@@ -100,7 +100,8 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
 
   @override
   bool get supportsDatabaseNames {
-    return nativeFactory.supportsDatabaseNames;
+    // No longer supported on modern browsers. Always returns false
+    return false;
   }
 
   @override

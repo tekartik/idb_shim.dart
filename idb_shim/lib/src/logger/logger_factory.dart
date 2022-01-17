@@ -108,10 +108,12 @@ class IdbFactoryWrapperImpl extends IdbFactoryBase implements IdbFactoryLogger {
 
   @override
   bool get supportsDatabaseNames {
+    // ignore: deprecated_member_use_from_same_package
     return nativeFactory.supportsDatabaseNames;
   }
 
   @override
+  // ignore: deprecated_member_use_from_same_package
   Future<List<String>> getDatabaseNames() => nativeFactory.getDatabaseNames();
 
   @override
