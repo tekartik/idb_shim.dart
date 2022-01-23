@@ -194,6 +194,7 @@ void defineTests(TestContext ctx) {
 
   group('supportsDatabaseNames', () {
     test('supported', () {
+      // ignore: deprecated_member_use
       expect(idbFactory!.supportsDatabaseNames, isTrue);
     });
   }, skip: true);
