@@ -24,11 +24,11 @@ void defineTests(TestContext ctx) {
     }
 
     // new
-    late String _dbName;
+    late String dbName;
     // prepare for test
     Future _setupDeleteDb() async {
-      _dbName = ctx.dbName;
-      await idbFactory!.deleteDatabase(_dbName);
+      dbName = ctx.dbName;
+      await idbFactory!.deleteDatabase(dbName);
     }
 
     // generic tearDown
@@ -53,7 +53,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
@@ -88,7 +88,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
@@ -189,7 +189,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
@@ -382,7 +382,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
@@ -534,7 +534,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
@@ -608,7 +608,7 @@ void defineTests(TestContext ctx) {
         await _setupDeleteDb();
 
         // open the database
-        db = await idbFactory!.open(_dbName, version: 1,
+        db = await idbFactory!.open(dbName, version: 1,
             onUpgradeNeeded: (VersionChangeEvent event) {
           final db = event.database;
           // create the store
@@ -770,7 +770,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
@@ -885,7 +885,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
         _createTransaction();
       }
 
@@ -921,7 +921,7 @@ void defineTests(TestContext ctx) {
     group('late_index', () {
       test('create_index', () async {
         await _setupDeleteDb();
-        db = await idbFactory!.open(_dbName, version: 1, onUpgradeNeeded: (e) {
+        db = await idbFactory!.open(dbName, version: 1, onUpgradeNeeded: (e) {
           e.database.createObjectStore(testStoreName, autoIncrement: true);
         });
         _createTransaction();
@@ -929,7 +929,7 @@ void defineTests(TestContext ctx) {
         await objectStore.put(map);
         await objectStore.put({'dummy': 'value'});
         db!.close();
-        db = await idbFactory.open(_dbName, version: 2, onUpgradeNeeded: (e) {
+        db = await idbFactory.open(dbName, version: 2, onUpgradeNeeded: (e) {
           e.transaction
               .objectStore(testStoreName)
               .createIndex(testNameIndex, testNameField);
@@ -948,14 +948,14 @@ void defineTests(TestContext ctx) {
 
         Future testIndex(IdbIndexMeta indexMeta) async {
           try {
-            final _dbName = '$dbTestName-${++index}';
-            await idbFactory!.deleteDatabase(_dbName);
+            final dbName = '$dbTestName-${++index}';
+            await idbFactory!.deleteDatabase(dbName);
             final storeMeta = idbSimpleObjectStoreMeta.clone();
             storeMeta.putIndex(indexMeta);
             var db = await setUpSimpleStore(idbFactory,
-                meta: storeMeta, dbName: _dbName);
+                meta: storeMeta, dbName: dbName);
             db.close();
-            db = await idbFactory.open(_dbName);
+            db = await idbFactory.open(dbName);
 
             final transaction = db.transaction(storeMeta.name, idbModeReadOnly);
             final objectStore = transaction.objectStore(storeMeta.name);
@@ -1013,7 +1013,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);

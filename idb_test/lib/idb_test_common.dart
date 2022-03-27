@@ -203,8 +203,8 @@ bool isTestFailure(e) {
 }
 
 void dbGroup(TestContext ctx, String description, dynamic Function() body,
-    [void Function(String description, void Function() body) _group = group]) {
-  _group(description, () {
+    [void Function(String description, void Function() body) group = group]) {
+  group(description, () {
     _dbTestContext = ctx;
     body();
     _dbTestContext = null;

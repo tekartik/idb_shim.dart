@@ -28,7 +28,7 @@ void defineTests(TestContext ctx) {
   Transaction? transaction;
   late ObjectStore objectStore;
 
-  late String _dbName;
+  late String dbName;
 
   void _createTransaction() {
     transaction = db!.transaction(testStoreName, idbModeReadWrite);
@@ -37,8 +37,8 @@ void defineTests(TestContext ctx) {
 
   // prepare for test
   Future _setupDeleteDb() async {
-    _dbName = ctx.dbName;
-    await idbFactory!.deleteDatabase(_dbName);
+    dbName = ctx.dbName;
+    await idbFactory!.deleteDatabase(dbName);
   }
 
   Future _tearDown() async {
@@ -103,7 +103,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       tearDown(_tearDown);
@@ -306,7 +306,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
       test('empty cursor', () async {

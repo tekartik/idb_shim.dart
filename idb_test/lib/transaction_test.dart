@@ -16,11 +16,11 @@ void defineTests(TestContext ctx) {
   Database? db;
   Transaction? transaction;
 
-  late String _dbName;
+  late String dbName;
   // prepare for test
   Future _setupDeleteDb() async {
-    _dbName = ctx.dbName;
-    await idbFactory!.deleteDatabase(_dbName);
+    dbName = ctx.dbName;
+    await idbFactory!.deleteDatabase(dbName);
   }
 
   Future _tearDown() async {
@@ -51,7 +51,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
 
         final transaction = db!.transaction(testStoreName, idbModeReadWrite);
         final objectStore = transaction.objectStore(testStoreName);
@@ -72,7 +72,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
         final transaction = db!.transaction(testStoreName, idbModeReadWrite);
         await transaction.completed;
       });
@@ -83,7 +83,7 @@ void defineTests(TestContext ctx) {
         }
 
         return idbFactory!
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
+            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
             .then((Database database) {
           final transaction1 =
               database.transaction(testStoreName, idbModeReadWrite);
@@ -113,7 +113,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
 
         final transaction = db!.transaction(testStoreName, idbModeReadWrite);
         var objectStore = transaction.objectStore(testStoreName);
@@ -136,7 +136,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
 
         // not supported on safari!
         final transaction = db!
@@ -152,7 +152,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
         final transaction = db!.transaction(testStoreName, idbModeReadOnly);
 
         final store = transaction.objectStore(testStoreName);
@@ -182,7 +182,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
 
         try {
           db!.transaction(testStoreName2, idbModeReadWrite);
@@ -203,7 +203,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
 
         try {
           db!.transactionList([], idbModeReadWrite);
@@ -221,7 +221,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
 
         final transaction = db!.transaction(testStoreName, idbModeReadWrite);
         try {
@@ -247,7 +247,7 @@ void defineTests(TestContext ctx) {
           }
 
           return idbFactory!
-              .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
+              .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
               .then((Database database) {
             db = database;
             //transaction = db.transaction(testStoreName, idbModeReadWrite);

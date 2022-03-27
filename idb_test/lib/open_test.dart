@@ -13,24 +13,24 @@ void defineTests(TestContext ctx) {
   final idbFactory = ctx.factory;
 
   // new
-  late String _dbName;
+  late String dbName;
   // prepare for test
   Future<void> _setupDeleteDb() async {
-    _dbName = ctx.dbName;
-    await idbFactory!.deleteDatabase(_dbName);
+    dbName = ctx.dbName;
+    await idbFactory!.deleteDatabase(dbName);
   }
 
   group('delete', () {
     test('delete database', () async {
       await _setupDeleteDb();
-      return idbFactory!.deleteDatabase(_dbName);
+      return idbFactory!.deleteDatabase(dbName);
     });
   });
 
   group('open', () {
     test('no param', () async {
       await _setupDeleteDb();
-      return idbFactory!.open(_dbName).then((Database database) {
+      return idbFactory!.open(dbName).then((Database database) {
         expect(database.version, 1);
         database.close();
       });
@@ -38,9 +38,9 @@ void defineTests(TestContext ctx) {
 
     test('close then re-open', () async {
       await _setupDeleteDb();
-      return idbFactory!.open(_dbName).then((Database database) {
+      return idbFactory!.open(dbName).then((Database database) {
         database.close();
-        return idbFactory.open(_dbName).then((Database database) {
+        return idbFactory.open(dbName).then((Database database) {
           database.close();
         });
       });
@@ -66,7 +66,7 @@ void defineTests(TestContext ctx) {
 
       try {
         await idbFactory!
-            .open(_dbName, onUpgradeNeeded: _emptyInitializeDatabase);
+            .open(dbName, onUpgradeNeeded: _emptyInitializeDatabase);
         fail('should fail');
       } on ArgumentError catch (e) {
         expect(e.message,
@@ -76,7 +76,7 @@ void defineTests(TestContext ctx) {
 
     test('bad param with version', () async {
       await _setupDeleteDb();
-      return idbFactory!.open(_dbName, version: 1).then((_) {}).catchError((e) {
+      return idbFactory!.open(dbName, version: 1).then((_) {}).catchError((e) {
         expect((e as ArgumentError).message,
             'version and onUpgradeNeeded must be specified together');
       }, test: (e) => e is ArgumentError);
@@ -91,7 +91,7 @@ void defineTests(TestContext ctx) {
       }
 
       return idbFactory!
-          .open(_dbName, version: 0, onUpgradeNeeded: _initializeDatabase)
+          .open(dbName, version: 0, onUpgradeNeeded: _initializeDatabase)
           .then((Database database) {
         fail('should not open');
       }, onError: (e) {
@@ -102,7 +102,7 @@ void defineTests(TestContext ctx) {
 
     test('default then version 1', () async {
       await _setupDeleteDb();
-      var database = await idbFactory!.open(_dbName);
+      var database = await idbFactory!.open(dbName);
       expect(database.version, 1);
       database.close();
 
@@ -117,7 +117,7 @@ void defineTests(TestContext ctx) {
           initCalled = true;
         }
 
-        database = await idbFactory.open(_dbName,
+        database = await idbFactory.open(dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
         expect(initCalled, false);
         database.close();
@@ -135,7 +135,7 @@ void defineTests(TestContext ctx) {
       }
 
       return idbFactory!
-          .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
+          .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
           .then((Database database) {
         expect(initCalled, true);
         database.close();
@@ -153,7 +153,7 @@ void defineTests(TestContext ctx) {
       }
 
       var database = await idbFactory!
-          .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+          .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
 
       expect(initCalled, true);
       expect(database.version, 1);
@@ -169,14 +169,14 @@ void defineTests(TestContext ctx) {
           upgradeCalled = true;
         }
 
-        database = await idbFactory.open(_dbName,
+        database = await idbFactory.open(dbName,
             version: 2, onUpgradeNeeded: _upgradeDatabase);
 
         expect(upgradeCalled, true);
         expect(database.version, 2);
         database.close();
 
-        database = await idbFactory.open(_dbName);
+        database = await idbFactory.open(dbName);
         expect(database.version, 2);
         database.close();
       }
@@ -191,7 +191,7 @@ void defineTests(TestContext ctx) {
       }
 
       var database = await idbFactory!
-          .open(_dbName, version: 2, onUpgradeNeeded: _initializeDatabase);
+          .open(dbName, version: 2, onUpgradeNeeded: _initializeDatabase);
 
       expect(initCalled, true);
       database.close();
@@ -205,7 +205,7 @@ void defineTests(TestContext ctx) {
         }
 
         try {
-          await idbFactory.open(_dbName,
+          await idbFactory.open(dbName,
               version: 1, onUpgradeNeeded: _downgradeDatabase);
           fail('should fail');
         } catch (e) {
@@ -219,7 +219,7 @@ void defineTests(TestContext ctx) {
       var initCalled = false;
       await _setupDeleteDb();
       try {
-        await idbFactory!.open(_dbName, version: 2, onUpgradeNeeded: (event) {
+        await idbFactory!.open(dbName, version: 2, onUpgradeNeeded: (event) {
           initCalled = true;
           event.transaction.abort();
         });
@@ -232,7 +232,7 @@ void defineTests(TestContext ctx) {
       initCalled = false;
 
       var db =
-          await idbFactory!.open(_dbName, version: 3, onUpgradeNeeded: (event) {
+          await idbFactory!.open(dbName, version: 3, onUpgradeNeeded: (event) {
         expect(event.oldVersion, 0);
         expect(event.newVersion, 3);
         initCalled = true;
@@ -244,7 +244,7 @@ void defineTests(TestContext ctx) {
 
     test('put_read_in_open_transaction', () async {
       await _setupDeleteDb();
-      var db = await idbFactory!.open(_dbName, version: 1,
+      var db = await idbFactory!.open(dbName, version: 1,
           onUpgradeNeeded: (event) async {
         var store = event.database.createObjectStore('note');
         await store.put('my_value', 'my_key').then((key) async {
@@ -260,7 +260,7 @@ void defineTests(TestContext ctx) {
       } finally {
         db.close();
       }
-      db = await idbFactory.open(_dbName, version: 2,
+      db = await idbFactory.open(dbName, version: 2,
           onUpgradeNeeded: (event) async {
         var store = event.transaction.objectStore('note');
         expect(await store.getObject('my_key'), 'my_value');
