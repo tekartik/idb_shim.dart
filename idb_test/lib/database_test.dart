@@ -16,15 +16,15 @@ void defineTests(TestContext ctx) {
     Database? db;
 
     // new
-    String? _dbName;
+    String? dbName;
     // prepare for test
     Future _setupDeleteDb() async {
-      _dbName = ctx.dbName;
-      await idbFactory!.deleteDatabase(_dbName!);
+      dbName = ctx.dbName;
+      await idbFactory!.deleteDatabase(dbName!);
     }
 
     Future _openDb() async {
-      db = await idbFactory!.open(_dbName!);
+      db = await idbFactory!.open(dbName!);
     }
 
     Future _openWith1Store() async {
@@ -35,7 +35,7 @@ void defineTests(TestContext ctx) {
       }
 
       db = await idbFactory!
-          .open(_dbName!, version: 1, onUpgradeNeeded: _initializeDatabase);
+          .open(dbName!, version: 1, onUpgradeNeeded: _initializeDatabase);
     }
 
     void _onBlocked(Event event) {
@@ -46,10 +46,10 @@ void defineTests(TestContext ctx) {
       void _initializeDatabase(VersionChangeEvent e) {
         final db = e.database;
         // ObjectStore objectStore =
-        db.createObjectStore(testStoreName + '_2');
+        db.createObjectStore('${testStoreName}_2');
       }
 
-      db = await idbFactory!.open(_dbName!,
+      db = await idbFactory!.open(dbName!,
           version: 2,
           onUpgradeNeeded: _initializeDatabase,
           onBlocked: _onBlocked);
@@ -57,7 +57,7 @@ void defineTests(TestContext ctx) {
 
     setUp(() {
       // new test - make sure _deleteDb is called
-      _dbName = null;
+      dbName = null;
     });
 
     tearDown(() {
@@ -71,7 +71,7 @@ void defineTests(TestContext ctx) {
       await _openDb();
       expect(db!.factory, idbFactory);
       expect(db!.objectStoreNames.isEmpty, true);
-      expect(db!.name, _dbName);
+      expect(db!.name, dbName);
       expect(db!.version, 1);
     });
 
@@ -86,7 +86,7 @@ void defineTests(TestContext ctx) {
       }
 
       db = await idbFactory!
-          .open(_dbName!, version: 1, onUpgradeNeeded: _initializeDatabase);
+          .open(dbName!, version: 1, onUpgradeNeeded: _initializeDatabase);
       expect(db!.objectStoreNames, [testStoreName]);
 
       db!.close();
@@ -103,7 +103,7 @@ void defineTests(TestContext ctx) {
       }
 
       db = await idbFactory!
-          .open(_dbName!, version: 1, onUpgradeNeeded: _initializeDatabase);
+          .open(dbName!, version: 1, onUpgradeNeeded: _initializeDatabase);
       var storeNames = List<String>.from(db!.objectStoreNames);
       expect(storeNames.length, 1);
       expect(storeNames[0], testStoreName);
@@ -135,7 +135,7 @@ void defineTests(TestContext ctx) {
         await _openWith1OtherStore();
         storeNames = List.from(db!.objectStoreNames);
         expect(storeNames.length, 2);
-        expect(storeNames, [testStoreName, testStoreName + '_2']);
+        expect(storeNames, [testStoreName, '${testStoreName}_2']);
       }
     });
 
@@ -148,7 +148,7 @@ void defineTests(TestContext ctx) {
 
       // not working in memory since not persistent
       if (!ctx.isInMemory) {
-        db = await idbFactory!.open(_dbName!, version: 2,
+        db = await idbFactory!.open(dbName!, version: 2,
             onUpgradeNeeded: (VersionChangeEvent e) {
           final db = e.database;
 
@@ -160,7 +160,7 @@ void defineTests(TestContext ctx) {
         db!.close();
 
         // re-open
-        db = await idbFactory.open(_dbName!,
+        db = await idbFactory.open(dbName!,
             version: 2, onUpgradeNeeded: (VersionChangeEvent e) {});
         expect(db!.objectStoreNames, []);
       }
@@ -169,7 +169,7 @@ void defineTests(TestContext ctx) {
     test('delete_non_existing_store', () async {
       await _setupDeleteDb();
 
-      db = await idbFactory!.open(_dbName!, version: 1,
+      db = await idbFactory!.open(dbName!, version: 1,
           onUpgradeNeeded: (VersionChangeEvent e) {
         final db = e.database;
 
@@ -184,7 +184,7 @@ void defineTests(TestContext ctx) {
         db.createObjectStore(testStoreName);
       });
       db!.close();
-      db = await idbFactory.open(_dbName!, version: 2,
+      db = await idbFactory.open(dbName!, version: 2,
           onUpgradeNeeded: (VersionChangeEvent e) {
         final db = e.database;
         try {
@@ -200,7 +200,7 @@ void defineTests(TestContext ctx) {
 
     test('create_delete_index', () async {
       await _setupDeleteDb();
-      db = await idbFactory!.open(_dbName!, version: 1,
+      db = await idbFactory!.open(dbName!, version: 1,
           onUpgradeNeeded: (VersionChangeEvent e) {
         final db = e.database;
         final store = db.createObjectStore(testStoreName);
@@ -211,7 +211,7 @@ void defineTests(TestContext ctx) {
       db!.close();
       // not working in memory since not persistent
       if (!ctx.isInMemory) {
-        db = await idbFactory.open(_dbName!, version: 2,
+        db = await idbFactory.open(dbName!, version: 2,
             onUpgradeNeeded: (VersionChangeEvent e) {
           final store = e.transaction.objectStore(testStoreName);
 
@@ -223,7 +223,7 @@ void defineTests(TestContext ctx) {
         db!.close();
         //await Future.delayed(Duration(milliseconds: 1));
         // check that the index is indeed gone
-        db = await idbFactory.open(_dbName!, version: 3,
+        db = await idbFactory.open(dbName!, version: 3,
             onUpgradeNeeded: (VersionChangeEvent e) {
           final store = e.transaction.objectStore(testStoreName);
           expect(store.indexNames, []);
@@ -235,7 +235,7 @@ void defineTests(TestContext ctx) {
     test('delete_non_existing_index', () async {
       await _setupDeleteDb();
 
-      db = await idbFactory!.open(_dbName!, version: 1,
+      db = await idbFactory!.open(dbName!, version: 1,
           onUpgradeNeeded: (VersionChangeEvent e) {
         final db = e.database;
         final store = db.createObjectStore(testStoreName);
@@ -253,7 +253,7 @@ void defineTests(TestContext ctx) {
 
       // not working in memory since not persistent
       if (!ctx.isInMemory) {
-        db = await idbFactory.open(_dbName!, version: 2,
+        db = await idbFactory.open(dbName!, version: 2,
             onUpgradeNeeded: (VersionChangeEvent e) {
           final store = e.transaction.objectStore(testStoreName);
           try {
@@ -267,7 +267,7 @@ void defineTests(TestContext ctx) {
           expect(store.indexNames, [testNameIndex2]);
         });
         db!.close();
-        db = await idbFactory.open(_dbName!, version: 3,
+        db = await idbFactory.open(dbName!, version: 3,
             onUpgradeNeeded: (VersionChangeEvent e) {
           final store = e.transaction.objectStore(testStoreName);
           store.deleteIndex(testNameIndex2);
@@ -276,7 +276,7 @@ void defineTests(TestContext ctx) {
         });
         db!.close();
         // check that the index is indeed gone
-        db = await idbFactory.open(_dbName!, version: 3,
+        db = await idbFactory.open(dbName!, version: 3,
             onUpgradeNeeded: (VersionChangeEvent e) {
           final store = e.transaction.objectStore(testStoreName);
           try {
@@ -326,7 +326,7 @@ void defineTests(TestContext ctx) {
       // re-open
       await _openWith1OtherStore();
       final storeNames = List<String>.from(db!.objectStoreNames);
-      expect(storeNames, [testStoreName, testStoreName + '_2']);
+      expect(storeNames, [testStoreName, '${testStoreName}_2']);
 
       // at this point native db should be close already
       if (!db1Closed) {

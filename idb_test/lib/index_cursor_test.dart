@@ -29,11 +29,11 @@ void defineTests(TestContext ctx) {
     late Index index;
 
     // new
-    late String _dbName;
+    late String dbName;
     // prepare for test
     Future _setupDeleteDb() async {
-      _dbName = ctx.dbName;
-      await idbFactory.deleteDatabase(_dbName);
+      dbName = ctx.dbName;
+      await idbFactory.deleteDatabase(dbName);
     }
 
     Future<Object> add(String name) {
@@ -67,8 +67,8 @@ void defineTests(TestContext ctx) {
 
     group('with_null_key', () {
       Future _openDb() async {
-        final _dbName = ctx.dbName;
-        await idbFactory.deleteDatabase(_dbName);
+        final dbName = ctx.dbName;
+        await idbFactory.deleteDatabase(dbName);
         void _initializeDatabase(VersionChangeEvent e) {
           final db = e.database;
           final objectStore =
@@ -76,7 +76,7 @@ void defineTests(TestContext ctx) {
           objectStore.createIndex(testNameIndex, testNameField);
         }
 
-        db = await idbFactory.open(_dbName,
+        db = await idbFactory.open(dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
@@ -123,15 +123,15 @@ void defineTests(TestContext ctx) {
     });
 
     Future testKey(Object value) async {
-      final _dbName = ctx.dbName;
-      await idbFactory.deleteDatabase(_dbName);
+      final dbName = ctx.dbName;
+      await idbFactory.deleteDatabase(dbName);
       void _initializeDatabase(VersionChangeEvent e) {
         final db = e.database;
         final objectStore = db.createObjectStore(testStoreName);
         objectStore.createIndex(testNameIndex, testNameField);
       }
 
-      db = await idbFactory.open(_dbName,
+      db = await idbFactory.open(dbName,
           version: 1, onUpgradeNeeded: _initializeDatabase);
       try {
         var txn = db!.transaction(testStoreName, idbModeReadWrite);
@@ -208,7 +208,7 @@ void defineTests(TestContext ctx) {
           objectStore.createIndex(testNameIndex, testNameField);
         }
 
-        db = await idbFactory.open(_dbName,
+        db = await idbFactory.open(dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
@@ -465,7 +465,7 @@ void defineTests(TestContext ctx) {
         }
 
         return idbFactory
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
+            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
             .then((Database database) {
           db = database;
           return db;
@@ -519,11 +519,11 @@ void defineTests(TestContext ctx) {
 
     group('keyPath', () {
       // new
-      late String _dbName;
+      late String dbName;
       // prepare for test
       Future _setupDeleteDb() async {
-        _dbName = ctx.dbName;
-        await idbFactory.deleteDatabase(_dbName);
+        dbName = ctx.dbName;
+        await idbFactory.deleteDatabase(dbName);
       }
 
       test('multi', () async {
@@ -535,7 +535,7 @@ void defineTests(TestContext ctx) {
           expect(index.keyPath, ['year', 'name']);
         }
 
-        var db = await idbFactory.open(_dbName,
+        var db = await idbFactory.open(dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
 
         Transaction transaction;
@@ -645,7 +645,7 @@ void defineTests(TestContext ctx) {
           objectStore.createIndex(testNameIndex, keyPath);
         }
 
-        db = await idbFactory.open(_dbName,
+        db = await idbFactory.open(dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
@@ -684,7 +684,7 @@ void defineTests(TestContext ctx) {
               multiEntry: true);
         }
 
-        db = await idbFactory.open(_dbName,
+        db = await idbFactory.open(dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 
@@ -825,8 +825,8 @@ void defineTests(TestContext ctx) {
 
     group('with_3_keys', () {
       Future _openDb() async {
-        final _dbName = ctx.dbName;
-        await idbFactory.deleteDatabase(_dbName);
+        final dbName = ctx.dbName;
+        await idbFactory.deleteDatabase(dbName);
         void _initializeDatabase(VersionChangeEvent e) {
           final db = e.database;
           final objectStore =
@@ -834,7 +834,7 @@ void defineTests(TestContext ctx) {
           objectStore.createIndex(testNameIndex, ['f1', 'f2', 'f3']);
         }
 
-        db = await idbFactory.open(_dbName,
+        db = await idbFactory.open(dbName,
             version: 1, onUpgradeNeeded: _initializeDatabase);
       }
 

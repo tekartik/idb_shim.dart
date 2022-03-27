@@ -20,15 +20,15 @@ void defineTests(TestContext ctx) {
 
   Database? db;
   //Database dstDb;
-  late String _srcDbName;
-  String? _dstDbName;
-  late String _importedDbName;
+  late String srcDbName;
+  String? dstDbName;
+  late String importedDbName;
   // prepare for test
   Future _setupDeleteDb() async {
-    _srcDbName = ctx.dbName;
-    _dstDbName = 'dst_$_srcDbName';
-    _importedDbName = 'imported_$_srcDbName';
-    await idbFactory!.deleteDatabase(_srcDbName);
+    srcDbName = ctx.dbName;
+    dstDbName = 'dst_$srcDbName';
+    importedDbName = 'imported_$srcDbName';
+    await idbFactory!.deleteDatabase(srcDbName);
   }
 
   void _tearDown() {
@@ -53,9 +53,9 @@ void defineTests(TestContext ctx) {
 
       // import
       var importedDb =
-          await sdbImportDatabase(export, idbFactory!, _importedDbName);
+          await sdbImportDatabase(export, idbFactory!, importedDbName);
       // The name might be relative...
-      expect(importedDb.name.endsWith(_importedDbName), isTrue);
+      expect(importedDb.name.endsWith(importedDbName), isTrue);
 
       await check(importedDb);
 
@@ -65,7 +65,7 @@ void defineTests(TestContext ctx) {
       importedDb.close();
 
       // re open
-      importedDb = await idbFactory.open(_importedDbName);
+      importedDb = await idbFactory.open(importedDbName);
       await check(importedDb);
       importedDb.close();
     }
@@ -75,8 +75,8 @@ void defineTests(TestContext ctx) {
 
       Future _checkCopySchema(
           Database db, Future Function(Database db) check) async {
-        final dstDb = await copySchema(db, idbFactory!, _dstDbName!);
-        expect(dstDb.name, _dstDbName);
+        final dstDb = await copySchema(db, idbFactory!, dstDbName!);
+        expect(dstDb.name, dstDbName);
         await check(dstDb);
         dstDb.close();
       }
@@ -90,12 +90,12 @@ void defineTests(TestContext ctx) {
 
       test('empty', () async {
         await _setupDeleteDb();
-        db = await idbFactory!.open(_srcDbName);
+        db = await idbFactory!.open(srcDbName);
 
         Future _check(Database db) async {
           expect(db.factory, idbFactory);
           expect(db.objectStoreNames.isEmpty, true);
-          expect(basename(db.name).endsWith(basename(_srcDbName)), isTrue);
+          expect(basename(db.name).endsWith(basename(srcDbName)), isTrue);
           expect(db.version, 1);
         }
 
@@ -118,33 +118,33 @@ void defineTests(TestContext ctx) {
       test('import version 2 and reopen', () async {
         await _setupDeleteDb();
         db = await idbFactory!
-            .open(_srcDbName, version: 2, onUpgradeNeeded: (_) {});
+            .open(srcDbName, version: 2, onUpgradeNeeded: (_) {});
         expect(db!.version, 2);
         final export = await sdbExportDatabase(db!);
         db!.close();
 
         // import
         var importedDb =
-            await sdbImportDatabase(export, idbFactory, _importedDbName);
+            await sdbImportDatabase(export, idbFactory, importedDbName);
         expect(importedDb.version, 2);
         //devPrint()
         final newExport = await sdbExportDatabase(db!);
         expect(newExport, export);
         importedDb.close();
 
-        db = await idbFactory.open(_importedDbName);
+        db = await idbFactory.open(importedDbName);
         expect(db!.version, 2);
       });
 
       test('empty idbVersion 2', () async {
         await _setupDeleteDb();
         db = await idbFactory!
-            .open(_srcDbName, version: 2, onUpgradeNeeded: (_) {});
+            .open(srcDbName, version: 2, onUpgradeNeeded: (_) {});
 
         Future _check(Database db) async {
           expect(db.factory, idbFactory);
           expect(db.objectStoreNames.isEmpty, true);
-          expect(basename(db.name).endsWith(basename(_srcDbName)), isTrue);
+          expect(basename(db.name).endsWith(basename(srcDbName)), isTrue);
           expect(db.version, 2);
         }
 
@@ -175,12 +175,12 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_srcDbName, version: 2, onUpgradeNeeded: _initializeDatabase);
+            .open(srcDbName, version: 2, onUpgradeNeeded: _initializeDatabase);
 
         Future _check(Database db) async {
           expect(db.factory, idbFactory);
           expect(db.objectStoreNames, [testStoreName]);
-          expect(basename(db.name).endsWith(basename(_srcDbName)), isTrue);
+          expect(basename(db.name).endsWith(basename(srcDbName)), isTrue);
           expect(db.version, 2);
           final txn = db.transaction(testStoreName, idbModeReadOnly);
           final store = txn.objectStore(testStoreName);
@@ -234,7 +234,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_srcDbName, version: 2, onUpgradeNeeded: _initializeDatabase);
+            .open(srcDbName, version: 2, onUpgradeNeeded: _initializeDatabase);
 
         Future _check(Database db) async {
           expect(db.factory, idbFactory);
@@ -288,7 +288,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_srcDbName, version: 3, onUpgradeNeeded: _initializeDatabase);
+            .open(srcDbName, version: 3, onUpgradeNeeded: _initializeDatabase);
 
         Future _check(Database db) async {
           expect(db.version, 3);
@@ -358,7 +358,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_srcDbName, version: 4, onUpgradeNeeded: _initializeDatabase);
+            .open(srcDbName, version: 4, onUpgradeNeeded: _initializeDatabase);
 
         Future _check(Database db) async {
           expect(db.version, 4);
@@ -450,7 +450,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_srcDbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(srcDbName, version: 1, onUpgradeNeeded: _initializeDatabase);
 
         Future _check(Database db, String storeName) async {
           final txn = db.transaction(storeName, idbModeReadOnly);
@@ -478,7 +478,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_srcDbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(srcDbName, version: 1, onUpgradeNeeded: _initializeDatabase);
 
         // put one in src and one in dst that should get deleted
         final txn =
@@ -509,8 +509,8 @@ void defineTests(TestContext ctx) {
 
       Future _checkCopyDatabase(
           Database db, Future Function(Database database) check) async {
-        final dstDb = await copyDatabase(db, idbFactory!, _dstDbName!);
-        expect(dstDb.name, _dstDbName);
+        final dstDb = await copyDatabase(db, idbFactory!, dstDbName!);
+        expect(dstDb.name, dstDbName);
         await check(dstDb);
         dstDb.close();
       }
@@ -524,12 +524,12 @@ void defineTests(TestContext ctx) {
 
       test('empty', () async {
         await _setupDeleteDb();
-        db = await idbFactory!.open(_srcDbName);
+        db = await idbFactory!.open(srcDbName);
 
         Future _check(Database db) async {
           expect(db.factory, idbFactory);
           expect(db.objectStoreNames.isEmpty, true);
-          expect(basename(db.name).endsWith(basename(_srcDbName)), isTrue);
+          expect(basename(db.name).endsWith(basename(srcDbName)), isTrue);
           expect(db.version, 1);
         }
 
@@ -558,7 +558,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_srcDbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(srcDbName, version: 1, onUpgradeNeeded: _initializeDatabase);
         final txn = db!.transaction(testStoreName, idbModeReadWrite);
         final store = txn.objectStore(testStoreName);
         var map = {
@@ -585,7 +585,7 @@ void defineTests(TestContext ctx) {
         Future _check(Database db) async {
           expect(db.factory, idbFactory);
           expect(db.objectStoreNames, [testStoreName]);
-          expect(basename(db.name).endsWith(basename(_srcDbName)), isTrue);
+          expect(basename(db.name).endsWith(basename(srcDbName)), isTrue);
           expect(db.version, 1);
           final txn = db.transaction(testStoreName, idbModeReadOnly);
           final store = txn.objectStore(testStoreName);
@@ -652,7 +652,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_srcDbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(srcDbName, version: 1, onUpgradeNeeded: _initializeDatabase);
 
         // put one in src and one in dst that should get deleted
         final txn = db!.transaction(testStoreName, idbModeReadWrite);

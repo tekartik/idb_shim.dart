@@ -24,11 +24,11 @@ void defineTests(TestContext ctx) {
     }
 
     // new
-    late String _dbName;
+    late String dbName;
     // prepare for test
     Future _setupDeleteDb() async {
-      _dbName = ctx.dbName;
-      await idbFactory!.deleteDatabase(_dbName);
+      dbName = ctx.dbName;
+      await idbFactory!.deleteDatabase(dbName);
     }
 
     // generic tearDown
@@ -53,7 +53,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory!
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
       });
 
       tearDown(_tearDown);
@@ -95,7 +95,7 @@ void defineTests(TestContext ctx) {
 
         // Re-open!
         db!.close();
-        db = await idbFactory!.open(_dbName);
+        db = await idbFactory!.open(dbName);
 
         _createTransaction();
         await _testReadValue(key, value);

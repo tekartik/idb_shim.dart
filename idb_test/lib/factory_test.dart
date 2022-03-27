@@ -12,17 +12,17 @@ void main() {
 void defineTests(TestContext ctx) {
   final idbFactory = ctx.factory;
   group('factory', () {
-    String? _dbName;
+    String? dbName;
 
     // prepare for test
     Future _setupDeleteDb() async {
-      _dbName = ctx.dbName;
-      await idbFactory!.deleteDatabase(_dbName!);
+      dbName = ctx.dbName;
+      await idbFactory!.deleteDatabase(dbName!);
     }
 
     test('delete database', () async {
       await _setupDeleteDb();
-      await idbFactory!.deleteDatabase(_dbName!);
+      await idbFactory!.deleteDatabase(dbName!);
     });
 
     test('cmp', () {
@@ -118,25 +118,25 @@ void defineTests(TestContext ctx) {
 
         test('open find', () async {
           await _setupDeleteDb();
-          final db = await idbFactory.open(_dbName!);
+          final db = await idbFactory.open(dbName!);
           db.close();
 
           // ignore: deprecated_member_use
           final names = await idbFactory.getDatabaseNames();
-          expect(names, contains(_dbName));
+          expect(names, contains(dbName));
         });
 
         test('open delete', () async {
           await _setupDeleteDb();
-          final db = await idbFactory.open(_dbName!);
+          final db = await idbFactory.open(dbName!);
           db.close();
           // ignore: deprecated_member_use
           var names = await idbFactory.getDatabaseNames();
-          expect(names, contains(_dbName));
-          await idbFactory.deleteDatabase(_dbName!);
+          expect(names, contains(dbName));
+          await idbFactory.deleteDatabase(dbName!);
           // ignore: deprecated_member_use
           names = await idbFactory.getDatabaseNames();
-          expect(names, isNot(contains(_dbName)));
+          expect(names, isNot(contains(dbName)));
         });
 
         test('open 2 db', () async {

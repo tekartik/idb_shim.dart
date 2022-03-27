@@ -32,11 +32,11 @@ void idbNativeFactoryTests(IdbFactory idbFactoryNative) {
 
       group('keyPath', () {
         // new
-        late String _dbName;
+        late String dbName;
         // prepare for test
         Future _setupDeleteDb() async {
-          _dbName = ctx.dbName;
-          await idbFactory.deleteDatabase(_dbName);
+          dbName = ctx.dbName;
+          await idbFactory.deleteDatabase(dbName);
         }
 
         test('multi', () async {
@@ -49,7 +49,7 @@ void idbNativeFactoryTests(IdbFactory idbFactoryNative) {
             expect(index.keyPath, ['year', 'name']);
           }
 
-          var db = await idbFactory.open(_dbName,
+          var db = await idbFactory.open(dbName,
               version: 1, onUpgradeNeeded: _initializeDatabase);
 
           Transaction transaction;
