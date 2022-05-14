@@ -8,13 +8,13 @@ void main() {
     if (IdbFactory.supported) {
       final dbName = 'com.tekartik.ie_count_bug.test';
       await window.indexedDB!.deleteDatabase(dbName);
-      void _setupDb(VersionChangeEvent e) {
+      void setupDb(VersionChangeEvent e) {
         final db = e.target.result as Database;
         db.createObjectStore('store', autoIncrement: true);
       }
 
       final db = await window.indexedDB!
-          .open(dbName, version: 1, onUpgradeNeeded: _setupDb);
+          .open(dbName, version: 1, onUpgradeNeeded: setupDb);
 
       final transaction = db.transaction('store', 'readwrite');
       var objectStore = transaction.objectStore('store');

@@ -6,14 +6,14 @@ import '../idb_test_common.dart';
 
 void main() {
   group('api', () {
-    void _expectBrowser([Object? e]) {
+    void expectBrowser([Object? e]) {
       if (e != null) {
         expect(e, isNot(const TypeMatcher<TestFailure>()));
       }
       expect(idbIsRunningAsJavascript, isTrue);
     }
 
-    void _expectIo([Object? e]) {
+    void expectIo([Object? e]) {
       if (e != null) {
         expect(e, isNot(const TypeMatcher<TestFailure>()));
       }
@@ -28,16 +28,16 @@ void main() {
 
       try {
         idbFactorySembastIo;
-        _expectIo();
+        expectIo();
       } catch (e) {
-        _expectBrowser(e);
+        expectBrowser(e);
       }
 
       try {
         idbFactoryNative;
-        _expectBrowser();
+        expectBrowser();
       } catch (e) {
-        _expectIo(e);
+        expectIo(e);
       }
     });
   });

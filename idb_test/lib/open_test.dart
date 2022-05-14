@@ -15,21 +15,21 @@ void defineTests(TestContext ctx) {
   // new
   late String dbName;
   // prepare for test
-  Future<void> _setupDeleteDb() async {
+  Future<void> setupDeleteDb() async {
     dbName = ctx.dbName;
     await idbFactory!.deleteDatabase(dbName);
   }
 
   group('delete', () {
     test('delete database', () async {
-      await _setupDeleteDb();
+      await setupDeleteDb();
       return idbFactory!.deleteDatabase(dbName);
     });
   });
 
   group('open', () {
     test('no param', () async {
-      await _setupDeleteDb();
+      await setupDeleteDb();
       return idbFactory!.open(dbName).then((Database database) {
         expect(database.version, 1);
         database.close();
@@ -37,7 +37,7 @@ void defineTests(TestContext ctx) {
     });
 
     test('close then re-open', () async {
-      await _setupDeleteDb();
+      await setupDeleteDb();
       return idbFactory!.open(dbName).then((Database database) {
         database.close();
         return idbFactory.open(dbName).then((Database database) {
@@ -61,12 +61,12 @@ void defineTests(TestContext ctx) {
     */
 
     test('bad param with onUpgradeNeeded', () async {
-      await _setupDeleteDb();
-      void _emptyInitializeDatabase(VersionChangeEvent e) {}
+      await setupDeleteDb();
+      void emptyInitializeDatabase(VersionChangeEvent e) {}
 
       try {
         await idbFactory!
-            .open(dbName, onUpgradeNeeded: _emptyInitializeDatabase);
+            .open(dbName, onUpgradeNeeded: emptyInitializeDatabase);
         fail('should fail');
       } on ArgumentError catch (e) {
         expect(e.message,
@@ -75,7 +75,7 @@ void defineTests(TestContext ctx) {
     });
 
     test('bad param with version', () async {
-      await _setupDeleteDb();
+      await setupDeleteDb();
       return idbFactory!.open(dbName, version: 1).then((_) {}).catchError((e) {
         expect((e as ArgumentError).message,
             'version and onUpgradeNeeded must be specified together');
@@ -83,15 +83,15 @@ void defineTests(TestContext ctx) {
     });
 
     test('open with version 0', () async {
-      await _setupDeleteDb();
+      await setupDeleteDb();
       var initCalled = false;
-      void _initializeDatabase(VersionChangeEvent e) {
+      void onUpgradeNeeded(VersionChangeEvent e) {
         // should be called
         initCalled = true;
       }
 
       return idbFactory!
-          .open(dbName, version: 0, onUpgradeNeeded: _initializeDatabase)
+          .open(dbName, version: 0, onUpgradeNeeded: onUpgradeNeeded)
           .then((Database database) {
         fail('should not open');
       }, onError: (e) {
@@ -101,7 +101,7 @@ void defineTests(TestContext ctx) {
     });
 
     test('default then version 1', () async {
-      await _setupDeleteDb();
+      await setupDeleteDb();
       var database = await idbFactory!.open(dbName);
       expect(database.version, 1);
       database.close();
@@ -111,23 +111,23 @@ void defineTests(TestContext ctx) {
       if (!ctx.isInMemory) {
         // devPrint('#2');
         var initCalled = false;
-        void _initializeDatabase(VersionChangeEvent e) {
+        void onUpgradeNeeded(VersionChangeEvent e) {
           // should not be called
           // devPrint('previous ${e.oldVersion} new ${e.newVersion}');
           initCalled = true;
         }
 
         database = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
         expect(initCalled, false);
         database.close();
       }
     });
 
     test('version 1', () async {
-      await _setupDeleteDb();
+      await setupDeleteDb();
       var initCalled = false;
-      void _initializeDatabase(VersionChangeEvent e) {
+      void onUpgradeNeeded(VersionChangeEvent e) {
         // should be called
         expect(e.oldVersion, 0);
         expect(e.newVersion, 1);
@@ -135,7 +135,7 @@ void defineTests(TestContext ctx) {
       }
 
       return idbFactory!
-          .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
+          .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded)
           .then((Database database) {
         expect(initCalled, true);
         database.close();
@@ -143,9 +143,9 @@ void defineTests(TestContext ctx) {
     });
 
     test('version 1 then 2', () async {
-      await _setupDeleteDb();
+      await setupDeleteDb();
       var initCalled = false;
-      void _initializeDatabase(VersionChangeEvent e) {
+      void onUpgradeNeeded(VersionChangeEvent e) {
         // should be called
         expect(e.oldVersion, 0);
         expect(e.newVersion, 1);
@@ -153,7 +153,7 @@ void defineTests(TestContext ctx) {
       }
 
       var database = await idbFactory!
-          .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+          .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
 
       expect(initCalled, true);
       expect(database.version, 1);
@@ -162,7 +162,7 @@ void defineTests(TestContext ctx) {
       // not working in memory since not persistent
       if (!ctx.isInMemory) {
         var upgradeCalled = false;
-        void _upgradeDatabase(VersionChangeEvent e) {
+        void onUpgradeNeeded(VersionChangeEvent e) {
           // should be called
           expect(e.oldVersion, 1);
           expect(e.newVersion, 2);
@@ -170,7 +170,7 @@ void defineTests(TestContext ctx) {
         }
 
         database = await idbFactory.open(dbName,
-            version: 2, onUpgradeNeeded: _upgradeDatabase);
+            version: 2, onUpgradeNeeded: onUpgradeNeeded);
 
         expect(upgradeCalled, true);
         expect(database.version, 2);
@@ -183,15 +183,15 @@ void defineTests(TestContext ctx) {
     });
 
     test('version 2 then downgrade', () async {
-      await _setupDeleteDb();
+      await setupDeleteDb();
       var initCalled = false;
-      void _initializeDatabase(VersionChangeEvent e) {
+      void onUpgradeNeeded(VersionChangeEvent e) {
         // should not be called
         initCalled = true;
       }
 
       var database = await idbFactory!
-          .open(dbName, version: 2, onUpgradeNeeded: _initializeDatabase);
+          .open(dbName, version: 2, onUpgradeNeeded: onUpgradeNeeded);
 
       expect(initCalled, true);
       database.close();
@@ -199,14 +199,14 @@ void defineTests(TestContext ctx) {
       // not working in memory since not persistent
       if (!ctx.isInMemory) {
         var downgradeCalled = false;
-        void _downgradeDatabase(VersionChangeEvent e) {
+        void onUpgradeNeeded(VersionChangeEvent e) {
           // should not be be called
           downgradeCalled = true;
         }
 
         try {
           await idbFactory.open(dbName,
-              version: 1, onUpgradeNeeded: _downgradeDatabase);
+              version: 1, onUpgradeNeeded: onUpgradeNeeded);
           fail('should fail');
         } catch (e) {
           expect(e, isNot(const TypeMatcher<TestFailure>()));
@@ -217,7 +217,7 @@ void defineTests(TestContext ctx) {
 
     test('abort', () async {
       var initCalled = false;
-      await _setupDeleteDb();
+      await setupDeleteDb();
       try {
         await idbFactory!.open(dbName, version: 2, onUpgradeNeeded: (event) {
           initCalled = true;
@@ -243,7 +243,7 @@ void defineTests(TestContext ctx) {
     });
 
     test('put_read_in_open_transaction', () async {
-      await _setupDeleteDb();
+      await setupDeleteDb();
       var db = await idbFactory!.open(dbName, version: 1,
           onUpgradeNeeded: (event) async {
         var store = event.database.createObjectStore('note');
@@ -290,7 +290,7 @@ void defineTests(TestContext ctx) {
     //    const String MILESTONE_STORE = 'milestoneStore';
     //    const String NAME_INDEX = 'name_index';
     //
-    //    void _initializeDatabase(VersionChangeEvent e) {
+    //    void onUpgradeNeeded(VersionChangeEvent e) {
     //      Database db = (e.target as Request).result;
     //
     //      var objectStore = db.createObjectStore(MILESTONE_STORE, autoIncrement: true);

@@ -18,32 +18,32 @@ void defineTests(TestContext ctx) {
     // new
     String? dbName;
     // prepare for test
-    Future _setupDeleteDb() async {
+    Future setupDeleteDb() async {
       dbName = ctx.dbName;
       await idbFactory!.deleteDatabase(dbName!);
     }
 
-    Future _openDb() async {
+    Future openDb() async {
       db = await idbFactory!.open(dbName!);
     }
 
-    Future _openWith1Store() async {
-      void _initializeDatabase(VersionChangeEvent e) {
+    Future openWith1Store() async {
+      void onUpgradeNeeded(VersionChangeEvent e) {
         final db = e.database;
         //ObjectStore objectStore =
         db.createObjectStore(testStoreName);
       }
 
       db = await idbFactory!
-          .open(dbName!, version: 1, onUpgradeNeeded: _initializeDatabase);
+          .open(dbName!, version: 1, onUpgradeNeeded: onUpgradeNeeded);
     }
 
-    void _onBlocked(Event event) {
+    void openOnBlocked(Event event) {
       //idbDevPrint('# onBlocked: $event');
     }
 
-    Future _openWith1OtherStore() async {
-      void _initializeDatabase(VersionChangeEvent e) {
+    Future openWith1OtherStore() async {
+      void onUpgradeNeeded(VersionChangeEvent e) {
         final db = e.database;
         // ObjectStore objectStore =
         db.createObjectStore('${testStoreName}_2');
@@ -51,8 +51,8 @@ void defineTests(TestContext ctx) {
 
       db = await idbFactory!.open(dbName!,
           version: 2,
-          onUpgradeNeeded: _initializeDatabase,
-          onBlocked: _onBlocked);
+          onUpgradeNeeded: onUpgradeNeeded,
+          onBlocked: openOnBlocked);
     }
 
     setUp(() {
@@ -67,8 +67,8 @@ void defineTests(TestContext ctx) {
     });
 
     test('empty', () async {
-      await _setupDeleteDb();
-      await _openDb();
+      await setupDeleteDb();
+      await openDb();
       expect(db!.factory, idbFactory);
       expect(db!.objectStoreNames.isEmpty, true);
       expect(db!.name, dbName);
@@ -76,8 +76,8 @@ void defineTests(TestContext ctx) {
     });
 
     test('one', () async {
-      await _setupDeleteDb();
-      void _initializeDatabase(VersionChangeEvent e) {
+      await setupDeleteDb();
+      void onUpgradeNeeded(VersionChangeEvent e) {
         final db = e.database;
         expect(db.objectStoreNames, []);
         final objectStore = db.createObjectStore(testStoreName);
@@ -86,15 +86,15 @@ void defineTests(TestContext ctx) {
       }
 
       db = await idbFactory!
-          .open(dbName!, version: 1, onUpgradeNeeded: _initializeDatabase);
+          .open(dbName!, version: 1, onUpgradeNeeded: onUpgradeNeeded);
       expect(db!.objectStoreNames, [testStoreName]);
 
       db!.close();
     });
 
     test('one_then_check', () async {
-      await _setupDeleteDb();
-      void _initializeDatabase(VersionChangeEvent e) {
+      await setupDeleteDb();
+      void onUpgradeNeeded(VersionChangeEvent e) {
         final db = e.database;
         expect(db.objectStoreNames, []);
         final objectStore = db.createObjectStore(testStoreName);
@@ -103,7 +103,7 @@ void defineTests(TestContext ctx) {
       }
 
       db = await idbFactory!
-          .open(dbName!, version: 1, onUpgradeNeeded: _initializeDatabase);
+          .open(dbName!, version: 1, onUpgradeNeeded: onUpgradeNeeded);
       var storeNames = List<String>.from(db!.objectStoreNames);
       expect(storeNames.length, 1);
       expect(storeNames[0], testStoreName);
@@ -113,7 +113,7 @@ void defineTests(TestContext ctx) {
       // not working in memory since not persistent
       if (!ctx.isInMemory) {
         // re-open
-        await _openDb();
+        await openDb();
         storeNames = List.from(db!.objectStoreNames);
         expect(storeNames.length, 1);
         expect(storeNames, [testStoreName]);
@@ -121,8 +121,8 @@ void defineTests(TestContext ctx) {
     });
 
     test('one_then_one', () async {
-      await _setupDeleteDb();
-      await _openWith1Store();
+      await setupDeleteDb();
+      await openWith1Store();
       var storeNames = List<String>.from(db!.objectStoreNames);
       expect(storeNames.length, 1);
       expect(storeNames[0], testStoreName);
@@ -132,7 +132,7 @@ void defineTests(TestContext ctx) {
       // not working in memory since not persistent
       if (!ctx.isInMemory) {
         // re-open
-        await _openWith1OtherStore();
+        await openWith1OtherStore();
         storeNames = List.from(db!.objectStoreNames);
         expect(storeNames.length, 2);
         expect(storeNames, [testStoreName, '${testStoreName}_2']);
@@ -140,8 +140,8 @@ void defineTests(TestContext ctx) {
     });
 
     test('one_then_delete', () async {
-      await _setupDeleteDb();
-      await _openWith1Store();
+      await setupDeleteDb();
+      await openWith1Store();
       expect(db!.objectStoreNames, [testStoreName]);
 
       db!.close();
@@ -167,7 +167,7 @@ void defineTests(TestContext ctx) {
     });
 
     test('delete_non_existing_store', () async {
-      await _setupDeleteDb();
+      await setupDeleteDb();
 
       db = await idbFactory!.open(dbName!, version: 1,
           onUpgradeNeeded: (VersionChangeEvent e) {
@@ -199,7 +199,7 @@ void defineTests(TestContext ctx) {
     });
 
     test('create_delete_index', () async {
-      await _setupDeleteDb();
+      await setupDeleteDb();
       db = await idbFactory!.open(dbName!, version: 1,
           onUpgradeNeeded: (VersionChangeEvent e) {
         final db = e.database;
@@ -233,7 +233,7 @@ void defineTests(TestContext ctx) {
     });
 
     test('delete_non_existing_index', () async {
-      await _setupDeleteDb();
+      await setupDeleteDb();
 
       db = await idbFactory!.open(dbName!, version: 1,
           onUpgradeNeeded: (VersionChangeEvent e) {
@@ -292,8 +292,8 @@ void defineTests(TestContext ctx) {
     });
 
     test('twice', () async {
-      await _setupDeleteDb();
-      await _openWith1Store();
+      await setupDeleteDb();
+      await openWith1Store();
       var storeNames = List.from(db!.objectStoreNames);
       expect(storeNames.length, 1);
       expect(storeNames[0], testStoreName);
@@ -301,7 +301,7 @@ void defineTests(TestContext ctx) {
       final db1 = db!;
       // db.close();
       // re-open
-      await _openWith1Store();
+      await openWith1Store();
       storeNames = List.from(db!.objectStoreNames);
       expect(storeNames.length, 1);
       expect(storeNames[0], testStoreName);
@@ -311,8 +311,8 @@ void defineTests(TestContext ctx) {
 
     // does not work in IE...
     test('one keep open then one', () async {
-      await _setupDeleteDb();
-      await _openWith1Store();
+      await setupDeleteDb();
+      await openWith1Store();
       final firstDb = db;
 
       var db1Closed = false;
@@ -324,7 +324,7 @@ void defineTests(TestContext ctx) {
       });
 
       // re-open
-      await _openWith1OtherStore();
+      await openWith1OtherStore();
       final storeNames = List<String>.from(db!.objectStoreNames);
       expect(storeNames, [testStoreName, '${testStoreName}_2']);
 

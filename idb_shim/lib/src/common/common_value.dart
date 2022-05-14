@@ -105,13 +105,13 @@ int compareKeys(dynamic first, dynamic second) {
 /// when keyPath is an array
 /// Return the relevant keyPath at index
 KeyRange keyArrayRangeAt(KeyRange keyRange, int index) {
-  Object? _valueAt(List? value, int index) {
+  Object? valueAt(List? value, int index) {
     return value == null ? null : value[index];
   }
 
   return KeyRange.bound(
-      _valueAt(keyRange.lower as List?, index),
-      _valueAt(keyRange.upper as List?, index),
+      valueAt(keyRange.lower as List?, index),
+      valueAt(keyRange.upper as List?, index),
       keyRange.lowerOpen,
       keyRange.upperOpen);
 }

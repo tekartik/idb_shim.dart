@@ -37,7 +37,7 @@ void defineTests(SembastFsTestContext ctx) {
     late sdb.Database memSdb;
 
     // generic tearDown
-    Future _tearDown() async {
+    Future dbTearDown() async {
       if (db != null) {
         db!.close();
         db = null;
@@ -73,12 +73,12 @@ void defineTests(SembastFsTestContext ctx) {
       return db;
     }
 
-    Future _checkExport() async {
+    Future checkExport() async {
       expect(await getStorageContent(), await getSdbStorageContext());
     }
 
     var store = sdb.StoreRef<String, Object?>.main();
-    tearDown(_tearDown);
+    tearDown(dbTearDown);
     dbTest('empty', () async {
       db = await idbFactory.open(dbTestName);
       memSdb = await openTmpDatabase(1);
@@ -92,7 +92,7 @@ void defineTests(SembastFsTestContext ctx) {
     dbTest('one_store', () async {
       late IdbObjectStoreMeta storeMeta;
 
-      void _initializeDatabase(VersionChangeEvent e) {
+      void onUpgradeNeeded(VersionChangeEvent e) {
         final db = e.database;
         final store = db.createObjectStore(testStoreName,
             keyPath: testNameField, autoIncrement: true);
@@ -100,7 +100,7 @@ void defineTests(SembastFsTestContext ctx) {
       }
 
       db = await idbFactory.open(dbTestName,
-          version: 2, onUpgradeNeeded: _initializeDatabase);
+          version: 2, onUpgradeNeeded: onUpgradeNeeded);
 
       memSdb = await openTmpDatabase(1);
       await store.record('version').put(memSdb, 2);
@@ -112,13 +112,13 @@ void defineTests(SembastFsTestContext ctx) {
       await memSdb.close();
       // Make sure the db is flushed
       await (db as idb_sdb.DatabaseSembast).db!.close();
-      await _checkExport();
+      await checkExport();
     });
 
     dbTest('one_index', () async {
       late IdbObjectStoreMeta storeMeta;
 
-      void _initializeDatabase(VersionChangeEvent e) {
+      void onUpgradeNeeded(VersionChangeEvent e) {
         final db = e.database;
         final store = db.createObjectStore(testStoreName, autoIncrement: true);
         storeMeta = IdbObjectStoreMeta.fromObjectStore(store);
@@ -129,7 +129,7 @@ void defineTests(SembastFsTestContext ctx) {
       }
 
       db = await idbFactory.open(dbTestName,
-          version: 3, onUpgradeNeeded: _initializeDatabase);
+          version: 3, onUpgradeNeeded: onUpgradeNeeded);
 
       memSdb = await openTmpDatabase(1);
       await store.record('version').put(memSdb, 3);
@@ -141,7 +141,7 @@ void defineTests(SembastFsTestContext ctx) {
       await memSdb.close();
       // Make sure the db is flushed
       await (db as idb_sdb.DatabaseSembast).db!.close();
-      await _checkExport();
+      await checkExport();
     });
 
     dbTest('dummy_file', () async {

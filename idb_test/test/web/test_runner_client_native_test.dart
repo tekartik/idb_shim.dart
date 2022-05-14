@@ -34,14 +34,14 @@ void idbNativeFactoryTests(IdbFactory idbFactoryNative) {
         // new
         late String dbName;
         // prepare for test
-        Future _setupDeleteDb() async {
+        Future setupDeleteDb() async {
           dbName = ctx.dbName;
           await idbFactory.deleteDatabase(dbName);
         }
 
         test('multi', () async {
-          await _setupDeleteDb();
-          void _initializeDatabase(VersionChangeEvent e) {
+          await setupDeleteDb();
+          void onUpgradeNeeded(VersionChangeEvent e) {
             var db = e.database;
             var store =
                 db.createObjectStore(testStoreName, autoIncrement: true);
@@ -50,7 +50,7 @@ void idbNativeFactoryTests(IdbFactory idbFactoryNative) {
           }
 
           var db = await idbFactory.open(dbName,
-              version: 1, onUpgradeNeeded: _initializeDatabase);
+              version: 1, onUpgradeNeeded: onUpgradeNeeded);
 
           Transaction transaction;
           ObjectStore objectStore;

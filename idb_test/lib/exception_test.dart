@@ -14,7 +14,7 @@ void defineTests(TestContext ctx) {
   Transaction? transaction;
 
   // generic tearDown
-  Future _tearDown() async {
+  Future dbTearDown() async {
     if (transaction != null) {
       await transaction!.completed;
       transaction = null;
@@ -34,7 +34,7 @@ void defineTests(TestContext ctx) {
         await idbFactory!.deleteDatabase(testDbName);
       });
 
-      tearDown(_tearDown);
+      tearDown(dbTearDown);
 
       test('create object store not in initialize', () async {
         try {

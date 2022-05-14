@@ -101,7 +101,7 @@ Future<Database> setUpSimpleStore(IdbFactory idbFactory, //
   meta ??= idbSimpleObjectStoreMeta;
 
   return idbFactory.deleteDatabase(dbName).then((_) {
-    void _initializeDatabase(VersionChangeEvent e) {
+    void openOnUpgradeNeeded(VersionChangeEvent e) {
       final db = e.database;
       final objectStore = db.createObjectStore(meta!.name,
           keyPath: meta.keyPath!, autoIncrement: meta.autoIncrement);
@@ -112,7 +112,7 @@ Future<Database> setUpSimpleStore(IdbFactory idbFactory, //
     }
 
     return idbFactory.open(dbName,
-        version: 1, onUpgradeNeeded: _initializeDatabase);
+        version: 1, onUpgradeNeeded: openOnUpgradeNeeded);
   });
 }
 

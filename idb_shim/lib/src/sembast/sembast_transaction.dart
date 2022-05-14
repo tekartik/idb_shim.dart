@@ -139,7 +139,7 @@ class TransactionSembast extends IdbTransactionBase
       // however any delayed action will be out of the transaction
       // This fixes sample get/await/get
 
-      Future _checkNextAction() {
+      Future checkNextAction() {
         //return new Future.value().then((_) {
         if (_index < _actions.length) {
           return _next();
@@ -152,10 +152,10 @@ class TransactionSembast extends IdbTransactionBase
       }
 
       if (_transactionLazyMode) {
-        return Future.delayed(const Duration(), _checkNextAction);
+        return Future.delayed(const Duration(), checkNextAction);
       } else {
         //return new Future.sync(new Duration(), _checkNextAction);
-        return _checkNextAction();
+        return checkNextAction();
       }
     }
   }
@@ -179,7 +179,7 @@ class TransactionSembast extends IdbTransactionBase
 
       //lazyExecution = new Future.delayed(new Duration(), () {
 
-      Future _sdbAction() {
+      Future sdbAction() {
         //assert(sdbDatabase.transaction == null);
 
         // No return value here
@@ -214,9 +214,9 @@ class TransactionSembast extends IdbTransactionBase
 
       if (_transactionLazyMode) {
         // old lazy mode
-        _lazyExecution = Future.microtask(_sdbAction);
+        _lazyExecution = Future.microtask(sdbAction);
       } else {
-        _lazyExecution = Future.sync(_sdbAction);
+        _lazyExecution = Future.sync(sdbAction);
       }
 
       //return lazyExecution;

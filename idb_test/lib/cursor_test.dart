@@ -30,18 +30,18 @@ void defineTests(TestContext ctx) {
 
   late String dbName;
 
-  void _createTransaction() {
+  void createTransaction() {
     transaction = db!.transaction(testStoreName, idbModeReadWrite);
     objectStore = transaction!.objectStore(testStoreName);
   }
 
   // prepare for test
-  Future _setupDeleteDb() async {
+  Future setupDeleteDb() async {
     dbName = ctx.dbName;
     await idbFactory!.deleteDatabase(dbName);
   }
 
-  Future _tearDown() async {
+  Future dbTearDown() async {
     if (transaction != null) {
       await transaction!.completed;
       transaction = null;
@@ -94,23 +94,23 @@ void defineTests(TestContext ctx) {
     group('key_path_with_dot', () {
       const keyPath = 'my.key';
 
-      Future _setUp() async {
-        await _setupDeleteDb();
+      Future dbSetUp() async {
+        await setupDeleteDb();
 
-        void _initializeDatabase(VersionChangeEvent e) {
+        void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
           db.createObjectStore(testStoreName, keyPath: keyPath);
         }
 
         db = await idbFactory!
-            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
       }
 
-      tearDown(_tearDown);
+      tearDown(dbTearDown);
 
       test('one item cursor', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        createTransaction();
         var value = {
           'my': {'key': 'test_value'}
         };
@@ -290,28 +290,28 @@ void defineTests(TestContext ctx) {
     });
 
     group('auto', () {
-      tearDown(_tearDown);
+      tearDown(dbTearDown);
 
-      void _createTransaction() {
+      void dbCreateTransaction() {
         transaction = db!.transaction(testStoreName, idbModeReadWrite);
         objectStore = transaction!.objectStore(testStoreName);
       }
 
-      Future _setUp() async {
-        await _setupDeleteDb();
-        void _initializeDatabase(VersionChangeEvent e) {
+      Future dbSetUp() async {
+        await setupDeleteDb();
+        void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
           //ObjectStore objectStore =
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
 
         db = await idbFactory!
-            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
       }
 
       test('empty cursor', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         final stream = objectStore.openCursor(autoAdvance: true);
         var count = 0;
         return stream
@@ -325,8 +325,8 @@ void defineTests(TestContext ctx) {
       });
 
       test('one item cursor', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         return add('test1').then((_) {
           final stream = objectStore.openCursor(autoAdvance: true);
           var count = 0;
@@ -344,8 +344,8 @@ void defineTests(TestContext ctx) {
       });
 
       test('openCursor_read_2_row', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         await fill3SampleRows();
 
         var count = 0;
@@ -363,8 +363,8 @@ void defineTests(TestContext ctx) {
       });
 
       test('openKeyCursor_read_2_row', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         await fill3SampleRows();
 
         var count = 0;
@@ -380,8 +380,8 @@ void defineTests(TestContext ctx) {
       });
 
       test('openCursor no auto advance timeout', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         await fill3SampleRows().then((_) async {
           await objectStore
               .openCursor(autoAdvance: false)
@@ -397,8 +397,8 @@ void defineTests(TestContext ctx) {
       });
 
       test('openCursor null auto advance timeout', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         await fill3SampleRows().then((_) async {
           await objectStore
               .openCursor(autoAdvance: null)
@@ -412,8 +412,8 @@ void defineTests(TestContext ctx) {
         });
       });
       test('3 item cursor no auto advance', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         return fill3SampleRows().then((_) {
           return manualCursorToList(objectStore.openCursor(autoAdvance: false))
               .then((list) {
@@ -427,8 +427,8 @@ void defineTests(TestContext ctx) {
         });
       });
       test('3 item cursor', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         return fill3SampleRows().then((_) {
           return cursorToList(objectStore.openCursor(autoAdvance: true))
               .then((list) {
@@ -492,8 +492,8 @@ void defineTests(TestContext ctx) {
         });
       });
       test('key args as Range', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         try {
           await objectStore
               .openCursor(autoAdvance: false, key: KeyRange.only(1))

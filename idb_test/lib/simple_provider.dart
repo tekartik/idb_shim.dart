@@ -28,7 +28,7 @@ class SimpleProvider {
 
   SimpleProvider(this.idbFactory);
 
-  void _initializeDatabase(VersionChangeEvent e) {
+  void onUpgradeNeeded(VersionChangeEvent e) {
     final db = (e.target as Request).result;
 
     var objectStore = db.createObjectStore(storeName, autoIncrement: true);
@@ -69,7 +69,7 @@ class SimpleProvider {
     return idbFactory!.deleteDatabase(dbName).then((_) {
       //done();
       return idbFactory!
-          .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
+          .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded)
           .then((Database db) {
         this.db = db;
       });

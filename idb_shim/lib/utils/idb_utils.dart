@@ -40,7 +40,7 @@ Future<Database> copySchema(
     await txn.completed;
   }
 
-  void _onUpgradeNeeded(VersionChangeEvent event) {
+  void openOnUpgradeNeeded(VersionChangeEvent event) {
     final db = event.database;
     for (final storeMeta in schemaMeta.stores) {
       final store = db.createObjectStore(storeMeta.name,
@@ -55,7 +55,7 @@ Future<Database> copySchema(
   // devPrint('Open $dstDbName version $version');
   // Open and copy scheme
   final dstDatabase = await dstFactory.open(dstDbName,
-      version: version, onUpgradeNeeded: _onUpgradeNeeded);
+      version: version, onUpgradeNeeded: openOnUpgradeNeeded);
   return dstDatabase;
 }
 
