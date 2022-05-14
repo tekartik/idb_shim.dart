@@ -18,12 +18,12 @@ void defineTests(TestContext ctx) {
 
   late String dbName;
   // prepare for test
-  Future _setupDeleteDb() async {
+  Future setupDeleteDb() async {
     dbName = ctx.dbName;
     await idbFactory!.deleteDatabase(dbName);
   }
 
-  Future _tearDown() async {
+  Future dbTearDown() async {
     if (transaction != null) {
       try {
         await transaction!.completed;
@@ -41,17 +41,17 @@ void defineTests(TestContext ctx) {
   group('transaction', () {
     //String testDbName = ctx.dbName;
     group('scratch', () {
-      tearDown(_tearDown);
+      tearDown(dbTearDown);
 
       test('put & completed', () async {
-        await _setupDeleteDb();
-        void _initializeDatabase(VersionChangeEvent e) {
+        await setupDeleteDb();
+        void onUpgradeNeeded(VersionChangeEvent e) {
           db = e.database;
           db!.createObjectStore(testStoreName, autoIncrement: true);
         }
 
         db = await idbFactory!
-            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
 
         final transaction = db!.transaction(testStoreName, idbModeReadWrite);
         final objectStore = transaction.objectStore(testStoreName);
@@ -65,25 +65,25 @@ void defineTests(TestContext ctx) {
       });
 
       test('empty transaction', () async {
-        await _setupDeleteDb();
-        void _initializeDatabase(VersionChangeEvent e) {
+        await setupDeleteDb();
+        void onUpgradeNeeded(VersionChangeEvent e) {
           db = e.database;
           db!.createObjectStore(testStoreName, autoIncrement: true);
         }
 
         db = await idbFactory!
-            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
         final transaction = db!.transaction(testStoreName, idbModeReadWrite);
         await transaction.completed;
       });
       test('multiple transaction', () async {
-        await _setupDeleteDb();
-        void _initializeDatabase(VersionChangeEvent e) {
+        await setupDeleteDb();
+        void onUpgradeNeeded(VersionChangeEvent e) {
           e.database.createObjectStore(testStoreName, autoIncrement: true);
         }
 
         return idbFactory!
-            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
+            .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded)
             .then((Database database) {
           final transaction1 =
               database.transaction(testStoreName, idbModeReadWrite);
@@ -107,13 +107,13 @@ void defineTests(TestContext ctx) {
       });
 
       test('chain 2 transactions', () async {
-        await _setupDeleteDb();
-        void _initializeDatabase(VersionChangeEvent e) {
+        await setupDeleteDb();
+        void onUpgradeNeeded(VersionChangeEvent e) {
           e.database.createObjectStore(testStoreName, autoIncrement: true);
         }
 
         db = await idbFactory!
-            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
 
         final transaction = db!.transaction(testStoreName, idbModeReadWrite);
         var objectStore = transaction.objectStore(testStoreName);
@@ -128,15 +128,15 @@ void defineTests(TestContext ctx) {
       });
 
       test('transactionList', () async {
-        await _setupDeleteDb();
-        void _initializeDatabase(VersionChangeEvent e) {
+        await setupDeleteDb();
+        void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
           db.createObjectStore(testStoreName2, autoIncrement: false);
         }
 
         db = await idbFactory!
-            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
 
         // not supported on safari!
         final transaction = db!
@@ -145,14 +145,14 @@ void defineTests(TestContext ctx) {
       });
 
       test('bad_mode', () async {
-        await _setupDeleteDb();
-        void _initializeDatabase(VersionChangeEvent e) {
+        await setupDeleteDb();
+        void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
 
         db = await idbFactory!
-            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
         final transaction = db!.transaction(testStoreName, idbModeReadOnly);
 
         final store = transaction.objectStore(testStoreName);
@@ -175,14 +175,14 @@ void defineTests(TestContext ctx) {
       });
 
       test('bad_store_transaction', () async {
-        await _setupDeleteDb();
-        void _initializeDatabase(VersionChangeEvent e) {
+        await setupDeleteDb();
+        void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
 
         db = await idbFactory!
-            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
 
         try {
           db!.transaction(testStoreName2, idbModeReadWrite);
@@ -196,14 +196,14 @@ void defineTests(TestContext ctx) {
       });
 
       test('no_store_transaction_list', () async {
-        await _setupDeleteDb();
-        void _initializeDatabase(VersionChangeEvent e) {
+        await setupDeleteDb();
+        void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
 
         db = await idbFactory!
-            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
 
         try {
           db!.transactionList([], idbModeReadWrite);
@@ -214,14 +214,14 @@ void defineTests(TestContext ctx) {
       });
 
       test('bad_store', () async {
-        await _setupDeleteDb();
-        void _initializeDatabase(VersionChangeEvent e) {
+        await setupDeleteDb();
+        void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
 
         db = await idbFactory!
-            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
 
         final transaction = db!.transaction(testStoreName, idbModeReadWrite);
         try {
@@ -238,16 +238,16 @@ void defineTests(TestContext ctx) {
       group('transaction auto', () {
         //ObjectStore objectStore;
 
-        Future _setUp() async {
-          await _setupDeleteDb();
+        Future dbSetUp() async {
+          await setupDeleteDb();
 
-          void _initializeDatabase(VersionChangeEvent e) {
+          void onUpgradeNeeded(VersionChangeEvent e) {
             final db = e.database;
             db.createObjectStore(testStoreName, autoIncrement: true);
           }
 
           return idbFactory!
-              .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
+              .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded)
               .then((Database database) {
             db = database;
             //transaction = db.transaction(testStoreName, idbModeReadWrite);
@@ -256,17 +256,17 @@ void defineTests(TestContext ctx) {
           });
         }
 
-        tearDown(_tearDown);
+        tearDown(dbTearDown);
 
         test('immediate completed', () async {
-          await _setUp();
+          await dbSetUp();
           //bool done = false;
           final transaction = db!.transaction(testStoreName, idbModeReadWrite);
           return transaction.completed;
         });
 
         test('add immediate completed', () async {
-          await _setUp();
+          await dbSetUp();
           // not working in memory
           // devPrint('***** ${idbFactory.name}');
 
@@ -286,7 +286,7 @@ void defineTests(TestContext ctx) {
 
         // not working in memory
         test('immediate completed then add', () async {
-          await _setUp();
+          await dbSetUp();
 // not working in memory
           // devPrint('***** ${idbFactory.name}');
 
@@ -307,7 +307,7 @@ void defineTests(TestContext ctx) {
         });
 
         test('complete previous transaction', () async {
-          void _initializeDatabase(VersionChangeEvent e) {
+          void onUpgradeNeeded(VersionChangeEvent e) {
             var db = e.database;
             db.createObjectStore(testStoreName);
           }
@@ -315,7 +315,7 @@ void defineTests(TestContext ctx) {
           var name = 'complete_previous_transaction.db';
           await idbFactory!.deleteDatabase(name);
           var db = await idbFactory.open(name,
-              version: 1, onUpgradeNeeded: _initializeDatabase);
+              version: 1, onUpgradeNeeded: onUpgradeNeeded);
 
           var txn1 = db.transaction(testStoreName, idbModeReadWrite);
           var txn2 = db.transaction(testStoreName, idbModeReadWrite);
@@ -333,23 +333,23 @@ void defineTests(TestContext ctx) {
     });
 
     group('timing', () {
-      Future _setUp() async {
+      Future dbSetUp() async {
         return setUpSimpleStore(idbFactory!, dbName: ctx.dbName)
             .then((Database database) {
           db = database;
         });
       }
 
-      tearDown(_tearDown);
+      tearDown(dbTearDown);
 
       test('immediate completed', () async {
-        await _setUp();
+        await dbSetUp();
         final transaction = db!.transaction(testStoreName, idbModeReadWrite);
         return transaction.completed;
       });
 
       test('add immediate completed', () async {
-        await _setUp();
+        await dbSetUp();
         var done = false;
         final transaction = db!.transaction(testStoreName, idbModeReadWrite);
         final objectStore = transaction.objectStore(testStoreName);
@@ -365,7 +365,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('add 1 then 1 immediate completed', () async {
-        await _setUp();
+        await dbSetUp();
         var done = false;
         final transaction = db!.transaction(testStoreName, idbModeReadWrite);
         final objectStore = transaction.objectStore(testStoreName);
@@ -385,7 +385,7 @@ void defineTests(TestContext ctx) {
       // The following tests when there are extra await in the transaction
 
       test('get_get', () async {
-        await _setUp();
+        await dbSetUp();
         final transaction = db!.transaction(testStoreName, idbModeReadOnly);
         final objectStore = transaction.objectStore(testStoreName);
         await objectStore.getObject(0);
@@ -394,7 +394,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('get_after_completed', () async {
-        await _setUp();
+        await dbSetUp();
         final transaction = db!.transaction(testStoreName, idbModeReadOnly);
         final objectStore = transaction.objectStore(testStoreName);
         await objectStore.getObject(0);
@@ -409,34 +409,34 @@ void defineTests(TestContext ctx) {
       });
 
       test('transaction_async_get', () async {
-        await _setUp();
+        await dbSetUp();
         late Transaction transaction;
         late ObjectStore objectStore;
-        void _createTransactionSync() {
+        void dbCreateTransactionSync() {
           transaction = db!.transaction(testStoreName, idbModeReadWrite);
           objectStore = transaction.objectStore(testStoreName);
         }
 
-        Future _createTransaction() async {
+        Future dbCreateTransaction() async {
           await Future.delayed(const Duration(milliseconds: 1));
-          _createTransactionSync();
+          dbCreateTransactionSync();
         }
 
         // Sync ok
-        _createTransactionSync();
+        dbCreateTransactionSync();
         await objectStore.getObject(0);
         await transaction.completed;
 
         // Async ok now even on Safari
         // this used to fail with a transactioninactiveerror
-        await _createTransaction();
+        await dbCreateTransaction();
         await objectStore.getObject(0);
 
         await transaction.completed;
       });
 
       test('transaction_wait_get', () async {
-        await _setUp();
+        await dbSetUp();
         final transaction = db!.transaction(testStoreName, idbModeReadOnly);
         final objectStore = transaction.objectStore(testStoreName);
 
@@ -452,7 +452,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('get_wait_get', () async {
-        await _setUp();
+        await dbSetUp();
         final transaction = db!.transaction(testStoreName, idbModeReadOnly);
         final objectStore = transaction.objectStore(testStoreName);
         await objectStore.getObject(0);
@@ -476,16 +476,16 @@ void defineTests(TestContext ctx) {
       });
 
       test('get_async_get', () async {
-        await _setUp();
+        await dbSetUp();
         final transaction = db!.transaction(testStoreName, idbModeReadOnly);
         final objectStore = transaction.objectStore(testStoreName);
-        Future _get() async {
+        Future doGet() async {
           await objectStore.getObject(0);
         }
 
         await objectStore.getObject(0);
         try {
-          await _get();
+          await doGet();
           // extra skeep
           // await new Future.delayed(new Duration(milliseconds: 1));
           if (ctx.isIdbNoLazy) {
@@ -501,7 +501,7 @@ void defineTests(TestContext ctx) {
       }, skip: 'TODO');
 
       test('get_then_get', () async {
-        await _setUp();
+        await dbSetUp();
         final transaction = db!.transaction(testStoreName, idbModeReadOnly);
         final objectStore = transaction.objectStore(testStoreName);
 
@@ -527,7 +527,7 @@ void defineTests(TestContext ctx) {
 
       test('get_delay_get', () async {
         try {
-          await _setUp();
+          await dbSetUp();
           // this hangs on ie now
           final transaction = db!.transaction(testStoreName, idbModeReadOnly);
           final objectStore = transaction.objectStore(testStoreName);
@@ -554,7 +554,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('get_wait_wait_get', () async {
-        await _setUp();
+        await dbSetUp();
         final transaction = db!.transaction(testStoreName, idbModeReadOnly);
         final objectStore = transaction.objectStore(testStoreName);
         await objectStore.getObject(0);
@@ -568,7 +568,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('put_wait_wait_put', () async {
-        await _setUp();
+        await dbSetUp();
         final transaction = db!.transaction(testStoreName, idbModeReadWrite);
         final objectStore = transaction.objectStore(testStoreName);
         await objectStore.put({});
@@ -582,7 +582,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('put_abort_min_steps', () async {
-        await _setUp();
+        await dbSetUp();
         transaction = db!.transaction(testStoreName, idbModeReadWrite);
         var objectStore = transaction!.objectStore(testStoreName);
         await objectStore.put({'test': 1}, 'key1');
@@ -597,7 +597,7 @@ void defineTests(TestContext ctx) {
         db!.close();
         // devPrint('closed');
 
-        await _setUp();
+        await dbSetUp();
         transaction = db!.transaction(testStoreName, idbModeReadWrite);
         objectStore = transaction!.objectStore(testStoreName);
         await objectStore.put({'test': 1}, 'key1');
@@ -612,7 +612,7 @@ void defineTests(TestContext ctx) {
       }, skip: 'io experiment');
 
       test('put_abort', () async {
-        await _setUp();
+        await dbSetUp();
         transaction = db!.transaction(testStoreName, idbModeReadWrite);
         var objectStore = transaction!.objectStore(testStoreName);
         // TEST to make this fail on sembase, the index is a primary key
@@ -640,7 +640,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('add 1 then 1 then 1 immediate completed', () async {
-        await _setUp();
+        await dbSetUp();
         var done = false;
         final transaction = db!.transaction(testStoreName, idbModeReadWrite);
         final objectStore = transaction.objectStore(testStoreName);
@@ -660,7 +660,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('add 1 level 5 deep immediate completed', () async {
-        await _setUp();
+        await dbSetUp();
         var done = false;
         final transaction = db!.transaction(testStoreName, idbModeReadWrite);
         final objectStore = transaction.objectStore(testStoreName);
@@ -684,7 +684,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('multiple await operation', () async {
-        await _setUp();
+        await dbSetUp();
         final transaction = db!.transaction(testStoreName, idbModeReadWrite);
         final objectStore = transaction.objectStore(testStoreName);
         // ignore: unawaited_futures
@@ -697,7 +697,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('immediate completed then add', () async {
-        await _setUp();
+        await dbSetUp();
 
         var done = false;
         final transaction = db!.transaction(testStoreName, idbModeReadWrite);
@@ -716,7 +716,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('add 2 immediate completed', () async {
-        await _setUp();
+        await dbSetUp();
         var done1 = false;
         var done2 = false;
         final transaction = db!.transaction(testStoreName, idbModeReadWrite);
@@ -739,7 +739,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('add/put immediate completed', () async {
-        await _setUp();
+        await dbSetUp();
 
         var done = false;
         final transaction = db!.transaction(testStoreName, idbModeReadWrite);
@@ -758,7 +758,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('add/put/get/delete', () async {
-        await _setUp();
+        await dbSetUp();
         var done = false;
         final transaction = db!.transaction(testStoreName, idbModeReadWrite);
         final objectStore = transaction.objectStore(testStoreName);
@@ -785,14 +785,14 @@ void defineTests(TestContext ctx) {
       });
 
       test('2 embedded transaction empty', () async {
-        await _setUp();
+        await dbSetUp();
         final transaction1 = db!.transaction(testStoreName, idbModeReadWrite);
         final transaction2 = db!.transaction(testStoreName, idbModeReadWrite);
         return Future.wait([transaction1.completed, transaction2.completed]);
       });
 
       test('2 embedded transaction 2 put', () async {
-        await _setUp();
+        await dbSetUp();
         final transaction1 = db!.transaction(testStoreName, idbModeReadWrite);
         final transaction2 = db!.transaction(testStoreName, idbModeReadWrite);
         // ignore: unawaited_futures

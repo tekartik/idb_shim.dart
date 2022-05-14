@@ -15,13 +15,13 @@ void defineTests(TestContext ctx) {
     String? dbName;
 
     // prepare for test
-    Future _setupDeleteDb() async {
+    Future setupDeleteDb() async {
       dbName = ctx.dbName;
       await idbFactory!.deleteDatabase(dbName!);
     }
 
     test('delete database', () async {
-      await _setupDeleteDb();
+      await setupDeleteDb();
       await idbFactory!.deleteDatabase(dbName!);
     });
 
@@ -117,7 +117,7 @@ void defineTests(TestContext ctx) {
         */
 
         test('open find', () async {
-          await _setupDeleteDb();
+          await setupDeleteDb();
           final db = await idbFactory.open(dbName!);
           db.close();
 
@@ -127,7 +127,7 @@ void defineTests(TestContext ctx) {
         });
 
         test('open delete', () async {
-          await _setupDeleteDb();
+          await setupDeleteDb();
           final db = await idbFactory.open(dbName!);
           db.close();
           // ignore: deprecated_member_use

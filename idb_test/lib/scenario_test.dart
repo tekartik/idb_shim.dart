@@ -17,15 +17,15 @@ void defineTests(TestContext ctx) {
   group('scenario', () {
     group('bug_put_delete', () {
       late Database db;
-      Future _setUp() async {
+      Future dbSetUp() async {
         await idbFactory!.deleteDatabase(ctx.dbName);
-        void _initializeDatabase(VersionChangeEvent e) {
+        void onUpgradeNeeded(VersionChangeEvent e) {
           db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
 
         db = await idbFactory.open(ctx.dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
       }
 
       tearDown(() {
@@ -33,7 +33,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('put_delete', () async {
-        await _setUp();
+        await dbSetUp();
         final transaction = db.transaction(testStoreName, idbModeReadWrite);
         final objectStore = transaction.objectStore(testStoreName);
         var key = await objectStore.put({});
@@ -42,7 +42,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('get_delete', () async {
-        await _setUp();
+        await dbSetUp();
         var transaction = db.transaction(testStoreName, idbModeReadWrite);
         var objectStore = transaction.objectStore(testStoreName);
         var key = await objectStore

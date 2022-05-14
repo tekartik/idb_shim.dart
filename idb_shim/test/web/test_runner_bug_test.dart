@@ -16,13 +16,13 @@ void main() {
         await idbFactory.deleteDatabase(dbName);
       } catch (_) {}
 
-      void _initializeDatabase(VersionChangeEvent e) {
+      void onUpgradeNeeded(VersionChangeEvent e) {
         final db = e.database;
         db.createObjectStore(testStoreName);
       }
 
       var db = await idbFactory.open(dbName,
-          version: 1, onUpgradeNeeded: _initializeDatabase);
+          version: 1, onUpgradeNeeded: onUpgradeNeeded);
 
       db.close();
     } finally {

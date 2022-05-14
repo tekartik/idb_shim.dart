@@ -55,12 +55,12 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
       {int? version,
       OnUpgradeNeededFunction? onUpgradeNeeded,
       OnBlockedFunction? onBlocked}) {
-    void _onUpgradeNeeded(idb.VersionChangeEvent e) {
+    void openOnUpgradeNeeded(idb.VersionChangeEvent e) {
       final event = VersionChangeEventNative(this, e);
       onUpgradeNeeded!(event);
     }
 
-    void _onBlocked(html.Event e) {
+    void openOnBlocked(html.Event e) {
       if (onBlocked != null) {
         Event event = EventNative(e);
         onBlocked(event);
@@ -72,10 +72,11 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
     return nativeFactory
         .open(dbName,
             version: version,
-            onUpgradeNeeded: onUpgradeNeeded == null ? null : _onUpgradeNeeded,
+            onUpgradeNeeded:
+                onUpgradeNeeded == null ? null : openOnUpgradeNeeded,
             onBlocked: onBlocked == null && onUpgradeNeeded == null
                 ? null
-                : _onBlocked)
+                : openOnBlocked)
         .then((idb.Database database) {
       return DatabaseNative(this, database);
     });
@@ -84,7 +85,7 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
   @override
   Future<IdbFactory> deleteDatabase(String dbName,
       {OnBlockedFunction? onBlocked}) {
-    void _onBlocked(html.Event e) {
+    void openOnBlocked(html.Event e) {
       print('blocked deleting $dbName');
       Event event = EventNative(e);
       onBlocked!(event);
@@ -92,7 +93,7 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
 
     return nativeFactory
         .deleteDatabase(dbName,
-            onBlocked: onBlocked == null ? null : _onBlocked)
+            onBlocked: onBlocked == null ? null : openOnBlocked)
         .then((_) {
       return this;
     });

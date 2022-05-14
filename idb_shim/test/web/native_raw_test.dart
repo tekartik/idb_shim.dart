@@ -88,25 +88,25 @@ void main() {
 
       idb.Transaction transaction;
       idb.ObjectStore objectStore;
-      void _createTransactionSync() {
+      void createTransactionSync() {
         transaction = db.transaction('store', 'readonly');
         objectStore = transaction.objectStore('store');
       }
 
-      Future _createTransaction() async {
+      Future createTransaction() async {
         await Future.delayed(const Duration(milliseconds: 1));
-        _createTransactionSync();
+        createTransactionSync();
       }
 
       // Sync ok
-      _createTransactionSync();
+      createTransactionSync();
       transaction = db.transaction('store', 'readonly');
       objectStore = transaction.objectStore('store');
       await objectStore.getObject(0);
       await transaction.completed;
 
       // Async ok even on Safari with dart 1.13
-      await _createTransaction();
+      await createTransaction();
       await objectStore.getObject(0);
 
       await transaction.completed;
@@ -124,18 +124,18 @@ void main() {
 
       late idb.Transaction transaction;
       late idb.ObjectStore objectStore;
-      void _createTransactionSync() {
+      void createTransactionSync() {
         transaction = db.transaction('store', 'readonly');
         objectStore = transaction.objectStore('store');
       }
 
-      _createTransactionSync();
+      createTransactionSync();
       await objectStore.getObject(0);
-      Future _get() async {
+      Future get() async {
         await objectStore.getObject(0);
       }
 
-      await _get();
+      await get();
 
       await transaction.completed;
     }, skip: 'crashing on ie');
@@ -151,18 +151,18 @@ void main() {
 
       late idb.Transaction transaction;
       late idb.ObjectStore objectStore;
-      void _createTransactionSync() {
+      void createTransactionSync() {
         transaction = db.transaction('store', 'readonly');
         objectStore = transaction.objectStore('store');
       }
 
-      _createTransactionSync();
-      Future _get() async {
+      createTransactionSync();
+      Future doGet() async {
         await objectStore.getObject(0);
       }
 
       await objectStore.getObject(0).then((_) async {
-        await _get();
+        await doGet();
       });
 
       await transaction.completed;
@@ -181,13 +181,13 @@ void main() {
 
       late idb.Transaction transaction;
       late idb.ObjectStore objectStore;
-      void _createTransactionSync() {
+      void createTransactionSync() {
         transaction = db.transaction('store', 'readonly');
         objectStore = transaction.objectStore('store');
       }
 
       // Sync ok
-      _createTransactionSync();
+      createTransactionSync();
       await objectStore.getObject(0);
       await Future.value();
 
@@ -213,12 +213,12 @@ void main() {
 
       late idb.Transaction transaction;
       late idb.ObjectStore objectStore;
-      void _createTransactionSync() {
+      void createTransactionSync() {
         transaction = db.transaction('store', idbModeReadWrite);
         objectStore = transaction.objectStore('store');
       }
 
-      _createTransactionSync();
+      createTransactionSync();
       var key = await objectStore.add(DateTime.fromMillisecondsSinceEpoch(1));
       var keyBlob = await objectStore.add(Uint8List.fromList([1, 2, 3]));
       expect(

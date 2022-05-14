@@ -21,14 +21,14 @@ void defineTests(TestContext ctx) {
     Transaction? transaction;
     late ObjectStore objectStore;
 
-    void _createTransaction() {
+    void dbCreateTransaction() {
       transaction = db.transaction(_storeName, idbModeReadWrite);
       objectStore = transaction!.objectStore(_storeName);
     }
 
     setUp(() {
       return idbFactory!.deleteDatabase(_dbName).then((_) {
-        void _initializeDatabase(VersionChangeEvent e) {
+        void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
           final objectStore =
               db.createObjectStore(_storeName, autoIncrement: true);
@@ -36,7 +36,7 @@ void defineTests(TestContext ctx) {
         }
 
         return idbFactory
-            .open(_dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
+            .open(_dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded)
             .then((Database database) {
           db = database;
         });
@@ -55,7 +55,7 @@ void defineTests(TestContext ctx) {
     });
 
     test('add/get map', () {
-      _createTransaction();
+      dbCreateTransaction();
       final value = {_nameField: 'test1'};
       final index = objectStore.index(_nameIndex);
       return objectStore.add(value).then((key) {

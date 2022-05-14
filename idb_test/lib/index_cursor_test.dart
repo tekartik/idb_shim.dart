@@ -31,7 +31,7 @@ void defineTests(TestContext ctx) {
     // new
     late String dbName;
     // prepare for test
-    Future _setupDeleteDb() async {
+    Future setupDeleteDb() async {
       dbName = ctx.dbName;
       await idbFactory.deleteDatabase(dbName);
     }
@@ -48,7 +48,7 @@ void defineTests(TestContext ctx) {
     }
 
     // generic tearDown
-    Future _tearDown() async {
+    Future dbTearDown() async {
       if (transaction != null) {
         await transaction!.completed;
         transaction = null;
@@ -59,17 +59,17 @@ void defineTests(TestContext ctx) {
       }
     }
 
-    void _createTransaction() {
+    void dbCreateTransaction() {
       transaction = db!.transaction(testStoreName, idbModeReadWrite);
       objectStore = transaction!.objectStore(testStoreName);
       index = objectStore.index(testNameIndex);
     }
 
     group('with_null_key', () {
-      Future _openDb() async {
+      Future openDb() async {
         final dbName = ctx.dbName;
         await idbFactory.deleteDatabase(dbName);
-        void _initializeDatabase(VersionChangeEvent e) {
+        void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
           final objectStore =
               db.createObjectStore(testStoreName, autoIncrement: true);
@@ -77,7 +77,7 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
       }
 
       // Don't make this function async, crashes on ie
@@ -99,8 +99,8 @@ void defineTests(TestContext ctx) {
       }
 
       test('one_record', () async {
-        await _openDb();
-        _createTransaction();
+        await openDb();
+        dbCreateTransaction();
         await objectStore.put({'dummy': 1});
 
         expect(await getIndexRecords(), []);
@@ -108,8 +108,8 @@ void defineTests(TestContext ctx) {
       });
 
       test('two_record', () async {
-        await _openDb();
-        _createTransaction();
+        await openDb();
+        dbCreateTransaction();
         await objectStore.put({'dummy': 1});
         await objectStore.put({'dummy': 2, testNameField: 'ok'});
         // must be empy as the key is not specified
@@ -119,20 +119,20 @@ void defineTests(TestContext ctx) {
         expect(await getIndexKeys(), ['ok']);
       });
 
-      tearDown(_tearDown);
+      tearDown(dbTearDown);
     });
 
     Future testKey(Object value) async {
       final dbName = ctx.dbName;
       await idbFactory.deleteDatabase(dbName);
-      void _initializeDatabase(VersionChangeEvent e) {
+      void onUpgradeNeeded(VersionChangeEvent e) {
         final db = e.database;
         final objectStore = db.createObjectStore(testStoreName);
         objectStore.createIndex(testNameIndex, testNameField);
       }
 
       db = await idbFactory.open(dbName,
-          version: 1, onUpgradeNeeded: _initializeDatabase);
+          version: 1, onUpgradeNeeded: onUpgradeNeeded);
       try {
         var txn = db!.transaction(testStoreName, idbModeReadWrite);
         await txn.objectStore(testStoreName).put({testNameField: value}, 1);
@@ -198,10 +198,10 @@ void defineTests(TestContext ctx) {
     });
 
     group('auto', () {
-      Future _setUp() async {
-        await _setupDeleteDb();
+      Future dbSetUp() async {
+        await setupDeleteDb();
 
-        void _initializeDatabase(VersionChangeEvent e) {
+        void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
           final objectStore =
               db.createObjectStore(testStoreName, autoIncrement: true);
@@ -209,14 +209,14 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
       }
 
-      tearDown(_tearDown);
+      tearDown(dbTearDown);
 
       test('empty key cursor', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         final stream = index.openKeyCursor(autoAdvance: true);
         var count = 0;
         final completer = Completer();
@@ -231,8 +231,8 @@ void defineTests(TestContext ctx) {
       });
 
       test('empty key cursor by key', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         final stream = index.openKeyCursor(key: 1, autoAdvance: true);
         var count = 0;
         final completer = Completer();
@@ -247,8 +247,8 @@ void defineTests(TestContext ctx) {
       });
 
       test('empty cursor', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         final stream = index.openCursor(autoAdvance: true);
         var count = 0;
         final completer = Completer();
@@ -263,8 +263,8 @@ void defineTests(TestContext ctx) {
       });
 
       test('empty cursor by key', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         final stream = index.openCursor(key: 1, autoAdvance: true);
         var count = 0;
         final completer = Completer();
@@ -279,8 +279,8 @@ void defineTests(TestContext ctx) {
       });
 
       test('one item key cursor', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         return add('test1').then((_) {
           final stream = index.openKeyCursor(autoAdvance: true);
           var count = 0;
@@ -300,8 +300,8 @@ void defineTests(TestContext ctx) {
       });
 
       test('one item cursor', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         return add('test1').then((_) {
           final stream = index.openCursor(autoAdvance: true);
           var count = 0;
@@ -320,8 +320,8 @@ void defineTests(TestContext ctx) {
       });
 
       test('index get 1', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         return add('test1').then((key) {
           return index.get('test1').then((value) {
             expect((value as Map)[testNameField], 'test1');
@@ -330,8 +330,8 @@ void defineTests(TestContext ctx) {
       });
 
       test('cursor non-auto', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         return add('test1').then((key) {
           var count = 0;
           // non auto to control advance
@@ -352,8 +352,8 @@ void defineTests(TestContext ctx) {
       });
 
       test('cursor none auto delete 1', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         return add('test1').then((key) {
           // non auto to control advance
           return index
@@ -379,8 +379,8 @@ void defineTests(TestContext ctx) {
       });
 
       test('cursor none auto update 1', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         return add('test1').then((key) {
           late Map map;
           // non auto to control advance
@@ -408,8 +408,8 @@ void defineTests(TestContext ctx) {
         });
       });
       test('3 item cursor', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         return fill3SampleRows().then((_) {
           return cursorToList(index.openCursor(autoAdvance: true)).then((list) {
             expect((list[0].value as Map)['name'], equals('test1'));
@@ -447,16 +447,16 @@ void defineTests(TestContext ctx) {
       late Index nameIndex;
       late Index valueIndex;
 
-      void _createTransaction() {
+      void dbCreateTransaction() {
         transaction = db!.transaction(testStoreName, idbModeReadWrite);
         objectStore = transaction!.objectStore(testStoreName);
         nameIndex = objectStore.index(testNameIndex);
         valueIndex = objectStore.index(testValueIndex);
       }
 
-      Future _setUp() async {
-        await _setupDeleteDb();
-        void _initializeDatabase(VersionChangeEvent e) {
+      Future dbSetUp() async {
+        await setupDeleteDb();
+        void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
           final objectStore =
               db.createObjectStore(testStoreName, autoIncrement: true);
@@ -465,18 +465,18 @@ void defineTests(TestContext ctx) {
         }
 
         return idbFactory
-            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase)
+            .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded)
             .then((Database database) {
           db = database;
           return db;
         });
       }
 
-      tearDown(_tearDown);
+      tearDown(dbTearDown);
 
       test('add and read', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         Future<List<int>> getKeys(Stream<Cursor> stream) {
           final keys = <int>[];
           return stream
@@ -521,14 +521,14 @@ void defineTests(TestContext ctx) {
       // new
       late String dbName;
       // prepare for test
-      Future _setupDeleteDb() async {
+      Future setupDeleteDb() async {
         dbName = ctx.dbName;
         await idbFactory.deleteDatabase(dbName);
       }
 
       test('multi', () async {
-        await _setupDeleteDb();
-        void _initializeDatabase(VersionChangeEvent e) {
+        await setupDeleteDb();
+        void onUpgradeNeeded(VersionChangeEvent e) {
           var db = e.database;
           var store = db.createObjectStore(testStoreName, autoIncrement: true);
           var index = store.createIndex('test', ['year', 'name']);
@@ -536,7 +536,7 @@ void defineTests(TestContext ctx) {
         }
 
         var db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
 
         Transaction transaction;
         ObjectStore objectStore;
@@ -635,10 +635,10 @@ void defineTests(TestContext ctx) {
     group('key_path_with_dot', () {
       const keyPath = 'my.key';
 
-      Future _setUp() async {
-        await _setupDeleteDb();
+      Future dbSetUp() async {
+        await setupDeleteDb();
 
-        void _initializeDatabase(VersionChangeEvent e) {
+        void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
           final objectStore =
               db.createObjectStore(testStoreName, autoIncrement: true);
@@ -646,14 +646,14 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
       }
 
-      tearDown(_tearDown);
+      tearDown(dbTearDown);
 
       test('one item cursor', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         final value = {
           'my': {'key': 'test_value'}
         };
@@ -673,10 +673,10 @@ void defineTests(TestContext ctx) {
     });
 
     group('multi_entry', () {
-      Future _setUp() async {
-        await _setupDeleteDb();
+      Future dbSetUp() async {
+        await setupDeleteDb();
 
-        void _initializeDatabase(VersionChangeEvent e) {
+        void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
           final objectStore =
               db.createObjectStore(testStoreName, autoIncrement: true);
@@ -685,14 +685,14 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
       }
 
-      tearDown(_tearDown);
+      tearDown(dbTearDown);
 
       test('one_value', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         final value = {testNameField: 'test1'};
         final index = objectStore.index(testNameIndex);
         var key = await objectStore.add(value);
@@ -719,8 +719,8 @@ void defineTests(TestContext ctx) {
       });
 
       test('one_array', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         final value = {
           testNameField: [2, 1, 2]
         };
@@ -769,8 +769,8 @@ void defineTests(TestContext ctx) {
       });
 
       test('one_array_update_delete', () async {
-        await _setUp();
-        _createTransaction();
+        await dbSetUp();
+        dbCreateTransaction();
         final value = {
           testNameField: [2, 1]
         };
@@ -824,10 +824,10 @@ void defineTests(TestContext ctx) {
     });
 
     group('with_3_keys', () {
-      Future _openDb() async {
+      Future openDb() async {
         final dbName = ctx.dbName;
         await idbFactory.deleteDatabase(dbName);
-        void _initializeDatabase(VersionChangeEvent e) {
+        void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
           final objectStore =
               db.createObjectStore(testStoreName, autoIncrement: true);
@@ -835,12 +835,12 @@ void defineTests(TestContext ctx) {
         }
 
         db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: _initializeDatabase);
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
       }
 
       test('one_record', () async {
-        await _openDb();
-        _createTransaction();
+        await openDb();
+        dbCreateTransaction();
 
         var key = await objectStore.put({'f1': 1, 'f2': 2, 'f3': 3});
         final index = objectStore.index(testNameIndex);
@@ -852,7 +852,7 @@ void defineTests(TestContext ctx) {
         expect(first.primaryKey, key);
       });
 
-      tearDown(_tearDown);
+      tearDown(dbTearDown);
     });
   });
 }

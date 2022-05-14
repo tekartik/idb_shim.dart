@@ -18,7 +18,7 @@ void defineTests(TestContext ctx) {
     Transaction? transaction;
     late ObjectStore objectStore;
 
-    void _createTransaction() {
+    void dbCreateTransaction() {
       transaction = db!.transaction(testStoreName, idbModeReadWrite);
       objectStore = transaction!.objectStore(testStoreName);
     }
@@ -26,13 +26,13 @@ void defineTests(TestContext ctx) {
     // new
     late String dbName;
     // prepare for test
-    Future _setupDeleteDb() async {
+    Future setupDeleteDb() async {
       dbName = ctx.dbName;
       await idbFactory!.deleteDatabase(dbName);
     }
 
     // generic tearDown
-    Future _tearDown() async {
+    Future dbTearDown() async {
       if (transaction != null) {
         await transaction!.completed;
         transaction = null;
@@ -45,20 +45,20 @@ void defineTests(TestContext ctx) {
 
     group('simple', () {
       setUp(() async {
-        await _setupDeleteDb();
+        await setupDeleteDb();
 
-        void _initializeDatabase(VersionChangeEvent e) {
+        void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
 
         db = await idbFactory!
-            .open(dbName, version: 1, onUpgradeNeeded: _initializeDatabase);
+            .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
       });
 
-      tearDown(_tearDown);
+      tearDown(dbTearDown);
 
-      Future _testReadValue(int key, Object value) async {
+      Future testReadValue(int key, Object value) async {
         var read = await objectStore.getObject(key);
         expect(read, value);
         // Read using cursor
@@ -69,7 +69,7 @@ void defineTests(TestContext ctx) {
         expect(await completer.future, value);
       }
 
-      Future _testUpdateValue(int key, Object value) async {
+      Future testUpdateValue(int key, Object value) async {
         var completer = Completer.sync();
         objectStore.openCursor(key: key).listen((cvw) {
           // Update with the same value
@@ -80,16 +80,16 @@ void defineTests(TestContext ctx) {
         await completer.future;
       }
 
-      Future _testValue(Object value) async {
-        _createTransaction();
+      Future testValue(Object value) async {
+        dbCreateTransaction();
         // Write
         var key = await objectStore.add(value) as int;
         // Read
-        await _testReadValue(key, value);
+        await testReadValue(key, value);
         // Update
-        await _testUpdateValue(key, value);
+        await testUpdateValue(key, value);
         // Read
-        await _testReadValue(key, value);
+        await testReadValue(key, value);
 
         await transaction!.completed;
 
@@ -97,8 +97,8 @@ void defineTests(TestContext ctx) {
         db!.close();
         db = await idbFactory!.open(dbName);
 
-        _createTransaction();
-        await _testReadValue(key, value);
+        dbCreateTransaction();
+        await testReadValue(key, value);
       }
 
       test('values', () async {
@@ -111,12 +111,12 @@ void defineTests(TestContext ctx) {
           DateTime.fromMillisecondsSinceEpoch(1, isUtc: true),
           Uint8List.fromList([1, 2, 3]),
         ]) {
-          await _testValue(value);
+          await testValue(value);
         }
       });
 
       test('dateTime', () async {
-        _createTransaction();
+        dbCreateTransaction();
         // date time is read as utc
         var key = await objectStore.add(DateTime.fromMillisecondsSinceEpoch(1));
         var read = await objectStore.getObject(key);
@@ -124,7 +124,7 @@ void defineTests(TestContext ctx) {
       });
 
       test('Uint8List', () async {
-        _createTransaction();
+        dbCreateTransaction();
         // date time is read as utc
         var key = await objectStore.add(Uint8List.fromList([1, 2, 3]));
         var read = await objectStore.getObject(key);
