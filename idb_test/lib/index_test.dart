@@ -4,7 +4,6 @@ import 'package:idb_shim/idb_client.dart';
 import 'package:idb_test/idb_test_common_meta.dart';
 
 import 'idb_test_common.dart';
-import 'idb_test_common_meta.dart';
 
 // so that this can be run directly
 void main() {
