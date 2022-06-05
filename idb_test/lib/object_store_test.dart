@@ -5,7 +5,6 @@ import 'package:idb_shim/src/common/common_value.dart'; // ignore: implementatio
 import 'package:idb_test/idb_test_common_meta.dart';
 
 import 'idb_test_common.dart';
-import 'idb_test_common_meta.dart';
 
 // so that this can be run directly
 void main() {
