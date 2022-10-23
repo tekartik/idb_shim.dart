@@ -170,7 +170,6 @@ void defineTests(TestContext ctx) {
           } on DatabaseError catch (e) {
             print(e);
             // DataError: Failed to execute 'get' on 'IDBIndex': The parameter is not a valid key.
-
           }
         } else {
           var recordValue = await txn
