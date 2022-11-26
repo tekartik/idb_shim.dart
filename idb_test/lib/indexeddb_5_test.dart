@@ -25,7 +25,7 @@ void defineTests(TestContext ctx) {
     late Database db;
 
     setUp(() {
-      return idbFactory!.deleteDatabase(dbName).then((_) {
+      return idbFactory.deleteDatabase(dbName).then((_) {
         return idbFactory.open(dbName, version: 1, onUpgradeNeeded: (e) {
           var db = e.database;
           var objectStore =
@@ -42,7 +42,7 @@ void defineTests(TestContext ctx) {
     });
 
     // ignore: deprecated_member_use
-    if (idbFactory!.supportsDatabaseNames) {
+    if (idbFactory.supportsDatabaseNames) {
       test('getDatabaseNames', () {
         // ignore: deprecated_member_use
         return idbFactory.getDatabaseNames().then((names) {

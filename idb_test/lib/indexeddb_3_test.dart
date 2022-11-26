@@ -124,7 +124,7 @@ void defineTests(TestContext ctx) {
       setUp(() {
         //oldTimeout = unittestConfiguration.timeout;
         //unittestConfiguration.timeout = new Duration(seconds: 30);
-        return setupDb(idbFactory!).then((result) {
+        return setupDb(idbFactory).then((result) {
           db = result;
         });
       });

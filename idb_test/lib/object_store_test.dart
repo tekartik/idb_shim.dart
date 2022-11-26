@@ -28,7 +28,7 @@ void defineTests(TestContext ctx) {
   // prepare for test
   Future setupDeleteDb() async {
     dbName = ctx.dbName;
-    await idbFactory!.deleteDatabase(dbName);
+    await idbFactory.deleteDatabase(dbName);
   }
 
   // generic tearDown
@@ -49,11 +49,11 @@ void defineTests(TestContext ctx) {
 
     group('failure', () {
       setUp(() async {
-        await idbFactory!.deleteDatabase(testDbName);
+        await idbFactory.deleteDatabase(testDbName);
       });
 
       test('create object store not in initialize', () {
-        return idbFactory!.open(testDbName).then((Database database) {
+        return idbFactory.open(testDbName).then((Database database) {
           try {
             database.createObjectStore(testStoreName, autoIncrement: true);
           } catch (e) {
@@ -78,8 +78,8 @@ void defineTests(TestContext ctx) {
             db.createObjectStore(testStoreName);
           }
 
-          var db = await idbFactory!
-              .open(dbName, version: 1, onUpgradeNeeded: dbCreateStore);
+          var db = await idbFactory.open(dbName,
+              version: 1, onUpgradeNeeded: dbCreateStore);
           var txn = db.transaction(testStoreName, idbModeReadWrite);
           var store = txn.objectStore(testStoreName);
           await store.put('value', 'key');
@@ -121,8 +121,8 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName);
         }
 
-        db = await idbFactory!
-            .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(dbName,
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
       }
 
       test('properties', () async {
@@ -244,8 +244,8 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
 
-        db = await idbFactory!
-            .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(dbName,
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
       }
 
       tearDown(dbTearDown);
@@ -588,8 +588,8 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
 
-        db = await idbFactory!
-            .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(dbName,
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
       }
 
       tearDown(dbTearDown);
@@ -668,8 +668,8 @@ void defineTests(TestContext ctx) {
               keyPath: keyPath, autoIncrement: true);
         }
 
-        db = await idbFactory!
-            .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(dbName,
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
       }
 
       tearDown(dbTearDown);
@@ -698,6 +698,26 @@ void defineTests(TestContext ctx) {
             expect(valueRead, expectedValue);
           });
         });
+      });
+
+      test('add_read_no_key', () async {
+        await dbSetUp();
+        dbCreateTransaction();
+        final value = {'test': 'test_value'};
+        var key = await objectStore.add(value);
+        expect(key, 1);
+        expect(await objectStore.getObject(key),
+            {'test': 'test_value', keyPath: key});
+      });
+
+      test('add_read_explicit_key', () async {
+        await dbSetUp();
+        dbCreateTransaction();
+        final value = {'test': 'test_value', keyPath: 1};
+        var key = await objectStore.add(value);
+        expect(key, 1);
+        expect(await objectStore.getObject(key),
+            {'test': 'test_value', 'my_key': 1});
       });
 
       test('simple add with keyPath and next', () async {
@@ -774,8 +794,8 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, keyPath: keyPath);
         }
 
-        db = await idbFactory!
-            .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(dbName,
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
       }
 
       tearDown(dbTearDown);
@@ -915,11 +935,11 @@ void defineTests(TestContext ctx) {
     if (!ctx.isInMemory) {
       group('create store and re-open', () {
         setUp(() {
-          return idbFactory!.deleteDatabase(testDbName);
+          return idbFactory.deleteDatabase(testDbName);
         });
 
         Future testStore(IdbObjectStoreMeta storeMeta) {
-          return setUpSimpleStore(idbFactory!,
+          return setUpSimpleStore(idbFactory,
                   meta: storeMeta, dbName: testDbName)
               .then((Database db) {
             db.close();
@@ -968,8 +988,8 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, keyPath: keyPath);
         }
 
-        db = await idbFactory!
-            .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(dbName,
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
       }
 
       tearDown(dbTearDown);
@@ -1051,7 +1071,7 @@ void defineTests(TestContext ctx) {
     group('various', () {
       Future dbSetUp() async {
         await setupDeleteDb();
-        db = await setUpSimpleStore(idbFactory!, dbName: dbName);
+        db = await setUpSimpleStore(idbFactory, dbName: dbName);
       }
 
       tearDown(dbTearDown);
@@ -1075,8 +1095,8 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName2, autoIncrement: true);
         }
 
-        db = await idbFactory!
-            .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(dbName,
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
       }
 
       tearDown(dbTearDown);

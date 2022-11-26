@@ -27,7 +27,7 @@ void defineTests(TestContext ctx) {
     }
 
     setUp(() {
-      return idbFactory!.deleteDatabase(_dbName).then((_) {
+      return idbFactory.deleteDatabase(_dbName).then((_) {
         void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
           final objectStore =

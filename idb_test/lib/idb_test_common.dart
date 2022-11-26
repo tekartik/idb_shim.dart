@@ -43,9 +43,9 @@ TestContext? _dbTestContext;
 
 class TestContext {
   static var _id = 0;
-  IdbFactory? factory;
+  late IdbFactory factory;
 
-  // Each time you call dbName, it generates one
+  /// Each time you call dbName, it generates one
   String get dbName => 'test${++_id}.db';
 
   // special internet explorer handling
@@ -63,7 +63,7 @@ class TestContext {
   bool get supportsDoubleKey => (factory as IdbFactoryBase).supportsDoubleKey;
 
   void wrapInLogger({IdbFactoryLoggerType type = IdbFactoryLoggerType.all}) {
-    factory = getIdbFactoryLogger(factory!, type: type);
+    factory = getIdbFactoryLogger(factory, type: type);
   }
 
   /// Get inner factory implementation (somehow not working...)
@@ -75,7 +75,7 @@ class TestContext {
     if (idbFactory is IdbFactoryLogger) {
       return idbFactory.factory as T;
     }
-    print(idbFactory!.name);
+    print(idbFactory.name);
     print(T);
     print(idbFactory.runtimeType);
     throw 'no factory of type $T found';
@@ -120,7 +120,7 @@ class SembastFsTestContext extends SembastTestContext {
     if (idbFactory is IdbFactoryLogger) {
       return idbFactory.factory as IdbFactorySembast;
     }
-    print(idbFactory!.name);
+    print(idbFactory.name);
     print(idbFactory.runtimeType);
     throw 'no factory of type IdbFactorySembast found';
   }
@@ -221,7 +221,7 @@ void dbTest(String description, dynamic Function() body,
   final ctx = _dbTestContext;
   test(description, () async {
     dbTestName = ctx!.dbName;
-    await ctx.factory!.deleteDatabase(dbTestName);
+    await ctx.factory.deleteDatabase(dbTestName);
     await Future.value(body());
   },
       // ignore: deprecated_member_use

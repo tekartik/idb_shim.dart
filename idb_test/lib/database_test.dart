@@ -20,11 +20,11 @@ void defineTests(TestContext ctx) {
     // prepare for test
     Future setupDeleteDb() async {
       dbName = ctx.dbName;
-      await idbFactory!.deleteDatabase(dbName!);
+      await idbFactory.deleteDatabase(dbName!);
     }
 
     Future openDb() async {
-      db = await idbFactory!.open(dbName!);
+      db = await idbFactory.open(dbName!);
     }
 
     Future openWith1Store() async {
@@ -34,8 +34,8 @@ void defineTests(TestContext ctx) {
         db.createObjectStore(testStoreName);
       }
 
-      db = await idbFactory!
-          .open(dbName!, version: 1, onUpgradeNeeded: onUpgradeNeeded);
+      db = await idbFactory.open(dbName!,
+          version: 1, onUpgradeNeeded: onUpgradeNeeded);
     }
 
     void openOnBlocked(Event event) {
@@ -49,7 +49,7 @@ void defineTests(TestContext ctx) {
         db.createObjectStore('${testStoreName}_2');
       }
 
-      db = await idbFactory!.open(dbName!,
+      db = await idbFactory.open(dbName!,
           version: 2,
           onUpgradeNeeded: onUpgradeNeeded,
           onBlocked: openOnBlocked);
@@ -85,8 +85,8 @@ void defineTests(TestContext ctx) {
         expect(objectStore.name, testStoreName);
       }
 
-      db = await idbFactory!
-          .open(dbName!, version: 1, onUpgradeNeeded: onUpgradeNeeded);
+      db = await idbFactory.open(dbName!,
+          version: 1, onUpgradeNeeded: onUpgradeNeeded);
       expect(db!.objectStoreNames, [testStoreName]);
 
       db!.close();
@@ -102,8 +102,8 @@ void defineTests(TestContext ctx) {
         expect(objectStore.name, testStoreName);
       }
 
-      db = await idbFactory!
-          .open(dbName!, version: 1, onUpgradeNeeded: onUpgradeNeeded);
+      db = await idbFactory.open(dbName!,
+          version: 1, onUpgradeNeeded: onUpgradeNeeded);
       var storeNames = List<String>.from(db!.objectStoreNames);
       expect(storeNames.length, 1);
       expect(storeNames[0], testStoreName);
@@ -148,7 +148,7 @@ void defineTests(TestContext ctx) {
 
       // not working in memory since not persistent
       if (!ctx.isInMemory) {
-        db = await idbFactory!.open(dbName!, version: 2,
+        db = await idbFactory.open(dbName!, version: 2,
             onUpgradeNeeded: (VersionChangeEvent e) {
           final db = e.database;
 
@@ -169,7 +169,7 @@ void defineTests(TestContext ctx) {
     test('delete_non_existing_store', () async {
       await setupDeleteDb();
 
-      db = await idbFactory!.open(dbName!, version: 1,
+      db = await idbFactory.open(dbName!, version: 1,
           onUpgradeNeeded: (VersionChangeEvent e) {
         final db = e.database;
 
@@ -200,7 +200,7 @@ void defineTests(TestContext ctx) {
 
     test('create_delete_index', () async {
       await setupDeleteDb();
-      db = await idbFactory!.open(dbName!, version: 1,
+      db = await idbFactory.open(dbName!, version: 1,
           onUpgradeNeeded: (VersionChangeEvent e) {
         final db = e.database;
         final store = db.createObjectStore(testStoreName);
@@ -235,7 +235,7 @@ void defineTests(TestContext ctx) {
     test('delete_non_existing_index', () async {
       await setupDeleteDb();
 
-      db = await idbFactory!.open(dbName!, version: 1,
+      db = await idbFactory.open(dbName!, version: 1,
           onUpgradeNeeded: (VersionChangeEvent e) {
         final db = e.database;
         final store = db.createObjectStore(testStoreName);

@@ -82,6 +82,15 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     return key;
   }
 
+  /// Fix the key in map
+  /// Need for add without explicit key
+  Object fixKeyInValueImpl(Object value, Object key) {
+    if ((keyPath != null) && (value is Map)) {
+      return cloneValue(value, keyPath, key);
+    }
+    return value;
+  }
+
   /// Only key the if key path is null
   dynamic getUpdateKeyIfNeeded(value, [key]) {
     if (keyPath == null) {
@@ -114,9 +123,15 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
         }
       }
     }
-    return Future.wait(futures).then((_) {
+    return Future.wait(futures).then((_) async {
       if (key == null) {
-        return sdbStore.add(sdbClient, value as Object);
+        // Handle the case where a generated key is added
+        // We are in a transaction so the key is safe
+        // Make sure the key field is added
+        var generatedKey = await sdbStore.generateKey(sdbClient);
+        var fixedValue = fixKeyInValueImpl(value!, generatedKey);
+        await sdbStore.record(generatedKey).add(sdbClient, fixedValue);
+        return generatedKey;
       } else {
         return sdbStore
             .record(key)
@@ -216,11 +231,6 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
       return null;
     } else {
       var value = record.value;
-      // Add key if _keyPath is not null
-      if ((keyPath != null) && (value is Map)) {
-        value = cloneValue(value, keyPath, record.key);
-      }
-
       return fromSembastValue(value);
     }
   }

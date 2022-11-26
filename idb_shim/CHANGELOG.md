@@ -1,3 +1,8 @@
+## 2.1.0
+
+* Fix io implementation for generated key internal storage
+* Requires dart 2.18+
+
 ## 2.0.1+1
 
 * New lint supports

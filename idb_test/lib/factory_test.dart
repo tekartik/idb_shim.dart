@@ -17,16 +17,16 @@ void defineTests(TestContext ctx) {
     // prepare for test
     Future setupDeleteDb() async {
       dbName = ctx.dbName;
-      await idbFactory!.deleteDatabase(dbName!);
+      await idbFactory.deleteDatabase(dbName!);
     }
 
     test('delete database', () async {
       await setupDeleteDb();
-      await idbFactory!.deleteDatabase(dbName!);
+      await idbFactory.deleteDatabase(dbName!);
     });
 
     test('cmp', () {
-      expect(idbFactory!.cmp(1, 2), -1);
+      expect(idbFactory.cmp(1, 2), -1);
       expect(idbFactory.cmp(1, 1), 0);
       expect(idbFactory.cmp(2, 1), 1);
       expect(idbFactory.cmp('a', 'b'), -1);
@@ -70,7 +70,7 @@ void defineTests(TestContext ctx) {
     });
 
     test('cmp array', () {
-      expect(idbFactory!.cmp([1, 2], [1, 3]), -1);
+      expect(idbFactory.cmp([1, 2], [1, 3]), -1);
       expect(idbFactory.cmp([1, 2], [1, 2]), 0);
       expect(idbFactory.cmp([1, 2], [1, 1]), 1);
     });
@@ -90,7 +90,7 @@ void defineTests(TestContext ctx) {
     */
 
     // ignore: deprecated_member_use
-    if (idbFactory!.supportsDatabaseNames) {
+    if (idbFactory.supportsDatabaseNames) {
       test('supportsDatabaseNames', () {
         // ignore: deprecated_member_use
         expect(idbFactory.supportsDatabaseNames, true);

@@ -85,7 +85,7 @@ void defineTests(TestContext ctx) {
 
   dynamic skipGo(name, data) => null;
   void go(String name, Object data) =>
-      test(name, () => testReadWrite(idbFactory!, 123, data, verifyGraph));
+      test(name, () => testReadWrite(idbFactory, 123, data, verifyGraph));
 
   test('test_verifyGraph', () {
     // Nice to know verifyGraph is working before we rely on it.

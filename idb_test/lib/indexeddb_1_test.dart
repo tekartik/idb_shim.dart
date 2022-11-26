@@ -195,7 +195,7 @@ void defineTests(TestContext ctx) {
   group('supportsDatabaseNames', () {
     test('supported', () {
       // ignore: deprecated_member_use
-      expect(idbFactory!.supportsDatabaseNames, isTrue);
+      expect(idbFactory.supportsDatabaseNames, isTrue);
     });
   }, skip: true);
 
@@ -204,7 +204,7 @@ void defineTests(TestContext ctx) {
       var failed = false;
 
       try {
-        var db = idbFactory!;
+        var db = idbFactory;
         await db.open('random_db');
       } catch (_) {
         failed = true;
@@ -216,7 +216,7 @@ void defineTests(TestContext ctx) {
     if (idb.IdbFactory.supported) {
       // not working in memory since not persistent
       if (!ctx.isInMemory) {
-        test('upgrade', () => testUpgrade(idbFactory!));
+        test('upgrade', () => testUpgrade(idbFactory));
       }
       // temp skip
       group('dynamic', () {
