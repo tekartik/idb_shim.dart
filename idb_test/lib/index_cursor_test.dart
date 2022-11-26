@@ -21,7 +21,7 @@ void main() {
 }
 
 void defineTests(TestContext ctx) {
-  final idbFactory = ctx.factory!;
+  final idbFactory = ctx.factory;
   group('index_cursor', () {
     Database? db;
     Transaction? transaction;
@@ -150,7 +150,7 @@ void defineTests(TestContext ctx) {
           try {
             expect(values, isEmpty);
           } catch (e) {
-            expect(ctx.factory!.name, contains('sembast'));
+            expect(ctx.factory.name, contains('sembast'));
             expect(values, [
               {'name': true}
             ]);

@@ -31,14 +31,14 @@ void defineTests(TestContext ctx) {
 
     group('error', () {
       setUp(() async {
-        await idbFactory!.deleteDatabase(testDbName);
+        await idbFactory.deleteDatabase(testDbName);
       });
 
       tearDown(dbTearDown);
 
       test('create object store not in initialize', () async {
         try {
-          await idbFactory!.open(testDbName).then((Database database) {
+          await idbFactory.open(testDbName).then((Database database) {
             try {
               database.createObjectStore(testStoreName, autoIncrement: true);
             } catch (_) {

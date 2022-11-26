@@ -38,7 +38,7 @@ void defineTests(TestContext ctx) {
   // prepare for test
   Future setupDeleteDb() async {
     dbName = ctx.dbName;
-    await idbFactory!.deleteDatabase(dbName);
+    await idbFactory.deleteDatabase(dbName);
   }
 
   Future dbTearDown() async {
@@ -102,8 +102,8 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, keyPath: keyPath);
         }
 
-        db = await idbFactory!
-            .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(dbName,
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
       }
 
       tearDown(dbTearDown);
@@ -182,7 +182,7 @@ void defineTests(TestContext ctx) {
     group('update', () {
       test('key_path_cursor_update', () async {
         var dbName = 'key_path_cursor_update.db';
-        await idbFactory!.deleteDatabase(dbName);
+        await idbFactory.deleteDatabase(dbName);
 
         final db = await idbFactory.open(dbName, version: 1,
             onUpgradeNeeded: (VersionChangeEvent change) {
@@ -225,7 +225,72 @@ void defineTests(TestContext ctx) {
 
       test('key_path_auto_cursor_update', () async {
         var dbName = 'key_path_auto_cursor_update.db';
-        await idbFactory!.deleteDatabase(dbName);
+        await idbFactory.deleteDatabase(dbName);
+
+        final db = await idbFactory.open(dbName, version: 1,
+            onUpgradeNeeded: (VersionChangeEvent change) {
+          change.database
+              .createObjectStore('store1', keyPath: 'key', autoIncrement: true);
+        });
+        try {
+          final obj = <String, Object?>{
+            'key': 1,
+            'someval': 'lorem',
+          };
+          final obj2 = <String, Object?>{
+            'key': 1,
+            'someval': 'ipsem',
+          };
+          final t1 = db.transaction('store1', idbModeReadWrite);
+          final store1 = t1.objectStore('store1');
+          unawaited(store1.put(obj));
+          await t1.completed;
+
+          final t2 = db.transaction('store1', idbModeReadWrite);
+          final store2 = t2.objectStore('store1');
+          unawaited(store2.openCursor().forEach((cv) {
+            expect(cv.key, 1);
+            expect(cv.primaryKey, 1);
+            expect(cv.value, obj);
+
+            cv.update(obj2);
+          }));
+          await t2.completed;
+
+          final t3 = db.transaction('store1', idbModeReadOnly);
+          final store3 = t3.objectStore('store1');
+          final ret = await store3.getObject(1);
+
+          expect(ret, equals(obj2));
+
+          // Key cursor
+          {
+            final t = db.transaction('store1', idbModeReadWrite);
+            var store = t.objectStore('store1');
+            await store.openKeyCursor().forEach((cursor) async {
+              expect(cursor.key, 1);
+              expect(cursor.primaryKey, 1);
+
+              /*
+              try {
+                await cursor.update(obj3);
+                fail('should fail - update not supported on key cursor');
+              } catch (e) {
+                expect(e, isNot(const TypeMatcher<TestFailure>()));
+                devPrint('${e.runtimeType}');
+              }
+               */
+              cursor.next();
+            });
+          }
+        } finally {
+          db.close();
+        }
+      });
+
+      test('key_path_auto_cursor_update', () async {
+        var dbName = 'key_path_auto_cursor_update.db';
+        await idbFactory.deleteDatabase(dbName);
 
         final db = await idbFactory.open(dbName, version: 1,
             onUpgradeNeeded: (VersionChangeEvent change) {
@@ -305,8 +370,8 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
 
-        db = await idbFactory!
-            .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(dbName,
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
       }
 
       test('empty cursor', () async {

@@ -28,7 +28,7 @@ void defineTests(TestContext ctx) {
     // prepare for test
     Future setupDeleteDb() async {
       dbName = ctx.dbName;
-      await idbFactory!.deleteDatabase(dbName);
+      await idbFactory.deleteDatabase(dbName);
     }
 
     // generic tearDown
@@ -52,8 +52,8 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
 
-        db = await idbFactory!
-            .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(dbName,
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
       });
 
       tearDown(dbTearDown);
@@ -95,7 +95,7 @@ void defineTests(TestContext ctx) {
 
         // Re-open!
         db!.close();
-        db = await idbFactory!.open(dbName);
+        db = await idbFactory.open(dbName);
 
         dbCreateTransaction();
         await testReadValue(key, value);

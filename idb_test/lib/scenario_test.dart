@@ -18,7 +18,7 @@ void defineTests(TestContext ctx) {
     group('bug_put_delete', () {
       late Database db;
       Future dbSetUp() async {
-        await idbFactory!.deleteDatabase(ctx.dbName);
+        await idbFactory.deleteDatabase(ctx.dbName);
         void onUpgradeNeeded(VersionChangeEvent e) {
           db = e.database;
           db.createObjectStore(testStoreName, autoIncrement: true);

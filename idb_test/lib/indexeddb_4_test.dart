@@ -109,7 +109,7 @@ void defineTests(TestContext ctx) {
   if (IdbFactory.supported) {
     late Database db;
     setUp(() {
-      return setupDb(idbFactory!).then((result) {
+      return setupDb(idbFactory).then((result) {
         db = result;
       });
     });

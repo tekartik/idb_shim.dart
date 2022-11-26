@@ -28,7 +28,7 @@ void defineTests(TestContext ctx) {
     srcDbName = ctx.dbName;
     dstDbName = 'dst_$srcDbName';
     importedDbName = 'imported_$srcDbName';
-    await idbFactory!.deleteDatabase(srcDbName);
+    await idbFactory.deleteDatabase(srcDbName);
   }
 
   void dbTearDown() {
@@ -53,7 +53,7 @@ void defineTests(TestContext ctx) {
 
       // import
       var importedDb =
-          await sdbImportDatabase(export, idbFactory!, importedDbName);
+          await sdbImportDatabase(export, idbFactory, importedDbName);
       // The name might be relative...
       expect(importedDb.name.endsWith(importedDbName), isTrue);
 
@@ -75,7 +75,7 @@ void defineTests(TestContext ctx) {
 
       Future checkCopySchema(
           Database db, Future Function(Database db) check) async {
-        final dstDb = await copySchema(db, idbFactory!, dstDbName!);
+        final dstDb = await copySchema(db, idbFactory, dstDbName!);
         expect(dstDb.name, dstDbName);
         await check(dstDb);
         dstDb.close();
@@ -90,7 +90,7 @@ void defineTests(TestContext ctx) {
 
       test('empty', () async {
         await setupDeleteDb();
-        db = await idbFactory!.open(srcDbName);
+        db = await idbFactory.open(srcDbName);
 
         Future dbCheck(Database db) async {
           expect(db.factory, idbFactory);
@@ -117,8 +117,8 @@ void defineTests(TestContext ctx) {
 
       test('import version 2 and reopen', () async {
         await setupDeleteDb();
-        db = await idbFactory!
-            .open(srcDbName, version: 2, onUpgradeNeeded: (_) {});
+        db = await idbFactory.open(srcDbName,
+            version: 2, onUpgradeNeeded: (_) {});
         expect(db!.version, 2);
         final export = await sdbExportDatabase(db!);
         db!.close();
@@ -138,8 +138,8 @@ void defineTests(TestContext ctx) {
 
       test('empty idbVersion 2', () async {
         await setupDeleteDb();
-        db = await idbFactory!
-            .open(srcDbName, version: 2, onUpgradeNeeded: (_) {});
+        db = await idbFactory.open(srcDbName,
+            version: 2, onUpgradeNeeded: (_) {});
 
         Future dbCheck(Database db) async {
           expect(db.factory, idbFactory);
@@ -174,8 +174,8 @@ void defineTests(TestContext ctx) {
               keyPath: testNameField, autoIncrement: true);
         }
 
-        db = await idbFactory!
-            .open(srcDbName, version: 2, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(srcDbName,
+            version: 2, onUpgradeNeeded: onUpgradeNeeded);
 
         Future dbCheck(Database db) async {
           expect(db.factory, idbFactory);
@@ -233,8 +233,8 @@ void defineTests(TestContext ctx) {
           db.createObjectStore('store2');
         }
 
-        db = await idbFactory!
-            .open(srcDbName, version: 2, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(srcDbName,
+            version: 2, onUpgradeNeeded: onUpgradeNeeded);
 
         Future dbCheck(Database db) async {
           expect(db.factory, idbFactory);
@@ -287,8 +287,8 @@ void defineTests(TestContext ctx) {
               unique: true, multiEntry: true);
         }
 
-        db = await idbFactory!
-            .open(srcDbName, version: 3, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(srcDbName,
+            version: 3, onUpgradeNeeded: onUpgradeNeeded);
 
         Future dbCheck(Database db) async {
           expect(db.version, 3);
@@ -357,8 +357,8 @@ void defineTests(TestContext ctx) {
               unique: true, multiEntry: true);
         }
 
-        db = await idbFactory!
-            .open(srcDbName, version: 4, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(srcDbName,
+            version: 4, onUpgradeNeeded: onUpgradeNeeded);
 
         Future dbCheck(Database db) async {
           expect(db.version, 4);
@@ -449,8 +449,8 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName2);
         }
 
-        db = await idbFactory!
-            .open(srcDbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(srcDbName,
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
 
         Future dbCheck(Database db, String storeName) async {
           final txn = db.transaction(storeName, idbModeReadOnly);
@@ -478,8 +478,8 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName2);
         }
 
-        db = await idbFactory!
-            .open(srcDbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(srcDbName,
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
 
         // put one in src and one in dst that should get deleted
         final txn =
@@ -511,7 +511,7 @@ void defineTests(TestContext ctx) {
 
       Future checkCopyDatabase(
           Database db, Future Function(Database database) check) async {
-        final dstDb = await copyDatabase(db, idbFactory!, dstDbName!);
+        final dstDb = await copyDatabase(db, idbFactory, dstDbName!);
         expect(dstDb.name, dstDbName);
         await check(dstDb);
         dstDb.close();
@@ -526,7 +526,7 @@ void defineTests(TestContext ctx) {
 
       test('empty', () async {
         await setupDeleteDb();
-        db = await idbFactory!.open(srcDbName);
+        db = await idbFactory.open(srcDbName);
 
         Future dbCheck(Database db) async {
           expect(db.factory, idbFactory);
@@ -559,8 +559,8 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName);
         }
 
-        db = await idbFactory!
-            .open(srcDbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(srcDbName,
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
         final txn = db!.transaction(testStoreName, idbModeReadWrite);
         final store = txn.objectStore(testStoreName);
         var map = {
@@ -653,8 +653,8 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName2);
         }
 
-        db = await idbFactory!
-            .open(srcDbName, version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(srcDbName,
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
 
         // put one in src and one in dst that should get deleted
         final txn = db!.transaction(testStoreName, idbModeReadWrite);
