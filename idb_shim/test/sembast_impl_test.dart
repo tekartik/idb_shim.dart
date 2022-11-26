@@ -44,13 +44,20 @@ void main() {
 
       tearDown(dbTearDown);
 
+      // Make sure the sembast record contains the key (additional test for issue #42)
       test('add_read_no_key', () async {
         await dbSetUp();
         dbCreateTransaction();
         final value = {'test': 'test_value'};
         var key = await objectStore.add(value);
         expect(key, 1);
-        expect(await sdbExportDatabase(db), {});
+        expect(((await sdbExportDatabase(db))['stores'] as List)[1], {
+          'name': 'test_store',
+          'keys': [1],
+          'values': [
+            {'test': 'test_value', 'my_key': 1}
+          ]
+        });
       });
 
       test('add_read_explicit_key', () async {
@@ -59,7 +66,13 @@ void main() {
         final value = {'test': 'test_value', keyPath: 1};
         var key = await objectStore.add(value);
         expect(key, 1);
-        expect(await sdbExportDatabase(db), {});
+        expect(((await sdbExportDatabase(db))['stores'] as List)[1], {
+          'name': 'test_store',
+          'keys': [1],
+          'values': [
+            {'test': 'test_value', 'my_key': 1}
+          ]
+        });
       });
     });
   });
