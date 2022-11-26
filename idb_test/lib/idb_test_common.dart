@@ -45,7 +45,7 @@ class TestContext {
   static var _id = 0;
   late IdbFactory factory;
 
-  // Each time you call dbName, it generates one
+  /// Each time you call dbName, it generates one
   String get dbName => 'test${++_id}.db';
 
   // special internet explorer handling

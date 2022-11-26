@@ -700,6 +700,26 @@ void defineTests(TestContext ctx) {
         });
       });
 
+      test('add_read_no_key', () async {
+        await dbSetUp();
+        dbCreateTransaction();
+        final value = {'test': 'test_value'};
+        var key = await objectStore.add(value);
+        expect(key, 1);
+        expect(await objectStore.getObject(key),
+            {'test': 'test_value', keyPath: key});
+      });
+
+      test('add_read_explicit_key', () async {
+        await dbSetUp();
+        dbCreateTransaction();
+        final value = {'test': 'test_value', keyPath: 1};
+        var key = await objectStore.add(value);
+        expect(key, 1);
+        expect(await objectStore.getObject(key),
+            {'test': 'test_value', 'my_key': 1});
+      });
+
       test('simple add with keyPath and next', () async {
         await dbSetUp();
         dbCreateTransaction();

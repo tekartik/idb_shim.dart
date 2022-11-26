@@ -573,5 +573,79 @@ void defineTests(TestContext ctx) {
         }
       });
     });
+
+    group('issue#42', () {
+      Future<Database> getDb() async {
+        var dbName = 'key_path_cursor_update_issue48.db';
+        await idbFactory.deleteDatabase(dbName);
+
+        return idbFactory.open(dbName, version: 1,
+            onUpgradeNeeded: (VersionChangeEvent change) {
+          change.database
+              .createObjectStore('store', keyPath: 'key', autoIncrement: true);
+        });
+      }
+
+      Future<Object> insert(Database db, Map<String, Object?> obj) async {
+        final t = db.transaction('store', idbModeReadWrite);
+        final store = t.objectStore('store');
+
+        final ret = await store.put(obj);
+        await t.completed;
+        return ret;
+      }
+
+      Future<Object> update(Database db, Map<String, Object?> obj) async {
+        final t = db.transaction('store', idbModeReadWrite);
+        final store = t.objectStore('store');
+
+        final ret = store.openCursor().forEach((cv) {
+          cv.update(obj);
+        });
+        await t.completed;
+        return ret;
+      }
+
+      Future<Object?> get(Database db, Object? key) {
+        final t = db.transaction('store', idbModeReadWrite);
+        final store = t.objectStore('store');
+
+        return store.getObject(1);
+      }
+
+      test('key_path_cursor_update_with_explicit_id', () async {
+        final db = await getDb();
+
+        try {
+          final obj = <String, Object?>{'key': 1, 'someval': 'lorem'};
+          final obj2 = <String, Object?>{'key': 1, 'someval': 'ipsem'};
+
+          await insert(db, obj);
+          await update(db, obj2);
+          final ret = await get(db, 1);
+
+          expect(ret, equals(obj2));
+        } finally {
+          db.close();
+        }
+      });
+
+      test('key_path_cursor_update_with_auto_incremented_id', () async {
+        final db = await getDb();
+
+        try {
+          final obj = <String, Object?>{'someval': 'lorem'};
+          final key = await insert(db, obj);
+          final obj2 = <String, Object?>{'key': key, 'someval': 'ipsem'};
+
+          await update(db, obj2);
+          final ret = await get(db, 1);
+
+          expect(ret, equals(obj2));
+        } finally {
+          db.close();
+        }
+      });
+    });
   });
 }
