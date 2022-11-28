@@ -36,9 +36,10 @@ void defineTests(TestContext ctx) {
   }
 
   // prepare for test
-  Future setupDeleteDb() async {
+  Future<String> setupDeleteDb() async {
     dbName = ctx.dbName;
     await idbFactory.deleteDatabase(dbName);
+    return dbName;
   }
 
   Future dbTearDown() async {
@@ -576,7 +577,7 @@ void defineTests(TestContext ctx) {
 
     group('issue#42', () {
       Future<Database> getDb() async {
-        var dbName = 'key_path_cursor_update_issue48.db';
+        var dbName = await setupDeleteDb();
         await idbFactory.deleteDatabase(dbName);
 
         return idbFactory.open(dbName, version: 1,
@@ -595,22 +596,25 @@ void defineTests(TestContext ctx) {
         return ret;
       }
 
+      Future<Object?> get(Database db, Object key) {
+        final t = db.transaction('store', idbModeReadWrite);
+        final store = t.objectStore('store');
+
+        return store.getObject(key);
+      }
+
       Future<Object> update(Database db, Map<String, Object?> obj) async {
         final t = db.transaction('store', idbModeReadWrite);
         final store = t.objectStore('store');
 
-        final ret = store.openCursor().forEach((cv) {
-          cv.update(obj);
+        final ret = store.openCursor(autoAdvance: true).forEach((cv) {
+          // change: update the correct row
+          if (cv.key == obj['key']) {
+            cv.update(obj);
+          }
         });
         await t.completed;
         return ret;
-      }
-
-      Future<Object?> get(Database db, Object? key) {
-        final t = db.transaction('store', idbModeReadWrite);
-        final store = t.objectStore('store');
-
-        return store.getObject(1);
       }
 
       test('key_path_cursor_update_with_explicit_id', () async {
@@ -642,6 +646,28 @@ void defineTests(TestContext ctx) {
           final ret = await get(db, 1);
 
           expect(ret, equals(obj2));
+        } finally {
+          db.close();
+        }
+      });
+
+      test('key_path_cursor_update_with_multiple_rows', () async {
+        final db = await getDb();
+
+        try {
+          final obj = <String, Object?>{'someval': 'lorem'};
+          final key = await insert(db, obj);
+          final obj2 = <String, Object?>{'someval': 'lorem'};
+          final key2 = await insert(db, obj2);
+
+          await update(db, {'key': key, 'someval': 'ipsem'});
+          await update(db, {'key': key2, 'someval': 'ipsem'});
+          final ret = await get(db, key);
+          final ret2 = await get(db, key2);
+          print(ret);
+          print(ret2);
+          expect(ret, equals({'key': key, 'someval': 'ipsem'}));
+          expect(ret2, equals({'key': key2, 'someval': 'ipsem'}));
         } finally {
           db.close();
         }
