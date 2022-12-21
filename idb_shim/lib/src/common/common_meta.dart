@@ -437,9 +437,7 @@ class IdbIndexMeta {
 
   IdbIndexMeta(this.name, this.keyPath, bool? unique, bool? multiEntry)
       : multiEntry = (multiEntry == true),
-        unique = (unique == true) {
-    print('Set here $keyPath ${keyPath.runtimeType}');
-  }
+        unique = (unique == true);
 
   static List<IdbIndexMeta>? fromMapList(List<Map>? list) {
     if (list == null) {
@@ -458,8 +456,6 @@ class IdbIndexMeta {
         map['keyPath'],
         map['unique'] as bool?, //
         map['multiEntry'] as bool?);
-    var keyPath = map['keyPath'];
-    print('fromMap $keyPath ${keyPath.runtimeType}');
     return meta;
   }
 

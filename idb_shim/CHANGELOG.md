@@ -1,3 +1,7 @@
+## 2.1.1-2
+
+* Fix keyPath array index creation
+
 ## 2.1.0
 
 * Fix io implementation for generated key internal storage
