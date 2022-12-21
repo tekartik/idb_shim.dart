@@ -1116,6 +1116,27 @@ void defineTests(TestContext ctx) {
               {'name': 'test1', 'name_2': 456},
             ]);
       });
+      test('index_array_multi_not_supported', () async {
+        final dbName = ctx.dbName;
+        await idbFactory.deleteDatabase(dbName);
+        void onUpgradeNeeded(VersionChangeEvent e) {
+          final db = e.database;
+          final objectStore =
+              db.createObjectStore(testStoreName, autoIncrement: true);
+          try {
+            objectStore.createIndex(testNameIndex, ['f1', 'f2'],
+                unique: true, multiEntry: true);
+            fail('should fail');
+          } catch (e) {
+            expect(e, isNot(isA<TestFailure>()));
+            // Native: InvalidAccessError: Failed to execute 'createIndex' on 'IDBObjectStore': The keyPath argument was an array and the multiEntry option is true.
+            // devPrint(e);
+          }
+        }
+
+        await idbFactory.open(dbName,
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+      });
 //
 //      solo_test('add_twice_same_key', () {
 //        Map value1 = {

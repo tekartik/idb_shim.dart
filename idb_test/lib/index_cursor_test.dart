@@ -849,7 +849,50 @@ void defineTests(TestContext ctx) {
                 direction: idbDirectionPrev)
             .first;
         expect(first.primaryKey, key);
+        var key2 = await objectStore.put({'f1': 1, 'f2': 2, 'f3': 3});
+        expect([key, key2], [1, 2]);
       });
+
+      tearDown(dbTearDown);
+    });
+    group('with_3_keys_unique', () {
+      Future openDb() async {
+        final dbName = ctx.dbName;
+        await idbFactory.deleteDatabase(dbName);
+        void onUpgradeNeeded(VersionChangeEvent e) {
+          final db = e.database;
+          final objectStore =
+              db.createObjectStore(testStoreName, autoIncrement: true);
+          objectStore.createIndex(testNameIndex, ['f1', 'f2', 'f3'],
+              unique: true);
+        }
+
+        db = await idbFactory.open(dbName,
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+      }
+
+      tearDown(dbTearDown);
+
+      test('one_record', () async {
+        await openDb();
+        dbCreateTransaction();
+        var key = await objectStore.put({'f1': 1, 'f2': 2, 'f3': 3});
+        expect([key], [1]);
+      }, skip: false); //'open failed'
+      test('two_same_record', () async {
+        await openDb();
+        dbCreateTransaction();
+        var key = await objectStore.put({'f1': 1, 'f2': 2, 'f3': 3});
+        try {
+          await objectStore.put({'f1': 1, 'f2': 2, 'f3': 3});
+          await transaction!.completed;
+          fail('should fail');
+        } on DatabaseError catch (_) {
+          // devPrint('error $e');
+        }
+        transaction = null;
+        expect([key], [1]);
+      }, skip: false); //'open failed');
 
       tearDown(dbTearDown);
     });

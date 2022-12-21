@@ -108,6 +108,23 @@ void defineTests() {
       expect(newMeta, meta);
     }
 
+    test('store with keyPath array', () {
+      final meta = idbSimpleObjectStoreMeta.clone();
+      meta.putIndex(IdbIndexMeta('index3', ['keyA', 'keyB'], true, false));
+      expect(meta.toMap(), {
+        'name': 'test_store',
+        'autoIncrement': true,
+        'indecies': [
+          {
+            'name': 'index3',
+            'keyPath': ['keyA', 'keyB'],
+            'unique': true
+          }
+        ]
+      });
+      testStoreRoundTrip(meta);
+    });
+
     test('store to/from map', () {
       final meta1 = idbSimpleObjectStoreMeta.clone();
       meta1.putIndex(idbIndexMeta1);

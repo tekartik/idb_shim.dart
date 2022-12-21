@@ -437,7 +437,9 @@ class IdbIndexMeta {
 
   IdbIndexMeta(this.name, this.keyPath, bool? unique, bool? multiEntry)
       : multiEntry = (multiEntry == true),
-        unique = (unique == true);
+        unique = (unique == true) {
+    print('Set here $keyPath ${keyPath.runtimeType}');
+  }
 
   static List<IdbIndexMeta>? fromMapList(List<Map>? list) {
     if (list == null) {
@@ -450,12 +452,16 @@ class IdbIndexMeta {
     return metas;
   }
 
-  IdbIndexMeta.fromMap(Map<String, Object?> map) //
-      : this(
-            map['name'] as String?, //
-            map['keyPath'],
-            map['unique'] as bool?, //
-            map['multiEntry'] as bool?);
+  factory IdbIndexMeta.fromMap(Map<String, Object?> map) {
+    var meta = IdbIndexMeta(
+        map['name'] as String?, //
+        map['keyPath'],
+        map['unique'] as bool?, //
+        map['multiEntry'] as bool?);
+    var keyPath = map['keyPath'];
+    print('fromMap $keyPath ${keyPath.runtimeType}');
+    return meta;
+  }
 
   IdbIndexMeta.fromIndex(Index index)
       : this(index.name, index.keyPath, index.unique, index.multiEntry);
@@ -467,7 +473,7 @@ class IdbIndexMeta {
   Map<String, Object?> toMap() {
     dynamic keyPath;
     if (this.keyPath is Iterable) {
-      keyPath = (this.keyPath as Iterable).cast<String>();
+      keyPath = (this.keyPath as Iterable).cast<String>().toList();
     } else {
       keyPath = this.keyPath?.toString();
     }
