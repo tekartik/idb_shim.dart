@@ -94,7 +94,7 @@ class SembastTestContext extends TestContext {
 class SembastMemoryTestContext extends SembastTestContext {
   /// Optional factory
   SembastMemoryTestContext() {
-    factory = idbFactoryMemory;
+    factory = newIdbFactoryMemory();
   }
 
   @override
