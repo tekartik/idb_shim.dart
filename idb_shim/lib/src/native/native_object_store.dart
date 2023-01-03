@@ -17,6 +17,11 @@ class ObjectStoreNative extends ObjectStore {
 
   @override
   Index createIndex(String name, keyPath, {bool? unique, bool? multiEntry}) {
+    /// Fix compilation using dart2js for keyPath array
+    /// causing SyntaxError: Failed to execute 'createIndex' on 'IDBObjectStore': The keyPath argument contains an invalid key path.
+    if (keyPath is Iterable) {
+      keyPath = List<String>.from(keyPath);
+    }
     return IndexNative(idbObjectStore.createIndex(name, keyPath,
         unique: unique, multiEntry: multiEntry));
   }

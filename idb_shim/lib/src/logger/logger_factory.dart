@@ -10,6 +10,7 @@ enum IdbFactoryLoggerType {
   all,
 }
 
+/// Logger wrapper
 abstract class IdbFactoryLogger extends IdbFactory {
   /// Allow setting a max number of logs
   static int? debugMaxLogCount;
@@ -128,4 +129,7 @@ class IdbFactoryWrapperImpl extends IdbFactoryBase implements IdbFactoryLogger {
 
   @override
   IdbFactory get factory => nativeFactory;
+
+  @override
+  String toString() => 'Logger($factory)';
 }

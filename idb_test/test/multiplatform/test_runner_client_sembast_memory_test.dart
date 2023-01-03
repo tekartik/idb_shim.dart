@@ -5,4 +5,5 @@ import 'package:idb_test/test_runner.dart';
 
 void main() {
   defineAllTests(idbMemoryContext);
+  defineAllTests(idbMemoryContext);
 }

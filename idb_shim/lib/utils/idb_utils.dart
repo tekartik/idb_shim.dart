@@ -1,7 +1,5 @@
 library idb_shim.utils.idb_utils;
 
-import 'dart:async';
-
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:sembast/utils/value_utils.dart';
 
@@ -46,7 +44,9 @@ Future<Database> copySchema(
       final store = db.createObjectStore(storeMeta.name,
           keyPath: storeMeta.keyPath, autoIncrement: storeMeta.autoIncrement);
       for (final indexMeta in storeMeta.indecies) {
-        store.createIndex(indexMeta.name!, indexMeta.keyPath,
+        var keyPath = indexMeta.keyPath;
+
+        store.createIndex(indexMeta.name!, keyPath,
             unique: indexMeta.unique, multiEntry: indexMeta.multiEntry);
       }
     }

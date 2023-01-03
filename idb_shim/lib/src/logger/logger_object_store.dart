@@ -6,6 +6,7 @@ import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/logger/logger_transaction.dart';
 
 import 'logger_index.dart';
+import 'logger_utils.dart';
 
 class ObjectStoreLogger extends ObjectStore {
   final TransactionLogger idbTransactionLogger;
@@ -53,14 +54,17 @@ class ObjectStoreLogger extends ObjectStore {
     return idbObjectStore.clear();
   }
 
+  String _debugSafeKey(Object? key) => logTruncateAny(key ?? '<null key>');
+  String _debugSafeValue(Object? value) => logTruncateAny(value);
+
   @override
   Future<Object> put(Object value, [Object? key]) async {
     try {
       var result = await idbObjectStore.put(value, key);
-      log('put($value${key != null ? ', $key' : ''}): $result');
+      log('put(${_debugSafeValue(value)}${key != null ? ', ${_debugSafeKey(key)}' : ''}): ${_debugSafeValue(result)}');
       return result;
     } catch (e) {
-      err('put($value, $key) failed $e');
+      err('put(${_debugSafeValue(value)}, ${_debugSafeKey(key)}) failed $e');
       rethrow;
     }
   }

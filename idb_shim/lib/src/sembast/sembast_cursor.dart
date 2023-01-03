@@ -3,6 +3,7 @@
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
 import 'package:idb_shim/src/common/common_value.dart';
+import 'package:idb_shim/src/logger/logger_utils.dart';
 import 'package:idb_shim/src/sembast/sembast_import.dart' as sdb;
 import 'package:idb_shim/src/sembast/sembast_index.dart';
 import 'package:idb_shim/src/sembast/sembast_object_store.dart';
@@ -37,6 +38,11 @@ abstract class KeyCursorSembastMixin implements Cursor {
 
   @override
   Future delete() async {
+    if (this is! CursorWithValue) {
+      // Mimic Chrome behavior
+      throw StateError(
+          'Cannot call cursor.delete when openKeyCursor is used, try openCursor instead');
+    }
     await store.delete(record.primaryKey);
     var i = recordIndex + 1;
     while (i < ctlr.records!.length) {
@@ -108,6 +114,10 @@ class IndexKeyCursorSembast extends Object
     this.ctlr = ctlr;
     recordIndex = index;
   }
+
+  @override
+  String toString() =>
+      'KeyCursor(${logTruncateAny(primaryKey)}, ${logTruncateAny(key)})';
 }
 
 class IndexCursorWithValueSembast extends Object
@@ -120,6 +130,10 @@ class IndexCursorWithValueSembast extends Object
     this.ctlr = ctlr;
     recordIndex = index;
   }
+
+  @override
+  String toString() =>
+      'KeyWithValueCursor(${logTruncateAny(primaryKey)}, ${logTruncateAny(key)}): ${logTruncateAny(value)}';
 }
 
 class StoreCursorWithValueSembast extends Object

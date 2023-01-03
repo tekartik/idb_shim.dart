@@ -344,6 +344,74 @@ void defineTests(TestContext ctx) {
         await checkAll(db!, expectedExport, dbCheck);
       });
 
+      test('one_index_key_path_2_columns', () async {
+        await setupDeleteDb();
+
+        void onUpgradeNeeded(VersionChangeEvent e) {
+          final db = e.database;
+          final objectStore =
+              db.createObjectStore(testStoreName, autoIncrement: true);
+          objectStore.createIndex(
+              testNameIndex, [testNameField, testNameField2],
+              unique: true);
+        }
+
+        db = await idbFactory.open(srcDbName,
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+
+        Future dbCheck(Database db) async {
+          expect(db.version, 1);
+          final txn = db.transaction(testStoreName, idbModeReadOnly);
+          final store = txn.objectStore(testStoreName);
+          expect(store.indexNames, [testNameIndex]);
+          final index = store.index(testNameIndex);
+          expect(index.name, testNameIndex);
+          expect(index.keyPath, [testNameField, testNameField2]);
+          expect(index.unique, isTrue);
+
+          // multiEntry not supported on ie
+          if (!ctx.isIdbIe) {
+            expect(index.multiEntry, isFalse);
+          }
+          await txn.completed;
+        }
+
+        final expectedExport = <String, Object?>{
+          'sembast_export': 1,
+          'version': 1,
+          'stores': [
+            {
+              'name': '_main',
+              'keys': ['store_test_store', 'stores', 'version'],
+              'values': [
+                {
+                  'name': 'test_store',
+                  'autoIncrement': true,
+                  'indecies': [
+                    {
+                      'name': 'name_index',
+                      'keyPath': ['name', 'name_2'],
+                      'unique': true,
+                    }
+                  ]
+                },
+                ['test_store'],
+                1
+              ]
+            }
+          ]
+        };
+        if (ctx.isIdbIe) {
+          ((((expectedExport['stores'] as List)[0] as Map)['values'] as List)[2]
+                  as Map)
+              .remove('autoIncrement');
+          ((((((expectedExport['stores'] as List)[0] as Map)['values']
+                  as List)[2] as Map)['indecies'] as List)[0] as Map)
+              .remove('multiEntry');
+        }
+        await checkAll(db!, expectedExport, dbCheck);
+      });
+
       test('two_indecies', () async {
         await setupDeleteDb();
 

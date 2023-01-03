@@ -1,3 +1,8 @@
+## 2.1.1-3
+
+* Fix keyPath array index creation
+* mimic Chrome and prevent cursor delete when using openKeyCursor
+
 ## 2.1.0
 
 * Fix io implementation for generated key internal storage
