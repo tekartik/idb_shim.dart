@@ -5,7 +5,7 @@ Future main() async {
 
   await shell.run('''
 
-  dart run test -p chrome
+  dart test -p chrome
 
 ''');
 }

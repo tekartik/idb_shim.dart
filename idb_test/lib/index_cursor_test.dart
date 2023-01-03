@@ -21,6 +21,7 @@ void main() {
 }
 
 void defineTests(TestContext ctx) {
+  // final idbFactory = devWarning(getIdbFactoryLogger(ctx.factory));
   final idbFactory = ctx.factory;
   group('index_cursor', () {
     Database? db;
@@ -349,6 +350,36 @@ void defineTests(TestContext ctx) {
               });
         });
       });
+      test('cursor key delete failed', () async {
+        await dbSetUp();
+        dbCreateTransaction();
+        Object? cursorException;
+        var key = add('test1');
+        try {
+          await index.openKeyCursor(autoAdvance: false).listen((Cursor cursor) {
+            // This fails on Chrome, mimic on idb
+            try {
+              cursor.delete().then((_) {
+                cursor.next();
+              });
+            } catch (e) {
+              cursorException = e;
+              print('cursorException: $cursorException');
+              cursor.next();
+            }
+          }).asFuture();
+
+          await transaction!.completed;
+          transaction = db!.transaction(testStoreName, idbModeReadOnly);
+          objectStore = transaction!.objectStore(testStoreName);
+          index = objectStore.index(testNameIndex);
+          var value = await index.get(key);
+          expect(value, isNotNull);
+        } catch (e) {
+          print(e);
+          expect(e, isNot(isA<TestFailure>()));
+        }
+      }, skip: true); // Hangs on Chrome
 
       test('cursor none auto delete 1', () async {
         await dbSetUp();
