@@ -375,6 +375,7 @@ void defineTests(TestContext ctx) {
           index = objectStore.index(testNameIndex);
           var value = await index.get(key);
           expect(value, isNotNull);
+          expect(cursorException, isNotNull);
         } catch (e) {
           print(e);
           expect(e, isNot(isA<TestFailure>()));

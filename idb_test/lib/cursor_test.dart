@@ -289,6 +289,48 @@ void defineTests(TestContext ctx) {
         }
       });
 
+      test('cursor key delete failed', () async {
+        var dbName = 'key_path_auto_cursor_delete.db';
+        await idbFactory.deleteDatabase(dbName);
+
+        final db = await idbFactory.open(dbName, version: 1,
+            onUpgradeNeeded: (VersionChangeEvent change) {
+          change.database
+              .createObjectStore('store1', keyPath: 'key', autoIncrement: true);
+        });
+        final obj = <String, Object?>{
+          'key': 1,
+          'someval': 'lorem',
+        };
+
+        final t1 = db.transaction('store1', idbModeReadWrite);
+        final store1 = t1.objectStore('store1');
+        unawaited(store1.put(obj));
+
+        Object? cursorException;
+
+        try {
+          await store1
+              .openKeyCursor(autoAdvance: false)
+              .listen((Cursor cursor) async {
+            // This fails on Chrome, mimic on idb
+            try {
+              await cursor.delete().then((_) {
+                cursor.next();
+              });
+            } catch (e) {
+              cursorException = e;
+              print('cursorException: $cursorException');
+              cursor.next();
+            }
+          }).asFuture();
+          await t1.completed;
+        } catch (e) {
+          print(e);
+          expect(e, isNot(isA<TestFailure>()));
+        }
+      }); // Remove if it hangs on Chrome
+
       test('key_path_auto_cursor_update', () async {
         var dbName = 'key_path_auto_cursor_update.db';
         await idbFactory.deleteDatabase(dbName);
