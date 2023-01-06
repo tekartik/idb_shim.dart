@@ -16,10 +16,12 @@ final IdbObjectStoreMeta idbObjectStoreMeta3 =
     IdbObjectStoreMeta('name', null, true);
 final IdbObjectStoreMeta idbObjectStoreMeta4 =
     IdbObjectStoreMeta('other_name', 'my_key', true);
+final IdbObjectStoreMeta idbObjectStoreMetaComposite =
+    IdbObjectStoreMeta('composite', ['my', 'key'], false);
 final List<IdbObjectStoreMeta> idbObjectStoreMetas = [
   idbObjectStoreMeta1,
   idbObjectStoreMeta2,
-  idbObjectStoreMeta3
+  idbObjectStoreMeta3,
 ];
 
 IdbIndexMeta idbIndexMeta1 = IdbIndexMeta('name', 'my_key', true, true);
@@ -55,11 +57,18 @@ void defineTests() {
       expect(meta1, isNot(meta3));
     });
 
+    void testStoreRoundTrip(IdbObjectStoreMeta meta) {
+      var map = meta.toMap();
+      final newMeta = IdbObjectStoreMeta.fromMap(map);
+      expect(newMeta, meta);
+    }
+
     test('store', () {
       expect(idbObjectStoreMeta1, idbObjectStoreMeta1Same);
       expect(idbObjectStoreMeta1, isNot(idbObjectStoreMeta2));
       expect(idbObjectStoreMeta1, isNot(idbObjectStoreMeta3));
       expect(idbObjectStoreMeta1, isNot(idbObjectStoreMeta4));
+      testStoreRoundTrip(idbObjectStoreMeta1);
     });
 
     test('index', () {
@@ -79,8 +88,17 @@ void defineTests() {
       final meta3 = idbSimpleObjectStoreMeta.clone();
       meta2.putIndex(idbIndexMeta2);
       expect(meta1, isNot(meta3));
+      testStoreRoundTrip(meta1);
     });
 
+    test('store with keyPath array', () {
+      final meta = idbObjectStoreMetaComposite;
+      expect(meta.toMap(), {
+        'name': 'composite',
+        'keyPath': ['my', 'key']
+      });
+      testStoreRoundTrip(meta);
+    });
     test('store with three indecies', () {
       final meta = idbSimpleObjectStoreMeta.clone();
       meta.putIndex(IdbIndexMeta('index3', 'keyA', true, false));
@@ -102,13 +120,7 @@ void defineTests() {
       });
     });
 
-    void testStoreRoundTrip(IdbObjectStoreMeta meta) {
-      var map = meta.toMap();
-      final newMeta = IdbObjectStoreMeta.fromMap(map);
-      expect(newMeta, meta);
-    }
-
-    test('store with keyPath array', () {
+    test('store with keyPath array index', () {
       final meta = idbSimpleObjectStoreMeta.clone();
       meta.putIndex(IdbIndexMeta('index3', ['keyA', 'keyB'], true, false));
       expect(meta.toMap(), {

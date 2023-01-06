@@ -210,7 +210,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
 
   @override
   ObjectStore createObjectStore(String name,
-      {String? keyPath, bool? autoIncrement}) {
+      {Object? keyPath, bool? autoIncrement}) {
     final storeMeta = IdbObjectStoreMeta(name, keyPath, autoIncrement);
     meta.createObjectStore(storeMeta);
     return ObjectStoreSembast(versionChangeTransaction, storeMeta);

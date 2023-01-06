@@ -207,7 +207,7 @@ abstract class ObjectStoreWithMetaMixin {
   IdbObjectStoreMeta? get meta;
 
   //@override
-  String? get keyPath => meta!.keyPath;
+  Object? get keyPath => meta!.keyPath;
 
   //@override
   bool get autoIncrement => meta!.autoIncrement;
@@ -228,7 +228,7 @@ class IdbObjectStoreMeta {
   static const String indeciesKey = 'indecies';
 
   final String name;
-  final String? keyPath;
+  final Object? keyPath;
   final bool autoIncrement;
 
   Iterable<IdbIndexMeta> get indecies => _indecies.values;
@@ -291,11 +291,19 @@ class IdbObjectStoreMeta {
     }
   }
 
+  static Object? _keyPathAsStringOrList(Object? keyPath) {
+    if (keyPath is Iterable) {
+      return keyPath.cast<String>().toList();
+    } else {
+      return keyPath?.toString();
+    }
+  }
+
   IdbObjectStoreMeta.fromMap(Map<String, Object?> map) //
       : this(
             //
             map[nameKey] as String, //
-            map[keyPathKey] as String?, //
+            _keyPathAsStringOrList(map[keyPathKey]),
             map[autoIncrementKey] as bool?,
             IdbIndexMeta.fromMapList(
                 ((map[indeciesKey]) as List?)?.cast<Map>()));
@@ -431,7 +439,7 @@ abstract class IndexWithMetaMixin {
 
 class IdbIndexMeta {
   final String? name;
-  final dynamic keyPath;
+  final Object? keyPath;
   final bool unique;
   final bool multiEntry;
 
