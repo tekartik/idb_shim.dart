@@ -44,5 +44,24 @@ void defineTests() {
       expect(keyRange.lower, null);
       expect(keyRange.upper, 'John');
     });
+
+    test('IdbValueMapExt', () {
+      var map = <String, Object?>{'key': 1};
+      expect(map.getFieldValue('key'), 1);
+      expect(map.getKeyValue('key'), 1);
+      expect(map.getKeyValue(['key']), [1]);
+      map.setKeyValue('key', 2);
+      expect(map.getKeyValue(['key']), [2]);
+      map.setKeyValue(['key'], [3]);
+      expect(map.getKeyValue('key'), 3);
+      expect(map, {'key': 3});
+      map.setKeyValue('my', 'text');
+      expect(map, {'key': 3, 'my': 'text'});
+      map.setKeyValue(['my', 'key'], [4, 'text']);
+      expect(map.getKeyValue(['my', 'key']), [4, 'text']);
+      expect(map, {'key': 'text', 'my': 4});
+      map.setFieldValue('my', 1);
+      expect(map, {'key': 'text', 'my': 1});
+    });
   });
 }

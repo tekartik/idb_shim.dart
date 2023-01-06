@@ -22,8 +22,14 @@ void checkKeyParam(var key) {
   }
 }
 
+/// Check a key
 void checkKeyValueParam(
-    {String? keyPath, dynamic key, dynamic value, bool? autoIncrement}) {
+    {
+    /** List<String> | String */
+    Object? keyPath,
+    dynamic key,
+    dynamic value,
+    bool? autoIncrement}) {
   if (key != null) {
     checkKeyParam(key);
     if (keyPath != null) {

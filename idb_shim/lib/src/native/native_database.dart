@@ -56,7 +56,7 @@ class DatabaseNative extends IdbDatabaseBase {
 
   @override
   ObjectStore createObjectStore(String name,
-      {String? keyPath, bool? autoIncrement}) {
+      {Object? keyPath, bool? autoIncrement}) {
     return catchNativeError(() {
       return ObjectStoreNative(idbDatabase!.createObjectStore(name,
           keyPath: keyPath, autoIncrement: autoIncrement));

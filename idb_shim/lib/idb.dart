@@ -309,7 +309,7 @@ abstract class Database {
   /// This method can be called only within a versionchange transaction.
   ///
   ObjectStore createObjectStore(String name,
-      {String? keyPath, bool? autoIncrement});
+      {Object? keyPath, bool? autoIncrement});
 
   ///
   /// returns a transaction object (Transaction) containing the

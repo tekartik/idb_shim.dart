@@ -10,12 +10,12 @@ Future main() async {
   dart test -p vm,chrome -j 1
 
   # Currently running as 2 commands
-  dart pub run build_runner test -- -p chrome -j 1 test/web
-  dart pub run build_runner test -- -p chrome -j 1 test/multiplatform
+  dart run build_runner test -- -p chrome -j 1 test/web
+  dart run build_runner test -- -p chrome -j 1 test/multiplatform
   
   # test dartdevc support
-  dart pub run build_runner build example -o example:build/example_debug
-  dart pub run build_runner build -r example -o example:build/example_release
+  dart run build_runner build example -o example:build/example_debug
+  dart run build_runner build -r example -o example:build/example_release
 
   ''');
 }

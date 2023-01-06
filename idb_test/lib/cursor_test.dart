@@ -1,6 +1,7 @@
 library cursor_test;
 
 import 'package:idb_shim/idb_client.dart';
+import 'package:idb_shim/utils/idb_utils.dart';
 
 import 'idb_test_common.dart';
 
@@ -30,7 +31,7 @@ void defineTests(TestContext ctx) {
 
   late String dbName;
 
-  void createTransaction() {
+  void dbCreateTransaction() {
     transaction = db!.transaction(testStoreName, idbModeReadWrite);
     objectStore = transaction!.objectStore(testStoreName);
   }
@@ -76,7 +77,8 @@ void defineTests(TestContext ctx) {
 //      return completer.future;
 //    }
 
-    Future<List<TestIdNameRow>> cursorToList(Stream<CursorWithValue> stream) {
+    Future<List<TestIdNameRow>> testCursorToList(
+        Stream<CursorWithValue> stream) {
       final list = <TestIdNameRow>[];
       return stream.listen((CursorWithValue cwv) {
         list.add(TestIdNameRow(cwv));
@@ -111,7 +113,7 @@ void defineTests(TestContext ctx) {
 
       test('one item cursor', () async {
         await dbSetUp();
-        createTransaction();
+        dbCreateTransaction();
         var value = {
           'my': {'key': 'test_value'}
         };
@@ -289,6 +291,48 @@ void defineTests(TestContext ctx) {
         }
       });
 
+      test('cursor key delete failed', () async {
+        var dbName = 'key_path_auto_cursor_delete.db';
+        await idbFactory.deleteDatabase(dbName);
+
+        final db = await idbFactory.open(dbName, version: 1,
+            onUpgradeNeeded: (VersionChangeEvent change) {
+          change.database
+              .createObjectStore('store1', keyPath: 'key', autoIncrement: true);
+        });
+        final obj = <String, Object?>{
+          'key': 1,
+          'someval': 'lorem',
+        };
+
+        final t1 = db.transaction('store1', idbModeReadWrite);
+        final store1 = t1.objectStore('store1');
+        unawaited(store1.put(obj));
+
+        Object? cursorException;
+
+        try {
+          await store1
+              .openKeyCursor(autoAdvance: false)
+              .listen((Cursor cursor) async {
+            // This fails on Chrome, mimic on idb
+            try {
+              await cursor.delete().then((_) {
+                cursor.next();
+              });
+            } catch (e) {
+              cursorException = e;
+              print('cursorException: $cursorException');
+              cursor.next();
+            }
+          }).asFuture();
+          await t1.completed;
+        } catch (e) {
+          print(e);
+          expect(e, isNot(isA<TestFailure>()));
+        }
+      }); // Remove if it hangs on Chrome
+
       test('key_path_auto_cursor_update', () async {
         var dbName = 'key_path_auto_cursor_update.db';
         await idbFactory.deleteDatabase(dbName);
@@ -357,11 +401,6 @@ void defineTests(TestContext ctx) {
 
     group('auto', () {
       tearDown(dbTearDown);
-
-      void dbCreateTransaction() {
-        transaction = db!.transaction(testStoreName, idbModeReadWrite);
-        objectStore = transaction!.objectStore(testStoreName);
-      }
 
       Future dbSetUp() async {
         await setupDeleteDb();
@@ -496,7 +535,7 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         return fill3SampleRows().then((_) {
-          return cursorToList(objectStore.openCursor(autoAdvance: true))
+          return testCursorToList(objectStore.openCursor(autoAdvance: true))
               .then((list) {
             expect(list[0].name, equals('test2'));
             expect(list[0].id, equals(1));
@@ -505,7 +544,7 @@ void defineTests(TestContext ctx) {
             expect(list[2].id, equals(3));
             expect(list.length, 3);
 
-            return cursorToList(objectStore.openCursor(
+            return testCursorToList(objectStore.openCursor(
                     range: KeyRange.bound(2, 3), autoAdvance: true))
                 .then((list) {
               expect(list.length, 2);
@@ -514,7 +553,7 @@ void defineTests(TestContext ctx) {
               expect(list[1].name, equals('test3'));
               expect(list[1].id, equals(3));
 
-              return cursorToList(objectStore.openCursor(
+              return testCursorToList(objectStore.openCursor(
                       range: KeyRange.bound(1, 3, true, true),
                       autoAdvance: true))
                   .then((list) {
@@ -522,7 +561,7 @@ void defineTests(TestContext ctx) {
                 expect(list[0].name, equals('test1'));
                 expect(list[0].id, equals(2));
 
-                return cursorToList(objectStore.openCursor(
+                return testCursorToList(objectStore.openCursor(
                         range: KeyRange.lowerBound(2), autoAdvance: true))
                     .then((list) {
                   expect(list.length, 2);
@@ -531,7 +570,7 @@ void defineTests(TestContext ctx) {
                   expect(list[1].name, equals('test3'));
                   expect(list[1].id, equals(3));
 
-                  return cursorToList(objectStore.openCursor(
+                  return testCursorToList(objectStore.openCursor(
                           range: KeyRange.upperBound(2, true),
                           autoAdvance: true))
                       .then((list) {
@@ -539,7 +578,7 @@ void defineTests(TestContext ctx) {
                     expect(list[0].name, equals('test2'));
                     expect(list[0].id, equals(1));
 
-                    return cursorToList(
+                    return testCursorToList(
                             objectStore.openCursor(key: 2, autoAdvance: true))
                         .then((list) {
                       expect(list.length, 1);
@@ -672,6 +711,59 @@ void defineTests(TestContext ctx) {
           db.close();
         }
       });
+    });
+
+    group('composite_key', () {
+      const keyPath = ['my', 'key'];
+
+      Future dbSetUp() async {
+        await setupDeleteDb();
+
+        void onUpgradeNeeded(VersionChangeEvent e) {
+          final db = e.database;
+          db.createObjectStore(testStoreName, keyPath: keyPath);
+        }
+
+        db = await idbFactory.open(dbName,
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+      }
+
+      test('put/openCursor', () async {
+        await dbSetUp();
+        dbCreateTransaction();
+        var map = {'my': 1, 'key': 'value'};
+        var key = await objectStore.put(map);
+        expect(key, [1, 'value']);
+        var keyRows =
+            await keyCursorToList(objectStore.openKeyCursor(autoAdvance: true));
+        var keyRow = keyRows.first;
+
+        expect(keyRow.key, key);
+        expect(keyRow.primaryKey, key);
+
+        var rows =
+            await cursorToList(objectStore.openCursor(autoAdvance: true));
+        var row = rows.first;
+
+        expect(row.key, key);
+        expect(row.primaryKey, key);
+        expect(row.value, map);
+
+        var map2 = {'my': 1, 'key': 'value2'};
+        var key2 = await objectStore.put(map2);
+        keyRows =
+            await keyCursorToList(objectStore.openKeyCursor(autoAdvance: true));
+        expect(keyRows, hasLength(2));
+        keyRow = keyRows.first;
+        expect(keyRow.key, key);
+        keyRow = keyRows[1];
+        expect(keyRow.key, key2);
+        keyRows = await keyCursorToList(objectStore.openKeyCursor(
+            autoAdvance: true, range: KeyRange.lowerBound([1, 'value2'])));
+        expect(keyRows, hasLength(1));
+      });
+
+      tearDown(dbTearDown);
     });
   });
 }

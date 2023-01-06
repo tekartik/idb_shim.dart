@@ -3,6 +3,7 @@ library idb_shim_common_value;
 import 'dart:convert';
 
 import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/src/utils/env_utils.dart';
 
 /// encode a value using JSON.
 dynamic encodeValue(dynamic value) {
@@ -117,13 +118,20 @@ KeyRange keyArrayRangeAt(KeyRange keyRange, int index) {
 }
 
 /// return a list if keyPath is an array
-Object? mapValueAtKeyPath(Map? map, keyPath) {
+///
+/// if [keyPath] is a, the list cannot contain null values and null is returned instead.
+Object? mapValueAtKeyPath(Map? map, Object? keyPath) {
   if (keyPath is String) {
     return getMapFieldValue(map, keyPath);
   } else if (keyPath is List) {
     final keyList = keyPath;
-    return List.generate(
+    var keys = List.generate(
         keyList.length, (i) => getMapFieldValue(map, keyPath[i] as String));
+    if (keys.where((element) => element == null).isNotEmpty) {
+      /// the list cannot contain null values
+      return null;
+    }
+    return keys;
   }
   throw 'keyPath $keyPath not supported';
 }
@@ -180,12 +188,12 @@ T? getPartsMapValue<T>(Map? map, Iterable<String> parts) {
 }
 
 /// Set a field value.
-void setMapFieldValue<T>(Map map, String field, T value) {
+void setMapFieldValue(Map map, String field, Object value) {
   setPartsMapValue(map, getFieldParts(field), value);
 }
 
 /// Set a a deep map member value
-void setPartsMapValue<T>(Map map, List<String> parts, value) {
+void setPartsMapValue(Map map, List<String> parts, Object value) {
   for (var i = 0; i < parts.length - 1; i++) {
     final part = parts[i];
     dynamic sub = map[part];
@@ -195,5 +203,72 @@ void setPartsMapValue<T>(Map map, List<String> parts, value) {
     }
     map = sub;
   }
-  map[parts.last] = value;
+  var key = parts.last;
+  map[key] = value;
+}
+
+/// Common extension
+extension IdbValueMapExt on Map {
+  /// return a list if keyPath is an array
+  ///
+  /// if [keyPath] is a, the list cannot contain null values and null is returned instead.
+  Object? getKeyValue(Object? keyPath) {
+    if (keyPath is String) {
+      return getFieldValue(keyPath);
+    } else if (keyPath is List) {
+      final keyList = keyPath;
+      var keys = List.generate(
+          keyList.length, (i) => getFieldValue(keyPath[i] as String));
+      if (keys.where((element) => element == null).isNotEmpty) {
+        /// the list cannot contain null values
+        return null;
+      }
+      return keys;
+    }
+    throw 'keyPath $keyPath not supported';
+  }
+
+  /// return a list if keyPath is an array
+  ///
+  /// if [keyPath] is a, the list cannot contain null values and null is returned instead.
+  void setKeyValue(Object? keyPath, Object value) {
+    if (keyPath is String) {
+      return setFieldValue(keyPath, value);
+    } else if (keyPath is List) {
+      final keyList = keyPath;
+      if (isDebug) {
+        if (value is! List) {
+          throw ArgumentError.value(value, 'key value', 'is not a list');
+        }
+        if (keyPath is! List<String>) {
+          throw ArgumentError.value(
+              keyPath, 'keyPath', 'is not a list of string');
+        }
+        if (value.length != keyList.length) {
+          throw ArgumentError.value('$keyPath: $value', 'keyPath: value',
+              'length do not match (${keyList.length} vs ${value.length}');
+        }
+      }
+
+      /// value must be a list
+
+      final valueList = value as List<Object?>;
+      assert(keyList.length == valueList.length);
+      for (var i = 0; i < keyList.length; i++) {
+        setFieldValue(keyList[i], valueList[i]!);
+      }
+    } else {
+      throw 'keyPath $keyPath not supported';
+    }
+  }
+
+  /// Get map field helper.
+  T? getFieldValue<T>(String field) {
+    return getPartsMapValue(this, getFieldParts(field));
+  }
+
+  /// Set a field value.
+  void setFieldValue(String field, Object value) {
+    setPartsMapValue(this, getFieldParts(field), value);
+  }
 }

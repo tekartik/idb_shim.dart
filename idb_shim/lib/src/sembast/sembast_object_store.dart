@@ -86,7 +86,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   /// Need for add without explicit key
   Object fixKeyInValueImpl(Object value, Object key) {
     if ((keyPath != null) && (value is Map)) {
-      return cloneValue(value, keyPath, key);
+      return cloneValue(value, keyPath as String, key);
     }
     return value;
   }

@@ -31,7 +31,7 @@ void defineTests() {
     });
 
     void checkKeyValueParamFail(
-        {String? keyPath, dynamic key, dynamic value, bool? autoIncrement}) {
+        {Object? keyPath, dynamic key, dynamic value, bool? autoIncrement}) {
       try {
         checkKeyValueParam(
             keyPath: keyPath,
@@ -44,6 +44,15 @@ void defineTests() {
       fail('$key should fail');
     }
 
+    test('composite checkKeyValueParam', () {
+      // DataError: neither keyPath nor autoIncrement set and trying to add object without key.
+      checkKeyValueParamFail(keyPath: ['my', 'key']);
+      checkKeyValueParamFail(
+          keyPath: ['my', 'key'], value: {'my': 1, 'key': null});
+      checkKeyValueParamFail(keyPath: ['my', 'key'], value: {'my': 1});
+      checkKeyValueParam(
+          keyPath: ['my', 'key'], value: {'my': 1, 'key': 'text'});
+    });
     test('checkKeyValueParam', () {
       checkKeyValueParamFail(keyPath: 'keyPath', key: 'key', value: {});
       checkKeyValueParamFail(
