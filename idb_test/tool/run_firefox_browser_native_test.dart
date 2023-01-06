@@ -5,7 +5,7 @@ Future main() async {
 
   await shell.run('''
 
-  pub run test -p firefox test/web/test_runner_client_native_test.dart
+  dart run test -p firefox test/web/test_runner_client_native_test.dart
 
 ''');
 }
