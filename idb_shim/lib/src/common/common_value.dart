@@ -117,13 +117,20 @@ KeyRange keyArrayRangeAt(KeyRange keyRange, int index) {
 }
 
 /// return a list if keyPath is an array
-Object? mapValueAtKeyPath(Map? map, keyPath) {
+///
+/// if [keyPath] is a, the list cannot contain null values and null is returned instead.
+Object? mapValueAtKeyPath(Map? map, Object? keyPath) {
   if (keyPath is String) {
     return getMapFieldValue(map, keyPath);
   } else if (keyPath is List) {
     final keyList = keyPath;
-    return List.generate(
+    var keys = List.generate(
         keyList.length, (i) => getMapFieldValue(map, keyPath[i] as String));
+    if (keys.where((element) => element == null).isNotEmpty) {
+      /// the list cannot contain null values
+      return null;
+    }
+    return keys;
   }
   throw 'keyPath $keyPath not supported';
 }
