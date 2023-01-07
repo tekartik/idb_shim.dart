@@ -928,5 +928,95 @@ void defineTests(TestContext ctx) {
 
       tearDown(dbTearDown);
     });
+
+    group('single composite on single composite', () {
+      Future openDb() async {
+        final dbName = ctx.dbName;
+        await idbFactory.deleteDatabase(dbName);
+        void onUpgradeNeeded(VersionChangeEvent e) {
+          final db = e.database;
+          final objectStore =
+              db.createObjectStore(testStoreName, keyPath: ['f1']);
+          objectStore.createIndex(testNameIndex, ['f2'], unique: true);
+        }
+
+        db = await idbFactory.open(dbName,
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+      }
+
+      tearDown(dbTearDown);
+
+      test('add read', () async {
+        await openDb();
+        dbCreateTransaction();
+        var map = {'f1': 1, 'f2': 2, 'f3': 3, 'f4': 4};
+        var key = await objectStore.put(map);
+        expect(key, [1]);
+        var rows = await cursorToList(
+            objectStore.index(testNameIndex).openCursor(autoAdvance: true));
+        var row = rows.first;
+        expect(row.primaryKey, [1]);
+        expect(row.key, [2]);
+        expect(row.value, map);
+      }); //'open failed');
+
+      tearDown(dbTearDown);
+    });
+
+    group('composite on composite', () {
+      Future openDb() async {
+        final dbName = ctx.dbName;
+        await idbFactory.deleteDatabase(dbName);
+        void onUpgradeNeeded(VersionChangeEvent e) {
+          final db = e.database;
+          final objectStore =
+              db.createObjectStore(testStoreName, keyPath: ['f1', 'f2']);
+          objectStore.createIndex(testNameIndex, ['f1', 'f3', 'f4'],
+              unique: true);
+        }
+
+        db = await idbFactory.open(dbName,
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+      }
+
+      tearDown(dbTearDown);
+
+      test('add read', () async {
+        await openDb();
+        dbCreateTransaction();
+        var map = {'f1': 1, 'f2': 2, 'f3': 3, 'f4': 4};
+        var map2 = {'f1': 1, 'f2': 3, 'f3': 3, 'f4': 3};
+
+        var key = await objectStore.put(map);
+        var key2 = await objectStore.put(map2);
+        expect(key, [1, 2]);
+        expect(key2, [1, 3]);
+        var rows =
+            await cursorToList(objectStore.openCursor(autoAdvance: true));
+        expect(rows, hasLength(2));
+        var row = rows.first;
+        expect(row.primaryKey, [1, 2]);
+        expect(row.key, [1, 2]);
+        expect(row.value, map);
+        expect(key, [1, 2]);
+        rows = await cursorToList(
+            objectStore.index(testNameIndex).openCursor(autoAdvance: true));
+        expect(rows, hasLength(2));
+        row = rows.first;
+        expect(row.primaryKey, [1, 3]);
+        expect(row.key, [1, 3, 3]);
+        expect(row.value, map2);
+        rows = await cursorToList(objectStore.openCursor(
+            autoAdvance: true, range: KeyRange.lowerBound([1, 3])));
+        expect(rows, hasLength(1));
+        expect(rows.first.value, map2);
+        rows = await cursorToList(objectStore.index(testNameIndex).openCursor(
+            autoAdvance: true, range: KeyRange.lowerBound([1, 3, 4])));
+        expect(rows, hasLength(1));
+        expect(rows.first.value, map);
+      }); //'open failed');
+
+      tearDown(dbTearDown);
+    });
   });
 }

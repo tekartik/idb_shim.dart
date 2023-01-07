@@ -1137,29 +1137,6 @@ void defineTests(TestContext ctx) {
         await idbFactory.open(dbName,
             version: 1, onUpgradeNeeded: onUpgradeNeeded);
       });
-//
-//      solo_test('add_twice_same_key', () {
-//        Map value1 = {
-//          NAME_FIELD: 'test1'
-//        };
-//
-//        Index index = objectStore.index(NAME_INDEX);
-//        objectStore.add(value1);
-//        objectStore.add(value1);
-//        return transaction.completed.then((_) {
-////            // create new transaction;
-//          dbCreateTransaction();
-//          index = objectStore.index(NAME_INDEX);
-//          return index.count(new KeyRange.only('test1')).then((int count) {
-//            expect(count == 2, isTrue);
-//          });
-//          // });
-//        });
-//      });
-    });
-    group('other', () {
-      // InvalidAccessError: Failed to execute 'createIndex' on 'IDBObjectStore': The keyPath argument was an array and the multiEntry option is true.
-      // nvalidAccessError: A parameter or an operation is not supported by the underlying object
     });
   });
 }

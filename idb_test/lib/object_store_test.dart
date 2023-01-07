@@ -1068,6 +1068,47 @@ void defineTests(TestContext ctx) {
       });
     });
 
+    group('single_field_composite_key', () {
+      const keyPath = ['key'];
+
+      Future dbSetUp() async {
+        await setupDeleteDb();
+
+        void onUpgradeNeeded(VersionChangeEvent e) {
+          final db = e.database;
+          db.createObjectStore(testStoreName, keyPath: keyPath);
+        }
+
+        db = await idbFactory.open(dbName,
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+      }
+
+      test('add/get', () async {
+        await dbSetUp();
+        dbCreateTransaction();
+        var map = {'key': 1};
+        var key = await objectStore.add(map);
+        expect(key, [1]);
+        var value = await objectStore.getObject(key);
+        expect(value, map);
+        await objectStore.delete(key);
+        value = await objectStore.getObject(key);
+        expect(value, isNull);
+        // ok to delete twice
+        await objectStore.delete(key);
+      });
+
+      test('put/update', () async {
+        await dbSetUp();
+        dbCreateTransaction();
+        var map = {'my': 1, 'key': 'value'};
+        var key = await objectStore.put(map);
+        expect(key, ['value']);
+      });
+
+      tearDown(dbTearDown);
+    });
+
     group('composite_key', () {
       const keyPath = ['my', 'key'];
 
