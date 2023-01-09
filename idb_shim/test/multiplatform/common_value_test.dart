@@ -33,6 +33,20 @@ void defineTests() {
       }
     });
 
+    test('KeyRangeBound', () {
+      try {
+        KeyRange.bound(1, 1, false, true);
+        fail('should fail');
+      } catch (e) {
+        expect(e, isNot(isA<TestFailure>()));
+      }
+      try {
+        KeyRange.bound('test', 'test', true, false);
+        fail('should fail');
+      } catch (e) {
+        expect(e, isNot(isA<TestFailure>()));
+      }
+    });
     test('keyArrayRangeAt', () {
       var keyRange = keyArrayRangeAt(KeyRange.only([1]), 0);
       expect(keyRange.lower, 1);

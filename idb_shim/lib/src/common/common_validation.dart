@@ -25,7 +25,7 @@ void checkKeyParam(var key) {
 /// Check a key
 void checkKeyValueParam(
     {
-    /** List<String> | String */
+    /// List<String> | String
     Object? keyPath,
     dynamic key,
     dynamic value,

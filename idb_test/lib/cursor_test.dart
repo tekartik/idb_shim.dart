@@ -612,6 +612,19 @@ void defineTests(TestContext ctx) {
           expect(e, isNot(const TypeMatcher<TestFailure>()));
         }
       });
+      test('invalid range cursor', () async {
+        await dbSetUp();
+        dbCreateTransaction();
+        try {
+          objectStore.openCursor(
+              autoAdvance: true, range: KeyRange.bound(1, 1, false, true));
+          fail('should fail');
+        } catch (e) {
+          // Chrome: DataError: Failed to execute 'bound' on 'IDBKeyRange': The lower key and upper key are equal and one of the bounds is open.
+          print(e);
+          expect(e, isNot(isA<TestFailure>()));
+        }
+      });
     });
 
     group('issue#42', () {
