@@ -35,7 +35,7 @@ void checkKeyValueParam(
   } else {
     if (!(value is Map &&
         keyPath != null &&
-        mapValueAtKeyPath(value, keyPath) != null)) {
+        value.getKeyValue(keyPath) != null)) {
       if (!(autoIncrement ?? false)) {
         if (key == null) {
           throw DatabaseMissingKeyError();

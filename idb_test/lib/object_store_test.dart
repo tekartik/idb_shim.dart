@@ -1139,12 +1139,19 @@ void defineTests(TestContext ctx) {
         await objectStore.delete(key);
       });
 
-      test('put/update', () async {
+      test('put/get using key', () async {
         await dbSetUp();
         dbCreateTransaction();
-        var map = {'my': 1, 'key': 'value'};
+        var map = {'my': 1, 'key': 'value', 'content': 'text'};
         var key = await objectStore.put(map);
         expect(key, [1, 'value']);
+        var value = await objectStore.getObject(key);
+        expect(value, map);
+        value = await objectStore.getObject([1, 'value']);
+        expect(value, map);
+        await objectStore.delete([1, 'value']);
+        value = await objectStore.getObject([1, 'value']);
+        expect(value, isNull);
       });
 
       tearDown(dbTearDown);

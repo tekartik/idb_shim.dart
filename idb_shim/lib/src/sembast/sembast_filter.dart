@@ -276,9 +276,14 @@ final singleFieldKeyNotNullFilter = _singleFieldKeyNotNullFilter;
 // final singleFieldKeyEqualsFilter = _debugSingleFieldKeyEqualsFilter;
 // final singleFieldKeyNotNullFilter = _debugSingleFieldNotNullFilter;
 
+/// for composite or not
+sdb.Filter storeKeyFilter(Object? keyPath, Object key) {
+  return keyFilter(keyPath, key);
+}
+
 /// The null value for the key actually means any but null...
 /// Key path must have been escaped before
-sdb.Filter keyFilter(dynamic keyPath, var key, bool multiEntry) {
+sdb.Filter keyFilter(dynamic keyPath, var key, [bool multiEntry = false]) {
   if (keyPath is String) {
     if (multiEntry) {
       return sdb.Filter.custom((snapshot) {

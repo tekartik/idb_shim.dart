@@ -422,7 +422,7 @@ abstract class IndexWithMetaMixin {
   String get name => meta.name!;
 
   //@override
-  dynamic get keyPath => meta.keyPath;
+  Object? get keyPath => meta.keyPath;
 
   //@override
   bool get unique => meta.unique;

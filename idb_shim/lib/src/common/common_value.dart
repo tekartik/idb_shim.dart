@@ -121,19 +121,7 @@ KeyRange keyArrayRangeAt(KeyRange keyRange, int index) {
 ///
 /// if [keyPath] is a, the list cannot contain null values and null is returned instead.
 Object? mapValueAtKeyPath(Map? map, Object? keyPath) {
-  if (keyPath is String) {
-    return getMapFieldValue(map, keyPath);
-  } else if (keyPath is List) {
-    final keyList = keyPath;
-    var keys = List.generate(
-        keyList.length, (i) => getMapFieldValue(map, keyPath[i] as String));
-    if (keys.where((element) => element == null).isNotEmpty) {
-      /// the list cannot contain null values
-      return null;
-    }
-    return keys;
-  }
-  throw 'keyPath $keyPath not supported';
+  return map?.getKeyValue(keyPath);
 }
 
 /// Convert a single value or an iterable to a list
@@ -171,7 +159,7 @@ List<String> getFieldParts(String field) => field.split('.');
 
 /// Get map field helper.
 T? getMapFieldValue<T>(Map? map, String field) {
-  return getPartsMapValue(map, getFieldParts(field));
+  return map?.getFieldValue(field);
 }
 
 /// Get deep map member value.

@@ -75,8 +75,8 @@ abstract class KeyCursorSembastMixin implements Cursor {
           if (sdbSnapshot == null) {
             ctlr.records!.removeAt(i);
           } else {
-            ctlr.records![i] =
-                IndexRecordSnapshotSembast(ctlr.records![i].key, sdbSnapshot);
+            ctlr.records![i] = IndexRecordSnapshotSembast(
+                store, ctlr.records![i].key, sdbSnapshot);
             i++;
           }
         } else {
@@ -174,11 +174,14 @@ abstract class _ICursorSembast {
 }
 
 class RecordSnapshotSembast {
+  final ObjectStoreSembast idbStore;
   final sdb.RecordSnapshot<Object, Object> snapshot;
-  Object get primaryKey => snapshot.key;
+  Object get id => snapshot.key;
+  Object get primaryKey =>
+      idbStore.hasCompositeKey ? idbStore.getKeyImpl(snapshot.value)! : id;
   Object get key => primaryKey;
 
-  RecordSnapshotSembast(this.snapshot);
+  RecordSnapshotSembast(this.idbStore, this.snapshot);
 
   @override
   String toString() => '$snapshot';
@@ -187,9 +190,9 @@ class RecordSnapshotSembast {
 class IndexRecordSnapshotSembast extends RecordSnapshotSembast {
   @override
   final Object key;
-  IndexRecordSnapshotSembast(
-      this.key, sdb.RecordSnapshot<Object, Object> snapshot)
-      : super(snapshot);
+  IndexRecordSnapshotSembast(ObjectStoreSembast idbStore, this.key,
+      sdb.RecordSnapshot<Object, Object> snapshot)
+      : super(idbStore, snapshot);
 
   @override
   String toString() => '$key $snapshot';
@@ -205,6 +208,8 @@ abstract class IndexCursorControllerSembastMixin implements _ICursorSembast {
     return index.sortOrders(meta.ascending);
   }
 
+  ObjectStoreSembast get idbStore => index.store;
+
   @override
   sdb.Filter get filter {
     return index.cursorFilter(meta.key, meta.range);
@@ -217,11 +222,11 @@ abstract class IndexCursorControllerSembastMixin implements _ICursorSembast {
       /// Duplicate some records
       var list = <IndexRecordSnapshotSembast>[];
       for (var record in records) {
-        var keys =
-            valueAsSet(mapValueAtKeyPath(record.value as Map?, index.keyPath));
+        var keys = valueAsSet((record.value as Map).getKeyValue(index.keyPath));
         if (keys != null) {
           for (var key in keys) {
-            list.add(IndexRecordSnapshotSembast(decodeKey(key!), record));
+            list.add(
+                IndexRecordSnapshotSembast(idbStore, decodeKey(key!), record));
           }
         }
       }
@@ -230,9 +235,8 @@ abstract class IndexCursorControllerSembastMixin implements _ICursorSembast {
       this.records = list;
     } else {
       this.records = records
-          .map((snapshot) => IndexRecordSnapshotSembast(
-              mapValueAtKeyPath(snapshot.value as Map, index.keyPath)!,
-              snapshot))
+          .map((snapshot) => IndexRecordSnapshotSembast(idbStore,
+              (snapshot.value as Map).getKeyValue(index.keyPath)!, snapshot))
           .toList(growable: false);
     }
   }
@@ -308,7 +312,7 @@ abstract class BaseCursorControllerSembastMixin<T extends Cursor>
   @override
   void setRecords(List<sdb.RecordSnapshot<Object, Object>> records) {
     this.records = records
-        .map((snapshot) => RecordSnapshotSembast(snapshot))
+        .map((snapshot) => RecordSnapshotSembast(store, snapshot))
         .toList(growable: false);
   }
 }
