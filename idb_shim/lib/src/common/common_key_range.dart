@@ -1,5 +1,5 @@
 import 'package:idb_shim/idb.dart';
-import 'package:idb_shim/src/common/common_value.dart';
+import 'package:idb_shim/src/utils/value_utils.dart';
 
 /// See [KeyRange] for information
 class IdbKeyRange implements KeyRange {
@@ -25,8 +25,8 @@ class IdbKeyRange implements KeyRange {
       [bool lowerOpen = false, bool upperOpen = false]) {
     _lowerBoundOpen = lowerOpen;
     _upperBoundOpen = upperOpen;
-    // Extra.
-    if (compareKeys(_lowerBound, _upperBound) == 0) {
+    // Extra compare value not keys as it might not be bounded
+    if (compareValue(_lowerBound, _upperBound) == 0) {
       if (lowerOpen || upperOpen) {
         throw StateError(
             'DataError: The lower key and upper key are equal and one of the bounds is open ($this)');

@@ -100,7 +100,7 @@ int compareKeys(dynamic first, dynamic second) {
     return 0;
   }
   //print(first.runtimeType);
-  throw DatabaseInvalidKeyError(first);
+  throw DatabaseInvalidKeyError([first, second]);
 }
 
 /// when keyPath is an array

@@ -1,8 +1,8 @@
-## 2.2.0+4
+## 2.2.0+5
 
 * Fix keyPath array index creation
 * mimic Chrome and prevent cursor delete when using openKeyCursor
-* allow keyPath as List<String> when in createObjectStore. 
+* composite key support: allow keyPath as List<String> in createObjectStore 
 
 ## 2.1.0
 
