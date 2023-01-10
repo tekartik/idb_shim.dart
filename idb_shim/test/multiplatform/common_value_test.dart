@@ -47,14 +47,42 @@ void defineTests() {
         expect(e, isNot(isA<TestFailure>()));
       }
     });
+
+    void expectThrow(KeyRange Function() action) {
+      expect(action, throwsA(isA<DatabaseError>()));
+    }
+
+    test('KeyRangeLowerBound', () {
+      //expectThrow(() => KeyRange.lowerBound(null, false));
+      //expectThrow(() => KeyRange.lowerBound(null, true));
+      expectThrow(() => KeyRange.lowerBound([1, null], false));
+      expectThrow(() => KeyRange.lowerBound([1, null], true));
+      KeyRange.lowerBound([1, 1], false);
+      KeyRange.lowerBound([1, 1], true);
+    });
+    test('KeyRangeUpperBound', () {
+      //expectThrow(() => KeyRange.upperBound(null, false));
+      //expectThrow(() => KeyRange.upperBound(null, true));
+      expectThrow(() => KeyRange.upperBound([1, null], false));
+      expectThrow(() => KeyRange.upperBound([1, null], true));
+      KeyRange.upperBound([1, 1], false);
+      KeyRange.upperBound([1, 1], true);
+    });
+    test('KeyRangeBound', () {
+      //expectThrow(() => KeyRange.bound(1, null, true, true));
+      //expectThrow(() => KeyRange.bound(null, 1, true, true));
+      expectThrow(() => KeyRange.bound([1, null], [1, null], true, true));
+      KeyRange.bound(1, 2, false, false);
+      KeyRange.bound(1, 2, true, true);
+    });
     test('keyArrayRangeAt', () {
-      var keyRange = keyArrayRangeAt(KeyRange.only([1]), 0);
+      var keyRange = compositeKeyRangeAt(KeyRange.only([1]), 0);
       expect(keyRange.lower, 1);
       expect(keyRange.upper, 1);
-      keyRange = keyArrayRangeAt(KeyRange.lowerBound([1], false), 0);
+      keyRange = compositeKeyRangeAt(KeyRange.lowerBound([1], false), 0);
       expect(keyRange.lower, 1);
       expect(keyRange.upper, null);
-      keyRange = keyArrayRangeAt(KeyRange.upperBound(['John'], false), 0);
+      keyRange = compositeKeyRangeAt(KeyRange.upperBound(['John'], false), 0);
       expect(keyRange.lower, null);
       expect(keyRange.upper, 'John');
     });

@@ -364,7 +364,8 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   Future<Object> put(Object value, [Object? key]) {
     value = toSembastValue(value);
     return _inWritableTransaction(() {
-      return putImpl(value, getKeyImpl(value, key));
+      var fixedKey = getKeyImpl(value, key);
+      return putImpl(value, fixedKey);
     });
   }
 }

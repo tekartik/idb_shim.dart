@@ -105,16 +105,18 @@ int compareKeys(dynamic first, dynamic second) {
 
 /// when keyPath is an array
 /// Return the relevant keyPath at index
-KeyRange keyArrayRangeAt(KeyRange keyRange, int index) {
-  Object? valueAt(List? value, int index) {
-    return value == null ? null : value[index];
-  }
+KeyRange compositeKeyRangeAt(KeyRange keyRange, int index) {
+  var lower = keyRange.lower;
+  var upper = keyRange.upper;
 
-  return KeyRange.bound(
-      valueAt(keyRange.lower as List?, index),
-      valueAt(keyRange.upper as List?, index),
-      keyRange.lowerOpen,
-      keyRange.upperOpen);
+  if (lower is List) {
+    if (upper is List) {
+      return KeyRange.bound(
+          lower[index], upper[index], keyRange.lowerOpen, keyRange.upperOpen);
+    }
+    return KeyRange.lowerBound(lower[index], keyRange.lowerOpen);
+  }
+  return KeyRange.upperBound((upper as List)[index], keyRange.upperOpen);
 }
 
 /// return a list if keyPath is an array

@@ -748,12 +748,10 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value = {'test': 'test_value', keyPath: 123};
-        return objectStore.put(value).then((key) {
-          expect(key, 123);
-          return objectStore.getObject(key).then((valueRead) {
-            expect(value, valueRead);
-          });
-        });
+        var key = await objectStore.put(value);
+        expect(key, 123);
+        var valueRead = await objectStore.getObject(key);
+        expect(value, valueRead);
       });
 
       test('add key and keyPath', () async {
@@ -827,14 +825,10 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value = {keyPath: 'test_value'};
-        return objectStore.add(value).then((key) {
-          expect(key, 'test_value');
-          return objectStore.getObject(key).then((valueRead) {
-//               Map expectedValue = cloneValue(value);
-//               expectedValue[keyPath] = 1;
-            expect(valueRead, value);
-          });
-        });
+        var key = await objectStore.add(value);
+        expect(key, 'test_value');
+        var valueRead = await objectStore.getObject(key);
+        expect(valueRead, value);
       });
 
       test('simple put_get', () async {

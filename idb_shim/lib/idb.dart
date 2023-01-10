@@ -572,7 +572,7 @@ abstract class KeyRange {
       IdbKeyRange.upperBound(upperBound, open);
 
   /// Creates a new key range with upper and lower bounds.
-  factory KeyRange.bound(Object? lowerBound, Object? upperBound,
+  factory KeyRange.bound(Object lowerBound, Object upperBound,
           [bool lowerOpen = false, bool upperOpen = false]) =>
       IdbKeyRange.bound(lowerBound, upperBound, lowerOpen, upperOpen);
 

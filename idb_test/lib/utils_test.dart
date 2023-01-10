@@ -711,7 +711,7 @@ void defineTests(TestContext ctx) {
       });
 
       // safari does not support multiple stores - fakes
-      test('two_store_two_records', () async {
+      test('two_store_two_and_one_records', () async {
         await setupDeleteDb();
 
         void onUpgradeNeeded(VersionChangeEvent e) {
@@ -725,11 +725,15 @@ void defineTests(TestContext ctx) {
             version: 1, onUpgradeNeeded: onUpgradeNeeded);
 
         // put one in src and one in dst that should get deleted
-        final txn = db!.transaction(testStoreName, idbModeReadWrite);
+        final txn =
+            db!.transaction([testStoreName, testStoreName2], idbModeReadWrite);
         var store = txn.objectStore(testStoreName);
         // Put 2 before to check the order
         await (store.put('value2', 'key2'));
         await (store.put('value1', 'key1'));
+        store = txn.objectStore(testStoreName2);
+        // Put 2 before to check the order
+        await (store.put('value3', 'key3'));
 
         await txn.completed;
 
@@ -746,9 +750,9 @@ void defineTests(TestContext ctx) {
             expect(await store.count(), 2);
           }
           var store2 = txn.objectStore(testStoreName2);
-
+          expect(await store2.getObject('key3'), 'value3');
           if (!ctx.isIdbIe) {
-            expect(await store2.count(), 0);
+            expect(await store2.count(), 1);
           }
           await txn.completed;
         }
@@ -778,6 +782,74 @@ void defineTests(TestContext ctx) {
                   'name': 'test_store',
                   'keys': ['key1', 'key2'],
                   'values': ['value1', 'value2']
+                },
+                {
+                  'name': 'test_store_2',
+                  'keys': ['key3'],
+                  'values': ['value3']
+                }
+              ]
+            },
+            dbCheck);
+      });
+
+      // safari does not support multiple stores - fakes
+      test('one composite record', () async {
+        await setupDeleteDb();
+
+        void onUpgradeNeeded(VersionChangeEvent e) {
+          final db = e.database;
+          db.createObjectStore(testStoreName, keyPath: ['my', 'key']);
+        }
+
+        db = await idbFactory.open(srcDbName,
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+
+        // put one in src and one in dst that should get deleted
+        final txn = db!.transaction(testStoreName, idbModeReadWrite);
+        var store = txn.objectStore(testStoreName);
+        // Put 2 before to check the order
+        var map = {'my': 1, 'key': 1};
+        var key = await store.put(map);
+        expect(key, [1, 1]);
+        expect(await store.getObject([1, 1]), map);
+
+        await txn.completed;
+
+        //dstDb = await copyDatabase(db, idbFactory, _dstDbName);
+
+        //expect(await sdbExportDatabase(db!), {});
+        Future dbCheck(Database db) async {
+          final txn = db.transaction(testStoreName, idbModeReadOnly);
+          store = txn.objectStore(testStoreName);
+          expect(await store.getObject([1, 1]), map);
+          await txn.completed;
+        }
+
+        await checkAll(
+            db!,
+            {
+              'sembast_export': 1,
+              'version': 1,
+              'stores': [
+                {
+                  'name': '_main',
+                  'keys': ['store_test_store', 'stores', 'version'],
+                  'values': [
+                    {
+                      'name': 'test_store',
+                      'keyPath': ['my', 'key']
+                    },
+                    ['test_store'],
+                    1
+                  ]
+                },
+                {
+                  'name': 'test_store',
+                  'keys': [1],
+                  'values': [
+                    {'my': 1, 'key': 1}
+                  ]
                 }
               ]
             },

@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/src/utils/env_utils.dart';
 import 'package:idb_shim/src/utils/value_utils.dart';
 
 /// See [KeyRange] for information
@@ -11,13 +14,39 @@ class IdbKeyRange implements KeyRange {
   IdbKeyRange.only(/*Key*/ value) : this.bound(value, value);
 
   /// Creates a new key range with only a lower bound.
-  IdbKeyRange.lowerBound(this._lowerBound, [bool open = false]) {
+  IdbKeyRange.lowerBound(Object? lowerBound, [bool open = false]) {
+    _lowerBound = lowerBound;
     _lowerBoundOpen = open;
+    _checkLowerBoundDef();
+  }
+
+  void _checkLowerBoundDef() =>
+      _checkBound('lower', _lowerBound, _lowerBoundOpen);
+  void _checkUpperBoundDef() =>
+      _checkBound('upper', _upperBound, _upperBoundOpen);
+
+  void _checkBound(String tag, bound, open) {
+    if (_boundHasNull(bound)) {
+      // DataError: Failed to execute 'lowerBound' on 'IDBKeyRange': The parameter is not a valid key.
+      throw DatabaseError(
+          'DataError: The $tag key has nulls and the bounds is not open ($this)');
+    }
+  }
+
+  bool _boundHasNull(Object? bound) {
+    if (bound is Iterable) {
+      if (bound is! Uint8List) {
+        return bound.where((element) => element == null).isNotEmpty;
+      }
+    }
+    return bound == null;
   }
 
   /// Creates a new upper-bound key range.
-  IdbKeyRange.upperBound(this._upperBound, [bool open = false]) {
+  IdbKeyRange.upperBound(Object? upperBound, [bool open = false]) {
+    _upperBound = upperBound;
     _upperBoundOpen = open;
+    _checkUpperBoundDef();
   }
 
   /// Creates a new key range with upper and lower bounds.
@@ -25,11 +54,13 @@ class IdbKeyRange implements KeyRange {
       [bool lowerOpen = false, bool upperOpen = false]) {
     _lowerBoundOpen = lowerOpen;
     _upperBoundOpen = upperOpen;
-    // Extra compare value not keys as it might not be bounded
-    if (compareValue(_lowerBound, _upperBound) == 0) {
-      if (lowerOpen || upperOpen) {
-        throw StateError(
-            'DataError: The lower key and upper key are equal and one of the bounds is open ($this)');
+    if (isDebug) {
+      // Extra compare value not keys as it might not be bounded
+      if (compareValue(_lowerBound, _upperBound) == 0) {
+        if (lowerOpen || upperOpen) {
+          throw StateError(
+              'DataError: The lower key and upper key are equal and one of the bounds is open ($this)');
+        }
       }
     }
   }
