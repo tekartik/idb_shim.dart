@@ -179,3 +179,11 @@ Future<List<KeyCursorRow>> keyCursorToList(Stream<Cursor> stream) {
   });
   return completer.future;
 }
+
+/// Convert an openKeyCursor stream to a list of key, must be auto-advance)
+Future<List<Object>> cursorToPrimaryKeyList(Stream<Cursor> stream) =>
+    stream.map((cursor) => cursor.primaryKey).toList();
+
+/// Convert an openKeyCursor stream to a list (must be auto-advance)
+Future<List<Object>> cursorToKeyList(Stream<Cursor> stream) =>
+    stream.map((cursor) => cursor.key).toList();

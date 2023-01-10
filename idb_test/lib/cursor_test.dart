@@ -788,6 +788,18 @@ void defineTests(TestContext ctx) {
               autoAdvance: true, range: KeyRange.lowerBound([2, null])));
           expect(keyRows, hasLength(1));
         }
+
+        var map3 = {'my': 2, 'key': 'value1'};
+        // ignore: unused_local_variable
+        var key3 = await objectStore.put(map3);
+
+        var keys = await cursorToPrimaryKeyList(objectStore.openKeyCursor(
+            autoAdvance: true, range: KeyRange.lowerBound([1, ''])));
+        expect(keys, [key, key2, key3]);
+        keys = await cursorToKeyList(objectStore.openKeyCursor(
+            autoAdvance: true,
+            range: KeyRange.bound([1, ''], [2, ''], false, true)));
+        expect(keys, [key, key2]);
       });
 
       tearDown(dbTearDown);
