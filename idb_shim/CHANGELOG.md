@@ -1,4 +1,4 @@
-## 2.2.0+7
+## 2.2.0+8
 
 * Fix keyPath array index creation
 * mimic Chrome and prevent cursor delete when using openKeyCursor and invalid KeyRange
