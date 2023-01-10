@@ -70,7 +70,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
             "The object store uses in-line keys and the key parameter '$key' was provided");
       }
       if (value is Map) {
-        key = mapValueAtKeyPath(value, keyPath);
+        key = value.getKeyValue(keyPath);
       }
     }
 
@@ -84,6 +84,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   /// Fix the key in map
   /// Need for add without explicit key
+  /// Not for composite key
   Object fixKeyInValueImpl(Object value, Object key) {
     if ((keyPath != null) && (value is Map)) {
       return cloneValue(value, keyPath as String, key);
@@ -104,7 +105,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     final futures = <Future>[];
     if (value is Map) {
       for (var indexMeta in meta!.indecies) {
-        var fieldValue = mapValueAtKeyPath(value, indexMeta.keyPath);
+        var fieldValue = value.getKeyValue(indexMeta.keyPath);
         if (fieldValue != null) {
           final finder = sdb.Finder(
               filter: keyFilter(indexMeta.keyPath, fieldValue, false),
@@ -133,27 +134,50 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
         await sdbStore.record(generatedKey).add(sdbClient, fixedValue);
         return generatedKey;
       } else {
+        var id = key;
+        if (hasCompositeKey) {
+          // Get existing if any
+          var existing = await txnCompositeFindIdByKey(key);
+          if (existing == null) {
+            var generatedKey = await sdbStore.generateKey(sdbClient);
+            id = generatedKey;
+          } else {
+            id = existing;
+          }
+        }
         return sdbStore
-            .record(key)
+            .record(id)
             .put(sdbClient, value as Object)
             .then((_) => key);
       }
     });
   }
 
+  sdb.Finder compositeFindByKeyFinder(Object key) {
+    assert(key is Iterable);
+    return sdb.Finder(filter: storeKeyFilter(keyPath, key));
+  }
+
+  Future<Object?> txnCompositeFindIdByKey(Object key) async {
+    var existing = await sdbStore.findKey(sdbClient,
+        finder: compositeFindByKeyFinder(key));
+    return existing;
+  }
+
+  bool get hasCompositeKey => keyPath is Iterable;
+
   @override
   Future<Object> add(Object value, [Object? key]) {
     value = toSembastValue(value);
-    return _inWritableTransaction(() {
-      key = getKeyImpl(value, key);
+    return _inWritableTransaction(() async {
+      var fixedKey = getKeyImpl(value, key);
 
-      if (key != null) {
-        return sdbStore.record(key!).get(sdbClient).then((existingValue) {
-          if (existingValue != null) {
-            throw DatabaseError('Key $key already exists in the object store');
-          }
-          return putImpl(value, key!);
-        });
+      if (fixedKey != null) {
+        var existingValue = await txnGetSnapshot(fixedKey);
+        if (existingValue != null) {
+          throw DatabaseError('Key $key already exists in the object store');
+        }
+        return putImpl(value, fixedKey);
       } else {
         return putImpl(value, null);
       }
@@ -184,22 +208,46 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   @override
   Future<List<Object>> getAll([Object? query, int? count]) {
     return inTransaction(() async {
-      return (await sdbStore.find(
-        sdbClient,
-        finder: sdb.Finder(filter: _storeKeyOrRangeFilter(query), limit: count),
-      ))
+      return (await txnGetAllSnapshots(query, count))
           .map((r) => recordToValue(r)!)
           .toList(growable: false);
     });
   }
 
+  Future<List<sdb.RecordSnapshot<Object, Object>>> txnGetAllSnapshots(
+      [Object? query, int? count]) async {
+    return (await sdbStore.find(
+      sdbClient,
+      finder: sdb.Finder(filter: _storeKeyOrRangeFilter(query), limit: count),
+    ));
+  }
+
+  Future<sdb.RecordSnapshot<Object, Object>?> txnCompositeGetSnapshot(
+      Object key) async {
+    return (await sdbStore.findFirst(
+      sdbClient,
+      finder: compositeFindByKeyFinder(key),
+    ));
+  }
+
+  /// Ids are key for non composite key
+  Future<List<Object>> txnGetAllIds([Object? query, int? count]) async {
+    return (await sdbStore.findKeys(
+      sdbClient,
+      finder: sdb.Finder(filter: _storeKeyOrRangeFilter(query), limit: count),
+    ));
+  }
+
   @override
   Future<List<Object>> getAllKeys([Object? query, int? count]) {
     return inTransaction(() async {
-      return (await sdbStore.findKeys(
-        sdbClient,
-        finder: sdb.Finder(filter: _storeKeyOrRangeFilter(query), limit: count),
-      ));
+      if (hasCompositeKey) {
+        var keys = (await txnGetAllSnapshots(query, count))
+            .map((r) => (r as Map).getKeyValue(keyPath)!)
+            .toList(growable: false);
+        return keys;
+      }
+      return await txnGetAllIds(query, count);
     });
   }
 
@@ -224,12 +272,13 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   @override
-  Future<void> delete(Object key) {
-    return _inWritableTransaction(() {
-      return sdbStore.record(key).delete(sdbClient).then((_) {
-        // delete returns null
-        return null;
-      });
+  Future<void> delete(Object key) async {
+    return _inWritableTransaction(() async {
+      if (hasCompositeKey) {
+        await sdbStore.delete(sdbClient, finder: compositeFindByKeyFinder(key));
+      } else {
+        await sdbStore.record(key).delete(sdbClient);
+      }
     });
   }
 
@@ -243,13 +292,23 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     }
   }
 
+  Future<sdb.RecordSnapshot<Object, Object>?> txnGetSnapshot(Object key) async {
+    sdb.RecordSnapshot<Object, Object>? record;
+    if (hasCompositeKey) {
+      record = await txnCompositeGetSnapshot(key);
+    } else {
+      record = await sdbStore.record(key).getSnapshot(sdbClient);
+    }
+
+    return record;
+  }
+
   @override
-  Future<Object?> getObject(key) {
+  Future<Object?> getObject(Object key) {
     checkKeyParam(key);
-    return inTransaction(() {
-      return sdbStore.record(key).getSnapshot(sdbClient).then((record) {
-        return recordToValue(record);
-      });
+    return inTransaction(() async {
+      var record = await txnGetSnapshot(key);
+      return recordToValue(record);
     });
   }
 
@@ -305,7 +364,8 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   Future<Object> put(Object value, [Object? key]) {
     value = toSembastValue(value);
     return _inWritableTransaction(() {
-      return putImpl(value, getKeyImpl(value, key));
+      var fixedKey = getKeyImpl(value, key);
+      return putImpl(value, fixedKey);
     });
   }
 }

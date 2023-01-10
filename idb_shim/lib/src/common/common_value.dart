@@ -100,40 +100,30 @@ int compareKeys(dynamic first, dynamic second) {
     return 0;
   }
   //print(first.runtimeType);
-  throw DatabaseInvalidKeyError(first);
+  throw DatabaseInvalidKeyError([first, second]);
 }
 
 /// when keyPath is an array
 /// Return the relevant keyPath at index
-KeyRange keyArrayRangeAt(KeyRange keyRange, int index) {
-  Object? valueAt(List? value, int index) {
-    return value == null ? null : value[index];
-  }
+KeyRange compositeKeyRangeAt(KeyRange keyRange, int index) {
+  var lower = keyRange.lower;
+  var upper = keyRange.upper;
 
-  return KeyRange.bound(
-      valueAt(keyRange.lower as List?, index),
-      valueAt(keyRange.upper as List?, index),
-      keyRange.lowerOpen,
-      keyRange.upperOpen);
+  if (lower is List) {
+    if (upper is List) {
+      return KeyRange.bound(
+          lower[index], upper[index], keyRange.lowerOpen, keyRange.upperOpen);
+    }
+    return KeyRange.lowerBound(lower[index], keyRange.lowerOpen);
+  }
+  return KeyRange.upperBound((upper as List)[index], keyRange.upperOpen);
 }
 
 /// return a list if keyPath is an array
 ///
 /// if [keyPath] is a, the list cannot contain null values and null is returned instead.
 Object? mapValueAtKeyPath(Map? map, Object? keyPath) {
-  if (keyPath is String) {
-    return getMapFieldValue(map, keyPath);
-  } else if (keyPath is List) {
-    final keyList = keyPath;
-    var keys = List.generate(
-        keyList.length, (i) => getMapFieldValue(map, keyPath[i] as String));
-    if (keys.where((element) => element == null).isNotEmpty) {
-      /// the list cannot contain null values
-      return null;
-    }
-    return keys;
-  }
-  throw 'keyPath $keyPath not supported';
+  return map?.getKeyValue(keyPath);
 }
 
 /// Convert a single value or an iterable to a list
@@ -171,7 +161,7 @@ List<String> getFieldParts(String field) => field.split('.');
 
 /// Get map field helper.
 T? getMapFieldValue<T>(Map? map, String field) {
-  return getPartsMapValue(map, getFieldParts(field));
+  return map?.getFieldValue(field);
 }
 
 /// Get deep map member value.

@@ -17,6 +17,7 @@ idb.KeyRange? toNativeKeyRange(KeyRange? common) {
       return idb.KeyRange.lowerBound(common.lower, common.lowerOpen == true);
     }
   } else {
+    // devPrint('upper ${common.upper} ${common.upperOpen}');
     return idb.KeyRange.upperBound(common.upper, common.upperOpen == true);
   }
 }

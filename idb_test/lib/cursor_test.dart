@@ -612,6 +612,19 @@ void defineTests(TestContext ctx) {
           expect(e, isNot(const TypeMatcher<TestFailure>()));
         }
       });
+      test('invalid range cursor', () async {
+        await dbSetUp();
+        dbCreateTransaction();
+        try {
+          objectStore.openCursor(
+              autoAdvance: true, range: KeyRange.bound(1, 1, false, true));
+          fail('should fail');
+        } catch (e) {
+          // Chrome: DataError: Failed to execute 'bound' on 'IDBKeyRange': The lower key and upper key are equal and one of the bounds is open.
+          print(e);
+          expect(e, isNot(isA<TestFailure>()));
+        }
+      });
     });
 
     group('issue#42', () {
@@ -761,6 +774,32 @@ void defineTests(TestContext ctx) {
         keyRows = await keyCursorToList(objectStore.openKeyCursor(
             autoAdvance: true, range: KeyRange.lowerBound([1, 'value2'])));
         expect(keyRows, hasLength(1));
+
+        // Not supported
+        // ignore: dead_code
+        if (false) {
+          keyRows = await keyCursorToList(objectStore.openKeyCursor(
+              autoAdvance: true, range: KeyRange.lowerBound([1, null])));
+          expect(keyRows, hasLength(2));
+          var map3 = {'my': 2, 'key': 'value1'};
+          // ignore: unused_local_variable
+          var key3 = await objectStore.put(map3);
+          keyRows = await keyCursorToList(objectStore.openKeyCursor(
+              autoAdvance: true, range: KeyRange.lowerBound([2, null])));
+          expect(keyRows, hasLength(1));
+        }
+
+        var map3 = {'my': 2, 'key': 'value1'};
+        // ignore: unused_local_variable
+        var key3 = await objectStore.put(map3);
+
+        var keys = await cursorToPrimaryKeyList(objectStore.openKeyCursor(
+            autoAdvance: true, range: KeyRange.lowerBound([1, ''])));
+        expect(keys, [key, key2, key3]);
+        keys = await cursorToKeyList(objectStore.openKeyCursor(
+            autoAdvance: true,
+            range: KeyRange.bound([1, ''], [2, ''], false, true)));
+        expect(keys, [key, key2]);
       });
 
       tearDown(dbTearDown);

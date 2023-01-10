@@ -748,12 +748,10 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value = {'test': 'test_value', keyPath: 123};
-        return objectStore.put(value).then((key) {
-          expect(key, 123);
-          return objectStore.getObject(key).then((valueRead) {
-            expect(value, valueRead);
-          });
-        });
+        var key = await objectStore.put(value);
+        expect(key, 123);
+        var valueRead = await objectStore.getObject(key);
+        expect(value, valueRead);
       });
 
       test('add key and keyPath', () async {
@@ -827,14 +825,10 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value = {keyPath: 'test_value'};
-        return objectStore.add(value).then((key) {
-          expect(key, 'test_value');
-          return objectStore.getObject(key).then((valueRead) {
-//               Map expectedValue = cloneValue(value);
-//               expectedValue[keyPath] = 1;
-            expect(valueRead, value);
-          });
-        });
+        var key = await objectStore.add(value);
+        expect(key, 'test_value');
+        var valueRead = await objectStore.getObject(key);
+        expect(valueRead, value);
       });
 
       test('simple put_get', () async {
@@ -1068,6 +1062,47 @@ void defineTests(TestContext ctx) {
       });
     });
 
+    group('single_field_composite_key', () {
+      const keyPath = ['key'];
+
+      Future dbSetUp() async {
+        await setupDeleteDb();
+
+        void onUpgradeNeeded(VersionChangeEvent e) {
+          final db = e.database;
+          db.createObjectStore(testStoreName, keyPath: keyPath);
+        }
+
+        db = await idbFactory.open(dbName,
+            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+      }
+
+      test('add/get', () async {
+        await dbSetUp();
+        dbCreateTransaction();
+        var map = {'key': 1};
+        var key = await objectStore.add(map);
+        expect(key, [1]);
+        var value = await objectStore.getObject(key);
+        expect(value, map);
+        await objectStore.delete(key);
+        value = await objectStore.getObject(key);
+        expect(value, isNull);
+        // ok to delete twice
+        await objectStore.delete(key);
+      });
+
+      test('put/update', () async {
+        await dbSetUp();
+        dbCreateTransaction();
+        var map = {'my': 1, 'key': 'value'};
+        var key = await objectStore.put(map);
+        expect(key, ['value']);
+      });
+
+      tearDown(dbTearDown);
+    });
+
     group('composite_key', () {
       const keyPath = ['my', 'key'];
 
@@ -1098,12 +1133,19 @@ void defineTests(TestContext ctx) {
         await objectStore.delete(key);
       });
 
-      test('put/update', () async {
+      test('put/get using key', () async {
         await dbSetUp();
         dbCreateTransaction();
-        var map = {'my': 1, 'key': 'value'};
+        var map = {'my': 1, 'key': 'value', 'content': 'text'};
         var key = await objectStore.put(map);
         expect(key, [1, 'value']);
+        var value = await objectStore.getObject(key);
+        expect(value, map);
+        value = await objectStore.getObject([1, 'value']);
+        expect(value, map);
+        await objectStore.delete([1, 'value']);
+        value = await objectStore.getObject([1, 'value']);
+        expect(value, isNull);
       });
 
       tearDown(dbTearDown);

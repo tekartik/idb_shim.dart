@@ -6,7 +6,7 @@ import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/common/common_error.dart';
 import 'package:idb_shim/src/common/common_value.dart';
 
-void checkKeyParam(var key) {
+void checkKeyParam(Object? key) {
   if (key == null) {
     throw DatabaseNoKeyError();
   }
@@ -23,13 +23,9 @@ void checkKeyParam(var key) {
 }
 
 /// Check a key
+/// keyPath can be: List<String> | String
 void checkKeyValueParam(
-    {
-    /** List<String> | String */
-    Object? keyPath,
-    dynamic key,
-    dynamic value,
-    bool? autoIncrement}) {
+    {Object? keyPath, Object? key, Object? value, bool? autoIncrement}) {
   if (key != null) {
     checkKeyParam(key);
     if (keyPath != null) {
@@ -39,7 +35,7 @@ void checkKeyValueParam(
   } else {
     if (!(value is Map &&
         keyPath != null &&
-        mapValueAtKeyPath(value, keyPath) != null)) {
+        value.getKeyValue(keyPath) != null)) {
       if (!(autoIncrement ?? false)) {
         if (key == null) {
           throw DatabaseMissingKeyError();

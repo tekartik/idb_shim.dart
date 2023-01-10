@@ -177,7 +177,7 @@ class ObjectStoreNative extends ObjectStore {
   }
 
   @override
-  String? get keyPath => idbObjectStore.keyPath as String?;
+  Object? get keyPath => idbObjectStore.keyPath;
 
   // ie return null so make sure it is a bool
   @override

@@ -1,6 +1,8 @@
 library idb_shim.utils.idb_utils;
 
+import 'package:idb_shim/src/logger/logger_utils.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
+import 'package:idb_shim/src/utils/env_utils.dart';
 import 'package:sembast/utils/value_utils.dart';
 
 import '../idb_client.dart';
@@ -62,6 +64,9 @@ Future<Database> copySchema(
 class _Record {
   late Object value;
   late Object key;
+
+  @override
+  String toString() => logTruncate('$key: $value');
 }
 
 /// Copy a store from a database to another existing one.
@@ -84,11 +89,25 @@ Future copyStore(Database srcDatabase, String srcStoreName,
   store = dstTransaction.objectStore(dstStoreName);
   // clear the existing records
   await store.clear();
-  for (final record in records) {
-    // ignore: unawaited_futures
-    store.put(record.value, record.key);
+  try {
+    for (final record in records) {
+      /// If key is set don't store the key
+      if (store.keyPath != null) {
+        // ignore: unawaited_futures
+        store.put(record.value);
+      } else {
+        // ignore: unawaited_futures
+        store.put(record.value, record.key);
+      }
+    }
+  } catch (e) {
+    if (isDebug) {
+      print(e);
+    }
+    rethrow;
+  } finally {
+    await dstTransaction.completed;
   }
-  await dstTransaction.completed;
 }
 
 /// Copy a database content to a new database.
@@ -160,3 +179,11 @@ Future<List<KeyCursorRow>> keyCursorToList(Stream<Cursor> stream) {
   });
   return completer.future;
 }
+
+/// Convert an openKeyCursor stream to a list of key, must be auto-advance)
+Future<List<Object>> cursorToPrimaryKeyList(Stream<Cursor> stream) =>
+    stream.map((cursor) => cursor.primaryKey).toList();
+
+/// Convert an openKeyCursor stream to a list (must be auto-advance)
+Future<List<Object>> cursorToKeyList(Stream<Cursor> stream) =>
+    stream.map((cursor) => cursor.key).toList();

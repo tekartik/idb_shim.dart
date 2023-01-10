@@ -1,8 +1,9 @@
-## 2.2.0
+## 2.2.0+8
 
 * Fix keyPath array index creation
-* mimic Chrome and prevent cursor delete when using openKeyCursor
-* allow keyPath as List<String> when in createObjectStore. 
+* mimic Chrome and prevent cursor delete when using openKeyCursor and invalid KeyRange
+* composite key support: allow keyPath as List<String> in createObjectStore 
+* add `cursorToPrimaryKeyList()` and `cursorToKeyList` utility in idb_utils
 
 ## 2.1.0
 

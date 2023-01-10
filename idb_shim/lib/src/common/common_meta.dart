@@ -278,8 +278,7 @@ class IdbObjectStoreMeta {
   }
 
   IdbObjectStoreMeta.fromObjectStore(ObjectStore objectStore)
-      : this(objectStore.name, objectStore.keyPath as String?,
-            objectStore.autoIncrement);
+      : this(objectStore.name, objectStore.keyPath, objectStore.autoIncrement);
 
   IdbObjectStoreMeta(this.name, this.keyPath, bool? autoIncrement,
       [List<IdbIndexMeta>? indecies])
@@ -423,7 +422,7 @@ abstract class IndexWithMetaMixin {
   String get name => meta.name!;
 
   //@override
-  dynamic get keyPath => meta.keyPath;
+  Object? get keyPath => meta.keyPath;
 
   //@override
   bool get unique => meta.unique;
@@ -461,7 +460,7 @@ class IdbIndexMeta {
   factory IdbIndexMeta.fromMap(Map<String, Object?> map) {
     var meta = IdbIndexMeta(
         map['name'] as String?, //
-        map['keyPath'],
+        _keyPathAsStringOrList(map['keyPath']),
         map['unique'] as bool?, //
         map['multiEntry'] as bool?);
     return meta;
@@ -505,5 +504,13 @@ class IdbIndexMeta {
       return const DeepCollectionEquality().equals(toMap(), other.toMap());
     }
     return false;
+  }
+}
+
+Object? _keyPathAsStringOrList(Object? keyPath) {
+  if (keyPath is Iterable) {
+    return keyPath.cast<String>().toList();
+  } else {
+    return keyPath?.toString();
   }
 }

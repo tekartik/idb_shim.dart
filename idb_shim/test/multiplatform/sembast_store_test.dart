@@ -16,6 +16,16 @@ void main() {
         fail('should fail');
       } on ArgumentError catch (_) {}
     });
+    test('composite getKeyImpl', () {
+      var meta = IdbObjectStoreMeta('test', ['my', 'key'], false);
+      var store = sembast.ObjectStoreSembast(null, meta);
+      expect(store.getKeyImpl({'my': 1, 'key': 2}), [1, 2]);
+
+      try {
+        expect(store.getKeyImpl({'key': 1}, 1), 1);
+        fail('should fail');
+      } on ArgumentError catch (_) {}
+    });
     test('getUpdateKeyIfNeeded', () {
       var meta = IdbObjectStoreMeta('test', 'key', false);
       var store = sembast.ObjectStoreSembast(null, meta);
