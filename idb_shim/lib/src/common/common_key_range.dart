@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:idb_shim/idb.dart';
-import 'package:idb_shim/src/utils/env_utils.dart';
 import 'package:idb_shim/src/utils/value_utils.dart';
 
 /// See [KeyRange] for information
@@ -22,10 +21,11 @@ class IdbKeyRange implements KeyRange {
 
   void _checkLowerBoundDef() =>
       _checkBound('lower', _lowerBound, _lowerBoundOpen);
+
   void _checkUpperBoundDef() =>
       _checkBound('upper', _upperBound, _upperBoundOpen);
 
-  void _checkBound(String tag, bound, open) {
+  void _checkBound(String tag, Object bound, bool open) {
     if (_boundHasNull(bound)) {
       // DataError: Failed to execute 'lowerBound' on 'IDBKeyRange': The parameter is not a valid key.
       throw DatabaseError(
@@ -54,13 +54,14 @@ class IdbKeyRange implements KeyRange {
       [bool lowerOpen = false, bool upperOpen = false]) {
     _lowerBoundOpen = lowerOpen;
     _upperBoundOpen = upperOpen;
-    if (isDebug) {
+    _checkLowerBoundDef();
+    _checkUpperBoundDef();
+
+    if (lowerOpen || upperOpen) {
       // Extra compare value not keys as it might not be bounded
       if (compareValue(_lowerBound, _upperBound) == 0) {
-        if (lowerOpen || upperOpen) {
-          throw StateError(
-              'DataError: The lower key and upper key are equal and one of the bounds is open ($this)');
-        }
+        throw StateError(
+            'DataError: The lower key and upper key are equal and one of the bounds is open ($this)');
       }
     }
   }

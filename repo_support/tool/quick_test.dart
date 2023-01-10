@@ -7,9 +7,17 @@ Future main() async {
   shell = shell.pushd(join('..', 'idb_shim'));
   await shell.run('''
 
-pub get
-pub run test test/test_runner_client_sembast_io_test.dart
-pub run build_runner test -- -p chrome test/web/idb_native_factory_test.dart
+dart pub get
+dart test -p vm test/multiplatform
+
+    ''');
+  shell = shell.popd();
+  shell = shell.pushd(join('..', 'idb_test'));
+  await shell.run('''
+
+dart pub get
+dart test -p vm test/io/test_runner_client_sembast_io_test.dart
+dart test -p chrome test/web/test_runner_client_native_test.dart
 
     ''');
   shell = shell.popd();

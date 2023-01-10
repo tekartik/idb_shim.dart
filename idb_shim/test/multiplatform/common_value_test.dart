@@ -60,6 +60,7 @@ void defineTests() {
       KeyRange.lowerBound([1, 1], false);
       KeyRange.lowerBound([1, 1], true);
     });
+
     test('KeyRangeUpperBound', () {
       //expectThrow(() => KeyRange.upperBound(null, false));
       //expectThrow(() => KeyRange.upperBound(null, true));
@@ -68,6 +69,7 @@ void defineTests() {
       KeyRange.upperBound([1, 1], false);
       KeyRange.upperBound([1, 1], true);
     });
+
     test('KeyRangeBound', () {
       //expectThrow(() => KeyRange.bound(1, null, true, true));
       //expectThrow(() => KeyRange.bound(null, 1, true, true));
@@ -75,6 +77,7 @@ void defineTests() {
       KeyRange.bound(1, 2, false, false);
       KeyRange.bound(1, 2, true, true);
     });
+
     test('keyArrayRangeAt', () {
       var keyRange = compositeKeyRangeAt(KeyRange.only([1]), 0);
       expect(keyRange.lower, 1);
