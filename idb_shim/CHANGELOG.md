@@ -1,3 +1,7 @@
+## 2.3.0-1
+
+* Support typed strict mode.
+
 ## 2.2.0+8
 
 * Fix keyPath array index creation
