@@ -171,7 +171,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
 
           // First delete everything from deleted stores
           for (final storeMeta in deletedStores) {
-            await sdb.StoreRef(storeMeta.name).drop(txn);
+            await sdb.intMapStoreFactory.store(storeMeta.name).drop(txn);
           }
 
           // Handle deleted object store

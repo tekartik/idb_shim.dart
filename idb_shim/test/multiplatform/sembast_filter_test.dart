@@ -7,7 +7,7 @@ import 'package:sembast/src/filter_impl.dart' as sdb;
 import 'package:sembast/src/record_snapshot_impl.dart' as sdb;
 import '../idb_test_common.dart';
 
-var _record = sdb.StoreRef.main().record(1);
+var _record = sdb.StoreRef<int, Object>.main().record(1);
 sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range,
         [bool multiEntry = false]) =>
     sembast_filter.keyRangeFilter(keyPath, range, multiEntry);

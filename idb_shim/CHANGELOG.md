@@ -1,6 +1,6 @@
-## 2.3.0-2
+## 2.3.0-3
 
-* Support typed strict mode.
+* Support strict-casts mode.
 
 ## 2.2.0+8
 
