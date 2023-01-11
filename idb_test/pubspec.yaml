@@ -1,6 +1,6 @@
 name: idb_test
 description: idb testing
-version: 0.3.1
+version: 0.3.3
 homepage: https://github.com/tekartik/idb_shim.dart/tree/master/idb_test
 
 publish_to: none
@@ -25,5 +25,3 @@ dev_dependencies:
 dependency_overrides:
   idb_shim:
     path: ../idb_shim
-  sembast:
-    path: ../../sembast.dart/sembast
