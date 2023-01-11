@@ -139,7 +139,8 @@ class IdbDatabaseMeta {
     return _stores.keys.contains(storeName);
   }
 
-  IdbTransactionMeta transaction(Object storeNameOrStoreNames, String mode) {
+  /// Allow null for initial transaction
+  IdbTransactionMeta transaction(Object? storeNameOrStoreNames, String mode) {
     // Check store(s) exist
     if (storeNameOrStoreNames is String) {
       if (!_containsStore(storeNameOrStoreNames)) {

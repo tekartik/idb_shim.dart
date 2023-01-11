@@ -1,4 +1,4 @@
-## 2.3.0-1
+## 2.3.0-2
 
 * Support typed strict mode.
 
