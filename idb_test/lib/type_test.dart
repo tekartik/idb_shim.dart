@@ -62,7 +62,7 @@ void defineTests(TestContext ctx) {
         var read = await objectStore.getObject(key);
         expect(read, value);
         // Read using cursor
-        var completer = Completer.sync();
+        var completer = Completer<Object>.sync();
         objectStore.openCursor(key: key).listen((cvw) {
           completer.complete(cvw.value);
         });
@@ -70,7 +70,7 @@ void defineTests(TestContext ctx) {
       }
 
       Future testUpdateValue(int key, Object value) async {
-        var completer = Completer.sync();
+        var completer = Completer<void>.sync();
         objectStore.openCursor(key: key).listen((cvw) {
           // Update with the same value
           cvw.update(value);

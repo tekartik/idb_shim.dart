@@ -79,7 +79,7 @@ void defineTests(TestContext ctx) {
       await setupDeleteDb();
       void onUpgradeNeeded(VersionChangeEvent e) {
         final db = e.database;
-        expect(db.objectStoreNames, []);
+        expect(db.objectStoreNames, <String>[]);
         final objectStore = db.createObjectStore(testStoreName);
         expect(db.objectStoreNames, [testStoreName]);
         expect(objectStore.name, testStoreName);
@@ -96,7 +96,7 @@ void defineTests(TestContext ctx) {
       await setupDeleteDb();
       void onUpgradeNeeded(VersionChangeEvent e) {
         final db = e.database;
-        expect(db.objectStoreNames, []);
+        expect(db.objectStoreNames, isEmpty);
         final objectStore = db.createObjectStore(testStoreName);
         expect(db.objectStoreNames, [testStoreName]);
         expect(objectStore.name, testStoreName);
@@ -154,7 +154,7 @@ void defineTests(TestContext ctx) {
 
           expect(db.objectStoreNames, [testStoreName]);
           db.deleteObjectStore(testStoreName);
-          expect(db.objectStoreNames, []);
+          expect(db.objectStoreNames, isEmpty);
         });
 
         db!.close();
@@ -162,7 +162,7 @@ void defineTests(TestContext ctx) {
         // re-open
         db = await idbFactory.open(dbName!,
             version: 2, onUpgradeNeeded: (VersionChangeEvent e) {});
-        expect(db!.objectStoreNames, []);
+        expect(db!.objectStoreNames, isEmpty);
       }
     });
 
@@ -218,7 +218,7 @@ void defineTests(TestContext ctx) {
           expect(store.indexNames, [testNameIndex]);
           store.deleteIndex(testNameIndex);
 
-          expect(store.indexNames, []);
+          expect(store.indexNames, isEmpty);
         });
         db!.close();
         //await Future.delayed(Duration(milliseconds: 1));
@@ -226,7 +226,7 @@ void defineTests(TestContext ctx) {
         db = await idbFactory.open(dbName!, version: 3,
             onUpgradeNeeded: (VersionChangeEvent e) {
           final store = e.transaction.objectStore(testStoreName);
-          expect(store.indexNames, []);
+          expect(store.indexNames, isEmpty);
         });
         db!.close();
       }
@@ -272,7 +272,7 @@ void defineTests(TestContext ctx) {
           final store = e.transaction.objectStore(testStoreName);
           store.deleteIndex(testNameIndex2);
 
-          expect(store.indexNames, []);
+          expect(store.indexNames, isEmpty);
         });
         db!.close();
         // check that the index is indeed gone
@@ -285,7 +285,7 @@ void defineTests(TestContext ctx) {
           } on DatabaseError catch (e) {
             expect(isNotFoundError(e), isTrue);
           }
-          expect(store.indexNames, []);
+          expect(store.indexNames, isEmpty);
         });
         db!.close();
       }
@@ -294,7 +294,7 @@ void defineTests(TestContext ctx) {
     test('twice', () async {
       await setupDeleteDb();
       await openWith1Store();
-      var storeNames = List.from(db!.objectStoreNames);
+      var storeNames = List<String>.from(db!.objectStoreNames);
       expect(storeNames.length, 1);
       expect(storeNames[0], testStoreName);
 
@@ -302,7 +302,7 @@ void defineTests(TestContext ctx) {
       // db.close();
       // re-open
       await openWith1Store();
-      storeNames = List.from(db!.objectStoreNames);
+      storeNames = List<String>.from(db!.objectStoreNames);
       expect(storeNames.length, 1);
       expect(storeNames[0], testStoreName);
 

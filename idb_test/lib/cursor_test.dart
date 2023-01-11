@@ -121,7 +121,7 @@ void defineTests(TestContext ctx) {
         final stream =
             objectStore.openCursor(autoAdvance: true, key: 'test_value');
         var count = 0;
-        final completer = Completer();
+        final completer = Completer<void>();
         stream.listen((CursorWithValue cwv) {
           expect(cwv.value, value);
           count++;
@@ -141,7 +141,7 @@ void defineTests(TestContext ctx) {
             expect(cursor.key, 'test_value');
             expect(cursor.primaryKey, 'test_value');
             count++;
-          }).asFuture();
+          }).asFuture<void>();
 
           expect(count, 1);
         }
@@ -325,7 +325,7 @@ void defineTests(TestContext ctx) {
               print('cursorException: $cursorException');
               cursor.next();
             }
-          }).asFuture();
+          }).asFuture<void>();
           await t1.completed;
         } catch (e) {
           print(e);
@@ -423,7 +423,7 @@ void defineTests(TestContext ctx) {
             .listen((CursorWithValue cwv) {
               count++;
             })
-            .asFuture()
+            .asFuture<void>()
             .then((_) {
               expect(count, 0);
             });
@@ -435,7 +435,7 @@ void defineTests(TestContext ctx) {
         return add('test1').then((_) {
           final stream = objectStore.openCursor(autoAdvance: true);
           var count = 0;
-          final completer = Completer();
+          final completer = Completer<void>();
           stream.listen((CursorWithValue cwv) {
             expect((cwv.value as Map)[testNameField], 'test1');
             count++;
@@ -491,7 +491,7 @@ void defineTests(TestContext ctx) {
           await objectStore
               .openCursor(autoAdvance: false)
               .listen((CursorWithValue cwv) {})
-              .asFuture()
+              .asFuture<void>()
               .timeout(const Duration(milliseconds: 500), onTimeout: () {
             // don't wait on the transaction
             transaction = null;
@@ -508,7 +508,7 @@ void defineTests(TestContext ctx) {
           await objectStore
               .openCursor(autoAdvance: null)
               .listen((CursorWithValue cwv) {})
-              .asFuture()
+              .asFuture<void>()
               .timeout(const Duration(milliseconds: 500), onTimeout: () {
             // don't wait on the transaction
             transaction = null;

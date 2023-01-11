@@ -56,7 +56,7 @@ void defineTests(TestContext ctx) {
 
         // wait crashes on ie
         if (!ctx.isIdbNoLazy) {
-          await Future.value();
+          await Future<void>.value();
         }
         await objectStore.delete(key);
         await transaction.completed;

@@ -12,10 +12,11 @@ sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range,
         [bool multiEntry = false]) =>
     sembast_filter.keyRangeFilter(keyPath, range, multiEntry);
 
-sdb.Filter keyFilter(dynamic keyPath, var key, [bool multiEntry = false]) =>
+/// key can be null
+sdb.Filter keyFilter(dynamic keyPath, Object? key, [bool multiEntry = false]) =>
     sembast_filter.keyFilter(keyPath, key, multiEntry);
 
-bool _fieldMatch(sdb.Filter filter, dynamic value) {
+bool _fieldMatch(sdb.Filter filter, Object value) {
   return sdb.filterMatchesRecord(
       filter, sdb.SembastRecordSnapshot(_record, value));
 }
@@ -159,7 +160,7 @@ void main() {
               'value': [1, 2]
             }),
             isTrue);
-        expect(_fieldMatch(filter, {'value': []}), isFalse);
+        expect(_fieldMatch(filter, {'value': <int>[]}), isFalse);
         expect(_fieldMatch(filter, {'value': null}), isFalse);
         expect(_fieldMatch(filter, {'value': 3}), isTrue);
         expect(_fieldMatch(filter, 1), isFalse);

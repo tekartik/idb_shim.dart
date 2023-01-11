@@ -130,7 +130,7 @@ void defineTests(TestContext ctx) {
         dbCreateTransaction();
         expect(objectStore.keyPath, null);
         expect(objectStore.name, testStoreName);
-        expect(objectStore.indexNames, []);
+        expect(objectStore.indexNames, isEmpty);
 
         // ie weird missing feature
         if (ctx.isIdbIe) {
@@ -143,7 +143,7 @@ void defineTests(TestContext ctx) {
       test('add/get map', () async {
         await dbSetUp();
         dbCreateTransaction();
-        final value = {};
+        final value = <Object?, Object?>{};
         return objectStore.add(value, 123).then((key) {
           expect(key, 123);
           return objectStore.getObject(key).then((readValue) {
@@ -156,7 +156,7 @@ void defineTests(TestContext ctx) {
       test('add_twice_same_key', () async {
         await dbSetUp();
         dbCreateTransaction();
-        final value = {};
+        final value = <String, Object?>{};
         await objectStore.add(value, 123).then((key) {
           expect(key, 123);
           return transaction!.completed.then((_) {
@@ -220,7 +220,7 @@ void defineTests(TestContext ctx) {
         expect(await objectStore.getAll(1, 1), ['test']);
         expect(await objectStore.getAll(1, null), ['test']);
         expect(await objectStore.getAll(KeyRange.only(1)), ['test']);
-        expect(await objectStore.getAll(2, 1), []);
+        expect(await objectStore.getAll(2, 1), isEmpty);
 
         expect(await objectStore.put('test2', 2), 2);
         expect(
@@ -265,7 +265,7 @@ void defineTests(TestContext ctx) {
       test('add', () async {
         await dbSetUp();
         dbCreateTransaction();
-        final value = {};
+        final value = <String, Object?>{};
         return objectStore.add(value).then((key) {
           expect(key, 1);
         });
@@ -274,7 +274,7 @@ void defineTests(TestContext ctx) {
       test('add2', () async {
         await dbSetUp();
         dbCreateTransaction();
-        final value = {};
+        final value = <String, Object?>{};
         return objectStore.add(value).then((key) {
           expect(key, 1);
         }).then((_) {
@@ -287,7 +287,7 @@ void defineTests(TestContext ctx) {
       test('add with key and next', () async {
         await dbSetUp();
         dbCreateTransaction();
-        final value = {};
+        final value = <String, Object?>{};
         return objectStore.add(value, 1234).then((key) {
           expect(key, 1234);
         }).then((_) {
@@ -305,7 +305,7 @@ void defineTests(TestContext ctx) {
       test('add_with_same_key', () async {
         await dbSetUp();
         dbCreateTransaction();
-        final value = {};
+        final value = <String, Object?>{};
         final key = await objectStore.add(value, 1234) as int?;
         expect(key, 1234);
         try {
@@ -321,7 +321,7 @@ void defineTests(TestContext ctx) {
       test('add with key then back', () async {
         await dbSetUp();
         dbCreateTransaction();
-        final value = {};
+        final value = <String, Object?>{};
         return objectStore.add(value, 1234).then((key) {
           expect(key, 1234);
         }).then((_) {
@@ -344,7 +344,7 @@ void defineTests(TestContext ctx) {
       test('add_with_text_number_key_and_next', () async {
         await dbSetUp();
         dbCreateTransaction();
-        final value = {};
+        final value = <String, Object?>{};
         final key2 = await objectStore.add(value, '2') as String?;
         expect(key2, '2');
         final key1 = await objectStore.add(value) as int?;
@@ -371,7 +371,7 @@ void defineTests(TestContext ctx) {
       test('get', () async {
         await dbSetUp();
         dbCreateTransaction();
-        final value = {};
+        final value = <String, Object?>{};
         return objectStore.add(value).then((key) {
           return objectStore.getObject(key).then((value) {
             expect((value as Map).length, 0);
@@ -393,7 +393,7 @@ void defineTests(TestContext ctx) {
       test('get dummy', () async {
         await dbSetUp();
         dbCreateTransaction();
-        final value = {};
+        final value = <String, Object?>{};
         return objectStore.add(value).then((key) {
           return objectStore.getObject((key as int) + 1).then((value) {
             expect(value, null);
@@ -413,7 +413,7 @@ void defineTests(TestContext ctx) {
       test('count_one', () async {
         await dbSetUp();
         dbCreateTransaction();
-        final value = {};
+        final value = <String, Object?>{};
         await objectStore.add(value);
 
         // crashes on ie
@@ -425,7 +425,7 @@ void defineTests(TestContext ctx) {
       test('count by key', () async {
         await dbSetUp();
         dbCreateTransaction();
-        final value = {};
+        final value = <String, Object?>{};
         return objectStore.add(value).then((key1) {
           return objectStore.add(value).then((key2) {
             return objectStore.count(key1).then((int count) {
@@ -441,7 +441,7 @@ void defineTests(TestContext ctx) {
       test('count by range', () async {
         await dbSetUp();
         dbCreateTransaction();
-        final value = {};
+        final value = <String, Object?>{};
         return objectStore.add(value).then((key1) {
           return objectStore.add(value).then((key2) {
             return objectStore
@@ -472,7 +472,7 @@ void defineTests(TestContext ctx) {
       test('delete', () async {
         await dbSetUp();
         dbCreateTransaction();
-        final value = {};
+        final value = <String, Object?>{};
         return objectStore.add(value).then((key) {
           return objectStore.delete(key).then((_) {
             return objectStore.getObject(key).then((value) {
@@ -526,7 +526,7 @@ void defineTests(TestContext ctx) {
       test('update empty', () async {
         await dbSetUp();
         dbCreateTransaction();
-        final value = {};
+        final value = <String, Object?>{};
         return objectStore.put(value, 1234).then((value) {
           expect(value, 1234);
         });
@@ -553,7 +553,7 @@ void defineTests(TestContext ctx) {
       test('clear', () async {
         await dbSetUp();
         dbCreateTransaction();
-        final value = {};
+        final value = <String, Object?>{};
         return objectStore.add(value).then((key) {
           return objectStore.clear().then((clearResult) {
             // expect(clearResult, null); ! void
@@ -597,8 +597,8 @@ void defineTests(TestContext ctx) {
       test('add', () async {
         await dbSetUp();
         dbCreateTransaction();
-        dynamic exception;
-        return objectStore.add({}, 1).catchError((e) {
+        late Object exception;
+        return objectStore.add({}, 1).catchError((Object e) {
           // There must be an error!
           exception = e;
           return Object();
@@ -613,8 +613,8 @@ void defineTests(TestContext ctx) {
       test('put', () async {
         await dbSetUp();
         dbCreateTransaction();
-        dynamic exception;
-        return objectStore.put({}, 1).catchError((e) {
+        late Object exception;
+        return objectStore.put({}, 1).catchError((Object e) {
           // There must be an error!
           exception = e;
           return Object();
@@ -629,8 +629,8 @@ void defineTests(TestContext ctx) {
       test('clear', () async {
         await dbSetUp();
         dbCreateTransaction();
-        dynamic exception;
-        return objectStore.clear().catchError((e) {
+        late Object exception;
+        return objectStore.clear().catchError((Object e) {
           // There must be an error!
           exception = e;
         }).then((_) {
@@ -849,8 +849,8 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value = {'dummy': 'test_value'};
-        dynamic exception;
-        return objectStore.add(value).catchError((e) {
+        late Object exception;
+        return objectStore.add(value).catchError((Object e) {
           // There must be an error!
           exception = e;
           return Object();
@@ -868,8 +868,8 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value = {'dummy': 'test_value'};
-        dynamic exception;
-        return objectStore.put(value).catchError((e) {
+        late Object exception;
+        return objectStore.put(value).catchError((Object e) {
           // There must be an error!
 
           exception = e;
@@ -887,10 +887,10 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value = {keyPath: 'test_value'};
-        dynamic exception;
+        late Object exception;
         return objectStore.add(value).then((key) {
           expect(key, 'test_value');
-          return objectStore.add(value).catchError((e) {
+          return objectStore.add(value).catchError((Object e) {
             // There must be an error!
             exception = e;
             return Object();
@@ -963,7 +963,7 @@ void defineTests(TestContext ctx) {
                 return next();
               });
             }
-            return Future.value();
+            return Future<void>.value();
           }
 
           return next();

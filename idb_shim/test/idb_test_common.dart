@@ -106,7 +106,7 @@ Future<Database> setUpSimpleStore(IdbFactory idbFactory, //
       final objectStore = db.createObjectStore(meta!.name,
           keyPath: meta.keyPath!, autoIncrement: meta.autoIncrement);
       for (final indexMeta in meta.indecies) {
-        objectStore.createIndex(indexMeta.name!, indexMeta.keyPath,
+        objectStore.createIndex(indexMeta.name!, indexMeta.keyPath as Object,
             unique: indexMeta.unique, multiEntry: indexMeta.multiEntry);
       }
     }
@@ -116,11 +116,11 @@ Future<Database> setUpSimpleStore(IdbFactory idbFactory, //
   });
 }
 
-bool isDatabaseError(e) {
+bool isDatabaseError(Object e) {
   return (e is DatabaseError);
 }
 
-bool isTransactionReadOnlyError(e) {
+bool isTransactionReadOnlyError(Object e) {
   // if (e is DatabaseError) {
   final message = e.toString().toLowerCase();
   if (message.contains('readonly')) {
@@ -133,7 +133,7 @@ bool isTransactionReadOnlyError(e) {
   return false;
 }
 
-bool isTransactionInactiveError(e) {
+bool isTransactionInactiveError(Object e) {
   // if (e is DatabaseError) {
   final message = e.toString().toLowerCase();
   if (message.contains('inactive')) {
@@ -143,7 +143,7 @@ bool isTransactionInactiveError(e) {
   return false;
 }
 
-bool isNotFoundError(e) {
+bool isNotFoundError(Object e) {
   //if (e is DatabaseError) {
   final message = e.toString().toLowerCase();
   if (message.contains('notfounderror')) {
@@ -153,6 +153,6 @@ bool isNotFoundError(e) {
   return false;
 }
 
-bool isTestFailure(e) {
+bool isTestFailure(Object e) {
   return e is TestFailure;
 }

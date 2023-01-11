@@ -191,7 +191,7 @@ void defineTests(TestContext ctx) {
           if (!ctx.isIdbIe) {
             expect(store.autoIncrement, isTrue);
           }
-          expect(store.indexNames, []);
+          expect(store.indexNames, isEmpty);
           await txn.completed;
         }
 
@@ -239,7 +239,7 @@ void defineTests(TestContext ctx) {
         Future dbCheck(Database db) async {
           expect(db.factory, idbFactory);
           expect(
-              const UnorderedIterableEquality()
+              const UnorderedIterableEquality<String>()
                   .equals(db.objectStoreNames, ['store1', 'store2', 'store3']),
               isTrue,
               reason: '${db.objectStoreNames}');
@@ -433,7 +433,7 @@ void defineTests(TestContext ctx) {
           final txn = db.transaction(testStoreName, idbModeReadOnly);
           final store = txn.objectStore(testStoreName);
           expect(
-              const UnorderedIterableEquality()
+              const UnorderedIterableEquality<String>()
                   .equals(store.indexNames, [testNameIndex2, testNameIndex]),
               isTrue,
               reason:
@@ -662,7 +662,7 @@ void defineTests(TestContext ctx) {
           expect(store.name, testStoreName);
           expect(store.keyPath, isNull);
 
-          expect(store.indexNames, []);
+          expect(store.indexNames, isEmpty);
           expect(await store.getObject('my_key'), map);
           await txn.completed;
         }

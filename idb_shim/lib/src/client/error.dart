@@ -19,7 +19,7 @@ class DatabaseStoreNotFoundError extends DatabaseError {
       'NotFoundError: One of the specified object stores was not found.';
 
   /// Store not found message.
-  static String storeMessage(var storeOrStores) =>
+  static String storeMessage(Object storeOrStores) =>
       "NotFoundError: One of the specified object stores '$storeOrStores' was not found.";
 
   /// Store not found error.
@@ -29,7 +29,7 @@ class DatabaseStoreNotFoundError extends DatabaseError {
 /// Index not found.
 class DatabaseIndexNotFoundError extends DatabaseError {
   /// Message helper.
-  static String indexMessage(var indexName) =>
+  static String indexMessage(String indexName) =>
       "NotFoundError: The specified index '$indexName' was not found.";
 
   /// Index not found.
@@ -55,7 +55,7 @@ class DatabaseNoKeyError extends DatabaseError {
 /// invalid key error.
 class DatabaseInvalidKeyError extends DatabaseError {
   /// invalid key error.
-  DatabaseInvalidKeyError(key)
+  DatabaseInvalidKeyError(Object? key)
       : super(
             "DataError: The data provided does not meet requirements. The parameter '$key' is not a valid key.");
 }

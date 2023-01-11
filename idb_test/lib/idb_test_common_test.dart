@@ -7,7 +7,7 @@ import 'idb_test_common.dart';
 void main() {
   group('idb_test_common', () {
     test('transaction_readonly_error', () {
-      expect(isTransactionReadOnlyError(null), isFalse);
+      //expect(isTransactionReadOnlyError(null), isFalse);
       expect(isTransactionReadOnlyError(DatabaseStoreNotFoundError()), isFalse);
 
       expect(isTransactionReadOnlyError(DatabaseReadOnlyError()), isTrue);
@@ -19,7 +19,7 @@ void main() {
     });
 
     test('store_notfound_error', () {
-      expect(isNotFoundError(null), isFalse);
+      // expect(isNotFoundError(null), isFalse);
       expect(isNotFoundError(DatabaseReadOnlyError()), isFalse);
 
       expect(isNotFoundError(DatabaseStoreNotFoundError()), isTrue);

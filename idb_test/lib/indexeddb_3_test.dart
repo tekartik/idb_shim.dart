@@ -39,7 +39,7 @@ Future<Database> writeItems(Database db) {
 Future<Database> writeItems(Database db) {
   var transaction = db.transaction(_storeName, 'readwrite');
 
-  Future<Object?> write(index) {
+  Future<Object?> write(int index) {
     return transaction.objectStore(_storeName).put('Item $index', index);
   }
 

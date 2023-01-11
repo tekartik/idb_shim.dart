@@ -9,4 +9,4 @@ dynamic get idbDevWarning => null;
 @Deprecated('Dev only')
 
 /// Dev print (deprecated on purpose)
-void idbDevPrint(msg) => print(msg);
+void idbDevPrint(Object? msg) => print(msg);

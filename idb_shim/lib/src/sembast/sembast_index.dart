@@ -20,7 +20,7 @@ class IndexSembast extends Index with IndexWithMetaMixin {
     return store.inTransaction(computation);
   }
 
-  sdb.Filter _indexKeyOrRangeFilter([keyOrRange]) {
+  sdb.Filter _indexKeyOrRangeFilter([Object? keyOrRange]) {
     // null means all entry without null value
     if (keyOrRange == null) {
       return keyNotNullFilter(meta.keyPath);
@@ -92,7 +92,7 @@ class IndexSembast extends Index with IndexWithMetaMixin {
     return ctlr.stream;
   }
 
-  sdb.Filter cursorFilter(key, KeyRange? range) {
+  sdb.Filter cursorFilter(Object? key, KeyRange? range) {
     return keyCursorFilter(keyPath, key, range, multiEntry);
   }
 

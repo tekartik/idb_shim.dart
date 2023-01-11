@@ -9,7 +9,7 @@ void main() => defineTests();
 
 void defineTests() {
   group('validation', () {
-    void checkKeyParamFail(key) {
+    void checkKeyParamFail(Object? key) {
       try {
         checkKeyParam(key);
       } catch (_) {
@@ -54,7 +54,8 @@ void defineTests() {
           keyPath: ['my', 'key'], value: {'my': 1, 'key': 'text'});
     });
     test('checkKeyValueParam', () {
-      checkKeyValueParamFail(keyPath: 'keyPath', key: 'key', value: {});
+      checkKeyValueParamFail(
+          keyPath: 'keyPath', key: 'key', value: <String, Object?>{});
       checkKeyValueParamFail(
           keyPath: 'keyPath', key: 'key', value: {'keyPath': 'key'});
       checkKeyValueParam(keyPath: 'keyPath', value: {'keyPath': 'key'});

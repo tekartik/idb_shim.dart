@@ -25,3 +25,5 @@ dev_dependencies:
 dependency_overrides:
   idb_shim:
     path: ../idb_shim
+  sembast:
+    path: ../../sembast.dart/sembast

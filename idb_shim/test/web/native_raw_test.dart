@@ -95,7 +95,7 @@ void main() {
       }
 
       Future createTransaction() async {
-        await Future.delayed(const Duration(milliseconds: 1));
+        await Future<void>.delayed(const Duration(milliseconds: 1));
         createTransactionSync();
       }
 
@@ -190,7 +190,7 @@ void main() {
       // Sync ok
       createTransactionSync();
       await objectStore.getObject(0);
-      await Future.value();
+      await Future<void>.value();
 
       try {
         await objectStore.getObject(0);

@@ -139,7 +139,7 @@ class IdbDatabaseMeta {
     return _stores.keys.contains(storeName);
   }
 
-  IdbTransactionMeta transaction(storeNameOrStoreNames, String mode) {
+  IdbTransactionMeta transaction(Object storeNameOrStoreNames, String mode) {
     // Check store(s) exist
     if (storeNameOrStoreNames is String) {
       if (!_containsStore(storeNameOrStoreNames)) {
@@ -161,9 +161,6 @@ class IdbDatabaseMeta {
         }
       }
       return IdbTransactionMeta(storeNameOrStoreNames.cast<String>(), mode);
-    } else if (storeNameOrStoreNames != null) {
-      throw DatabaseError(
-          'Invalid store name(s) parameter: $storeNameOrStoreNames');
     } else {
       // assume null - it will complain otherwise
       // this is use for transaction created on open
