@@ -295,7 +295,7 @@ abstract class BaseCursorControllerSembastMixin<T extends Cursor>
     }
 
     ctlr.add(nextEvent(currentIndex!));
-    return Future.value();
+    return Future<void>.value();
   }
 
   Future openCursor() async {

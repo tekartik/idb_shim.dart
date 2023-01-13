@@ -7,14 +7,14 @@ import 'package:test/test.dart';
 
 /// Verifies that [actual] has the same graph structure as [expected].
 /// Detects cycles and DAG structure in Maps and Lists.
-void verifyGraph(expected, actual) {
-  var eItems = [];
-  var aItems = [];
+void verifyGraph(Object? expected, Object? actual) {
+  var eItems = <Object?>[];
+  var aItems = <Object?>[];
 
   String message(String path, String reason) =>
       path == '' ? reason : 'path: $path, $reason';
 
-  void walk(String path, expected, actual) {
+  void walk(String path, Object? expected, Object? actual) {
     if (expected is String || expected is num || expected == null) {
       expect(actual, equals(expected), reason: message(path, 'not equal'));
       return;

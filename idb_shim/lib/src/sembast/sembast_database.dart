@@ -63,7 +63,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
 
   DatabaseSembast._(IdbFactory factory) : super(factory);
 
-  final mainStore = sdb.StoreRef<String, Object?>.main();
+  final mainStore = sdb.StoreRef<String, Object>.main();
 
   static Future<DatabaseSembast> fromDatabase(
       IdbFactory factory, sdb.Database db) async {
@@ -167,18 +167,18 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
         });
 
         await db!.transaction((txn) async {
-          await mainStore.record('version').put(txn, newVersion);
+          await mainStore.record('version').put(txn, newVersion!);
 
           // First delete everything from deleted stores
           for (final storeMeta in deletedStores) {
-            await sdb.StoreRef(storeMeta.name).drop(txn);
+            await sdb.intMapStoreFactory.store(storeMeta.name).drop(txn);
           }
 
           // Handle deleted object store
           if (changedStores.isNotEmpty || deletedStores.isNotEmpty) {
             await mainStore.record('stores').put(
                 txn,
-                List.from(objectStoreNames)
+                List<String>.from(objectStoreNames)
                   ..sort()); // Sort the names to always have the same export
           }
 

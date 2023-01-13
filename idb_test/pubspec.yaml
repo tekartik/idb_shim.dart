@@ -1,6 +1,6 @@
 name: idb_test
 description: idb testing
-version: 0.3.0
+version: 0.3.3
 homepage: https://github.com/tekartik/idb_shim.dart/tree/master/idb_test
 
 publish_to: none
@@ -11,10 +11,10 @@ environment:
 dependencies:
   idb_shim: '>=2.0.0-nullsafety.0 <3.0.0'
   meta: '>=1.2.3 <3.0.0'
-  sembast:
   test: '>=1.16.0-nullsafety.12'
   collection:
   path:
+  sembast:
 dev_dependencies:
   lints: '>=1.0.1'
   process_run: '>=0.10.0+1'

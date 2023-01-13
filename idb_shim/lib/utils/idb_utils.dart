@@ -46,7 +46,7 @@ Future<Database> copySchema(
       final store = db.createObjectStore(storeMeta.name,
           keyPath: storeMeta.keyPath, autoIncrement: storeMeta.autoIncrement);
       for (final indexMeta in storeMeta.indecies) {
-        var keyPath = indexMeta.keyPath;
+        var keyPath = indexMeta.keyPath as Object;
 
         store.createIndex(indexMeta.name!, keyPath,
             unique: indexMeta.unique, multiEntry: indexMeta.multiEntry);

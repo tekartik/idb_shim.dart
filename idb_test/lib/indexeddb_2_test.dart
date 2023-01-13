@@ -18,7 +18,7 @@ const String _storeName = 'TEST';
 const int _version = 1;
 
 Future testReadWrite(idb.IdbFactory idbFactory, Object key, Object value,
-    Function(dynamic expected, dynamic actual) check,
+    Object? Function(Object? expected, Object? actual) check,
     [String dbName = _dbName,
     String storeName = _storeName,
     int version = _version]) async {
@@ -72,7 +72,7 @@ void defineTests(TestContext ctx) {
   var obj1 = {'a': 100, 'b': 's'};
   var obj2 = {'x': obj1, 'y': obj1}; // DAG.
 
-  var obj3 = {};
+  var obj3 = <String, Object?>{};
   obj3['a'] = 100;
   obj3['b'] = obj3; // Cycle.
 
@@ -90,8 +90,8 @@ void defineTests(TestContext ctx) {
   test('test_verifyGraph', () {
     // Nice to know verifyGraph is working before we rely on it.
     verifyGraph(obj4, obj4);
-    verifyGraph(obj1, Map.from(obj1));
-    verifyGraph(obj4, Map.from(obj4));
+    verifyGraph(obj1, Map<String, Object?>.from(obj1));
+    verifyGraph(obj4, Map<String, Object?>.from(obj4));
 
     var l1 = [1, 2, 3];
     var l2 = [

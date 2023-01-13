@@ -122,7 +122,7 @@ void defineTests(TestContext ctx) {
         objectStore = transaction2.objectStore(testStoreName);
         await objectStore.openCursor(autoAdvance: true).listen((cursor) {
           //print(cursor);
-        }).asFuture();
+        }).asFuture<void>();
         await transaction2.completed;
         // BUG in indexeddb native - this never complete await transaction.completed;
       });
@@ -156,8 +156,8 @@ void defineTests(TestContext ctx) {
         final transaction = db!.transaction(testStoreName, idbModeReadOnly);
 
         final store = transaction.objectStore(testStoreName);
-        dynamic exception;
-        await store.put({}).catchError((e) {
+        Object? exception;
+        await store.put({}).catchError((Object e) {
           expect(e is TestFailure, isFalse);
           // There must be an error!
           // print(e);
@@ -168,7 +168,7 @@ void defineTests(TestContext ctx) {
         }).then((_) {
           // there must be an error
           expect(exception is TestFailure, isFalse);
-          expect(isTransactionReadOnlyError(exception), isTrue);
+          expect(isTransactionReadOnlyError(exception!), isTrue);
         });
         //database.close();
         await transaction.completed;
@@ -418,7 +418,7 @@ void defineTests(TestContext ctx) {
         }
 
         Future dbCreateTransaction() async {
-          await Future.delayed(const Duration(milliseconds: 1));
+          await Future<void>.delayed(const Duration(milliseconds: 1));
           dbCreateTransactionSync();
         }
 
@@ -442,9 +442,9 @@ void defineTests(TestContext ctx) {
 
         // In 1.12 this was causing the transaction to terminate on ie
         // this is no longer the case in 1.13
-        await Future.value();
-        await Future.value();
-        await Future.value();
+        await Future<void>.value();
+        await Future<void>.value();
+        await Future<void>.value();
 
         await objectStore.getObject(0);
 
@@ -459,7 +459,7 @@ void defineTests(TestContext ctx) {
 
         // this cause the transaction to terminate on ie
         // and so on sembast
-        await Future.value();
+        await Future<void>.value();
         try {
           await objectStore.getObject(0);
           if (ctx.isIdbNoLazy) {
@@ -509,7 +509,7 @@ void defineTests(TestContext ctx) {
         // this cause the transaction to terminate on ie
 
         // and so on sembast
-        await Future.value();
+        await Future<void>.value();
         try {
           await objectStore.getObject(0);
           if (ctx.isIdbSembast || ctx.isIdbIe) {
@@ -534,7 +534,7 @@ void defineTests(TestContext ctx) {
           await objectStore.getObject(0);
 
           // this cause the transaction to terminate on every implementation
-          await Future.delayed(const Duration());
+          await Future<void>.delayed(const Duration());
 
           try {
             await objectStore.getObject(0);
@@ -560,8 +560,8 @@ void defineTests(TestContext ctx) {
         await objectStore.getObject(0);
         // this cause the transaction to terminate on ie
         if (!ctx.isIdbNoLazy) {
-          await Future.value();
-          await Future.value();
+          await Future<void>.value();
+          await Future<void>.value();
         }
         await objectStore.getObject(0);
         await transaction.completed;
@@ -574,8 +574,8 @@ void defineTests(TestContext ctx) {
         await objectStore.put({});
         // this cause the transaction to terminate on ie
         if (!ctx.isIdbNoLazy) {
-          await Future.value();
-          await Future.value();
+          await Future<void>.value();
+          await Future<void>.value();
         }
         await objectStore.put({});
         await transaction.completed;
@@ -630,8 +630,8 @@ void defineTests(TestContext ctx) {
         /*
         // this cause the transaction to terminate on ie
         if (!ctx.isIdbNoLazy) {
-          await Future.value();
-          await Future.value();
+          await Future<void>.value();
+          await Future<void>.value();
         }*/
         transaction = db!.transaction(testStoreName, idbModeReadOnly);
         objectStore = transaction!.objectStore(testStoreName);

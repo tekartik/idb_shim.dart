@@ -44,7 +44,7 @@ typedef TestFunc = BodyFunc Function(
     [String? dbName, String storeName, int? version, bool? stringifyResult]);
 
 BodyFunc testReadWrite(
-        idb.IdbFactory? idbFactory, Object key, Object value, matcher,
+        idb.IdbFactory? idbFactory, Object key, Object value, Object? matcher,
         [String? dbName,
         String storeName = _storeName,
         int? version = _version,
@@ -89,16 +89,16 @@ BodyFunc testReadWrite(
     };
 
 BodyFunc testReadWriteTyped(
-        idb.IdbFactory? idbFactory, Object key, Object value, matcher,
+        idb.IdbFactory? idbFactory, Object key, Object value, Object? matcher,
         [String? dbName,
-        String? storeName = _storeName,
+        String storeName = _storeName,
         int? version = _version,
         bool? stringifyResult = false]) =>
     () {
       dbName ??= nextDatabaseName();
 
       void createObjectStore(idb.VersionChangeEvent e) {
-        var store = e.database.createObjectStore(storeName!);
+        var store = e.database.createObjectStore(storeName);
         expect(store, isNotNull);
       }
 
@@ -109,13 +109,13 @@ BodyFunc testReadWriteTyped(
             version: version, onUpgradeNeeded: createObjectStore);
       }).then((idb.Database result) {
         db = result;
-        final transaction = db!.transactionList([storeName!], 'readwrite');
+        final transaction = db!.transactionList([storeName], 'readwrite');
         transaction.objectStore(storeName).put(value, key);
 
         return transaction.completed;
       }).then((idb.Database result) {
         final transaction = db!.transaction(storeName, 'readonly');
-        return transaction.objectStore(storeName!).getObject(key);
+        return transaction.objectStore(storeName).getObject(key);
       }).then((object) {
         db!.close();
         if (stringifyResult!) {

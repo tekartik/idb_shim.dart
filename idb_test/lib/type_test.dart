@@ -62,7 +62,7 @@ void defineTests(TestContext ctx) {
         var read = await objectStore.getObject(key);
         expect(read, value);
         // Read using cursor
-        var completer = Completer.sync();
+        var completer = Completer<Object>.sync();
         objectStore.openCursor(key: key).listen((cvw) {
           completer.complete(cvw.value);
         });
@@ -70,7 +70,7 @@ void defineTests(TestContext ctx) {
       }
 
       Future testUpdateValue(int key, Object value) async {
-        var completer = Completer.sync();
+        var completer = Completer<void>.sync();
         objectStore.openCursor(key: key).listen((cvw) {
           // Update with the same value
           cvw.update(value);
@@ -110,6 +110,21 @@ void defineTests(TestContext ctx) {
           'text',
           DateTime.fromMillisecondsSinceEpoch(1, isUtc: true),
           Uint8List.fromList([1, 2, 3]),
+          {
+            'test': [
+              [1, null],
+              {
+                'sub': [
+                  [
+                    [1],
+                    [2, 1]
+                  ],
+                  [null],
+                  'text'
+                ]
+              }
+            ]
+          }
         ]) {
           await testValue(value);
         }
@@ -130,6 +145,15 @@ void defineTests(TestContext ctx) {
         var read = await objectStore.getObject(key);
         expect(read, const TypeMatcher<Uint8List>());
         expect(read, [1, 2, 3]);
+      });
+
+      test('list with null', () async {
+        dbCreateTransaction();
+        // date time is read as utc
+        var key = await objectStore.add([1, null, 2]);
+        var read = await objectStore.getObject(key);
+        expect(read, isNot(isA<Uint8List>()));
+        expect(read, [1, null, 2]);
       });
     });
   });

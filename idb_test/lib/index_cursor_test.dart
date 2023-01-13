@@ -104,8 +104,8 @@ void defineTests(TestContext ctx) {
         dbCreateTransaction();
         await objectStore.put({'dummy': 1});
 
-        expect(await getIndexRecords(), []);
-        expect(await getIndexKeys(), []);
+        expect(await getIndexRecords(), isEmpty);
+        expect(await getIndexKeys(), isEmpty);
       });
 
       test('two_record', () async {
@@ -138,14 +138,14 @@ void defineTests(TestContext ctx) {
         var txn = db!.transaction(testStoreName, idbModeReadWrite);
         await txn.objectStore(testStoreName).put({testNameField: value}, 1);
         // await txn.objectStore(testStoreName).put({testNameField: 'other'}, 2);
-        var values = [];
+        var values = <Object>[];
         await txn
             .objectStore(testStoreName)
             .index(testNameIndex)
             .openCursor(autoAdvance: true)
             .listen((cwv) {
           values.add(cwv.value);
-        }).asFuture();
+        }).asFuture<void>();
         if (value is bool) {
           // TO FIX for sembast, bool are not allowed
           try {
@@ -219,7 +219,7 @@ void defineTests(TestContext ctx) {
         dbCreateTransaction();
         final stream = index.openKeyCursor(autoAdvance: true);
         var count = 0;
-        final completer = Completer();
+        final completer = Completer<void>();
         stream.listen((Cursor cwv) {
           count++;
         }).onDone(() {
@@ -235,7 +235,7 @@ void defineTests(TestContext ctx) {
         dbCreateTransaction();
         final stream = index.openKeyCursor(key: 1, autoAdvance: true);
         var count = 0;
-        final completer = Completer();
+        final completer = Completer<void>();
         stream.listen((Cursor cwv) {
           count++;
         }).onDone(() {
@@ -251,7 +251,7 @@ void defineTests(TestContext ctx) {
         dbCreateTransaction();
         final stream = index.openCursor(autoAdvance: true);
         var count = 0;
-        final completer = Completer();
+        final completer = Completer<void>();
         stream.listen((CursorWithValue cwv) {
           count++;
         }).onDone(() {
@@ -267,7 +267,7 @@ void defineTests(TestContext ctx) {
         dbCreateTransaction();
         final stream = index.openCursor(key: 1, autoAdvance: true);
         var count = 0;
-        final completer = Completer();
+        final completer = Completer<void>();
         stream.listen((CursorWithValue cwv) {
           count++;
         }).onDone(() {
@@ -284,7 +284,7 @@ void defineTests(TestContext ctx) {
         return add('test1').then((_) {
           final stream = index.openKeyCursor(autoAdvance: true);
           var count = 0;
-          final completer = Completer();
+          final completer = Completer<void>();
           stream.listen((Cursor cursor) {
             // no value here
             expect(cursor is CursorWithValue, isFalse);
@@ -305,7 +305,7 @@ void defineTests(TestContext ctx) {
         return add('test1').then((_) {
           final stream = index.openCursor(autoAdvance: true);
           var count = 0;
-          final completer = Completer();
+          final completer = Completer<void>();
           stream.listen((CursorWithValue cwv) {
             expect((cwv.value as Map)[testNameField], 'test1');
             expect(cwv.key, 'test1');
@@ -344,7 +344,7 @@ void defineTests(TestContext ctx) {
                 count++;
                 cwv.next();
               })
-              .asFuture()
+              .asFuture<void>()
               .then((_) {
                 expect(count, 1);
               });
@@ -367,7 +367,7 @@ void defineTests(TestContext ctx) {
               print('cursorException: $cursorException');
               cursor.next();
             }
-          }).asFuture();
+          }).asFuture<void>();
 
           await transaction!.completed;
           transaction = db!.transaction(testStoreName, idbModeReadOnly);
@@ -394,7 +394,7 @@ void defineTests(TestContext ctx) {
                   cwv.next();
                 });
               })
-              .asFuture()
+              .asFuture<void>()
               .then((_) {
                 return transaction!.completed.then((_) {
                   transaction =
@@ -424,7 +424,7 @@ void defineTests(TestContext ctx) {
                   cwv.next();
                 });
               })
-              .asFuture()
+              .asFuture<void>()
               .then((_) {
                 return transaction!.completed.then((_) {
                   transaction =
@@ -514,7 +514,7 @@ void defineTests(TestContext ctx) {
               .listen((Cursor cursor) {
                 keys.add(cursor.primaryKey as int);
               })
-              .asFuture()
+              .asFuture<void>()
               .then((_) {
                 return keys;
               });
@@ -691,7 +691,7 @@ void defineTests(TestContext ctx) {
         await objectStore.add(value);
         final stream = index.openCursor(autoAdvance: true, key: 'test_value');
         var count = 0;
-        final completer = Completer();
+        final completer = Completer<void>();
         stream.listen((CursorWithValue cwv) {
           expect(cwv.value, value);
           count++;
@@ -735,7 +735,7 @@ void defineTests(TestContext ctx) {
           gotItem = true;
           expect(cursor.primaryKey, 1);
           expect(cursor.key, 'test1');
-        }).asFuture();
+        }).asFuture<void>();
         expect(gotItem, isTrue);
 
         gotItem = false;
@@ -745,7 +745,7 @@ void defineTests(TestContext ctx) {
           expect(cwv.primaryKey, 1);
           expect(cwv.key, 'test1');
           expect(cwv.value, value);
-        }).asFuture();
+        }).asFuture<void>();
         expect(gotItem, isTrue);
       });
 
@@ -775,7 +775,7 @@ void defineTests(TestContext ctx) {
           } else {
             fail('should fail');
           }
-        }).asFuture();
+        }).asFuture<void>();
         expect(gotItem1 && gotItem2, isTrue);
 
         gotItem1 = false;
@@ -795,7 +795,7 @@ void defineTests(TestContext ctx) {
           } else {
             fail('should fail');
           }
-        }).asFuture();
+        }).asFuture<void>();
         expect(gotItem1 && gotItem2, isTrue);
       });
 
@@ -835,7 +835,7 @@ void defineTests(TestContext ctx) {
           } else {
             fail('should fail');
           }
-        }).asFuture();
+        }).asFuture<void>();
         expect(gotItem1, isTrue);
 
         var gotItem = false;
@@ -849,7 +849,7 @@ void defineTests(TestContext ctx) {
           } else {
             fail('should fail');
           }
-        }).asFuture();
+        }).asFuture<void>();
         expect(gotItem, isTrue);
       });
     });

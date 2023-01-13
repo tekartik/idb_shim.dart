@@ -10,7 +10,7 @@ void main() => defineTests();
 void defineTests() {
   group('value', () {
     test('Map', () {
-      expect(encodeValue({}), '{}');
+      expect(encodeValue(<String, Object?>{}), '{}');
     });
 
     test('String', () {
@@ -92,7 +92,7 @@ void defineTests() {
 
     test('IdbValueMapExt', () {
       var map = <String, Object?>{'key': 1};
-      expect(map.getFieldValue('key'), 1);
+      expect(map.getFieldValue<int>('key'), 1);
       expect(map.getKeyValue('key'), 1);
       expect(map.getKeyValue(['key']), [1]);
       map.setKeyValue('key', 2);

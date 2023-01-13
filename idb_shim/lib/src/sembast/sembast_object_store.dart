@@ -28,7 +28,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   sdb.DatabaseClient? _sdbClient;
   sdb.StoreRef<Object, Object>? _sdbStore;
 
-  // Lazy computat
+  // Lazy computed
   sdb.StoreRef<Object, Object> get sdbStore =>
       _sdbStore ??= sdb.StoreRef<Object, Object>(name);
 
@@ -93,7 +93,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   /// Only key the if key path is null
-  dynamic getUpdateKeyIfNeeded(value, [key]) {
+  dynamic getUpdateKeyIfNeeded(value, [Object? key]) {
     if (keyPath == null) {
       return key;
     }
@@ -129,7 +129,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
         // Handle the case where a generated key is added
         // We are in a transaction so the key is safe
         // Make sure the key field is added
-        var generatedKey = await sdbStore.generateKey(sdbClient);
+        var generatedKey = await sdbStore.generateIntKey(sdbClient);
         var fixedValue = fixKeyInValueImpl(value!, generatedKey);
         await sdbStore.record(generatedKey).add(sdbClient, fixedValue);
         return generatedKey;
@@ -139,7 +139,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
           // Get existing if any
           var existing = await txnCompositeFindIdByKey(key);
           if (existing == null) {
-            var generatedKey = await sdbStore.generateKey(sdbClient);
+            var generatedKey = await sdbStore.generateIntKey(sdbClient);
             id = generatedKey;
           } else {
             id = existing;
@@ -193,7 +193,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     });
   }
 
-  sdb.Filter _storeKeyOrRangeFilter([keyOrRange]) {
+  sdb.Filter _storeKeyOrRangeFilter([Object? keyOrRange]) {
     return keyOrRangeFilter(sdb.Field.key, keyOrRange, false);
   }
 
@@ -323,7 +323,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
       keyPathSortOrders(keyField, ascending);
 
   /// Convert to a sembast filter.
-  sdb.Filter cursorFilter(key, KeyRange? range) {
+  sdb.Filter cursorFilter(Object? key, KeyRange? range) {
     if (range != null) {
       return keyRangeFilter(keyField, range, false);
     } else {

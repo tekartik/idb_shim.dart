@@ -75,7 +75,8 @@ void defineTests(TestContext ctx) {
 
     test('bad param with version', () async {
       await setupDeleteDb();
-      return idbFactory.open(dbName, version: 1).then((_) {}).catchError((e) {
+      return idbFactory.open(dbName, version: 1).then((_) {}).catchError(
+          (Object e) {
         expect((e as ArgumentError).message,
             'version and onUpgradeNeeded must be specified together');
       }, test: (e) => e is ArgumentError);

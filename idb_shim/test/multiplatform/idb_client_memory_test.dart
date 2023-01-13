@@ -54,7 +54,7 @@ void main() {
         } catch (e) {
           exception = e;
         }
-      }).asFuture();
+      }).asFuture<void>();
 
       await txn.completed;
 
@@ -80,7 +80,7 @@ void main() {
         } catch (e) {
           exception = e;
         }
-      }).asFuture();
+      }).asFuture<void>();
 
       await txn.completed;
 

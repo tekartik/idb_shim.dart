@@ -39,7 +39,7 @@ class TodoList {
         .catchError(_onError);
   }
 
-  void _onError(e) {
+  void _onError(Object e) {
     // Get the user's attention for the sake of this tutorial. (Of course we
     // would *never* use window.alert() in real life.)
     window.alert('Oh no! Something went wrong. See the console for details.');

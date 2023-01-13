@@ -60,7 +60,7 @@ void defineTests(TestContext ctx) {
             .transaction(testStoreName, idbModeReadOnly)
             .objectStore(testStoreName);
         final stream = store.openCursor();
-        final completer = Completer();
+        final completer = Completer<void>();
         final list = <SimpleRow>[];
         stream.listen((CursorWithValue cwv) {
           expect(cwv.direction, 'next');

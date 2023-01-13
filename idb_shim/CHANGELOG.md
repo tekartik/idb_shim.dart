@@ -1,3 +1,7 @@
+## 2.3.0
+
+* Support strict-casts mode.
+
 ## 2.2.0+8
 
 * Fix keyPath array index creation

@@ -54,7 +54,7 @@ void defineTests(SembastFsTestContext ctx) {
           .transform(const LineSplitter())
           .listen((String line) {
         content.add(json.decode(line) as Map?);
-      }).asFuture();
+      }).asFuture<void>();
       return content;
     }
 
@@ -80,7 +80,7 @@ void defineTests(SembastFsTestContext ctx) {
       expect(await getStorageContent(), await getSdbStorageContext());
     }
 
-    var store = sdb.StoreRef<String, Object?>.main();
+    var store = sdb.StoreRef<String, Object>.main();
     tearDown(dbTearDown);
     dbTest('empty', () async {
       db = await idbFactory.open(dbTestName);

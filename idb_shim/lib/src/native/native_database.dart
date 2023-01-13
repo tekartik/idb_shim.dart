@@ -115,7 +115,7 @@ class DatabaseNative extends IdbDatabaseBase {
     }
   }
 
-  bool _isNotFoundError(e) {
+  bool _isNotFoundError(Object e) {
     if (e is DatabaseError) {
       final message = e.toString().toLowerCase();
       if (message.contains('notfounderror')) {
@@ -161,8 +161,8 @@ class DatabaseNative extends IdbDatabaseBase {
       ctlr.add(VersionChangeEventNative(factory, idbVersionChangeEvent));
     }, onDone: () {
       ctlr.close();
-    }, onError: (error) {
-      ctlr.addError(error as Object);
+    }, onError: (Object error) {
+      ctlr.addError(error);
     });
     return ctlr.stream;
   }

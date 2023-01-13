@@ -166,7 +166,8 @@ abstract class ObjectStore {
   /// Note that this method must be called only from a VersionChange transaction
   /// mode callback.
   ///
-  Index createIndex(String name, keyPath, {bool? unique, bool? multiEntry});
+  Index createIndex(String name, Object keyPath,
+      {bool? unique, bool? multiEntry});
 
   ///
   /// Creates a structured clone of the value, and stores the cloned value in
@@ -233,13 +234,13 @@ abstract class ObjectStore {
   /// Used for iterating through an object store with a cursor.
   ///
   Stream<CursorWithValue> openCursor(
-      {key, KeyRange? range, String? direction, bool? autoAdvance});
+      {Object? key, KeyRange? range, String? direction, bool? autoAdvance});
 
   ///
   /// Used for iterating through an object store with a key cursor.
   ///
   Stream<Cursor> openKeyCursor(
-      {key, KeyRange? range, String? direction, bool? autoAdvance});
+      {Object? key, KeyRange? range, String? direction, bool? autoAdvance});
 
   ///
   /// returns the total number of records that match the provided key or
@@ -318,7 +319,7 @@ abstract class Database {
   ///
   /// [mode] can be readonly (idbModeReadOnly), the default or readwrite (idbModeReadWrite)
   ///
-  Transaction transaction(storeNameOrStoreNames, String mode);
+  Transaction transaction(Object storeNameOrStoreNames, String mode);
 
   ///
   /// helper for transaction on list of object stores
@@ -402,7 +403,7 @@ abstract class Index {
   ///
   /// returns the number of records within a key range.
   ///
-  Future<int> count([keyOrRange]);
+  Future<int> count([Object? keyOrRange]);
 
   ///
   /// finds either the value in the referenced object store that corresponds to
@@ -422,11 +423,11 @@ abstract class Index {
 
   /// Creates a cursor over the specified key range.
   Stream<CursorWithValue> openCursor(
-      {key, KeyRange? range, String? direction, bool? autoAdvance});
+      {Object? key, KeyRange? range, String? direction, bool? autoAdvance});
 
   /// Creates a key cursor over the specified key range.
   Stream<Cursor> openKeyCursor(
-      {key, KeyRange? range, String? direction, bool? autoAdvance});
+      {Object? key, KeyRange? range, String? direction, bool? autoAdvance});
 
   ///
   /// returns all objects in the index matching the specified parameter
@@ -592,7 +593,7 @@ abstract class KeyRange {
   ///
   /// Used internally, deprecated since 1.10.0+1
   @protected
-  bool contains(key);
+  bool contains(Object key);
 }
 
 ///

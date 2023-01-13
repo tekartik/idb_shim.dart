@@ -266,7 +266,7 @@ void defineTests(TestContext ctx) {
       test('WEIRD count by range', () async {
         await dbSetUp();
         dbCreateTransaction();
-        final value = {};
+        final value = <String, Object?>{};
         return objectStore.add(value).then((key1) {
           return objectStore.add(value).then((key2) {
             return objectStore
@@ -443,7 +443,7 @@ void defineTests(TestContext ctx) {
       test('WEIRD count by range', () async {
         await dbSetUp();
         dbCreateTransaction();
-        final value = {};
+        final value = <Object?, Object?>{};
         return objectStore.add(value).then((key1) {
           return objectStore.add(value).then((key2) {
             return objectStore

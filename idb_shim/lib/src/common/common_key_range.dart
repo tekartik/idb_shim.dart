@@ -10,10 +10,10 @@ class IdbKeyRange implements KeyRange {
   IdbKeyRange();
 
   /// Creates a new key range containing a single value.
-  IdbKeyRange.only(/*Key*/ value) : this.bound(value, value);
+  IdbKeyRange.only(Object value) : this.bound(value, value);
 
   /// Creates a new key range with only a lower bound.
-  IdbKeyRange.lowerBound(Object? lowerBound, [bool open = false]) {
+  IdbKeyRange.lowerBound(Object lowerBound, [bool open = false]) {
     _lowerBound = lowerBound;
     _lowerBoundOpen = open;
     _checkLowerBoundDef();
@@ -25,7 +25,7 @@ class IdbKeyRange implements KeyRange {
   void _checkUpperBoundDef() =>
       _checkBound('upper', _upperBound, _upperBoundOpen);
 
-  void _checkBound(String tag, Object bound, bool open) {
+  void _checkBound(String tag, Object? bound, bool open) {
     if (_boundHasNull(bound)) {
       // DataError: Failed to execute 'lowerBound' on 'IDBKeyRange': The parameter is not a valid key.
       throw DatabaseError(
@@ -66,9 +66,9 @@ class IdbKeyRange implements KeyRange {
     }
   }
 
-  dynamic _lowerBound;
+  Object? _lowerBound;
   bool _lowerBoundOpen = true;
-  dynamic _upperBound;
+  Object? _upperBound;
   bool _upperBoundOpen = true;
 
   /// Lower bound of the key range.
@@ -87,7 +87,7 @@ class IdbKeyRange implements KeyRange {
   @override
   bool get upperOpen => _upperBoundOpen;
 
-  num _compareValue(value1, value2) {
+  num _compareValue(Object value1, Object value2) {
     if (value1 is num) {
       return value1 - (value2 as num);
     } else if (value1 is String) {
@@ -95,7 +95,8 @@ class IdbKeyRange implements KeyRange {
     } else if (value1 is List) {
       final list = value1;
       for (var i = 0; i < list.length; i++) {
-        var diff = _compareValue(list[i], (value2 as List)[i]);
+        var diff =
+            _compareValue(list[i] as Object, (value2 as List)[i] as Object);
         if (diff != 0) {
           return diff;
         }
@@ -110,10 +111,10 @@ class IdbKeyRange implements KeyRange {
   ///
   /// Added method for memory implementation
   ///
-  bool _checkLowerBound(key) {
+  bool _checkLowerBound(Object key) {
     if (_lowerBound != null) {
       final exclude = _lowerBoundOpen;
-      final cmp = _compareValue(key, _lowerBound);
+      final cmp = _compareValue(key, _lowerBound!);
       if (cmp == 0 && exclude) {
         return false;
       } else {
@@ -123,10 +124,10 @@ class IdbKeyRange implements KeyRange {
     return true;
   }
 
-  bool _checkUpperBound(key) {
+  bool _checkUpperBound(Object key) {
     if (_upperBound != null) {
       final exclude = _upperBoundOpen;
-      final cmp = _compareValue(key, _upperBound);
+      final cmp = _compareValue(key, _upperBound!);
       if (cmp == 0 && exclude) {
         return false;
       } else {
@@ -138,7 +139,7 @@ class IdbKeyRange implements KeyRange {
 
   /// Return true if a key range contains a given key
   @override
-  bool contains(key) {
+  bool contains(Object key) {
     if (!_checkLowerBound(key)) {
       return false;
     } else {

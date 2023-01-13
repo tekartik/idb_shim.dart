@@ -48,7 +48,8 @@ void main() {
         true,
         // null, no longer supported with nnbd
         //<Object?, Object?>{},
-        [],
+        <Object?>[],
+        [1, null, 3],
         [
           {
             'test': [

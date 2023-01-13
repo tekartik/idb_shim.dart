@@ -1,5 +1,7 @@
 library idb_shim.common_meta_test;
 
+import 'package:idb_shim/idb.dart';
+
 import '../idb_test_common.dart';
 
 // auto-increment, no key path
@@ -141,6 +143,11 @@ void defineTests() {
       final meta1 = idbSimpleObjectStoreMeta.clone();
       meta1.putIndex(idbIndexMeta1);
       testStoreRoundTrip(meta1);
+    });
+
+    test('null transaction', () {
+      final meta1 = IdbDatabaseMeta(1);
+      meta1.transaction(null, idbModeReadWrite);
     });
   });
 }

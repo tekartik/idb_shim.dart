@@ -23,7 +23,7 @@ typedef Action = FutureOr Function();
 bool newTransaction = false;
 
 Future<void> _delayedInit() async {
-  await Future.delayed(const Duration());
+  await Future<void>.delayed(Duration.zero);
 }
 
 /// Transaction wrapper around a sembast transaction.
@@ -140,7 +140,7 @@ class TransactionSembast extends IdbTransactionBase
       // This fixes sample get/await/get
 
       Future checkNextAction() {
-        //return new Future.value().then((_) {
+        //return new Future<void>.value().then((_) {
         if (_index < _actions.length) {
           return _next();
         }
@@ -246,7 +246,7 @@ class TransactionSembast extends IdbTransactionBase
   }
 
   //sdb.Transaction sdbTransaction;
-  final _transactionCompleter = Completer();
+  final _transactionCompleter = Completer<void>();
   final _completers = <Completer>[];
   final _actions = <Function>[];
   final _futures = <Future>[];
@@ -286,7 +286,7 @@ class TransactionSembast extends IdbTransactionBase
         _inactive = true;
 
         // Try a simple await to postpone the completed
-        await Future.value();
+        await Future<void>.value();
         // The only place to call it
         // ignore: deprecated_member_use_from_same_package
         _complete();
@@ -367,12 +367,12 @@ class TransactionSembast extends IdbTransactionBase
     // postpone to next 2 cycles to allow enqueing
     // actions after completed has been called
     //if (_transactionLazyMode) {
-    await Future.value();
+    await Future<void>.value();
     await _completed();
 
      */
     // postpone to next cycle to allow enqueing
-    await Future.value();
+    await Future<void>.value();
     try {
       await _completed;
     } catch (_) {}

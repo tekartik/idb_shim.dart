@@ -40,7 +40,7 @@ Future<Database> writeItems(Database db) {
 Future<Database> writeItems(Database db) {
   var transaction = db.transaction(_storeName, 'readwrite');
 
-  Future<Object?> write(index) {
+  Future<Object?> write(int index) {
     return transaction
         .objectStore(_storeName)
         .put({'content': 'Item $index'}, index);
@@ -59,7 +59,8 @@ Future<Database> setupDb(IdbFactory idbFactory) {
   return createAndOpenDb(idbFactory).then(writeItems);
 }
 
-Future testRange(Database db, range, int? expectedFirst, int? expectedLast) {
+Future testRange(
+    Database db, Object range, int? expectedFirst, int? expectedLast) {
   //var done = expectAsync0(() {});
 
   final txn = db.transaction(_storeName, 'readonly');

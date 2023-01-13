@@ -7,7 +7,7 @@ import 'package:idb_shim/src/sembast/sembast_import.dart' as sdb;
 
 /// keyPath must have been escaped before
 sdb.Filter keyCursorFilter(
-    dynamic keyPath, key, KeyRange? range, bool multiEntry) {
+    dynamic keyPath, Object? key, KeyRange? range, bool multiEntry) {
   if (range != null) {
     return keyRangeFilter(keyPath, range, multiEntry);
   } else
@@ -283,7 +283,7 @@ sdb.Filter storeKeyFilter(Object? keyPath, Object key) {
 
 /// The null value for the key actually means any but null...
 /// Key path must have been escaped before
-sdb.Filter keyFilter(dynamic keyPath, var key, [bool multiEntry = false]) {
+sdb.Filter keyFilter(dynamic keyPath, Object? key, [bool multiEntry = false]) {
   if (keyPath is String) {
     if (multiEntry) {
       return sdb.Filter.custom((snapshot) {

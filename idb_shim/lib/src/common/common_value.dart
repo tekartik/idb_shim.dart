@@ -38,18 +38,18 @@ Object decodeKey(Object key) {
   return key;
 }
 
-List _cloneList(List original) {
-  final list = [];
+List<T> _cloneList<T>(List<T> original) {
+  final list = <T>[];
   for (var value in original) {
-    list.add(_cloneValue(value));
+    list.add(_cloneValue(value) as T);
   }
   return list;
 }
 
 Map _cloneMap(Map original) {
-  final map = {};
+  final map = <String, Object?>{};
   original.forEach((key, value) {
-    map[key] = _cloneValue(value);
+    map[key as String] = _cloneValue(value);
   });
   return map;
 }
@@ -65,11 +65,11 @@ Object? _cloneValue(Object? original) {
 }
 
 /// Clone and add the key if needed
-Object cloneValue(Object value, [String? keyPath, dynamic key]) {
+Object cloneValue(Object value, [String? keyPath, Object? key]) {
   var clone = _cloneValue(value)!;
   if (keyPath != null) {
     // assume map
-    setMapFieldValue(clone as Map, keyPath, key);
+    setMapFieldValue(clone as Map, keyPath, key as Object);
   }
   return clone;
 }
@@ -111,12 +111,13 @@ KeyRange compositeKeyRangeAt(KeyRange keyRange, int index) {
 
   if (lower is List) {
     if (upper is List) {
-      return KeyRange.bound(
-          lower[index], upper[index], keyRange.lowerOpen, keyRange.upperOpen);
+      return KeyRange.bound(lower[index] as Object, upper[index] as Object,
+          keyRange.lowerOpen, keyRange.upperOpen);
     }
-    return KeyRange.lowerBound(lower[index], keyRange.lowerOpen);
+    return KeyRange.lowerBound(lower[index] as Object, keyRange.lowerOpen);
   }
-  return KeyRange.upperBound((upper as List)[index], keyRange.upperOpen);
+  return KeyRange.upperBound(
+      (upper as List)[index] as Object, keyRange.upperOpen);
 }
 
 /// return a list if keyPath is an array
@@ -178,12 +179,12 @@ T? getPartsMapValue<T>(Map? map, Iterable<String> parts) {
 }
 
 /// Set a field value.
-void setMapFieldValue(Map map, String field, Object value) {
+void setMapFieldValue(Map map, String field, Object? value) {
   setPartsMapValue(map, getFieldParts(field), value);
 }
 
 /// Set a a deep map member value
-void setPartsMapValue(Map map, List<String> parts, Object value) {
+void setPartsMapValue(Map map, List<String> parts, Object? value) {
   for (var i = 0; i < parts.length - 1; i++) {
     final part = parts[i];
     dynamic sub = map[part];
@@ -207,7 +208,7 @@ extension IdbValueMapExt on Map {
       return getFieldValue(keyPath);
     } else if (keyPath is List) {
       final keyList = keyPath;
-      var keys = List.generate(
+      var keys = List<Object?>.generate(
           keyList.length, (i) => getFieldValue(keyPath[i] as String));
       if (keys.where((element) => element == null).isNotEmpty) {
         /// the list cannot contain null values
@@ -245,7 +246,7 @@ extension IdbValueMapExt on Map {
       final valueList = value as List<Object?>;
       assert(keyList.length == valueList.length);
       for (var i = 0; i < keyList.length; i++) {
-        setFieldValue(keyList[i], valueList[i]!);
+        setFieldValue(keyList[i] as String, valueList[i]!);
       }
     } else {
       throw 'keyPath $keyPath not supported';
@@ -254,11 +255,11 @@ extension IdbValueMapExt on Map {
 
   /// Get map field helper.
   T? getFieldValue<T>(String field) {
-    return getPartsMapValue(this, getFieldParts(field));
+    return getPartsMapValue<T>(this, getFieldParts(field));
   }
 
   /// Set a field value.
-  void setFieldValue(String field, Object value) {
+  void setFieldValue(String field, Object? value) {
     setPartsMapValue(this, getFieldParts(field), value);
   }
 }

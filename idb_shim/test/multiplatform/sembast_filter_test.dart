@@ -7,15 +7,16 @@ import 'package:sembast/src/filter_impl.dart' as sdb;
 import 'package:sembast/src/record_snapshot_impl.dart' as sdb;
 import '../idb_test_common.dart';
 
-var _record = sdb.StoreRef.main().record(1);
+var _record = sdb.StoreRef<int, Object>.main().record(1);
 sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range,
         [bool multiEntry = false]) =>
     sembast_filter.keyRangeFilter(keyPath, range, multiEntry);
 
-sdb.Filter keyFilter(dynamic keyPath, var key, [bool multiEntry = false]) =>
+/// key can be null
+sdb.Filter keyFilter(dynamic keyPath, Object? key, [bool multiEntry = false]) =>
     sembast_filter.keyFilter(keyPath, key, multiEntry);
 
-bool _fieldMatch(sdb.Filter filter, dynamic value) {
+bool _fieldMatch(sdb.Filter filter, Object value) {
   return sdb.filterMatchesRecord(
       filter, sdb.SembastRecordSnapshot(_record, value));
 }
@@ -159,7 +160,7 @@ void main() {
               'value': [1, 2]
             }),
             isTrue);
-        expect(_fieldMatch(filter, {'value': []}), isFalse);
+        expect(_fieldMatch(filter, {'value': <int>[]}), isFalse);
         expect(_fieldMatch(filter, {'value': null}), isFalse);
         expect(_fieldMatch(filter, {'value': 3}), isTrue);
         expect(_fieldMatch(filter, 1), isFalse);
