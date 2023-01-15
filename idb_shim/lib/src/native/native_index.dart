@@ -102,7 +102,7 @@ class IndexNative extends Index {
   }
 
   @override
-  dynamic get keyPath => idbIndex.keyPath;
+  Object get keyPath => idbIndex.keyPath as Object;
 
   @override
   bool get unique => idbIndex.unique!;

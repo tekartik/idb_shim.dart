@@ -445,7 +445,7 @@ abstract class Index {
   /// returns the key path of the current index. If null, this index is not
   /// auto-populated.
   ///
-  dynamic get keyPath;
+  Object get keyPath;
 
   ///
   /// states whether the index allows duplicate keys or not.
