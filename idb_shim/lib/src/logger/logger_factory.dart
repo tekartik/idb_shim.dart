@@ -133,3 +133,20 @@ class IdbFactoryWrapperImpl extends IdbFactoryBase implements IdbFactoryLogger {
   @override
   String toString() => 'Logger($factory)';
 }
+
+/// Debug extension for Logger.
+extension IdbFactoryLoggerDebugExt on IdbFactory {
+  /// Quick logger wrapper, useful in unit test.
+  ///
+  /// idbFactory = idbFactory.debugQuickLoggerWrapper()
+  ///
+  /// [maxLogCount] default to 100
+  @Deprecated('Debug/dev mode')
+  IdbFactory debugWrapInLogger(
+      {IdbFactoryLoggerType type = IdbFactoryLoggerType.all,
+      int? maxLogCount}) {
+    IdbFactoryLogger.debugMaxLogCount = maxLogCount ?? 100;
+    var factory = getIdbFactoryLogger(this, type: type);
+    return factory;
+  }
+}

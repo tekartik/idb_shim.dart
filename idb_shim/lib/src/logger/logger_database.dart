@@ -63,6 +63,7 @@ class DatabaseLogger extends IdbDatabaseBase {
 
   @override
   void close() {
+    log('closing database');
     return catchNativeError(() {
       idbDatabase.close();
     });
