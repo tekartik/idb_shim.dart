@@ -49,7 +49,7 @@ class IndexLogger extends Index {
       idbIndex.getAllKeys(query, count);
 
   @override
-  dynamic get keyPath => idbIndex.keyPath;
+  Object get keyPath => idbIndex.keyPath;
 
   @override
   bool get unique => idbIndex.unique;

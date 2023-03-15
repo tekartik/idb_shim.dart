@@ -151,7 +151,7 @@ Future<Database> setUpSimpleStore(IdbFactory idbFactory, //
       final objectStore = db.createObjectStore(meta!.name,
           keyPath: meta.keyPath, autoIncrement: meta.autoIncrement);
       for (final indexMeta in meta.indecies) {
-        objectStore.createIndex(indexMeta.name!, indexMeta.keyPath as Object,
+        objectStore.createIndex(indexMeta.name!, indexMeta.keyPath,
             unique: indexMeta.unique, multiEntry: indexMeta.multiEntry);
       }
     }

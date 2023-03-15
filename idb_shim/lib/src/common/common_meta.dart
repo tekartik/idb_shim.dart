@@ -420,7 +420,7 @@ abstract class IndexWithMetaMixin {
   String get name => meta.name!;
 
   //@override
-  Object? get keyPath => meta.keyPath;
+  Object get keyPath => meta.keyPath;
 
   //@override
   bool get unique => meta.unique;
@@ -436,7 +436,7 @@ abstract class IndexWithMetaMixin {
 
 class IdbIndexMeta {
   final String? name;
-  final Object? keyPath;
+  final Object keyPath;
   final bool unique;
   final bool multiEntry;
 
@@ -457,8 +457,8 @@ class IdbIndexMeta {
 
   factory IdbIndexMeta.fromMap(Map<String, Object?> map) {
     var meta = IdbIndexMeta(
-        map['name'] as String?, //
-        _keyPathAsStringOrList(map['keyPath']),
+        map['name'] as String, //
+        _keyPathAsStringOrList(map['keyPath'] as Object),
         map['unique'] as bool?, //
         map['multiEntry'] as bool?);
     return meta;
@@ -476,7 +476,7 @@ class IdbIndexMeta {
     if (this.keyPath is Iterable) {
       keyPath = (this.keyPath as Iterable).cast<String>().toList();
     } else {
-      keyPath = this.keyPath?.toString();
+      keyPath = this.keyPath.toString();
     }
     var map = <String, Object?>{'name': name, 'keyPath': keyPath};
     if (unique) {
@@ -505,7 +505,10 @@ class IdbIndexMeta {
   }
 }
 
-Object? _keyPathAsStringOrList(Object? keyPath) {
+Object _keyPathAsStringOrList(Object keyPath) =>
+    _keyPathAsStringOrListOrNull(keyPath)!;
+
+Object? _keyPathAsStringOrListOrNull(Object? keyPath) {
   if (keyPath is Iterable) {
     return keyPath.cast<String>().toList();
   } else {
