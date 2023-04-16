@@ -655,18 +655,17 @@ void defineTests(TestContext ctx) {
         return store.getObject(key);
       }
 
-      Future<Object> update(Database db, Map<String, Object?> obj) async {
+      Future<void> update(Database db, Map<String, Object?> obj) async {
         final t = db.transaction('store', idbModeReadWrite);
         final store = t.objectStore('store');
 
-        final ret = store.openCursor(autoAdvance: true).forEach((cv) {
+        unawaited(store.openCursor(autoAdvance: true).forEach((cv) {
           // change: update the correct row
           if (cv.key == obj['key']) {
             cv.update(obj);
           }
-        });
+        }));
         await t.completed;
-        return ret;
       }
 
       test('key_path_cursor_update_with_explicit_id', () async {
