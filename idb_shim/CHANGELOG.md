@@ -1,3 +1,7 @@
+## 2.3.1
+
+* Dart 3 support
+
 ## 2.3.0+2
 
 * Support strict-casts mode.
