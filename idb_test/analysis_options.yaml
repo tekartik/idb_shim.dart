@@ -36,8 +36,7 @@ linter:
     - empty_statements
     - hash_and_equals
     - implementation_imports
-    - iterable_contains_unrelated_type
-    - list_remove_unrelated_type
+    - collection_methods_unrelated_type
     - no_adjacent_strings_in_list
     - non_constant_identifier_names
     - overridden_fields
