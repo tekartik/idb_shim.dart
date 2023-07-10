@@ -9,7 +9,7 @@ import 'package:idb_shim/src/sembast/sembast_index.dart';
 import 'package:idb_shim/src/sembast/sembast_object_store.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 
-abstract class KeyCursorSembastMixin implements Cursor {
+abstract mixin class KeyCursorSembastMixin implements Cursor {
   // set upon creation
   late int recordIndex;
   late BaseCursorControllerSembastMixin ctlr;
@@ -87,7 +87,7 @@ abstract class KeyCursorSembastMixin implements Cursor {
   }
 }
 
-abstract class IndexCursorSembastMixin implements Cursor {
+abstract mixin class IndexCursorSembastMixin implements Cursor {
   IndexCursorControllerSembastMixin get indexCtlr;
 
   IndexSembast get index => indexCtlr.index;
@@ -95,7 +95,7 @@ abstract class IndexCursorSembastMixin implements Cursor {
   RecordSnapshotSembast get record;
 }
 
-abstract class CursorWithValueSembastMixin implements CursorWithValue {
+abstract mixin class CursorWithValueSembastMixin implements CursorWithValue {
   ObjectStoreSembast get store;
   RecordSnapshotSembast get record;
 
@@ -198,7 +198,8 @@ class IndexRecordSnapshotSembast extends RecordSnapshotSembast {
   String toString() => '$key $snapshot';
 }
 
-abstract class IndexCursorControllerSembastMixin implements _ICursorSembast {
+abstract mixin class IndexCursorControllerSembastMixin
+    implements _ICursorSembast {
   late IndexSembast index;
 
   IdbCursorMeta get meta;
@@ -242,7 +243,8 @@ abstract class IndexCursorControllerSembastMixin implements _ICursorSembast {
   }
 }
 
-abstract class StoreCursorControllerSembastMixin implements _ICursorSembast {
+abstract mixin class StoreCursorControllerSembastMixin
+    implements _ICursorSembast {
   ObjectStoreSembast get store;
 
   IdbCursorMeta get meta;
@@ -258,7 +260,7 @@ abstract class StoreCursorControllerSembastMixin implements _ICursorSembast {
   }
 }
 
-abstract class BaseCursorControllerSembastMixin<T extends Cursor>
+abstract mixin class BaseCursorControllerSembastMixin<T extends Cursor>
     implements _ICursorSembast {
   late IdbCursorMeta meta;
 
@@ -317,13 +319,13 @@ abstract class BaseCursorControllerSembastMixin<T extends Cursor>
   }
 }
 
-abstract class KeyCursorControllerSembastMixin {
+abstract mixin class KeyCursorControllerSembastMixin {
   StreamController<Cursor> get ctlr;
 
   Stream<Cursor> get stream => ctlr.stream;
 }
 
-abstract class CursorWithValueControllerSembastMixin {
+abstract mixin class CursorWithValueControllerSembastMixin {
   StreamController<CursorWithValue> get ctlr;
 
   Stream<CursorWithValue> get stream => ctlr.stream;
