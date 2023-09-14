@@ -8,7 +8,7 @@ import 'package:collection/collection.dart';
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 
-abstract class TransactionWithMetaMixin {
+abstract mixin class TransactionWithMetaMixin {
   IdbTransactionMeta? get meta;
 }
 
@@ -58,7 +58,7 @@ class IdbVersionChangeTransactionMeta extends IdbTransactionMeta {
   void checkObjectStore(String storeName) {}
 }
 
-abstract class DatabaseWithMetaMixin {
+abstract mixin class DatabaseWithMetaMixin {
   IdbDatabaseMeta get meta;
 
   //@implement
@@ -201,7 +201,7 @@ class IdbDatabaseMeta {
   }
 }
 
-abstract class ObjectStoreWithMetaMixin {
+abstract mixin class ObjectStoreWithMetaMixin {
   IdbObjectStoreMeta? get meta;
 
   //@override
@@ -413,7 +413,7 @@ class IdbCursorMeta {
   }
 }
 
-abstract class IndexWithMetaMixin {
+abstract mixin class IndexWithMetaMixin {
   IdbIndexMeta get meta;
 
   //@override

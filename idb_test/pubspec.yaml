@@ -6,7 +6,7 @@ homepage: https://github.com/tekartik/idb_shim.dart/tree/master/idb_test
 publish_to: none
 
 environment:
-  sdk: '>=2.18.0 <4.0.0'
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
   idb_shim: '>=2.0.0-nullsafety.0 <3.0.0'
@@ -16,7 +16,7 @@ dependencies:
   path:
   sembast:
 dev_dependencies:
-  lints: '>=1.0.1'
+  lints: '>=2.1.1'
   process_run: '>=0.10.0+1'
   build_runner: '>=1.5.0'
   build_test: '>=0.10.2'
