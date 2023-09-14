@@ -11,6 +11,6 @@ dependencies:
   yaml:
 dev_dependencies:
   test: '>=1.0.0'
-  dev_test: '>=0.13.4-dev.1'
-  lints:
+  dev_test: '>=0.16.2'
+  lints: '>=2.1.1'
   path:
