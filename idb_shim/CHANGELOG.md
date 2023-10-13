@@ -1,3 +1,8 @@
+## 2.3.2
+
+* Add new cursor stream extension in `utils/idb_cursor_utils.dart` to convert a stream to a list 
+  that supports offset and limit.
+
 ## 2.3.1
 
 * Dart 3 support
