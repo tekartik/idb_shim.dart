@@ -124,7 +124,7 @@ void defineTests(TestContext ctx) {
         final stream =
             objectStore.openCursor(autoAdvance: true, key: 'test_value');
         var count = 0;
-        final completer = Completer<void>();
+        final completer = Completer<void>.sync();
         stream.listen((CursorWithValue cwv) {
           expect(cwv.value, value);
           count++;
@@ -133,7 +133,6 @@ void defineTests(TestContext ctx) {
         });
         await completer.future;
         expect(count, 1);
-
         // Key cursor
         {
           final stream =
@@ -148,7 +147,6 @@ void defineTests(TestContext ctx) {
 
           expect(count, 1);
         }
-
         var valueRead = false;
 
         // Cancel subscription
@@ -482,7 +480,7 @@ void defineTests(TestContext ctx) {
             });
       });
 
-      test('one item cursor', () async {
+      test('one_item_cursor', () async {
         await dbSetUp();
         dbCreateTransaction();
         return add('test1').then((_) {

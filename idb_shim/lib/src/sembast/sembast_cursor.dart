@@ -39,9 +39,12 @@ abstract mixin class KeyCursorSembastMixin implements Cursor {
   @override
   Future delete() async {
     if (this is! CursorWithValue) {
-      // Mimic Chrome behavior
-      throw StateError(
-          'Cannot call cursor.delete when openKeyCursor is used, try openCursor instead');
+      // Do this to maintain the transaction...
+      await store.transaction!.execute(() async {
+        // Mimic Chrome behavior
+        throw StateError(
+            'Cannot call cursor.delete when openKeyCursor is used, try openCursor instead');
+      });
     }
     await store.delete(record.primaryKey);
     var i = recordIndex + 1;
@@ -97,6 +100,7 @@ abstract mixin class IndexCursorSembastMixin implements Cursor {
 
 abstract mixin class CursorWithValueSembastMixin implements CursorWithValue {
   ObjectStoreSembast get store;
+
   RecordSnapshotSembast get record;
 
   @override
@@ -176,9 +180,12 @@ abstract class _ICursorSembast {
 class RecordSnapshotSembast {
   final ObjectStoreSembast idbStore;
   final sdb.RecordSnapshot<Object, Object> snapshot;
+
   Object get id => snapshot.key;
+
   Object get primaryKey =>
       idbStore.hasCompositeKey ? idbStore.getKeyImpl(snapshot.value)! : id;
+
   Object get key => primaryKey;
 
   RecordSnapshotSembast(this.idbStore, this.snapshot);
@@ -190,6 +197,7 @@ class RecordSnapshotSembast {
 class IndexRecordSnapshotSembast extends RecordSnapshotSembast {
   @override
   final Object key;
+
   IndexRecordSnapshotSembast(ObjectStoreSembast idbStore, this.key,
       sdb.RecordSnapshot<Object, Object> snapshot)
       : super(idbStore, snapshot);

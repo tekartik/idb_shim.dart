@@ -385,28 +385,22 @@ void defineTests(TestContext ctx) {
       test('cursor none auto delete 1', () async {
         await dbSetUp();
         dbCreateTransaction();
-        return add('test1').then((key) {
-          // non auto to control advance
-          return index
-              .openCursor(autoAdvance: false)
-              .listen((CursorWithValue cwv) {
-                cwv.delete().then((_) {
-                  cwv.next();
-                });
-              })
-              .asFuture<void>()
-              .then((_) {
-                return transaction!.completed.then((_) {
-                  transaction =
-                      db!.transaction(testStoreName, idbModeReadWrite);
-                  objectStore = transaction!.objectStore(testStoreName);
-                  index = objectStore.index(testNameIndex);
-                  return index.get(key).then((value) {
-                    expect(value, isNull);
-                  });
-                });
-              });
-        });
+        var key = await add('test1');
+        // non auto to control advance
+        await index
+            .openCursor(autoAdvance: false)
+            .listen((CursorWithValue cwv) {
+          cwv.delete().then((_) {
+            cwv.next();
+          });
+        }).asFuture<void>();
+
+        await transaction!.completed;
+        transaction = db!.transaction(testStoreName, idbModeReadWrite);
+        objectStore = transaction!.objectStore(testStoreName);
+        index = objectStore.index(testNameIndex);
+        var value = await index.get(key);
+        expect(value, isNull);
       });
 
       test('cursor none auto update 1', () async {
