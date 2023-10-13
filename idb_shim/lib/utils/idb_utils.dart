@@ -1,12 +1,14 @@
 library idb_shim.utils.idb_utils;
 
+import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/src/common/common_meta.dart';
+import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/logger/logger_utils.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:idb_shim/src/utils/env_utils.dart';
-import 'package:sembast/utils/value_utils.dart';
 
-import '../idb_client.dart';
-import '../src/common/common_meta.dart';
+import 'idb_cursor_utils.dart';
+export 'idb_cursor_utils.dart' show CursorRow, KeyCursorRow;
 
 class _SchemaMeta {
   List<IdbObjectStoreMeta> stores = [];
@@ -120,70 +122,25 @@ Future<Database> copyDatabase(
   return dstDatabase;
 }
 
-/// Cursor row.
-class CursorRow extends KeyCursorRow {
-  /// Cursor row value.
-  final dynamic value;
+/// Convert an autoAdvance openCursor stream to a list.
+Future<List<T>> _autoCursorStreamToList<C extends Cursor, T>(
+        Stream<C> stream, T Function(C cursor) convert) =>
+    stream.map((cursor) => convert(cursor)).toList();
 
-  /// Create a cursor row with a [key], [primaryKey] and [value].
-  CursorRow(dynamic key, dynamic primaryKey, this.value)
-      : super(key, primaryKey);
+/// Convert an autoAdvance openCursor stream to a list
+Future<List<CursorRow>> cursorToList(Stream<CursorWithValue> stream) =>
+    _autoCursorStreamToList(stream,
+        (cwv) => CursorRow(cwv.key, cwv.primaryKey, cloneValue(cwv.value)));
 
-  @override
-  String toString() {
-    return '$value';
-  }
-}
+/// Convert an autoAdvance openKeyCursor stream to a list
+Future<List<KeyCursorRow>> keyCursorToList(Stream<Cursor> stream) =>
+    _autoCursorStreamToList(
+        stream, (cursor) => KeyCursorRow(cursor.key, cursor.primaryKey));
 
-/// Key cursor row.
-class KeyCursorRow {
-  /// Cursor row key.
-  ///
-  /// This is the index key if the cursor is open on an index. Otherwise, it is
-  /// the primary key.
-  final dynamic key;
-
-  /// Cursory row primary key.
-  final dynamic primaryKey;
-
-  @override
-  String toString() {
-    return '$key $primaryKey';
-  }
-
-  /// Create a cursor row with a [key], and [primaryKey].
-  KeyCursorRow(this.key, this.primaryKey);
-}
-
-/// Convert an openCursor stream to a list
-Future<List<CursorRow>> cursorToList(Stream<CursorWithValue> stream) {
-  var completer = Completer<List<CursorRow>>.sync();
-  final list = <CursorRow>[];
-  stream.listen((CursorWithValue cwv) {
-    // Clone value in case it is reused
-    list.add(CursorRow(cwv.key, cwv.primaryKey, cloneValue(cwv.value)));
-  }).onDone(() {
-    completer.complete(list);
-  });
-  return completer.future;
-}
-
-/// Convert an openKeyCursor stream to a list
-Future<List<KeyCursorRow>> keyCursorToList(Stream<Cursor> stream) {
-  var completer = Completer<List<KeyCursorRow>>.sync();
-  final list = <KeyCursorRow>[];
-  stream.listen((Cursor cursor) {
-    list.add(KeyCursorRow(cursor.key, cursor.primaryKey));
-  }).onDone(() {
-    completer.complete(list);
-  });
-  return completer.future;
-}
-
-/// Convert an openKeyCursor stream to a list of key, must be auto-advance)
+/// Convert an autoAdvance openKeyCursor stream to a list of key, must be auto-advance)
 Future<List<Object>> cursorToPrimaryKeyList(Stream<Cursor> stream) =>
-    stream.map((cursor) => cursor.primaryKey).toList();
+    _autoCursorStreamToList(stream, (cursor) => cursor.primaryKey);
 
-/// Convert an openKeyCursor stream to a list (must be auto-advance)
+/// Convert an autoAdvance openKeyCursor stream to a list (must be auto-advance)
 Future<List<Object>> cursorToKeyList(Stream<Cursor> stream) =>
-    stream.map((cursor) => cursor.key).toList();
+    _autoCursorStreamToList(stream, (cursor) => cursor.key);

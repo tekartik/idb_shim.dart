@@ -5,7 +5,7 @@ Future main() async {
 
   await shell.run('''
 
-  dart test
+  dart test -p vm
 
 ''');
 }

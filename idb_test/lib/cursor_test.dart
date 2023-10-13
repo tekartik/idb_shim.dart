@@ -1,6 +1,7 @@
 library cursor_test;
 
 import 'package:idb_shim/idb_client.dart';
+import 'package:idb_shim/utils/idb_cursor_utils.dart';
 import 'package:idb_shim/utils/idb_utils.dart';
 
 import 'idb_test_common.dart';
@@ -55,15 +56,17 @@ void defineTests(TestContext ctx) {
   }
 
   group('cursor', () {
-    Future add(String name) {
+    // ignore: unused_local_variable
+    late Object key1, key2, key3;
+    Future<Object> add(String name) {
       var obj = {testNameField: name};
       return objectStore.put(obj);
     }
 
     Future fill3SampleRows() async {
-      await add('test2');
-      await add('test1');
-      await add('test3');
+      key1 = await add('test2');
+      key2 = await add('test1');
+      key3 = await add('test3');
     }
 
 //    Future<List<TestIdNameRow>> _cursorToList(Stream<CursorWithValue> stream) {
@@ -398,21 +401,71 @@ void defineTests(TestContext ctx) {
         }
       });
     });
+    Future dbSetUp() async {
+      await setupDeleteDb();
+      void onUpgradeNeeded(VersionChangeEvent e) {
+        final db = e.database;
+        //ObjectStore objectStore =
+        db.createObjectStore(testStoreName, autoIncrement: true);
+      }
 
-    group('auto', () {
+      db = await idbFactory.open(dbName,
+          version: 1, onUpgradeNeeded: onUpgradeNeeded);
+    }
+
+    group('non_auto', () {
       tearDown(dbTearDown);
 
-      Future dbSetUp() async {
-        await setupDeleteDb();
-        void onUpgradeNeeded(VersionChangeEvent e) {
-          final db = e.database;
-          //ObjectStore objectStore =
-          db.createObjectStore(testStoreName, autoIncrement: true);
-        }
+      test('cursorToList', () async {
+        await dbSetUp();
+        dbCreateTransaction();
+        await fill3SampleRows();
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
-      }
+        expect(
+            (await objectStore.openCursor().toRowList()).map((e) => e.value), [
+          {'name': 'test2'},
+          {'name': 'test1'},
+          {'name': 'test3'}
+        ]);
+        expect(
+            (await objectStore.openCursor().toRowList(offset: 1))
+                .map((e) => e.value),
+            [
+              {'name': 'test1'},
+              {'name': 'test3'}
+            ]);
+        expect(
+            (await objectStore.openCursor().toRowList(limit: 1))
+                .map((e) => e.value),
+            [
+              {'name': 'test2'},
+            ]);
+        expect(
+            (await objectStore.openCursor().toRowList(offset: 1, limit: 1))
+                .map((e) => e.value),
+            [
+              {'name': 'test1'},
+            ]);
+        expect(
+            await objectStore.openCursor().toValueList(offset: 1, limit: 1), [
+          {'name': 'test1'},
+        ]);
+
+        expect(
+            await objectStore
+                .openCursor()
+                .toPrimaryKeyList(offset: 1, limit: 1),
+            [key2]);
+        expect(
+            (await objectStore.openCursor().toKeyRowList(offset: 1, limit: 1))
+                .map((e) => e.key),
+            [key2]);
+        expect(await objectStore.openCursor().toKeyList(offset: 1, limit: 1),
+            [key2]);
+      });
+    });
+    group('auto', () {
+      tearDown(dbTearDown);
 
       test('empty cursor', () async {
         await dbSetUp();
@@ -624,6 +677,36 @@ void defineTests(TestContext ctx) {
           print(e);
           expect(e, isNot(isA<TestFailure>()));
         }
+      });
+
+      test('autoCursorToList', () async {
+        await dbSetUp();
+        dbCreateTransaction();
+        await fill3SampleRows();
+
+        var list =
+            (await cursorToList(objectStore.openCursor(autoAdvance: true)))
+                .map((e) => e.value);
+        expect(list, [
+          {'name': 'test2'},
+          {'name': 'test1'},
+          {'name': 'test3'}
+        ]);
+        print('#3-');
+        list = (await cursorToList(objectStore.openCursor(autoAdvance: true)))
+            .map((e) => e.value);
+        expect(list, [
+          {'name': 'test2'},
+          {'name': 'test1'},
+          {'name': 'test3'}
+        ]);
+        print('#4-');
+        /*
+        list = (await cursorToList(objectStore.openCursor(), offset: 1)).map((e) => e.value);
+        expect(list, [
+          {'name': 'test1'},
+          {'name': 'test3'}
+        ]);*/
       });
     });
 

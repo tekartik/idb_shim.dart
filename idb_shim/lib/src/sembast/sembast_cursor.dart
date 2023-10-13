@@ -29,12 +29,12 @@ abstract mixin class KeyCursorSembastMixin implements Cursor {
   @override
   void advance(int count) {
     // no future
-    ctlr.advance(count);
+    store.transaction!.execute(() => ctlr._advance(count));
   }
 
   // Make sure advance does not pause the transaction
   @override
-  void next() => store.transaction!.execute(() => advance(1));
+  void next() => advance(1);
 
   @override
   Future delete() async {
@@ -264,6 +264,8 @@ abstract mixin class BaseCursorControllerSembastMixin<T extends Cursor>
     implements _ICursorSembast {
   late IdbCursorMeta meta;
 
+  bool get autoAdvance => meta.autoAdvance;
+
   ObjectStoreSembast get store;
 
 // To implement for KeyCursor vs CursorWithValue
@@ -280,24 +282,23 @@ abstract mixin class BaseCursorControllerSembastMixin<T extends Cursor>
     ctlr = StreamController(sync: true);
   }
 
-  Future autoNext() {
-    return advance(1).then((_) {
-      if (meta.autoAdvance && (!done)) {
-        return autoNext();
-      }
-      return null;
-    });
+  void autoNext() {
+    _advance(1);
+    if (meta.autoAdvance && (!done)) {
+      return autoNext();
+    }
   }
 
-  Future advance(int count) {
+  void _advance(int count) {
     currentIndex = currentIndex! + count;
     if (currentIndex! >= records!.length) {
       currentIndex = null;
-      return ctlr.close();
+      ctlr.close();
+
+      return;
     }
 
     ctlr.add(nextEvent(currentIndex!));
-    return Future<void>.value();
   }
 
   Future openCursor() async {
