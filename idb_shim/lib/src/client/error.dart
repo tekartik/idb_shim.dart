@@ -23,7 +23,7 @@ class DatabaseStoreNotFoundError extends DatabaseError {
       "NotFoundError: One of the specified object stores '$storeOrStores' was not found.";
 
   /// Store not found error.
-  DatabaseStoreNotFoundError([String message = _errorMessage]) : super(message);
+  DatabaseStoreNotFoundError([super.message = _errorMessage]);
 }
 
 /// Index not found.

@@ -500,8 +500,7 @@ abstract class Request {
 ///
 class OpenDBRequest extends Request {
   /// Create an open request on a given database and transaction.
-  OpenDBRequest(Database database, Transaction transaction)
-      : super(database, transaction);
+  OpenDBRequest(super.database, super.transaction);
 }
 
 ///

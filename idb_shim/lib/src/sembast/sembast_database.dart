@@ -61,7 +61,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
 
   sdb.DatabaseFactory get sdbFactory => factory.sdbFactory;
 
-  DatabaseSembast._(IdbFactory factory) : super(factory);
+  DatabaseSembast._(super.factory);
 
   final mainStore = sdb.StoreRef<String, Object>.main();
 
@@ -77,7 +77,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
     return idbDb;
   }
 
-  DatabaseSembast(IdbFactory factory, String name) : super(factory) {
+  DatabaseSembast(super.factory, String name) {
     meta.name = name;
   }
 

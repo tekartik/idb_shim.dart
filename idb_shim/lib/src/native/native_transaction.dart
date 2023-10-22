@@ -11,13 +11,13 @@ import 'package:idb_shim/src/native/native_object_store.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 
 abstract class TransactionNativeBase extends IdbTransactionBase {
-  TransactionNativeBase(Database database) : super(database);
+  TransactionNativeBase(super.database);
 }
 
 class TransactionNative extends TransactionNativeBase {
   idb.Transaction idbTransaction;
 
-  TransactionNative(Database database, this.idbTransaction) : super(database);
+  TransactionNative(super.database, this.idbTransaction);
   final _completed = Completer<Database>.sync();
 
   void _complete() {
@@ -75,8 +75,7 @@ class FakeMultiStoreTransactionNative extends TransactionNativeBase {
   idb.Database get idbDatabase => _nativeDatabase.idbDatabase!;
   String mode;
 
-  FakeMultiStoreTransactionNative(Database database, this.mode)
-      : super(database);
+  FakeMultiStoreTransactionNative(super.database, this.mode);
 
   @override
   ObjectStore objectStore(String name) {

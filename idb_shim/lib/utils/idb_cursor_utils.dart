@@ -11,8 +11,7 @@ class CursorRow extends KeyCursorRow {
   final dynamic value;
 
   /// Create a cursor row with a [key], [primaryKey] and [value].
-  CursorRow(dynamic key, dynamic primaryKey, this.value)
-      : super(key, primaryKey);
+  CursorRow(super.key, super.primaryKey, this.value);
 
   @override
   String toString() {

@@ -256,7 +256,7 @@ class TransactionSembast extends IdbTransactionBase
 
   ///
   /// Constructor.
-  TransactionSembast(DatabaseSembast database, this.meta) : super(database) {
+  TransactionSembast(DatabaseSembast super.database, this.meta) {
     if (_debugTransaction) {
       _debugId = ++_debugAllIds;
     }

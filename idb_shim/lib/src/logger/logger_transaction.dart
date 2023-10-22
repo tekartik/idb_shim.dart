@@ -15,9 +15,8 @@ class TransactionLogger extends IdbTransactionBase {
 
   DatabaseLogger get idbDatabaseLogger => database as DatabaseLogger;
 
-  TransactionLogger(DatabaseLogger database, this.idbTransaction)
-      : id = ++_id,
-        super(database);
+  TransactionLogger(DatabaseLogger super.database, this.idbTransaction)
+      : id = ++_id;
 
   @override
   ObjectStore objectStore(String name) =>
