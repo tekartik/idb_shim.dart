@@ -779,6 +779,24 @@ void defineTests(TestContext ctx) {
           transaction = null;
         });
       });
+
+      test('put_with_key', () async {
+        await dbSetUp();
+        dbCreateTransaction();
+        final value = {'test': 'test_value'};
+        var id = await objectStore.put(value);
+        expect(await objectStore.getObject(id),
+            {'test': 'test_value', 'my_key': id});
+        final value2 = {'test2': 'test_value2'};
+        try {
+          await objectStore.put(value2, id);
+          fail('should fail');
+        } catch (e) {
+          // DataError: Failed to execute 'put' on 'IDBObjectStore': The object store uses in-line keys and the key parameter was provided.
+          expect(isTestFailure(e), isFalse);
+          transaction = null;
+        }
+      });
     });
 
     group('key_path_non_auto', () {
