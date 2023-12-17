@@ -259,7 +259,7 @@ void defineTests(TestContext ctx) {
         } else {
           expect(objectStore.autoIncrement, true);
         }
-      }, testOn: '!ie');
+      });
 
       // Good first test
       test('add', () async {
