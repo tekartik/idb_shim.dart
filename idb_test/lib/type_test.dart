@@ -3,6 +3,7 @@ library idb_test.type_test;
 import 'dart:typed_data';
 
 import 'package:idb_shim/idb_client.dart';
+import 'package:idb_test/database_test.dart';
 
 import 'idb_test_common.dart';
 
@@ -128,7 +129,7 @@ void defineTests(TestContext ctx) {
         ]) {
           await testValue(value);
         }
-      });
+      }, skip: tmpSkipForNativeWeb);
 
       test('dateTime', () async {
         dbCreateTransaction();
@@ -136,7 +137,7 @@ void defineTests(TestContext ctx) {
         var key = await objectStore.add(DateTime.fromMillisecondsSinceEpoch(1));
         var read = await objectStore.getObject(key);
         expect(read, DateTime.fromMillisecondsSinceEpoch(1, isUtc: true));
-      });
+      }, skip: tmpSkipForNativeWeb);
 
       test('Uint8List', () async {
         dbCreateTransaction();

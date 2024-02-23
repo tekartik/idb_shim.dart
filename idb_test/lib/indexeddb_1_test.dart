@@ -28,11 +28,15 @@ Future<void> testUpgrade(idb.IdbFactory idbFactory) async {
   await idbFactory.deleteDatabase(dbName);
   var db = await idbFactory.open(dbName, version: 1, onUpgradeNeeded: (e) {});
   db.close();
+  late int onUpgradeOldVersion;
+  late int onUpgradeNewVersion;
   db = await idbFactory.open(dbName, version: 2, onUpgradeNeeded: (e) {
-    expect(e.oldVersion, 1);
-    expect(e.newVersion, 2);
+    onUpgradeOldVersion = e.oldVersion;
+    onUpgradeNewVersion = e.newVersion;
     upgraded = true;
   });
+  expect(onUpgradeOldVersion, 1);
+  expect(onUpgradeNewVersion, 2);
   expect(upgraded, isTrue);
   db.close();
 }
@@ -97,9 +101,10 @@ BodyFunc testReadWriteTyped(
     () {
       dbName ??= nextDatabaseName();
 
+      late Object? onUpgradeNeededStore;
       void createObjectStore(idb.VersionChangeEvent e) {
         var store = e.database.createObjectStore(storeName);
-        expect(store, isNotNull);
+        onUpgradeNeededStore = store;
       }
 
       idb.Database? db;
@@ -108,6 +113,7 @@ BodyFunc testReadWriteTyped(
         return idbFactory.open(dbName!,
             version: version, onUpgradeNeeded: createObjectStore);
       }).then((idb.Database result) {
+        expect(onUpgradeNeededStore, isNotNull);
         db = result;
         final transaction = db!.transactionList([storeName], 'readwrite');
         transaction.objectStore(storeName).put(value, key);

@@ -3,6 +3,7 @@
 import 'dart:js_interop';
 
 import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/src/utils/env_utils.dart';
 
 import 'indexed_db_web.dart' as idb;
 
@@ -35,14 +36,18 @@ JSAny? toNativeQuery(Object? query) {
 }
 
 JSAny? keyOrKeyRangeToNativeQuery({Object? key, KeyRange? range}) {
-  dynamic keyOrRange;
   if (key != null) {
-    if (range != null) {
-      throw ArgumentError('Cannot specify both key and range.');
+    if (isDebug) {
+      if (range != null) {
+        throw ArgumentError('Cannot specify both key and range.');
+      }
+      if (key is KeyRange) {
+        throw ArgumentError(
+            'Invalid keyRange $key as key argument, use the range argument');
+      }
     }
-    keyOrRange = key;
+    return key.jsify();
   } else {
-    keyOrRange = range;
+    return toNativeKeyRange(range);
   }
-  return toNativeQuery(keyOrRange);
 }

@@ -5,6 +5,8 @@ import 'package:idb_shim/idb_client.dart';
 import 'idb_test_common.dart';
 //import 'idb_test_factory.dart';
 
+var tmpSkipForNativeWeb = false;
+
 void main() {
   defineTests(idbMemoryContext);
 }
@@ -77,17 +79,14 @@ void defineTests(TestContext ctx) {
 
     test('one', () async {
       await setupDeleteDb();
-      late Iterable<String> initialOnUpgradeStoreNames;
-      late Iterable<String> endingOnUpgradeStoreNames;
+      late List<String> initialOnUpgradeStoreNames;
+      late List<String> endingOnUpgradeStoreNames;
       late String onUpgradeStoreName;
       void onUpgradeNeeded(VersionChangeEvent e) {
-        print('3');
-
         final db = e.database;
-        initialOnUpgradeStoreNames = db.objectStoreNames;
-
+        initialOnUpgradeStoreNames = db.objectStoreNames.toList();
         final objectStore = db.createObjectStore(testStoreName);
-        endingOnUpgradeStoreNames = db.objectStoreNames;
+        endingOnUpgradeStoreNames = db.objectStoreNames.toList();
         onUpgradeStoreName = objectStore.name;
       }
 
@@ -97,8 +96,6 @@ void defineTests(TestContext ctx) {
       expect(endingOnUpgradeStoreNames, [testStoreName]);
       expect(onUpgradeStoreName, testStoreName);
       expect(db!.objectStoreNames, [testStoreName]);
-
-      db!.close();
     });
 
     test('one_then_check', () async {
@@ -153,15 +150,19 @@ void defineTests(TestContext ctx) {
 
       // not working in memory since not persistent
       if (!ctx.isInMemory) {
+        late List<String> initialOnUpgradeStoreNames;
+        late List<String> endingOnUpgradeStoreNames;
         db = await idbFactory.open(dbName!, version: 2,
             onUpgradeNeeded: (VersionChangeEvent e) {
           final db = e.database;
 
-          expect(db.objectStoreNames, [testStoreName]);
-          db.deleteObjectStore(testStoreName);
-          expect(db.objectStoreNames, isEmpty);
-        });
+          initialOnUpgradeStoreNames = List.from(db.objectStoreNames);
 
+          db.deleteObjectStore(testStoreName);
+          endingOnUpgradeStoreNames = List.from(db.objectStoreNames);
+        });
+        expect(initialOnUpgradeStoreNames, [testStoreName]);
+        expect(endingOnUpgradeStoreNames, isEmpty);
         db!.close();
 
         // re-open
@@ -174,6 +175,7 @@ void defineTests(TestContext ctx) {
     test('delete_non_existing_store', () async {
       await setupDeleteDb();
 
+      late DatabaseError deleteObjectStoreError;
       db = await idbFactory.open(dbName!, version: 1,
           onUpgradeNeeded: (VersionChangeEvent e) {
         final db = e.database;
@@ -182,12 +184,15 @@ void defineTests(TestContext ctx) {
           db.deleteObjectStore(testStoreName2);
           fail('should fail');
         } on DatabaseError catch (e) {
-          // NotFoundError: An attempt was made to reference a Node in a context where it does not exist. The specified object store was not found.
-          // NotFoundError: One of the specified object stores 'test_store_2' was not found.
-          expect(isNotFoundError(e), isTrue);
+          deleteObjectStoreError = e;
         }
         db.createObjectStore(testStoreName);
       });
+      // print('$deleteObjectStoreError');
+      // native_web: NotFoundError: Failed to execute 'deleteObjectStore' on 'IDBDatabase': The specified object store was not found.
+      // NotFoundError: An attempt was made to reference a Node in a context where it does not exist. The specified object store was not found.
+      // NotFoundError: One of the specified object stores 'test_store_2' was not found.
+      expect(isNotFoundError(deleteObjectStoreError), isTrue);
       db!.close();
       db = await idbFactory.open(dbName!, version: 2,
           onUpgradeNeeded: (VersionChangeEvent e) {
@@ -196,50 +201,57 @@ void defineTests(TestContext ctx) {
           db.deleteObjectStore(testStoreName2);
           fail('should fail');
         } on DatabaseError catch (e) {
-          expect(isNotFoundError(e), isTrue);
+          deleteObjectStoreError = e;
         }
+        db.deleteObjectStore(testStoreName);
       });
+      expect(isNotFoundError(deleteObjectStoreError), isTrue);
 
       db!.close();
     });
 
     test('create_delete_index', () async {
       await setupDeleteDb();
+      late List<String> onUpgradeIndexNames;
       db = await idbFactory.open(dbName!, version: 1,
           onUpgradeNeeded: (VersionChangeEvent e) {
         final db = e.database;
         final store = db.createObjectStore(testStoreName);
         store.createIndex(testNameIndex, testNameField);
-
-        expect(store.indexNames, [testNameIndex]);
+        onUpgradeIndexNames = store.indexNames.toList();
       });
+      expect(onUpgradeIndexNames, [testNameIndex]);
       db!.close();
       // not working in memory since not persistent
+      late List<String> onUpgradeInitialIndexNames;
       if (!ctx.isInMemory) {
         db = await idbFactory.open(dbName!, version: 2,
             onUpgradeNeeded: (VersionChangeEvent e) {
           final store = e.transaction.objectStore(testStoreName);
+          onUpgradeInitialIndexNames = store.indexNames.toList();
 
-          expect(store.indexNames, [testNameIndex]);
           store.deleteIndex(testNameIndex);
 
-          expect(store.indexNames, isEmpty);
+          onUpgradeIndexNames = store.indexNames.toList();
         });
+        expect(onUpgradeInitialIndexNames, [testNameIndex]);
+        expect(onUpgradeIndexNames, isEmpty);
         db!.close();
         //await Future.delayed(Duration(milliseconds: 1));
         // check that the index is indeed gone
         db = await idbFactory.open(dbName!, version: 3,
             onUpgradeNeeded: (VersionChangeEvent e) {
           final store = e.transaction.objectStore(testStoreName);
-          expect(store.indexNames, isEmpty);
+          onUpgradeIndexNames = store.indexNames.toList();
         });
+        expect(onUpgradeIndexNames, isEmpty);
         db!.close();
       }
     });
 
     test('delete_non_existing_index', () async {
       await setupDeleteDb();
-
+      late DatabaseError deleteDatabaseError;
       db = await idbFactory.open(dbName!, version: 1,
           onUpgradeNeeded: (VersionChangeEvent e) {
         final db = e.database;
@@ -249,13 +261,17 @@ void defineTests(TestContext ctx) {
           store.deleteIndex(testNameIndex);
           fail('should fail');
         } on DatabaseError catch (e) {
-          // NotFoundError: An attempt was made to reference a Node in a context where it does not exist. The specified index was not found.
-          // NotFoundError: The specified index 'name_index' was not found.
-          expect(isNotFoundError(e), isTrue);
+          deleteDatabaseError = e;
         }
       });
+      print('$deleteDatabaseError');
+      // NotFoundError: An attempt was made to reference a Node in a context where it does not exist. The specified index was not found.
+      // NotFoundError: The specified index 'name_index' was not found.
+      // native_web: NotFoundError: Failed to execute 'deleteIndex' on 'IDBObjectStore': The specified index was not found.
+      expect(isNotFoundError(deleteDatabaseError), isTrue);
       db!.close();
 
+      late List<String> onUpgradeIndexNames;
       // not working in memory since not persistent
       if (!ctx.isInMemory) {
         db = await idbFactory.open(dbName!, version: 2,
@@ -265,20 +281,21 @@ void defineTests(TestContext ctx) {
             store.deleteIndex(testNameIndex);
             fail('should fail');
           } on DatabaseError catch (e) {
-            expect(isNotFoundError(e), isTrue);
+            deleteDatabaseError = e;
           }
           store.createIndex(testNameIndex2, testNameField2);
-
-          expect(store.indexNames, [testNameIndex2]);
+          onUpgradeIndexNames = store.indexNames.toList();
         });
+        expect(onUpgradeIndexNames, [testNameIndex2]);
+        expect(isNotFoundError(deleteDatabaseError), isTrue);
         db!.close();
         db = await idbFactory.open(dbName!, version: 3,
             onUpgradeNeeded: (VersionChangeEvent e) {
           final store = e.transaction.objectStore(testStoreName);
           store.deleteIndex(testNameIndex2);
-
-          expect(store.indexNames, isEmpty);
+          onUpgradeIndexNames = store.indexNames.toList();
         });
+        expect(onUpgradeIndexNames, isEmpty);
         db!.close();
         // check that the index is indeed gone
         db = await idbFactory.open(dbName!, version: 3,
@@ -290,8 +307,9 @@ void defineTests(TestContext ctx) {
           } on DatabaseError catch (e) {
             expect(isNotFoundError(e), isTrue);
           }
-          expect(store.indexNames, isEmpty);
+          onUpgradeIndexNames = store.indexNames.toList();
         });
+        expect(onUpgradeIndexNames, isEmpty);
         db!.close();
       }
     });

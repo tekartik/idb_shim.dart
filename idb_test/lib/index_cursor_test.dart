@@ -553,15 +553,17 @@ void defineTests(TestContext ctx) {
 
       test('multi', () async {
         await setupDeleteDb();
+        late List onUpgradeIndexKeyPath;
         void onUpgradeNeeded(VersionChangeEvent e) {
           var db = e.database;
           var store = db.createObjectStore(testStoreName, autoIncrement: true);
           var index = store.createIndex('test', ['year', 'name']);
-          expect(index.keyPath, ['year', 'name']);
+          onUpgradeIndexKeyPath = (index.keyPath as List).toList();
         }
 
         var db = await idbFactory.open(dbName,
             version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        expect(onUpgradeIndexKeyPath, ['year', 'name']);
 
         Transaction transaction;
         ObjectStore objectStore;

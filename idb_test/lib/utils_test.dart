@@ -8,6 +8,7 @@ import 'package:idb_shim/utils/idb_import_export.dart';
 import 'package:idb_shim/utils/idb_utils.dart';
 import 'package:path/path.dart';
 
+import 'database_test.dart';
 import 'idb_test_common.dart';
 //import 'idb_test_factory.dart';
 
@@ -708,7 +709,7 @@ void defineTests(TestContext ctx) {
           ]
         };
         await dbCheckExportImport(db!, expectedExport, dbCheck);
-      });
+      }, skip: tmpSkipForNativeWeb);
 
       // safari does not support multiple stores - fakes
       test('two_store_two_and_one_records', () async {

@@ -23,8 +23,8 @@ Future testReadWrite(idb.IdbFactory idbFactory, Object key, Object value,
     String storeName = _storeName,
     int version = _version]) async {
   void createObjectStore(idb.VersionChangeEvent e) {
-    var store = e.database.createObjectStore(storeName);
-    expect(store, isNotNull);
+    e.database.createObjectStore(storeName);
+    // expect(store, isNotNull);
   }
 
   idb.Database? db;

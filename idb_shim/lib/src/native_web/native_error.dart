@@ -46,5 +46,8 @@ class DatabaseErrorNative extends DatabaseError {
         super(exception.message);
 
   @override
+  StackTrace? get stackTrace => null;
+
+  @override
   String toString() => '$name: $message';
 }

@@ -41,9 +41,13 @@ class ObjectStoreNative extends ObjectStore {
   @override
   Future<Object> add(Object value, [Object? key]) {
     return catchAsyncNativeError(() {
-      var request = idbObjectStore.add(value.jsify(), key?.jsify());
+      idb.IDBRequest request;
+      if (key == null) {
+        request = idbObjectStore.add(value.jsify());
+      } else {
+        request = idbObjectStore.add(value.jsify(), key.jsify());
+      }
       return request.future.then((value) => value!.dartify()!);
-      //.then((key) => key as Object);
     });
   }
 
@@ -65,9 +69,13 @@ class ObjectStoreNative extends ObjectStore {
   @override
   Future<Object> put(Object value, [Object? key]) {
     return catchAsyncNativeError(() {
-      return idbObjectStore
-          .put(value.jsify(), key?.jsify())
-          .dartFuture<Object>();
+      if (key == null) {
+        return idbObjectStore.put(value.jsify()).dartFuture<Object>();
+      } else {
+        return idbObjectStore
+            .put(value.jsify(), key.jsify())
+            .dartFuture<Object>();
+      }
     });
   }
 
@@ -110,7 +118,7 @@ class ObjectStoreNative extends ObjectStore {
     } else {
       request = idbObjectStore.openKeyCursor(query, direction);
     }
-    return cursorWithValueStreamFromResult(request, autoAdvance);
+    return cursorStreamFromResult(request, autoAdvance);
   }
 
   @override

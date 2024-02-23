@@ -55,7 +55,7 @@ class IndexNative extends Index {
     } else {
       request = idbIndex.openKeyCursor(query, direction);
     }
-    return cursorWithValueStreamFromResult(request, autoAdvance);
+    return cursorStreamFromResult(request, autoAdvance);
   }
 
   /// Same implementation than for the Store

@@ -22,5 +22,5 @@ void main() {
       expect(db.version, version);
       db.close();
     });
-  }, skip: true);
+  });
 }

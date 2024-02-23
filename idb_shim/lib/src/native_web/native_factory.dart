@@ -55,7 +55,7 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
   Future<Database> open(String dbName,
       {int? version,
       OnUpgradeNeededFunction? onUpgradeNeeded,
-      OnBlockedFunction? onBlocked}) {
+      OnBlockedFunction? onBlocked}) async {
     if ((version == null) != (onUpgradeNeeded == null)) {
       throw ArgumentError(
           'version and onUpgradeNeeded must be specified together');
@@ -72,14 +72,21 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
         onBlocked(EventNative(event));
       }.toJS;
     }
+    FutureOr? onUpdateNeededFutureOr;
     if (onUpgradeNeeded != null) {
       openRequest.onupgradeneeded = (idb.IDBVersionChangeEvent event) {
-        onUpgradeNeeded(VersionChangeEventNative(this, event));
+        onUpdateNeededFutureOr =
+            onUpgradeNeeded(VersionChangeEventNative(this, event));
       }.toJS;
     }
     openRequest.handleOnSuccessAndError(completer);
-    return completer.future.then(
-        (value) => DatabaseNative(this, openRequest.result as idb.IDBDatabase));
+    await completer.future;
+
+    /// Wait on onUpgradeNeeded to complete.
+    if (onUpdateNeededFutureOr is Future) {
+      //await onUpdateNeededFutureOr;
+    }
+    return DatabaseNative(this, openRequest.result as idb.IDBDatabase);
   }
 
   @override

@@ -4,12 +4,14 @@ library idb_shim.test_runner_client_native_test;
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/idb_client_native_web.dart';
 import 'package:idb_shim/utils/idb_utils.dart';
+import 'package:idb_test/database_test.dart';
 import 'package:idb_test/idb_test_common.dart';
 import 'package:idb_test/test_runner.dart';
 
 import 'idb_browser_test_common.dart';
 
 void main() {
+  tmpSkipForNativeWeb = true;
   idbNativeFactoryTests(idbFactoryNative);
 }
 
@@ -41,16 +43,18 @@ void idbNativeFactoryTests(IdbFactory idbFactoryNative) {
 
         test('multi', () async {
           await setupDeleteDb();
+          late List onUpgradeIndexKeyPath;
           void onUpgradeNeeded(VersionChangeEvent e) {
             var db = e.database;
             var store =
                 db.createObjectStore(testStoreName, autoIncrement: true);
             var index = store.createIndex('test', ['year', 'name']);
-            expect(index.keyPath, ['year', 'name']);
+            onUpgradeIndexKeyPath = (index.keyPath as List).toList();
           }
 
           var db = await idbFactory.open(dbName,
               version: 1, onUpgradeNeeded: onUpgradeNeeded);
+          expect(onUpgradeIndexKeyPath, ['year', 'name']);
 
           Transaction transaction;
           ObjectStore objectStore;

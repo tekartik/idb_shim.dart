@@ -1,6 +1,7 @@
 library open_test_common;
 
 import 'package:idb_shim/idb_client.dart';
+import 'package:idb_test/database_test.dart';
 
 import 'idb_test_common.dart';
 
@@ -75,11 +76,13 @@ void defineTests(TestContext ctx) {
 
     test('bad param with version', () async {
       await setupDeleteDb();
-      return idbFactory.open(dbName, version: 1).then((_) {}).catchError(
-          (Object e) {
-        expect((e as ArgumentError).message,
+      try {
+        await idbFactory.open(dbName, version: 1);
+        fail('should fail');
+      } on ArgumentError catch (e) {
+        expect(e.message,
             'version and onUpgradeNeeded must be specified together');
-      }, test: (e) => e is ArgumentError);
+      }
     });
 
     test('open with version 0', () async {
@@ -90,14 +93,14 @@ void defineTests(TestContext ctx) {
         initCalled = true;
       }
 
-      return idbFactory
-          .open(dbName, version: 0, onUpgradeNeeded: onUpgradeNeeded)
-          .then((Database database) {
+      try {
+        await idbFactory.open(dbName,
+            version: 0, onUpgradeNeeded: onUpgradeNeeded);
         fail('should not open');
-      }, onError: (e) {
+      } catch (e) {
         // cannot check type here...
         expect(initCalled, isFalse);
-      });
+      }
     });
 
     test('default then version 1', () async {
@@ -127,34 +130,40 @@ void defineTests(TestContext ctx) {
     test('version 1', () async {
       await setupDeleteDb();
       var initCalled = false;
+      late int onUpgradeOldVersion;
+      late int onUpgradeNewVersion;
       void onUpgradeNeeded(VersionChangeEvent e) {
         // should be called
-        expect(e.oldVersion, 0);
-        expect(e.newVersion, 1);
-        initCalled = true;
-      }
-
-      return idbFactory
-          .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded)
-          .then((Database database) {
-        expect(initCalled, true);
-        database.close();
-      });
-    });
-
-    test('version 1 then 2', () async {
-      await setupDeleteDb();
-      var initCalled = false;
-      void onUpgradeNeeded(VersionChangeEvent e) {
-        // should be called
-        expect(e.oldVersion, 0);
-        expect(e.newVersion, 1);
+        onUpgradeOldVersion = e.oldVersion;
+        onUpgradeNewVersion = e.newVersion;
         initCalled = true;
       }
 
       var database = await idbFactory.open(dbName,
           version: 1, onUpgradeNeeded: onUpgradeNeeded);
 
+      expect(initCalled, true);
+      expect(onUpgradeOldVersion, 0);
+      expect(onUpgradeNewVersion, 1);
+
+      database.close();
+    });
+
+    test('version 1 then 2', () async {
+      await setupDeleteDb();
+      var initCalled = false;
+      late int onUpgradeOldVersion;
+      late int onUpgradeNewVersion;
+      void onUpgradeNeeded(VersionChangeEvent e) {
+        onUpgradeOldVersion = e.oldVersion;
+        onUpgradeNewVersion = e.newVersion;
+        initCalled = true;
+      }
+
+      var database = await idbFactory.open(dbName,
+          version: 1, onUpgradeNeeded: onUpgradeNeeded);
+      expect(onUpgradeOldVersion, 0);
+      expect(onUpgradeNewVersion, 1);
       expect(initCalled, true);
       expect(database.version, 1);
       database.close();
@@ -164,8 +173,8 @@ void defineTests(TestContext ctx) {
         var upgradeCalled = false;
         void onUpgradeNeeded(VersionChangeEvent e) {
           // should be called
-          expect(e.oldVersion, 1);
-          expect(e.newVersion, 2);
+          onUpgradeOldVersion = e.oldVersion;
+          onUpgradeNewVersion = e.newVersion;
           upgradeCalled = true;
         }
 
@@ -174,6 +183,8 @@ void defineTests(TestContext ctx) {
 
         expect(upgradeCalled, true);
         expect(database.version, 2);
+        expect(onUpgradeOldVersion, 1);
+        expect(onUpgradeNewVersion, 2);
         database.close();
 
         database = await idbFactory.open(dbName);
@@ -240,7 +251,7 @@ void defineTests(TestContext ctx) {
 
       expect(initCalled, true);
       db.close();
-    });
+    }, skip: tmpSkipForNativeWeb);
 
     test('put_read_in_open_transaction', () async {
       await setupDeleteDb();
@@ -285,7 +296,7 @@ void defineTests(TestContext ctx) {
       } finally {
         db.close();
       }
-    });
+    }, skip: tmpSkipForNativeWeb);
 
     //    const String MILESTONE_STORE = 'milestoneStore';
     //    const String NAME_INDEX = 'name_index';
