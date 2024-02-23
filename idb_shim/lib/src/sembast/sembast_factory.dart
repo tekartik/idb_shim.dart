@@ -34,7 +34,7 @@ class IdbFactorySembastImpl extends IdbFactoryBase
 
   @override
   String getDbPath(String dbName) =>
-      _path == null ? dbName : join(_path!, dbName);
+      _path == null ? dbName : join(_path, dbName);
 
   @override
   sdb.DatabaseFactory get sdbFactory => _databaseFactory;

@@ -77,16 +77,25 @@ void defineTests(TestContext ctx) {
 
     test('one', () async {
       await setupDeleteDb();
+      late Iterable<String> initialOnUpgradeStoreNames;
+      late Iterable<String> endingOnUpgradeStoreNames;
+      late String onUpgradeStoreName;
       void onUpgradeNeeded(VersionChangeEvent e) {
+        print('3');
+
         final db = e.database;
-        expect(db.objectStoreNames, <String>[]);
+        initialOnUpgradeStoreNames = db.objectStoreNames;
+
         final objectStore = db.createObjectStore(testStoreName);
-        expect(db.objectStoreNames, [testStoreName]);
-        expect(objectStore.name, testStoreName);
+        endingOnUpgradeStoreNames = db.objectStoreNames;
+        onUpgradeStoreName = objectStore.name;
       }
 
       db = await idbFactory.open(dbName!,
           version: 1, onUpgradeNeeded: onUpgradeNeeded);
+      expect(initialOnUpgradeStoreNames, isEmpty);
+      expect(endingOnUpgradeStoreNames, [testStoreName]);
+      expect(onUpgradeStoreName, testStoreName);
       expect(db!.objectStoreNames, [testStoreName]);
 
       db!.close();
@@ -96,17 +105,13 @@ void defineTests(TestContext ctx) {
       await setupDeleteDb();
       void onUpgradeNeeded(VersionChangeEvent e) {
         final db = e.database;
-        expect(db.objectStoreNames, isEmpty);
-        final objectStore = db.createObjectStore(testStoreName);
-        expect(db.objectStoreNames, [testStoreName]);
-        expect(objectStore.name, testStoreName);
+        db.createObjectStore(testStoreName);
       }
 
       db = await idbFactory.open(dbName!,
           version: 1, onUpgradeNeeded: onUpgradeNeeded);
       var storeNames = List<String>.from(db!.objectStoreNames);
-      expect(storeNames.length, 1);
-      expect(storeNames[0], testStoreName);
+      expect(storeNames, [testStoreName]);
 
       db!.close();
 
