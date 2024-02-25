@@ -6,6 +6,7 @@ import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/utils/env_utils.dart';
 
 import 'indexed_db_web.dart' as idb;
+import 'js_utils.dart';
 
 idb.IDBKeyRange? toNativeKeyRange(KeyRange? common) {
   //print(common);
@@ -14,16 +15,16 @@ idb.IDBKeyRange? toNativeKeyRange(KeyRange? common) {
   }
   if (common.lower != null) {
     if (common.upper != null) {
-      return idb.IDBKeyRange.bound(common.lower.jsify(), common.upper.jsify(),
+      return idb.IDBKeyRange.bound(common.lower?.jsify(), common.upper?.jsify(),
           common.lowerOpen == true, common.upperOpen == true);
     } else {
       return idb.IDBKeyRange.lowerBound(
-          common.lower.jsify(), common.lowerOpen == true);
+          common.lower?.jsify(), common.lowerOpen == true);
     }
   } else {
     // devPrint('upper ${common.upper} ${common.upperOpen}');
     return idb.IDBKeyRange.upperBound(
-        common.upper.jsify(), common.upperOpen == true);
+        common.upper?.jsify(), common.upperOpen == true);
   }
 }
 
@@ -32,7 +33,7 @@ JSAny? toNativeQuery(Object? query) {
   if (query is KeyRange) {
     return toNativeKeyRange(query);
   }
-  return query?.jsify();
+  return query?.jsifyValue();
 }
 
 JSAny? keyOrKeyRangeToNativeQuery({Object? key, KeyRange? range}) {

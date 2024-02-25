@@ -6,6 +6,7 @@ import 'dart:js_interop';
 import 'package:idb_shim/idb.dart';
 
 import 'indexed_db_web.dart' as idb;
+import 'js_utils.dart';
 import 'native_error.dart';
 import 'native_helpers.dart';
 import 'native_index.dart';
@@ -26,7 +27,7 @@ class ObjectStoreNative extends ObjectStore {
     }
     return IndexNative(idbObjectStore.createIndex(
         name,
-        keyPath.jsify()!,
+        keyPath.jsifyValue(),
         idb.IDBIndexParameters(
             unique: unique ?? false, multiEntry: multiEntry ?? false)));
   }
@@ -43,11 +44,11 @@ class ObjectStoreNative extends ObjectStore {
     return catchAsyncNativeError(() {
       idb.IDBRequest request;
       if (key == null) {
-        request = idbObjectStore.add(value.jsify());
+        request = idbObjectStore.add(value.jsifyValue());
       } else {
-        request = idbObjectStore.add(value.jsify(), key.jsify());
+        request = idbObjectStore.add(value.jsifyValue(), key.jsify());
       }
-      return request.future.then((value) => value!.dartify()!);
+      return request.future.then((value) => value!.dartifyValue());
     });
   }
 
@@ -70,10 +71,10 @@ class ObjectStoreNative extends ObjectStore {
   Future<Object> put(Object value, [Object? key]) {
     return catchAsyncNativeError(() {
       if (key == null) {
-        return idbObjectStore.put(value.jsify()).dartFuture<Object>();
+        return idbObjectStore.put(value.jsifyValue()).dartFuture<Object>();
       } else {
         return idbObjectStore
-            .put(value.jsify(), key.jsify())
+            .put(value.jsifyValue(), key.jsify())
             .dartFuture<Object>();
       }
     });
@@ -82,7 +83,7 @@ class ObjectStoreNative extends ObjectStore {
   @override
   Future delete(Object? key) {
     return catchAsyncNativeError(() {
-      return idbObjectStore.delete(key?.jsify()).future;
+      return idbObjectStore.delete(key?.jsifyValue()).future;
     });
   }
 
@@ -138,8 +139,7 @@ class ObjectStoreNative extends ObjectStore {
   @override
   Future<List<Object>> getAll([Object? query, int? count]) {
     return catchAsyncNativeError(() {
-      final nativeQuery = toNativeQuery(query);
-      var results = storeGetAll(idbObjectStore, nativeQuery, count);
+      var results = storeGetAll(idbObjectStore, query, count);
       return results;
     });
   }
@@ -147,8 +147,7 @@ class ObjectStoreNative extends ObjectStore {
   @override
   Future<List<Object>> getAllKeys([dynamic query, int? count]) {
     return catchAsyncNativeError(() {
-      final nativeQuery = toNativeQuery(query);
-      var results = storeGetAllKeys(idbObjectStore, nativeQuery, count);
+      var results = storeGetAllKeys(idbObjectStore, query, count);
       return results;
     });
   }

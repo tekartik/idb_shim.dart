@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:js_interop';
 
 import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/src/native_web/js_utils.dart';
 
 import 'indexed_db_web.dart' as idb;
 
@@ -13,10 +14,10 @@ class CursorNative extends Cursor {
   CursorNative(this._cursor);
 
   @override
-  Object get key => _cursor.key!.dartify()!;
+  Object get key => _cursor.key!.dartifyValue();
 
   @override
-  Object get primaryKey => _cursor.primaryKey!.dartify()!;
+  Object get primaryKey => _cursor.primaryKey!.dartifyValue();
 
   @override
   String get direction => _cursor.direction;
@@ -28,12 +29,12 @@ class CursorNative extends Cursor {
 
   @override
   void next([Object? key]) {
-    _cursor.continue_(key?.jsify());
+    _cursor.continue_(key?.jsifyValue());
   }
 
   @override
   Future update(Object? value) {
-    return _cursor.update(value?.jsify()).future;
+    return _cursor.update(value?.jsifyValue()).future;
   }
 
   @override
@@ -54,13 +55,13 @@ class CursorWithValueNative extends CursorWithValue {
   //    _key = _cwv.key;
   //  }
   @override
-  Object get value => _cwv.value!.dartify()!;
+  Object get value => _cwv.value!.dartifyValue();
 
   @override
-  Object get key => _cwv.key!.dartify()!;
+  Object get key => _cwv.key!.dartifyValue();
 
   @override
-  Object get primaryKey => _cwv.primaryKey!.dartify()!;
+  Object get primaryKey => _cwv.primaryKey!.dartifyValue();
 
   @override
   String get direction => _cwv.direction;
@@ -81,7 +82,7 @@ class CursorWithValueNative extends CursorWithValue {
 
   @override
   Future update(Object value) {
-    return _cwv.update(value.jsify()).future;
+    return _cwv.update(value.jsifyValue()).future;
   }
 
   @override

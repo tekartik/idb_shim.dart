@@ -1,11 +1,11 @@
 // ignore_for_file: public_member_api_docs
 
 import 'dart:async';
-import 'dart:js_interop';
 
 import 'package:idb_shim/idb.dart';
 
 import 'indexed_db_web.dart' as idb;
+import 'js_utils.dart';
 import 'native_error.dart';
 import 'native_helpers.dart';
 import 'native_key_range.dart';
@@ -18,14 +18,14 @@ class IndexNative extends Index {
   @override
   Future<Object?> get(Object? key) {
     return catchAsyncNativeError(() {
-      return idbIndex.get(key?.jsify()).dartFutureNullable<Object?>();
+      return idbIndex.get(key?.jsifyValue()).dartFutureNullable<Object?>();
     });
   }
 
   @override
   Future<Object?> getKey(Object? key) {
     return catchAsyncNativeError(() {
-      return idbIndex.getKey(key?.jsify()).dartFutureNullable<Object?>();
+      return idbIndex.getKey(key?.jsifyValue()).dartFutureNullable<Object?>();
     });
   }
 
@@ -77,8 +77,7 @@ class IndexNative extends Index {
   @override
   Future<List<Object>> getAll([Object? query, int? count]) {
     return catchAsyncNativeError(() {
-      final nativeQuery = toNativeQuery(query);
-      var results = indexGetAll(idbIndex, nativeQuery, count);
+      var results = indexGetAll(idbIndex, query, count);
       return results;
     });
   }
@@ -86,8 +85,7 @@ class IndexNative extends Index {
   @override
   Future<List<Object>> getAllKeys([Object? query, int? count]) {
     return catchAsyncNativeError(() {
-      final nativeQuery = toNativeQuery(query);
-      var results = indexGetAllKeys(idbIndex, nativeQuery, count);
+      var results = indexGetAllKeys(idbIndex, query, count);
       return results;
     });
   }

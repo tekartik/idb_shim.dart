@@ -8,6 +8,7 @@ import 'package:idb_shim/src/common/common_database.dart';
 import 'package:idb_shim/src/utils/browser_utils.dart';
 
 import 'indexed_db_web.dart' as idb;
+import 'js_utils.dart';
 import 'native_error.dart';
 import 'native_object_store.dart';
 import 'native_transaction.dart';
@@ -55,7 +56,7 @@ class DatabaseNative extends IdbDatabaseBase {
       return ObjectStoreNative(idbDatabase.createObjectStore(
           name,
           idb.IDBObjectStoreParameters(
-              keyPath: keyPath.jsify(),
+              keyPath: keyPath?.jsifyValue(),
               autoIncrement: autoIncrement ?? false)));
     })!;
   }
@@ -71,7 +72,7 @@ class DatabaseNative extends IdbDatabaseBase {
     try {
       return catchNativeError(() {
         final idbTransaction =
-            idbDatabase.transaction(storeNameOrStoreNames.jsify()!, mode);
+            idbDatabase.transaction(storeNameOrStoreNames.jsifyValue(), mode);
         return TransactionNative(this, idbTransaction);
       })!;
     } catch (e) {

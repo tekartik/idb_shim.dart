@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:js_interop';
 
+import 'package:idb_shim/src/native_web/js_utils.dart';
 import 'package:idb_shim/src/native_web/native_error.dart';
 import 'package:web/web.dart';
 
@@ -98,15 +99,15 @@ extension IDBRequestExt on IDBRequest {
 
   /// Dart future nullable.
   Future<T> dartFutureNullable<T extends Object?>() =>
-      future.then((value) => value?.dartify() as T);
+      future.then((value) => value?.dartifyValue() as T);
 
   /// Dart future.
   Future<T> dartFuture<T extends Object>() =>
-      future.then((value) => value!.dartify()! as T);
+      future.then((value) => value!.dartifyValue() as T);
 
   /// Dart future list.
   Future<List<T>> dartFutureList<T extends Object?>() =>
-      future.then((value) => (value!.dartify()! as List).cast<T>());
+      future.then((value) => (value!.dartifyValue() as List).cast<T>());
 }
 
 /// Compat
