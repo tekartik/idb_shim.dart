@@ -154,13 +154,13 @@ void defineTests(TestContext ctx) {
         late List<String> endingOnUpgradeStoreNames;
         db = await idbFactory.open(dbName!, version: 2,
             onUpgradeNeeded: (VersionChangeEvent e) {
-              final db = e.database;
+          final db = e.database;
 
-              initialOnUpgradeStoreNames = List.from(db.objectStoreNames);
+          initialOnUpgradeStoreNames = List.from(db.objectStoreNames);
 
-              db.deleteObjectStore(testStoreName);
-              endingOnUpgradeStoreNames = List.from(db.objectStoreNames);
-            });
+          db.deleteObjectStore(testStoreName);
+          endingOnUpgradeStoreNames = List.from(db.objectStoreNames);
+        });
         expect(initialOnUpgradeStoreNames, [testStoreName]);
         expect(endingOnUpgradeStoreNames, isEmpty);
         db!.close();
@@ -178,16 +178,16 @@ void defineTests(TestContext ctx) {
       late DatabaseError deleteObjectStoreError;
       db = await idbFactory.open(dbName!, version: 1,
           onUpgradeNeeded: (VersionChangeEvent e) {
-            final db = e.database;
+        final db = e.database;
 
-            try {
-              db.deleteObjectStore(testStoreName2);
-              fail('should fail');
-            } on DatabaseError catch (e) {
-              deleteObjectStoreError = e;
-            }
-            db.createObjectStore(testStoreName);
-          });
+        try {
+          db.deleteObjectStore(testStoreName2);
+          fail('should fail');
+        } on DatabaseError catch (e) {
+          deleteObjectStoreError = e;
+        }
+        db.createObjectStore(testStoreName);
+      });
       // print('$deleteObjectStoreError');
       // native_web: NotFoundError: Failed to execute 'deleteObjectStore' on 'IDBDatabase': The specified object store was not found.
       // NotFoundError: An attempt was made to reference a Node in a context where it does not exist. The specified object store was not found.
@@ -196,15 +196,15 @@ void defineTests(TestContext ctx) {
       db!.close();
       db = await idbFactory.open(dbName!, version: 2,
           onUpgradeNeeded: (VersionChangeEvent e) {
-            final db = e.database;
-            try {
-              db.deleteObjectStore(testStoreName2);
-              fail('should fail');
-            } on DatabaseError catch (e) {
-              deleteObjectStoreError = e;
-            }
-            db.deleteObjectStore(testStoreName);
-          });
+        final db = e.database;
+        try {
+          db.deleteObjectStore(testStoreName2);
+          fail('should fail');
+        } on DatabaseError catch (e) {
+          deleteObjectStoreError = e;
+        }
+        db.deleteObjectStore(testStoreName);
+      });
       expect(isNotFoundError(deleteObjectStoreError), isTrue);
 
       db!.close();
@@ -215,11 +215,11 @@ void defineTests(TestContext ctx) {
       late List<String> onUpgradeIndexNames;
       db = await idbFactory.open(dbName!, version: 1,
           onUpgradeNeeded: (VersionChangeEvent e) {
-            final db = e.database;
-            final store = db.createObjectStore(testStoreName);
-            store.createIndex(testNameIndex, testNameField);
-            onUpgradeIndexNames = store.indexNames.toList();
-          });
+        final db = e.database;
+        final store = db.createObjectStore(testStoreName);
+        store.createIndex(testNameIndex, testNameField);
+        onUpgradeIndexNames = store.indexNames.toList();
+      });
       expect(onUpgradeIndexNames, [testNameIndex]);
       db!.close();
       // not working in memory since not persistent
@@ -227,13 +227,13 @@ void defineTests(TestContext ctx) {
       if (!ctx.isInMemory) {
         db = await idbFactory.open(dbName!, version: 2,
             onUpgradeNeeded: (VersionChangeEvent e) {
-              final store = e.transaction.objectStore(testStoreName);
-              onUpgradeInitialIndexNames = store.indexNames.toList();
+          final store = e.transaction.objectStore(testStoreName);
+          onUpgradeInitialIndexNames = store.indexNames.toList();
 
-              store.deleteIndex(testNameIndex);
+          store.deleteIndex(testNameIndex);
 
-              onUpgradeIndexNames = store.indexNames.toList();
-            });
+          onUpgradeIndexNames = store.indexNames.toList();
+        });
         expect(onUpgradeInitialIndexNames, [testNameIndex]);
         expect(onUpgradeIndexNames, isEmpty);
         db!.close();
@@ -241,9 +241,9 @@ void defineTests(TestContext ctx) {
         // check that the index is indeed gone
         db = await idbFactory.open(dbName!, version: 3,
             onUpgradeNeeded: (VersionChangeEvent e) {
-              final store = e.transaction.objectStore(testStoreName);
-              onUpgradeIndexNames = store.indexNames.toList();
-            });
+          final store = e.transaction.objectStore(testStoreName);
+          onUpgradeIndexNames = store.indexNames.toList();
+        });
         expect(onUpgradeIndexNames, isEmpty);
         db!.close();
       }
@@ -254,16 +254,16 @@ void defineTests(TestContext ctx) {
       late DatabaseError deleteDatabaseError;
       db = await idbFactory.open(dbName!, version: 1,
           onUpgradeNeeded: (VersionChangeEvent e) {
-            final db = e.database;
-            final store = db.createObjectStore(testStoreName);
+        final db = e.database;
+        final store = db.createObjectStore(testStoreName);
 
-            try {
-              store.deleteIndex(testNameIndex);
-              fail('should fail');
-            } on DatabaseError catch (e) {
-              deleteDatabaseError = e;
-            }
-          });
+        try {
+          store.deleteIndex(testNameIndex);
+          fail('should fail');
+        } on DatabaseError catch (e) {
+          deleteDatabaseError = e;
+        }
+      });
       print('$deleteDatabaseError');
       // NotFoundError: An attempt was made to reference a Node in a context where it does not exist. The specified index was not found.
       // NotFoundError: The specified index 'name_index' was not found.
@@ -276,39 +276,39 @@ void defineTests(TestContext ctx) {
       if (!ctx.isInMemory) {
         db = await idbFactory.open(dbName!, version: 2,
             onUpgradeNeeded: (VersionChangeEvent e) {
-              final store = e.transaction.objectStore(testStoreName);
-              try {
-                store.deleteIndex(testNameIndex);
-                fail('should fail');
-              } on DatabaseError catch (e) {
-                deleteDatabaseError = e;
-              }
-              store.createIndex(testNameIndex2, testNameField2);
-              onUpgradeIndexNames = store.indexNames.toList();
-            });
+          final store = e.transaction.objectStore(testStoreName);
+          try {
+            store.deleteIndex(testNameIndex);
+            fail('should fail');
+          } on DatabaseError catch (e) {
+            deleteDatabaseError = e;
+          }
+          store.createIndex(testNameIndex2, testNameField2);
+          onUpgradeIndexNames = store.indexNames.toList();
+        });
         expect(onUpgradeIndexNames, [testNameIndex2]);
         expect(isNotFoundError(deleteDatabaseError), isTrue);
         db!.close();
         db = await idbFactory.open(dbName!, version: 3,
             onUpgradeNeeded: (VersionChangeEvent e) {
-              final store = e.transaction.objectStore(testStoreName);
-              store.deleteIndex(testNameIndex2);
-              onUpgradeIndexNames = store.indexNames.toList();
-            });
+          final store = e.transaction.objectStore(testStoreName);
+          store.deleteIndex(testNameIndex2);
+          onUpgradeIndexNames = store.indexNames.toList();
+        });
         expect(onUpgradeIndexNames, isEmpty);
         db!.close();
         // check that the index is indeed gone
         db = await idbFactory.open(dbName!, version: 3,
             onUpgradeNeeded: (VersionChangeEvent e) {
-              final store = e.transaction.objectStore(testStoreName);
-              try {
-                store.deleteIndex(testNameIndex2);
-                fail('should fail');
-              } on DatabaseError catch (e) {
-                expect(isNotFoundError(e), isTrue);
-              }
-              onUpgradeIndexNames = store.indexNames.toList();
-            });
+          final store = e.transaction.objectStore(testStoreName);
+          try {
+            store.deleteIndex(testNameIndex2);
+            fail('should fail');
+          } on DatabaseError catch (e) {
+            expect(isNotFoundError(e), isTrue);
+          }
+          onUpgradeIndexNames = store.indexNames.toList();
+        });
         expect(onUpgradeIndexNames, isEmpty);
         db!.close();
       }
@@ -354,7 +354,7 @@ void defineTests(TestContext ctx) {
       // at this point native db should be close already
       if (!db1Closed) {
         final transaction =
-        firstDb!.transaction(testStoreName, idbModeReadOnly);
+            firstDb!.transaction(testStoreName, idbModeReadOnly);
         final store = transaction.objectStore(testStoreName);
         return store.clear().then((_) {
           fail('should not succeed');
