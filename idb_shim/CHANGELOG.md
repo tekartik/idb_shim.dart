@@ -1,3 +1,7 @@
+## 2.4.0-0
+
+* Add new implementation based on new js_interop and web package.
+
 ## 2.3.2
 
 * Add new cursor stream extension in `utils/idb_cursor_utils.dart` to convert a stream to a list 
