@@ -1,19 +1,8 @@
 // ignore_for_file: public_member_api_docs
 
-library idb_shim.src.utils.browser_utils;
+library;
 
 import 'dart:html';
-
-//
-// Dart vs Javascript detection
-//
-bool get _isDartVm => !_isJavascriptVm;
-
-bool get _isJavascriptVm => identical(1.0, 1);
-
-bool? __isDartVm;
-
-bool get isDartVm => __isDartVm ??= _isDartVm;
 
 bool isUserAgentIe(String userAgent) {
   // Yoga IE 11: Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; Touch; .NET4.0C; .NET4.0E; .NET CLR 2.0.50727; .NET CLR 3.0.30729; .NET CLR 3.5.30729; Tablet PC 2.0; MALNJS; rv:11.0) like Gecko

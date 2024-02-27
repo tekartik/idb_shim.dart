@@ -1,6 +1,7 @@
-## 2.4.0-0
+## 2.4.0-1
 
 * Add new implementation based on new js_interop and web package.
+* Allow wasm compilation for web support (include idb_native_web_factory.dart explicitly)
 
 ## 2.3.2
 

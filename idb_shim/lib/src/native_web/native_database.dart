@@ -5,7 +5,7 @@ import 'dart:js_interop';
 
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/common/common_database.dart';
-import 'package:idb_shim/src/utils/browser_utils.dart';
+import 'package:idb_shim/src/utils/env_utils.dart';
 
 import 'indexed_db_web.dart' as idb;
 import 'js_utils.dart';
@@ -92,7 +92,7 @@ class DatabaseNative extends IdbDatabaseBase {
         }
 
         if (allFound) {
-          if (!isDartVm) {
+          if (idbIsRunningAsJavascript) {
             // In javascript this is likely a safari issue...
             return FakeMultiStoreTransactionNative(this, mode);
           }
