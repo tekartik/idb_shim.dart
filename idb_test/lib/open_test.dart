@@ -1,7 +1,6 @@
 library open_test_common;
 
 import 'package:idb_shim/idb_client.dart';
-import 'package:idb_test/database_test.dart';
 
 import 'idb_test_common.dart';
 
@@ -16,9 +15,10 @@ void defineTests(TestContext ctx) {
   // new
   late String dbName;
   // prepare for test
-  Future<void> setupDeleteDb() async {
+  Future<String> setupDeleteDb() async {
     dbName = ctx.dbName;
     await idbFactory.deleteDatabase(dbName);
+    return dbName;
   }
 
   group('delete', () {
@@ -239,30 +239,36 @@ void defineTests(TestContext ctx) {
         expect(e, isNot(const TypeMatcher<TestFailure>()));
       }
       expect(initCalled, true);
-
       initCalled = false;
 
+      late int initialOldVersion, initialNewVersion;
       var db =
           await idbFactory.open(dbName, version: 3, onUpgradeNeeded: (event) {
-        expect(event.oldVersion, 0);
-        expect(event.newVersion, 3);
+        initialOldVersion = event.oldVersion;
+        initialNewVersion = event.newVersion;
+
         initCalled = true;
       });
-
+      expect(initialOldVersion, 0);
+      expect(initialNewVersion, 3);
       expect(initCalled, true);
       db.close();
-    }, skip: tmpSkipForNativeWeb);
+    });
 
     test('put_read_in_open_transaction', () async {
       await setupDeleteDb();
+      late Object putKey;
+      late Object? putValue;
       var db = await idbFactory.open(dbName, version: 1,
           onUpgradeNeeded: (event) async {
         var store = event.database.createObjectStore('note');
         await store.put('my_value', 'my_key').then((key) async {
-          expect(key, 'my_key');
-          expect(await store.getObject('my_key'), 'my_value');
+          putKey = key;
+          putValue = await store.getObject('my_key');
         });
       });
+      expect(putKey, 'my_key');
+      expect(putValue, 'my_value');
       try {
         var txn = db.transaction('note', idbModeReadOnly);
         var store = txn.objectStore('note');
@@ -274,11 +280,12 @@ void defineTests(TestContext ctx) {
       db = await idbFactory.open(dbName, version: 2,
           onUpgradeNeeded: (event) async {
         var store = event.transaction.objectStore('note');
-        expect(await store.getObject('my_key'), 'my_value');
+        putValue = await store.getObject(putKey);
         await store.put('value2', 'key2');
         store = event.database.createObjectStore('note2');
         await store.put('value3', 'key3');
       });
+      expect(putValue, 'my_value');
       try {
         var txn = db.transaction(['note'], idbModeReadOnly);
         var store = txn.objectStore('note');
@@ -296,7 +303,7 @@ void defineTests(TestContext ctx) {
       } finally {
         db.close();
       }
-    }, skip: tmpSkipForNativeWeb);
+    });
 
     //    const String MILESTONE_STORE = 'milestoneStore';
     //    const String NAME_INDEX = 'name_index';

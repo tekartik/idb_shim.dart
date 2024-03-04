@@ -75,6 +75,16 @@ extension IDBRequestExt on IDBRequest {
     }.toJS;
   }
 
+  /*
+  /// Handle on abort
+  void handleOnAbort(Completer<JSAny?> completer) {
+    onabort = (Event event) {
+      if (!completer.isCompleted) {
+        completer.completeError(DatabaseErrorNative.domException(error!));
+      }
+    }.toJS;
+  }*/
+
   /// On success helper.
   void handleOnSuccess(Completer<JSAny?> completer) {
     onsuccess = (Event event) {

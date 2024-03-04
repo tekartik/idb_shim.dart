@@ -5,8 +5,6 @@ import 'package:idb_shim/idb_client.dart';
 import 'idb_test_common.dart';
 //import 'idb_test_factory.dart';
 
-var tmpSkipForNativeWeb = false;
-
 void main() {
   defineTests(idbMemoryContext);
 }
