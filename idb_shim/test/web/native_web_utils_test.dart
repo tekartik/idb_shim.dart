@@ -13,7 +13,7 @@ void main() {
       expect(jsArray.isJSArray, isTrue);
       expect(jsArray.isJSArrayBuffer, isFalse);
       expect(jsArray.isJSObject, isTrue);
-      var dartList = jsArray.dartifyValue();
+      var dartList = jsArray.dartifyValueStrict();
       expect(dartList, isA<List>());
       expect(dartList, isNot(isA<Uint8List>()));
       expect(dartList, [1]);
@@ -35,19 +35,42 @@ void main() {
       expect(jsDate.getTime(), 1);
       expect(jsDate.isJSDate, isTrue);
       expect(jsDate.isJSObject, isTrue);
-      var dartDate = jsDate.dartifyValue();
+      var dartDate = jsDate.dartifyValueStrict();
       expect(dartDate, isA<DateTime>());
       expect(dartDate, DateTime.fromMillisecondsSinceEpoch(1, isUtc: true));
-      var jsDateFromDart = dartDate.jsifyValue() as JSDate;
+
+      var jsDateFromDart = dartDate.jsifyValueStrict() as JSDate;
       expect(jsDateFromDart.toISOString(), '1970-01-01T00:00:00.001Z');
       expect(jsDateFromDart.getTime(), 1);
       expect(jsDateFromDart.isJSDate, isTrue);
       expect(jsDateFromDart.isJSObject, isTrue);
+
+      jsDateFromDart = dartDate.jsifyValue() as JSDate;
+      expect(jsDateFromDart.toISOString(), '1970-01-01T00:00:00.001Z');
+      expect(jsDateFromDart.getTime(), 1);
+      expect(jsDateFromDart.isJSDate, isTrue);
+      expect(jsDateFromDart.isJSObject, isTrue);
+
+      // Temp bug!
+      try {
+        var rawJisifiedDateTime = dartDate.jsify();
+        expect(rawJisifiedDateTime, isA<DateTime>());
+        print(
+            'rawJisifiedDateTime: $rawJisifiedDateTime ${rawJisifiedDateTime.runtimeType}');
+      } catch (e) {
+        print('Temp DateTime().jisify bug fixed: $e');
+      }
+
+      // Compare with dartify()! same as dartifyValue
+      dartDate = jsDate.dartify()!;
+      print('dartDate: $dartDate');
+      expect(dartDate, isA<DateTime>());
+      expect(dartDate, DateTime.fromMillisecondsSinceEpoch(1, isUtc: true));
     });
     test('JSString', () {
       var jsString = 'test'.toJS;
       expect(jsString.isJSString, isTrue);
-      var dartString = jsString.dartifyValue();
+      var dartString = jsString.dartifyValueStrict();
       expect(dartString, isA<String>());
       expect(dartString, 'test');
       var jsStringFromDart = dartString.jsifyValue() as JSString;
@@ -60,7 +83,7 @@ void main() {
     test('JSNumber(int)', () {
       var jsNumber = 1.toJS;
       expect(jsNumber.isJSNumber, isTrue);
-      var dartNumber = jsNumber.dartifyValue();
+      var dartNumber = jsNumber.dartifyValueStrict();
       expect(dartNumber, isA<int>());
       expect(dartNumber, 1);
       var jsNumberFromDart = dartNumber.jsifyValue() as JSNumber;
@@ -72,7 +95,7 @@ void main() {
     test('JSNumber(double)', () {
       var jsNumber = 1.5.toJS;
       expect(jsNumber.isJSNumber, isTrue);
-      var dartNumber = jsNumber.dartifyValue();
+      var dartNumber = jsNumber.dartifyValueStrict();
       expect(dartNumber, isA<double>());
       expect(dartNumber, 1.5);
       var jsNumberFromDart = dartNumber.jsifyValue() as JSNumber;
@@ -84,7 +107,7 @@ void main() {
     test('JSBoolean', () {
       var jsBoolean = true.toJS;
       expect(jsBoolean.isJSBoolean, isTrue);
-      var dartBoolean = jsBoolean.dartifyValue();
+      var dartBoolean = jsBoolean.dartifyValueStrict();
       expect(dartBoolean, isA<bool>());
       expect(dartBoolean, true);
       var jsBooleanFromDart = dartBoolean.jsifyValue() as JSBoolean;
@@ -94,30 +117,50 @@ void main() {
       expect(dartBoolean, isA<bool>());
       expect(dartBoolean, true);
     });
+    // no longer supported.
     test('JSArrayBuffer', () {
       var jsArrayBuffer = Uint8List.fromList([1]).buffer.toJS;
       expect(jsArrayBuffer.isJSObject, isTrue);
       expect(jsArrayBuffer.isJSArrayBuffer, isTrue);
       expect(jsArrayBuffer.isJSArray, isFalse);
 
-      var dartList = jsArrayBuffer.dartifyValue();
+      var dartList = jsArrayBuffer.dartifyValueStrict();
       expect(dartList, isA<List>());
       expect(dartList, isA<Uint8List>());
       expect(dartList, [1]);
-
-      var jsArrayBufferFromDart = dartList.jsifyValue();
-      expect(jsArrayBufferFromDart.isJSArrayBuffer, isTrue);
-      expect(jsArrayBufferFromDart.isJSArray, isFalse);
-      expect(jsArrayBufferFromDart.isJSObject, isTrue);
 
       // Compare with dartify()
       dartList = jsArrayBuffer.dartify()!;
       expect(dartList, isNot(isA<List>()));
     });
+    test('JSUint8Array', () {
+      var jsUint8Array = Uint8List.fromList([1]).toJS;
+      expect(jsUint8Array.isJSObject, isTrue);
+      expect(jsUint8Array.isJSUint8Array, isTrue);
+      expect(jsUint8Array.isJSArrayBuffer, isFalse);
+      expect(jsUint8Array.isJSArray, isFalse);
+
+      var dartList = jsUint8Array.dartifyValueStrict();
+      expect(dartList, isA<List>());
+      expect(dartList, isA<Uint8List>());
+      expect(dartList, [1]);
+
+      var jsUint8ArrayFromDart = dartList.jsifyValue();
+      expect(jsUint8ArrayFromDart.isJSArrayBuffer, isFalse);
+      expect(jsUint8ArrayFromDart.isJSUint8Array, isTrue);
+      expect(jsUint8ArrayFromDart.isJSArray, isFalse);
+      expect(jsUint8ArrayFromDart.isJSObject, isTrue);
+
+      // Compare with dartify()
+      dartList = jsUint8Array.dartify()!;
+      expect(dartList, isA<List>());
+      expect(dartList, isA<Uint8List>());
+      expect(dartList, [1]);
+    });
     test('JSObject', () {
       var jsObject = {'test': 1}.jsify()!;
       expect(jsObject.isJSObject, isTrue);
-      var dartMap = jsObject.dartifyValue();
+      var dartMap = jsObject.dartifyValueStrict();
       expect(dartMap, isA<Map>());
       expect(dartMap, {'test': 1});
 
@@ -146,7 +189,8 @@ void main() {
               'sub': [
                 [
                   [1],
-                  [2, 1]
+                  [2, 1],
+                  {'sub2': 1}
                 ],
                 [null],
                 'text'
@@ -157,7 +201,13 @@ void main() {
           'testDate': DateTime.fromMillisecondsSinceEpoch(1, isUtc: true),
         }
       ];
+      expect(list.jsifyValue().dartifyValueStrict(), list);
       expect(list.jsifyValue().dartifyValue(), list);
+      expect(list.jsifyValueStrict().dartifyValueStrict(), list);
+      expect(list.jsifyValueStrict().dartifyValue(), list);
+      expect(list.jsifyValue().dartify(), list);
+      expect(list.jsify().dartify(), list);
+      expect(list.jsify()?.dartifyValue(), list);
     });
   });
 }

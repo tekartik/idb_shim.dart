@@ -42,6 +42,11 @@ extension JSAnyExtension on JSAny {
     return instanceOfString('ArrayBuffer');
   }
 
+  /// True if it is a Javascript uint8 buffer object
+  bool get isJSUint8Array {
+    return instanceOfString('Uint8Array');
+  }
+
   /// Could be an array or a data!
   bool get isJSObject {
     return typeofEquals('object');
@@ -67,6 +72,12 @@ extension JSAnyExtension on JSAny {
 extension IDBJsifyExtension on Object {
   /// Convert Dart object to JavaScript object
   JSAny jsifyValue() {
+    // Bug in DateTime that requires this hack (or drop support for DateTime)
+    return jsifyValueStrict();
+  }
+
+  /// Convert Dart object to JavaScript object
+  JSAny jsifyValueStrict() {
     var value = this;
     if (value is String) {
       return value.toJS;
@@ -80,7 +91,7 @@ extension IDBJsifyExtension on Object {
       return jsObject;
     } else if (value is List) {
       if (value is Uint8List) {
-        return value.buffer.toJS;
+        return value.toJS; // value.buffer.toJS;
       }
       var jsArray = JSArray.withLength(value.length);
       for (var (i, item) in value.indexed) {
@@ -101,6 +112,11 @@ extension IDBJsifyExtension on Object {
 extension IDBDartifyExtension on JSAny {
   /// Convert JavaScript object to Dart object
   Object dartifyValue() {
+    return dartify()!;
+  }
+
+  /// Convert JavaScript object to Dart object
+  Object dartifyValueStrict() {
     var value = this;
     if (value.isJSString) {
       return (value as JSString).toDart;
@@ -124,6 +140,8 @@ extension IDBDartifyExtension on JSAny {
             isUtc: true);
       } else if (value.isJSArrayBuffer) {
         return (value as JSArrayBuffer).toDart.asUint8List();
+      } else if (value.isJSUint8Array) {
+        return (value as JSUint8Array).toDart;
       }
       var object = <String, Object?>{};
       var jsObject = value as JSObject;
