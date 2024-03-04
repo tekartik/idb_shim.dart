@@ -70,6 +70,31 @@ void defineTests(TestContext ctx) {
       importedDb.close();
     }
 
+    Future dbCheckExportImportLines(Database db, List expectedExportLines,
+        Future Function(Database db) check) async {
+      // export
+      final export = await sdbExportDatabaseLines(db);
+      expect(export, expectedExportLines);
+
+      // import
+      var importedDb =
+          await sdbImportDatabase(export, idbFactory, importedDbName);
+      // The name might be relative...
+      expect(importedDb.name.endsWith(importedDbName), isTrue);
+
+      await check(importedDb);
+
+      // re-export
+      expect(await sdbExportDatabaseLines(importedDb), expectedExportLines);
+
+      importedDb.close();
+
+      // re open
+      importedDb = await idbFactory.open(importedDbName);
+      await check(importedDb);
+      importedDb.close();
+    }
+
     group('copySchema', () {
       tearDown(dbTearDown);
 
@@ -617,6 +642,14 @@ void defineTests(TestContext ctx) {
               ]
             },
             dbCheck);
+        await dbCheckExportImportLines(
+            db!,
+            [
+              {'sembast_export': 1, 'version': 1},
+              {'store': '_main'},
+              ['version', 1]
+            ],
+            dbCheck);
       });
 
       test('all_types', () async {
@@ -708,6 +741,45 @@ void defineTests(TestContext ctx) {
           ]
         };
         await dbCheckExportImport(db!, expectedExport, dbCheck);
+        await dbCheckExportImportLines(
+            db!,
+            [
+              {'sembast_export': 1, 'version': 1},
+              {'store': '_main'},
+              [
+                'store_test_store',
+                {'name': 'test_store'}
+              ],
+              [
+                'stores',
+                ['test_store']
+              ],
+              ['version', 1],
+              {'store': 'test_store'},
+              [
+                'my_key',
+                {
+                  'my_bool': true,
+                  'my_date': {'@Timestamp': '2020-10-27T13:14:15.999Z'},
+                  'my_int': 1,
+                  'my_double': 1.5,
+                  'my_blob': {'@Blob': 'AQID'},
+                  'my_string': 'some text',
+                  'my_list': [4, 5, 6],
+                  'my_map': {'sub': 73},
+                  'my_complex': [
+                    {
+                      'sub': [
+                        {
+                          'inner': [7, 8, 9]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ],
+            dbCheck);
       });
 
       // safari does not support multiple stores - fakes
@@ -791,6 +863,31 @@ void defineTests(TestContext ctx) {
               ]
             },
             dbCheck);
+        await dbCheckExportImportLines(
+            db!,
+            [
+              {'sembast_export': 1, 'version': 1},
+              {'store': '_main'},
+              [
+                'store_test_store',
+                {'name': 'test_store'}
+              ],
+              [
+                'store_test_store_2',
+                {'name': 'test_store_2'}
+              ],
+              [
+                'stores',
+                ['test_store', 'test_store_2']
+              ],
+              ['version', 1],
+              {'store': 'test_store'},
+              ['key1', 'value1'],
+              ['key2', 'value2'],
+              {'store': 'test_store_2'},
+              ['key3', 'value3']
+            ],
+            dbCheck);
       });
 
       // safari does not support multiple stores - fakes
@@ -853,6 +950,30 @@ void defineTests(TestContext ctx) {
                 }
               ]
             },
+            dbCheck);
+        await dbCheckExportImportLines(
+            db!,
+            [
+              {'sembast_export': 1, 'version': 1},
+              {'store': '_main'},
+              [
+                'store_test_store',
+                {
+                  'name': 'test_store',
+                  'keyPath': ['my', 'key']
+                }
+              ],
+              [
+                'stores',
+                ['test_store']
+              ],
+              ['version', 1],
+              {'store': 'test_store'},
+              [
+                1,
+                {'my': 1, 'key': 1}
+              ]
+            ],
             dbCheck);
       });
     });

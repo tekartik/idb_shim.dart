@@ -17,7 +17,7 @@ String get _tempExportPath => 'sembast://tmp/idb_shim/${++_exportId}';
 ///
 /// export a database in a sdb export format
 ///
-Future<Map> sdbExportDatabase(Database db) async {
+Future<Map<String, Object?>> sdbExportDatabase(Database db) async {
   var srcIdbFactory = db.factory;
 
   sdb.Database? sdbDatabase;
@@ -31,32 +31,56 @@ Future<Map> sdbExportDatabase(Database db) async {
     // otherwise copy to a memory one
     db = await copyDatabase(db, idbFactoryMemory, _tempExportPath);
     sdbDatabase = (idbFactoryMemory as IdbFactorySembast).getSdbDatabase(db);
-    Map export = await exportDatabase(sdbDatabase!);
+    var export = await exportDatabase(sdbDatabase!);
     db.close();
     return export;
   }
 }
 
 ///
-/// Copy a database to another
+/// Copy a database export (lines or map sembast export) to another
+///
 /// return the opened database
 ///
 Future<Database> sdbImportDatabase(
-    Map data, IdbFactory dstFactory, String dstDbName) async {
+    Object data, IdbFactory dstFactory, String dstDbName) async {
   // if it is a sembast factory use it!
   // if (false) {
   if (dstFactory is IdbFactorySembast) {
-    final sdbDb = await importDatabase(
+    final sdbDb = await importDatabaseAny(
         data, dstFactory.sdbFactory, dstFactory.getDbPath(dstDbName));
     return dstFactory.openFromSdbDatabase(sdbDb);
   } else {
     // import to a memory one
-    final sdbDb =
-        await importDatabase(data, sdb.databaseFactoryMemory, _tempExportPath);
+    final sdbDb = await importDatabaseAny(
+        data, sdb.databaseFactoryMemory, _tempExportPath);
     final tmpDb = await (idbFactoryMemory as IdbFactorySembast)
         .openFromSdbDatabase(sdbDb);
     final db = await copyDatabase(tmpDb, dstFactory, dstDbName);
     tmpDb.close();
     return db;
+  }
+}
+
+///
+/// export a database in a sdb export format
+///
+Future<List<Object>> sdbExportDatabaseLines(Database db) async {
+  var srcIdbFactory = db.factory;
+
+  sdb.Database? sdbDatabase;
+
+  // if already a sembast database use it
+  // if (false) {
+  if (srcIdbFactory is IdbFactorySembast) {
+    sdbDatabase = srcIdbFactory.getSdbDatabase(db);
+    return exportDatabaseLines(sdbDatabase!);
+  } else {
+    // otherwise copy to a memory one
+    db = await copyDatabase(db, idbFactoryMemory, _tempExportPath);
+    sdbDatabase = (idbFactoryMemory as IdbFactorySembast).getSdbDatabase(db);
+    var export = await exportDatabaseLines(sdbDatabase!);
+    db.close();
+    return export;
   }
 }
