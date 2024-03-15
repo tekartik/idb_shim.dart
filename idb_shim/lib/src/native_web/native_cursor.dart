@@ -1,7 +1,6 @@
 // ignore_for_file: public_member_api_docs
 
 import 'dart:async';
-import 'dart:js_interop';
 
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/native_web/js_utils.dart';
@@ -76,7 +75,7 @@ class CursorWithValueNative extends CursorWithValue {
     if (key == null) {
       _cwv.continue_();
     } else {
-      _cwv.continue_(key.jsify());
+      _cwv.continue_(key.jsifyKey());
     }
   }
 

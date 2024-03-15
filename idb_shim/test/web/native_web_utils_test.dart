@@ -8,6 +8,9 @@ import 'package:test/test.dart';
 
 void main() {
   group('native_web_utils', () {
+    test('null', () {
+      expect(null.jsify()?.dartifyValueStrict(), null);
+    });
     test('JSArray', () {
       var jsArray = [1.toJS].toJS;
       expect(jsArray.isJSArray, isTrue);
@@ -55,15 +58,17 @@ void main() {
       try {
         var rawJisifiedDateTime = dartDate.jsify();
         expect(rawJisifiedDateTime, isA<DateTime>());
+        // ignore: avoid_print
         print(
             'rawJisifiedDateTime: $rawJisifiedDateTime ${rawJisifiedDateTime.runtimeType}');
       } catch (e) {
+        // ignore: avoid_print
         print('Temp DateTime().jisify bug fixed: $e');
       }
 
       // Compare with dartify()! same as dartifyValue
       dartDate = jsDate.dartify()!;
-      print('dartDate: $dartDate');
+      //print('dartDate: $dartDate');
       expect(dartDate, isA<DateTime>());
       expect(dartDate, DateTime.fromMillisecondsSinceEpoch(1, isUtc: true));
     });
@@ -201,13 +206,10 @@ void main() {
           'testDate': DateTime.fromMillisecondsSinceEpoch(1, isUtc: true),
         }
       ];
-      expect(list.jsifyValue().dartifyValueStrict(), list);
-      expect(list.jsifyValue().dartifyValue(), list);
-      expect(list.jsifyValueStrict().dartifyValueStrict(), list);
-      expect(list.jsifyValueStrict().dartifyValue(), list);
-      expect(list.jsifyValue().dartify(), list);
+      expect(list.jsify()?.dartifyValueStrict(), list);
       expect(list.jsify().dartify(), list);
-      expect(list.jsify()?.dartifyValue(), list);
+      expect(list.jsifyValueStrict().dartifyValueStrict(), list);
+      expect(list.jsifyValueStrict().dartify(), list);
     });
   });
 }

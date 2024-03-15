@@ -4,6 +4,7 @@ import 'dart:js_interop';
 
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/common/common_factory.dart';
+import 'package:idb_shim/src/native_web/js_utils.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:idb_shim/src/utils/env_utils.dart';
 
@@ -134,7 +135,7 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
   @override
   int cmp(Object first, Object second) {
     return catchNativeError(() {
-      return nativeFactory.cmp(first.jsify(), second.jsify());
+      return nativeFactory.cmp(first.jsifyKey(), second.jsifyKey());
     })!;
   }
 

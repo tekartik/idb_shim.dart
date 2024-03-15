@@ -2,6 +2,8 @@ import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
+import 'package:idb_shim/src/utils/env_utils.dart';
+
 /// Get object keys
 @JS('Object.keys')
 external JSArray jsObjectKeys(JSObject object);
@@ -72,8 +74,13 @@ extension JSAnyExtension on JSAny {
 extension IDBJsifyExtension on Object {
   /// Convert Dart object to JavaScript object
   JSAny jsifyValue() {
-    // Bug in DateTime that requires this hack (or drop support for DateTime)
+// Bug in DateTime that requires this hack (or drop support for DateTime)
     return jsifyValueStrict();
+  }
+
+  /// Convert a key (assuming not a date or Uint8List) to a JavaScript object
+  JSAny jsifyKey() {
+    return jsify()!;
   }
 
   /// Convert Dart object to JavaScript object
@@ -86,7 +93,7 @@ extension IDBJsifyExtension on Object {
     } else if (value is Map) {
       var jsObject = JSObject();
       value.forEach((key, value) {
-        jsObject[(key as String)] = (value as Object?)?.jsifyValue();
+        jsObject[(key as String)] = (value as Object?)?.jsifyValueStrict();
       });
       return jsObject;
     } else if (value is List) {
@@ -95,7 +102,7 @@ extension IDBJsifyExtension on Object {
       }
       var jsArray = JSArray.withLength(value.length);
       for (var (i, item) in value.indexed) {
-        jsArray.setProperty(i.toJS, (item as Object?)?.jsifyValue());
+        jsArray.setProperty(i.toJS, (item as Object?)?.jsifyValueStrict());
       }
       return jsArray;
     } else if (value is DateTime) {
@@ -112,7 +119,11 @@ extension IDBJsifyExtension on Object {
 extension IDBDartifyExtension on JSAny {
   /// Convert JavaScript object to Dart object
   Object dartifyValue() {
-    return dartify()!;
+    if (idbIsRunningAsJavascript) {
+      return dartifyValueStrict();
+    } else {
+      return dartify()!;
+    }
   }
 
   /// Convert JavaScript object to Dart object
@@ -133,7 +144,7 @@ extension IDBDartifyExtension on JSAny {
       if (value.isJSArray) {
         var jsArray = value as JSArray;
         var list = List.generate(jsArray.length,
-            (index) => jsArray.getProperty(index.toJS)?.dartifyValue());
+            (index) => jsArray.getProperty(index.toJS)?.dartifyValueStrict());
         return list;
       } else if (value.isJSDate) {
         return DateTime.fromMillisecondsSinceEpoch((value as JSDate).getTime(),
@@ -143,14 +154,22 @@ extension IDBDartifyExtension on JSAny {
       } else if (value.isJSUint8Array) {
         return (value as JSUint8Array).toDart;
       }
-      var object = <String, Object?>{};
-      var jsObject = value as JSObject;
-      var keys = jsObjectKeys(jsObject).toDart;
-      for (var key in keys) {
-        object[(key as JSString).toDart] =
-            jsObject.getProperty(key)?.dartifyValue();
+      try {
+        var jsObject = value as JSObject;
+        var object = <String, Object?>{};
+        var keys = jsObjectKeys(jsObject).toDart;
+        for (var key in keys) {
+          object[(key as JSString).toDart] =
+              jsObject.getProperty(key)?.dartifyValueStrict();
+        }
+        return object;
+      } catch (_) {
+// Special handling of js dartified value issue for DateTime
+// jisify concert a DateTime as is...
+        if (value is DateTime) {
+          return value;
+        }
       }
-      return object;
     }
     throw UnsupportedError(
         'Unsupported value: $value (type: ${value.runtimeType})');

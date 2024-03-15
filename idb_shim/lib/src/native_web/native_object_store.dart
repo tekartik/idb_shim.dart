@@ -1,7 +1,6 @@
 // ignore_for_file: public_member_api_docs
 
 import 'dart:async';
-import 'dart:js_interop';
 
 import 'package:idb_shim/idb.dart';
 
@@ -46,7 +45,7 @@ class ObjectStoreNative extends ObjectStore {
       if (key == null) {
         request = idbObjectStore.add(value.jsifyValue());
       } else {
-        request = idbObjectStore.add(value.jsifyValue(), key.jsify());
+        request = idbObjectStore.add(value.jsifyValue(), key.jsifyKey());
       }
       return request.future.then((value) => value!.dartifyValue());
     });
@@ -56,7 +55,7 @@ class ObjectStoreNative extends ObjectStore {
   @override
   Future<Object?> getObject(Object key) {
     return catchAsyncNativeError(() {
-      return idbObjectStore.get(key.jsify()).dartFutureNullable<Object?>();
+      return idbObjectStore.get(key.jsifyKey()).dartFutureNullable<Object?>();
     });
   }
 
@@ -74,7 +73,7 @@ class ObjectStoreNative extends ObjectStore {
         return idbObjectStore.put(value.jsifyValue()).dartFuture<Object>();
       } else {
         return idbObjectStore
-            .put(value.jsifyValue(), key.jsify())
+            .put(value.jsifyValue(), key.jsifyKey())
             .dartFuture<Object>();
       }
     });

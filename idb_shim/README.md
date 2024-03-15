@@ -128,8 +128,9 @@ Safari has the following limitations (as of v 9.0)
 
 ##### Wasm
 
-As of 2.4 the default implementation use js_interop which makes it wasm compatible.
+As of 2.4 the default implementation use `js_interop` which makes it wasm compatible if you import `idb_shim.dart`
 You can still use the legacy `dart:html` by importing `idb_shim_client_native_html.dart`.
 
 Limitations:
-- In my initial testing, numbers were read as double although they were stored as int...
+- DateTime is converted manually to support `DateTime` (although not supported in Firefox)
+- So for compatibility, data is jsified and dartified using custom encoder. To see if this could be removed in the future.
