@@ -1,4 +1,4 @@
-## 2.4.0-5
+## 2.4.0
 
 * Add new native implementation based on new js_interop and web package.
 * Allow wasm compilation for web support (legacy implementation is still available for now by importing explicitly `idb_shim_client_native_html.dart`)
