@@ -58,9 +58,16 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
       {int? version,
       OnUpgradeNeededFunction? onUpgradeNeeded,
       OnBlockedFunction? onBlocked}) {
+    FutureOr? onUpdateNeededFutureOr;
+    Object? onUpdateNeededException;
     void openOnUpgradeNeeded(idb.VersionChangeEvent e) {
       final event = VersionChangeEventNative(this, e);
-      onUpgradeNeeded!(event);
+
+      try {
+        onUpdateNeededFutureOr = onUpgradeNeeded!(event);
+      } catch (e) {
+        onUpdateNeededException = e;
+      }
     }
 
     void openOnBlocked(html.Event e) {
@@ -80,7 +87,20 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
             onBlocked: onBlocked == null && onUpgradeNeeded == null
                 ? null
                 : openOnBlocked)
-        .then((idb.Database database) {
+        .then((idb.Database database) async {
+      // Handle exception in onUpgradeNeeded
+      if (onUpdateNeededFutureOr is Future && onUpdateNeededException == null) {
+        try {
+          await onUpdateNeededFutureOr;
+        } catch (e) {
+          onUpdateNeededException = e;
+        }
+      }
+      if (onUpdateNeededException != null) {
+        database.close();
+        throw onUpdateNeededException!;
+      }
+
       return DatabaseNative(this, database);
     });
   }

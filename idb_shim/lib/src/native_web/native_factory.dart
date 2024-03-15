@@ -6,7 +6,6 @@ import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/common/common_factory.dart';
 import 'package:idb_shim/src/native_web/js_utils.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
-import 'package:idb_shim/src/utils/env_utils.dart';
 
 import 'indexed_db_web.dart' as idb;
 import 'indexed_db_web.dart' as native;
@@ -74,24 +73,16 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
       }.toJS;
     }
     FutureOr? onUpdateNeededFutureOr;
+    Object? onUpdateNeededException;
     if (onUpgradeNeeded != null) {
       EventStreamProviders.upgradeNeededEvent
           .forTarget(openRequest)
-          .listen((idb.IDBVersionChangeEvent event) async {
+          .listen((idb.IDBVersionChangeEvent event) {
         try {
           onUpdateNeededFutureOr =
               onUpgradeNeeded(VersionChangeEventNative(this, event));
-          if (onUpdateNeededFutureOr is Future) {
-            onUpdateNeededFutureOr = await onUpdateNeededFutureOr;
-          }
         } catch (e) {
-          if (isDebug) {
-            idbLog('error $e');
-          }
-          try {
-            openRequest.transaction?.abort();
-          } catch (_) {}
-          completer.completeError(e);
+          onUpdateNeededException = e;
         }
       });
     }
@@ -99,11 +90,20 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
     await completer.future;
 
     /// Wait on onUpgradeNeeded to complete.
-    if (onUpdateNeededFutureOr is Future) {
-      //openRequest.transaction.abort();
-      //await onUpdateNeededFutureOr;
+    if (onUpdateNeededFutureOr is Future && onUpdateNeededException == null) {
+      try {
+        await onUpdateNeededFutureOr;
+      } catch (e) {
+        onUpdateNeededException = e;
+      }
     }
-    return DatabaseNative(this, openRequest.result as idb.IDBDatabase);
+    var idbDatabase = openRequest.result as idb.IDBDatabase;
+    if (onUpdateNeededException != null) {
+      idbDatabase.close();
+      throw onUpdateNeededException!;
+    }
+
+    return DatabaseNative(this, idbDatabase);
   }
 
   @override

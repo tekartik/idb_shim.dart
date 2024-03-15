@@ -87,6 +87,19 @@ void defineTests(TestContext ctx) {
       }
     });
 
+    test('throw late in onUpgradeNeeded', () async {
+      await setupDeleteDb();
+
+      try {
+        await idbFactory.open(dbName, onUpgradeNeeded: (_) {
+          throw StateError('My error');
+        }, version: 1);
+        fail('should fail');
+      } on StateError catch (e) {
+        expect(e.message, 'My error');
+      }
+    });
+
     test('bad param with version', () async {
       await setupDeleteDb();
       try {
