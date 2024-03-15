@@ -2,7 +2,7 @@ import 'package:idb_shim/idb_client_memory.dart';
 import 'package:idb_shim/idb_io.dart';
 import 'package:idb_shim/idb_shim.dart';
 import 'package:idb_shim/src/utils/env_utils.dart'
-    show idbIsRunningAsJavascript;
+    show idbIsRunningAsJavascript, kIdbDartIsWeb;
 import 'package:idb_shim/utils/idb_utils.dart';
 import 'package:test/test.dart';
 
@@ -15,14 +15,15 @@ void main() {
       if (e != null) {
         expect(e, isNot(const TypeMatcher<TestFailure>()));
       }
-      expect(idbIsRunningAsJavascript, isTrue);
+      expect(kIdbDartIsWeb, isTrue);
+      expect(idbIsRunningAsJavascript, isTrue); // Not true for wasm
     }
 
     void expectIo([Object? e]) {
       if (e != null) {
         expect(e, isNot(const TypeMatcher<TestFailure>()));
       }
-      expect(idbIsRunningAsJavascript, isFalse);
+      expect(kIdbDartIsWeb, isFalse);
     }
 
     test('api', () {

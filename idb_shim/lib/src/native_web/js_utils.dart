@@ -2,8 +2,6 @@ import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
-import 'package:idb_shim/src/utils/env_utils.dart';
-
 /// Get object keys
 @JS('Object.keys')
 external JSArray jsObjectKeys(JSObject object);
@@ -119,11 +117,8 @@ extension IDBJsifyExtension on Object {
 extension IDBDartifyExtension on JSAny {
   /// Convert JavaScript object to Dart object
   Object dartifyValue() {
-    if (idbIsRunningAsJavascript) {
-      return dartifyValueStrict();
-    } else {
-      return dartify()!;
-    }
+    /// When running as wasm strict is necessary
+    return dartifyValueStrict();
   }
 
   /// Convert JavaScript object to Dart object

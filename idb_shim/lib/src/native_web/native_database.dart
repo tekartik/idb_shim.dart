@@ -92,7 +92,7 @@ class DatabaseNative extends IdbDatabaseBase {
         }
 
         if (allFound) {
-          if (idbIsRunningAsJavascript) {
+          if (kIdbDartIsWeb) {
             // In javascript this is likely a safari issue...
             return FakeMultiStoreTransactionNative(this, mode);
           }

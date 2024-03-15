@@ -2,14 +2,14 @@ import 'package:idb_shim/idb_io.dart';
 import 'package:idb_shim/idb_shim.dart';
 import 'package:test/test.dart';
 
-import '../idb_test_common.dart' show idbIsRunningAsJavascript;
+import '../idb_test_common.dart' show kIdbDartIsWeb;
 
 void main() {
   group('import', () {
     test('web', () {
       try {
         idbFactoryNative;
-        if (!idbIsRunningAsJavascript) {
+        if (!kIdbDartIsWeb) {
           fail('should fail');
         }
       } on UnimplementedError catch (_) {}
@@ -18,7 +18,7 @@ void main() {
     test('io', () {
       try {
         idbFactorySembastIo;
-        if (idbIsRunningAsJavascript) {
+        if (kIdbDartIsWeb) {
           fail('should fail');
         }
       } on UnimplementedError catch (_) {}
