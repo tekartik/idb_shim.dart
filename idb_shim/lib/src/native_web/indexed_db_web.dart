@@ -22,7 +22,8 @@ export 'package:web/web.dart'
         IDBIndexParameters,
         IDBKeyRange,
         IDBFactory,
-        DOMException;
+        DOMException,
+        EventStreamProviders;
 
 /// IDB upgrade needed event
 extension type IDBOnUpgradeNeededEvent._(JSObject _)

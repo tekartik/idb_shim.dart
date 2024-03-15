@@ -1,6 +1,5 @@
 // ignore_for_file: public_member_api_docs
 
-import 'dart:async';
 import 'dart:indexed_db' as idb;
 
 import 'package:idb_shim/idb.dart';
@@ -9,6 +8,7 @@ import 'package:idb_shim/src/native/native_database.dart';
 import 'package:idb_shim/src/native/native_error.dart';
 import 'package:idb_shim/src/native/native_object_store.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
+import 'package:idb_shim/src/utils/env_utils.dart';
 
 abstract class TransactionNativeBase extends IdbTransactionBase {
   TransactionNativeBase(super.database);
@@ -18,6 +18,7 @@ class TransactionNative extends TransactionNativeBase {
   idb.Transaction idbTransaction;
 
   TransactionNative(super.database, this.idbTransaction);
+
   final _completed = Completer<Database>.sync();
 
   void _complete() {
@@ -109,6 +110,8 @@ class FakeMultiStoreTransactionNative extends TransactionNativeBase {
   @override
   void abort() {
     // Not supported
-    print('abort not supported in fake multistore transaction');
+    if (isDebug) {
+      idbLog('abort not supported in fake multistore transaction');
+    }
   }
 }

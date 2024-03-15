@@ -104,7 +104,7 @@ Future copyStore(Database srcDatabase, String srcStoreName,
     }
   } catch (e) {
     if (isDebug) {
-      print(e);
+      idbLog(e);
     }
     rethrow;
   } finally {

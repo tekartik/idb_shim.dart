@@ -74,6 +74,19 @@ void defineTests(TestContext ctx) {
       }
     });
 
+    test('throw in onUpgradeNeeded', () async {
+      await setupDeleteDb();
+
+      try {
+        await idbFactory.open(dbName, onUpgradeNeeded: (_) {
+          throw StateError('My error');
+        }, version: 1);
+        fail('should fail');
+      } on StateError catch (e) {
+        expect(e.message, 'My error');
+      }
+    });
+
     test('bad param with version', () async {
       await setupDeleteDb();
       try {
@@ -130,12 +143,13 @@ void defineTests(TestContext ctx) {
     test('version 1', () async {
       await setupDeleteDb();
       var initCalled = false;
-      late int onUpgradeOldVersion;
-      late int onUpgradeNewVersion;
+
       void onUpgradeNeeded(VersionChangeEvent e) {
         // should be called
-        onUpgradeOldVersion = e.oldVersion;
-        onUpgradeNewVersion = e.newVersion;
+        var onUpgradeOldVersion = e.oldVersion;
+        var onUpgradeNewVersion = e.newVersion;
+        expect(onUpgradeOldVersion, 0);
+        expect(onUpgradeNewVersion, 1);
         initCalled = true;
       }
 
@@ -143,9 +157,6 @@ void defineTests(TestContext ctx) {
           version: 1, onUpgradeNeeded: onUpgradeNeeded);
 
       expect(initCalled, true);
-      expect(onUpgradeOldVersion, 0);
-      expect(onUpgradeNewVersion, 1);
-
       database.close();
     });
 

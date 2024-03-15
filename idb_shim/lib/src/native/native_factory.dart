@@ -7,11 +7,14 @@ import 'dart:indexed_db' as native;
 
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/common/common_factory.dart';
+import 'package:idb_shim/src/common/common_import.dart';
 import 'package:idb_shim/src/native/native_database.dart';
 import 'package:idb_shim/src/native/native_error.dart';
 import 'package:idb_shim/src/native/native_event.dart';
-import 'package:idb_shim/src/utils/browser_utils.dart';
+import 'package:idb_shim/src/utils/env_utils.dart';
 import 'package:idb_shim/src/utils/value_utils.dart';
+
+import 'browser_utils_html.dart';
 
 IdbFactory? _idbFactoryNativeBrowserImpl;
 
@@ -65,7 +68,7 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
         Event event = EventNative(e);
         onBlocked(event);
       } else {
-        print('blocked opening $dbName v $version');
+        idbLog('blocked opening $dbName v $version');
       }
     }
 
@@ -86,7 +89,9 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
   Future<IdbFactory> deleteDatabase(String dbName,
       {OnBlockedFunction? onBlocked}) {
     void openOnBlocked(html.Event e) {
-      print('blocked deleting $dbName');
+      if (isDebug) {
+        idbLog('blocked deleting $dbName');
+      }
       Event event = EventNative(e);
       onBlocked!(event);
     }

@@ -73,7 +73,7 @@ class IdbFactorySembastImpl extends IdbFactoryBase
     final db = DatabaseSembast(this, dbName);
 
     if (sembastDebug) {
-      print(
+      idbLog(
           'open1 onUpgradeNeeded ${onUpgradeNeeded != null ? 'NOT NULL' : 'NULL'}');
     }
     await db.open(version, onUpgradeNeeded);

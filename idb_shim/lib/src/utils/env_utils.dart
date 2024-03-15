@@ -1,6 +1,9 @@
 /// Special runtime trick to known whether we are in the javascript world
 const idbIsRunningAsJavascript = identical(0, 0.0);
 
+/// Borrowed from flutter (isRunningAsJavascript is false in wasm)
+const bool kIdbDartIsWeb = bool.fromEnvironment('dart.library.js_util');
+
 bool? _isRelease;
 
 /// Check whether in release mode

@@ -71,7 +71,7 @@ class TransactionSembast extends IdbTransactionBase
 
   Future _execute(int i) {
     if (_debugTransaction) {
-      print('exec $i');
+      idbLog('exec $i');
     }
     final completer = _completers[i];
     final action = _actions[i] as Action;
@@ -86,12 +86,12 @@ class TransactionSembast extends IdbTransactionBase
             result = await result;
           }
           if (_debugTransaction) {
-            print('done $i');
+            idbLog('done $i');
           }
           completer.complete(result);
         } catch (e, st) {
           if (_debugTransaction) {
-            print('err $i $e');
+            idbLog('err $i $e');
           }
           completer.completeError(e, st);
         }
@@ -100,13 +100,13 @@ class TransactionSembast extends IdbTransactionBase
       // Yes!
       return Future.sync(action).then((result) {
         if (_debugTransaction) {
-          print('done $i');
+          idbLog('done $i');
         }
         completer.complete(result);
       }).catchError((Object e, StackTrace st) {
         //devPrint(' err $i');
         if (_debugTransaction) {
-          print('err $i $e');
+          idbLog('err $i $e');
         }
         completer.completeError(e, st);
       });
@@ -116,7 +116,7 @@ class TransactionSembast extends IdbTransactionBase
   Future _next() {
     if (_aborted) {
       if (_debugTransaction) {
-        print('throwing abort exception');
+        idbLog('throwing abort exception');
       }
       throw newAbortException('Transaction aborted');
     }
@@ -130,7 +130,7 @@ class TransactionSembast extends IdbTransactionBase
       // Safari/IE crashs it a call is made
       // after an async cycle
       if (_debugTransaction) {
-        print('transaction done?');
+        idbLog('transaction done?');
       }
 
       // check next cycle too
@@ -145,7 +145,7 @@ class TransactionSembast extends IdbTransactionBase
           return _next();
         }
         if (_debugTransaction) {
-          print('transaction done');
+          idbLog('transaction done');
         }
         _inactive = true;
         return Future.value(null);
@@ -201,7 +201,7 @@ class TransactionSembast extends IdbTransactionBase
             _transactionCompleter.complete();
           }
           if (_debugTransaction) {
-            print('txn end of sembast transaction');
+            idbLog('txn end of sembast transaction');
           }
         }).catchError((Object e) {
           if (!_transactionCompleter.isCompleted) {
@@ -227,7 +227,7 @@ class TransactionSembast extends IdbTransactionBase
 
   Future<T> _enqueue<T>(FutureOr<T> Function() action) {
     if (_debugTransaction) {
-      print('enqueing');
+      idbLog('enqueing');
     }
     if (_inactive) {
       return Future.error(DatabaseError('TransactionInactiveError'));
@@ -269,19 +269,19 @@ class TransactionSembast extends IdbTransactionBase
 
       _delayedInit().then((_) async {
         if (_debugTransaction) {
-          print('Delayed init triggered');
+          idbLog('Delayed init triggered');
         }
         // Lazy trigger completed.
         try {
           await _completed;
         } catch (e) {
           if (_debugTransaction) {
-            print(
+            idbLog(
                 'Handle TransactionSembast constructor async completed error $e');
           }
         }
         if (_debugTransaction) {
-          print('completed aborted: $_aborted');
+          idbLog('completed aborted: $_aborted');
         }
         _inactive = true;
 
@@ -298,12 +298,12 @@ class TransactionSembast extends IdbTransactionBase
     try {
       if (_lazyExecution == null) {
         if (_debugTransaction) {
-          print('no lazy executor $_debugId...');
+          idbLog('no lazy executor $_debugId...');
         }
         _inactive = true;
       } else {
         if (_debugTransaction) {
-          print('lazy executor created $_debugId...');
+          idbLog('lazy executor created $_debugId...');
         }
 
         // Old and new code
@@ -333,7 +333,7 @@ class TransactionSembast extends IdbTransactionBase
                 <Future>[_transactionCompleter.future, ..._futures]);
           } catch (e) {
             if (_debugTransaction) {
-              print('Handling transaction error $e');
+              idbLog('Handling transaction error $e');
             }
             _endException = DatabaseException(e.toString());
           }
@@ -341,7 +341,7 @@ class TransactionSembast extends IdbTransactionBase
       }
     } catch (e) {
       if (_debugTransaction) {
-        print('Catch _completed exception $e');
+        idbLog('Catch _completed exception $e');
       }
       rethrow;
     }
@@ -393,7 +393,7 @@ class TransactionSembast extends IdbTransactionBase
   @override
   void abort() {
     if (_debugTransaction) {
-      print('abort');
+      idbLog('abort');
     }
     _aborted = true;
     _endException = newAbortException();

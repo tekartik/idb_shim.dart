@@ -50,6 +50,7 @@ class IdbFactoryWrapperImpl extends IdbFactoryBase implements IdbFactoryLogger {
   @override
   void log(String message, {int? id}) {
     if (_incrementAndShouldLog) {
+      // ignore: avoid_print
       print('[idb${id != null ? '-$id' : ''}]: $message');
     }
   }

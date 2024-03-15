@@ -1,12 +1,13 @@
 library idb_shim.src.client.client;
 
+import 'package:idb_shim/src/common/common_import.dart';
+
 /// to simply add a warning in a code for
 /// something todo later
 /// idbDevWarning;
 @Deprecated('Dev only')
 dynamic get idbDevWarning => null;
 
-@Deprecated('Dev only')
-
 /// Dev print (deprecated on purpose)
-void idbDevPrint(Object? msg) => print(msg);
+@Deprecated('Dev only')
+void idbDevPrint(Object? msg) => idbLog(msg);

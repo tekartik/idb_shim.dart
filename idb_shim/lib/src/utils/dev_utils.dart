@@ -5,9 +5,14 @@ library idb_shim_dev_utils;
 
 import 'package:meta/meta.dart';
 
+void idbLog(Object? object) {
+  // ignore: avoid_print
+  print(object);
+}
+
 void _devPrint(Object? object) {
   if (_devPrintEnabled) {
-    print(object);
+    idbLog(object);
   }
 }
 
@@ -19,7 +24,8 @@ set devPrintEnabled(bool enabled) => _devPrintEnabled = enabled;
 @Deprecated('Dev only')
 void devPrint(Object? object) {
   if (_devPrintEnabled) {
-    print(object);
+    // ignore: avoid_print
+    idbLog(object);
   }
 }
 
@@ -36,8 +42,8 @@ void _devError([Object? msg]) {
     throw UnsupportedError(msg?.toString() ?? 'devError');
   } catch (e, st) {
     if (_devPrintEnabled) {
-      print('# ERROR $msg');
-      print(st);
+      idbLog('# ERROR $msg');
+      idbLog(st);
     }
     rethrow;
   }

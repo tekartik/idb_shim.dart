@@ -20,14 +20,14 @@ void main() {
       var objectStore = transaction.objectStore('store');
       final value = {'sample': 'value'};
       final key = await objectStore.add(value) as int?;
-      print('added $key $value');
+      //print('added $key $value');
       var count = await objectStore.count(key);
-      print('count_by_key: $count');
+      //print('count_by_key: $count');
       expect(count, 1);
 
       // This crashes on ie
       count = await objectStore.count();
-      print('count_all: $count');
+      // print('count_all: $count');
 
       await transaction.completed;
       db.close();

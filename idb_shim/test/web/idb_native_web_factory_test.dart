@@ -1,7 +1,7 @@
 @TestOn('browser')
 library;
 
-import 'package:idb_shim/idb_client_native_web.dart';
+import 'package:idb_shim/idb_client_native.dart';
 import 'package:test/test.dart';
 import 'package:web/web.dart';
 

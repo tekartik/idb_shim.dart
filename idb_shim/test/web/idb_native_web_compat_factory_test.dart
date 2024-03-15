@@ -4,15 +4,15 @@ library;
 import 'dart:typed_data';
 
 import 'package:idb_shim/idb.dart';
-import 'package:idb_shim/idb_client_native.dart' as native;
-import 'package:idb_shim/idb_client_native_web.dart' as native_web;
+import 'package:idb_shim/idb_client_native.dart' as native_web;
+import 'package:idb_shim/idb_client_native_html.dart' as native_html;
 
 import '../idb_test_common.dart';
 
 void main() {
   group('idb_native_web_compat factory', () {
     test('idbFactoryFromIndexedDB', () async {
-      var factory1 = native.idbFactoryNative;
+      var factory1 = native_html.idbFactoryNative;
       var factory2 = native_web.idbFactoryNative;
 
       var value = {

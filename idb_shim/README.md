@@ -1,6 +1,6 @@
 # idb shim
 
-Pure dart indexed db like API on top of native, sembast implementation. Its goal is to support browsers that do
+Pure dart indexed db like API on top of native (Wasm compatible) or sembast implementation. Its goal is to support browsers that do
 not support the indexed_db api with very few changes as well as setting the base for a flutter implementation.
 
 It also  allows to test your database schema and access in vm unit tests.
@@ -105,11 +105,11 @@ Limitations
 
 * String and num (int or double) are supported for keys
 
-#### Native exception
+##### Native exception
 
 * Native exception type have no match in dart so a custom DatabaseError object is created to wrap the exception
 
-### Ie limitation
+##### Ie limitation
 
 IE 11, Edge 12 has the following limitations:
 
@@ -119,10 +119,17 @@ IE 11, Edge 12 has the following limitations:
   makes the transaction terminate
 * IDBIndex.multiEntry not supported on ie
 
-### Safari limitation
+##### Safari limitation
 
 Safari has the following limitations (as of v 9.0)
 
 * no support for transactions on multiple stores
 * very short transaction life cycle (no await on sdk 1.12)
 
+##### Wasm
+
+As of 2.4 the default implementation use js_interop which makes it wasm compatible.
+You can still use the legacy `dart:html` by importing `idb_shim_client_native_html.dart`.
+
+Limitations:
+- In my initial testing, numbers were read as double although they were stored as int...

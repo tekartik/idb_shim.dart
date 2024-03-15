@@ -6,7 +6,7 @@ import 'package:idb_shim/idb_client_native.dart';
 import 'package:idb_test/idb_test_common.dart';
 import 'package:test/test.dart';
 
-import '../web/test_runner_client_native_test.dart';
+import '../web/test_runner_client_native_html_test.dart';
 
 void main() {
   idbNativeFactoryTests(getIdbFactoryLogger(idbFactoryNative));

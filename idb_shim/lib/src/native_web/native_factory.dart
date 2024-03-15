@@ -5,9 +5,11 @@ import 'dart:js_interop';
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/common/common_factory.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
+import 'package:idb_shim/src/utils/env_utils.dart';
 
 import 'indexed_db_web.dart' as idb;
 import 'indexed_db_web.dart' as native;
+import 'indexed_db_web.dart';
 import 'native_database.dart';
 import 'native_error.dart';
 import 'native_event.dart';
@@ -72,16 +74,32 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
     }
     FutureOr? onUpdateNeededFutureOr;
     if (onUpgradeNeeded != null) {
-      openRequest.onupgradeneeded = (idb.IDBVersionChangeEvent event) {
-        onUpdateNeededFutureOr =
-            onUpgradeNeeded(VersionChangeEventNative(this, event));
-      }.toJS;
+      EventStreamProviders.upgradeNeededEvent
+          .forTarget(openRequest)
+          .listen((idb.IDBVersionChangeEvent event) async {
+        try {
+          onUpdateNeededFutureOr =
+              onUpgradeNeeded(VersionChangeEventNative(this, event));
+          if (onUpdateNeededFutureOr is Future) {
+            onUpdateNeededFutureOr = await onUpdateNeededFutureOr;
+          }
+        } catch (e) {
+          if (isDebug) {
+            idbLog('error $e');
+          }
+          try {
+            openRequest.transaction?.abort();
+          } catch (_) {}
+          completer.completeError(e);
+        }
+      });
     }
     openRequest.handleOnSuccessAndError(completer);
     await completer.future;
 
     /// Wait on onUpgradeNeeded to complete.
     if (onUpdateNeededFutureOr is Future) {
+      //openRequest.transaction.abort();
       //await onUpdateNeededFutureOr;
     }
     return DatabaseNative(this, openRequest.result as idb.IDBDatabase);

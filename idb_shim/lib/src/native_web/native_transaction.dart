@@ -1,11 +1,11 @@
 // ignore_for_file: public_member_api_docs
 
-import 'dart:async';
 import 'dart:js_interop';
 
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/common/common_transaction.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
+import 'package:idb_shim/src/utils/env_utils.dart';
 
 import 'indexed_db_web.dart' as idb;
 import 'native_database.dart';
@@ -20,6 +20,7 @@ class TransactionNative extends TransactionNativeBase {
   idb.IDBTransaction idbTransaction;
 
   TransactionNative(super.database, this.idbTransaction);
+
   late final Completer _completer = () {
     var completer = Completer<JSAny?>.sync();
     idbTransaction.onerror = (idb.Event event) {
@@ -110,6 +111,8 @@ class FakeMultiStoreTransactionNative extends TransactionNativeBase {
   @override
   void abort() {
     // Not supported
-    print('abort not supported in fake multistore transaction');
+    if (isDebug) {
+      idbLog('abort not supported in fake multistore transaction');
+    }
   }
 }
