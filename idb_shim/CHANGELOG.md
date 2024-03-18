@@ -1,3 +1,7 @@
+## 2.4.1-0
+
+* Add simple sdb opinionated strong typed api based on idb database.
+
 ## 2.4.0
 
 * Add new native implementation based on new js_interop and web package.
