@@ -122,6 +122,12 @@ extension IDBDartifyExtension on JSAny {
   }
 
   /// Convert JavaScript object to Dart object
+  Object dartifyKey() {
+    /// When running as wasm strict is necessary
+    return dartifyValueStrict();
+  }
+
+  /// Convert JavaScript object to Dart object
   Object dartifyValueStrict() {
     var value = this;
     if (value.isJSString) {

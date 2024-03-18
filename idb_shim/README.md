@@ -134,3 +134,12 @@ You can still use the legacy `dart:html` by importing `idb_shim_client_native_ht
 Limitations:
 - DateTime is converted manually to support `DateTime` (although not supported in Firefox)
 - So for compatibility, data is jsified and dartified using custom encoder. To see if this could be removed in the future.
+
+#### sdb
+
+Experimental opinionated strong typed api based on idb database, which is currrently
+the main available options for locale storage on web with an easy support on desktop
+using sqlite. Basically the lowest common denominator. idb_shim only include a sembast based implementation (which is ok
+for testing but does not bring any good benefit, just use sembast directly as it works on all platforms).
+
+Include `idb_sqlite` for a solid cross process safe io implementation.
