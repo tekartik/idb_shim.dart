@@ -1,4 +1,4 @@
-## 2.4.1-0
+## 2.4.1
 
 * Add simple sdb opinionated strong typed api based on idb database.
 
