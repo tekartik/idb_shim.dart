@@ -244,6 +244,6 @@ void main() {
       expect(dartWasmInt, isA<int>());
       expect(dartAnyInt, 1);
       expect(dartAnyInt, isA<int>());
-    }, solo: true);
+    });
   });
 }
