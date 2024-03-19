@@ -211,5 +211,39 @@ void main() {
       expect(list.jsifyValueStrict().dartifyValueStrict(), list);
       expect(list.jsifyValueStrict().dartify(), list);
     });
+
+    test('dartifyNum', () {
+      var jsInt = 1.toJS;
+      var jsDouble = 1.5.toJS;
+      var dartInt = jsDartifyNum(jsInt);
+      var dartDouble = jsDartifyNum(jsDouble);
+      var dartWasmInt = wasmDartifyNum(jsInt);
+      var dartWasmDouble = wasmDartifyNum(jsDouble);
+      var dartAnyInt = jsInt.toDartNum;
+      var dartAnyDouble = jsDouble.toDartNum;
+      expect(dartInt, 1);
+      expect(dartInt, isA<int>());
+      expect(dartWasmInt, 1);
+      expect(dartWasmInt, isA<int>());
+      expect(dartAnyInt, 1);
+      expect(dartAnyInt, isA<int>());
+      expect(dartDouble, closeTo(1.5, 0.00001));
+      expect(dartDouble, isA<double>());
+      expect(dartWasmDouble, closeTo(1.5, 0.00001));
+      expect(dartWasmDouble, isA<double>());
+      expect(dartAnyDouble, closeTo(1.5, 0.00001));
+      expect(dartAnyDouble, isA<double>());
+
+      jsInt = 1.0.toJS;
+      dartInt = jsDartifyNum(jsInt);
+      dartWasmInt = wasmDartifyNum(jsInt);
+      dartAnyInt = jsInt.toDartNum;
+      expect(dartInt, 1);
+      expect(dartInt, isA<int>());
+      expect(dartWasmInt, 1);
+      expect(dartWasmInt, isA<int>());
+      expect(dartAnyInt, 1);
+      expect(dartAnyInt, isA<int>());
+    }, solo: true);
   });
 }

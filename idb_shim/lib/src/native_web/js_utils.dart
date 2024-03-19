@@ -2,6 +2,8 @@ import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
+import 'package:idb_shim/src/utils/env_utils.dart';
+
 /// Get object keys
 @JS('Object.keys')
 external JSArray jsObjectKeys(JSObject object);
@@ -72,7 +74,8 @@ extension JSAnyExtension on JSAny {
 extension IDBJsifyExtension on Object {
   /// Convert Dart object to JavaScript object
   JSAny jsifyValue() {
-// Bug in DateTime that requires this hack (or drop support for DateTime)
+    // Bug in DateTime that requires this
+    // hack (or drop support for DateTime)
     return jsifyValueStrict();
   }
 
@@ -113,6 +116,26 @@ extension IDBJsifyExtension on Object {
   }
 }
 
+/// See https://github.com/dart-lang/sdk/issues/55203#issuecomment-2003246663
+num wasmDartifyNum(JSNumber value) {
+  final jsDouble = value.toDartDouble;
+  final jsInt = jsDouble.truncate();
+  return (jsInt.toDouble() == jsDouble) ? jsInt : jsDouble;
+}
+
+/// In JS everything is a double.
+num jsDartifyNum(JSNumber value) {
+  return value.toDartDouble;
+}
+
+/// JavaScript number extension.
+extension IdbJSNumberExt on JSNumber {
+  /// Convert JavaScript number to Dart number
+  /// /// See https://github.com/dart-lang/sdk/issues/55203#issuecomment-2003246663
+  num get toDartNum =>
+      idbIsRunningAsJavascript ? jsDartifyNum(this) : wasmDartifyNum(this);
+}
+
 /// dartify helper for JavaScript objects (handle Uint8List, DateTime, Map, List, String, num, bool)
 extension IDBDartifyExtension on JSAny {
   /// Convert JavaScript object to Dart object
@@ -133,12 +156,7 @@ extension IDBDartifyExtension on JSAny {
     if (value.isJSString) {
       return (value as JSString).toDart;
     } else if (value.isJSNumber) {
-      try {
-// toDartInt throws if it is not an integer
-        return (value as JSNumber).toDartInt;
-      } catch (_) {
-        return (value as JSNumber).toDartDouble;
-      }
+      return (value as JSNumber).toDartNum;
     } else if (value.isJSBoolean) {
       return (value as JSBoolean).toDart;
     } else if (value.isJSObject) {
