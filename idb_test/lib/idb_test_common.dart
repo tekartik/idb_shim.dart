@@ -224,6 +224,6 @@ void dbTest(String description, dynamic Function() body,
     await ctx.factory.deleteDatabase(dbTestName);
     await Future.value(body());
   },
-      // ignore: deprecated_member_use
+      // ignore: deprecated_member_use, invalid_use_of_do_not_submit_member
       solo: solo == true);
 }
