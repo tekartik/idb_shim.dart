@@ -1,6 +1,7 @@
-## 2.4.1+1
+## 2.4.1+2
 
 * Add simple sdb opinionated strong typed api based on idb database.
+* Complete dart2wasm compilation support
 
 ## 2.4.0
 
