@@ -272,7 +272,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   @override
-  Future<void> delete(Object key) {
+  Future<Object?> delete(Object key) {
     return _inWritableTransaction(() {
       if (hasCompositeKey) {
         return sdbStore.delete(sdbClient,
