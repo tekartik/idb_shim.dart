@@ -272,12 +272,13 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   @override
-  Future<void> delete(Object key) async {
-    return _inWritableTransaction(() async {
+  Future<void> delete(Object key) {
+    return _inWritableTransaction(() {
       if (hasCompositeKey) {
-        await sdbStore.delete(sdbClient, finder: compositeFindByKeyFinder(key));
+        return sdbStore.delete(sdbClient,
+            finder: compositeFindByKeyFinder(key));
       } else {
-        await sdbStore.record(key).delete(sdbClient);
+        return sdbStore.record(key).delete(sdbClient);
       }
     });
   }

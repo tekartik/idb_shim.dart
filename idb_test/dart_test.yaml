@@ -5,7 +5,7 @@ platforms:
 compilers:
   - dart2js
   - dart2wasm
-  - source
+  - kernel
 override_platforms:
   # Unfortunately not working...
   firefox:

@@ -120,7 +120,6 @@ class TransactionSembast extends IdbTransactionBase
       }
       throw newAbortException('Transaction aborted');
     }
-    //print('_next? ${index}/${actions.length}');
     if (_index < _actions.length) {
       // Always try more
       return _execute(_index++).then((_) {
@@ -227,7 +226,7 @@ class TransactionSembast extends IdbTransactionBase
 
   Future<T> _enqueue<T>(FutureOr<T> Function() action) {
     if (_debugTransaction) {
-      idbLog('enqueing');
+      idbLog('enqueueing${_inactive ? ' (inactive)' : ''} $_debugId');
     }
     if (_inactive) {
       return Future.error(DatabaseError('TransactionInactiveError'));

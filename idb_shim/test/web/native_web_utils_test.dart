@@ -10,7 +10,12 @@ import '../idb_test_common.dart';
 void main() {
   group('native_web_utils', () {
     test('null', () {
-      expect(null.jsify()?.dartifyValueStrict(), null);
+      if (idbIsRunningAsJavascript) {
+        expect(null.jsify()?.dartifyValueStrict(), null);
+      } else {
+        // ignore: dead_code
+        expect(null?.jsifyValueStrict()?.dartifyValueStrict(), null);
+      }
     });
     test('JSArray', () {
       var jsArray = [1.toJS].toJS;
@@ -39,6 +44,7 @@ void main() {
       expect(jsDate.getTime(), 1);
       expect(jsDate.isJSDate, isTrue);
       expect(jsDate.isJSObject, isTrue);
+
       var dartDate = jsDate.dartifyValueStrict();
       expect(dartDate, isA<DateTime>());
       expect(dartDate, DateTime.fromMillisecondsSinceEpoch(1, isUtc: true));
@@ -70,8 +76,13 @@ void main() {
       // Compare with dartify()! same as dartifyValue
       dartDate = jsDate.dartify()!;
       //print('dartDate: $dartDate');
-      expect(dartDate, isA<DateTime>());
-      expect(dartDate, DateTime.fromMillisecondsSinceEpoch(1, isUtc: true));
+      if (idbIsRunningAsJavascript) {
+        expect(dartDate, isA<DateTime>());
+        expect(dartDate, DateTime.fromMillisecondsSinceEpoch(1, isUtc: true));
+      } else {
+        // In wasm all numbers are double!
+        expect(dartDate, isNot(isA<DateTime>()));
+      }
     });
     test('JSString', () {
       var jsString = 'test'.toJS;
@@ -96,7 +107,13 @@ void main() {
       expect(jsNumberFromDart.toDartInt, 1);
 // Same as dartify
       dartNumber = jsNumber.dartify()!;
-      expect(dartNumber, isA<int>());
+
+      if (idbIsRunningAsJavascript) {
+        expect(dartNumber, isA<int>());
+      } else {
+        // In wasm all numbers are double!
+        expect(dartNumber, isA<double>());
+      }
     });
     test('JSNumber(double)', () {
       var jsNumber = 1.5.toJS;
@@ -207,10 +224,20 @@ void main() {
           'testDate': DateTime.fromMillisecondsSinceEpoch(1, isUtc: true),
         }
       ];
-      expect(list.jsify()?.dartifyValueStrict(), list);
-      expect(list.jsify().dartify(), list);
+
+      if (idbIsRunningAsJavascript) {
+        expect(list.jsify()?.dartifyValueStrict(), list);
+        expect(list.jsify().dartify(), list);
+      } else {
+        expect(list.jsify()?.dartifyValueStrict(), isNot(list));
+        expect(list.jsify().dartify(), isNot(list));
+      }
       expect(list.jsifyValueStrict().dartifyValueStrict(), list);
-      expect(list.jsifyValueStrict().dartify(), list);
+      if (idbIsRunningAsJavascript) {
+        expect(list.jsifyValueStrict().dartify(), list);
+      } else {
+        expect(list.jsifyValueStrict().dartify(), isNot(list));
+      }
     });
 
     test('dartifyNum', () {

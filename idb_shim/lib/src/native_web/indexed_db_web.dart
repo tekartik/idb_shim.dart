@@ -97,8 +97,8 @@ extension IDBRequestExt on IDBRequest {
 
   /// On success and error helper.
   void handleOnSuccessAndError(Completer<JSAny?> completer) {
-    handleOnError(completer);
     handleOnSuccess(completer);
+    handleOnError(completer);
   }
 
   /// Future result

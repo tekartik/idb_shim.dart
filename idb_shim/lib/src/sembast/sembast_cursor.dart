@@ -37,24 +37,26 @@ abstract mixin class KeyCursorSembastMixin implements Cursor {
   void next() => advance(1);
 
   @override
-  Future delete() async {
+  Future delete() {
     if (this is! CursorWithValue) {
       // Do this to maintain the transaction...
-      await store.transaction!.execute(() async {
+      return store.transaction!.execute(() async {
         // Mimic Chrome behavior
         throw StateError(
             'Cannot call cursor.delete when openKeyCursor is used, try openCursor instead');
       });
     }
-    await store.delete(record.primaryKey);
-    var i = recordIndex + 1;
-    while (i < ctlr.records!.length) {
-      if (ctlr.records![i].primaryKey == record.primaryKey) {
-        ctlr.records!.removeAt(i);
-      } else {
-        i++;
+
+    return store.delete(record.primaryKey).then((_) {
+      var i = recordIndex + 1;
+      while (i < ctlr.records!.length) {
+        if (ctlr.records![i].primaryKey == record.primaryKey) {
+          ctlr.records!.removeAt(i);
+        } else {
+          i++;
+        }
       }
-    }
+    });
   }
 
   @override
@@ -64,17 +66,20 @@ abstract mixin class KeyCursorSembastMixin implements Cursor {
   Object get primaryKey => record.primaryKey;
 
   @override
-  Future<void> update(Object value) async {
+  Future<void> update(Object value) {
     // Keep the transaction alive
     // value is converted in put
-    await store.put(value, store.getUpdateKeyIfNeeded(value, primaryKey));
-    await store.transaction!.execute(() async {
+
+    var primaryKey = this.primaryKey;
+    var recordIndex = this.recordIndex;
+    return store.put(value, primaryKey).then((_) {
+      //return store.transaction!.execute(() async {
       var sdbSnapshot =
-          await store.sdbStore.record(primaryKey).getSnapshot(store.sdbClient);
-      // Also update all records in the current list...
+          store.sdbStore.record(primaryKey).getSnapshotSync(store.sdbClient);
+// Also update all records in the current list...
       var i = recordIndex + 1;
       while (i < ctlr.records!.length) {
-        if (ctlr.records![i].primaryKey == record.primaryKey) {
+        if (ctlr.records![i].primaryKey == primaryKey) {
           if (sdbSnapshot == null) {
             ctlr.records!.removeAt(i);
           } else {
@@ -86,6 +91,7 @@ abstract mixin class KeyCursorSembastMixin implements Cursor {
           i++;
         }
       }
+      //});
     });
   }
 }

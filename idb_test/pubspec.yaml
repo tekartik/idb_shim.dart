@@ -14,7 +14,7 @@ dependencies:
   test: '>=1.16.0-nullsafety.12'
   collection:
   path:
-  sembast:
+  sembast: '>=3.7.1'
 dev_dependencies:
   web:
   lints: '>=2.1.1'
