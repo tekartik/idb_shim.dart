@@ -1,4 +1,4 @@
-@TestOn('!wasm')
+@TestOn('!wasm') // tmp
 library;
 
 import 'package:idb_test/idb_test_common.dart';
