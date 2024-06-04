@@ -1,4 +1,4 @@
-@TestOn('browser')
+@TestOn('browser && !wasm')
 library idb_browser_test;
 
 import 'dart:html';

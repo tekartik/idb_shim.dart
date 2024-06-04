@@ -1,6 +1,6 @@
 library idb_shim.idb_io_test_common;
 
-import 'dart:html';
+import 'package:web/web.dart';
 
 bool? _isIe;
 

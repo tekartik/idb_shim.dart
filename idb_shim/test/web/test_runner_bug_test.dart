@@ -7,6 +7,7 @@ import '../idb_test_common.dart';
 
 void main() {
   var idbFactory = idbFactoryMemoryFs;
+  // test('solo', () {}, solo: true);
   test('bug', () async {
     // Turn on dev logs
     sembastDebug = true;

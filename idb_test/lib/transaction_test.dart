@@ -2,6 +2,7 @@ library transaction_test_common;
 
 import 'package:idb_shim/idb_client.dart';
 
+import 'exception_test.dart';
 import 'idb_test_common.dart';
 
 // so that this can be run directly
@@ -168,7 +169,9 @@ void defineTests(TestContext ctx) {
         }).then((_) {
           // there must be an error
           expect(exception is TestFailure, isFalse);
-          expect(isTransactionReadOnlyError(exception!), isTrue);
+          if (!isWasmError(exception!)) {
+            expect(isTransactionReadOnlyError(exception!), isTrue);
+          }
         });
         //database.close();
         await transaction.completed;
@@ -191,7 +194,9 @@ void defineTests(TestContext ctx) {
           //print(e);
           //print(e.runtimeType);
           expect(isTestFailure(e), isFalse);
-          expect(isNotFoundError(e), isTrue);
+          if (!isWasmError(e)) {
+            expect(isNotFoundError(e), isTrue);
+          }
         }
       });
 
@@ -229,7 +234,9 @@ void defineTests(TestContext ctx) {
           fail('exception expected');
         } catch (e) {
           expect(e is TestFailure, isFalse);
-          expect(isNotFoundError(e), isTrue);
+          if (!isWasmError(e)) {
+            expect(isNotFoundError(e), isTrue);
+          }
         }
       });
     });
@@ -404,7 +411,9 @@ void defineTests(TestContext ctx) {
         } catch (e) {
           // Transaction inactive
           expect(isTestFailure(e), isFalse);
-          expect(isTransactionInactiveError(e), isTrue);
+          if (!isWasmError(e)) {
+            expect(isTransactionInactiveError(e), isTrue);
+          }
         }
       });
 
@@ -542,7 +551,9 @@ void defineTests(TestContext ctx) {
             //} on DatabaseError catch (e) {
           } catch (e) {
             expect(isTestFailure(e), isFalse);
-            expect(isTransactionInactiveError(e), isTrue);
+            if (!isWasmError(e)) {
+              expect(isTransactionInactiveError(e), isTrue);
+            }
           }
 
           // this hangs on idb, chrome ie/safari

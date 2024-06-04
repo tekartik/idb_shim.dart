@@ -1,4 +1,4 @@
-@TestOn('browser')
+@TestOn('browser && !wasm')
 library;
 
 import 'dart:typed_data';

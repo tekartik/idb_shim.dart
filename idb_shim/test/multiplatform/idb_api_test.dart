@@ -15,8 +15,9 @@ void main() {
       if (e != null) {
         expect(e, isNot(const TypeMatcher<TestFailure>()));
       }
+      // print('kIdbDartIsWeb: $kIdbDartIsWeb');
       expect(kIdbDartIsWeb, isTrue);
-      expect(idbIsRunningAsJavascript, isTrue); // Not true for wasm
+      //expect(idbIsRunningAsJavascript, isTrue); // Not true for wasm
     }
 
     void expectIo([Object? e]) {
@@ -24,6 +25,7 @@ void main() {
         expect(e, isNot(const TypeMatcher<TestFailure>()));
       }
       expect(kIdbDartIsWeb, isFalse);
+      expect(idbIsRunningAsJavascript, isFalse); // Not true for wasm
     }
 
     test('api', () {

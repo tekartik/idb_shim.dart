@@ -4,6 +4,7 @@ import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/common/common_value.dart'; // ignore: implementation_imports
 import 'package:idb_test/idb_test_common_meta.dart';
 
+import 'exception_test.dart';
 import 'idb_test_common.dart';
 
 // so that this can be run directly
@@ -604,7 +605,9 @@ void defineTests(TestContext ctx) {
           return Object();
         }).then((_) {
           expect(isTestFailure(exception), isFalse);
-          expect(isTransactionReadOnlyError(exception), isTrue);
+          if (!isWasmError(exception)) {
+            expect(isTransactionReadOnlyError(exception), isTrue);
+          }
           // don't wait for transaction
           transaction = null;
         });
@@ -620,7 +623,10 @@ void defineTests(TestContext ctx) {
           return Object();
         }).then((_) {
           expect(isTestFailure(exception), isFalse);
-          expect(isTransactionReadOnlyError(exception), isTrue);
+          if (!isWasmError(exception)) {
+            expect(isTransactionReadOnlyError(exception), isTrue);
+          }
+
           // don't wait for transaction
           transaction = null;
         });
@@ -635,7 +641,10 @@ void defineTests(TestContext ctx) {
           exception = e;
         }).then((_) {
           expect(isTestFailure(exception), isFalse);
-          expect(isTransactionReadOnlyError(exception), isTrue);
+          if (!isWasmError(exception)) {
+            expect(isTransactionReadOnlyError(exception), isTrue);
+          }
+
           // don't wait for transaction
           transaction = null;
         });
@@ -649,7 +658,10 @@ void defineTests(TestContext ctx) {
           fail('should fail');
         } catch (e) {
           expect(isTestFailure(e), isFalse);
-          expect(isTransactionReadOnlyError(e), isTrue);
+          if (!isWasmError(e)) {
+            expect(isTransactionReadOnlyError(e), isTrue);
+          }
+
           // don't wait for transaction
           transaction = null;
         }

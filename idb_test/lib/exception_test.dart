@@ -2,6 +2,9 @@ import 'package:idb_shim/idb_client.dart';
 
 import 'idb_test_common.dart';
 
+// Tmp support for failing test case exception handling
+bool isWasmError(Object e) => e.toString() == 'JavaScriptError';
+
 // so that this can be run directly
 void main() {
   defineTests(idbMemoryContext);

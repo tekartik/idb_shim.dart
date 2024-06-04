@@ -450,6 +450,7 @@ void defineTests(TestContext ctx) {
               unique: true, multiEntry: true);
         }
 
+        print('1');
         db = await idbFactory.open(srcDbName,
             version: 4, onUpgradeNeeded: onUpgradeNeeded);
 
@@ -467,11 +468,11 @@ void defineTests(TestContext ctx) {
           expect(index.name, testNameIndex);
           expect(index.keyPath, testNameField);
           expect(index.unique, isTrue);
-
           // multiEntry not supported on ie
           if (!ctx.isIdbIe) {
             expect(index.multiEntry, isTrue);
           }
+
           await txn.completed;
         }
 

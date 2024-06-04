@@ -191,7 +191,8 @@ void defineTests(TestContext ctx) {
       try {
         await testKey(true);
       } catch (e) {
-        print(e);
+        // native web interop wasm: 'JavaScriptError'
+        // print(e);
       }
       await testKey(1234);
       await testKey(1.234);

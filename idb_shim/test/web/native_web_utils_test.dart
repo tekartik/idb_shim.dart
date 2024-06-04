@@ -4,7 +4,8 @@ library;
 import 'dart:js_interop';
 import 'dart:typed_data';
 import 'package:idb_shim/src/native_web/js_utils.dart';
-import 'package:test/test.dart';
+
+import '../idb_test_common.dart';
 
 void main() {
   group('native_web_utils', () {
@@ -215,33 +216,45 @@ void main() {
     test('dartifyNum', () {
       var jsInt = 1.toJS;
       var jsDouble = 1.5.toJS;
+
       var dartInt = jsDartifyNum(jsInt);
-      var dartDouble = jsDartifyNum(jsDouble);
-      var dartWasmInt = wasmDartifyNum(jsInt);
-      var dartWasmDouble = wasmDartifyNum(jsDouble);
+
+      if (idbIsRunningAsJavascript) {
+        var dartDouble = jsDartifyNum(jsDouble);
+        expect(dartInt, 1);
+        expect(dartInt, isA<int>());
+        expect(dartDouble, closeTo(1.5, 0.00001));
+        expect(dartDouble, isA<double>());
+
+        jsInt = 1.0.toJS;
+        dartInt = jsDartifyNum(jsInt);
+
+        expect(dartInt, 1);
+        expect(dartInt, isA<int>());
+      } else {
+        expect(dartInt, 1.0);
+        expect(dartInt, isA<double>());
+
+        var dartWasmInt = wasmDartifyNum(jsInt);
+        var dartWasmDouble = wasmDartifyNum(jsDouble);
+        expect(dartWasmInt, 1);
+        expect(dartWasmInt, isA<int>());
+        expect(dartWasmDouble, closeTo(1.5, 0.00001));
+        expect(dartWasmDouble, isA<double>());
+
+        dartWasmInt = wasmDartifyNum(jsInt);
+        expect(dartWasmInt, 1);
+        expect(dartWasmInt, isA<int>());
+      }
       var dartAnyInt = jsInt.toDartNum;
       var dartAnyDouble = jsDouble.toDartNum;
-      expect(dartInt, 1);
-      expect(dartInt, isA<int>());
-      expect(dartWasmInt, 1);
-      expect(dartWasmInt, isA<int>());
+
       expect(dartAnyInt, 1);
       expect(dartAnyInt, isA<int>());
-      expect(dartDouble, closeTo(1.5, 0.00001));
-      expect(dartDouble, isA<double>());
-      expect(dartWasmDouble, closeTo(1.5, 0.00001));
-      expect(dartWasmDouble, isA<double>());
       expect(dartAnyDouble, closeTo(1.5, 0.00001));
       expect(dartAnyDouble, isA<double>());
 
-      jsInt = 1.0.toJS;
-      dartInt = jsDartifyNum(jsInt);
-      dartWasmInt = wasmDartifyNum(jsInt);
       dartAnyInt = jsInt.toDartNum;
-      expect(dartInt, 1);
-      expect(dartInt, isA<int>());
-      expect(dartWasmInt, 1);
-      expect(dartWasmInt, isA<int>());
       expect(dartAnyInt, 1);
       expect(dartAnyInt, isA<int>());
     });

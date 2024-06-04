@@ -150,6 +150,25 @@ extension IDBDartifyExtension on JSAny {
     return dartifyValueStrict();
   }
 
+  /// Convert a js value to String or List<String>
+  Object dartifyStringOrStringList() {
+    // devPrint('dartifyStringOrStringList: $this');
+    var value = this;
+    if (value.isJSString) {
+      return (value as JSString).toDart;
+    } else if (value.isJSArray) {
+      return (value as JSArray).toDart.map((e) {
+        return (e as JSAny).dartifyKeyPath();
+      }).toList();
+    }
+
+    throw UnsupportedError(
+        'Unsupported keyPath: $value (type: ${value.runtimeType})');
+  }
+
+  /// Convert keyPath to String or List<String>
+  Object dartifyKeyPath() => dartifyStringOrStringList();
+
   /// Convert JavaScript object to Dart object
   Object dartifyValueStrict() {
     var value = this;

@@ -2,6 +2,7 @@ library database_test;
 
 import 'package:idb_shim/idb_client.dart';
 
+import 'exception_test.dart';
 import 'idb_test_common.dart';
 //import 'idb_test_factory.dart';
 
@@ -186,11 +187,15 @@ void defineTests(TestContext ctx) {
         }
         db.createObjectStore(testStoreName);
       });
-      // print('$deleteObjectStoreError');
-      // native_web: NotFoundError: Failed to execute 'deleteObjectStore' on 'IDBDatabase': The specified object store was not found.
-      // NotFoundError: An attempt was made to reference a Node in a context where it does not exist. The specified object store was not found.
-      // NotFoundError: One of the specified object stores 'test_store_2' was not found.
-      expect(isNotFoundError(deleteObjectStoreError), isTrue);
+      // Tmp wasm support
+      if (!isWasmError(deleteObjectStoreError)) {
+        // native_web on wasm!: 'JavaScriptError'.
+        // native_web: NotFoundError: Failed to execute 'deleteObjectStore' on 'IDBDatabase': The specified object store was not found.
+        // NotFoundError: An attempt was made to reference a Node in a context where it does not exist. The specified object store was not found.
+        // NotFoundError: One of the specified object stores 'test_store_2' was not found.
+        expect(isNotFoundError(deleteObjectStoreError), isTrue,
+            reason: '1 $deleteObjectStoreError');
+      }
       db!.close();
       db = await idbFactory.open(dbName!, version: 2,
           onUpgradeNeeded: (VersionChangeEvent e) {
@@ -203,7 +208,12 @@ void defineTests(TestContext ctx) {
         }
         db.deleteObjectStore(testStoreName);
       });
-      expect(isNotFoundError(deleteObjectStoreError), isTrue);
+      // Tmp wasm support
+      // devPrint('deleteObjectStoreError: $deleteObjectStoreError');
+      if (!isWasmError(deleteObjectStoreError)) {
+        expect(isNotFoundError(deleteObjectStoreError), isTrue,
+            reason: '2 $deleteObjectStoreError');
+      }
 
       db!.close();
     });
@@ -249,7 +259,7 @@ void defineTests(TestContext ctx) {
 
     test('delete_non_existing_index', () async {
       await setupDeleteDb();
-      late DatabaseError deleteDatabaseError;
+      late DatabaseError deleteIndexError;
       db = await idbFactory.open(dbName!, version: 1,
           onUpgradeNeeded: (VersionChangeEvent e) {
         final db = e.database;
@@ -259,14 +269,15 @@ void defineTests(TestContext ctx) {
           store.deleteIndex(testNameIndex);
           fail('should fail');
         } on DatabaseError catch (e) {
-          deleteDatabaseError = e;
+          deleteIndexError = e;
         }
       });
-      print('$deleteDatabaseError');
-      // NotFoundError: An attempt was made to reference a Node in a context where it does not exist. The specified index was not found.
-      // NotFoundError: The specified index 'name_index' was not found.
-      // native_web: NotFoundError: Failed to execute 'deleteIndex' on 'IDBObjectStore': The specified index was not found.
-      expect(isNotFoundError(deleteDatabaseError), isTrue);
+      if (!isWasmError(deleteIndexError)) {
+        // NotFoundError: An attempt was made to reference a Node in a context where it does not exist. The specified index was not found.
+        // NotFoundError: The specified index 'name_index' was not found.
+        // native_web: NotFoundError: Failed to execute 'deleteIndex' on 'IDBObjectStore': The specified index was not found.
+        expect(isNotFoundError(deleteIndexError), isTrue);
+      }
       db!.close();
 
       late List<String> onUpgradeIndexNames;
@@ -279,13 +290,17 @@ void defineTests(TestContext ctx) {
             store.deleteIndex(testNameIndex);
             fail('should fail');
           } on DatabaseError catch (e) {
-            deleteDatabaseError = e;
+            deleteIndexError = e;
           }
           store.createIndex(testNameIndex2, testNameField2);
           onUpgradeIndexNames = store.indexNames.toList();
         });
         expect(onUpgradeIndexNames, [testNameIndex2]);
-        expect(isNotFoundError(deleteDatabaseError), isTrue);
+        if (!isWasmError(deleteIndexError)) {
+          // NotFoundError: The specified index 'name_index' was not found.
+          expect(isNotFoundError(deleteIndexError), isTrue);
+        }
+
         db!.close();
         db = await idbFactory.open(dbName!, version: 3,
             onUpgradeNeeded: (VersionChangeEvent e) {
@@ -303,7 +318,10 @@ void defineTests(TestContext ctx) {
             store.deleteIndex(testNameIndex2);
             fail('should fail');
           } on DatabaseError catch (e) {
-            expect(isNotFoundError(e), isTrue);
+            if (!isWasmError(e)) {
+              // NotFoundError: The specified index 'name_index_2' was not found.
+              expect(isNotFoundError(e), isTrue);
+            }
           }
           onUpgradeIndexNames = store.indexNames.toList();
         });

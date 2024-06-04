@@ -152,7 +152,7 @@ class ObjectStoreNative extends ObjectStore {
   }
 
   @override
-  Object? get keyPath => idbObjectStore.keyPath;
+  Object? get keyPath => idbObjectStore.keyPath?.dartifyKeyPath();
 
   // ie return null so make sure it is a bool
   @override
