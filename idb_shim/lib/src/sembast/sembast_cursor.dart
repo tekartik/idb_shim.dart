@@ -37,24 +37,27 @@ abstract mixin class KeyCursorSembastMixin implements Cursor {
   void next() => advance(1);
 
   @override
-  Future delete() {
+  Future delete() async {
     if (this is! CursorWithValue) {
       // Do this to maintain the transaction...
-      return store.transaction!.execute(() async {
+      await store.transaction!.execute(() async {
         // Mimic Chrome behavior
         throw StateError(
             'Cannot call cursor.delete when openKeyCursor is used, try openCursor instead');
       });
     }
 
-    return store.delete(record.primaryKey).then((_) {
-      var i = recordIndex + 1;
-      while (i < ctlr.records!.length) {
-        if (ctlr.records![i].primaryKey == record.primaryKey) {
+    var records = ctlr.records!;
+    var primaryKey = record.primaryKey;
+    var recordIndex = this.recordIndex;
+    await store.transaction!.execute(() async {
+      await store.txnDelete(primaryKey);
+      var i = records.length - 1;
+      while (i > recordIndex) {
+        if (records[i].primaryKey == record.primaryKey) {
           ctlr.records!.removeAt(i);
-        } else {
-          i++;
         }
+        i--;
       }
     });
   }
@@ -66,32 +69,32 @@ abstract mixin class KeyCursorSembastMixin implements Cursor {
   Object get primaryKey => record.primaryKey;
 
   @override
-  Future<void> update(Object value) {
+  Future<void> update(Object value) async {
     // Keep the transaction alive
     // value is converted in put
-
+    var records = ctlr.records!;
     var primaryKey = this.primaryKey;
-    var recordIndex = this.recordIndex;
-    return store.put(value, primaryKey).then((_) {
-      //return store.transaction!.execute(() async {
+    var updateKey = store.getUpdateKeyIfNeeded(value, primaryKey);
+
+    await store.transaction!.execute(() async {
+      await store.txnPut(value, updateKey);
       var sdbSnapshot =
-          store.sdbStore.record(primaryKey).getSnapshotSync(store.sdbClient);
-// Also update all records in the current list...
+          await store.sdbStore.record(primaryKey).getSnapshot(store.sdbClient);
+      // Also update all records in the current list...
       var i = recordIndex + 1;
       while (i < ctlr.records!.length) {
-        if (ctlr.records![i].primaryKey == primaryKey) {
+        if (records[i].primaryKey == primaryKey) {
           if (sdbSnapshot == null) {
-            ctlr.records!.removeAt(i);
+            records.removeAt(i);
           } else {
-            ctlr.records![i] = IndexRecordSnapshotSembast(
-                store, ctlr.records![i].key, sdbSnapshot);
+            records[i] =
+                IndexRecordSnapshotSembast(store, records[i].key, sdbSnapshot);
             i++;
           }
         } else {
           i++;
         }
       }
-      //});
     });
   }
 }

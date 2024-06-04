@@ -274,13 +274,16 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   @override
   Future<Object?> delete(Object key) {
     return _inWritableTransaction(() {
-      if (hasCompositeKey) {
-        return sdbStore.delete(sdbClient,
-            finder: compositeFindByKeyFinder(key));
-      } else {
-        return sdbStore.record(key).delete(sdbClient);
-      }
+      return txnDelete(key);
     });
+  }
+
+  Future<Object?> txnDelete(Object key) {
+    if (hasCompositeKey) {
+      return sdbStore.delete(sdbClient, finder: compositeFindByKeyFinder(key));
+    } else {
+      return sdbStore.record(key).delete(sdbClient);
+    }
   }
 
   /// Clone and convert
@@ -363,10 +366,15 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   @override
   Future<Object> put(Object value, [Object? key]) {
-    value = toSembastValue(value);
     return _inWritableTransaction(() {
-      var fixedKey = getKeyImpl(value, key);
-      return putImpl(value, fixedKey);
+      return txnPut(value, key);
     });
+  }
+
+  /// Assume in transaction.
+  Future<Object> txnPut(Object value, [Object? key]) {
+    value = toSembastValue(value);
+    var fixedKey = getKeyImpl(value, key);
+    return putImpl(value, fixedKey);
   }
 }

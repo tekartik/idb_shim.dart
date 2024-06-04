@@ -1,4 +1,5 @@
-library idb_shim.test_runner_client_sembast_fs_test;
+@TestOn('!wasm')
+library;
 
 import 'dart:convert';
 

@@ -391,9 +391,8 @@ void defineTests(TestContext ctx) {
         await index
             .openCursor(autoAdvance: false)
             .listen((CursorWithValue cwv) {
-          cwv.delete().then((_) {
-            cwv.next();
-          });
+          cwv.delete();
+          cwv.next();
         }).asFuture<void>();
 
         await transaction!.completed;
@@ -415,9 +414,8 @@ void defineTests(TestContext ctx) {
               .listen((CursorWithValue cwv) {
                 map = Map.from(cwv.value as Map);
                 map['other'] = 'too';
-                cwv.update(map).then((_) {
-                  cwv.next();
-                });
+                cwv.update(map);
+                cwv.next();
               })
               .asFuture<void>()
               .then((_) {
@@ -819,7 +817,8 @@ void defineTests(TestContext ctx) {
             cwv.update({
               testNameField: [2, 1],
               'other': 'test'
-            }).then((_) => cwv.next());
+            });
+            cwv.next();
           } else if (!gotItem2) {
             gotItem2 = true;
             expect(cwv.primaryKey, 1);
@@ -842,7 +841,8 @@ void defineTests(TestContext ctx) {
             gotItem = true;
             expect(cwv.primaryKey, 1);
             expect(cwv.key, 1);
-            cwv.delete().then((_) => cwv.next());
+            cwv.delete();
+            cwv.next();
           } else {
             fail('should fail');
           }
