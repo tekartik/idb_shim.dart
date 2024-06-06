@@ -1,3 +1,7 @@
+## 2.5.0-1
+
+* Remove legacy html implementation.
+
 ## 2.4.1+4
 
 * Add simple sdb opinionated strong typed api based on idb database.
