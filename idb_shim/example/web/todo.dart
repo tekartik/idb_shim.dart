@@ -6,23 +6,23 @@
 // See: http://www.html5rocks.com/en/tutorials/indexeddb/todo/
 
 import 'dart:async';
-import 'dart:html';
 
 import 'package:idb_shim/idb.dart' as idb;
 import 'package:idb_shim/idb_browser.dart' as idb;
+import 'package:web/web.dart';
 //import 'dart:indexed_db' as idb;
 
 //idb.IdbFactory idbFactory = window.indexedDB;
 idb.IdbFactory? idbFactory;
 
 class TodoList {
-  late InputElement _input;
+  late HTMLInputElement _input;
   late Element _todoItems;
 
   TodoList() {
-    _todoItems = querySelector('#todo-items')!;
-    _input = querySelector('#todo') as InputElement;
-    querySelector('input#submit')!.onClick.listen((e) => _onAddTodo());
+    _todoItems = document.querySelector('#todo-items')!;
+    _input = document.querySelector('#todo') as HTMLInputElement;
+    document.querySelector('input#submit')!.onClick.listen((e) => _onAddTodo());
   }
 
   static final String _todosDb = 'com.tekartik.idb.todo';
@@ -43,7 +43,8 @@ class TodoList {
     // Get the user's attention for the sake of this tutorial. (Of course we
     // would *never* use window.alert() in real life.)
     window.alert('Oh no! Something went wrong. See the console for details.');
-    window.console.log('An error occurred: {$e}');
+    // ignore: avoid_print
+    print('An error occurred: {$e}');
   }
 
   void _onDbOpened(idb.Database db) {
@@ -59,7 +60,7 @@ class TodoList {
   }
 
   void _onAddTodo() {
-    var value = _input.value!.trim();
+    var value = _input.value.trim();
     if (value.isNotEmpty) {
       _addTodo(value);
     }
@@ -86,7 +87,9 @@ class TodoList {
   }
 
   void _getAllTodoItems() {
-    _todoItems.nodes.clear();
+    for (var i = 0; i < _todoItems.children.length; i++) {
+      _todoItems.children.item(i)?.remove();
+    }
 
     var trans = _db.transaction(_todosStore, 'readwrite');
     var store = trans.objectStore(_todosStore);
@@ -98,18 +101,18 @@ class TodoList {
   }
 
   void _renderTodo(Map todoItem) {
-    var textDisplay = Element.tag('span');
-    textDisplay.text = todoItem['text'] as String?;
+    var textDisplay = HTMLSpanElement();
+    textDisplay.text = todoItem['text']?.toString() ?? '<no data>';
 
-    var deleteControl = Element.tag('a');
+    var deleteControl = HTMLAnchorElement();
     deleteControl.text = '[Delete]';
     deleteControl.onClick
         .listen((e) => _deleteTodo(todoItem['timeStamp'] as String));
 
-    var item = Element.tag('li');
-    item.nodes.add(textDisplay);
-    item.nodes.add(deleteControl);
-    _todoItems.nodes.add(item);
+    var item = HTMLLIElement();
+    item.appendChild(textDisplay);
+    item.appendChild(deleteControl);
+    _todoItems.appendChild(item);
   }
 }
 
@@ -146,7 +149,8 @@ Future<void> main() async {
     window.alert(
         "No idbFactory of type '$idbFactoryName' supported on this browser");
   } else {
-    querySelector('#idb span')!.innerHtml = "Using '${idbFactory!.name}'";
+    document.querySelector('#idb span')!.innerHTML =
+        "Using '${idbFactory!.name}'";
     await TodoList().open();
   }
 }
