@@ -6,7 +6,6 @@ import 'package:idb_shim/idb_client.dart' as idb;
 
 import 'idb_test_common.dart';
 
-
 const String _storeName = 'TEST';
 const int _version = 1;
 
