@@ -431,40 +431,45 @@ void defineTests(TestContext ctx) {
               });
         });
       });
-      test('3 item cursor', () async {
-        await dbSetUp();
-        dbCreateTransaction();
-        return fill3SampleRows().then((_) {
-          return cursorToList(index.openCursor(autoAdvance: true)).then((list) {
-            expect((list[0].value as Map)['name'], equals('test1'));
-            expect(list[0].primaryKey, equals(2));
-            expect((list[1].value as Map)['name'], equals('test2'));
-            expect((list[2].value as Map)['name'], equals('test3'));
-            expect(list[2].primaryKey, equals(3));
-            expect(list.length, 3);
-
-            return cursorToList(index.openCursor(
-                    range: KeyRange.bound('test2', 'test3'), autoAdvance: true))
+      test(
+        '3 item cursor',
+        () async {
+          await dbSetUp();
+          dbCreateTransaction();
+          return fill3SampleRows().then((_) {
+            return cursorToList(index.openCursor(autoAdvance: true))
                 .then((list) {
-              expect(list.length, 2);
-              expect((list[0].value as Map)['name'], equals('test2'));
-              expect(list[0].primaryKey, equals(1));
-              expect((list[1].value as Map)['name'], equals('test3'));
-              expect(list[1].primaryKey, equals(3));
+              expect((list[0].value as Map)['name'], equals('test1'));
+              expect(list[0].primaryKey, equals(2));
+              expect((list[1].value as Map)['name'], equals('test2'));
+              expect((list[2].value as Map)['name'], equals('test3'));
+              expect(list[2].primaryKey, equals(3));
+              expect(list.length, 3);
 
-              return cursorToList(
-                      index.openCursor(key: 'test1', autoAdvance: true))
+              return cursorToList(index.openCursor(
+                      range: KeyRange.bound('test2', 'test3'),
+                      autoAdvance: true))
                   .then((list) {
-                expect(list.length, 1);
-                expect((list[0].value as Map)['name'], equals('test1'));
-                expect(list[0].primaryKey, equals(2));
+                expect(list.length, 2);
+                expect((list[0].value as Map)['name'], equals('test2'));
+                expect(list[0].primaryKey, equals(1));
+                expect((list[1].value as Map)['name'], equals('test3'));
+                expect(list[1].primaryKey, equals(3));
 
-                //return transaction.completed;
+                return cursorToList(
+                        index.openCursor(key: 'test1', autoAdvance: true))
+                    .then((list) {
+                  expect(list.length, 1);
+                  expect((list[0].value as Map)['name'], equals('test1'));
+                  expect(list[0].primaryKey, equals(2));
+
+                  //return transaction.completed;
+                });
               });
             });
           });
-        });
-      });
+        },
+      );
     });
 
     group('multiple', () {

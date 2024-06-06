@@ -8,6 +8,7 @@ import 'package:idb_shim/src/common/common_transaction.dart';
 import 'package:idb_shim/src/sembast/sembast_database.dart';
 import 'package:idb_shim/src/sembast/sembast_object_store.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
+import 'package:idb_shim/src/utils/env_utils.dart';
 import 'package:sembast/sembast.dart' as sdb;
 
 bool _debugTransaction = false; // devWarning(true); // false;
@@ -153,7 +154,10 @@ class TransactionSembast extends IdbTransactionBase
       if (_transactionLazyMode) {
         return Future.delayed(const Duration(), checkNextAction);
       } else {
-        //return new Future.sync(new Duration(), _checkNextAction);
+        // special wasm workaround
+        if (kIdbDartIsWeb && !idbIsRunningAsJavascript) {
+          return Future(checkNextAction);
+        }
         return checkNextAction();
       }
     }

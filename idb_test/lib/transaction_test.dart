@@ -516,12 +516,11 @@ void defineTests(TestContext ctx) {
 
         await objectStore.getObject(0);
         // this cause the transaction to terminate on ie
-
         // and so on sembast
         await Future<void>.value();
         try {
           await objectStore.getObject(0);
-          if (ctx.isIdbSembast || ctx.isIdbIe) {
+          if (ctx.isIdbNoLazy) {
             fail('should fail');
           }
         } catch (e) {

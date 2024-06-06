@@ -6,6 +6,8 @@ import 'package:idb_shim/idb_client_memory.dart';
 import 'package:idb_shim/idb_client_sembast.dart';
 import 'package:idb_shim/src/common/common_factory.dart'; // ignore: implementation_imports
 import 'package:idb_shim/src/common/common_meta.dart'; // ignore: implementation_imports
+// ignore: implementation_imports
+import 'package:idb_shim/src/utils/env_utils.dart';
 import 'package:sembast/sembast.dart' as sdb;
 import 'package:sembast/src/sembast_fs.dart' // ignore: implementation_imports
     as sdb_fs;
@@ -18,8 +20,9 @@ export 'dart:async';
 export 'package:idb_shim/idb_client_memory.dart';
 export 'package:idb_shim/src/common/common_meta.dart';
 export 'package:idb_shim/src/utils/dev_utils.dart';
+export 'package:idb_shim/src/utils/env_utils.dart'
+    show kIdbDartIsWeb, idbIsRunningAsJavascript;
 export 'package:test/test.dart';
-
 //import 'package:unittest/unittest.dart';
 //export 'common_meta_test.dart' hide main;
 //export 'package:tekartik_test/test_utils.dart';
@@ -54,8 +57,10 @@ class TestContext {
   bool isIdbSafari = false;
   bool isIdbSembast = false;
 
+  bool get isWebWasm => kIdbDartIsWeb && !idbIsRunningAsJavascript;
+
   // ie don't except any pause between 2 calls
-  bool get isIdbNoLazy => isIdbSembast || isIdbIe;
+  bool get isIdbNoLazy => !isWebWasm && (isIdbSembast || isIdbIe);
 
   bool get isInMemory => false;
 
