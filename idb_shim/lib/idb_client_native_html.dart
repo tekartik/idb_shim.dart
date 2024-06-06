@@ -1,5 +1,5 @@
 /// {@canonicalFor idb_shim.src.native.idb_native_web.idbFactoryFromIndexedDB}
-/// Legacy version using dart:html not wasm compatible
+/// Legacy API
 library idb_shim_native_html;
 
 import 'package:idb_shim/src/utils/unimplemented_stub.dart';

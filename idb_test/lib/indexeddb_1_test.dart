@@ -6,9 +6,6 @@ import 'package:idb_shim/idb_client.dart' as idb;
 
 import 'idb_test_common.dart';
 
-//TEKARTIK_IDB_REMOVED import 'dart:html' as html;
-//TEKARTIK_IDB_REMOVED import 'dart:indexed_db' as idb;
-// so that this can be run directly
 
 const String _storeName = 'TEST';
 const int _version = 1;

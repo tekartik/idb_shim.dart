@@ -10,9 +10,7 @@ import 'dart:async';
 import 'package:idb_shim/idb.dart' as idb;
 import 'package:idb_shim/idb_browser.dart' as idb;
 import 'package:web/web.dart';
-//import 'dart:indexed_db' as idb;
 
-//idb.IdbFactory idbFactory = window.indexedDB;
 idb.IdbFactory? idbFactory;
 
 class TodoList {
