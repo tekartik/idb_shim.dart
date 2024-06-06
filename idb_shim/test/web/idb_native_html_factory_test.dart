@@ -10,6 +10,7 @@ void main() {
   group('idb_native_factory', () {
     test('idbFactoryFromIndexedDB', () async {
       var factory1 = idbFactoryFromIndexedDB(window.indexedDB!);
+      // ignore: deprecated_member_use_from_same_package
       var factory2 = idbFactoryNative;
       var dbName = 'idbFactoryFromIndexedDB.db';
       var version = 1234;

@@ -9,6 +9,7 @@ import 'test_runner_client_native_test_common.dart';
 void main() {
   group('native_html', () {
     if (idbFactoryNativeSupported) {
+      // ignore: deprecated_member_use
       idbNativeFactoryTests(idbFactoryNative);
     } else {
       test('idb native html supported', () {},

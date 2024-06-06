@@ -12,6 +12,7 @@ import '../idb_test_common.dart';
 void main() {
   group('idb_native_web_compat factory', () {
     test('idbFactoryFromIndexedDB', () async {
+      // ignore: deprecated_member_use_from_same_package
       var factory1 = native_html.idbFactoryNative;
       var factory2 = native_web.idbFactoryNative;
 
