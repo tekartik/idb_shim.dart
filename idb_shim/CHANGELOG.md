@@ -1,4 +1,4 @@
-## 2.5.0-1
+## 2.5.0
 
 * Remove legacy html implementation.
 
