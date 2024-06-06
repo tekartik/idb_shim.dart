@@ -15,6 +15,7 @@ dependencies:
   collection:
   path:
   sembast: '>=3.7.1'
+
 dev_dependencies:
   web:
   lints: '>=2.1.1'
