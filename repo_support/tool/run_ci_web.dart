@@ -7,6 +7,10 @@ Future main() async {
     'idb_test',
   ]) {
     await packageRunCi(join('..', dir),
-        options: PackageRunCiOptions(noBrowserTest: true));
+        options: PackageRunCiOptions(
+          testOnly: true,
+          noNodeTest: true,
+          noVmTest: true,
+        ));
   }
 }
