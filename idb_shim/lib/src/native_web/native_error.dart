@@ -4,10 +4,12 @@ import 'dart:async';
 import 'dart:js_interop';
 
 import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/src/utils/env_utils.dart';
 import 'indexed_db_web.dart' as idb;
 
 @JS('Object.keys')
 external JSArray _jsObjectKeys(JSAny object);
+
 List<String> jsObjectKeys(JSAny object) =>
     _jsObjectKeys(object).toDart.cast<String>();
 
@@ -15,6 +17,14 @@ T catchNativeError<T>(T Function() action) {
   try {
     return action();
   } catch (e) {
+    if (kIdbDartIsWeb && !idbIsRunningAsJavascript) {
+      // var error = e as Error;
+      // print(error);
+    }
+    /*else {
+      print('key: ${jsObjectKeys(e as JSObject)}');
+    }*/
+
     _handleError(e);
     rethrow;
   }
@@ -47,6 +57,7 @@ class DatabaseErrorNative extends DatabaseError {
   final String name;
 
   DatabaseErrorNative(this.name, String message) : super(message);
+
   DatabaseErrorNative.domException(idb.DOMException exception)
       : name = exception.name,
         super(exception.message);

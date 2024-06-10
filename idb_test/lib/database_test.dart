@@ -187,6 +187,7 @@ void defineTests(TestContext ctx) {
         }
         db.createObjectStore(testStoreName);
       });
+
       // Tmp wasm support
       if (!isWasmError(deleteObjectStoreError)) {
         // native_web on wasm!: 'JavaScriptError'.
