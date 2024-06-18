@@ -71,6 +71,11 @@ Flutter (iOS/Android/Web).
 
 While idb_shim over sembast is a solution on Flutter, there is an implementation [idb_sqflite](https://pub.dev/packages/idb_sqflite) based on sqflite for mobile (iOS and Android)
 
+### Use the same web port when debugging
+
+The database is stored in the browser indexeddb. Like any other web storage, it is tied to the port. (i.e. localhost:8080 is different from localhost:8081).
+When debugging, you should use the same port to keep the same indexeddb database.
+
 ### Testing
 
 #### Testing with dartdevc
@@ -88,7 +93,7 @@ While idb_shim over sembast is a solution on Flutter, there is an implementation
 * No generic support for blocked. It is always possible to upgrade the database, however other tabs will get blocked in their future calls
 * Index.get: only by key is supported (no range yet)
 
-##### Type of data
+#### Type of data
 
 Supported types:
 * Stuff that can be JSON serialized/deserialized (`num`, `String`, `bool`, `null`, `List` & `Map`)
@@ -101,15 +106,15 @@ Limitations
 * Large float are not converted to int (native indexeddb implementation does this)
 * Don't create an index on boolean value. IndexedDB does not support that, however sembast implementation allows it (this could change). This will only be prevented in debug.
 
-##### Type of key
+#### Type of key
 
 * String and num (int or double) are supported for keys
 
-##### Native exception
+#### Native exception
 
 * Native exception type have no match in dart so a custom DatabaseError object is created to wrap the exception
 
-##### Ie limitation
+#### Ie limitation
 
 IE 11, Edge 12 has the following limitations:
 
