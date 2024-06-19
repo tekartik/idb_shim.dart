@@ -4,7 +4,7 @@ import 'dart:async';
 import 'dart:js_interop';
 
 import 'package:idb_shim/idb.dart';
-import 'package:idb_shim/src/utils/env_utils.dart';
+import 'package:idb_shim/src/native_web/js_utils.dart';
 import 'indexed_db_web.dart' as idb;
 
 @JS('Object.keys')
@@ -17,26 +17,36 @@ T catchNativeError<T>(T Function() action) {
   try {
     return action();
   } catch (e) {
-    if (kIdbDartIsWeb && !idbIsRunningAsJavascript) {
-      // var error = e as Error;
-      // print(error);
-    }
-    /*else {
-      print('key: ${jsObjectKeys(e as JSObject)}');
-    }*/
-
+    // Might throw before
     _handleError(e);
     rethrow;
   }
 }
 
-bool _handleError(dynamic e) {
+/// Should rethrow if the error was handled.
+bool _handleError(Object e) {
   if (e is DatabaseError) {
     return false;
   } else if (e is DatabaseException) {
     return false;
-  } else {
+  } else if (e is Error) {
+    // Happens on wasm, very unfortunate
+    // _JavascriptError
+    // devPrint('error: ${Error.safeToString(e)}');
     throw DatabaseError(e.toString());
+  } else {
+    Object? errorToThrow;
+    try {
+      if (e is JSObject) {
+        var error = e as JSError;
+        errorToThrow = DatabaseErrorNative(
+            error.name ?? 'IDBError', error.message ?? e.toString());
+      }
+    } catch (_) {
+      // print('error: $_');
+      throw DatabaseError(e.toString());
+    }
+    throw errorToThrow ?? DatabaseError(e.toString());
   }
 }
 
@@ -48,6 +58,7 @@ Future<T> catchAsyncNativeError<T>(Future<T> Function() action) async {
   try {
     return await action();
   } catch (e) {
+    /// Might throw before
     _handleError(e);
     rethrow;
   }
