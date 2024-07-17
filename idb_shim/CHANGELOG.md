@@ -1,4 +1,4 @@
-## 2.5.0+2
+## 2.5.0+3
 
 * Remove legacy `dart:html` implementation.
 * Remove `dev_test` dependency
