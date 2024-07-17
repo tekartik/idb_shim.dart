@@ -37,6 +37,7 @@ void simpleDbTest(SdbFactory factory) {
       var record = (await testStore.record(key).get(db))!;
       expect(record.value, {'test': 1});
       expect(record.key, key);
+      expect(await testStore.record(key).getValue(db), {'test': 1});
       record = (await testStore.record(key2).get(db))!;
       expect(record.value, {'test': 2});
       expect(await testStore.record(3).get(db), isNull);

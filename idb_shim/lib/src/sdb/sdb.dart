@@ -1,3 +1,4 @@
+import 'package:idb_shim/idb_io.dart' as idb;
 import 'package:idb_shim/idb_shim.dart' as idb;
 
 import 'sdb_factory.dart';
@@ -18,8 +19,8 @@ export 'sdb_open.dart'
         SdbOpenStoreRefExtension;
 export 'sdb_record.dart' show SdbRecordRef, SdbRecordRefExtension;
 export 'sdb_store.dart' show SdbStoreRef, SdbStoreRefExtension;
-export 'sdb_transaction.dart' show SdbTransaction;
 export 'sdb_transaction.dart' show SdbTransaction, SdbTransactionMode;
+export 'sdb_transaction.dart' show SdbTransaction;
 export 'sdb_transaction_store.dart'
     show
         SdbTransactionStoreRef,
@@ -40,5 +41,11 @@ SdbFactory sdbFactoryFromIdb(idb.IdbFactory idbFactory) {
 /// Memory factory.
 final SdbFactory sdbFactoryMemory = sdbFactoryFromIdb(idb.idbFactoryMemory);
 
-/// Native (browser) factory. compat.
+/// Native (browser) factory.
 final SdbFactory sdbFactoryWeb = sdbFactoryFromIdb(idb.idbFactoryNative);
+
+/// Sembast io factory.
+final SdbFactory sdbFactoryIo = sdbFactoryFromIdb(idb.idbFactorySembastIo);
+
+/// Web constant helper (needed for non-flutter app)
+const kSdbDartIsWeb = idb.kIdbDartIsWeb;

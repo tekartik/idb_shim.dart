@@ -22,6 +22,7 @@ export 'src/constant.dart'
         idbFactoryNameSembastMemory;
 export 'src/database_exception.dart' show DatabaseException;
 export 'src/logger/logger_factory.dart' show IdbFactoryLoggerDebugExt;
+export 'src/utils/env_utils.dart' show kIdbDartIsWeb;
 
 ///
 /// represents a cursor for traversing or iterating over multiple records in a

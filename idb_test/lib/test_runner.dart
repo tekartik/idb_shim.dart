@@ -1,5 +1,8 @@
 library idb_shim.test_runner;
 
+import 'package:idb_shim/sdb/sdb.dart';
+import 'package:idb_test/sdb_test.dart';
+
 import 'cursor_test.dart' as cursor_test;
 import 'database_test.dart' as database_test;
 import 'exception_test.dart' as exception_test;
@@ -38,6 +41,10 @@ void defineAllTests(TestContext ctx) {
   utils_test.defineTests(ctx);
   exception_test.defineTests(ctx);
   type_test.defineTests(ctx);
+  var factory = sdbFactoryFromIdb(ctx.factory);
+  group('sdb', () {
+    simpleDbTest(factory);
+  });
 
   group('indexeddb_1', () {
     indexeddb_1_test.defineTests(ctx);
