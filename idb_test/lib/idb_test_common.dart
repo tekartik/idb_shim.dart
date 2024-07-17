@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dev_test/test.dart';
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/idb_client_logger.dart';
 import 'package:idb_shim/idb_client_memory.dart';
@@ -11,18 +12,17 @@ import 'package:idb_shim/src/utils/env_utils.dart';
 import 'package:sembast/sembast.dart' as sdb;
 import 'package:sembast/src/sembast_fs.dart' // ignore: implementation_imports
     as sdb_fs;
-import 'package:test/test.dart';
 
 import 'idb_test_common_meta.dart';
 
 export 'dart:async';
 
+export 'package:dev_test/test.dart';
 export 'package:idb_shim/idb_client_memory.dart';
 export 'package:idb_shim/src/common/common_meta.dart';
 export 'package:idb_shim/src/utils/dev_utils.dart';
 export 'package:idb_shim/src/utils/env_utils.dart'
     show kIdbDartIsWeb, idbIsRunningAsJavascript;
-export 'package:test/test.dart';
 //import 'package:unittest/unittest.dart';
 //export 'common_meta_test.dart' hide main;
 //export 'package:tekartik_test/test_utils.dart';

@@ -3,7 +3,7 @@ library idb_shim.test.indexeddb_utils;
 
 import 'dart:typed_data';
 
-import 'package:test/test.dart';
+import 'package:dev_test/test.dart';
 
 /// Verifies that [actual] has the same graph structure as [expected].
 /// Detects cycles and DAG structure in Maps and Lists.

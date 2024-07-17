@@ -1,8 +1,7 @@
+import 'package:dev_test/test.dart';
 import 'package:idb_shim/idb_client_logger.dart';
 import 'package:idb_shim/idb_shim.dart' as idb;
 import 'package:idb_shim/sdb/sdb.dart';
-
-import 'package:test/test.dart';
 
 void main() {
   IdbFactoryLogger.debugMaxLogCount = 100;
