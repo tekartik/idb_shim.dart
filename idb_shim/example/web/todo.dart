@@ -147,7 +147,7 @@ Future<void> main() async {
     window.alert(
         "No idbFactory of type '$idbFactoryName' supported on this browser");
   } else {
-    document.querySelector('#idb span')!.innerHTML =
+    document.querySelector('#idb span')!.textContent =
         "Using '${idbFactory!.name}'";
     await TodoList().open();
   }
