@@ -1,6 +1,7 @@
-## 2.5.0+1
+## 2.5.0+2
 
-* Remove legacy html implementation.
+* Remove legacy `dart:html` implementation.
+* Remove `dev_test` dependency
 
 ## 2.4.1+4
 
