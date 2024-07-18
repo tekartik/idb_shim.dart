@@ -6,7 +6,26 @@ import 'sdb_types.dart';
 
 /// Index record snapshot implementation.
 class SdbIndexRecordSnapshotImpl<K extends KeyBase, V extends ValueBase,
-    I extends IndexBase> implements SdbIndexRecordSnapshot<K, V, I> {
+        I extends IndexBase> extends SdbIndexRecordKeyImpl<K, V, I>
+    implements SdbIndexRecordSnapshot<K, V, I> {
+  @override
+  final V value;
+
+  /// Index record snapshot implementation.
+  SdbIndexRecordSnapshotImpl(
+      super.index, super.key, this.value, super.indexKey);
+
+  @override
+  String toString() =>
+      'IndexRecord(${logTruncateAny(key)}, ${logTruncateAny(indexKey)}, ${logTruncateAny(value)}';
+
+  @override
+  SdbStoreRef<K, V> get store => index.store;
+}
+
+/// Index record snapshot implementation.
+class SdbIndexRecordKeyImpl<K extends KeyBase, V extends ValueBase,
+    I extends IndexBase> implements SdbIndexRecordKey<K, V, I> {
   /// Index reference.
   @override
   final SdbIndexRefImpl<K, V, I> index;
@@ -17,15 +36,12 @@ class SdbIndexRecordSnapshotImpl<K extends KeyBase, V extends ValueBase,
   @override
   final I indexKey;
 
-  @override
-  final V value;
-
   /// Index record snapshot implementation.
-  SdbIndexRecordSnapshotImpl(this.index, this.key, this.value, this.indexKey);
+  SdbIndexRecordKeyImpl(this.index, this.key, this.indexKey);
 
   @override
   String toString() =>
-      'IndexRecord(${logTruncateAny(key)}, ${logTruncateAny(indexKey)}, ${logTruncateAny(value)}';
+      'IndexRecordKey(${logTruncateAny(key)}, ${logTruncateAny(indexKey)}}';
 
   @override
   SdbStoreRef<K, V> get store => index.store;

@@ -40,7 +40,31 @@ abstract class SdbBoundaries<T extends Object> {
   /// Upper boundary.
   SdbBoundary<T>? get upper;
 
-  /// Create boundaries from an upper and lower boundary.
-  factory SdbBoundaries(SdbBoundary<T> lower, SdbBoundary<T> upper) =>
+  /// Create boundaries from a lower and upper  boundary.
+  factory SdbBoundaries(SdbBoundary<T>? lower, SdbBoundary<T>? upper) =>
       DbBoundariesImpl(lower, upper);
+
+  /// Create boundaries from an lower (included) and upper (excluded) boundary.
+  factory SdbBoundaries.values(T? lower, T? upper) => DbBoundariesImpl(
+      lower == null ? null : SdbLowerBoundary(lower),
+      upper == null ? null : SdbUpperBoundary(upper));
+
+  /// Lower only boundary.
+  factory SdbBoundaries.lowerValue(T lower) =>
+      DbBoundariesImpl(SdbLowerBoundary(lower), null);
+
+  /// Lower only boundary.
+  factory SdbBoundaries.lower(SdbBoundary<T>? lower) =>
+      DbBoundariesImpl(lower, null);
+
+  /// Upper only boundary.
+  factory SdbBoundaries.upperValue(T upper) =>
+      DbBoundariesImpl(null, SdbUpperBoundary(upper));
+
+  /// Upper only boundary.
+  factory SdbBoundaries.upper(SdbBoundary<T>? upper) =>
+      DbBoundariesImpl(null, upper);
+
+  /// Returns a string representation of the boundaries like '0 <= ? < 1'.
+  String toConditionString();
 }

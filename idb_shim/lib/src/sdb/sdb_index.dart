@@ -26,6 +26,13 @@ extension SdbIndexRefExtension<K extends KeyBase, V extends ValueBase,
 
   /// Find records.
   Future<List<SdbIndexRecordSnapshot<K, V, I>>> findRecords(SdbClient client,
-          {SdbBoundaries<I>? boundaries}) =>
-      impl.findRecordsImpl(client, boundaries: boundaries);
+          {SdbBoundaries<I>? boundaries, int? offset, int? limit}) =>
+      impl.findRecordsImpl(client,
+          boundaries: boundaries, offset: offset, limit: limit);
+
+  /// Find records.
+  Future<List<SdbIndexRecordKey<K, V, I>>> findRecordKeys(SdbClient client,
+          {SdbBoundaries<I>? boundaries, int? offset, int? limit}) =>
+      impl.findRecordKeysImpl(client,
+          boundaries: boundaries, offset: offset, limit: limit);
 }

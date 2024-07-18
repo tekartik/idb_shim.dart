@@ -11,6 +11,8 @@ export 'sdb_factory.dart' show SdbFactory, SdbFactoryExtension;
 export 'sdb_index.dart' show SdbIndexRef, SdbIndexRefExtension;
 export 'sdb_index_record.dart'
     show SdbIndexRecordRef, SdbIndexRecordRefExtension;
+export 'sdb_index_record_snapshot.dart'
+    show SdbIndexRecordSnapshot, SdbIndexRecordKey;
 export 'sdb_open.dart'
     show
         SdbOpenDatabase,

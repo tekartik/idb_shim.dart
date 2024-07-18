@@ -29,9 +29,11 @@ class SdbOpenDatabaseImpl implements SdbOpenDatabase {
 
   /// Add a store.
   SdbOpenStoreRef<K, V> addStoreImpl<K extends KeyBase, V extends ValueBase>(
-      SdbStoreRefImpl<K, V> store) {
-    var idbStore = db.idbDatabase
-        .createObjectStore(store.name, autoIncrement: store.isIntKey);
+      SdbStoreRefImpl<K, V> store,
+      {String? keyPath,
+      bool? autoIncrement}) {
+    var idbStore = db.idbDatabase.createObjectStore(store.name,
+        keyPath: keyPath, autoIncrement: autoIncrement ?? store.isIntKey);
     var storeOpen = SdbOpenStoreRefImpl<K, V>(this, store, idbStore);
     stores.add(storeOpen);
     return storeOpen;
@@ -76,7 +78,7 @@ class SdbOpenStoreRefImpl<K extends KeyBase, V extends ValueBase>
 
   /// Create an index.
   SdbOpenIndexRef<K, V, I> createIndexImpl<I extends IndexBase>(
-      SdbIndexRefImpl<K, V, I> index, String indexKeyPath) {
+      SdbIndexRefImpl<K, V, I> index, Object indexKeyPath) {
     var idbIndex = idbObjectStore.createIndex(index.name, indexKeyPath);
     var indexOpen = SdbOpenIndexRefImpl<K, V, I>(this, index, idbIndex);
 

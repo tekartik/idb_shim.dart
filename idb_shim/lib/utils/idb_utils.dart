@@ -124,23 +124,38 @@ Future<Database> copyDatabase(
 
 /// Convert an autoAdvance openCursor stream to a list.
 Future<List<T>> _autoCursorStreamToList<C extends Cursor, T>(
-        Stream<C> stream, T Function(C cursor) convert) =>
-    stream.map((cursor) => convert(cursor)).toList();
+    Stream<C> stream, T Function(C cursor) convert, int? offset, int? limit) {
+  if ((offset ?? 0) > 0) {
+    stream = stream.skip(offset!);
+  }
+  if ((limit ?? 0) > 0) {
+    stream = stream.take(limit!);
+  }
+  return stream.map((cursor) => convert(cursor)).toList();
+}
 
 /// Convert an autoAdvance openCursor stream to a list
-Future<List<CursorRow>> cursorToList(Stream<CursorWithValue> stream) =>
-    _autoCursorStreamToList(stream,
-        (cwv) => CursorRow(cwv.key, cwv.primaryKey, cloneValue(cwv.value)));
+Future<List<CursorRow>> cursorToList(Stream<CursorWithValue> stream,
+        [int? offset, int? limit]) =>
+    _autoCursorStreamToList(
+        stream,
+        (cwv) => CursorRow(cwv.key, cwv.primaryKey, cloneValue(cwv.value)),
+        offset,
+        limit);
 
 /// Convert an autoAdvance openKeyCursor stream to a list
-Future<List<KeyCursorRow>> keyCursorToList(Stream<Cursor> stream) =>
-    _autoCursorStreamToList(
-        stream, (cursor) => KeyCursorRow(cursor.key, cursor.primaryKey));
+Future<List<KeyCursorRow>> keyCursorToList(Stream<Cursor> stream,
+        [int? offset, int? limit]) =>
+    _autoCursorStreamToList(stream,
+        (cursor) => KeyCursorRow(cursor.key, cursor.primaryKey), offset, limit);
 
 /// Convert an autoAdvance openKeyCursor stream to a list of key, must be auto-advance)
-Future<List<Object>> cursorToPrimaryKeyList(Stream<Cursor> stream) =>
-    _autoCursorStreamToList(stream, (cursor) => cursor.primaryKey);
+Future<List<Object>> cursorToPrimaryKeyList(Stream<Cursor> stream,
+        [int? offset, int? limit]) =>
+    _autoCursorStreamToList(
+        stream, (cursor) => cursor.primaryKey, offset, limit);
 
 /// Convert an autoAdvance openKeyCursor stream to a list (must be auto-advance)
-Future<List<Object>> cursorToKeyList(Stream<Cursor> stream) =>
-    _autoCursorStreamToList(stream, (cursor) => cursor.key);
+Future<List<Object>> cursorToKeyList(Stream<Cursor> stream,
+        [int? offset, int? limit]) =>
+    _autoCursorStreamToList(stream, (cursor) => cursor.key, offset, limit);

@@ -93,6 +93,7 @@ the key type and the value type.
 Good options is to use `int` as a key and `SdbModel` as a value.
 
 ```dart
+// Our book store/table
 var bookStore = SdbStoreRef<int, SdbModel>('book');
 ```
 
@@ -144,6 +145,62 @@ The API is similar to sembast but:
 - simple query (using boundaries)
 - Single index (for now)
 
+### Transaction
+
+Similar to indexed db, you declare the stores on which the transaction occurs and the mode (read or write).
+
+```dart
+await db.inStoreTransaction(bookStore, SdbTransactionMode.readWrite,
+    (txn) async {
+  await bookStore
+      .add(txn, {'title': 'Le petit prince', 'serial': 'serial0001'});
+  await bookStore.add(txn, {'title': 'Hamlet', 'serial': 'serial0002'});
+  await bookStore
+      .add(txn, {'title': 'Harry Potter', 'serial': 'serial0003'});
+});
+```
 ### Creating index
 
-TODO - Yes it's possible but not documented yet.
+```dart
+// Our book store/table
+var bookStore = SdbStoreRef<int, SdbModel>('book');
+// Index on 'serial' field
+var bookSerialIndex = bookStore.index<String>('serial');
+```
+
+Index must be created during open
+
+```dart
+db = await factory.openDatabase(path, version: 2, onVersionChange: (event) {
+  var db = event.db;
+  var oldVersion = event.oldVersion;
+  if (oldVersion < 1) {
+    // Create the book store
+    var openStoreRef = db.createStore(bookStore);
+    openStoreRef.createIndex(bookSerialIndex, 'serial');
+  } else {
+    var openStoreRef = db.objectStore(bookStore);
+    openStoreRef.createIndex(bookSerialIndex, 'serial');
+  }
+});
+```
+
+You can then read a record by an index value:
+
+```dart
+// Read by serial
+var book = await bookSerialIndex.record('serial0002').get(db);
+expect(book!.value['title'], 'Hamlet');
+```
+
+Or find records by boundaries:
+
+```dart
+// Find >=serial0001 and <serial0003 (serial0003 excluded)
+var books = await bookSerialIndex.findRecords(db,
+    boundaries: SdbBoundaries.values('serial0001', 'serial0003'));
+expect(books[0].value['title'], 'Le petit prince');
+expect(books[1].value['title'], 'Hamlet');
+expect(books, hasLength(2));
+```
+

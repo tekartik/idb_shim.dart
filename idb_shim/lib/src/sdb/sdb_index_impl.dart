@@ -37,36 +37,98 @@ class SdbIndexRefImpl<K extends KeyBase, V extends ValueBase,
   /// Find records.
   Future<List<SdbIndexRecordSnapshot<K, V, I>>> findRecordsImpl(
           SdbClient client,
-          {SdbBoundaries<I>? boundaries}) =>
+          {SdbBoundaries<I>? boundaries,
+          int? offset,
+          int? limit}) =>
       client.handleDbOrTxn(
-          (db) => dbFindRecordsImpl(db, boundaries: boundaries),
-          (txn) => txnFindRecordsImpl(txn, boundaries: boundaries));
+          (db) => dbFindRecordsImpl(db,
+              boundaries: boundaries, offset: offset, limit: limit),
+          (txn) => txnFindRecordsImpl(txn,
+              boundaries: boundaries, offset: offset, limit: limit));
+
+  /// Find records.
+  Future<List<SdbIndexRecordKey<K, V, I>>> findRecordKeysImpl(SdbClient client,
+          {SdbBoundaries<I>? boundaries, int? offset, int? limit}) =>
+      client.handleDbOrTxn(
+          (db) => dbFindRecordKeysImpl(db,
+              boundaries: boundaries, offset: offset, limit: limit),
+          (txn) => txnFindRecordKeysImpl(txn,
+              boundaries: boundaries, offset: offset, limit: limit));
 
   /// Find records.
   Future<List<SdbIndexRecordSnapshot<K, V, I>>> dbFindRecordsImpl(
       SdbDatabaseImpl db,
-      {SdbBoundaries<I>? boundaries}) {
+      {SdbBoundaries<I>? boundaries,
+      int? offset,
+      int? limit}) {
     return db.inStoreTransaction(store, SdbTransactionMode.readOnly, (txn) {
-      return txnFindRecordsImpl(txn.rawImpl, boundaries: boundaries);
+      return txnFindRecordsImpl(txn.rawImpl,
+          boundaries: boundaries, offset: offset, limit: limit);
+    });
+  }
+
+  /// Find record keys.
+  Future<List<SdbIndexRecordKey<K, V, I>>> dbFindRecordKeysImpl(
+      SdbDatabaseImpl db,
+      {SdbBoundaries<I>? boundaries,
+      int? offset,
+      int? limit}) {
+    return db.inStoreTransaction(store, SdbTransactionMode.readOnly, (txn) {
+      return txnFindRecordKeysImpl(txn.rawImpl,
+          boundaries: boundaries, offset: offset, limit: limit);
     });
   }
 
   /// Find records.
   Future<List<SdbIndexRecordSnapshot<K, V, I>>> txnFindRecordsImpl(
       SdbTransactionImpl txn,
-      {SdbBoundaries<I>? boundaries}) async {
+      {SdbBoundaries<I>? boundaries,
+      int? offset,
+      int? limit}) async {
     var idbObjectStore = txn.idbTransaction.objectStore(store.name);
     var idbIndex = idbObjectStore.index(name);
     var cursor = idbIndex.openCursor(
         autoAdvance: true,
         direction: idb.idbDirectionNext,
         range: idbKeyRangeFromBoundaries(boundaries));
-    var rows = await idb.cursorToList(cursor);
+    var rows = await idb.cursorToList(cursor, offset, limit);
+    return rows.map((row) {
+      var key = row.primaryKey as K;
+      I indexKey;
+      var rowKey = row.key;
+      if (rowKey is List) {
+        if (rowKey.length == 2) {
+          indexKey = (rowKey[0], rowKey[1]) as I;
+        } else {
+          throw StateError('Only 2-tuple index keys are supported');
+        }
+      } else {
+        indexKey = row.key as I;
+      }
+
+      var value = row.value as V;
+      return SdbIndexRecordSnapshotImpl<K, V, I>(this, key, value, indexKey);
+    }).toList();
+  }
+
+  /// Find record keys.
+  Future<List<SdbIndexRecordKey<K, V, I>>> txnFindRecordKeysImpl(
+      SdbTransactionImpl txn,
+      {SdbBoundaries<I>? boundaries,
+      int? offset,
+      int? limit}) async {
+    var idbObjectStore = txn.idbTransaction.objectStore(store.name);
+    var idbIndex = idbObjectStore.index(name);
+    var cursor = idbIndex.openKeyCursor(
+        autoAdvance: true,
+        direction: idb.idbDirectionNext,
+        range: idbKeyRangeFromBoundaries(boundaries));
+    var rows = await idb.keyCursorToList(cursor, offset, limit);
     return rows.map((row) {
       var key = row.primaryKey as K;
       var indexKey = row.key as I;
-      var value = row.value as V;
-      return SdbIndexRecordSnapshotImpl<K, V, I>(this, key, value, indexKey);
+
+      return SdbIndexRecordKeyImpl<K, V, I>(this, key, indexKey);
     }).toList();
   }
 }

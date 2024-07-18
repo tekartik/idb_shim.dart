@@ -18,9 +18,13 @@ abstract class SdbOpenIndexRef<K extends KeyBase, V extends ValueBase,
 /// Database action during open.
 extension SdbOpenDatabaseExtension on SdbOpenDatabase {
   /// Create a store.
+  /// auto increment is set to true if not set for int keys
   SdbOpenStoreRef<K, V> createStore<K extends KeyBase, V extends ValueBase>(
-          SdbStoreRef<K, V> store) =>
-      impl.addStoreImpl<K, V>(store.impl);
+          SdbStoreRef<K, V> store,
+          {String? keyPath,
+          bool? autoIncrement}) =>
+      impl.addStoreImpl<K, V>(store.impl,
+          keyPath: keyPath, autoIncrement: autoIncrement);
 
   /// get an existing store.
   SdbOpenStoreRef<K, V> objectStore<K extends KeyBase, V extends ValueBase>(
@@ -35,4 +39,13 @@ extension SdbOpenStoreRefExtension<K extends KeyBase, V extends ValueBase>
   SdbOpenIndexRef<K, V, I> createIndex<I extends IndexBase>(
           SdbIndexRef<K, V, I> index, String indexKeyPath) =>
       impl.createIndexImpl<I>(index.impl, indexKeyPath);
+
+  /// Create an index.
+  SdbOpenIndexRef<K, V, (I1, I2)>
+      createIndex2<I1 extends IndexBase, I2 extends IndexBase>(
+              SdbIndexRef<K, V, (I1, I2)> index,
+              String indexKeyPath1,
+              String indexKeyPath2) =>
+          impl.createIndexImpl<(I1, I2)>(
+              index.impl, [indexKeyPath1, indexKeyPath2]);
 }

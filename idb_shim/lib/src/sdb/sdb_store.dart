@@ -34,4 +34,9 @@ extension SdbStoreRefExtension<K extends KeyBase, V extends ValueBase>
   /// Index reference
   SdbIndexRef<K, V, I> index<I extends IndexBase>(String name) =>
       SdbIndexRefImpl<K, V, I>(impl, name);
+
+  /// Index reference
+  SdbIndexRef<K, V, (I1, I2)>
+      index2<I1 extends IndexBase, I2 extends IndexBase>(String name) =>
+          SdbIndexRefImpl<K, V, (I1, I2)>(impl, name);
 }

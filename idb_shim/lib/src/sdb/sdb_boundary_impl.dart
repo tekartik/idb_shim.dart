@@ -12,6 +12,20 @@ class DbBoundaryImpl<T extends Object>
 
   /// Lower or upper boundary implementation.
   DbBoundaryImpl(this.value, this.include);
+
+  @override
+  int get hashCode => value.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is SdbBoundary) {
+      return value == other.value && include == other.include;
+    }
+    return false;
+  }
+
+  @override
+  String toString() => '$value ${include ? '(included)' : '(excluded)'}';
 }
 
 /// Lower and upper boundaries implementation.
@@ -25,7 +39,7 @@ class DbBoundariesImpl<T extends Object> implements SdbBoundaries<T> {
   DbBoundariesImpl(this.lower, this.upper);
 
   @override
-  String toString() {
+  String toConditionString() {
     var sb = StringBuffer();
     if (lower != null) {
       sb.write('${lower!.value} ${lower!.include ? '<=' : '<'} ');
@@ -36,6 +50,22 @@ class DbBoundariesImpl<T extends Object> implements SdbBoundaries<T> {
       sb.write(' ${upper!.include ? '<=' : '<'} ${upper!.value}');
     }
     return sb.toString();
+  }
+
+  @override
+  String toString() => toConditionString();
+
+  @override
+  int get hashCode {
+    return lower.hashCode ^ upper.hashCode;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is SdbBoundaries) {
+      return lower == other.lower && upper == other.upper;
+    }
+    return false;
   }
 }
 
