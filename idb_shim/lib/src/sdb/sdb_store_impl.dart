@@ -1,4 +1,4 @@
-import 'package:idb_shim/src//common/common_value.dart';
+import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
 
 import 'sdb_boundary.dart';
