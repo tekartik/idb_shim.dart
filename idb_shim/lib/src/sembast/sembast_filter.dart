@@ -3,10 +3,10 @@
 import 'dart:math';
 
 import 'package:idb_shim/idb.dart';
-import 'package:idb_shim/src/sembast/sembast_import.dart' as sdb;
+import 'package:idb_shim/src/sembast/sembast_import.dart' as sembast;
 
 /// keyPath must have been escaped before
-sdb.Filter keyCursorFilter(
+sembast.Filter keyCursorFilter(
     dynamic keyPath, Object? key, KeyRange? range, bool multiEntry) {
   if (range != null) {
     return keyRangeFilter(keyPath, range, multiEntry);
@@ -154,9 +154,10 @@ bool upperMatchesValue(
   return upperMatchesSingleValue(upper, upperOpen, value);
 }
 
-sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range, bool multiEntry) {
+sembast.Filter keyRangeFilter(
+    dynamic keyPath, KeyRange range, bool multiEntry) {
   if (keyPath is String) {
-    return sdb.Filter.custom((snapshot) {
+    return sembast.Filter.custom((snapshot) {
       var value = snapshot[keyPath];
       if (range.lower != null) {
         if (!lowerMatchesValue(
@@ -184,7 +185,7 @@ sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range, bool multiEntry) {
       assert(upperList.length == keyPathList.length,
           'keyPath and upper bound length must match');
     }
-    return sdb.Filter.custom((snapshot) {
+    return sembast.Filter.custom((snapshot) {
       final values = List.generate(
           keyPathList.length, (i) => snapshot[keyPathList[i] as String]);
 
@@ -252,24 +253,25 @@ sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range, bool multiEntry) {
   }
 }
 
-sdb.Filter _singleFieldKeyNotNullFilter(String keyPath) =>
-    sdb.Filter.notEquals(keyPath, null);
+sembast.Filter _singleFieldKeyNotNullFilter(String keyPath) =>
+    sembast.Filter.notEquals(keyPath, null);
 
-sdb.Filter _singleFieldKeyEqualsFilter(String keyPath, dynamic key) =>
-    sdb.Filter.equals(keyPath, key);
+sembast.Filter _singleFieldKeyEqualsFilter(String keyPath, dynamic key) =>
+    sembast.Filter.equals(keyPath, key);
 
 @Deprecated('Dev only')
 // ignore: unused_element
-sdb.Filter _debugSingleFieldNotNullFilter(String keyPath) => sdb.Filter.and([
-      sdb.Filter.notEquals(keyPath, true),
-      sdb.Filter.notEquals(keyPath, false),
+sembast.Filter _debugSingleFieldNotNullFilter(String keyPath) =>
+    sembast.Filter.and([
+      sembast.Filter.notEquals(keyPath, true),
+      sembast.Filter.notEquals(keyPath, false),
       _singleFieldKeyNotNullFilter(keyPath)
     ]);
 
 @Deprecated('Dev only')
 // ignore: unused_element
-sdb.Filter _debugSingleFieldKeyEqualsFilter(String keyPath, dynamic key) =>
-    sdb.Filter.equals(keyPath, key);
+sembast.Filter _debugSingleFieldKeyEqualsFilter(String keyPath, dynamic key) =>
+    sembast.Filter.equals(keyPath, key);
 
 final singleFieldKeyEqualsFilter = _singleFieldKeyEqualsFilter;
 final singleFieldKeyNotNullFilter = _singleFieldKeyNotNullFilter;
@@ -277,16 +279,17 @@ final singleFieldKeyNotNullFilter = _singleFieldKeyNotNullFilter;
 // final singleFieldKeyNotNullFilter = _debugSingleFieldNotNullFilter;
 
 /// for composite or not
-sdb.Filter storeKeyFilter(Object? keyPath, Object key) {
+sembast.Filter storeKeyFilter(Object? keyPath, Object key) {
   return keyFilter(keyPath, key);
 }
 
 /// The null value for the key actually means any but null...
 /// Key path must have been escaped before
-sdb.Filter keyFilter(dynamic keyPath, Object? key, [bool multiEntry = false]) {
+sembast.Filter keyFilter(dynamic keyPath, Object? key,
+    [bool multiEntry = false]) {
   if (keyPath is String) {
     if (multiEntry) {
-      return sdb.Filter.custom((snapshot) {
+      return sembast.Filter.custom((snapshot) {
         // We support array too!
         var value = snapshot[keyPath];
         if (value is List) {
@@ -315,24 +318,24 @@ sdb.Filter keyFilter(dynamic keyPath, Object? key, [bool multiEntry = false]) {
     // No constraint on the key it just needs to exist
     // so every field must be non-null
     if (key == null) {
-      return sdb.Filter.and(List.generate(
+      return sembast.Filter.and(List.generate(
           keyList.length, (i) => keyFilter(keyList[i], null, multiEntry)));
     } else {
       // The key must be a list too...
       if (key is List) {
         final valueList = key;
-        return sdb.Filter.and(List.generate(keyList.length,
+        return sembast.Filter.and(List.generate(keyList.length,
             (i) => keyFilter(keyList[i], valueList[i], multiEntry)));
       } else {
         // Always false
-        return sdb.Filter.custom((record) => false);
+        return sembast.Filter.custom((record) => false);
       }
     }
   }
   throw 'keyPath $keyPath not supported';
 }
 
-sdb.Filter keyOrRangeFilter(
+sembast.Filter keyOrRangeFilter(
     dynamic keyPath, dynamic keyOrRange, bool multiEntry) {
   if (keyOrRange is KeyRange) {
     return keyRangeFilter(keyPath, keyOrRange, multiEntry);
@@ -341,13 +344,13 @@ sdb.Filter keyOrRangeFilter(
   }
 }
 
-sdb.Filter keyNotNullFilter(dynamic keyPath) {
+sembast.Filter keyNotNullFilter(dynamic keyPath) {
   if (keyPath is String) {
-    return sdb.Filter.notEquals(keyPath, null);
+    return sembast.Filter.notEquals(keyPath, null);
   } else if (keyPath is List) {
     final keyList = keyPath;
-    return sdb.Filter.and(List.generate(keyList.length,
-        (i) => sdb.Filter.notEquals(keyList[i] as String, null)));
+    return sembast.Filter.and(List.generate(keyList.length,
+        (i) => sembast.Filter.notEquals(keyList[i] as String, null)));
   }
   throw 'keyPath $keyPath not supported';
 }

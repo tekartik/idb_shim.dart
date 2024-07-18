@@ -4,7 +4,7 @@ import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
 import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/logger/logger_utils.dart';
-import 'package:idb_shim/src/sembast/sembast_import.dart' as sdb;
+import 'package:idb_shim/src/sembast/sembast_import.dart' as sembast;
 import 'package:idb_shim/src/sembast/sembast_index.dart';
 import 'package:idb_shim/src/sembast/sembast_object_store.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
@@ -78,17 +78,18 @@ abstract mixin class KeyCursorSembastMixin implements Cursor {
 
     await store.transaction!.execute(() async {
       await store.txnPut(value, updateKey);
-      var sdbSnapshot =
-          await store.sdbStore.record(primaryKey).getSnapshot(store.sdbClient);
+      var sembastSnapshot = await store.sembastStore
+          .record(primaryKey)
+          .getSnapshot(store.sembastClient);
       // Also update all records in the current list...
       var i = recordIndex + 1;
       while (i < ctlr.records!.length) {
         if (records[i].primaryKey == primaryKey) {
-          if (sdbSnapshot == null) {
+          if (sembastSnapshot == null) {
             records.removeAt(i);
           } else {
-            records[i] =
-                IndexRecordSnapshotSembast(store, records[i].key, sdbSnapshot);
+            records[i] = IndexRecordSnapshotSembast(
+                store, records[i].key, sembastSnapshot);
             i++;
           }
         } else {
@@ -165,9 +166,9 @@ class StoreKeyCursorSembast extends Object with KeyCursorSembastMixin {
   }
 }
 /*
-class _SdbCursorWithValue extends Object
-    with _SdbKeyCursorMixin, _SdbCursorWithValueMixin {
-  _SdbCursorWithValue(_SdbBaseCursorControllerMixin ctlr, int index) {
+class _SembastCursorWithValue extends Object
+    with _SembastKeyCursorMixin, _SembastCursorWithValueMixin {
+  _SembastCursorWithValue(_SembastBaseCursorControllerMixin ctlr, int index) {
     this.ctlr = ctlr;
     this.recordIndex = index;
   }
@@ -175,20 +176,20 @@ class _SdbCursorWithValue extends Object
 */
 
 abstract class _ICursorSembast {
-  sdb.Filter get filter;
+  sembast.Filter get filter;
 
-  List<sdb.SortOrder> get sortOrders;
+  List<sembast.SortOrder> get sortOrders;
 
   /// The list of snapshot
   List<RecordSnapshotSembast>? records;
 
   /// Set the resulting records, special handling needed for multiEntry index
-  void setRecords(List<sdb.RecordSnapshot<Object, Object>> records);
+  void setRecords(List<sembast.RecordSnapshot<Object, Object>> records);
 }
 
 class RecordSnapshotSembast {
   final ObjectStoreSembast idbStore;
-  final sdb.RecordSnapshot<Object, Object> snapshot;
+  final sembast.RecordSnapshot<Object, Object> snapshot;
 
   Object get id => snapshot.key;
 
@@ -208,7 +209,7 @@ class IndexRecordSnapshotSembast extends RecordSnapshotSembast {
   final Object key;
 
   IndexRecordSnapshotSembast(ObjectStoreSembast idbStore, this.key,
-      sdb.RecordSnapshot<Object, Object> snapshot)
+      sembast.RecordSnapshot<Object, Object> snapshot)
       : super(idbStore, snapshot);
 
   @override
@@ -222,20 +223,20 @@ abstract mixin class IndexCursorControllerSembastMixin
   IdbCursorMeta get meta;
 
   @override
-  List<sdb.SortOrder> get sortOrders {
+  List<sembast.SortOrder> get sortOrders {
     return index.sortOrders(meta.ascending);
   }
 
   ObjectStoreSembast get idbStore => index.store;
 
   @override
-  sdb.Filter get filter {
+  sembast.Filter get filter {
     return index.cursorFilter(meta.key, meta.range);
   }
 
   /// To override for index
   @override
-  void setRecords(List<sdb.RecordSnapshot<Object, Object>> records) {
+  void setRecords(List<sembast.RecordSnapshot<Object, Object>> records) {
     if (index.multiEntry) {
       /// Duplicate some records
       var list = <IndexRecordSnapshotSembast>[];
@@ -267,12 +268,12 @@ abstract mixin class StoreCursorControllerSembastMixin
   IdbCursorMeta get meta;
 
   @override
-  List<sdb.SortOrder> get sortOrders {
+  List<sembast.SortOrder> get sortOrders {
     return store.sortOrders(meta.ascending);
   }
 
   @override
-  sdb.Filter get filter {
+  sembast.Filter get filter {
     return store.cursorFilter(meta.key, meta.range);
   }
 }
@@ -321,8 +322,9 @@ abstract mixin class BaseCursorControllerSembastMixin<T extends Cursor>
   Future openCursor() async {
     final filter = this.filter;
     final sortOrders = this.sortOrders;
-    final finder = sdb.Finder(filter: filter, sortOrders: sortOrders);
-    var records = await store.sdbStore.find(store.sdbClient, finder: finder);
+    final finder = sembast.Finder(filter: filter, sortOrders: sortOrders);
+    var records =
+        await store.sembastStore.find(store.sembastClient, finder: finder);
     setRecords(records);
 
     // Handle first
@@ -330,7 +332,7 @@ abstract mixin class BaseCursorControllerSembastMixin<T extends Cursor>
   }
 
   @override
-  void setRecords(List<sdb.RecordSnapshot<Object, Object>> records) {
+  void setRecords(List<sembast.RecordSnapshot<Object, Object>> records) {
     this.records = records
         .map((snapshot) => RecordSnapshotSembast(store, snapshot))
         .toList(growable: false);
@@ -350,19 +352,19 @@ abstract mixin class CursorWithValueControllerSembastMixin {
 }
 
 /*
-class _SdbStoreKeyCursorController extends Object
+class _SembastStoreKeyCursorController extends Object
     with
-        _SdbKeyCursorControllerMixin,
-        _SdbBaseCursorControllerMixin,
-        _SdbStoreCursorControllerMixin {
-  _SdbObjectStore store;
-  _SdbStoreKeyCursorController(this.store, IdbCursorMeta meta) {
+        _SembastKeyCursorControllerMixin,
+        _SembastBaseCursorControllerMixin,
+        _SembastStoreCursorControllerMixin {
+  _SembastObjectStore store;
+  _SembastStoreKeyCursorController(this.store, IdbCursorMeta meta) {
     this.meta = meta;
     init();
   }
 
   Cursor nextEvent(int index) {
-    _SdbStoreKeyCursor cursor = new _SdbStoreKeyCursor(this, index);
+    _SembastStoreKeyCursor cursor = new _SembastStoreKeyCursor(this, index);
     return cursor;
   }
 }
@@ -452,13 +454,13 @@ class StoreCursorWithValueControllerSembast extends Object
 }
 
 /// Key path must have been escaped before
-List<sdb.SortOrder> keyPathSortOrders(dynamic keyPath, bool ascending) {
+List<sembast.SortOrder> keyPathSortOrders(dynamic keyPath, bool ascending) {
   if (keyPath is String) {
-    return [sdb.SortOrder(keyPath, ascending)];
+    return [sembast.SortOrder(keyPath, ascending)];
   } else if (keyPath is List) {
     final keyList = keyPath;
-    return List.generate(
-        keyList.length, (i) => sdb.SortOrder(keyList[i] as String, ascending));
+    return List.generate(keyList.length,
+        (i) => sembast.SortOrder(keyList[i] as String, ascending));
   }
   throw 'invalid keyPath $keyPath';
 }

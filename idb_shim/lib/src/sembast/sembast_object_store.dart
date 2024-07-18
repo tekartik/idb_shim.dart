@@ -11,7 +11,7 @@ import 'package:idb_shim/src/sembast/sembast_index.dart';
 import 'package:idb_shim/src/sembast/sembast_transaction.dart';
 import 'package:idb_shim/src/sembast/sembast_value.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
-import 'package:sembast/sembast.dart' as sdb;
+import 'package:sembast/sembast.dart' as sembast;
 
 class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   @override
@@ -21,29 +21,30 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   DatabaseSembast get database => transaction!.database;
 
-  sdb.Database? get sdbDatabase => database.db;
+  sembast.Database? get sembastDatabase => database.db;
 
-  sdb.Transaction? get sdbTransaction => transaction!.sdbTransaction;
+  sembast.Transaction? get sembastTransaction =>
+      transaction!.sembastTransaction;
 
-  sdb.DatabaseClient? _sdbClient;
-  sdb.StoreRef<Object, Object>? _sdbStore;
+  sembast.DatabaseClient? _sembastClient;
+  sembast.StoreRef<Object, Object>? _sembastStore;
 
   // Lazy computed
-  sdb.StoreRef<Object, Object> get sdbStore =>
-      _sdbStore ??= sdb.StoreRef<Object, Object>(name);
+  sembast.StoreRef<Object, Object> get sembastStore =>
+      _sembastStore ??= sembast.StoreRef<Object, Object>(name);
 
   // lazy creation
   // If we are not in a transaction that's likely during open
-  sdb.DatabaseClient get sdbClient =>
-      (_sdbClient ??= (sdbTransaction ?? sdbDatabase))!;
+  sembast.DatabaseClient get sembastClient =>
+      (_sembastClient ??= (sembastTransaction ?? sembastDatabase))!;
 
   ObjectStoreSembast(this.transaction, this.meta) {
-    // Don't compute sdbStore yet we don't have the transaction
+    // Don't compute sembastStore yet we don't have the transaction
     /*
     // If we are not in a transaction that's likely during open
-    sdbStore = transaction.sdbTransaction == null
-        ? sdbDatabase.getStore(name)
-        : transaction.sdbTransaction.getStore(name);
+    sembastStore = transaction.sembastTransaction == null
+        ? sembastDatabase.getStore(name)
+        : transaction.sembastTransaction.getStore(name);
         */
   }
 
@@ -107,11 +108,12 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
       for (var indexMeta in meta!.indecies) {
         var fieldValue = value.getKeyValue(indexMeta.keyPath);
         if (fieldValue != null) {
-          final finder = sdb.Finder(
+          final finder = sembast.Finder(
               filter: keyFilter(indexMeta.keyPath, fieldValue, false),
               limit: 1);
-          futures
-              .add(sdbStore.findFirst(sdbClient, finder: finder).then((record) {
+          futures.add(sembastStore
+              .findFirst(sembastClient, finder: finder)
+              .then((record) {
             // not ourself
             if ((record != null) &&
                 (record.key != key) //
@@ -129,9 +131,9 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
         // Handle the case where a generated key is added
         // We are in a transaction so the key is safe
         // Make sure the key field is added
-        var generatedKey = await sdbStore.generateIntKey(sdbClient);
+        var generatedKey = await sembastStore.generateIntKey(sembastClient);
         var fixedValue = fixKeyInValueImpl(value!, generatedKey);
-        await sdbStore.record(generatedKey).add(sdbClient, fixedValue);
+        await sembastStore.record(generatedKey).add(sembastClient, fixedValue);
         return generatedKey;
       } else {
         var id = key;
@@ -139,27 +141,27 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
           // Get existing if any
           var existing = await txnCompositeFindIdByKey(key);
           if (existing == null) {
-            var generatedKey = await sdbStore.generateIntKey(sdbClient);
+            var generatedKey = await sembastStore.generateIntKey(sembastClient);
             id = generatedKey;
           } else {
             id = existing;
           }
         }
-        return sdbStore
+        return sembastStore
             .record(id)
-            .put(sdbClient, value as Object)
+            .put(sembastClient, value as Object)
             .then((_) => key);
       }
     });
   }
 
-  sdb.Finder compositeFindByKeyFinder(Object key) {
+  sembast.Finder compositeFindByKeyFinder(Object key) {
     assert(key is Iterable);
-    return sdb.Finder(filter: storeKeyFilter(keyPath, key));
+    return sembast.Finder(filter: storeKeyFilter(keyPath, key));
   }
 
   Future<Object?> txnCompositeFindIdByKey(Object key) async {
-    var existing = await sdbStore.findKey(sdbClient,
+    var existing = await sembastStore.findKey(sembastClient,
         finder: compositeFindByKeyFinder(key));
     return existing;
   }
@@ -187,20 +189,20 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   @override
   Future clear() {
     return _inWritableTransaction(() {
-      return sdbStore.delete(sdbClient);
+      return sembastStore.delete(sembastClient);
     }).then((_) {
       return null;
     });
   }
 
-  sdb.Filter _storeKeyOrRangeFilter([Object? keyOrRange]) {
-    return keyOrRangeFilter(sdb.Field.key, keyOrRange, false);
+  sembast.Filter _storeKeyOrRangeFilter([Object? keyOrRange]) {
+    return keyOrRangeFilter(sembast.Field.key, keyOrRange, false);
   }
 
   @override
   Future<int> count([keyOrRange]) {
     return inTransaction(() {
-      return sdbStore.count(sdbClient,
+      return sembastStore.count(sembastClient,
           filter: _storeKeyOrRangeFilter(keyOrRange));
     });
   }
@@ -214,27 +216,29 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     });
   }
 
-  Future<List<sdb.RecordSnapshot<Object, Object>>> txnGetAllSnapshots(
+  Future<List<sembast.RecordSnapshot<Object, Object>>> txnGetAllSnapshots(
       [Object? query, int? count]) async {
-    return (await sdbStore.find(
-      sdbClient,
-      finder: sdb.Finder(filter: _storeKeyOrRangeFilter(query), limit: count),
+    return (await sembastStore.find(
+      sembastClient,
+      finder:
+          sembast.Finder(filter: _storeKeyOrRangeFilter(query), limit: count),
     ));
   }
 
-  Future<sdb.RecordSnapshot<Object, Object>?> txnCompositeGetSnapshot(
+  Future<sembast.RecordSnapshot<Object, Object>?> txnCompositeGetSnapshot(
       Object key) async {
-    return (await sdbStore.findFirst(
-      sdbClient,
+    return (await sembastStore.findFirst(
+      sembastClient,
       finder: compositeFindByKeyFinder(key),
     ));
   }
 
   /// Ids are key for non composite key
   Future<List<Object>> txnGetAllIds([Object? query, int? count]) async {
-    return (await sdbStore.findKeys(
-      sdbClient,
-      finder: sdb.Finder(filter: _storeKeyOrRangeFilter(query), limit: count),
+    return (await sembastStore.findKeys(
+      sembastClient,
+      finder:
+          sembast.Finder(filter: _storeKeyOrRangeFilter(query), limit: count),
     ));
   }
 
@@ -280,14 +284,15 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   Future<Object?> txnDelete(Object key) {
     if (hasCompositeKey) {
-      return sdbStore.delete(sdbClient, finder: compositeFindByKeyFinder(key));
+      return sembastStore.delete(sembastClient,
+          finder: compositeFindByKeyFinder(key));
     } else {
-      return sdbStore.record(key).delete(sdbClient);
+      return sembastStore.record(key).delete(sembastClient);
     }
   }
 
   /// Clone and convert
-  Object? recordToValue(sdb.RecordSnapshot<Object, Object>? record) {
+  Object? recordToValue(sembast.RecordSnapshot<Object, Object>? record) {
     if (record == null) {
       return null;
     } else {
@@ -296,12 +301,13 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     }
   }
 
-  Future<sdb.RecordSnapshot<Object, Object>?> txnGetSnapshot(Object key) async {
-    sdb.RecordSnapshot<Object, Object>? record;
+  Future<sembast.RecordSnapshot<Object, Object>?> txnGetSnapshot(
+      Object key) async {
+    sembast.RecordSnapshot<Object, Object>? record;
     if (hasCompositeKey) {
       record = await txnCompositeGetSnapshot(key);
     } else {
-      record = await sdbStore.record(key).getSnapshot(sdbClient);
+      record = await sembastStore.record(key).getSnapshot(sembastClient);
     }
 
     return record;
@@ -323,11 +329,11 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   /// Get the sembast sort orders.
-  List<sdb.SortOrder> sortOrders(bool ascending) =>
+  List<sembast.SortOrder> sortOrders(bool ascending) =>
       keyPathSortOrders(keyField, ascending);
 
   /// Convert to a sembast filter.
-  sdb.Filter cursorFilter(Object? key, KeyRange? range) {
+  sembast.Filter cursorFilter(Object? key, KeyRange? range) {
     if (range != null) {
       return keyRangeFilter(keyField, range, false);
     } else {
@@ -335,8 +341,8 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     }
   }
 
-  /// Get the keyPath or default sdb key
-  dynamic get keyField => keyPath ?? sdb.Field.key;
+  /// Get the keyPath or default sembast key
+  dynamic get keyField => keyPath ?? sembast.Field.key;
 
   @override
   Stream<CursorWithValue> openCursor(

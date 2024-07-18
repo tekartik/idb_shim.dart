@@ -7,7 +7,7 @@ import 'package:idb_shim/src/sembast/sembast_cursor.dart';
 import 'package:idb_shim/src/sembast/sembast_filter.dart';
 import 'package:idb_shim/src/sembast/sembast_object_store.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
-import 'package:sembast/sembast.dart' as sdb;
+import 'package:sembast/sembast.dart' as sembast;
 
 class IndexSembast extends Index with IndexWithMetaMixin {
   final ObjectStoreSembast store;
@@ -20,7 +20,7 @@ class IndexSembast extends Index with IndexWithMetaMixin {
     return store.inTransaction(computation);
   }
 
-  sdb.Filter _indexKeyOrRangeFilter([Object? keyOrRange]) {
+  sembast.Filter _indexKeyOrRangeFilter([Object? keyOrRange]) {
     // null means all entry without null value
     if (keyOrRange == null) {
       return keyNotNullFilter(meta.keyPath);
@@ -31,8 +31,8 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   @override
   Future<int> count([keyOrRange]) {
     return inTransaction(() {
-      return store.sdbStore
-          .count(store.sdbClient, filter: _indexKeyOrRangeFilter(keyOrRange));
+      return store.sembastStore.count(store.sembastClient,
+          filter: _indexKeyOrRangeFilter(keyOrRange));
     });
   }
 
@@ -40,9 +40,10 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   Future get(key) {
     checkKeyParam(key);
     return inTransaction(() {
-      final finder = sdb.Finder(filter: _indexKeyOrRangeFilter(key), limit: 1);
-      return store.sdbStore
-          .find(store.sdbClient, finder: finder)
+      final finder =
+          sembast.Finder(filter: _indexKeyOrRangeFilter(key), limit: 1);
+      return store.sembastStore
+          .find(store.sembastClient, finder: finder)
           .then((records) {
         if (records.isNotEmpty) {
           return store.recordToValue(records.first);
@@ -55,9 +56,10 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   Future getKey(key) {
     checkKeyParam(key);
     return inTransaction(() {
-      final finder = sdb.Finder(filter: _indexKeyOrRangeFilter(key), limit: 1);
-      return store.sdbStore
-          .find(store.sdbClient, finder: finder)
+      final finder =
+          sembast.Finder(filter: _indexKeyOrRangeFilter(key), limit: 1);
+      return store.sembastStore
+          .find(store.sembastClient, finder: finder)
           .then((records) {
         if (records.isNotEmpty) {
           return records.first.key;
@@ -92,21 +94,22 @@ class IndexSembast extends Index with IndexWithMetaMixin {
     return ctlr.stream;
   }
 
-  sdb.Filter cursorFilter(Object? key, KeyRange? range) {
+  sembast.Filter cursorFilter(Object? key, KeyRange? range) {
     return keyCursorFilter(keyPath, key, range, multiEntry);
   }
 
-  List<sdb.SortOrder> sortOrders(bool ascending) =>
+  List<sembast.SortOrder> sortOrders(bool ascending) =>
       keyPathSortOrders(keyPath, ascending);
 
   @override
   Future<List<Object>> getAll([query, int? count]) {
     return inTransaction(() async {
-      final finder = sdb.Finder(
+      final finder = sembast.Finder(
           filter: _indexKeyOrRangeFilter(query),
           limit: count,
           sortOrders: sortOrders(true));
-      return (await store.sdbStore.find(store.sdbClient, finder: finder))
+      return (await store.sembastStore
+              .find(store.sembastClient, finder: finder))
           .map((r) => store.recordToValue(r)!)
           .toList(growable: false);
     });
@@ -115,11 +118,11 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   @override
   Future<List<Object>> getAllKeys([query, int? count]) {
     return inTransaction(() async {
-      final finder = sdb.Finder(
+      final finder = sembast.Finder(
           filter: _indexKeyOrRangeFilter(query),
           limit: count,
           sortOrders: sortOrders(true));
-      return store.sdbStore.findKeys(store.sdbClient, finder: finder);
+      return store.sembastStore.findKeys(store.sembastClient, finder: finder);
     });
   }
 }

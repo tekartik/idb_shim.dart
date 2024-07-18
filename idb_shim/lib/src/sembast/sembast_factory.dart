@@ -6,7 +6,7 @@ import 'package:idb_shim/src/common/common_factory.dart';
 import 'package:idb_shim/src/sembast/sembast_database.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:path/path.dart';
-import 'package:sembast/sembast.dart' as sdb;
+import 'package:sembast/sembast.dart' as sembast;
 import 'package:sembast/sembast_memory.dart';
 
 bool sembastDebug = false; // devWarning(true);
@@ -29,7 +29,7 @@ IdbFactory newIdbFactorySembastMemoryImpl() =>
 
 class IdbFactorySembastImpl extends IdbFactoryBase
     implements IdbFactorySembast {
-  final sdb.DatabaseFactory _databaseFactory;
+  final sembast.DatabaseFactory _databaseFactory;
   final String? _path;
 
   @override
@@ -37,8 +37,11 @@ class IdbFactorySembastImpl extends IdbFactoryBase
       _path == null ? dbName : join(_path, dbName);
 
   @override
-  sdb.DatabaseFactory get sdbFactory => _databaseFactory;
+  sembast.DatabaseFactory get sembastFactory => _databaseFactory;
 
+  // Compat
+  @override
+  sembast.DatabaseFactory get sdbFactory => sembastFactory;
   @override
   bool get persistent => _databaseFactory.hasStorage;
 
@@ -49,11 +52,19 @@ class IdbFactorySembastImpl extends IdbFactoryBase
 
   // get the underlying sembast database for a given database
   @override
-  sdb.Database? getSdbDatabase(Database db) => (db as DatabaseSembast).db;
+  sembast.Database? getSembastDatabase(Database db) =>
+      (db as DatabaseSembast).db;
 
   @override
-  Future<Database> openFromSdbDatabase(sdb.Database sdbDb) =>
-      DatabaseSembast.fromDatabase(this, sdbDb);
+  Future<Database> openFromSembastDatabase(sembast.Database sembastDb) =>
+      DatabaseSembast.fromDatabase(this, sembastDb);
+
+  @override
+  sembast.Database? getSdbDatabase(Database db) => getSembastDatabase(db);
+
+  @override
+  Future<Database> openFromSdbDatabase(sembast.Database sembastDb) =>
+      openFromSembastDatabase(sembastDb);
 
   @override
   Future<Database> open(String dbName,

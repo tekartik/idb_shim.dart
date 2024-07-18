@@ -8,9 +8,9 @@ import 'package:idb_shim/src/sembast/sembast_factory.dart';
 import 'package:idb_shim/src/sembast/sembast_object_store.dart';
 import 'package:idb_shim/src/sembast/sembast_transaction.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
-import 'package:sembast/sembast.dart' as sdb;
+import 'package:sembast/sembast.dart' as sembast;
 
-class _SdbVersionChangeEvent extends IdbVersionChangeEventBase {
+class _SembastVersionChangeEvent extends IdbVersionChangeEventBase {
   @override
   final int oldVersion;
   @override
@@ -28,7 +28,7 @@ class _SdbVersionChangeEvent extends IdbVersionChangeEventBase {
   TransactionSembast get transaction =>
       request.transaction as TransactionSembast;
 
-  _SdbVersionChangeEvent(
+  _SembastVersionChangeEvent(
       DatabaseSembast database, int? oldVersion, this.newVersion) //
       : oldVersion = oldVersion ?? 0 {
     // handle = too to catch programatical errors
@@ -54,19 +54,19 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
   TransactionSembast? versionChangeTransaction;
   @override
   final IdbDatabaseMeta meta = IdbDatabaseMeta();
-  sdb.Database? db;
+  sembast.Database? db;
 
   @override
   IdbFactorySembast get factory => super.factory as IdbFactorySembast;
 
-  sdb.DatabaseFactory get sdbFactory => factory.sdbFactory;
+  sembast.DatabaseFactory get sembastFactory => factory.sembastFactory;
 
   DatabaseSembast._(super.factory);
 
-  final mainStore = sdb.StoreRef<String, Object>.main();
+  final mainStore = sembast.StoreRef<String, Object>.main();
 
   static Future<DatabaseSembast> fromDatabase(
-      IdbFactory factory, sdb.Database db) async {
+      IdbFactory factory, sembast.Database db) async {
     final idbDb = DatabaseSembast._(factory);
     idbDb.db = db;
     var version = await idbDb._readMetaVersion();
@@ -123,7 +123,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
     });
   }
 
-  Future<sdb.Database?> open(
+  Future<sembast.Database?> open(
       int? newVersion, OnUpgradeNeededFunction? onUpgradeNeeded) async {
     late int previousVersion;
 
@@ -133,7 +133,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
           'open $onUpgradeNeeded ${onUpgradeNeeded != null ? 'NOT NULL' : 'NULL'}');
     }
     // Open the sembast database
-    db = await sdbFactory.openDatabase(factory.getDbPath(name), version: 1,
+    db = await sembastFactory.openDatabase(factory.getDbPath(name), version: 1,
         onVersionChanged: (db, oldVersion, newVersion) {
       if (sembastDebug) {
         idbLog('changing ${db.path} $oldVersion -> $newVersion');
@@ -156,7 +156,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
           // could be null when opening an empty database
           if (onUpgradeNeeded != null) {
             await onUpgradeNeeded(
-                _SdbVersionChangeEvent(this, previousVersion, newVersion!));
+                _SembastVersionChangeEvent(this, previousVersion, newVersion!));
           }
 
           await versionChangeTransaction!.completed;
@@ -171,7 +171,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
 
           // First delete everything from deleted stores
           for (final storeMeta in deletedStores) {
-            await sdb.intMapStoreFactory.store(storeMeta.name).drop(txn);
+            await sembast.intMapStoreFactory.store(storeMeta.name).drop(txn);
           }
 
           // Handle deleted object store

@@ -9,7 +9,7 @@ import 'package:idb_shim/src/sembast/sembast_database.dart';
 import 'package:idb_shim/src/sembast/sembast_object_store.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:idb_shim/src/utils/env_utils.dart';
-import 'package:sembast/sembast.dart' as sdb;
+import 'package:sembast/sembast.dart' as sembast;
 
 bool _debugTransaction = false; // devWarning(true); // false;
 
@@ -34,10 +34,10 @@ class TransactionSembast extends IdbTransactionBase
   DatabaseSembast get database => super.database as DatabaseSembast;
 
   /// Sembast database.
-  sdb.Database get sdbDatabase => database.db!;
+  sembast.Database get sembastDatabase => database.db!;
 
   /// Sembast transaction.
-  sdb.Transaction? sdbTransaction;
+  sembast.Transaction? sembastTransaction;
 
   static int _debugAllIds = 0;
   int? _debugId;
@@ -182,13 +182,13 @@ class TransactionSembast extends IdbTransactionBase
 
       //lazyExecution = new Future.delayed(new Duration(), () {
 
-      Future sdbAction() {
-        //assert(sdbDatabase.transaction == null);
+      Future sembastAction() {
+        //assert(sembastDatabase.transaction == null);
 
         // No return value here
-        return sdbDatabase.transaction((txn) async {
+        return sembastDatabase.transaction((txn) async {
           // assign right away as this is tested
-          sdbTransaction = txn;
+          sembastTransaction = txn;
           // Do we care about the type here?
           var result = await _next();
 
@@ -217,9 +217,9 @@ class TransactionSembast extends IdbTransactionBase
 
       if (_transactionLazyMode) {
         // old lazy mode
-        _lazyExecution = Future.microtask(sdbAction);
+        _lazyExecution = Future.microtask(sembastAction);
       } else {
-        _lazyExecution = Future.sync(sdbAction);
+        _lazyExecution = Future.sync(sembastAction);
       }
 
       //return lazyExecution;
@@ -248,7 +248,7 @@ class TransactionSembast extends IdbTransactionBase
     });
   }
 
-  //sdb.Transaction sdbTransaction;
+  //sembast.Transaction sembastTransaction;
   final _transactionCompleter = Completer<void>();
   final _completers = <Completer>[];
   final _actions = <Function>[];
@@ -382,7 +382,7 @@ class TransactionSembast extends IdbTransactionBase
     return _completedCompleter.future;
   }
 
-//    sdbTransaction == null ? new Future.value(database) : sdbTransaction.completed.then((_) {
+//    sembastTransaction == null ? new Future.value(database) : sembastTransaction.completed.then((_) {
 //    // delay the completed event
 //
 //  });
