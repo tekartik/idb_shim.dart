@@ -46,7 +46,10 @@ List<T> _cloneList<T>(List<T> original) {
   return list;
 }
 
-Map _cloneMap(Map original) {
+/// Deep clone a map
+Map<String, Object?> cloneMap(Map original) => _cloneMap(original);
+
+Map<String, Object?> _cloneMap(Map original) {
   final map = <String, Object?>{};
   original.forEach((key, value) {
     map[key as String] = _cloneValue(value);

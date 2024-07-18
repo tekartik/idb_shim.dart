@@ -13,7 +13,7 @@ extension SdbClientInternalExtension on SdbClient {
 
   /// Handle db or transaction.
   Future<T> handleDbOrTxn<T>(Future<T> Function(SdbDatabaseImpl db) dbFn,
-      Future<T> Function(SdbTransactionImpl db) txnFn) {
+      Future<T> Function(SdbTransactionImpl txn) txnFn) {
     if (this is SdbTransactionImpl) {
       return txnFn(txnImpl);
     } else {

@@ -27,7 +27,7 @@ extension SdbTransactionStoreRefExtension<K extends KeyBase,
   Future<K> add(V value) => _impl.addImpl(value);
 
   /// Put.
-  Future<void> put(K key, V value) => _impl.putImpl(key, value);
+  Future<void> put(K? key, V value) => _impl.putImpl(key, value);
 
   /// Delete.
   Future<void> delete(K key) => _impl.deleteImpl(key);

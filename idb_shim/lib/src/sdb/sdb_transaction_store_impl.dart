@@ -133,7 +133,7 @@ class SdbTransactionStoreRefImpl<K extends KeyBase, V extends ValueBase>
   }
 
   /// Put a record.
-  Future<void> putImpl(K key, V value) async {
+  Future<void> putImpl(K? key, V value) async {
     await idbObjectStore.put(value, key);
   }
 

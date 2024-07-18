@@ -20,8 +20,11 @@ abstract class SdbStoreRef<K extends KeyBase, V extends ValueBase> {
 /// Store methods.
 extension SdbStoreRefExtension<K extends KeyBase, V extends ValueBase>
     on SdbStoreRef<K, V> {
-  /// Get a single record.
+  /// Add a single record.
   Future<K> add(SdbClient client, V value) => impl.addImpl(client, value);
+
+  /// Put a single record (when using inline keys)
+  Future<K> put(SdbClient client, V value) => impl.putImpl(client, value);
 
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> findRecords(SdbClient client,

@@ -1,3 +1,4 @@
+import 'package:idb_shim/src//common/common_value.dart';
 import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
 
 import 'sdb_boundary.dart';
@@ -48,11 +49,11 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
     return false;
   }
 
-  /// Get a single record.
+  /// Add a single record.
   Future<K> addImpl(SdbClient client, V value) => client.handleDbOrTxn(
       (db) => dbAddImpl(db, value), (txn) => txnAddImpl(txn.rawImpl, value));
 
-  /// Get a single record.
+  /// Add a single record.
   Future<K> dbAddImpl(SdbDatabaseImpl db, V value) {
     return db.inStoreTransactionImpl<K, K, V>(
         this, SdbTransactionMode.readWrite, (txn) {
@@ -60,9 +61,30 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
     });
   }
 
-  /// Get a single record.
+  /// Add a single record.
   Future<K> txnAddImpl(SdbTransactionImpl txn, V value) {
     return txn.storeImpl(this).add(value);
+  }
+
+  /// Put a single record (inline keys)
+  Future<K> putImpl(SdbClient client, V value) => client.handleDbOrTxn(
+      (db) => dbPutImpl(db, value), (txn) => txnPutImpl(txn.rawImpl, value));
+
+  /// Put a single record (inline keys)
+  Future<K> dbPutImpl(SdbDatabaseImpl db, V value) {
+    return db.inStoreTransactionImpl<K, K, V>(
+        this, SdbTransactionMode.readWrite, (txn) {
+      return txnPutImpl(txn.rawImpl, value);
+    });
+  }
+
+  /// Put a single record (inline keys)
+  Future<K> txnPutImpl(SdbTransactionImpl txn, V value) {
+    return txn.storeImpl(this).put(null, value).then((_) {
+      var keyPath = txn.storeImpl(this).idbObjectStore.keyPath;
+      // Get the key from the value
+      return mapValueAtKeyPath(value as Map, keyPath) as K;
+    });
   }
 
   /// Find records.

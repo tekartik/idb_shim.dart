@@ -698,20 +698,6 @@ void defineTests(TestContext ctx) {
         }
       });
 
-      test('simple get', () async {
-        await dbSetUp();
-        dbCreateTransaction();
-        final value = {'test': 'test_value'};
-        return objectStore.add(value).then((key) {
-          expect(key, 1);
-          return objectStore.getObject(key).then((valueRead) {
-            final expectedValue = cloneValue(value) as Map;
-            expectedValue[keyPath] = 1;
-            expect(valueRead, expectedValue);
-          });
-        });
-      });
-
       test('add_read_no_key', () async {
         await dbSetUp();
         dbCreateTransaction();

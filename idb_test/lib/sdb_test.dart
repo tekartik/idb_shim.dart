@@ -255,11 +255,6 @@ void simpleDbTest(idb.IdbFactory idbFactory) {
     'index2',
     () {
       test('index2', () async {
-        // TODO
-        if (idbFactory.name == 'sqflite') {
-          return;
-        }
-
         var dbName = 'test_index2.db';
         await factory.deleteDatabase(dbName);
 
@@ -326,6 +321,12 @@ void simpleDbTest(idb.IdbFactory idbFactory) {
             ));
         expect(items.keys, [keyCatHarriet]);
 
+        // Beethoven is actually a cat...
+        await itemStore.put(
+            db, {'id': keyDogBeethoven, 'type': 'cat', 'name': 'Beethoven'});
+        // it should change the index order
+        items = await itemTypeIdIndex.findRecords(db);
+        expect(items.keys, [keyCatAlbert, keyDogBeethoven, keyCatHarriet]);
         // Close the database
         await db.close();
       });
