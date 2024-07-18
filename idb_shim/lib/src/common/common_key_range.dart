@@ -26,10 +26,9 @@ class IdbKeyRange implements KeyRange {
       _checkBound('upper', _upperBound, _upperBoundOpen);
 
   void _checkBound(String tag, Object? bound, bool open) {
-    if (_boundHasNull(bound) && !open) {
+    if (_boundHasNull(bound)) {
       // DataError: Failed to execute 'lowerBound' on 'IDBKeyRange': The parameter is not a valid key.
-      throw DatabaseError(
-          'DataError: The $tag key has nulls and the bounds is not open ($this)');
+      throw DatabaseError('DataError: The $tag key $bound has nulls');
     }
   }
 

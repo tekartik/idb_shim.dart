@@ -34,7 +34,7 @@ class SdbIndex2RefImpl<
         K extends KeyBase,
         V extends ValueBase,
         I1 extends IndexBase,
-        I2 extends IndexBase> extends SdbIndexRefImpl<K, V, (I1?, I2?)>
+        I2 extends IndexBase> extends SdbIndexRefImpl<K, V, (I1, I2)>
     implements SdbIndex2Ref<K, V, I1, I2> {
   /// Index on 2 fields.
   SdbIndex2RefImpl(super.store, super.name);
@@ -46,7 +46,7 @@ class SdbIndex3RefImpl<
         V extends ValueBase,
         I1 extends IndexBase,
         I2 extends IndexBase,
-        I3 extends IndexBase> extends SdbIndexRefImpl<K, V, (I1?, I2?, I3?)>
+        I3 extends IndexBase> extends SdbIndexRefImpl<K, V, (I1, I2, I3)>
     implements SdbIndex3Ref<K, V, I1, I2, I3> {
   /// Index on 3 fields.
   SdbIndex3RefImpl(super.store, super.name);
@@ -59,8 +59,7 @@ class SdbIndex4RefImpl<
         I1 extends IndexBase,
         I2 extends IndexBase,
         I3 extends IndexBase,
-        I4 extends IndexBase>
-    extends SdbIndexRefImpl<K, V, (I1?, I2?, I3?, I4?)>
+        I4 extends IndexBase> extends SdbIndexRefImpl<K, V, (I1, I2, I3, I4)>
     implements SdbIndex4Ref<K, V, I1, I2, I3, I4> {
   /// Index on 4 fields.
   SdbIndex4RefImpl(super.store, super.name);

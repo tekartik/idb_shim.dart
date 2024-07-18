@@ -73,7 +73,8 @@ void defineTests() {
     test('KeyRangeBound', () {
       //expectThrow(() => KeyRange.bound(1, null, true, true));
       //expectThrow(() => KeyRange.bound(null, 1, true, true));
-      expectThrow(() => KeyRange.bound([1, null], [1, null], true, true));
+      expectThrow(() => KeyRange.bound([1, 0], [1, null], true, true));
+      expectThrow(() => KeyRange.bound([1, null], [1, 2], true, true));
       KeyRange.bound(1, 2, false, false);
       KeyRange.bound(1, 2, true, true);
     });

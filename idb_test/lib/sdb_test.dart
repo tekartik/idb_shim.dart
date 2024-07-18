@@ -1,7 +1,7 @@
 import 'package:dev_test/test.dart';
 import 'package:idb_shim/idb_client_logger.dart';
 import 'package:idb_shim/idb_shim.dart' as idb;
-import 'package:idb_shim/sdb/sdb.dart';
+import 'package:idb_shim/sdb.dart';
 
 void main() {
   IdbFactoryLogger.debugMaxLogCount = 100;
@@ -34,7 +34,8 @@ void simpleDbTest(SdbFactory factory) {
       expect(key, 1);
       var key2 = await testStore.add(db, {'test': 2});
       expect(key2, 2);
-      var record = (await testStore.record(key).get(db))!;
+      SdbRecordRef<int, SdbModel> recordRef = testStore.record(key);
+      SdbRecordSnapshot<int, SdbModel> record = (await recordRef.get(db))!;
       expect(record.value, {'test': 1});
       expect(record.key, key);
       expect(await testStore.record(key).getValue(db), {'test': 1});
@@ -188,7 +189,8 @@ void simpleDbTest(SdbFactory factory) {
         }
       });
       await testStore.add(db, {'field': 1234});
-      var snapshot = (await testIndex.record(1234).get(db))!;
+      SdbIndexRecordRef<int, SdbModel, int> recordRef = testIndex.record(1234);
+      var snapshot = (await recordRef.get(db))!;
       expect(snapshot.key, 1);
       expect(snapshot.indexKey, 1234);
       expect(snapshot.value, {'field': 1234});
@@ -215,6 +217,9 @@ void simpleDbTest(SdbFactory factory) {
       var records = await testIndex.findRecords(db,
           boundaries: SdbBoundaries(SdbLowerBoundary(1), SdbUpperBoundary(3)));
       expect(records.length, 2);
+      var keys = await testIndex.findRecordKeys(db,
+          boundaries: SdbBoundaries(SdbLowerBoundary(1), SdbUpperBoundary(3)));
+      expect(keys.length, 2);
 
       await db.close();
     });
@@ -290,15 +295,26 @@ void simpleDbTest(SdbFactory factory) {
       expect(first.indexKey.$1, 'cat');
       expect(first.indexKey.$2, keyCatAlbert);
 
-      // TODO
-      // ignore: dead_code
-      if (false) {
-        var anyDogBoundary =
-            petTypeIdIndex.lowerBoundary('dog', null, include: false);
-        pets = await petTypeIdIndex.findRecords(db,
-            boundaries: SdbBoundaries.lower(anyDogBoundary));
-        expect(pets.keys, [keyDogBeethoven]);
-      }
+      pets = await petTypeIdIndex.findRecords(db,
+          boundaries: SdbBoundaries(
+              petTypeIdIndex.lowerBoundary('cat', keyCatAlbert, include: false),
+              null));
+      expect(pets.keys, [keyCatHarriet, keyDogBeethoven]);
+
+      pets = await petTypeIdIndex.findRecords(db,
+          boundaries: SdbBoundaries(
+            null,
+            petTypeIdIndex.upperBoundary('cat', keyCatHarriet),
+          ));
+      expect(pets.keys, [keyCatAlbert]);
+
+      pets = await petTypeIdIndex.findRecords(db,
+          boundaries: SdbBoundaries(
+            petTypeIdIndex.lowerBoundary('cat', keyCatAlbert, include: false),
+            petTypeIdIndex.upperBoundary('dog', keyDogBeethoven),
+          ));
+      expect(pets.keys, [keyCatHarriet]);
+
       // Close the database
       await db.close();
     });

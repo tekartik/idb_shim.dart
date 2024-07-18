@@ -26,7 +26,9 @@ export 'sdb_index_record_snapshot.dart'
     show
         SdbIndexRecordSnapshot,
         SdbIndexRecordSnapshotListExt,
-        SdbIndexRecordKey;
+        SdbIndexRecordKey,
+        SdbIndexRecordKeyListExt;
+
 export 'sdb_open.dart'
     show
         SdbOpenDatabase,
@@ -35,7 +37,11 @@ export 'sdb_open.dart'
         SdbOpenStoreRefExtension;
 export 'sdb_record.dart' show SdbRecordRef, SdbRecordRefExtension;
 export 'sdb_record_snapshot.dart'
-    show SdbRecordSnapshot, SdbRecordSnapshotListExt;
+    show
+        SdbRecordSnapshot,
+        SdbRecordSnapshotListExt,
+        SdbRecordKey,
+        SdbRecordKeyListExt;
 export 'sdb_store.dart' show SdbStoreRef, SdbStoreRefExtension;
 export 'sdb_transaction.dart' show SdbTransaction, SdbTransactionMode;
 export 'sdb_transaction.dart' show SdbTransaction;

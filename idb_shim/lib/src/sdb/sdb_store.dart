@@ -25,8 +25,15 @@ extension SdbStoreRefExtension<K extends KeyBase, V extends ValueBase>
 
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> findRecords(SdbClient client,
-          {SdbBoundaries<K>? boundaries}) =>
-      impl.findRecordsImpl(client, boundaries: boundaries);
+          {SdbBoundaries<K>? boundaries, int? offset, int? limit}) =>
+      impl.findRecordsImpl(client,
+          boundaries: boundaries, offset: offset, limit: limit);
+
+  /// Find records.
+  Future<List<SdbRecordKey<K, V>>> findRecordKeys(SdbClient client,
+          {SdbBoundaries<K>? boundaries, int? offset, int? limit}) =>
+      impl.findRecordKeysImpl(client,
+          boundaries: boundaries, offset: offset, limit: limit);
 
   /// Record reference.
   SdbRecordRef<K, V> record(K key) => SdbRecordRefImpl<K, V>(impl, key);

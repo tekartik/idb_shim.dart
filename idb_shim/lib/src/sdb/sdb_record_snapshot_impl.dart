@@ -5,18 +5,28 @@ import 'sdb_types.dart';
 
 /// Record snapshot implementation.
 class SdbRecordSnapshotImpl<K extends KeyBase, V extends ValueBase>
-    implements SdbRecordSnapshot<K, V> {
+    extends SdbRecordKeyImpl<K, V> implements SdbRecordSnapshot<K, V> {
+  @override
+  final V value;
+
+  /// Record snapshot implementation.
+  SdbRecordSnapshotImpl(super.store, super.key, this.value);
+
+  @override
+  String toString() => 'Record(${store.name}, $key, ${logTruncateAny(value)}';
+}
+
+/// Record key implementation.
+class SdbRecordKeyImpl<K extends KeyBase, V extends ValueBase>
+    implements SdbRecordKey<K, V> {
   @override
   final SdbStoreRefImpl<K, V> store;
   @override
   final K key;
 
-  @override
-  final V value;
-
-  /// Record snapshot implementation.
-  SdbRecordSnapshotImpl(this.store, this.key, this.value);
+  /// Record key implementation.
+  SdbRecordKeyImpl(this.store, this.key);
 
   @override
-  String toString() => 'Record($key, ${logTruncateAny(value)}';
+  String toString() => 'RecordKey(${store.name}, $key)';
 }

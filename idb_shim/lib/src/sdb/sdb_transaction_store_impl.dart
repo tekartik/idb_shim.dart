@@ -60,8 +60,15 @@ class SdbSingleStoreTransactionImpl<K extends KeyBase, V extends ValueBase>
 
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> findRecordsImpl(
-          {SdbBoundaries<K>? boundaries}) =>
-      txnStore.findRecords(boundaries: boundaries);
+          {SdbBoundaries<K>? boundaries, int? offset, int? limit}) =>
+      txnStore.findRecords(
+          boundaries: boundaries, offset: offset, limit: limit);
+
+  /// Find records.
+  Future<List<SdbRecordKey<K, V>>> findRecordKeysImpl(
+          {SdbBoundaries<K>? boundaries, int? offset, int? limit}) =>
+      txnStore.findRecordKeys(
+          boundaries: boundaries, offset: offset, limit: limit);
 }
 
 /// Transaction store reference internal extension.
@@ -137,16 +144,31 @@ class SdbTransactionStoreRefImpl<K extends KeyBase, V extends ValueBase>
 
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> findRecordsImpl(
-      {SdbBoundaries<K>? boundaries}) async {
+      {SdbBoundaries<K>? boundaries, int? offset, int? limit}) async {
     var cursor = idbObjectStore.openCursor(
         autoAdvance: true,
         direction: idb.idbDirectionNext,
         range: idbKeyRangeFromBoundaries(boundaries));
-    var rows = await idb.cursorToList(cursor);
+    var rows = await idb.cursorToList(cursor, offset, limit);
     return rows.map((row) {
       var key = row.key as K;
       var value = row.value as V;
       return SdbRecordSnapshotImpl<K, V>(store, key, value);
+    }).toList();
+  }
+
+  /// Find record keys.
+  Future<List<SdbRecordKey<K, V>>> findRecordKeysImpl(
+      {SdbBoundaries<K>? boundaries, int? offset, int? limit}) async {
+    var cursor = idbObjectStore.openKeyCursor(
+        autoAdvance: true,
+        direction: idb.idbDirectionNext,
+        range: idbKeyRangeFromBoundaries(boundaries));
+    var rows = await idb.keyCursorToList(cursor, offset, limit);
+    return rows.map((row) {
+      var key = row.key as K;
+
+      return SdbRecordKeyImpl<K, V>(store, key);
     }).toList();
   }
 }

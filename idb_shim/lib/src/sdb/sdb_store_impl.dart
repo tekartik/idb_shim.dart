@@ -67,23 +67,56 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
 
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> findRecordsImpl(SdbClient client,
-          {SdbBoundaries<K>? boundaries}) =>
+          {SdbBoundaries<K>? boundaries, int? offset, int? limit}) =>
       client.handleDbOrTxn(
-          (db) => dbFindRecordsImpl(db, boundaries: boundaries),
-          (txn) => txnFindRecordsImpl(txn, boundaries: boundaries));
+          (db) => dbFindRecordsImpl(db,
+              boundaries: boundaries, offset: offset, limit: limit),
+          (txn) => txnFindRecordsImpl(txn,
+              boundaries: boundaries, offset: offset, limit: limit));
+
+  /// Find records.
+  Future<List<SdbRecordKey<K, V>>> findRecordKeysImpl(SdbClient client,
+          {SdbBoundaries<K>? boundaries, int? offset, int? limit}) =>
+      client.handleDbOrTxn(
+          (db) => dbFindRecordKeysImpl(db,
+              boundaries: boundaries, offset: offset, limit: limit),
+          (txn) => txnFindRecordKeysImpl(txn,
+              boundaries: boundaries, offset: offset, limit: limit));
 
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> dbFindRecordsImpl(SdbDatabase db,
-      {SdbBoundaries<K>? boundaries}) {
+      {SdbBoundaries<K>? boundaries, int? offset, int? limit}) {
     return db.inStoreTransaction(this, SdbTransactionMode.readOnly, (txn) {
-      return txn.findRecords(boundaries: boundaries);
+      return txn.findRecords(
+          boundaries: boundaries, offset: offset, limit: limit);
     });
   }
 
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> txnFindRecordsImpl(
       SdbTransactionImpl txn,
-      {SdbBoundaries<K>? boundaries}) {
-    return txn.storeImpl(this).findRecords(boundaries: boundaries);
+      {SdbBoundaries<K>? boundaries,
+      int? offset,
+      int? limit}) {
+    return txn
+        .storeImpl(this)
+        .findRecords(boundaries: boundaries, offset: offset, limit: limit);
+  }
+
+  /// Find record keys.
+  Future<List<SdbRecordKey<K, V>>> dbFindRecordKeysImpl(SdbDatabase db,
+      {SdbBoundaries<K>? boundaries, int? offset, int? limit}) {
+    return db.inStoreTransaction(this, SdbTransactionMode.readOnly, (txn) {
+      return txn.findRecordKeys(
+          boundaries: boundaries, offset: offset, limit: limit);
+    });
+  }
+
+  /// Find record keys.
+  Future<List<SdbRecordKey<K, V>>> txnFindRecordKeysImpl(SdbTransactionImpl txn,
+      {SdbBoundaries<K>? boundaries, int? offset, int? limit}) {
+    return txn
+        .storeImpl(this)
+        .findRecordKeys(boundaries: boundaries, offset: offset, limit: limit);
   }
 }

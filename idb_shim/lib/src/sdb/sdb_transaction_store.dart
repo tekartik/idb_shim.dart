@@ -34,8 +34,15 @@ extension SdbTransactionStoreRefExtension<K extends KeyBase,
 
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> findRecords(
-          {SdbBoundaries<K>? boundaries}) =>
-      _impl.findRecordsImpl(boundaries: boundaries);
+          {SdbBoundaries<K>? boundaries, int? offset, int? limit}) =>
+      _impl.findRecordsImpl(
+          boundaries: boundaries, offset: offset, limit: limit);
+
+  /// Find record keys.
+  Future<List<SdbRecordKey<K, V>>> findRecordKeys(
+          {SdbBoundaries<K>? boundaries, int? offset, int? limit}) =>
+      _impl.findRecordKeysImpl(
+          boundaries: boundaries, offset: offset, limit: limit);
 
   /// store name.
   String get name => store.name;
@@ -65,8 +72,15 @@ extension SdbSingleStoreTransactionExtension<K extends KeyBase,
 
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> findRecords(
-          {SdbBoundaries<K>? boundaries}) =>
-      impl.findRecordsImpl(boundaries: boundaries);
+          {SdbBoundaries<K>? boundaries, int? offset, int? limit}) =>
+      impl.findRecordsImpl(
+          boundaries: boundaries, offset: offset, limit: limit);
+
+  /// Find record keys.
+  Future<List<SdbRecordKey<K, V>>> findRecordKeys(
+          {SdbBoundaries<K>? boundaries, int? offset, int? limit}) =>
+      impl.findRecordKeysImpl(
+          boundaries: boundaries, offset: offset, limit: limit);
 }
 
 /// Multi-store transaction.
