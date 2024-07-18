@@ -21,3 +21,13 @@ V fixResult<V>(Object result) {
   }
   return result as V;
 }
+
+/// Common extension
+extension SdbRecordSnapshotListExt<K extends KeyBase, V extends ValueBase>
+    on List<SdbRecordSnapshot<K, V>> {
+  /// List of primary keys
+  List<K> get keys => map((e) => e.key).toList();
+
+  /// List of values
+  List<V> get values => map((e) => e.value).toList();
+}

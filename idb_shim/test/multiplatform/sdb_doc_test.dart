@@ -157,6 +157,11 @@ void simpleDbDocTest() {
     });
     print(keyCatAlbert);
     print(await petStore.record(keyCatAlbert).get(db));
+
+    var pet = (await petTypeIdIndex.record(('cat', keyCatHarriet)).get(db))!;
+    expect(pet.indexKey.$1, 'cat');
+    expect(pet.value['name'], 'Harriet');
+
     var pets = await petTypeIdIndex.findRecords(db);
     expect(pets.map((item) => item.key),
         [keyCatAlbert, keyCatHarriet, keyDogBeethoven]);

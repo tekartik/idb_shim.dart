@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/common/common_factory.dart';
 import 'package:idb_shim/src/logger/logger_database.dart';
+import 'package:idb_shim/src/logger/logger_transaction.dart';
 
 enum IdbFactoryLoggerType {
   all,
@@ -20,6 +21,7 @@ abstract class IdbFactoryLogger extends IdbFactory {
   IdbFactoryLoggerType? type;
 
   void log(String message, {int? id});
+
   void err(String message, {int? id});
 }
 
@@ -34,12 +36,41 @@ IdbFactoryLogger getIdbFactoryLogger(IdbFactory factory,
 }
 
 int _logCount = 0;
+
 bool get _incrementAndShouldLog {
   ++_logCount;
   if (IdbFactoryLogger.debugMaxLogCount != null) {
     return _logCount <= IdbFactoryLogger.debugMaxLogCount!;
   }
   return false;
+}
+
+class _VersionChangeEventLogger implements VersionChangeEvent {
+  final IdbFactoryLogger factory;
+  final int id;
+  @override
+  late final DatabaseLogger database =
+      DatabaseLogger(factory: factory, idbDatabase: delegate.database, id: id);
+
+  @override
+  late final TransactionLogger transaction =
+      TransactionLogger(database, delegate.transaction);
+
+  final VersionChangeEvent delegate;
+
+  _VersionChangeEventLogger(this.factory, this.delegate, this.id);
+
+  @override
+  int get newVersion => delegate.newVersion;
+
+  @override
+  int get oldVersion => delegate.oldVersion;
+
+  @override
+  Object get target => delegate.target;
+
+  @override
+  Object get currentTarget => delegate.currentTarget;
 }
 
 /// Wrapper for window.indexedDB and worker self.indexedDB
@@ -80,10 +111,16 @@ class IdbFactoryWrapperImpl extends IdbFactoryBase implements IdbFactoryLogger {
     var id = ++_id;
     log('opening $dbName${version != null ? ', version: $version' : ''}',
         id: id);
+    FutureOr<void> onUpgradeNeededLogger(VersionChangeEvent event) {
+      log('onUpgradeNeeded $event', id: id);
+      return onUpgradeNeeded!(_VersionChangeEventLogger(this, event, id));
+    }
+
     try {
       var db = await nativeFactory.open(dbName,
           version: version,
-          onUpgradeNeeded: onUpgradeNeeded,
+          onUpgradeNeeded:
+              onUpgradeNeeded != null ? onUpgradeNeededLogger : null,
           onBlocked: onBlocked);
       log('opened $dbName');
       return DatabaseLogger(factory: this, idbDatabase: db, id: id);

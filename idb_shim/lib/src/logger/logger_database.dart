@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/idb_client_logger.dart';
 import 'package:idb_shim/src/common/common_database.dart';
+import 'package:idb_shim/src/logger/logger_object_store.dart';
 import 'package:idb_shim/src/logger/logger_transaction.dart';
 
 import 'logger_utils.dart';
@@ -38,11 +39,11 @@ class DatabaseLogger extends IdbDatabaseBase {
     log('createObjectStore($name${getPropertyMapText({
           'keyPath': keyPath,
           'autoIncrement': autoIncrement
-        })})');
+        }, true)})');
     try {
       var store = idbDatabase.createObjectStore(name,
           keyPath: keyPath, autoIncrement: autoIncrement);
-      return store;
+      return ObjectStoreLogger(this, null, store);
     } catch (e) {
       err('createObjectStore($name) failed $e');
       rethrow;

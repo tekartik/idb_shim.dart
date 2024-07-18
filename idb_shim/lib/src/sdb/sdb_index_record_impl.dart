@@ -6,6 +6,7 @@ import 'sdb_database_impl.dart';
 import 'sdb_index_impl.dart';
 import 'sdb_index_record.dart';
 import 'sdb_index_record_snapshot_impl.dart';
+import 'sdb_key_utils.dart';
 import 'sdb_record_snapshot.dart';
 import 'sdb_store.dart';
 import 'sdb_transaction.dart';
@@ -56,7 +57,7 @@ extension SdbIndexRecordRefImplExtension<K extends KeyBase, V extends ValueBase,
       SdbTransactionImpl txn) async {
     var idbStore = txn.idbTransaction.objectStore(store.name);
     var idbIndex = idbStore.index(index.name);
-    var key = await idbIndex.getKey(indexKey);
+    var key = await idbIndex.getKey(indexKeyToIdbKey(indexKey));
     if (key != null) {
       var result = await idbStore.getObject(key);
       if (result != null) {

@@ -3,23 +3,46 @@
 import 'dart:async';
 
 import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/src/logger/logger_database.dart';
 import 'package:idb_shim/src/logger/logger_transaction.dart';
 
 import 'logger_index.dart';
 import 'logger_utils.dart';
 
 class ObjectStoreLogger extends ObjectStore {
-  final TransactionLogger idbTransactionLogger;
+  /// Specified during open.
+  final DatabaseLogger? idbDatabaseLogger;
+
+  /// Specified in a transaction.
+  final TransactionLogger? idbTransactionLogger;
   ObjectStore idbObjectStore;
 
-  ObjectStoreLogger(this.idbTransactionLogger, this.idbObjectStore);
+  ObjectStoreLogger(
+      this.idbDatabaseLogger, this.idbTransactionLogger, this.idbObjectStore);
 
-  void log(String message) => idbTransactionLogger.log(message);
+  void log(String message) {
+    if (idbTransactionLogger != null) {
+      idbTransactionLogger?.log(message);
+    } else if (idbDatabaseLogger != null) {
+      idbDatabaseLogger?.log(message);
+    }
+  }
 
-  void err(String message) => idbTransactionLogger.err(message);
+  void err(String message) {
+    if (idbTransactionLogger != null) {
+      idbTransactionLogger?.err(message);
+    } else if (idbDatabaseLogger != null) {
+      idbDatabaseLogger?.err(message);
+    }
+  }
 
   @override
   Index createIndex(String name, keyPath, {bool? unique, bool? multiEntry}) {
+    var isUnique = unique ?? false;
+    var isMultiEntry = multiEntry ?? false;
+    log('createIndex $name on ${this.name} keyPath $keyPath${(isUnique || isMultiEntry) ? ''
+        '(${isUnique ? 'unique' : ''}'
+        '${isMultiEntry ? (isUnique ? ', multi' : 'multi') : ''})' : ''}');
     return idbObjectStore.createIndex(name, keyPath,
         unique: unique, multiEntry: multiEntry);
   }
@@ -55,6 +78,7 @@ class ObjectStoreLogger extends ObjectStore {
   }
 
   String _debugSafeKey(Object? key) => logTruncateAny(key ?? '<null key>');
+
   String _debugSafeValue(Object? value) => logTruncateAny(value);
 
   @override

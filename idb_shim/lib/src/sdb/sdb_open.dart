@@ -37,15 +37,36 @@ extension SdbOpenStoreRefExtension<K extends KeyBase, V extends ValueBase>
     on SdbOpenStoreRef<K, V> {
   /// Create an index.
   SdbOpenIndexRef<K, V, I> createIndex<I extends IndexBase>(
-          SdbIndexRef<K, V, I> index, String indexKeyPath) =>
+          SdbIndex1Ref<K, V, I> index, String indexKeyPath) =>
       impl.createIndexImpl<I>(index.impl, indexKeyPath);
 
-  /// Create an index.
-  SdbOpenIndexRef<K, V, (I1, I2)>
+  /// Create an index on 2 fields.
+  SdbOpenIndexRef<K, V, (I1?, I2?)>
       createIndex2<I1 extends IndexBase, I2 extends IndexBase>(
-              SdbIndexRef<K, V, (I1, I2)> index,
+              SdbIndex2Ref<K, V, I1, I2> index,
               String indexKeyPath1,
               String indexKeyPath2) =>
-          impl.createIndexImpl<(I1, I2)>(
+          impl.createIndexImpl<(I1?, I2?)>(
               index.impl, [indexKeyPath1, indexKeyPath2]);
+
+  /// Create an index on 3 fields.
+  SdbOpenIndexRef<K, V, (I1?, I2?, I3?)> createIndex3<I1 extends IndexBase,
+              I2 extends IndexBase, I3 extends IndexBase>(
+          SdbIndex3Ref<K, V, I1, I2, I3> index,
+          String indexKeyPath1,
+          String indexKeyPath2,
+          String indexKeyPath3) =>
+      impl.createIndexImpl<(I1?, I2?, I3?)>(
+          index.impl, [indexKeyPath1, indexKeyPath2, indexKeyPath3]);
+
+  /// Create an index on 4 fields.
+  SdbOpenIndexRef<K, V, (I1?, I2?, I3?, I4?)> createIndex4<I1 extends IndexBase,
+              I2 extends IndexBase, I3 extends IndexBase, I4 extends IndexBase>(
+          SdbIndex4Ref<K, V, I1, I2, I3, I4> index,
+          String indexKeyPath1,
+          String indexKeyPath2,
+          String indexKeyPath3,
+          String indexKeyPath4) =>
+      impl.createIndexImpl<(I1?, I2?, I3?, I4?)>(index.impl,
+          [indexKeyPath1, indexKeyPath2, indexKeyPath3, indexKeyPath4]);
 }

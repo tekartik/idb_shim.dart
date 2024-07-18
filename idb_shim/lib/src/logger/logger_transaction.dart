@@ -20,7 +20,7 @@ class TransactionLogger extends IdbTransactionBase {
 
   @override
   ObjectStore objectStore(String name) =>
-      ObjectStoreLogger(this, idbTransaction.objectStore(name));
+      ObjectStoreLogger(null, this, idbTransaction.objectStore(name));
 /*
   @override
   Future<Database> get completed async {

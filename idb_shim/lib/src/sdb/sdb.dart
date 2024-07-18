@@ -8,11 +8,25 @@ export 'sdb_boundary.dart'
     show SdbBoundaries, SdbBoundary, SdbLowerBoundary, SdbUpperBoundary;
 export 'sdb_database.dart' show SdbDatabase, SdbDatabaseExtension;
 export 'sdb_factory.dart' show SdbFactory, SdbFactoryExtension;
-export 'sdb_index.dart' show SdbIndexRef, SdbIndexRefExtension;
+export 'sdb_index.dart'
+    show
+        SdbIndexRef,
+        SdbIndex1Ref,
+        SdbIndex2Ref,
+        SdbIndex3Ref,
+        SdbIndex4Ref,
+        SdbIndexRefExtension,
+        SdbIndex1RefExtension,
+        SdbIndex2RefExtension,
+        SdbIndex3RefExtension,
+        SdbIndex4RefExtension;
 export 'sdb_index_record.dart'
     show SdbIndexRecordRef, SdbIndexRecordRefExtension;
 export 'sdb_index_record_snapshot.dart'
-    show SdbIndexRecordSnapshot, SdbIndexRecordKey;
+    show
+        SdbIndexRecordSnapshot,
+        SdbIndexRecordSnapshotListExt,
+        SdbIndexRecordKey;
 export 'sdb_open.dart'
     show
         SdbOpenDatabase,
@@ -20,6 +34,8 @@ export 'sdb_open.dart'
         SdbOpenStoreRef,
         SdbOpenStoreRefExtension;
 export 'sdb_record.dart' show SdbRecordRef, SdbRecordRefExtension;
+export 'sdb_record_snapshot.dart'
+    show SdbRecordSnapshot, SdbRecordSnapshotListExt;
 export 'sdb_store.dart' show SdbStoreRef, SdbStoreRefExtension;
 export 'sdb_transaction.dart' show SdbTransaction, SdbTransactionMode;
 export 'sdb_transaction.dart' show SdbTransaction;

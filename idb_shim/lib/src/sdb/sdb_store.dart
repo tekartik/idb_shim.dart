@@ -31,12 +31,34 @@ extension SdbStoreRefExtension<K extends KeyBase, V extends ValueBase>
   /// Record reference.
   SdbRecordRef<K, V> record(K key) => SdbRecordRefImpl<K, V>(impl, key);
 
-  /// Index reference
-  SdbIndexRef<K, V, I> index<I extends IndexBase>(String name) =>
-      SdbIndexRefImpl<K, V, I>(impl, name);
+  /// Index reference on 1 field
+  SdbIndex1Ref<K, V, I> index<I extends IndexBase>(String name) =>
+      SdbIndex1RefImpl<K, V, I>(impl, name);
 
-  /// Index reference
-  SdbIndexRef<K, V, (I1, I2)>
-      index2<I1 extends IndexBase, I2 extends IndexBase>(String name) =>
-          SdbIndexRefImpl<K, V, (I1, I2)>(impl, name);
+  /// Index reference on 2 fields
+  SdbIndex2Ref<K, V, I1, I2> index2<I1 extends IndexBase, I2 extends IndexBase>(
+          String name) =>
+      SdbIndex2RefImpl<K, V, I1, I2>(impl, name);
+
+  /// Index reference on 3 fields
+  SdbIndex3Ref<K, V, I1, I2, I3>
+      index3<I1 extends IndexBase, I2 extends IndexBase, I3 extends IndexBase>(
+              String name) =>
+          SdbIndex3RefImpl<K, V, I1, I2, I3>(impl, name);
+
+  /// Index reference on 4 fields
+  SdbIndex4Ref<K, V, I1, I2, I3, I4> index4<
+          I1 extends IndexBase,
+          I2 extends IndexBase,
+          I3 extends IndexBase,
+          I4 extends IndexBase>(String name) =>
+      SdbIndex4RefImpl<K, V, I1, I2, I3, I4>(impl, name);
+
+  /// Lower boundary
+  SdbBoundary<K> lowerBoundary(K value, {bool? include = true}) =>
+      SdbLowerBoundary(value, include: include);
+
+  /// Upper boundary
+  SdbBoundary<K> upperBoundary(K value, {bool? include = false}) =>
+      SdbUpperBoundary(value, include: include);
 }
