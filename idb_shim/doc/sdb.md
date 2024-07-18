@@ -143,7 +143,7 @@ print(snapshot?.value); // {'title': 'Book 1'}
 The API is similar to sembast but:
 - no listener
 - simple query (using boundaries)
-- Single index (for now)
+- Index on up to 4 fields
 
 ### Transaction
 
