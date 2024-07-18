@@ -57,7 +57,8 @@ extension SdbIndexRecordRefImplExtension<K extends KeyBase, V extends ValueBase,
       SdbTransactionImpl txn) async {
     var idbStore = txn.idbTransaction.objectStore(store.name);
     var idbIndex = idbStore.index(index.name);
-    var key = await idbIndex.getKey(indexKeyToIdbKey(indexKey));
+    var idbIndexKey = indexKeyToIdbKey(indexKey);
+    var key = await idbIndex.getKey(idbIndexKey);
     if (key != null) {
       var result = await idbStore.getObject(key);
       if (result != null) {

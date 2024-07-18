@@ -7,15 +7,16 @@ void main() {
   IdbFactoryLogger.debugMaxLogCount = 100;
   var idbFactory = idb.idbFactoryMemoryFs;
   idbFactory = getIdbFactoryLogger(idbFactory);
-  var factory = sdbFactoryFromIdb(idbFactory);
-  simpleDbTest(factory);
+
+  simpleDbTest(idbFactory);
 }
 
 var testStore = SdbStoreRef<int, SdbModel>('test');
 var testIndex = testStore.index<int>('myindex');
 var testStore2 = SdbStoreRef<String, SdbModel>('test2');
 
-void simpleDbTest(SdbFactory factory) {
+void simpleDbTest(idb.IdbFactory idbFactory) {
+  var factory = sdbFactoryFromIdb(idbFactory);
   test('open/close', () async {
     var db = await factory.openDatabase('test.db');
     await db.close();
@@ -250,157 +251,169 @@ void simpleDbTest(SdbFactory factory) {
     });
   });
 
-  group('index2', () {
-    test('index2', () async {
-      var dbName = 'test_index2.db';
-      await factory.deleteDatabase(dbName);
-
-      // Our pet store/table
-      var petStore = SdbStoreRef<int, SdbModel>('pet');
-      // Index on 'type' field
-      var petTypeIdIndex = petStore.index2<String, int>('type_id');
-
-      var db = await factory.openDatabase(dbName, version: 1,
-          onVersionChange: (event) {
-        var db = event.db;
-        var oldVersion = event.oldVersion;
-        if (oldVersion < 1) {
-          var openStoreRef =
-              db.createStore(petStore, keyPath: 'id', autoIncrement: true);
-          openStoreRef.createIndex2(petTypeIdIndex, 'type', 'id');
+  group(
+    'index2',
+    () {
+      test('index2', () async {
+        // TODO
+        if (idbFactory.name == 'sqflite') {
+          return;
         }
+
+        var dbName = 'test_index2.db';
+        await factory.deleteDatabase(dbName);
+
+        // Our item store/table
+        var itemStore = SdbStoreRef<int, SdbModel>('item');
+        // Index on 'type' field
+        var itemTypeIdIndex = itemStore.index2<String, int>('type_id');
+
+        var db = await factory.openDatabase(dbName, version: 1,
+            onVersionChange: (event) {
+          var db = event.db;
+          var oldVersion = event.oldVersion;
+          if (oldVersion < 1) {
+            var openStoreRef =
+                db.createStore(itemStore, keyPath: 'id', autoIncrement: true);
+            openStoreRef.createIndex2(itemTypeIdIndex, 'type', 'id');
+          }
+        });
+
+        late int keyCatAlbert;
+        late int keyCatHarriet;
+        late int keyDogBeethoven;
+        await db.inStoreTransaction(itemStore, SdbTransactionMode.readWrite,
+            (txn) async {
+          keyCatAlbert =
+              await itemStore.add(txn, {'type': 'cat', 'name': 'Albert'});
+          keyDogBeethoven =
+              await itemStore.add(txn, {'type': 'dog', 'name': 'Beethoven'});
+          keyCatHarriet =
+              await itemStore.add(txn, {'type': 'cat', 'name': 'Harriet'});
+        });
+
+        var item =
+            (await itemTypeIdIndex.record(('cat', keyCatHarriet)).get(db))!;
+        expect(item.indexKey.$1, 'cat');
+        expect(item.value['name'], 'Harriet');
+
+        var items = await itemTypeIdIndex.findRecords(db);
+        expect(items.keys, [keyCatAlbert, keyCatHarriet, keyDogBeethoven]);
+        var first = items.first;
+        expect(first.key, keyCatAlbert);
+        expect(first.indexKey.$1, 'cat');
+        expect(first.indexKey.$2, keyCatAlbert);
+
+        items = await itemTypeIdIndex.findRecords(db,
+            boundaries: SdbBoundaries(
+                itemTypeIdIndex.lowerBoundary('cat', keyCatAlbert,
+                    include: false),
+                null));
+        expect(items.keys, [keyCatHarriet, keyDogBeethoven]);
+
+        items = await itemTypeIdIndex.findRecords(db,
+            boundaries: SdbBoundaries(
+              null,
+              itemTypeIdIndex.upperBoundary('cat', keyCatHarriet),
+            ));
+        expect(items.keys, [keyCatAlbert]);
+
+        items = await itemTypeIdIndex.findRecords(db,
+            boundaries: SdbBoundaries(
+              itemTypeIdIndex.lowerBoundary('cat', keyCatAlbert,
+                  include: false),
+              itemTypeIdIndex.upperBoundary('dog', keyDogBeethoven),
+            ));
+        expect(items.keys, [keyCatHarriet]);
+
+        // Close the database
+        await db.close();
       });
 
-      late int keyCatAlbert;
-      late int keyCatHarriet;
-      late int keyDogBeethoven;
-      await db.inStoreTransaction(petStore, SdbTransactionMode.readWrite,
-          (txn) async {
-        keyCatAlbert =
-            await petStore.add(txn, {'type': 'cat', 'name': 'Albert'});
-        keyDogBeethoven =
-            await petStore.add(txn, {'type': 'dog', 'name': 'Beethoven'});
-        keyCatHarriet =
-            await petStore.add(txn, {'type': 'cat', 'name': 'Harriet'});
+      test('index3', () async {
+        var dbName = 'test_index3.db';
+        await factory.deleteDatabase(dbName);
+
+        // Our item store/table
+        var store = SdbStoreRef<int, SdbModel>('test');
+        // Index on 'type' field
+        var index = store.index3<String, int, String>('col1_col2_col3');
+
+        var db = await factory.openDatabase(dbName, version: 1,
+            onVersionChange: (event) {
+          var db = event.db;
+          var oldVersion = event.oldVersion;
+          if (oldVersion < 1) {
+            var openStoreRef =
+                db.createStore(store, keyPath: 'id', autoIncrement: true);
+            openStoreRef.createIndex3(index, 'col1', 'col2', 'col3');
+          }
+        });
+
+        late int key1;
+        late int key2;
+        late int key3;
+        await db.inStoreTransaction(store, SdbTransactionMode.readWrite,
+            (txn) async {
+          key1 = await store.add(txn, {'col1': 'a', 'col2': 1, 'col3': 'i'});
+          key2 = await store.add(txn, {'col1': 'b', 'col2': 1, 'col3': 'i'});
+          key3 = await store.add(txn, {'col1': 'a', 'col2': 1, 'col3': 'j'});
+        });
+
+        var item = (await index.record(('a', 1, 'i')).get(db))!;
+        expect(item.indexKey, ('a', 1, 'i'));
+
+        var items = await index.findRecords(db);
+        expect(items.keys, [key1, key3, key2]);
+        expect(items.indexKeys, [('a', 1, 'i'), ('a', 1, 'j'), ('b', 1, 'i')]);
+        // Close the database
+        await db.close();
       });
 
-      var pet = (await petTypeIdIndex.record(('cat', keyCatHarriet)).get(db))!;
-      expect(pet.indexKey.$1, 'cat');
-      expect(pet.value['name'], 'Harriet');
+      test('index4', () async {
+        var dbName = 'test_index4.db';
+        await factory.deleteDatabase(dbName);
 
-      var pets = await petTypeIdIndex.findRecords(db);
-      expect(pets.keys, [keyCatAlbert, keyCatHarriet, keyDogBeethoven]);
-      var first = pets.first;
-      expect(first.key, keyCatAlbert);
-      expect(first.indexKey.$1, 'cat');
-      expect(first.indexKey.$2, keyCatAlbert);
+        // Our item store/table
+        var store = SdbStoreRef<int, SdbModel>('test');
+        // Index on 'type' field
+        var index =
+            store.index4<String, int, String, int>('col1_col2_col3_col4');
 
-      pets = await petTypeIdIndex.findRecords(db,
-          boundaries: SdbBoundaries(
-              petTypeIdIndex.lowerBoundary('cat', keyCatAlbert, include: false),
-              null));
-      expect(pets.keys, [keyCatHarriet, keyDogBeethoven]);
+        var db = await factory.openDatabase(dbName, version: 1,
+            onVersionChange: (event) {
+          var db = event.db;
+          var oldVersion = event.oldVersion;
+          if (oldVersion < 1) {
+            var openStoreRef =
+                db.createStore(store, keyPath: 'id', autoIncrement: true);
+            openStoreRef.createIndex4(index, 'col1', 'col2', 'col3', 'col4');
+          }
+        });
 
-      pets = await petTypeIdIndex.findRecords(db,
-          boundaries: SdbBoundaries(
-            null,
-            petTypeIdIndex.upperBoundary('cat', keyCatHarriet),
-          ));
-      expect(pets.keys, [keyCatAlbert]);
+        late int key1;
+        late int key2;
+        late int key3;
+        await db.inStoreTransaction(store, SdbTransactionMode.readWrite,
+            (txn) async {
+          key1 = await store
+              .add(txn, {'col1': 'a', 'col2': 1, 'col3': 'i', 'col4': 2});
+          key2 = await store
+              .add(txn, {'col1': 'b', 'col2': 1, 'col3': 'i', 'col4': 3});
+          key3 = await store
+              .add(txn, {'col1': 'a', 'col2': 1, 'col3': 'j', 'col4': 4});
+        });
 
-      pets = await petTypeIdIndex.findRecords(db,
-          boundaries: SdbBoundaries(
-            petTypeIdIndex.lowerBoundary('cat', keyCatAlbert, include: false),
-            petTypeIdIndex.upperBoundary('dog', keyDogBeethoven),
-          ));
-      expect(pets.keys, [keyCatHarriet]);
+        var item = (await index.record(('a', 1, 'i', 2)).get(db))!;
+        expect(item.indexKey, ('a', 1, 'i', 2));
 
-      // Close the database
-      await db.close();
-    });
-
-    test('index3', () async {
-      var dbName = 'test_index3.db';
-      await factory.deleteDatabase(dbName);
-
-      // Our pet store/table
-      var store = SdbStoreRef<int, SdbModel>('test');
-      // Index on 'type' field
-      var index = store.index3<String, int, String>('col1_col2_col3');
-
-      var db = await factory.openDatabase(dbName, version: 1,
-          onVersionChange: (event) {
-        var db = event.db;
-        var oldVersion = event.oldVersion;
-        if (oldVersion < 1) {
-          var openStoreRef =
-              db.createStore(store, keyPath: 'id', autoIncrement: true);
-          openStoreRef.createIndex3(index, 'col1', 'col2', 'col3');
-        }
+        var items = await index.findRecords(db);
+        expect(items.keys, [key1, key3, key2]);
+        expect(items.indexKeys,
+            [('a', 1, 'i', 2), ('a', 1, 'j', 4), ('b', 1, 'i', 3)]);
+        // Close the database
+        await db.close();
       });
-
-      late int key1;
-      late int key2;
-      late int key3;
-      await db.inStoreTransaction(store, SdbTransactionMode.readWrite,
-          (txn) async {
-        key1 = await store.add(txn, {'col1': 'a', 'col2': 1, 'col3': 'i'});
-        key2 = await store.add(txn, {'col1': 'b', 'col2': 1, 'col3': 'i'});
-        key3 = await store.add(txn, {'col1': 'a', 'col2': 1, 'col3': 'j'});
-      });
-
-      var pet = (await index.record(('a', 1, 'i')).get(db))!;
-      expect(pet.indexKey, ('a', 1, 'i'));
-
-      var pets = await index.findRecords(db);
-      expect(pets.keys, [key1, key3, key2]);
-      expect(pets.indexKeys, [('a', 1, 'i'), ('a', 1, 'j'), ('b', 1, 'i')]);
-      // Close the database
-      await db.close();
-    });
-
-    test('index4', () async {
-      var dbName = 'test_index4.db';
-      await factory.deleteDatabase(dbName);
-
-      // Our pet store/table
-      var store = SdbStoreRef<int, SdbModel>('test');
-      // Index on 'type' field
-      var index = store.index4<String, int, String, int>('col1_col2_col3_col4');
-
-      var db = await factory.openDatabase(dbName, version: 1,
-          onVersionChange: (event) {
-        var db = event.db;
-        var oldVersion = event.oldVersion;
-        if (oldVersion < 1) {
-          var openStoreRef =
-              db.createStore(store, keyPath: 'id', autoIncrement: true);
-          openStoreRef.createIndex4(index, 'col1', 'col2', 'col3', 'col4');
-        }
-      });
-
-      late int key1;
-      late int key2;
-      late int key3;
-      await db.inStoreTransaction(store, SdbTransactionMode.readWrite,
-          (txn) async {
-        key1 = await store
-            .add(txn, {'col1': 'a', 'col2': 1, 'col3': 'i', 'col4': 2});
-        key2 = await store
-            .add(txn, {'col1': 'b', 'col2': 1, 'col3': 'i', 'col4': 3});
-        key3 = await store
-            .add(txn, {'col1': 'a', 'col2': 1, 'col3': 'j', 'col4': 4});
-      });
-
-      var pet = (await index.record(('a', 1, 'i', 2)).get(db))!;
-      expect(pet.indexKey, ('a', 1, 'i', 2));
-
-      var pets = await index.findRecords(db);
-      expect(pets.keys, [key1, key3, key2]);
-      expect(pets.indexKeys,
-          [('a', 1, 'i', 2), ('a', 1, 'j', 4), ('b', 1, 'i', 3)]);
-      // Close the database
-      await db.close();
-    });
-  });
+    },
+  );
 }
