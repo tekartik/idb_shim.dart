@@ -1,3 +1,7 @@
+## 2.6.0-1
+
+* More support for sdb, including key on 2 fields, and more.
+
 ## 2.5.0+3
 
 * Remove legacy `dart:html` implementation.
