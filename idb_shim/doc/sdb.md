@@ -149,6 +149,10 @@ The API is similar to sembast but:
 
 Similar to indexed db, you declare the stores on which the transaction occurs and the mode (read or write).
 
+Note that since indexed_db does not allow for a transaction to be opened forever you need to keep your transaction
+for doing only doing synchronous operations or async operations only on the database (i.e. don't fetch data or any other
+async operation that does not involve reading or writing to the database).
+
 ```dart
 await db.inStoreTransaction(bookStore, SdbTransactionMode.readWrite,
     (txn) async {
