@@ -78,7 +78,7 @@ if (kSdbDartIsWeb) {
   // Use sqflite_common_ffi on mobile and desktop
   sqfliteFfiInit();
   databaseFactory = databaseFactoryFfi;
-  }
+  
   // Uses sqflite on desktop and mobile
   factory = sdbFactorySqflite;
 }
