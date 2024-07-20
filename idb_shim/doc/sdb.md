@@ -90,7 +90,7 @@ if (kSdbDartIsWeb) {
 
 You must first define a schema for each store/table, defining
 the key type and the value type.
-Good options is to use `int` as a key and `SdbModel` as a value.
+Good options is to use `int` as a key and `SdbModel` (which is a typedef for `Map<String, Object?>`) as a value.
 
 ```dart
 // Our book store/table
