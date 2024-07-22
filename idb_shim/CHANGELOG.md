@@ -1,4 +1,4 @@
-## 2.6.0+3
+## 2.6.0+4
 
 * More support for sdb, including key on 2,3 and 4 fields, and more.
 
