@@ -100,9 +100,13 @@ void simpleDbTest(idb.IdbFactory idbFactory) {
         await txn.add({'test': 2});
         await txn.add({'test': 3});
       });
-      var records = await testStore.findRecords(db,
-          boundaries: SdbBoundaries(SdbLowerBoundary(1), SdbUpperBoundary(3)));
+      var boundaries = SdbBoundaries(SdbLowerBoundary(1), SdbUpperBoundary(3));
+      var records = await testStore.findRecords(db, boundaries: boundaries);
       expect(records.length, 2);
+      var keys = await testStore.findRecordKeys(db, boundaries: boundaries);
+      expect(keys.keys, [1, 2]);
+      var count = await testStore.count(db, boundaries: boundaries);
+      expect(count, 2);
 
       await db.close();
     });
@@ -122,10 +126,14 @@ void simpleDbTest(idb.IdbFactory idbFactory) {
         await txn.add({'test': 2});
         await txn.add({'test': 3});
 
-        var records = await testStore.findRecords(txn,
-            boundaries:
-                SdbBoundaries(SdbLowerBoundary(1), SdbUpperBoundary(3)));
+        var boundaries =
+            SdbBoundaries(SdbLowerBoundary(1), SdbUpperBoundary(3));
+        var records = await testStore.findRecords(txn, boundaries: boundaries);
         expect(records.length, 2);
+        var keys = await testStore.findRecordKeys(txn, boundaries: boundaries);
+        expect(keys.keys, [1, 2]);
+        var count = await testStore.count(txn, boundaries: boundaries);
+        expect(count, 2);
       });
 
       await db.close();
@@ -214,13 +222,21 @@ void simpleDbTest(idb.IdbFactory idbFactory) {
         await txn.add({'test': 1});
         await txn.add({'test': 2});
         await txn.add({'test': 3});
+
+        var boundaries =
+            SdbBoundaries(SdbLowerBoundary(1), SdbUpperBoundary(3));
+        var records = await testIndex.findRecords(txn, boundaries: boundaries);
+        expect(records.length, 2);
+        var keys = await testIndex.findRecordKeys(txn, boundaries: boundaries);
+        expect(keys.length, 2);
+        expect(await testIndex.count(txn, boundaries: boundaries), 2);
       });
-      var records = await testIndex.findRecords(db,
-          boundaries: SdbBoundaries(SdbLowerBoundary(1), SdbUpperBoundary(3)));
+      var boundaries = SdbBoundaries(SdbLowerBoundary(1), SdbUpperBoundary(3));
+      var records = await testIndex.findRecords(db, boundaries: boundaries);
       expect(records.length, 2);
-      var keys = await testIndex.findRecordKeys(db,
-          boundaries: SdbBoundaries(SdbLowerBoundary(1), SdbUpperBoundary(3)));
+      var keys = await testIndex.findRecordKeys(db, boundaries: boundaries);
       expect(keys.length, 2);
+      expect(await testIndex.count(db, boundaries: boundaries), 2);
 
       await db.close();
     });

@@ -38,6 +38,10 @@ extension SdbStoreRefExtension<K extends KeyBase, V extends ValueBase>
       impl.findRecordKeysImpl(client,
           boundaries: boundaries, offset: offset, limit: limit);
 
+  /// Count records.
+  Future<int> count(SdbClient client, {SdbBoundaries<K>? boundaries}) =>
+      impl.countImpl(client, boundaries: boundaries);
+
   /// Record reference.
   SdbRecordRef<K, V> record(K key) => SdbRecordRefImpl<K, V>(impl, key);
 

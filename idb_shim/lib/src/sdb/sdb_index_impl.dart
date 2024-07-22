@@ -165,4 +165,27 @@ class SdbIndexRefImpl<K extends KeyBase, V extends ValueBase,
       return SdbIndexRecordKeyImpl<K, V, I>(this, key, indexKey);
     }).toList();
   }
+
+  /// Count records.
+  Future<int> countImpl(SdbClient client, {SdbBoundaries<I>? boundaries}) =>
+      client.handleDbOrTxn((db) => dbCountImpl(db, boundaries: boundaries),
+          (txn) => txnCountImpl(txn, boundaries: boundaries));
+
+  /// Count records.
+  Future<int> dbCountImpl(SdbDatabase db, {SdbBoundaries<I>? boundaries}) {
+    return db.inStoreTransaction(store, SdbTransactionMode.readOnly, (txn) {
+      return txnCountImpl(txn.rawImpl, boundaries: boundaries);
+    });
+  }
+
+  /// Find record keys.
+  Future<int> txnCountImpl(
+    SdbTransactionImpl txn, {
+    SdbBoundaries<I>? boundaries,
+  }) async {
+    var idbObjectStore = txn.idbTransaction.objectStore(store.name);
+    var idbIndex = idbObjectStore.index(name);
+    var count = idbIndex.count(idbKeyRangeFromBoundaries(boundaries));
+    return count;
+  }
 }

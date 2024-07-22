@@ -171,6 +171,11 @@ class SdbTransactionStoreRefImpl<K extends KeyBase, V extends ValueBase>
       return SdbRecordKeyImpl<K, V>(store, key);
     }).toList();
   }
+
+  /// Count records.
+  Future<int> countImpl({SdbBoundaries<K>? boundaries}) async {
+    return idbObjectStore.count(idbKeyRangeFromBoundaries(boundaries));
+  }
 }
 
 /// Multi store transaction internal extension.

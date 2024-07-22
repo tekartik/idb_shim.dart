@@ -44,6 +44,10 @@ extension SdbTransactionStoreRefExtension<K extends KeyBase,
       _impl.findRecordKeysImpl(
           boundaries: boundaries, offset: offset, limit: limit);
 
+  /// Count record.
+  Future<int> count({SdbBoundaries<K>? boundaries}) =>
+      _impl.countImpl(boundaries: boundaries);
+
   /// store name.
   String get name => store.name;
 }
