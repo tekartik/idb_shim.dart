@@ -12,179 +12,184 @@ var testStore2 = SdbStoreRef<String, SdbModel>('test2');
 
 void simpleDbTest(TestContext ctx) {
   var factory = sdbFactoryFromIdb(ctx.factory);
-  test('open/close', () async {
-    var db = await factory.openDatabase('test.db');
-    await db.close();
-  });
-  group('int key', () {
-    test('put/get/delete int', () async {
-      await factory.deleteDatabase('test_put_get.db');
-      var db = await factory.openDatabase('test_put_get.db', version: 1,
-          onVersionChange: (event) {
-        var oldVersion = event.oldVersion;
-        if (oldVersion < 1) {
-          event.db.createStore(testStore);
-        }
-      });
-      var key = await testStore.add(db, {'test': 1});
-      expect(key, 1);
-      var key2 = await testStore.add(db, {'test': 2});
-      expect(key2, 2);
-      SdbRecordRef<int, SdbModel> recordRef = testStore.record(key);
-      SdbRecordSnapshot<int, SdbModel> record = (await recordRef.get(db))!;
-      expect(record.value, {'test': 1});
-      expect(record.key, key);
-      expect(await testStore.record(key).getValue(db), {'test': 1});
-      record = (await testStore.record(key2).get(db))!;
-      expect(record.value, {'test': 2});
-      expect(await testStore.record(3).get(db), isNull);
-      await testStore.record(key).delete(db);
-      expect(await testStore.record(key).get(db), isNull);
-      await testStore.record(key).put(db, {'test': 3});
-      record = (await testStore.record(key).get(db))!;
-      expect(record.value, {'test': 3});
-      expect(record.key, key);
+  group('sdb', () {
+    test('open/close', () async {
+      var db = await factory.openDatabase('test.db');
       await db.close();
     });
-    test('txn put/get/delete int', () async {
-      await factory.deleteDatabase('test_put_get.db');
-      var db = await factory.openDatabase('test_put_get.db', version: 1,
-          onVersionChange: (event) {
-        var oldVersion = event.oldVersion;
-        if (oldVersion < 1) {
-          event.db.createStore(testStore);
-        }
-      });
-      await db.inStoreTransaction(testStore, SdbTransactionMode.readWrite,
-          (txn) async {
-        var key = await testStore.add(txn, {'test': 1});
+    group('int key', () {
+      test('put/get/delete int', () async {
+        await factory.deleteDatabase('test_put_get.db');
+        var db = await factory.openDatabase('test_put_get.db', version: 1,
+            onVersionChange: (event) {
+          var oldVersion = event.oldVersion;
+          if (oldVersion < 1) {
+            event.db.createStore(testStore);
+          }
+        });
+        var key = await testStore.add(db, {'test': 1});
         expect(key, 1);
-        var key2 = await testStore.add(txn, {'test': 2});
+        var key2 = await testStore.add(db, {'test': 2});
         expect(key2, 2);
-
-        var record = (await testStore.record(key).get(txn))!;
+        SdbRecordRef<int, SdbModel> recordRef = testStore.record(key);
+        SdbRecordSnapshot<int, SdbModel> record = (await recordRef.get(db))!;
         expect(record.value, {'test': 1});
         expect(record.key, key);
-        record = (await testStore.record(key2).get(txn))!;
+        expect(await testStore.record(key).getValue(db), {'test': 1});
+        record = (await testStore.record(key2).get(db))!;
         expect(record.value, {'test': 2});
-        expect(await testStore.record(3).get(txn), isNull);
-        await testStore.record(key).delete(txn);
-        expect(await testStore.record(key).get(txn), isNull);
-
-        await testStore.record(key).put(txn, {'test': 3});
-        record = (await testStore.record(key).get(txn))!;
+        expect(await testStore.record(3).get(db), isNull);
+        await testStore.record(key).delete(db);
+        expect(await testStore.record(key).get(db), isNull);
+        await testStore.record(key).put(db, {'test': 3});
+        record = (await testStore.record(key).get(db))!;
         expect(record.value, {'test': 3});
         expect(record.key, key);
+        await db.close();
       });
-      /*
+      test('txn put/get/delete int', () async {
+        await factory.deleteDatabase('test_put_get.db');
+        var db = await factory.openDatabase('test_put_get.db', version: 1,
+            onVersionChange: (event) {
+          var oldVersion = event.oldVersion;
+          if (oldVersion < 1) {
+            event.db.createStore(testStore);
+          }
+        });
+        await db.inStoreTransaction(testStore, SdbTransactionMode.readWrite,
+            (txn) async {
+          var key = await testStore.add(txn, {'test': 1});
+          expect(key, 1);
+          var key2 = await testStore.add(txn, {'test': 2});
+          expect(key2, 2);
+
+          var record = (await testStore.record(key).get(txn))!;
+          expect(record.value, {'test': 1});
+          expect(record.key, key);
+          record = (await testStore.record(key2).get(txn))!;
+          expect(record.value, {'test': 2});
+          expect(await testStore.record(3).get(txn), isNull);
+          await testStore.record(key).delete(txn);
+          expect(await testStore.record(key).get(txn), isNull);
+
+          await testStore.record(key).put(txn, {'test': 3});
+          record = (await testStore.record(key).get(txn))!;
+          expect(record.value, {'test': 3});
+          expect(record.key, key);
+        });
+        /*
      */
-      await db.close();
-    });
-    test('boundaries int', () async {
-      await factory.deleteDatabase('test_boundaries.db');
-      var db = await factory.openDatabase('test_boundaries.db', version: 1,
-          onVersionChange: (event) {
-        var oldVersion = event.oldVersion;
-        if (oldVersion < 1) {
-          event.db.createStore(testStore);
-        }
+        await db.close();
       });
-      await db.inStoreTransaction(testStore, SdbTransactionMode.readWrite,
-          (txn) async {
-        await txn.add({'test': 1});
-        await txn.add({'test': 2});
-        await txn.add({'test': 3});
-      });
-      var boundaries = SdbBoundaries(SdbLowerBoundary(1), SdbUpperBoundary(3));
-      var records = await testStore.findRecords(db, boundaries: boundaries);
-      expect(records.length, 2);
-      var keys = await testStore.findRecordKeys(db, boundaries: boundaries);
-      expect(keys.keys, [1, 2]);
-      var count = await testStore.count(db, boundaries: boundaries);
-      expect(count, 2);
-
-      await testStore.delete(db, boundaries: boundaries);
-      expect(await testStore.count(db), 1);
-      await db.close();
-    });
-
-    test('txn boundaries int', () async {
-      await factory.deleteDatabase('test_boundaries.db');
-      var db = await factory.openDatabase('test_boundaries.db', version: 1,
-          onVersionChange: (event) {
-        var oldVersion = event.oldVersion;
-        if (oldVersion < 1) {
-          event.db.createStore(testStore);
-        }
-      });
-      await db.inStoreTransaction(testStore, SdbTransactionMode.readWrite,
-          (txn) async {
-        await txn.add({'test': 1});
-        await txn.add({'test': 2});
-        await txn.add({'test': 3});
-
+      test('boundaries int', () async {
+        await factory.deleteDatabase('test_boundaries.db');
+        var db = await factory.openDatabase('test_boundaries.db', version: 1,
+            onVersionChange: (event) {
+          var oldVersion = event.oldVersion;
+          if (oldVersion < 1) {
+            event.db.createStore(testStore);
+          }
+        });
+        await db.inStoreTransaction(testStore, SdbTransactionMode.readWrite,
+            (txn) async {
+          await txn.add({'test': 1});
+          await txn.add({'test': 2});
+          await txn.add({'test': 3});
+        });
         var boundaries =
             SdbBoundaries(SdbLowerBoundary(1), SdbUpperBoundary(3));
-        var records = await testStore.findRecords(txn, boundaries: boundaries);
+        var records = await testStore.findRecords(db, boundaries: boundaries);
         expect(records.length, 2);
-        var keys = await testStore.findRecordKeys(txn, boundaries: boundaries);
+        var keys = await testStore.findRecordKeys(db, boundaries: boundaries);
         expect(keys.keys, [1, 2]);
-        var count = await testStore.count(txn, boundaries: boundaries);
+        var count = await testStore.count(db, boundaries: boundaries);
         expect(count, 2);
 
-        await testStore.delete(txn, boundaries: boundaries);
-        expect(await testStore.count(txn), 1);
+        await testStore.delete(db, boundaries: boundaries);
+        expect(await testStore.count(db), 1);
+        await db.close();
       });
 
-      await db.close();
-    });
-  });
+      test('txn boundaries int', () async {
+        await factory.deleteDatabase('test_boundaries.db');
+        var db = await factory.openDatabase('test_boundaries.db', version: 1,
+            onVersionChange: (event) {
+          var oldVersion = event.oldVersion;
+          if (oldVersion < 1) {
+            event.db.createStore(testStore);
+          }
+        });
+        await db.inStoreTransaction(testStore, SdbTransactionMode.readWrite,
+            (txn) async {
+          await txn.add({'test': 1});
+          await txn.add({'test': 2});
+          await txn.add({'test': 3});
 
-  group('string key', () {
-    test('put/get/delete string', () async {
-      await factory.deleteDatabase('test_put_get.db');
-      var db = await factory.openDatabase('test_put_get.db', version: 1,
+          var boundaries =
+              SdbBoundaries(SdbLowerBoundary(1), SdbUpperBoundary(3));
+          var records =
+              await testStore.findRecords(txn, boundaries: boundaries);
+          expect(records.length, 2);
+          var keys =
+              await testStore.findRecordKeys(txn, boundaries: boundaries);
+          expect(keys.keys, [1, 2]);
+          var count = await testStore.count(txn, boundaries: boundaries);
+          expect(count, 2);
+
+          await testStore.delete(txn, boundaries: boundaries);
+          expect(await testStore.count(txn), 1);
+        });
+
+        await db.close();
+      });
+    });
+
+    group('string key', () {
+      test('put/get/delete string', () async {
+        await factory.deleteDatabase('test_put_get.db');
+        var db = await factory.openDatabase('test_put_get.db', version: 1,
+            onVersionChange: (event) {
+          var oldVersion = event.oldVersion;
+          if (oldVersion < 1) {
+            event.db.createStore(testStore2);
+          }
+        });
+        var key = await testStore2.add(db, {'test': 1});
+        expect(key.isNotEmpty, isTrue);
+        var key2 = await testStore2.add(db, {'test': 2});
+        var record = (await testStore2.record(key).get(db))!;
+        expect(record.value, {'test': 1});
+        expect(record.key, key);
+        record = (await testStore2.record(key2).get(db))!;
+        expect(record.value, {'test': 2});
+        expect(await testStore2.record('dummy').get(db), isNull);
+        await testStore2.record(key).delete(db);
+        expect(await testStore2.record(key).get(db), isNull);
+
+        await db.close();
+      });
+    });
+
+    test('multi store', () async {
+      var dbName = 'test_multi_store.db';
+      await factory.deleteDatabase(dbName);
+      var db = await factory.openDatabase(dbName, version: 1,
           onVersionChange: (event) {
         var oldVersion = event.oldVersion;
         if (oldVersion < 1) {
+          event.db.createStore(testStore);
           event.db.createStore(testStore2);
         }
       });
-      var key = await testStore2.add(db, {'test': 1});
-      expect(key.isNotEmpty, isTrue);
-      var key2 = await testStore2.add(db, {'test': 2});
-      var record = (await testStore2.record(key).get(db))!;
-      expect(record.value, {'test': 1});
-      expect(record.key, key);
-      record = (await testStore2.record(key2).get(db))!;
-      expect(record.value, {'test': 2});
-      expect(await testStore2.record('dummy').get(db), isNull);
-      await testStore2.record(key).delete(db);
-      expect(await testStore2.record(key).get(db), isNull);
+      await db.inStoresTransaction(
+          [testStore, testStore2], SdbTransactionMode.readWrite, (txn) async {
+        var key = await txn.txnStore(testStore).add({'test': 1});
+        var key2 = await txn.txnStore(testStore2).add({'test': 2});
+        expect(key, 1);
+        expect(key2.isNotEmpty, isTrue);
+      });
 
       await db.close();
     });
-  });
-
-  test('multi store', () async {
-    var dbName = 'test_multi_store.db';
-    await factory.deleteDatabase(dbName);
-    var db = await factory.openDatabase(dbName, version: 1,
-        onVersionChange: (event) {
-      var oldVersion = event.oldVersion;
-      if (oldVersion < 1) {
-        event.db.createStore(testStore);
-        event.db.createStore(testStore2);
-      }
-    });
-    await db.inStoresTransaction(
-        [testStore, testStore2], SdbTransactionMode.readWrite, (txn) async {
-      var key = await txn.txnStore(testStore).add({'test': 1});
-      var key2 = await txn.txnStore(testStore2).add({'test': 2});
-      expect(key, 1);
-      expect(key2.isNotEmpty, isTrue);
-    });
-
-    await db.close();
   });
 }
