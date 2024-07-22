@@ -1,3 +1,5 @@
+import 'package:idb_shim/src/utils/idb_utils.dart';
+
 import 'import_idb.dart' as idb;
 import 'sdb_boundary.dart';
 import 'sdb_boundary_impl.dart';
@@ -187,5 +189,38 @@ class SdbIndexRefImpl<K extends KeyBase, V extends ValueBase,
     var idbIndex = idbObjectStore.index(name);
     var count = idbIndex.count(idbKeyRangeFromBoundaries(boundaries));
     return count;
+  }
+
+  /// Delete records.
+  Future<void> deleteImpl(SdbClient client,
+          {SdbBoundaries<I>? boundaries, int? offset, int? limit}) =>
+      client.handleDbOrTxn(
+          (db) => dbDeleteImpl(db,
+              boundaries: boundaries, offset: offset, limit: limit),
+          (txn) => txnDeleteImpl(txn,
+              boundaries: boundaries, offset: offset, limit: limit));
+
+  /// Find records.
+  Future<void> dbDeleteImpl(SdbDatabase db,
+      {SdbBoundaries<I>? boundaries, int? offset, int? limit}) {
+    return db.inStoreTransaction(store, SdbTransactionMode.readWrite, (txn) {
+      return txnDeleteImpl(txn.rawImpl,
+          boundaries: boundaries, offset: offset, limit: limit);
+    });
+  }
+
+  /// Delete records.
+  Future<void> txnDeleteImpl(SdbTransactionImpl txn,
+      {SdbBoundaries<I>? boundaries, int? offset, int? limit}) async {
+    var idbObjectStore = txn.idbTransaction.objectStore(store.name);
+    var idbIndex = idbObjectStore.index(name);
+    // Need full cursor for delete
+    var stream = idbIndex.openCursor(
+        autoAdvance: true,
+        direction: idb.idbDirectionNext,
+        range: idbKeyRangeFromBoundaries(boundaries));
+    await streamWithOffsetAndLimit(stream, offset, limit).listen((cursor) {
+      cursor.delete();
+    }).asFuture<void>();
   }
 }

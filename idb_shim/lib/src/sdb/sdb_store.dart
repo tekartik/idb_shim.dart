@@ -42,6 +42,12 @@ extension SdbStoreRefExtension<K extends KeyBase, V extends ValueBase>
   Future<int> count(SdbClient client, {SdbBoundaries<K>? boundaries}) =>
       impl.countImpl(client, boundaries: boundaries);
 
+  /// Delete records.
+  Future<void> delete(SdbClient client,
+          {SdbBoundaries<K>? boundaries, int? offset, int? limit}) =>
+      impl.deleteImpl(client,
+          boundaries: boundaries, offset: offset, limit: limit);
+
   /// Record reference.
   SdbRecordRef<K, V> record(K key) => SdbRecordRefImpl<K, V>(impl, key);
 

@@ -1,6 +1,7 @@
 import 'package:idb_shim/idb.dart' as idb;
 import 'package:idb_shim/src/sdb/sdb_boundary_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_impl.dart';
+import 'package:idb_shim/src/utils/idb_utils.dart';
 import 'package:idb_shim/utils/idb_utils.dart' as idb;
 
 import 'sdb_boundary.dart';
@@ -175,6 +176,26 @@ class SdbTransactionStoreRefImpl<K extends KeyBase, V extends ValueBase>
   /// Count records.
   Future<int> countImpl({SdbBoundaries<K>? boundaries}) async {
     return idbObjectStore.count(idbKeyRangeFromBoundaries(boundaries));
+  }
+
+  /// Delete records.
+  Future<void> deleteRecordsImpl(
+      {SdbBoundaries<K>? boundaries, int? offset, int? limit}) async {
+    var keyRange = idbKeyRangeFromBoundaries(boundaries);
+
+    if (offset == null && limit == null) {
+      if (keyRange == null) {
+        await idbObjectStore.clear();
+      } else {
+        await idbObjectStore.delete(keyRange);
+      }
+    } else {
+      var cursor = idbObjectStore.openCursor(
+          autoAdvance: true, direction: idb.idbDirectionNext, range: keyRange);
+      await streamWithOffsetAndLimit(cursor, offset, limit).listen((cursor) {
+        cursor.delete();
+      }).asFuture<void>();
+    }
   }
 }
 

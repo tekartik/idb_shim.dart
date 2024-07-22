@@ -6,6 +6,7 @@ import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/logger/logger_utils.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:idb_shim/src/utils/env_utils.dart';
+import 'package:idb_shim/src/utils/idb_utils.dart';
 
 import 'idb_cursor_utils.dart';
 export 'idb_cursor_utils.dart' show CursorRow, KeyCursorRow;
@@ -125,13 +126,9 @@ Future<Database> copyDatabase(
 /// Convert an autoAdvance openCursor stream to a list.
 Future<List<T>> _autoCursorStreamToList<C extends Cursor, T>(
     Stream<C> stream, T Function(C cursor) convert, int? offset, int? limit) {
-  if ((offset ?? 0) > 0) {
-    stream = stream.skip(offset!);
-  }
-  if ((limit ?? 0) > 0) {
-    stream = stream.take(limit!);
-  }
-  return stream.map((cursor) => convert(cursor)).toList();
+  return streamWithOffsetAndLimit(stream, offset, limit)
+      .map((cursor) => convert(cursor))
+      .toList();
 }
 
 /// Convert an autoAdvance openCursor stream to a list

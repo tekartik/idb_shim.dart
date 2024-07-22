@@ -94,8 +94,8 @@ class ObjectStoreLogger extends ObjectStore {
   }
 
   @override
-  Future delete(key) {
-    return idbObjectStore.delete(key);
+  Future delete(Object keyOrRange) {
+    return idbObjectStore.delete(keyOrRange);
   }
 
   @override

@@ -155,10 +155,12 @@ bool upperMatchesValue(
 }
 
 sembast.Filter keyRangeFilter(
-    dynamic keyPath, KeyRange range, bool multiEntry) {
+    Object? keyPath, KeyRange range, bool multiEntry) {
+  keyPath ??= sembast.Field.key;
+
   if (keyPath is String) {
     return sembast.Filter.custom((snapshot) {
-      var value = snapshot[keyPath];
+      var value = snapshot[keyPath as String];
       if (range.lower != null) {
         if (!lowerMatchesValue(
             range.lower, range.lowerOpen, value, multiEntry)) {

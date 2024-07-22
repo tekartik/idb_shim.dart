@@ -116,7 +116,7 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
         .findRecords(boundaries: boundaries, offset: offset, limit: limit);
   }
 
-  /// Find records.
+  /// Find records keys.
   Future<List<SdbRecordKey<K, V>>> findRecordKeysImpl(SdbClient client,
           {SdbBoundaries<K>? boundaries, int? offset, int? limit}) =>
       client.handleDbOrTxn(
@@ -158,5 +158,31 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
   Future<int> txnCountImpl(SdbTransactionImpl txn,
       {SdbBoundaries<K>? boundaries}) {
     return txn.storeImpl(this).count(boundaries: boundaries);
+  }
+
+  /// Delete records.
+  Future<void> deleteImpl(SdbClient client,
+          {SdbBoundaries<K>? boundaries, int? offset, int? limit}) =>
+      client.handleDbOrTxn(
+          (db) => dbDeleteImpl(db,
+              boundaries: boundaries, offset: offset, limit: limit),
+          (txn) => txnDeleteImpl(txn,
+              boundaries: boundaries, offset: offset, limit: limit));
+
+  /// Find records.
+  Future<void> dbDeleteImpl(SdbDatabase db,
+      {SdbBoundaries<K>? boundaries, int? offset, int? limit}) {
+    return db.inStoreTransaction(this, SdbTransactionMode.readWrite, (txn) {
+      return txnDeleteImpl(txn.rawImpl,
+          boundaries: boundaries, offset: offset, limit: limit);
+    });
+  }
+
+  /// Find records.
+  Future<void> txnDeleteImpl(SdbTransactionImpl txn,
+      {SdbBoundaries<K>? boundaries, int? offset, int? limit}) {
+    return txn
+        .storeImpl(this)
+        .deleteRecords(boundaries: boundaries, offset: offset, limit: limit);
   }
 }

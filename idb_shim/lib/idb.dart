@@ -211,10 +211,9 @@ abstract class ObjectStore {
   Future<Object?> getObject(Object key);
 
   ///
-  /// deletes the current object store. This is for deleting individual records
-  /// out of an object store.
+  /// deletes the object store records by key or key range.
   ///
-  Future<void> delete(Object key);
+  Future<void> delete(Object keyOrRange);
 
   ///
   /// clears this object store in a separate thread.

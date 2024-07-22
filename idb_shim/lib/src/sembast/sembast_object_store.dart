@@ -276,18 +276,22 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   @override
-  Future<Object?> delete(Object key) {
+  Future<Object?> delete(Object keyOrRange) {
     return _inWritableTransaction(() {
-      return txnDelete(key);
+      return txnDelete(keyOrRange);
     });
   }
 
-  Future<Object?> txnDelete(Object key) {
-    if (hasCompositeKey) {
+  Future<Object?> txnDelete(Object keyOrRange) {
+    if (keyOrRange is KeyRange) {
       return sembastStore.delete(sembastClient,
-          finder: compositeFindByKeyFinder(key));
+          finder: sembast.Finder(
+              filter: keyRangeFilter(keyPath, keyOrRange, false)));
+    } else if (hasCompositeKey) {
+      return sembastStore.delete(sembastClient,
+          finder: compositeFindByKeyFinder(keyOrRange));
     } else {
-      return sembastStore.record(key).delete(sembastClient);
+      return sembastStore.record(keyOrRange).delete(sembastClient);
     }
   }
 

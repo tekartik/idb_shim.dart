@@ -19,6 +19,7 @@ import 'object_store_test.dart' as object_store_test;
 import 'open_test.dart' as open_test;
 import 'quick_standalone_test.dart' as quick_standalone_test;
 import 'scenario_test.dart' as scenario_test;
+import 'sdb_index_test.dart';
 import 'simple_provider_test.dart' as simple_provider_test;
 import 'transaction_test.dart' as transaction_test;
 import 'type_test.dart' as type_test;
@@ -40,7 +41,8 @@ void defineAllTests(TestContext ctx) {
   utils_test.defineTests(ctx);
   exception_test.defineTests(ctx);
   type_test.defineTests(ctx);
-  simpleDbTest(ctx.factory);
+  simpleDbTest(ctx);
+  simpleDbIndexTest(ctx);
 
   group('indexeddb_1', () {
     indexeddb_1_test.defineTests(ctx);

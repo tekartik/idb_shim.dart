@@ -67,6 +67,12 @@ extension SdbIndexRefExtension<K extends KeyBase, V extends ValueBase,
   /// Count records.
   Future<int> count(SdbClient client, {SdbBoundaries<I>? boundaries}) =>
       impl.countImpl(client, boundaries: boundaries);
+
+  /// Delete records.
+  Future<void> delete(SdbClient client,
+          {SdbBoundaries<I>? boundaries, int? offset, int? limit}) =>
+      impl.deleteImpl(client,
+          boundaries: boundaries, offset: offset, limit: limit);
 }
 
 /// Extension on index on 1 field.

@@ -48,6 +48,12 @@ extension SdbTransactionStoreRefExtension<K extends KeyBase,
   Future<int> count({SdbBoundaries<K>? boundaries}) =>
       _impl.countImpl(boundaries: boundaries);
 
+  /// Delete records.
+  Future<void> deleteRecords(
+          {SdbBoundaries<K>? boundaries, int? offset, int? limit}) =>
+      _impl.deleteRecordsImpl(
+          boundaries: boundaries, offset: offset, limit: limit);
+
   /// store name.
   String get name => store.name;
 }
