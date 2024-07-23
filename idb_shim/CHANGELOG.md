@@ -1,6 +1,7 @@
-## 2.6.0+4
+## 2.6.0+5
 
 * More support for sdb, including key on 2,3 and 4 fields, and more.
+* Add `idbFactoryWeb` (shortcut for `idbFactoryNative`)
 
 ## 2.5.0+3
 

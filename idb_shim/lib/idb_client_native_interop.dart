@@ -4,4 +4,9 @@
 library idb_shim_native_interop;
 
 export 'package:idb_shim/src/native_web/idb_native.dart'
-    show idbFactoryNative, idbFactoryNativeSupported, idbFactoryFromIndexedDB;
+    show
+        idbFactoryWeb,
+        idbFactoryNative,
+        idbFactoryNativeSupported,
+        idbFactoryWebSupported,
+        idbFactoryFromIndexedDB;
