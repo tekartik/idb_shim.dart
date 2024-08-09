@@ -76,5 +76,7 @@ linter:
     - unnecessary_null_in_if_null_operators
     - use_rethrow_when_possible
     - avoid_relative_lib_imports
+    # New in 3.5
+    - invalid_runtime_check_with_js_interop_types
     # === doc rules ===
     # - public_member_api_docs

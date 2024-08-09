@@ -192,22 +192,14 @@ extension IDBDartifyExtension on JSAny {
       } else if (value.isJSUint8Array) {
         return (value as JSUint8Array).toDart;
       }
-      try {
-        var jsObject = value as JSObject;
-        var object = <String, Object?>{};
-        var keys = jsObjectKeys(jsObject).toDart;
-        for (var key in keys) {
-          object[(key as JSString).toDart] =
-              jsObject.getProperty(key)?.dartifyValueStrict();
-        }
-        return object;
-      } catch (_) {
-// Special handling of js dartified value issue for DateTime
-// jisify concert a DateTime as is...
-        if (value is DateTime) {
-          return value;
-        }
+      var jsObject = value as JSObject;
+      var object = <String, Object?>{};
+      var keys = jsObjectKeys(jsObject).toDart;
+      for (var key in keys) {
+        object[(key as JSString).toDart] =
+            jsObject.getProperty(key)?.dartifyValueStrict();
       }
+      return object;
     }
     throw UnsupportedError(
         'Unsupported value: $value (type: ${value.runtimeType})');

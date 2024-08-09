@@ -28,3 +28,5 @@ linter:
     - unsafe_html
     - prefer_const_constructors
     - public_member_api_docs
+    # New in 3.5
+    - invalid_runtime_check_with_js_interop_types

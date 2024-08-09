@@ -35,18 +35,15 @@ bool _handleError(Object e) {
     // devPrint('error: ${Error.safeToString(e)}');
     throw DatabaseError(e.toString());
   } else {
-    Object? errorToThrow;
+    // Handle js error
     try {
-      if (e is JSObject) {
-        var error = e as JSError;
-        errorToThrow = DatabaseErrorNative(
-            error.name ?? 'IDBError', error.message ?? e.toString());
-      }
+      var error = e as JSError;
+      throw DatabaseErrorNative(
+          error.name ?? 'IDBError', error.message ?? e.toString());
     } catch (_) {
       // print('error: $_');
       throw DatabaseError(e.toString());
     }
-    throw errorToThrow ?? DatabaseError(e.toString());
   }
 }
 
