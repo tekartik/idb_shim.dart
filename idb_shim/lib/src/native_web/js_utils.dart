@@ -172,34 +172,42 @@ extension IDBDartifyExtension on JSAny {
   /// Convert JavaScript object to Dart object
   Object dartifyValueStrict() {
     var value = this;
-    if (value.isJSString) {
+    if (value.isA<JSString>()) {
       return (value as JSString).toDart;
-    } else if (value.isJSNumber) {
+    } else if (value.isA<JSNumber>()) {
       return (value as JSNumber).toDartNum;
-    } else if (value.isJSBoolean) {
+    } else if (value.isA<JSBoolean>()) {
       return (value as JSBoolean).toDart;
     } else if (value.isJSObject) {
-      if (value.isJSArray) {
+      if (value.isA<JSArray>()) {
         var jsArray = value as JSArray;
         var list = List.generate(jsArray.length,
             (index) => jsArray.getProperty(index.toJS)?.dartifyValueStrict());
         return list;
-      } else if (value.isJSDate) {
+      } else if (value.isA<JSDate>()) {
         return DateTime.fromMillisecondsSinceEpoch((value as JSDate).getTime(),
             isUtc: true);
-      } else if (value.isJSArrayBuffer) {
+      } else if (value.isA<JSArrayBuffer>()) {
         return (value as JSArrayBuffer).toDart.asUint8List();
-      } else if (value.isJSUint8Array) {
+      } else if (value.isA<JSUint8Array>()) {
         return (value as JSUint8Array).toDart;
       }
-      var jsObject = value as JSObject;
-      var object = <String, Object?>{};
-      var keys = jsObjectKeys(jsObject).toDart;
-      for (var key in keys) {
-        object[(key as JSString).toDart] =
-            jsObject.getProperty(key)?.dartifyValueStrict();
+      try {
+        var jsObject = value as JSObject;
+        var object = <String, Object?>{};
+        var keys = jsObjectKeys(jsObject).toDart;
+        for (var key in keys) {
+          object[(key as JSString).toDart] =
+              jsObject.getProperty(key)?.dartifyValueStrict();
+        }
+        return object;
+      } catch (_) {
+        // Compat, old jsify might convert to DateTime
+        // ignore: invalid_runtime_check_with_js_interop_types
+        if (value is DateTime) {
+          return value;
+        }
       }
-      return object;
     }
     throw UnsupportedError(
         'Unsupported value: $value (type: ${value.runtimeType})');
