@@ -1,9 +1,14 @@
 # idb shim
 
-Pure dart indexed db like API on top of native (Wasm compatible) or sembast implementation. Its goal is to support browsers that do
-not support the indexed_db api with very few changes as well as setting the base for a flutter implementation.
+Pure dart indexed db like API.
 
-It also  allows to test your database schema and access in vm unit tests.
+* On the web (Wasm compatible, using `dart:js_interop`) it is a thin layer on top of indexed_db Web API.
+* On IO (and in memory), a sembast implementation (useful for testing) is provided. 
+
+Its goal is to support the initial indexed_db api with very few changes as well as setting the base 
+for other implementation (idb_sqflite on top of sqflite for example).
+
+It also allows to test your database schema and access in vm unit tests.
 
 * Project [home page](https://tekartik.github.io/idb_shim.dart/)
 * Project [source code](https://github.com/tekartik/idb_shim.dart)
