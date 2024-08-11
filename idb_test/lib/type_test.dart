@@ -102,8 +102,8 @@ void defineTests(TestContext ctx) {
       }
 
       test('values', () async {
-        for (var value in [
-          // null, disabled for nnbd
+        var allValues = [
+          // null,
           true,
           1,
           1.2,
@@ -121,13 +121,20 @@ void defineTests(TestContext ctx) {
                   ],
                   [null],
                   'text'
-                ]
+                ],
+                'null_sub': null
               }
             ]
           }
-        ]) {
+        ];
+        for (var value in allValues) {
           await testValue(value);
         }
+        await testValue([
+          null,
+          {'test': null},
+          ...allValues
+        ]);
       });
 
       test('dateTime', () async {

@@ -13,7 +13,10 @@ external JSArray jsObjectKeys(JSObject object);
 extension type JSDate._(JSObject _) implements JSObject {
   /// Create a JavaScript date object
   external JSDate(int value);
+}
 
+/// JavaScript Date extension
+extension JSDateExtension on JSDate {
   /// Convert JavaScript date object to ISO string
   external String toISOString();
 
