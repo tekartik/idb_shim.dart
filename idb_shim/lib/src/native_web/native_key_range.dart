@@ -15,19 +15,16 @@ idb.IDBKeyRange? toNativeKeyRange(KeyRange? common) {
   }
   if (common.lower != null) {
     if (common.upper != null) {
-      return idb.IDBKeyRange.bound(
-          common.lower?.jsifyKey(),
-          common.upper?.jsifyKey(),
-          common.lowerOpen == true,
-          common.upperOpen == true);
+      return idb.IDBKeyRange.bound(common.lower?.jsifyKey(),
+          common.upper?.jsifyKey(), common.lowerOpen, common.upperOpen);
     } else {
       return idb.IDBKeyRange.lowerBound(
-          common.lower?.jsifyKey(), common.lowerOpen == true);
+          common.lower?.jsifyKey(), common.lowerOpen);
     }
   } else {
     // devPrint('upper ${common.upper} ${common.upperOpen}');
     return idb.IDBKeyRange.upperBound(
-        common.upper?.jsifyKey(), common.upperOpen == true);
+        common.upper?.jsifyKey(), common.upperOpen);
   }
 }
 
