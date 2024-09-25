@@ -1,4 +1,3 @@
-import 'package:idb_shim/idb.dart' as idb;
 import 'package:idb_shim/src/sdb/sdb_boundary_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_impl.dart';
 import 'package:idb_shim/src/utils/idb_utils.dart';

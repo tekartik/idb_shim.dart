@@ -1,6 +1,5 @@
 library idb_shim.utils.idb_utils;
 
-import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
 import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/logger/logger_utils.dart';
@@ -9,6 +8,9 @@ import 'package:idb_shim/src/utils/env_utils.dart';
 import 'package:idb_shim/src/utils/idb_utils.dart';
 
 import 'idb_cursor_utils.dart';
+
+export 'package:idb_shim/idb_shim.dart';
+
 export 'idb_cursor_utils.dart' show CursorRow, KeyCursorRow;
 
 class _SchemaMeta {

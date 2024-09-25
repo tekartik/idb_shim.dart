@@ -4,6 +4,7 @@ import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:sembast/utils/value_utils.dart';
 
 import '../idb_client.dart';
+export 'package:idb_shim/idb_shim.dart';
 
 /// Cursor row.
 class CursorRow extends KeyCursorRow {

@@ -8,6 +8,7 @@ import 'package:sembast/utils/sembast_import_export.dart';
 
 import '../idb_client_sembast.dart';
 import 'idb_utils.dart';
+export 'package:idb_shim/idb_shim.dart';
 
 var _exportId = 0;
 String get _tempExportPath => 'sembast://tmp/idb_shim/${++_exportId}';
