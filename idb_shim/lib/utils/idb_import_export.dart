@@ -2,8 +2,8 @@ library idb_shim.utils.idb_import_export;
 
 import 'dart:async';
 
-import 'package:sembast/sembast_memory.dart' as sdb;
-import 'package:sembast/utils/sembast_import_export.dart';
+import 'package:sembast/sembast_memory.dart' as sembast;
+import 'package:sembast/utils/sembast_import_export.dart' as sembast;
 
 import '../idb_client_sembast.dart';
 import 'idb_utils.dart';
@@ -18,18 +18,18 @@ String get _tempExportPath => 'sembast://tmp/idb_shim/${++_exportId}';
 Future<Map<String, Object?>> sdbExportDatabase(Database db) async {
   var srcIdbFactory = db.factory;
 
-  sdb.Database? sdbDatabase;
+  sembast.Database? sdbDatabase;
 
   // if already a sembast database use it
   // if (false) {
   if (srcIdbFactory is IdbFactorySembast) {
     sdbDatabase = srcIdbFactory.getSdbDatabase(db);
-    return exportDatabase(sdbDatabase!);
+    return sembast.exportDatabase(sdbDatabase!);
   } else {
     // otherwise copy to a memory one
     db = await copyDatabase(db, idbFactoryMemory, _tempExportPath);
     sdbDatabase = (idbFactoryMemory as IdbFactorySembast).getSdbDatabase(db);
-    var export = await exportDatabase(sdbDatabase!);
+    var export = await sembast.exportDatabase(sdbDatabase!);
     db.close();
     return export;
   }
@@ -45,13 +45,13 @@ Future<Database> sdbImportDatabase(
   // if it is a sembast factory use it!
   // if (false) {
   if (dstFactory is IdbFactorySembast) {
-    final sdbDb = await importDatabaseAny(
+    final sdbDb = await sembast.importDatabaseAny(
         data, dstFactory.sdbFactory, dstFactory.getDbPath(dstDbName));
     return dstFactory.openFromSdbDatabase(sdbDb);
   } else {
     // import to a memory one
-    final sdbDb = await importDatabaseAny(
-        data, sdb.databaseFactoryMemory, _tempExportPath);
+    final sdbDb = await sembast.importDatabaseAny(
+        data, sembast.databaseFactoryMemory, _tempExportPath);
     final tmpDb = await (idbFactoryMemory as IdbFactorySembast)
         .openFromSdbDatabase(sdbDb);
     final db = await copyDatabase(tmpDb, dstFactory, dstDbName);
@@ -66,18 +66,18 @@ Future<Database> sdbImportDatabase(
 Future<List<Object>> sdbExportDatabaseLines(Database db) async {
   var srcIdbFactory = db.factory;
 
-  sdb.Database? sdbDatabase;
+  sembast.Database? sdbDatabase;
 
   // if already a sembast database use it
   // if (false) {
   if (srcIdbFactory is IdbFactorySembast) {
     sdbDatabase = srcIdbFactory.getSdbDatabase(db);
-    return exportDatabaseLines(sdbDatabase!);
+    return sembast.exportDatabaseLines(sdbDatabase!);
   } else {
     // otherwise copy to a memory one
     db = await copyDatabase(db, idbFactoryMemory, _tempExportPath);
     sdbDatabase = (idbFactoryMemory as IdbFactorySembast).getSdbDatabase(db);
-    var export = await exportDatabaseLines(sdbDatabase!);
+    var export = await sembast.exportDatabaseLines(sdbDatabase!);
     db.close();
     return export;
   }
