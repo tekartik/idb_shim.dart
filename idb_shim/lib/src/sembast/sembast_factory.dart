@@ -5,8 +5,7 @@ import 'package:idb_shim/src/common/common_factory.dart';
 import 'package:idb_shim/src/sembast/sembast_database.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:path/path.dart';
-import 'package:sembast/sembast.dart' as sembast;
-import 'package:sembast/sembast_memory.dart';
+import 'package:sembast/sembast_memory.dart' as sembast;
 
 bool sembastDebug = false; // devWarning(true);
 
@@ -14,17 +13,17 @@ bool sembastDebug = false; // devWarning(true);
 IdbFactory? _idbFactorySembastMemoryFsImpl;
 IdbFactory get idbFactorySembastMemoryFsImpl =>
     _idbFactorySembastMemoryFsImpl ??=
-        IdbFactorySembast(databaseFactoryMemoryFs);
+        IdbFactorySembast(sembast.databaseFactoryMemoryFs);
 
 IdbFactory? _idbSembastMemoryFactoryImpl;
 
 /// Sembast memory based factory
-IdbFactory get idbFactorySembastMemoryImpl =>
-    _idbSembastMemoryFactoryImpl ??= IdbFactorySembast(databaseFactoryMemory);
+IdbFactory get idbFactorySembastMemoryImpl => _idbSembastMemoryFactoryImpl ??=
+    IdbFactorySembast(sembast.databaseFactoryMemory);
 
 /// New Sembast memory based factory
 IdbFactory newIdbFactorySembastMemoryImpl() =>
-    IdbFactorySembast(newDatabaseFactoryMemory());
+    IdbFactorySembast(sembast.newDatabaseFactoryMemory());
 
 class IdbFactorySembastImpl extends IdbFactoryBase
     implements IdbFactorySembast {

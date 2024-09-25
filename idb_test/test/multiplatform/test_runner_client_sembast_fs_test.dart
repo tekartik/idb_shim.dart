@@ -5,7 +5,6 @@ import 'dart:convert';
 import 'package:idb_shim/src/sembast/sembast_database.dart' as idb_sdb;
 import 'package:idb_test/idb_test_common.dart';
 import 'package:idb_test/test_runner.dart' as test_runner;
-import 'package:sembast/sembast.dart' as sdb;
 import 'package:sembast/sembast_memory.dart' as sdb;
 import 'package:sembast/src/file_system.dart';
 import 'package:sembast/src/sembast_fs.dart' as sdb;

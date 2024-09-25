@@ -2,7 +2,6 @@ library idb_shim.utils.idb_import_export;
 
 import 'dart:async';
 
-import 'package:sembast/sembast.dart' as sdb;
 import 'package:sembast/sembast_memory.dart' as sdb;
 import 'package:sembast/utils/sembast_import_export.dart';
 

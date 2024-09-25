@@ -4,7 +4,6 @@ import 'dart:convert';
 
 import 'package:idb_shim/src/sembast/sembast_database.dart' // ignore: implementation_imports
     as idb_sdb;
-import 'package:sembast/sembast.dart' as sdb;
 import 'package:sembast/sembast_memory.dart' as sdb;
 import 'package:sembast/src/file_system.dart'; // ignore: implementation_imports
 import 'package:sembast/src/sembast_fs.dart' // ignore: implementation_imports
