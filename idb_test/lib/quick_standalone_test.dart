@@ -1,7 +1,5 @@
 library idb_shim.quick_standalone;
 
-import 'package:idb_shim/idb_client.dart';
-
 import 'idb_test_common.dart';
 
 const _storeName = 'quick_store';

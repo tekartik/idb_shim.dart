@@ -1,6 +1,5 @@
 // ignore_for_file: avoid_print
 
-import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/idb_io.dart';
 
 void main() async {

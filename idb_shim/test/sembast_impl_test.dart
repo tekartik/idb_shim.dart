@@ -1,4 +1,3 @@
-import 'package:idb_shim/idb_shim.dart';
 import 'package:idb_shim/utils/idb_import_export.dart';
 
 import 'idb_test_common.dart';

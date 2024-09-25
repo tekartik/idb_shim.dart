@@ -6,6 +6,7 @@ import 'package:idb_shim/idb_client_native.dart';
 
 export 'package:idb_shim/idb_client_memory.dart' show idbFactoryMemory;
 export 'package:idb_shim/idb_client_native.dart' show idbFactoryNative;
+export 'idb_shim.dart';
 
 /// Get a factory by name.
 ///

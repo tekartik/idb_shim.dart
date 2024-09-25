@@ -3,7 +3,6 @@ library idb_shim.utils_test;
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
-import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/utils/idb_import_export.dart';
 import 'package:idb_shim/utils/idb_utils.dart';
 import 'package:path/path.dart';

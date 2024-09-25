@@ -1,5 +1,3 @@
-import 'package:idb_shim/idb.dart';
-
 import '../idb_test_common.dart';
 
 void main() {

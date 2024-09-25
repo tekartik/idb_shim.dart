@@ -2,7 +2,6 @@ library;
 
 import 'dart:convert';
 
-import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/sembast/sembast_database.dart' as idb_sdb;
 import 'package:idb_test/idb_test_common.dart';
 import 'package:idb_test/test_runner.dart' as test_runner;

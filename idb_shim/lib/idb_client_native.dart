@@ -4,3 +4,4 @@
 library idb_shim.native;
 
 export 'idb_client_native_interop.dart';
+export 'idb_shim.dart';

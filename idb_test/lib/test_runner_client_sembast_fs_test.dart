@@ -2,7 +2,6 @@ library idb_shim.test_runner_client_sembast_fs_test;
 
 import 'dart:convert';
 
-import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/sembast/sembast_database.dart' // ignore: implementation_imports
     as idb_sdb;
 import 'package:sembast/sembast.dart' as sdb;

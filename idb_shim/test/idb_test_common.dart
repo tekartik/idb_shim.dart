@@ -2,8 +2,6 @@ library idb_shim.idb_test_common;
 
 import 'dart:async';
 
-import 'package:idb_shim/idb_client.dart';
-import 'package:idb_shim/idb_client_memory.dart';
 import 'package:idb_shim/idb_client_sembast.dart';
 import 'package:idb_shim/src/common/common_factory.dart';
 import 'package:idb_shim/src/common/common_meta.dart';

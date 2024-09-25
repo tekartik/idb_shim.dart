@@ -7,6 +7,7 @@ import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/common/common_factory.dart';
 import 'package:idb_shim/src/sembast/sembast_factory.dart';
 import 'package:sembast/sembast.dart' as sdb;
+export 'idb_shim.dart';
 
 /// Sembast factory name.
 const idbFactoryNameSembast = 'sembast';

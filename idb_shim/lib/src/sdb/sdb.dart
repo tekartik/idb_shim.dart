@@ -1,5 +1,4 @@
 import 'package:idb_shim/idb_io.dart' as idb;
-import 'package:idb_shim/idb_shim.dart' as idb;
 
 import 'sdb_factory.dart';
 import 'sdb_factory_impl.dart';

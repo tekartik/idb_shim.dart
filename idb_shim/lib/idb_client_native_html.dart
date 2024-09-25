@@ -4,8 +4,10 @@ library idb_shim_native_html;
 
 import 'package:idb_shim/src/utils/unimplemented_stub.dart';
 
-import 'idb.dart';
 import 'idb_client_native_interop.dart' as interop;
+import 'idb_shim.dart';
+
+export 'idb_shim.dart';
 
 /// Deprecated implementation
 @Deprecated('Use idbFactoryNative from idb_client_native_interop')
