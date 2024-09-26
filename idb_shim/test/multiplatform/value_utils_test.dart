@@ -1,4 +1,4 @@
-library idb_shim.value_utils_test;
+library;
 
 import 'package:idb_shim/src/utils/value_utils.dart';
 import 'package:idb_shim/src/utils/value_utils.dart' as utils;

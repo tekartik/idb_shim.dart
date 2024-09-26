@@ -1,6 +1,6 @@
 // ignore_for_file: public_member_api_docs
 
-library tekartik_idb.idb_meta;
+library;
 
 import 'dart:async';
 

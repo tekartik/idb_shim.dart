@@ -1,4 +1,4 @@
-library idb_shim.test_runner;
+library;
 
 import 'package:idb_test/sdb_test.dart';
 

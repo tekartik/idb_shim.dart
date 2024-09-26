@@ -1,4 +1,4 @@
-library idb_shim.idb_io_test_common;
+library;
 
 import 'package:idb_shim/idb_client_sembast.dart';
 import 'package:idb_test/idb_test_common.dart';

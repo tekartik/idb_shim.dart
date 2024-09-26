@@ -1,7 +1,7 @@
 /// Development helpers to generate warning in code
 // ignore_for_file: public_member_api_docs
 
-library idb_shim_dev_utils;
+library;
 
 import 'package:meta/meta.dart';
 

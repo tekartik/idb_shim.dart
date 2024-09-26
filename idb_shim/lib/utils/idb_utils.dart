@@ -1,4 +1,4 @@
-library idb_shim.utils.idb_utils;
+library;
 
 import 'package:idb_shim/src/common/common_meta.dart';
 import 'package:idb_shim/src/common/common_value.dart';

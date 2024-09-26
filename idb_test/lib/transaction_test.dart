@@ -1,4 +1,4 @@
-library transaction_test_common;
+library;
 
 import 'exception_test.dart';
 import 'idb_test_common.dart';

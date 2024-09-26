@@ -1,5 +1,5 @@
 // https://dart.googlecode.com/svn/branches/bleeding_edge/dart/tests/html/utils.dart
-library idb_shim.test.indexeddb_utils;
+library;
 
 import 'dart:typed_data';
 

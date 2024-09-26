@@ -1,7 +1,7 @@
 // https://dart.googlecode.com/svn/branches/bleeding_edge/dart/tests/html/indexeddb_1_test.dart
 // replace html.window.indexedDB with idbFactory
 // replace IndexedDB1Test with IndexedDB2Test
-library idb_shim.test.indexeddb_2_test;
+library;
 
 import 'dart:collection';
 

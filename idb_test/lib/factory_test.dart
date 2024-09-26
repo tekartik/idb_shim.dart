@@ -1,4 +1,4 @@
-library factory_test;
+library;
 
 import 'dart:typed_data';
 

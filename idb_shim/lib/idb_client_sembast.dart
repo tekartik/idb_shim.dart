@@ -1,5 +1,5 @@
 /// Sembast based implementation.
-library idb_shim.sembast;
+library;
 
 import 'dart:async';
 

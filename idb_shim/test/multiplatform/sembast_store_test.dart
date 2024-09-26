@@ -1,4 +1,4 @@
-library idb_shim.sembast_store_test;
+library;
 
 import 'package:idb_shim/src/sembast/sembast_object_store.dart' as sembast;
 

@@ -1,4 +1,4 @@
-library simple_provider;
+library;
 
 import 'dart:async';
 

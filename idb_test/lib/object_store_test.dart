@@ -1,4 +1,4 @@
-library object_store_test;
+library;
 
 import 'package:idb_shim/src/common/common_value.dart'; // ignore: implementation_imports
 import 'package:idb_test/idb_test_common_meta.dart';

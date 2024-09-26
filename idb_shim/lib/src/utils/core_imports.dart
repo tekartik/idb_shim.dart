@@ -1,4 +1,4 @@
-library idb_shim_core_imports;
+library;
 
 export 'dart:async';
 

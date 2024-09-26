@@ -1,6 +1,6 @@
 /// {@canonicalFor idb_shim.src.native.idb_native_web.idbFactoryFromIndexedDB}
 /// Legacy API
-library idb_shim_native_html;
+library;
 
 import 'package:idb_shim/src/utils/unimplemented_stub.dart';
 

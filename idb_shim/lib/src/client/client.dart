@@ -1,4 +1,4 @@
-library idb_shim.src.client.client;
+library;
 
 import 'package:idb_shim/src/common/common_import.dart';
 

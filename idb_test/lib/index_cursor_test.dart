@@ -1,4 +1,4 @@
-library index_cursor_test;
+library;
 
 import 'package:idb_shim/utils/idb_utils.dart';
 

@@ -1,4 +1,4 @@
-library cursor_test;
+library;
 
 import 'package:idb_shim/utils/idb_cursor_utils.dart';
 import 'package:idb_shim/utils/idb_utils.dart';

@@ -1,4 +1,4 @@
-library database_test;
+library;
 
 import 'exception_test.dart';
 import 'idb_test_common.dart';

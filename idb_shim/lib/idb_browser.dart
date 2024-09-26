@@ -1,4 +1,4 @@
-library idb_shim_browser;
+library;
 
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/idb_client_memory.dart';

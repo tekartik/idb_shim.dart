@@ -1,6 +1,6 @@
 // ignore_for_file: public_member_api_docs
 
-library idb_shim.common_validation;
+library;
 
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/common/common_error.dart';

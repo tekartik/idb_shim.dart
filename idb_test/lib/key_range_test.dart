@@ -1,4 +1,4 @@
-library key_range_test;
+library;
 
 import 'idb_test_common.dart';
 

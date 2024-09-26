@@ -1,4 +1,4 @@
-library idb_test_utils;
+library;
 
 import 'idb_test_common.dart';
 

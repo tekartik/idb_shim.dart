@@ -1,4 +1,4 @@
-library idb_shim.idb_test_common;
+library;
 
 import 'dart:async';
 

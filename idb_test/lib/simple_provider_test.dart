@@ -1,4 +1,4 @@
-library store_test_common;
+library;
 
 import 'idb_test_common.dart' hide testNameIndex, testNameField;
 import 'simple_provider.dart';

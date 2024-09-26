@@ -1,4 +1,4 @@
-library idb_shim.common_meta_test;
+library;
 
 import '../idb_test_common.dart';
 

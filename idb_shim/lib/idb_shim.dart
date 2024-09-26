@@ -4,7 +4,7 @@
 /// {@canonicalFor idb_shim.error.DatabaseReadOnlyError}
 /// {@canonicalFor idb_shim.error.DatabaseStoreNotFoundError}
 /// {@canonicalFor idb_shim.error.DatabaseTransactionStoreNotFoundError}
-library idb_shim;
+library;
 
 export 'idb.dart';
 export 'idb_client_memory.dart' show idbFactoryMemory, idbFactoryMemoryFs;

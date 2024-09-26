@@ -1,4 +1,4 @@
-library idb_shim.idb_client;
+library;
 
 // Will be deprecated someday...
 export 'idb_shim.dart';

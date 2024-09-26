@@ -1,4 +1,4 @@
-library idb_test.type_test;
+library;
 
 import 'dart:typed_data';
 

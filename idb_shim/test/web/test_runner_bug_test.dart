@@ -1,4 +1,4 @@
-library idb_shim.test_runner_client_sembast_fs_test;
+library;
 
 import 'package:idb_shim/src/sembast/sembast_factory.dart';
 

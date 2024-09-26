@@ -1,4 +1,4 @@
-library idb_shim.idb_io_test_common;
+library;
 
 import 'package:web/web.dart';
 

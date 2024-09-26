@@ -1,4 +1,4 @@
-library idb_shim.utils.idb_cursor_utils;
+library;
 
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:sembast/utils/value_utils.dart';

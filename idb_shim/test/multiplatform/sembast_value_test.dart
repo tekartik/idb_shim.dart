@@ -1,4 +1,4 @@
-library idb_shim.sembast_value_test;
+library;
 
 import 'dart:typed_data';
 

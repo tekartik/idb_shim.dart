@@ -1,4 +1,4 @@
-library idb_shim.sembast_filter_test;
+library;
 
 import 'package:idb_shim/src/sembast/sembast_filter.dart' as sembast_filter;
 import 'package:sembast/sembast.dart' as sdb;

@@ -1,4 +1,4 @@
-library idb_shim.quick_standalone;
+library;
 
 import 'idb_test_common.dart';
 

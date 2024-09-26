@@ -1,4 +1,4 @@
-library index_test;
+library;
 
 import 'package:idb_test/idb_test_common_meta.dart';
 

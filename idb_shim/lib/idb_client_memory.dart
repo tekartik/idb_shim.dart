@@ -1,6 +1,6 @@
 /// In memory implementation.
 /// {@canonicalFor sembast_memory_compat.idbMemoryFactory}
-library idb_shim.memory;
+library;
 
 import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/sembast/sembast_factory.dart';

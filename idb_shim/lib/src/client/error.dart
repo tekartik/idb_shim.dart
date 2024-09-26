@@ -1,4 +1,4 @@
-library idb_shim.error;
+library;
 
 import 'package:idb_shim/idb.dart';
 

@@ -1,4 +1,4 @@
-library idb_shim.test.indexeddb_3_test;
+library;
 
 import 'idb_test_common.dart';
 

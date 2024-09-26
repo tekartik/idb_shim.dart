@@ -1,5 +1,5 @@
 @TestOn('vm')
-library idb_shim.test_runner_sembast_io;
+library;
 
 import 'package:test/test.dart';
 

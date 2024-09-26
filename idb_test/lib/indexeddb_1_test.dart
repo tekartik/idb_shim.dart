@@ -1,6 +1,6 @@
 // https://dart.googlecode.com/svn/branches/bleeding_edge/dart/tests/html/indexeddb_1_test.dart
 // replace _idbFactory with _idbFactory
-library idb_shim.test.indexeddb_1_test;
+library;
 
 import 'package:idb_shim/idb_client.dart' as idb;
 
