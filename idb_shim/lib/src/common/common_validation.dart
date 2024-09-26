@@ -23,7 +23,7 @@ void checkKeyParam(Object? key) {
 }
 
 /// Check a key
-/// keyPath can be: List<String> | String
+/// keyPath can be: `List<String>` | `String`
 void checkKeyValueParam(
     {Object? keyPath, Object? key, Object? value, bool? autoIncrement}) {
   if (key != null) {

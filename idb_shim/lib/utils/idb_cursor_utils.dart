@@ -40,7 +40,7 @@ class KeyCursorRow {
   KeyCursorRow(this.key, this.primaryKey);
 }
 
-/// Extension on [Stream<Cursor>]. Cursor must not be in auto-advanced mode.
+/// Extension on [`Stream<Cursor>`]. Cursor must not be in auto-advanced mode.
 extension CursorWithValueStreamExt on Stream<CursorWithValue> {
   /// Convert an openCursor stream to a list.
   Future<List<CursorRow>> toRowList({int? limit, int? offset}) =>
@@ -54,7 +54,7 @@ extension CursorWithValueStreamExt on Stream<CursorWithValue> {
           offset: offset, limit: limit);
 }
 
-/// Extension on [Stream<Cursor>]. Cursor must not be in auto-advanced mode.
+/// Extension on [`Stream<Cursor>`]. Cursor must not be in auto-advanced mode.
 extension CursorStreamExt<C extends Cursor> on Stream<C> {
   /// Convert an openKeyCursor stream to a list
   Future<List<KeyCursorRow>> toKeyRowList({int? limit, int? offset}) =>

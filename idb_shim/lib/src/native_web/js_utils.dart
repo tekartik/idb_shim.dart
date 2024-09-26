@@ -27,7 +27,7 @@ extension JSDateExtension on JSDate {
 /// JavaScript Array extension.
 extension JSArrayExtension on JSArray {
   /// Get the length of the array
-  external int get length;
+  external int get idbShimLength;
 }
 
 /// JavaScript helpers
@@ -153,7 +153,7 @@ extension IDBDartifyExtension on JSAny {
     return dartifyValueStrict();
   }
 
-  /// Convert a js value to String or List<String>
+  /// Convert a js value to [String] or `[List<String>]`
   Object dartifyStringOrStringList() {
     // devPrint('dartifyStringOrStringList: $this');
     var value = this;
@@ -169,7 +169,7 @@ extension IDBDartifyExtension on JSAny {
         'Unsupported keyPath: $value (type: ${value.runtimeType})');
   }
 
-  /// Convert keyPath to String or List<String>
+  /// Convert keyPath to [String] or [`List<String>`]
   Object dartifyKeyPath() => dartifyStringOrStringList();
 
   /// Convert JavaScript object to Dart object
@@ -184,7 +184,7 @@ extension IDBDartifyExtension on JSAny {
     } else if (value.isJSObject) {
       if (value.isA<JSArray>()) {
         var jsArray = value as JSArray;
-        var list = List.generate(jsArray.length,
+        var list = List.generate(jsArray.idbShimLength,
             (index) => jsArray.getProperty(index.toJS)?.dartifyValueStrict());
         return list;
       } else if (value.isA<JSDate>()) {
