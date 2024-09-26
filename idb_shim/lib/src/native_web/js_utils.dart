@@ -27,6 +27,7 @@ extension JSDateExtension on JSDate {
 /// JavaScript Array extension.
 extension JSArrayExtension on JSArray {
   /// Get the length of the array
+  @JS('length')
   external int get idbShimLength;
 }
 

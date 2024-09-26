@@ -20,7 +20,7 @@ bool equals(dynamic value1, dynamic value2) {
 
 /// Compare 2 values.
 ///
-/// return <0 if value1 < value2 or >0 if greater
+/// return `< 0` if value1 is before value2 or `> 0` if greater
 /// returns null if cannot be compared
 int? compareValue(dynamic value1, dynamic value2) {
   try {
