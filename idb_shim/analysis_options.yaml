@@ -11,6 +11,7 @@ linter:
   rules:
     - always_declare_return_types
     - avoid_dynamic_calls
+    - avoid_null_checks_in_equality_operators
     - avoid_print
     - avoid_slow_async_io
     - cancel_subscriptions
@@ -34,4 +35,5 @@ linter:
     - test_types_in_equals
     - throw_in_finally
     - unawaited_futures
+    - unintended_html_in_doc_comment
     - unnecessary_statements

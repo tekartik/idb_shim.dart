@@ -25,6 +25,7 @@ void simpleDbIndexTest(TestContext ctx) {
         }
       });
       await testStore.add(db, {'field': 1234});
+      // ignore: omit_local_variable_types
       SdbIndexRecordRef<int, SdbModel, int> recordRef = testIndex.record(1234);
       var snapshot = (await recordRef.get(db))!;
       expect(snapshot.key, 1);

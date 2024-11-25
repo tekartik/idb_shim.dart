@@ -31,7 +31,9 @@ void simpleDbTest(TestContext ctx) {
         expect(key, 1);
         var key2 = await testStore.add(db, {'test': 2});
         expect(key2, 2);
+        // ignore: omit_local_variable_types
         SdbRecordRef<int, SdbModel> recordRef = testStore.record(key);
+        // ignore: omit_local_variable_types
         SdbRecordSnapshot<int, SdbModel> record = (await recordRef.get(db))!;
         expect(record.value, {'test': 1});
         expect(record.key, key);

@@ -10,8 +10,8 @@ Future main() async {
   var version = Version.parse((loadYaml(
           await File(join('..', 'idb_shim', 'pubspec.yaml')).readAsString())
       as Map)['version'] as String);
-  print('Version $version');
-  print('Tap anything or CTRL-C: $version');
+  stdout.writeln('Version $version');
+  stdout.writeln('Tap anything or CTRL-C: $version');
 
   await sharedStdIn.first;
   await shell.run('''
