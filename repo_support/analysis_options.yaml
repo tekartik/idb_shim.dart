@@ -30,14 +30,11 @@ linter:
     - directives_ordering
     - no_adjacent_strings_in_list
     - omit_local_variable_types
-    - package_api_docs
+    - prefer_const_constructors
     - prefer_single_quotes
     - sort_child_properties_last
     - test_types_in_equals
     - throw_in_finally
     - unawaited_futures
-    - unnecessary_null_aware_assignments
     - unnecessary_statements
-    - unsafe_html
-    - prefer_const_constructors
     - use_full_hex_values_for_flutter_colors
