@@ -1,6 +1,6 @@
 # Usage in flutter
 
-While idb_shim over sembast is a solution on Flutter, The recommend implementation is [idb_sqflite](https://pub.dev/packages/idb_sqflite) 
+While idb_shim over sembast is a solution on Flutter, The recommended implementation is [idb_sqflite](https://pub.dev/packages/idb_sqflite) 
 based on sqflite for mobile (iOS, MacOS and Android) or desktop and dart VM using [sqflite_ffi_common](https://pub.dev/packages/sqflite_common_ffi).
 
 Choosing an implementation is mainly finding the best `IdbFactory` for the platform.
