@@ -74,7 +74,8 @@ Flutter (iOS/Android/Web).
 
 ### Flutter support
 
-While idb_shim over sembast is a solution on Flutter, there is an implementation [idb_sqflite](https://pub.dev/packages/idb_sqflite) based on sqflite for mobile (iOS and Android)
+While idb_shim over sembast is a solution on Flutter, there is an implementation [idb_sqflite](https://pub.dev/packages/idb_sqflite) based on sqflite for mobile (iOS, MacOS and Android)
+See [Usage in flutter](https://github.com/tekartik/idb_shim.dart/blob/master/idb_shim/doc/sdb.md) for more information.
 
 ### Use the same web port when debugging
 
