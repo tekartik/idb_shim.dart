@@ -347,29 +347,6 @@ void defineTests(TestContext ctx) {
       expect(await store.getObject(testKey), isNull);
     });
 
-    test('clear_object_store_in_open_transaction', () async {
-      await setupDeleteDb();
-      var db = await idbFactory.open(dbName, version: 1,
-          onUpgradeNeeded: (event) async {
-        var store = event.database.createObjectStore(testStoreName);
-        await store.put(testValue, testKey);
-      });
-
-      var txn = db.transaction(testStoreName, idbModeReadOnly);
-      var store = txn.objectStore(testStoreName);
-      expect(await store.getObject(testKey), testValue);
-      db.close();
-      db = await idbFactory.open(dbName, version: 2,
-          onUpgradeNeeded: (event) async {
-        var store = event.transaction.objectStore(testStoreName);
-        await store.clear();
-      });
-      txn = db.transaction(testStoreName, idbModeReadOnly);
-      store = txn.objectStore(testStoreName);
-      expect(await store.getObject(testKey), isNull);
-      db.close();
-    });
-
     test('clear_object_stores_in_open_transaction', () async {
       await setupDeleteDb();
       var db = await idbFactory.open(dbName, version: 1,
