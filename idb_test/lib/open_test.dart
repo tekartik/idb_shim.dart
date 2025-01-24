@@ -347,6 +347,63 @@ void defineTests(TestContext ctx) {
       expect(await store.getObject(testKey), isNull);
     });
 
+    test('clear_object_store_in_open_transaction', () async {
+      await setupDeleteDb();
+      var db = await idbFactory.open(dbName, version: 1,
+          onUpgradeNeeded: (event) async {
+        var store = event.database.createObjectStore(testStoreName);
+        await store.put(testValue, testKey);
+      });
+
+      var txn = db.transaction(testStoreName, idbModeReadOnly);
+      var store = txn.objectStore(testStoreName);
+      expect(await store.getObject(testKey), testValue);
+      db.close();
+      db = await idbFactory.open(dbName, version: 2,
+          onUpgradeNeeded: (event) async {
+        var store = event.transaction.objectStore(testStoreName);
+        await store.clear();
+      });
+      txn = db.transaction(testStoreName, idbModeReadOnly);
+      store = txn.objectStore(testStoreName);
+      expect(await store.getObject(testKey), isNull);
+      db.close();
+    });
+
+    test('clear_object_stores_in_open_transaction', () async {
+      await setupDeleteDb();
+      var db = await idbFactory.open(dbName, version: 1,
+          onUpgradeNeeded: (event) async {
+        var db = event.database;
+        var store = db.createObjectStore(testStoreName);
+        await store.put(testValue, testKey);
+        store = db.createObjectStore(testStoreName2);
+        await store.put(testValue2, testKey);
+      });
+
+      var txn =
+          db.transactionList([testStoreName, testStoreName2], idbModeReadOnly);
+      var store = txn.objectStore(testStoreName);
+      expect(await store.getObject(testKey), testValue);
+      store = txn.objectStore(testStoreName2);
+      expect(await store.getObject(testKey), testValue2);
+      db.close();
+      db = await idbFactory.open(dbName, version: 2,
+          onUpgradeNeeded: (event) async {
+        var txn = event.transaction;
+        var store = txn.objectStore(testStoreName);
+        var store2 = txn.objectStore(testStoreName2);
+        await Future.wait([store.clear(), store2.clear()]);
+      });
+      txn =
+          db.transactionList([testStoreName, testStoreName2], idbModeReadOnly);
+      store = txn.objectStore(testStoreName);
+      expect(await store.getObject(testKey), isNull);
+      store = txn.objectStore(testStoreName2);
+      expect(await store.getObject(testKey), isNull);
+      db.close();
+    });
+
     test('delete_recreate_object_store_in_open_transaction', () async {
       await setupDeleteDb();
       var db = await idbFactory.open(dbName, version: 1,
@@ -370,6 +427,7 @@ void defineTests(TestContext ctx) {
       txn = db.transaction(testStoreName, idbModeReadOnly);
       store = txn.objectStore(testStoreName);
       expect(await store.getObject(testKey), isNull);
+      db.close();
     });
   });
 }

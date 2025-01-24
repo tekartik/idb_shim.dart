@@ -35,6 +35,7 @@ const String testNameField = 'name';
 const String testValueIndex = 'value_index';
 const String testValueField = 'value';
 const String testValue = 'my_value';
+const String testValue2 = 'my_value_2';
 const String testKey = 'my_key';
 
 const String testNameIndex2 = 'name_index_2';
