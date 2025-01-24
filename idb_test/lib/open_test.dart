@@ -284,10 +284,8 @@ void defineTests(TestContext ctx) {
       var db = await idbFactory.open(dbName, version: 1,
           onUpgradeNeeded: (event) async {
         var store = event.database.createObjectStore('note');
-        await store.put('my_value', 'my_key').then((key) async {
-          putKey = key;
-          putValue = await store.getObject('my_key');
-        });
+        putKey = await store.put('my_value', 'my_key');
+        putValue = await store.getObject('my_key');
       });
       expect(putKey, 'my_key');
       expect(putValue, 'my_value');
@@ -327,33 +325,51 @@ void defineTests(TestContext ctx) {
       }
     });
 
-    //    const String MILESTONE_STORE = 'milestoneStore';
-    //    const String NAME_INDEX = 'name_index';
-    //
-    //    void onUpgradeNeeded(VersionChangeEvent e) {
-    //      Database db = (e.target as Request).result;
-    //
-    //      var objectStore = db.createObjectStore(MILESTONE_STORE, autoIncrement: true);
-    //      var index = objectStore.createIndex(NAME_INDEX, 'milestoneName', unique: true);
-    //    }
-    //
-    //
-    //    void _initializeTestDatabase(VersionChangeEvent e) {
-    //      expect(e.oldVersion, equals(0));
-    //      expect(e.newVersion, equals(1));
-    //      Database db = (e.target as Request).result;
-    //
-    //      var objectStore = db.createObjectStore(MILESTONE_STORE, autoIncrement: true);
-    //      var index = objectStore.createIndex(NAME_INDEX, 'milestoneName', unique: true);
-    //    }
-    //    test('open initialize', () {
-    //      Function done = expectAsync0(() => null);
-    //      idbFactory.deleteDatabase(DB_NAME).then((_) {
-    //        idbFactory.open('test', version: 1, onUpgradeNeeded: _initializeTestDatabase).then((Database database) {
-    //          database.close();
-    //          done();
-    //        });
-    //      });
-    //    });
+    test('clear_object_store_in_open_transaction', () async {
+      await setupDeleteDb();
+      var db = await idbFactory.open(dbName, version: 1,
+          onUpgradeNeeded: (event) async {
+        var store = event.database.createObjectStore(testStoreName);
+        await store.put(testValue, testKey);
+      });
+
+      var txn = db.transaction(testStoreName, idbModeReadOnly);
+      var store = txn.objectStore(testStoreName);
+      expect(await store.getObject(testKey), testValue);
+      db.close();
+      db = await idbFactory.open(dbName, version: 2,
+          onUpgradeNeeded: (event) async {
+        var store = event.transaction.objectStore(testStoreName);
+        await store.clear();
+      });
+      txn = db.transaction(testStoreName, idbModeReadOnly);
+      store = txn.objectStore(testStoreName);
+      expect(await store.getObject(testKey), isNull);
+    });
+
+    test('delete_recreate_object_store_in_open_transaction', () async {
+      await setupDeleteDb();
+      var db = await idbFactory.open(dbName, version: 1,
+          onUpgradeNeeded: (event) async {
+        var store = event.database.createObjectStore(testStoreName);
+        await store.put(testValue, testKey);
+      });
+
+      var txn = db.transaction(testStoreName, idbModeReadOnly);
+      var store = txn.objectStore(testStoreName);
+      expect(await store.getObject(testKey), testValue);
+      db.close();
+      db = await idbFactory.open(dbName, version: 2,
+          onUpgradeNeeded: (event) async {
+        var db = event.database;
+        db.deleteObjectStore(testStoreName);
+        expect(db.objectStoreNames, isNot(contains(testStoreName)));
+        db.createObjectStore(testStoreName);
+        expect(db.objectStoreNames, contains(testStoreName));
+      });
+      txn = db.transaction(testStoreName, idbModeReadOnly);
+      store = txn.objectStore(testStoreName);
+      expect(await store.getObject(testKey), isNull);
+    });
   });
 }

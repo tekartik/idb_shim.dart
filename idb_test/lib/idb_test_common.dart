@@ -34,6 +34,8 @@ const String testNameIndex = 'name_index';
 const String testNameField = 'name';
 const String testValueIndex = 'value_index';
 const String testValueField = 'value';
+const String testValue = 'my_value';
+const String testKey = 'my_key';
 
 const String testNameIndex2 = 'name_index_2';
 const String testNameField2 = 'name_2';
