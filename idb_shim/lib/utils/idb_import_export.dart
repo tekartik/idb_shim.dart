@@ -41,17 +41,26 @@ Future<Map<String, Object?>> sdbExportDatabase(Database db) async {
 /// return the opened database
 ///
 Future<Database> sdbImportDatabase(
-    Object data, IdbFactory dstFactory, String dstDbName) async {
+  Object data,
+  IdbFactory dstFactory,
+  String dstDbName,
+) async {
   // if it is a sembast factory use it!
   // if (false) {
   if (dstFactory is IdbFactorySembast) {
     final sdbDb = await sembast.importDatabaseAny(
-        data, dstFactory.sdbFactory, dstFactory.getDbPath(dstDbName));
+      data,
+      dstFactory.sdbFactory,
+      dstFactory.getDbPath(dstDbName),
+    );
     return dstFactory.openFromSdbDatabase(sdbDb);
   } else {
     // import to a memory one
     final sdbDb = await sembast.importDatabaseAny(
-        data, sembast.databaseFactoryMemory, _tempExportPath);
+      data,
+      sembast.databaseFactoryMemory,
+      _tempExportPath,
+    );
     final tmpDb = await (idbFactoryMemory as IdbFactorySembast)
         .openFromSdbDatabase(sdbDb);
     final db = await copyDatabase(tmpDb, dstFactory, dstDbName);

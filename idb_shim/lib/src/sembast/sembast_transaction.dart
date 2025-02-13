@@ -99,18 +99,20 @@ class TransactionSembast extends IdbTransactionBase
       }();
     } else {
       // Yes!
-      return Future.sync(action).then((result) {
-        if (_debugTransaction) {
-          idbLog('done $i');
-        }
-        completer.complete(result);
-      }).catchError((Object e, StackTrace st) {
-        //devPrint(' err $i');
-        if (_debugTransaction) {
-          idbLog('err $i $e');
-        }
-        completer.completeError(e, st);
-      });
+      return Future.sync(action)
+          .then((result) {
+            if (_debugTransaction) {
+              idbLog('done $i');
+            }
+            completer.complete(result);
+          })
+          .catchError((Object e, StackTrace st) {
+            //devPrint(' err $i');
+            if (_debugTransaction) {
+              idbLog('err $i $e');
+            }
+            completer.completeError(e, st);
+          });
     }
   }
 
@@ -186,31 +188,34 @@ class TransactionSembast extends IdbTransactionBase
         //assert(sembastDatabase.transaction == null);
 
         // No return value here
-        return sembastDatabase.transaction((txn) async {
-          // assign right away as this is tested
-          sembastTransaction = txn;
-          // Do we care about the type here?
-          var result = await _next();
+        return sembastDatabase
+            .transaction((txn) async {
+              // assign right away as this is tested
+              sembastTransaction = txn;
+              // Do we care about the type here?
+              var result = await _next();
 
-          // If aborted throw an error exception so that saves are
-          // cancelled
-          if (_endException != null) {
-            throw _endException!;
-          }
+              // If aborted throw an error exception so that saves are
+              // cancelled
+              if (_endException != null) {
+                throw _endException!;
+              }
 
-          return result;
-        }).whenComplete(() {
-          if (!_transactionCompleter.isCompleted) {
-            _transactionCompleter.complete();
-          }
-          if (_debugTransaction) {
-            idbLog('txn end of sembast transaction');
-          }
-        }).catchError((Object e) {
-          if (!_transactionCompleter.isCompleted) {
-            _transactionCompleter.completeError(e);
-          }
-        });
+              return result;
+            })
+            .whenComplete(() {
+              if (!_transactionCompleter.isCompleted) {
+                _transactionCompleter.complete();
+              }
+              if (_debugTransaction) {
+                idbLog('txn end of sembast transaction');
+              }
+            })
+            .catchError((Object e) {
+              if (!_transactionCompleter.isCompleted) {
+                _transactionCompleter.completeError(e);
+              }
+            });
       }
       //lazyExecution = new Future.sync(() {
       // don't return the result here
@@ -235,7 +240,7 @@ class TransactionSembast extends IdbTransactionBase
     if (_inactive) {
       return Future.error(DatabaseError('TransactionInactiveError'));
     }
-// not lazy
+    // not lazy
     var completer = Completer<T>.sync();
     _completers.add(completer);
     _actions.add(action);
@@ -280,7 +285,8 @@ class TransactionSembast extends IdbTransactionBase
         } catch (e) {
           if (_debugTransaction) {
             idbLog(
-                'Handle TransactionSembast constructor async completed error $e');
+              'Handle TransactionSembast constructor async completed error $e',
+            );
           }
         }
         if (_debugTransaction) {
@@ -332,8 +338,10 @@ class TransactionSembast extends IdbTransactionBase
         // with a sync completer
         await _lazyExecution!.then((_) async {
           try {
-            await Future.wait(
-                <Future>[_transactionCompleter.future, ..._futures]);
+            await Future.wait(<Future>[
+              _transactionCompleter.future,
+              ..._futures,
+            ]);
           } catch (e) {
             if (_debugTransaction) {
               idbLog('Handling transaction error $e');
@@ -382,10 +390,10 @@ class TransactionSembast extends IdbTransactionBase
     return _completedCompleter.future;
   }
 
-//    sembastTransaction == null ? new Future.value(database) : sembastTransaction.completed.then((_) {
-//    // delay the completed event
-//
-//  });
+  //    sembastTransaction == null ? new Future.value(database) : sembastTransaction.completed.then((_) {
+  //    // delay the completed event
+  //
+  //  });
 
   @override
   ObjectStore objectStore(String name) {
@@ -402,8 +410,8 @@ class TransactionSembast extends IdbTransactionBase
     _endException = newAbortException();
   }
 
-//  @override
-//  String toString() {
-//    return
-//  }
+  //  @override
+  //  String toString() {
+  //    return
+  //  }
 }

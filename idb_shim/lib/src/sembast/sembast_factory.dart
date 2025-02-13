@@ -12,14 +12,17 @@ bool sembastDebug = false; // devWarning(true);
 /// Special factory in memory but supporting writing on a virtual file system (in memory too)
 IdbFactory? _idbFactorySembastMemoryFsImpl;
 IdbFactory get idbFactorySembastMemoryFsImpl =>
-    _idbFactorySembastMemoryFsImpl ??=
-        IdbFactorySembast(sembast.databaseFactoryMemoryFs);
+    _idbFactorySembastMemoryFsImpl ??= IdbFactorySembast(
+      sembast.databaseFactoryMemoryFs,
+    );
 
 IdbFactory? _idbSembastMemoryFactoryImpl;
 
 /// Sembast memory based factory
-IdbFactory get idbFactorySembastMemoryImpl => _idbSembastMemoryFactoryImpl ??=
-    IdbFactorySembast(sembast.databaseFactoryMemory);
+IdbFactory get idbFactorySembastMemoryImpl =>
+    _idbSembastMemoryFactoryImpl ??= IdbFactorySembast(
+      sembast.databaseFactoryMemory,
+    );
 
 /// New Sembast memory based factory
 IdbFactory newIdbFactorySembastMemoryImpl() =>
@@ -65,10 +68,12 @@ class IdbFactorySembastImpl extends IdbFactoryBase
       openFromSembastDatabase(sembastDb);
 
   @override
-  Future<Database> open(String dbName,
-      {int? version,
-      OnUpgradeNeededFunction? onUpgradeNeeded,
-      OnBlockedFunction? onBlocked}) async {
+  Future<Database> open(
+    String dbName, {
+    int? version,
+    OnUpgradeNeededFunction? onUpgradeNeeded,
+    OnBlockedFunction? onBlocked,
+  }) async {
     checkOpenArguments(version: version, onUpgradeNeeded: onUpgradeNeeded);
 
     // 2020-10-31 try no setting the version here
@@ -83,15 +88,18 @@ class IdbFactorySembastImpl extends IdbFactoryBase
 
     if (sembastDebug) {
       idbLog(
-          'open1 onUpgradeNeeded ${onUpgradeNeeded != null ? 'NOT NULL' : 'NULL'}');
+        'open1 onUpgradeNeeded ${onUpgradeNeeded != null ? 'NOT NULL' : 'NULL'}',
+      );
     }
     await db.open(version, onUpgradeNeeded);
     return db;
   }
 
   @override
-  Future<IdbFactory> deleteDatabase(String dbName,
-      {OnBlockedFunction? onBlocked}) async {
+  Future<IdbFactory> deleteDatabase(
+    String dbName, {
+    OnBlockedFunction? onBlocked,
+  }) async {
     await _databaseFactory.deleteDatabase(getDbPath(dbName));
     return this;
   }

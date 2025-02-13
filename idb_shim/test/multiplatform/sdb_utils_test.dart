@@ -10,7 +10,8 @@ void main() {
       var keyRange = idbKeyRangeFromBoundaries(SdbBoundaries.values(1, 3));
       expect(keyRange.toString(), 'kr[1-3[');
       keyRange = idbKeyRangeFromBoundaries(
-          SdbBoundaries.values((1, ''), (3, 'test'), includeLower: false));
+        SdbBoundaries.values((1, ''), (3, 'test'), includeLower: false),
+      );
       expect(keyRange.toString(), 'kr][1, ]-[3, test][');
     });
   });

@@ -24,16 +24,25 @@ void defineTests(TestContext ctx) {
     late Database db;
 
     setUp(() {
-      return idbFactory.deleteDatabase(dbName).then((_) {
-        return idbFactory.open(dbName, version: 1, onUpgradeNeeded: (e) {
-          var db = e.database;
-          var objectStore =
-              db.createObjectStore(storeName, autoIncrement: true);
-          objectStore.createIndex(indexName, 'name_index', unique: false);
-        });
-      }).then((database) {
-        db = database;
-      });
+      return idbFactory
+          .deleteDatabase(dbName)
+          .then((_) {
+            return idbFactory.open(
+              dbName,
+              version: 1,
+              onUpgradeNeeded: (e) {
+                var db = e.database;
+                var objectStore = db.createObjectStore(
+                  storeName,
+                  autoIncrement: true,
+                );
+                objectStore.createIndex(indexName, 'name_index', unique: false);
+              },
+            );
+          })
+          .then((database) {
+            db = database;
+          });
     });
 
     tearDown(() {
@@ -115,45 +124,54 @@ void defineTests(TestContext ctx) {
       transaction.objectStore(storeName).add(value);
       transaction.objectStore(storeName).add(value);
 
-      return transaction.completed.then((_) async {
-        transaction = db.transactionList([storeName], 'readonly');
-        var index = transaction.objectStore(storeName).index(indexName);
+      return transaction.completed
+          .then((_) async {
+            transaction = db.transactionList([storeName], 'readonly');
+            var index = transaction.objectStore(storeName).index(indexName);
 
-        // count() crashes on ie
-        if (!ctx.isIdbIe) {
-          return await index.count();
-        } else {
-          return 4;
-        }
-      }).then((int count) {
-        expect(count, 4);
-        return transaction.completed;
-      }).then((_) {
-        transaction = db.transaction(storeName, 'readonly');
-        var index = transaction.objectStore(storeName).index(indexName);
-        return index.openCursor(autoAdvance: true).length;
-      }).then((cursorsLength) {
-        expect(cursorsLength, 4);
-        return transaction.completed;
-      }).then((_) {
-        transaction = db.transaction(storeName, 'readonly');
-        var index = transaction.objectStore(storeName).index(indexName);
-        return index.openKeyCursor(autoAdvance: true).length;
-      }).then((cursorsLength) {
-        expect(cursorsLength, 4);
-        return transaction.completed;
-      }).then((_) {
-        transaction = db.transaction(storeName, 'readonly');
-        var index = transaction.objectStore(storeName).index(indexName);
-        return index.get('one');
-      }).then((readValue) {
-        expect((readValue as Map)['value'], value['value']);
-        return transaction.completed;
-      }).then((_) {
-        transaction = db.transaction(storeName, 'readwrite');
-        transaction.objectStore(storeName).clear();
-        return transaction.completed;
-      });
+            // count() crashes on ie
+            if (!ctx.isIdbIe) {
+              return await index.count();
+            } else {
+              return 4;
+            }
+          })
+          .then((int count) {
+            expect(count, 4);
+            return transaction.completed;
+          })
+          .then((_) {
+            transaction = db.transaction(storeName, 'readonly');
+            var index = transaction.objectStore(storeName).index(indexName);
+            return index.openCursor(autoAdvance: true).length;
+          })
+          .then((cursorsLength) {
+            expect(cursorsLength, 4);
+            return transaction.completed;
+          })
+          .then((_) {
+            transaction = db.transaction(storeName, 'readonly');
+            var index = transaction.objectStore(storeName).index(indexName);
+            return index.openKeyCursor(autoAdvance: true).length;
+          })
+          .then((cursorsLength) {
+            expect(cursorsLength, 4);
+            return transaction.completed;
+          })
+          .then((_) {
+            transaction = db.transaction(storeName, 'readonly');
+            var index = transaction.objectStore(storeName).index(indexName);
+            return index.get('one');
+          })
+          .then((readValue) {
+            expect((readValue as Map)['value'], value['value']);
+            return transaction.completed;
+          })
+          .then((_) {
+            transaction = db.transaction(storeName, 'readwrite');
+            transaction.objectStore(storeName).clear();
+            return transaction.completed;
+          });
     });
 
     var deleteValue = {'name_index': 'two', 'value': 'delete_value'};
@@ -166,44 +184,50 @@ void defineTests(TestContext ctx) {
       transaction.objectStore(storeName).add(deleteValue);
       transaction.objectStore(storeName).add(updateValue);
 
-      return transaction.completed.then((_) {
-        transaction = db.transactionList([storeName], 'readwrite');
-        var index = transaction.objectStore(storeName).index(indexName);
-        var cursors = index.openCursor().asBroadcastStream();
+      return transaction.completed
+          .then((_) {
+            transaction = db.transactionList([storeName], 'readwrite');
+            var index = transaction.objectStore(storeName).index(indexName);
+            var cursors = index.openCursor().asBroadcastStream();
 
-        cursors.listen((cursor) {
-          //print("cursor $cursor");
-          var value = cursor.value as Map;
-          if (value['value'] == 'delete_value') {
-            cursor.delete().then((_) {
-              cursor.next();
+            cursors.listen((cursor) {
+              //print("cursor $cursor");
+              var value = cursor.value as Map;
+              if (value['value'] == 'delete_value') {
+                cursor.delete().then((_) {
+                  cursor.next();
+                });
+              } else if (value['value'] == 'update_value') {
+                cursor.update(updatedValue).then((_) {
+                  cursor.next();
+                });
+              } else {
+                cursor.next();
+              }
             });
-          } else if (value['value'] == 'update_value') {
-            cursor.update(updatedValue).then((_) {
-              cursor.next();
-            });
-          } else {
-            cursor.next();
-          }
-        });
-        return cursors.last;
-      }).then((_) {
-        return transaction.completed;
-      }).then((_) {
-        transaction = db.transaction(storeName, 'readonly');
-        var index = transaction.objectStore(storeName).index(indexName);
-        return index.get('three');
-      }).then((readValue) {
-        expect((readValue as Map)['value'], 'updated_value');
-        return transaction.completed;
-      }).then((_) {
-        transaction = db.transaction(storeName, 'readonly');
-        var index = transaction.objectStore(storeName).index(indexName);
-        return index.get('two');
-      }).then((readValue) {
-        expect(readValue, isNull);
-        return transaction.completed;
-      });
+            return cursors.last;
+          })
+          .then((_) {
+            return transaction.completed;
+          })
+          .then((_) {
+            transaction = db.transaction(storeName, 'readonly');
+            var index = transaction.objectStore(storeName).index(indexName);
+            return index.get('three');
+          })
+          .then((readValue) {
+            expect((readValue as Map)['value'], 'updated_value');
+            return transaction.completed;
+          })
+          .then((_) {
+            transaction = db.transaction(storeName, 'readonly');
+            var index = transaction.objectStore(storeName).index(indexName);
+            return index.get('two');
+          })
+          .then((readValue) {
+            expect(readValue, isNull);
+            return transaction.completed;
+          });
     });
   });
 }

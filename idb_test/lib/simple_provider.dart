@@ -49,14 +49,16 @@ class SimpleProvider {
   Future<List<SimpleRow>> cursorToList(Stream<CursorWithValue> stream) {
     var completer = Completer<List<SimpleRow>>();
     final list = <SimpleRow>[];
-    stream.listen((CursorWithValue cwv) {
-      final row = SimpleRow(cwv);
+    stream
+        .listen((CursorWithValue cwv) {
+          final row = SimpleRow(cwv);
 
-      list.add(row);
-      //cwv.advance(1);
-    }).onDone(() {
-      completer.complete(list);
-    });
+          list.add(row);
+          //cwv.advance(1);
+        })
+        .onDone(() {
+          completer.complete(list);
+        });
     return completer.future;
   }
 
@@ -71,8 +73,8 @@ class SimpleProvider {
       return idbFactory!
           .open(dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded)
           .then((Database db) {
-        this.db = db;
-      });
+            this.db = db;
+          });
     });
   }
 

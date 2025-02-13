@@ -11,9 +11,13 @@ void main() {
       expect(isTransactionReadOnlyError(DatabaseReadOnlyError()), isTrue);
       // Firefox
       expect(
-          isTransactionReadOnlyError(DatabaseError(
-              'A mutation operation was attempted in a READ_ONLY transaction.')),
-          isTrue);
+        isTransactionReadOnlyError(
+          DatabaseError(
+            'A mutation operation was attempted in a READ_ONLY transaction.',
+          ),
+        ),
+        isTrue,
+      );
     });
 
     test('store_notfound_error', () {
@@ -23,9 +27,13 @@ void main() {
       expect(isNotFoundError(DatabaseStoreNotFoundError()), isTrue);
       // Firefox
       expect(
-          isNotFoundError(DatabaseError(
-              "The operation failed because the requested database object could not be found. For example, an object store did not exist but was being opened.'  code: '8' nsresult: '0x80660003 (NotFoundError)'  location: '<unknown>'")),
-          isTrue);
+        isNotFoundError(
+          DatabaseError(
+            "The operation failed because the requested database object could not be found. For example, an object store did not exist but was being opened.'  code: '8' nsresult: '0x80660003 (NotFoundError)'  location: '<unknown>'",
+          ),
+        ),
+        isTrue,
+      );
     });
 
     test('isTestFailure', () {

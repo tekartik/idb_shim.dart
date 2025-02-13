@@ -22,23 +22,31 @@ class IndexLogger extends Index {
   Future<int> count([Object? keyOrRange]) => idbIndex.count(keyOrRange);
 
   @override
-  Stream<Cursor> openKeyCursor(
-          {key, KeyRange? range, String? direction, bool? autoAdvance}) =>
-      idbIndex.openKeyCursor(
-          key: key,
-          range: range,
-          direction: direction,
-          autoAdvance: autoAdvance);
+  Stream<Cursor> openKeyCursor({
+    key,
+    KeyRange? range,
+    String? direction,
+    bool? autoAdvance,
+  }) => idbIndex.openKeyCursor(
+    key: key,
+    range: range,
+    direction: direction,
+    autoAdvance: autoAdvance,
+  );
 
   /// Same implementation than for the Store
   @override
-  Stream<CursorWithValue> openCursor(
-          {key, KeyRange? range, String? direction, bool? autoAdvance}) =>
-      idbIndex.openCursor(
-          key: key,
-          range: range,
-          direction: direction,
-          autoAdvance: autoAdvance);
+  Stream<CursorWithValue> openCursor({
+    key,
+    KeyRange? range,
+    String? direction,
+    bool? autoAdvance,
+  }) => idbIndex.openCursor(
+    key: key,
+    range: range,
+    direction: direction,
+    autoAdvance: autoAdvance,
+  );
 
   @override
   Future<List<Object>> getAll([Object? query, int? count]) =>

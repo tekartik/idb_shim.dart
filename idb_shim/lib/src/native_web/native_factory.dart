@@ -52,13 +52,16 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
   String get name => idbFactoryNameNative;
 
   @override
-  Future<Database> open(String dbName,
-      {int? version,
-      OnUpgradeNeededFunction? onUpgradeNeeded,
-      OnBlockedFunction? onBlocked}) async {
+  Future<Database> open(
+    String dbName, {
+    int? version,
+    OnUpgradeNeededFunction? onUpgradeNeeded,
+    OnBlockedFunction? onBlocked,
+  }) async {
     if ((version == null) != (onUpgradeNeeded == null)) {
       throw ArgumentError(
-          'version and onUpgradeNeeded must be specified together');
+        'version and onUpgradeNeeded must be specified together',
+      );
     }
     var completer = Completer<JSAny>.sync();
     idb.IDBOpenDBRequest openRequest;
@@ -68,19 +71,21 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
       openRequest = nativeFactory.open(dbName);
     }
     if (onBlocked != null) {
-      openRequest.onblocked = (idb.Event event) {
-        onBlocked(EventNative(event));
-      }.toJS;
+      openRequest.onblocked =
+          (idb.Event event) {
+            onBlocked(EventNative(event));
+          }.toJS;
     }
     FutureOr? onUpdateNeededFutureOr;
     Object? onUpdateNeededException;
     if (onUpgradeNeeded != null) {
-      EventStreamProviders.upgradeNeededEvent
-          .forTarget(openRequest)
-          .listen((idb.IDBVersionChangeEvent event) {
+      EventStreamProviders.upgradeNeededEvent.forTarget(openRequest).listen((
+        idb.IDBVersionChangeEvent event,
+      ) {
         try {
-          onUpdateNeededFutureOr =
-              onUpgradeNeeded(VersionChangeEventNative(this, event));
+          onUpdateNeededFutureOr = onUpgradeNeeded(
+            VersionChangeEventNative(this, event),
+          );
         } catch (e) {
           onUpdateNeededException = e;
         }
@@ -107,14 +112,17 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
   }
 
   @override
-  Future<IdbFactory> deleteDatabase(String dbName,
-      {OnBlockedFunction? onBlocked}) {
+  Future<IdbFactory> deleteDatabase(
+    String dbName, {
+    OnBlockedFunction? onBlocked,
+  }) {
     var completer = Completer<JSAny?>.sync();
     var deleteRequest = nativeFactory.deleteDatabase(dbName);
     if (onBlocked != null) {
-      deleteRequest.onblocked = (idb.Event event) {
-        onBlocked(EventNative(event));
-      }.toJS;
+      deleteRequest.onblocked =
+          (idb.Event event) {
+            onBlocked(EventNative(event));
+          }.toJS;
     }
     deleteRequest.handleOnSuccessAndError(completer);
     return completer.future.then((_) => this);

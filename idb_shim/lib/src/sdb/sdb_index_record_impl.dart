@@ -14,16 +14,24 @@ import 'sdb_transaction_impl.dart';
 import 'sdb_types.dart';
 
 /// Index record reference internal extension.
-extension SdbIndexRecordRefInternalExtension<K extends KeyBase,
-    V extends ValueBase, I extends IndexBase> on SdbIndexRecordRef<K, V, I> {
+extension SdbIndexRecordRefInternalExtension<
+  K extends KeyBase,
+  V extends ValueBase,
+  I extends IndexBase
+>
+    on SdbIndexRecordRef<K, V, I> {
   /// Index record reference implementation.
   SdbIndexRecordRefImpl<K, V, I> get impl =>
       this as SdbIndexRecordRefImpl<K, V, I>;
 }
 
 /// Index record reference implementation.
-class SdbIndexRecordRefImpl<K extends KeyBase, V extends ValueBase,
-    I extends IndexBase> implements SdbIndexRecordRef<K, V, I> {
+class SdbIndexRecordRefImpl<
+  K extends KeyBase,
+  V extends ValueBase,
+  I extends IndexBase
+>
+    implements SdbIndexRecordRef<K, V, I> {
   @override
   final SdbIndexRefImpl<K, V, I> index;
   @override
@@ -37,24 +45,31 @@ class SdbIndexRecordRefImpl<K extends KeyBase, V extends ValueBase,
 }
 
 /// Index record reference extension.
-extension SdbIndexRecordRefImplExtension<K extends KeyBase, V extends ValueBase,
-    I extends IndexBase> on SdbIndexRecordRef<K, V, I> {
+extension SdbIndexRecordRefImplExtension<
+  K extends KeyBase,
+  V extends ValueBase,
+  I extends IndexBase
+>
+    on SdbIndexRecordRef<K, V, I> {
   /// Get a single record.
   Future<SdbIndexRecordSnapshotImpl<K, V, I>?> getImpl(SdbClient client) =>
       client.handleDbOrTxn(dbGetImpl, txnGetImpl);
 
   /// Get a single record.
   Future<SdbIndexRecordSnapshotImpl<K, V, I>?> dbGetImpl(
-      SdbDatabaseImpl db) async {
-    return await db.inStoreTransaction(store, SdbTransactionMode.readOnly,
-        (txn) {
+    SdbDatabaseImpl db,
+  ) async {
+    return await db.inStoreTransaction(store, SdbTransactionMode.readOnly, (
+      txn,
+    ) {
       return txnGetImpl(txn.rawImpl);
     });
   }
 
   /// Get a single record.
   Future<SdbIndexRecordSnapshotImpl<K, V, I>?> txnGetImpl(
-      SdbTransactionImpl txn) async {
+    SdbTransactionImpl txn,
+  ) async {
     var idbStore = txn.idbTransaction.objectStore(store.name);
     var idbIndex = idbStore.index(index.name);
     var idbIndexKey = indexKeyToIdbKey(indexKey);
@@ -63,7 +78,11 @@ extension SdbIndexRecordRefImplExtension<K extends KeyBase, V extends ValueBase,
       var result = await idbStore.getObject(key);
       if (result != null) {
         return SdbIndexRecordSnapshotImpl<K, V, I>(
-            index.impl, key as K, fixResult<V>(result), indexKey);
+          index.impl,
+          key as K,
+          fixResult<V>(result),
+          indexKey,
+        );
       }
     }
     return null;

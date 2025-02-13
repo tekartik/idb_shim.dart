@@ -1,7 +1,10 @@
 // ignore_for_file: public_member_api_docs
 
-String getPropertyValueText(String property, String value,
-    [bool addComma = false]) {
+String getPropertyValueText(
+  String property,
+  String value, [
+  bool addComma = false,
+]) {
   return '${addComma ? ', ' : ''}$property: $value';
 }
 

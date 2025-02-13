@@ -50,8 +50,11 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
       }
 
       tearDown(dbTearDown);
@@ -80,13 +83,18 @@ void defineTests(TestContext ctx) {
 
         void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
-          final objectStore =
-              db.createObjectStore(testStoreName, autoIncrement: true);
+          final objectStore = db.createObjectStore(
+            testStoreName,
+            autoIncrement: true,
+          );
           objectStore.createIndex(testNameIndex, testNameField, unique: false);
         }
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
       }
 
       tearDown(dbTearDown);
@@ -99,7 +107,7 @@ void defineTests(TestContext ctx) {
         var index = objectStore.index(testNameIndex);
         await objectStore.add(value1);
         await objectStore.add(value1);
-//            // create new transaction;
+        //            // create new transaction;
         index = objectStore.index(testNameIndex);
         final count = await index.count(KeyRange.only('test1'));
         expect(count, 2);
@@ -140,11 +148,11 @@ void defineTests(TestContext ctx) {
 
         expect(await index.getAll('test1'), [
           {'name': 'test1'},
-          {'name': 'test1'}
+          {'name': 'test1'},
         ]);
         expect(await index.getAllKeys('test1'), [1, 3]);
         expect(await index.getAll('test1', 1), [
-          {'name': 'test1'}
+          {'name': 'test1'},
         ]);
         expect(await index.getAllKeys('test1', 1), [1]);
         expect(await index.getAll(), [
@@ -154,25 +162,25 @@ void defineTests(TestContext ctx) {
         ]);
         expect(await index.getAllKeys(), [1, 3, 2]);
       });
-//
-//      solo_test('add_twice_same_key', () {
-//        Map value1 = {
-//          NAME_FIELD: 'test1'
-//        };
-//
-//        Index index = objectStore.index(NAME_INDEX);
-//        objectStore.add(value1);
-//        objectStore.add(value1);
-//        return transaction.completed.then((_) {
-////            // create new transaction;
-//          dbCreateTransaction();
-//          index = objectStore.index(NAME_INDEX);
-//          return index.count(new KeyRange.only('test1')).then((int count) {
-//            expect(count == 2, isTrue);
-//          });
-//          // });
-//        });
-//      });
+      //
+      //      solo_test('add_twice_same_key', () {
+      //        Map value1 = {
+      //          NAME_FIELD: 'test1'
+      //        };
+      //
+      //        Index index = objectStore.index(NAME_INDEX);
+      //        objectStore.add(value1);
+      //        objectStore.add(value1);
+      //        return transaction.completed.then((_) {
+      ////            // create new transaction;
+      //          dbCreateTransaction();
+      //          index = objectStore.index(NAME_INDEX);
+      //          return index.count(new KeyRange.only('test1')).then((int count) {
+      //            expect(count == 2, isTrue);
+      //          });
+      //          // });
+      //        });
+      //      });
     });
 
     group('one unique', () {
@@ -181,13 +189,18 @@ void defineTests(TestContext ctx) {
 
         void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
-          final objectStore =
-              db.createObjectStore(testStoreName, autoIncrement: true);
+          final objectStore = db.createObjectStore(
+            testStoreName,
+            autoIncrement: true,
+          );
           objectStore.createIndex(testNameIndex, testNameField, unique: true);
         }
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
       }
 
       tearDown(dbTearDown);
@@ -248,13 +261,13 @@ void defineTests(TestContext ctx) {
         final index = objectStore.index(testNameIndex);
         return objectStore.add(value1).then((_) {
           return objectStore.add(value2).then((_) {
-            return index
-                .count(KeyRange.lowerBound('test1', true))
-                .then((int count) {
+            return index.count(KeyRange.lowerBound('test1', true)).then((
+              int count,
+            ) {
               expect(count, 1);
-              return index
-                  .count(KeyRange.lowerBound('test1'))
-                  .then((int count) {
+              return index.count(KeyRange.lowerBound('test1')).then((
+                int count,
+              ) {
                 expect(count, 2);
               });
             });
@@ -268,13 +281,13 @@ void defineTests(TestContext ctx) {
         final value = <String, Object?>{};
         return objectStore.add(value).then((key1) {
           return objectStore.add(value).then((key2) {
-            return objectStore
-                .count(KeyRange.lowerBound(key1, true))
-                .then((int count) {
+            return objectStore.count(KeyRange.lowerBound(key1, true)).then((
+              int count,
+            ) {
               expect(count, 1);
-              return objectStore
-                  .count(KeyRange.lowerBound(key1))
-                  .then((int count) {
+              return objectStore.count(KeyRange.lowerBound(key1)).then((
+                int count,
+              ) {
                 expect(count, 2);
               });
             });
@@ -374,13 +387,18 @@ void defineTests(TestContext ctx) {
 
         void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
-          final objectStore =
-              db.createObjectStore(testStoreName, autoIncrement: true);
+          final objectStore = db.createObjectStore(
+            testStoreName,
+            autoIncrement: true,
+          );
           objectStore.createIndex(testNameIndex, keyPath);
         }
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
       }
 
       tearDown(dbTearDown);
@@ -395,10 +413,10 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value1 = {
-          'my': {'key': 'test1'}
+          'my': {'key': 'test1'},
         };
         final value2 = {
-          'my': {'key': 'test2'}
+          'my': {'key': 'test2'},
         };
         final index = objectStore.index(testNameIndex);
         return objectStore.add(value1).then((_) {
@@ -417,21 +435,21 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value1 = {
-          'my': {'key': 'test1'}
+          'my': {'key': 'test1'},
         };
         final value2 = {
-          'my': {'key': 'test2'}
+          'my': {'key': 'test2'},
         };
         final index = objectStore.index(testNameIndex);
         return objectStore.add(value1).then((_) {
           return objectStore.add(value2).then((_) {
-            return index
-                .count(KeyRange.lowerBound('test1', true))
-                .then((int count) {
+            return index.count(KeyRange.lowerBound('test1', true)).then((
+              int count,
+            ) {
               expect(count, 1);
-              return index
-                  .count(KeyRange.lowerBound('test1'))
-                  .then((int count) {
+              return index.count(KeyRange.lowerBound('test1')).then((
+                int count,
+              ) {
                 expect(count, 2);
               });
             });
@@ -445,13 +463,13 @@ void defineTests(TestContext ctx) {
         final value = <Object?, Object?>{};
         return objectStore.add(value).then((key1) {
           return objectStore.add(value).then((key2) {
-            return objectStore
-                .count(KeyRange.lowerBound(key1, true))
-                .then((int count) {
+            return objectStore.count(KeyRange.lowerBound(key1, true)).then((
+              int count,
+            ) {
               expect(count, 1);
-              return objectStore
-                  .count(KeyRange.lowerBound(key1))
-                  .then((int count) {
+              return objectStore.count(KeyRange.lowerBound(key1)).then((
+                int count,
+              ) {
                 expect(count, 2);
               });
             });
@@ -463,7 +481,7 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value = {
-          'my': {'key': 'test1'}
+          'my': {'key': 'test1'},
         };
         final index = objectStore.index(testNameIndex);
         var key = await objectStore.add(value);
@@ -484,7 +502,7 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value = {
-          'my': {'key': 'test1'}
+          'my': {'key': 'test1'},
         };
         final index = objectStore.index(testNameIndex);
         var key = await objectStore.add(value);
@@ -496,10 +514,10 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value1 = {
-          'my': {'key': 'test1'}
+          'my': {'key': 'test1'},
         };
         final value2 = {
-          'my': {'key': 'test2'}
+          'my': {'key': 'test2'},
         };
         var key = await objectStore.add(value1);
         expect(key, 1);
@@ -525,14 +543,22 @@ void defineTests(TestContext ctx) {
 
         void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
-          final objectStore =
-              db.createObjectStore(testStoreName, autoIncrement: true);
-          objectStore.createIndex(testNameIndex, testNameField,
-              multiEntry: true);
+          final objectStore = db.createObjectStore(
+            testStoreName,
+            autoIncrement: true,
+          );
+          objectStore.createIndex(
+            testNameIndex,
+            testNameField,
+            multiEntry: true,
+          );
         }
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
       }
 
       tearDown(dbTearDown);
@@ -573,7 +599,7 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value = {
-          testNameField: [1, 2]
+          testNameField: [1, 2],
         };
 
         final index = objectStore.index(testNameIndex);
@@ -587,10 +613,10 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value1 = {
-          testNameField: [1, 2]
+          testNameField: [1, 2],
         };
         final value2 = {
-          testNameField: [1, 3]
+          testNameField: [1, 3],
         };
         final index = objectStore.index(testNameIndex);
         var key1 = await objectStore.add(value1);
@@ -606,17 +632,20 @@ void defineTests(TestContext ctx) {
         await setupDeleteDb();
 
         // open the database
-        db = await idbFactory.open(dbName, version: 1,
-            onUpgradeNeeded: (VersionChangeEvent event) {
-          final db = event.database;
-          // create the store
-          final store = db.createObjectStore('test', autoIncrement: true);
-          store.createIndex('index', 'spath', multiEntry: true);
-        });
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: (VersionChangeEvent event) {
+            final db = event.database;
+            // create the store
+            final store = db.createObjectStore('test', autoIncrement: true);
+            store.createIndex('index', 'spath', multiEntry: true);
+          },
+        );
 
         // put some data
         final object = <String, Object?>{
-          'spath': [1, 2]
+          'spath': [1, 2],
         };
         var txn = db!.transaction('test', 'readwrite');
         var store = txn.objectStore('test');
@@ -690,10 +719,10 @@ void defineTests(TestContext ctx) {
         dbCreateTransaction();
         final value1 = {testNameField: 1};
         final value2 = {
-          testNameField: [2, 3]
+          testNameField: [2, 3],
         };
         final value3 = {
-          testNameField: [1, 2]
+          testNameField: [1, 2],
         };
 
         final index = objectStore.index(testNameIndex);
@@ -712,31 +741,31 @@ void defineTests(TestContext ctx) {
         expect(await index.getAll(1), [
           {'name': 1},
           {
-            'name': [1, 2]
-          }
+            'name': [1, 2],
+          },
         ]);
         expect(await index.getAllKeys(1), [1, 3]);
         expect(await index.getAll(1, 1), [
-          {'name': 1}
+          {'name': 1},
         ]);
         expect(await index.getAllKeys(1, 1), [1]);
 
         try {
-//        only work on native
+          //        only work on native
           expect(await index.getAll(), [
             {'name': 1},
             {
-              'name': [1, 2]
+              'name': [1, 2],
             },
             {
-              'name': [2, 3]
+              'name': [2, 3],
             },
             {
-              'name': [1, 2]
+              'name': [1, 2],
             },
             {
-              'name': [2, 3]
-            }
+              'name': [2, 3],
+            },
           ]);
           expect(await index.getAllKeys(), [1, 3, 2, 3, 2]);
         } on TestFailure catch (_) {
@@ -744,10 +773,10 @@ void defineTests(TestContext ctx) {
           expect(await index.getAll(), [
             {'name': 1},
             {
-              'name': [1, 2]
+              'name': [1, 2],
             },
             {
-              'name': [2, 3]
+              'name': [2, 3],
             },
           ]);
           expect(await index.getAllKeys(), [1, 3, 2]);
@@ -761,14 +790,22 @@ void defineTests(TestContext ctx) {
 
         void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
-          final objectStore =
-              db.createObjectStore(testStoreName, autoIncrement: true);
-          objectStore.createIndex(testNameIndex, testNameField,
-              multiEntry: false);
+          final objectStore = db.createObjectStore(
+            testStoreName,
+            autoIncrement: true,
+          );
+          objectStore.createIndex(
+            testNameIndex,
+            testNameField,
+            multiEntry: false,
+          );
         }
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
       }
 
       tearDown(dbTearDown);
@@ -813,7 +850,7 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value = {
-          testNameField: [1, 2]
+          testNameField: [1, 2],
         };
 
         final index = objectStore.index(testNameIndex);
@@ -833,10 +870,10 @@ void defineTests(TestContext ctx) {
         dbCreateTransaction();
         final value1 = {testNameField: 1};
         final value2 = {
-          testNameField: [2, 3]
+          testNameField: [2, 3],
         };
         final value3 = {
-          testNameField: [1, 2]
+          testNameField: [1, 2],
         };
 
         final index = objectStore.index(testNameIndex);
@@ -859,11 +896,11 @@ void defineTests(TestContext ctx) {
         expect(await index.getAll(), [
           {'name': 1},
           {
-            'name': [1, 2]
+            'name': [1, 2],
           },
           {
-            'name': [2, 3]
-          }
+            'name': [2, 3],
+          },
         ]);
         expect(await index.getAllKeys(), [1, 3, 2]);
       });
@@ -875,15 +912,23 @@ void defineTests(TestContext ctx) {
 
         void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
-          final objectStore =
-              db.createObjectStore(testStoreName, autoIncrement: true);
-          objectStore.createIndex(testNameIndex, testNameField,
-              multiEntry: true);
+          final objectStore = db.createObjectStore(
+            testStoreName,
+            autoIncrement: true,
+          );
+          objectStore.createIndex(
+            testNameIndex,
+            testNameField,
+            multiEntry: true,
+          );
           objectStore.createIndex(testNameIndex2, testNameField2, unique: true);
         }
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
         dbCreateTransaction();
       }
 
@@ -919,19 +964,27 @@ void defineTests(TestContext ctx) {
     group('late_index', () {
       test('create_index', () async {
         await setupDeleteDb();
-        db = await idbFactory.open(dbName, version: 1, onUpgradeNeeded: (e) {
-          e.database.createObjectStore(testStoreName, autoIncrement: true);
-        });
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: (e) {
+            e.database.createObjectStore(testStoreName, autoIncrement: true);
+          },
+        );
         dbCreateTransaction();
         var map = {testNameField: 1234};
         await objectStore.put(map);
         await objectStore.put({'dummy': 'value'});
         db!.close();
-        db = await idbFactory.open(dbName, version: 2, onUpgradeNeeded: (e) {
-          e.transaction
-              .objectStore(testStoreName)
-              .createIndex(testNameIndex, testNameField);
-        });
+        db = await idbFactory.open(
+          dbName,
+          version: 2,
+          onUpgradeNeeded: (e) {
+            e.transaction
+                .objectStore(testStoreName)
+                .createIndex(testNameIndex, testNameField);
+          },
+        );
         dbCreateTransaction();
         var index = objectStore.index(testNameIndex);
         expect(await index.get(1234), map);
@@ -950,8 +1003,11 @@ void defineTests(TestContext ctx) {
             await idbFactory.deleteDatabase(dbName);
             final storeMeta = idbSimpleObjectStoreMeta.clone();
             storeMeta.putIndex(indexMeta);
-            var db = await setUpSimpleStore(idbFactory,
-                meta: storeMeta, dbName: dbName);
+            var db = await setUpSimpleStore(
+              idbFactory,
+              meta: storeMeta,
+              dbName: dbName,
+            );
             db.close();
             db = await idbFactory.open(dbName);
 
@@ -962,8 +1018,12 @@ void defineTests(TestContext ctx) {
 
             // multi entry not supported on ie
             if (ctx.isIdbIe) {
-              readMeta = IdbIndexMeta(readMeta.name, readMeta.keyPath,
-                  readMeta.unique, indexMeta.multiEntry);
+              readMeta = IdbIndexMeta(
+                readMeta.name,
+                readMeta.keyPath,
+                readMeta.unique,
+                indexMeta.multiEntry,
+              );
             }
             expect(readMeta, indexMeta);
           } finally {
@@ -1003,15 +1063,21 @@ void defineTests(TestContext ctx) {
 
         void onUpgradeNeeded(VersionChangeEvent e) {
           var db = e.database;
-          var objectStore =
-              db.createObjectStore(testStoreName, autoIncrement: true);
-          objectStore.createIndex(
-              testNameIndex, [testNameField, testNameField2],
-              unique: false);
+          var objectStore = db.createObjectStore(
+            testStoreName,
+            autoIncrement: true,
+          );
+          objectStore.createIndex(testNameIndex, [
+            testNameField,
+            testNameField2,
+          ], unique: false);
         }
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
       }
 
       tearDown(dbTearDown);
@@ -1075,7 +1141,7 @@ void defineTests(TestContext ctx) {
         expect(await index.getAll('test1'), isEmpty); // Bad key
         expect(await index.getAll(['test1', 456]), [
           {testNameField: 'test1', testNameField2: 456},
-          {testNameField: 'test1', testNameField2: 456}
+          {testNameField: 'test1', testNameField2: 456},
         ]);
         expect(await index.getAllKeys('test1'), isEmpty);
         // Bad key
@@ -1088,32 +1154,38 @@ void defineTests(TestContext ctx) {
           {'name': 'test1', 'name_2': 123},
           {'name': 'test1', 'name_2': 456},
           {'name': 'test1', 'name_2': 456},
-          {'name': 'test1', 'name_2': 789}
+          {'name': 'test1', 'name_2': 789},
         ]);
         expect(await index.getAllKeys(), [4, 1, 3, 5]);
 
         expect(
-            await index
-                .getAllKeys(KeyRange.bound(['test1', 456], ['test1', 790])),
-            [1, 3, 5]);
+          await index.getAllKeys(
+            KeyRange.bound(['test1', 456], ['test1', 790]),
+          ),
+          [1, 3, 5],
+        );
         expect(
-            await index.getAllKeys(
-                KeyRange.bound(['test1', 456], ['test1', 790]), 2),
-            [1, 3]);
+          await index.getAllKeys(
+            KeyRange.bound(['test1', 456], ['test1', 790]),
+            2,
+          ),
+          [1, 3],
+        );
         expect(
-            await index.getAll(KeyRange.bound(['test1', 456], ['test1', 790])),
-            [
-              {'name': 'test1', 'name_2': 456},
-              {'name': 'test1', 'name_2': 456},
-              {'name': 'test1', 'name_2': 789}
-            ]);
+          await index.getAll(KeyRange.bound(['test1', 456], ['test1', 790])),
+          [
+            {'name': 'test1', 'name_2': 456},
+            {'name': 'test1', 'name_2': 456},
+            {'name': 'test1', 'name_2': 789},
+          ],
+        );
         expect(
-            await index.getAll(
-                KeyRange.bound(['test1', 456], ['test1', 790]), 2),
-            [
-              {'name': 'test1', 'name_2': 456},
-              {'name': 'test1', 'name_2': 456},
-            ]);
+          await index.getAll(KeyRange.bound(['test1', 456], ['test1', 790]), 2),
+          [
+            {'name': 'test1', 'name_2': 456},
+            {'name': 'test1', 'name_2': 456},
+          ],
+        );
       });
       test('index_array_multi_not_supported', () async {
         final dbName = ctx.dbName;
@@ -1121,19 +1193,28 @@ void defineTests(TestContext ctx) {
         late Object createIndexError;
         void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
-          final objectStore =
-              db.createObjectStore(testStoreName, autoIncrement: true);
+          final objectStore = db.createObjectStore(
+            testStoreName,
+            autoIncrement: true,
+          );
           try {
-            objectStore.createIndex(testNameIndex, ['f1', 'f2'],
-                unique: true, multiEntry: true);
+            objectStore.createIndex(
+              testNameIndex,
+              ['f1', 'f2'],
+              unique: true,
+              multiEntry: true,
+            );
             fail('should fail');
           } catch (e) {
             createIndexError = e;
           }
         }
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
 
         // native: InvalidAccessError: Failed to execute 'createIndex' on 'IDBObjectStore': The keyPath argument was an array and the multiEntry option is true.
         // native_web: InvalidAccessError: Failed to execute 'createIndex' on 'IDBObjectStore': The keyPath argument was an array and the multiEntry option is true.

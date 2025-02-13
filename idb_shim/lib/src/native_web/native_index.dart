@@ -44,8 +44,12 @@ class IndexNative extends Index {
   }
 
   @override
-  Stream<Cursor> openKeyCursor(
-      {key, KeyRange? range, String? direction, bool? autoAdvance}) {
+  Stream<Cursor> openKeyCursor({
+    key,
+    KeyRange? range,
+    String? direction,
+    bool? autoAdvance,
+  }) {
     var query = keyOrKeyRangeToNativeQuery(key: key, range: range);
     idb.IDBRequest request;
     if (query == null && direction == null) {
@@ -60,8 +64,12 @@ class IndexNative extends Index {
 
   /// Same implementation than for the Store
   @override
-  Stream<CursorWithValue> openCursor(
-      {key, KeyRange? range, String? direction, bool? autoAdvance}) {
+  Stream<CursorWithValue> openCursor({
+    key,
+    KeyRange? range,
+    String? direction,
+    bool? autoAdvance,
+  }) {
     var query = keyOrKeyRangeToNativeQuery(key: key, range: range);
     idb.IDBRequest request;
     if (query == null && direction == null) {

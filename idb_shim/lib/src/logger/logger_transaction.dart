@@ -16,12 +16,12 @@ class TransactionLogger extends IdbTransactionBase {
   DatabaseLogger get idbDatabaseLogger => database as DatabaseLogger;
 
   TransactionLogger(DatabaseLogger super.database, this.idbTransaction)
-      : id = ++_id;
+    : id = ++_id;
 
   @override
   ObjectStore objectStore(String name) =>
       ObjectStoreLogger(null, this, idbTransaction.objectStore(name));
-/*
+  /*
   @override
   Future<Database> get completed async {
     try {
@@ -35,12 +35,14 @@ class TransactionLogger extends IdbTransactionBase {
   @override
   Future<Database> get completed {
     try {
-      return idbTransaction.completed.catchError((Object e) {
-        err('completed error $e');
-        throw e;
-      }).whenComplete(() {
-        log('completed');
-      });
+      return idbTransaction.completed
+          .catchError((Object e) {
+            err('completed error $e');
+            throw e;
+          })
+          .whenComplete(() {
+            log('completed');
+          });
     } catch (e) {
       err('completed sync error $e');
       rethrow;

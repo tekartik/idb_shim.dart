@@ -3,21 +3,42 @@ library;
 import '../idb_test_common.dart';
 
 // auto-increment, no key path
-final IdbObjectStoreMeta idbSimpleObjectStoreMeta =
-    IdbObjectStoreMeta(testStoreName, null, true);
+final IdbObjectStoreMeta idbSimpleObjectStoreMeta = IdbObjectStoreMeta(
+  testStoreName,
+  null,
+  true,
+);
 
-final IdbObjectStoreMeta idbObjectStoreMeta1 =
-    IdbObjectStoreMeta('name', 'my_key', true);
-final IdbObjectStoreMeta idbObjectStoreMeta1Same =
-    IdbObjectStoreMeta('name', 'my_key', true);
-final IdbObjectStoreMeta idbObjectStoreMeta2 =
-    IdbObjectStoreMeta('name', 'my_key', false);
-final IdbObjectStoreMeta idbObjectStoreMeta3 =
-    IdbObjectStoreMeta('name', null, true);
-final IdbObjectStoreMeta idbObjectStoreMeta4 =
-    IdbObjectStoreMeta('other_name', 'my_key', true);
-final IdbObjectStoreMeta idbObjectStoreMetaComposite =
-    IdbObjectStoreMeta('composite', ['my', 'key'], false);
+final IdbObjectStoreMeta idbObjectStoreMeta1 = IdbObjectStoreMeta(
+  'name',
+  'my_key',
+  true,
+);
+final IdbObjectStoreMeta idbObjectStoreMeta1Same = IdbObjectStoreMeta(
+  'name',
+  'my_key',
+  true,
+);
+final IdbObjectStoreMeta idbObjectStoreMeta2 = IdbObjectStoreMeta(
+  'name',
+  'my_key',
+  false,
+);
+final IdbObjectStoreMeta idbObjectStoreMeta3 = IdbObjectStoreMeta(
+  'name',
+  null,
+  true,
+);
+final IdbObjectStoreMeta idbObjectStoreMeta4 = IdbObjectStoreMeta(
+  'other_name',
+  'my_key',
+  true,
+);
+final IdbObjectStoreMeta idbObjectStoreMetaComposite = IdbObjectStoreMeta(
+  'composite',
+  ['my', 'key'],
+  false,
+);
 final List<IdbObjectStoreMeta> idbObjectStoreMetas = [
   idbObjectStoreMeta1,
   idbObjectStoreMeta2,
@@ -30,19 +51,27 @@ IdbIndexMeta idbIndexMeta2 = IdbIndexMeta('name', 'my_key', true, false);
 IdbIndexMeta idbIndexMeta3 = IdbIndexMeta('name', 'my_key', false, true);
 IdbIndexMeta idbIndexMeta4 = IdbIndexMeta('name', 'other_key', true, true);
 IdbIndexMeta idbIndexMeta5 = IdbIndexMeta('other_name', 'my_key', true, true);
-IdbIndexMeta idbIndexMeta6 =
-    IdbIndexMeta('path_array', ['my_key', 'other_key'], true, false);
+IdbIndexMeta idbIndexMeta6 = IdbIndexMeta(
+  'path_array',
+  ['my_key', 'other_key'],
+  true,
+  false,
+);
 
 // Bad cannot bet array and multi-entry
-IdbIndexMeta idbIndexMeta7 =
-    IdbIndexMeta('path_array', ['my_key', 'other_key'], true, true);
+IdbIndexMeta idbIndexMeta7 = IdbIndexMeta(
+  'path_array',
+  ['my_key', 'other_key'],
+  true,
+  true,
+);
 final List<IdbIndexMeta> idbIndexMetas = [
   idbIndexMeta1,
   idbIndexMeta2,
   idbIndexMeta3,
   idbIndexMeta4,
   idbIndexMeta5,
-  idbIndexMeta6
+  idbIndexMeta6,
 ];
 
 void main() => defineTests();
@@ -95,7 +124,7 @@ void defineTests() {
       final meta = idbObjectStoreMetaComposite;
       expect(meta.toMap(), {
         'name': 'composite',
-        'keyPath': ['my', 'key']
+        'keyPath': ['my', 'key'],
       });
       testStoreRoundTrip(meta);
     });
@@ -112,11 +141,11 @@ void defineTests() {
             'name': 'index1',
             'keyPath': 'keyB',
             'unique': true,
-            'multiEntry': true
+            'multiEntry': true,
           },
           {'name': 'index2', 'keyPath': 'keyC', 'multiEntry': true},
-          {'name': 'index3', 'keyPath': 'keyA', 'unique': true}
-        ]
+          {'name': 'index3', 'keyPath': 'keyA', 'unique': true},
+        ],
       });
     });
 
@@ -130,9 +159,9 @@ void defineTests() {
           {
             'name': 'index3',
             'keyPath': ['keyA', 'keyB'],
-            'unique': true
-          }
-        ]
+            'unique': true,
+          },
+        ],
       });
       testStoreRoundTrip(meta);
     });

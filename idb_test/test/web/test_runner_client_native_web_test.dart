@@ -11,8 +11,11 @@ void main() {
     if (idbFactoryNativeSupported) {
       idbNativeFactoryTests(idbFactoryNative);
     } else {
-      test('idb native web supported', () {},
-          skip: 'idb native hweb not supported');
+      test(
+        'idb native web supported',
+        () {},
+        skip: 'idb native hweb not supported',
+      );
     }
   });
 }

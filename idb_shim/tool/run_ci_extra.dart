@@ -3,8 +3,10 @@ import 'package:process_run/shell.dart';
 
 Future main() async {
   var shell = Shell();
-  await packageRunCi('.',
-      options: PackageRunCiOptions(noTest: true, noOverride: true));
+  await packageRunCi(
+    '.',
+    options: PackageRunCiOptions(noTest: true, noOverride: true),
+  );
 
   await shell.run('''
   dart test -p vm,chrome -j 1

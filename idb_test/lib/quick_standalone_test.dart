@@ -28,16 +28,18 @@ void defineTests(TestContext ctx) {
       return idbFactory.deleteDatabase(_dbName).then((_) {
         void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
-          final objectStore =
-              db.createObjectStore(_storeName, autoIncrement: true);
+          final objectStore = db.createObjectStore(
+            _storeName,
+            autoIncrement: true,
+          );
           objectStore.createIndex(_nameIndex, _nameField, unique: true);
         }
 
         return idbFactory
             .open(_dbName, version: 1, onUpgradeNeeded: onUpgradeNeeded)
             .then((Database database) {
-          db = database;
-        });
+              db = database;
+            });
       });
     });
 

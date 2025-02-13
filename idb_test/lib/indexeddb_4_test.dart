@@ -10,10 +10,14 @@ const int _version = 1;
 
 Future<Database> createAndOpenDb(IdbFactory idbFactory) {
   return idbFactory.deleteDatabase(_dbName).then((_) {
-    return idbFactory.open(_dbName, version: _version, onUpgradeNeeded: (e) {
-      var db = e.database;
-      db.createObjectStore(_storeName);
-    });
+    return idbFactory.open(
+      _dbName,
+      version: _version,
+      onUpgradeNeeded: (e) {
+        var db = e.database;
+        db.createObjectStore(_storeName);
+      },
+    );
   });
 }
 
@@ -39,9 +43,9 @@ Future<Database> writeItems(Database db) {
   var transaction = db.transaction(_storeName, 'readwrite');
 
   Future<Object?> write(int index) {
-    return transaction
-        .objectStore(_storeName)
-        .put({'content': 'Item $index'}, index);
+    return transaction.objectStore(_storeName).put({
+      'content': 'Item $index',
+    }, index);
   }
 
   var future = write(0);
@@ -58,14 +62,19 @@ Future<Database> setupDb(IdbFactory idbFactory) {
 }
 
 Future testRange(
-    Database db, Object range, int? expectedFirst, int? expectedLast) {
+  Database db,
+  Object range,
+  int? expectedFirst,
+  int? expectedLast,
+) {
   //var done = expectAsync0(() {});
 
   final txn = db.transaction(_storeName, 'readonly');
   final objectStore = txn.objectStore(_storeName);
-  var cursors = objectStore
-      .openCursor(range: range as KeyRange, autoAdvance: true)
-      .asBroadcastStream();
+  var cursors =
+      objectStore
+          .openCursor(range: range as KeyRange, autoAdvance: true)
+          .asBroadcastStream();
 
   int? lastKey;
   cursors.listen((cursor) {

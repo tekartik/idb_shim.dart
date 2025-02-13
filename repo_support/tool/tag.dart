@@ -7,9 +7,11 @@ import 'package:yaml/yaml.dart';
 
 Future main() async {
   var shell = Shell();
-  var version = Version.parse((loadYaml(
-          await File(join('..', 'idb_shim', 'pubspec.yaml')).readAsString())
-      as Map)['version'] as String);
+  var version = Version.parse(
+    (loadYaml(await File(join('..', 'idb_shim', 'pubspec.yaml')).readAsString())
+            as Map)['version']
+        as String,
+  );
   stdout.writeln('Version $version');
   stdout.writeln('Tap anything or CTRL-C: $version');
 

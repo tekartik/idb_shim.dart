@@ -39,7 +39,9 @@ bool _handleError(Object e) {
     try {
       var error = e as JSError;
       throw DatabaseErrorNative(
-          error.name ?? 'IDBError', error.message ?? e.toString());
+        error.name ?? 'IDBError',
+        error.message ?? e.toString(),
+      );
     } catch (_) {
       // print('error: $_');
       throw DatabaseError(e.toString());
@@ -67,8 +69,8 @@ class DatabaseErrorNative extends DatabaseError {
   DatabaseErrorNative(this.name, String message) : super(message);
 
   DatabaseErrorNative.domException(idb.DOMException exception)
-      : name = exception.name,
-        super(exception.message);
+    : name = exception.name,
+      super(exception.message);
 
   @override
   StackTrace? get stackTrace => null;

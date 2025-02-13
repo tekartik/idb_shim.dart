@@ -48,14 +48,16 @@ void defineTests(SembastFsTestContext ctx) {
           .bind(file.openRead())
           .transform(const LineSplitter())
           .listen((String line) {
-        content.add(json.decode(line) as Map?);
-      }).asFuture<void>();
+            content.add(json.decode(line) as Map?);
+          })
+          .asFuture<void>();
       return content;
     }
 
     Future<List<Map?>> getStorageContent() async {
       var content = await getFileContent(
-          ctx.sdbFactory.fs.file(idbFactory.getDbPath(dbTestName)));
+        ctx.sdbFactory.fs.file(idbFactory.getDbPath(dbTestName)),
+      );
       // devPrint(content);
       return content;
     }
@@ -66,8 +68,11 @@ void defineTests(SembastFsTestContext ctx) {
 
     Future<sdb.Database> openTmpDatabase([int version = 1]) async {
       final sdbName = '${dbTestName}_mem';
-      final db = await tmpSdbFactory.openDatabase(sdbName,
-          version: version, mode: sdb.DatabaseMode.empty);
+      final db = await tmpSdbFactory.openDatabase(
+        sdbName,
+        version: version,
+        mode: sdb.DatabaseMode.empty,
+      );
       return db;
     }
 
@@ -92,13 +97,19 @@ void defineTests(SembastFsTestContext ctx) {
 
       void onUpgradeNeeded(VersionChangeEvent e) {
         final db = e.database;
-        final store = db.createObjectStore(testStoreName,
-            keyPath: testNameField, autoIncrement: true);
+        final store = db.createObjectStore(
+          testStoreName,
+          keyPath: testNameField,
+          autoIncrement: true,
+        );
         storeMeta = IdbObjectStoreMeta.fromObjectStore(store);
       }
 
-      db = await idbFactory.open(dbTestName,
-          version: 2, onUpgradeNeeded: onUpgradeNeeded);
+      db = await idbFactory.open(
+        dbTestName,
+        version: 2,
+        onUpgradeNeeded: onUpgradeNeeded,
+      );
 
       memSdb = await openTmpDatabase(1);
       await store.record('version').put(memSdb, 2);
@@ -120,14 +131,21 @@ void defineTests(SembastFsTestContext ctx) {
         final db = e.database;
         final store = db.createObjectStore(testStoreName, autoIncrement: true);
         storeMeta = IdbObjectStoreMeta.fromObjectStore(store);
-        final index = store.createIndex(testNameIndex, testNameField,
-            unique: true, multiEntry: true);
+        final index = store.createIndex(
+          testNameIndex,
+          testNameField,
+          unique: true,
+          multiEntry: true,
+        );
         final indexMeta = IdbIndexMeta.fromIndex(index);
         storeMeta.putIndex(indexMeta);
       }
 
-      db = await idbFactory.open(dbTestName,
-          version: 3, onUpgradeNeeded: onUpgradeNeeded);
+      db = await idbFactory.open(
+        dbTestName,
+        version: 3,
+        onUpgradeNeeded: onUpgradeNeeded,
+      );
 
       memSdb = await openTmpDatabase(1);
       await store.record('version').put(memSdb, 3);

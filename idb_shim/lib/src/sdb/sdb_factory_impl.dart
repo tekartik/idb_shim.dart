@@ -19,27 +19,37 @@ class SdbFactoryImpl implements SdbFactory {
   }
 
   /// Open the database.
-  Future<SdbDatabase> openDatabaseImpl(String name, int? version,
-      SdbOnVersionChangeCallback? onVersionChange) async {
+  Future<SdbDatabase> openDatabaseImpl(
+    String name,
+    int? version,
+    SdbOnVersionChangeCallback? onVersionChange,
+  ) async {
     final db = SdbDatabaseImpl(this, name, version);
-    var onUpgradeNeeded = onVersionChange != null
-        ? (idb.VersionChangeEvent event) async {
-            // print('onUpgradeNeeded: $event');
-            //var db = event.database;
-            var idbDatabase = event.database;
-            var idbTransaction = event.transaction;
-            final dbOpen = SdbOpenDatabaseImpl(db, idbTransaction);
-            db.idbDatabase = idbDatabase;
-            var oldVersion = event.oldVersion;
-            var newVersion = event.newVersion;
-            final dbVersionChangeEvent =
-                SdbVersionChangeEventImpl(dbOpen, oldVersion, newVersion);
+    var onUpgradeNeeded =
+        onVersionChange != null
+            ? (idb.VersionChangeEvent event) async {
+              // print('onUpgradeNeeded: $event');
+              //var db = event.database;
+              var idbDatabase = event.database;
+              var idbTransaction = event.transaction;
+              final dbOpen = SdbOpenDatabaseImpl(db, idbTransaction);
+              db.idbDatabase = idbDatabase;
+              var oldVersion = event.oldVersion;
+              var newVersion = event.newVersion;
+              final dbVersionChangeEvent = SdbVersionChangeEventImpl(
+                dbOpen,
+                oldVersion,
+                newVersion,
+              );
 
-            await onVersionChange(dbVersionChangeEvent);
-          }
-        : null;
-    var idbDatabase = await idbFactory.open(name,
-        version: version, onUpgradeNeeded: onUpgradeNeeded);
+              await onVersionChange(dbVersionChangeEvent);
+            }
+            : null;
+    var idbDatabase = await idbFactory.open(
+      name,
+      version: version,
+      onUpgradeNeeded: onUpgradeNeeded,
+    );
     db.idbDatabase = idbDatabase;
     return db;
   }

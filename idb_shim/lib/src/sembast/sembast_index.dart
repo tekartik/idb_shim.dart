@@ -31,8 +31,10 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   @override
   Future<int> count([keyOrRange]) {
     return inTransaction(() {
-      return store.sembastStore.count(store.sembastClient,
-          filter: _indexKeyOrRangeFilter(keyOrRange));
+      return store.sembastStore.count(
+        store.sembastClient,
+        filter: _indexKeyOrRangeFilter(keyOrRange),
+      );
     });
   }
 
@@ -40,11 +42,13 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   Future get(key) {
     checkKeyParam(key);
     return inTransaction(() {
-      final finder =
-          sembast.Finder(filter: _indexKeyOrRangeFilter(key), limit: 1);
-      return store.sembastStore
-          .find(store.sembastClient, finder: finder)
-          .then((records) {
+      final finder = sembast.Finder(
+        filter: _indexKeyOrRangeFilter(key),
+        limit: 1,
+      );
+      return store.sembastStore.find(store.sembastClient, finder: finder).then((
+        records,
+      ) {
         if (records.isNotEmpty) {
           return store.recordToValue(records.first);
         }
@@ -56,11 +60,13 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   Future getKey(key) {
     checkKeyParam(key);
     return inTransaction(() {
-      final finder =
-          sembast.Finder(filter: _indexKeyOrRangeFilter(key), limit: 1);
-      return store.sembastStore
-          .find(store.sembastClient, finder: finder)
-          .then((records) {
+      final finder = sembast.Finder(
+        filter: _indexKeyOrRangeFilter(key),
+        limit: 1,
+      );
+      return store.sembastStore.find(store.sembastClient, finder: finder).then((
+        records,
+      ) {
         if (records.isNotEmpty) {
           return records.first.key;
         }
@@ -69,8 +75,12 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   }
 
   @override
-  Stream<CursorWithValue> openCursor(
-      {key, KeyRange? range, String? direction, bool? autoAdvance}) {
+  Stream<CursorWithValue> openCursor({
+    key,
+    KeyRange? range,
+    String? direction,
+    bool? autoAdvance,
+  }) {
     final cursorMeta = IdbCursorMeta(key, range, direction, autoAdvance);
     final ctlr = IndexCursorWithValueControllerSembast(this, cursorMeta);
 
@@ -82,8 +92,12 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   }
 
   @override
-  Stream<Cursor> openKeyCursor(
-      {key, KeyRange? range, String? direction, bool? autoAdvance}) {
+  Stream<Cursor> openKeyCursor({
+    key,
+    KeyRange? range,
+    String? direction,
+    bool? autoAdvance,
+  }) {
     final cursorMeta = IdbCursorMeta(key, range, direction, autoAdvance);
     final ctlr = IndexKeyCursorControllerSembast(this, cursorMeta);
 
@@ -105,13 +119,14 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   Future<List<Object>> getAll([query, int? count]) {
     return inTransaction(() async {
       final finder = sembast.Finder(
-          filter: _indexKeyOrRangeFilter(query),
-          limit: count,
-          sortOrders: sortOrders(true));
-      return (await store.sembastStore
-              .find(store.sembastClient, finder: finder))
-          .map((r) => store.recordToValue(r)!)
-          .toList(growable: false);
+        filter: _indexKeyOrRangeFilter(query),
+        limit: count,
+        sortOrders: sortOrders(true),
+      );
+      return (await store.sembastStore.find(
+        store.sembastClient,
+        finder: finder,
+      )).map((r) => store.recordToValue(r)!).toList(growable: false);
     });
   }
 
@@ -119,9 +134,10 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   Future<List<Object>> getAllKeys([query, int? count]) {
     return inTransaction(() async {
       final finder = sembast.Finder(
-          filter: _indexKeyOrRangeFilter(query),
-          limit: count,
-          sortOrders: sortOrders(true));
+        filter: _indexKeyOrRangeFilter(query),
+        limit: count,
+        sortOrders: sortOrders(true),
+      );
       return store.sembastStore.findKeys(store.sembastClient, finder: finder);
     });
   }

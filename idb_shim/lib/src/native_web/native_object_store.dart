@@ -17,18 +17,27 @@ class ObjectStoreNative extends ObjectStore {
   ObjectStoreNative(this.idbObjectStore);
 
   @override
-  Index createIndex(String name, Object keyPath,
-      {bool? unique, bool? multiEntry}) {
+  Index createIndex(
+    String name,
+    Object keyPath, {
+    bool? unique,
+    bool? multiEntry,
+  }) {
     /// Fix compilation using dart2js for keyPath array
     /// causing SyntaxError: Failed to execute 'createIndex' on 'IDBObjectStore': The keyPath argument contains an invalid key path.
     if (keyPath is Iterable) {
       keyPath = List<String>.from(keyPath);
     }
-    return IndexNative(idbObjectStore.createIndex(
+    return IndexNative(
+      idbObjectStore.createIndex(
         name,
         keyPath.jsifyValue(),
         idb.IDBIndexParameters(
-            unique: unique ?? false, multiEntry: multiEntry ?? false)));
+          unique: unique ?? false,
+          multiEntry: multiEntry ?? false,
+        ),
+      ),
+    );
   }
 
   @override
@@ -92,8 +101,12 @@ class ObjectStoreNative extends ObjectStore {
   }
 
   @override
-  Stream<CursorWithValue> openCursor(
-      {Object? key, KeyRange? range, String? direction, bool? autoAdvance}) {
+  Stream<CursorWithValue> openCursor({
+    Object? key,
+    KeyRange? range,
+    String? direction,
+    bool? autoAdvance,
+  }) {
     var query = keyOrKeyRangeToNativeQuery(key: key, range: range);
     idb.IDBRequest request;
     if (query == null && direction == null) {
@@ -107,8 +120,12 @@ class ObjectStoreNative extends ObjectStore {
   }
 
   @override
-  Stream<Cursor> openKeyCursor(
-      {Object? key, KeyRange? range, String? direction, bool? autoAdvance}) {
+  Stream<Cursor> openKeyCursor({
+    Object? key,
+    KeyRange? range,
+    String? direction,
+    bool? autoAdvance,
+  }) {
     var query = keyOrKeyRangeToNativeQuery(key: key, range: range);
     idb.IDBRequest request;
     if (query == null && direction == null) {

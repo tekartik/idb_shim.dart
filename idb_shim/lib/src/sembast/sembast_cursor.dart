@@ -43,7 +43,8 @@ abstract mixin class KeyCursorSembastMixin implements Cursor {
       await store.transaction!.execute(() async {
         // Mimic Chrome behavior
         throw StateError(
-            'Cannot call cursor.delete when openKeyCursor is used, try openCursor instead');
+          'Cannot call cursor.delete when openKeyCursor is used, try openCursor instead',
+        );
       });
     }
 
@@ -89,7 +90,10 @@ abstract mixin class KeyCursorSembastMixin implements Cursor {
             records.removeAt(i);
           } else {
             records[i] = IndexRecordSnapshotSembast(
-                store, records[i].key, sembastSnapshot);
+              store,
+              records[i].key,
+              sembastSnapshot,
+            );
             i++;
           }
         } else {
@@ -140,7 +144,9 @@ class IndexCursorWithValueSembast extends Object
       ctlr as IndexCursorWithValueControllerSembast;
 
   IndexCursorWithValueSembast(
-      BaseCursorControllerSembastMixin ctlr, int index) {
+    BaseCursorControllerSembastMixin ctlr,
+    int index,
+  ) {
     this.ctlr = ctlr;
     recordIndex = index;
   }
@@ -153,7 +159,9 @@ class IndexCursorWithValueSembast extends Object
 class StoreCursorWithValueSembast extends Object
     with KeyCursorSembastMixin, CursorWithValueSembastMixin {
   StoreCursorWithValueSembast(
-      BaseCursorControllerSembastMixin ctlr, int index) {
+    BaseCursorControllerSembastMixin ctlr,
+    int index,
+  ) {
     this.ctlr = ctlr;
     recordIndex = index;
   }
@@ -208,9 +216,11 @@ class IndexRecordSnapshotSembast extends RecordSnapshotSembast {
   @override
   final Object key;
 
-  IndexRecordSnapshotSembast(ObjectStoreSembast idbStore, this.key,
-      sembast.RecordSnapshot<Object, Object> snapshot)
-      : super(idbStore, snapshot);
+  IndexRecordSnapshotSembast(
+    ObjectStoreSembast idbStore,
+    this.key,
+    sembast.RecordSnapshot<Object, Object> snapshot,
+  ) : super(idbStore, snapshot);
 
   @override
   String toString() => '$key $snapshot';
@@ -245,17 +255,25 @@ abstract mixin class IndexCursorControllerSembastMixin
         if (keys != null) {
           for (var key in keys) {
             list.add(
-                IndexRecordSnapshotSembast(idbStore, decodeKey(key!), record));
+              IndexRecordSnapshotSembast(idbStore, decodeKey(key!), record),
+            );
           }
         }
       }
-      list.sort((a, b) =>
-          fixCompareValue(compareKeys(a.key, b.key), asc: meta.ascending));
+      list.sort(
+        (a, b) =>
+            fixCompareValue(compareKeys(a.key, b.key), asc: meta.ascending),
+      );
       this.records = list;
     } else {
       this.records = records
-          .map((snapshot) => IndexRecordSnapshotSembast(idbStore,
-              (snapshot.value as Map).getKeyValue(index.keyPath)!, snapshot))
+          .map(
+            (snapshot) => IndexRecordSnapshotSembast(
+              idbStore,
+              (snapshot.value as Map).getKeyValue(index.keyPath)!,
+              snapshot,
+            ),
+          )
           .toList(growable: false);
     }
   }
@@ -286,7 +304,7 @@ abstract mixin class BaseCursorControllerSembastMixin<T extends Cursor>
 
   ObjectStoreSembast get store;
 
-// To implement for KeyCursor vs CursorWithValue
+  // To implement for KeyCursor vs CursorWithValue
   T nextEvent(int index);
 
   @override
@@ -323,8 +341,10 @@ abstract mixin class BaseCursorControllerSembastMixin<T extends Cursor>
     final filter = this.filter;
     final sortOrders = this.sortOrders;
     final finder = sembast.Finder(filter: filter, sortOrders: sortOrders);
-    var records =
-        await store.sembastStore.find(store.sembastClient, finder: finder);
+    var records = await store.sembastStore.find(
+      store.sembastClient,
+      finder: finder,
+    );
     setRecords(records);
 
     // Handle first
@@ -400,7 +420,9 @@ class IndexCursorWithValueControllerSembast extends Object
   ObjectStoreSembast get store => index.store;
 
   IndexCursorWithValueControllerSembast(
-      IndexSembast index, IdbCursorMeta meta) {
+    IndexSembast index,
+    IdbCursorMeta meta,
+  ) {
     this.meta = meta;
     this.index = index;
     init();
@@ -459,8 +481,10 @@ List<sembast.SortOrder> keyPathSortOrders(dynamic keyPath, bool ascending) {
     return [sembast.SortOrder(keyPath, ascending)];
   } else if (keyPath is List) {
     final keyList = keyPath;
-    return List.generate(keyList.length,
-        (i) => sembast.SortOrder(keyList[i] as String, ascending));
+    return List.generate(
+      keyList.length,
+      (i) => sembast.SortOrder(keyList[i] as String, ascending),
+    );
   }
   throw 'invalid keyPath $keyPath';
 }

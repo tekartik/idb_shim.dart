@@ -40,7 +40,7 @@ class DatabaseIndexNotFoundError extends DatabaseError {
 class DatabaseTransactionStoreNotFoundError extends DatabaseError {
   /// Store not found.
   DatabaseTransactionStoreNotFoundError(String store)
-      : super("NotFoundError: store '$store' not found in transaction.");
+    : super("NotFoundError: store '$store' not found in transaction.");
 }
 
 /// no key error.
@@ -56,6 +56,7 @@ class DatabaseNoKeyError extends DatabaseError {
 class DatabaseInvalidKeyError extends DatabaseError {
   /// invalid key error.
   DatabaseInvalidKeyError(Object? key)
-      : super(
-            "DataError: The data provided does not meet requirements. The parameter '$key' is not a valid key.");
+    : super(
+        "DataError: The data provided does not meet requirements. The parameter '$key' is not a valid key.",
+      );
 }

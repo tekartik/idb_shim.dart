@@ -30,9 +30,10 @@ class SdbTransactionImpl implements SdbTransaction {
   SdbTransactionImpl(this.db, this.mode);
 
   /// Store implementation.
-  SdbTransactionStoreRefImpl<K, V>
-      storeImpl<K extends KeyBase, V extends ValueBase>(
-          SdbStoreRefImpl<K, V> store) {
+  SdbTransactionStoreRefImpl<K, V> storeImpl<
+    K extends KeyBase,
+    V extends ValueBase
+  >(SdbStoreRefImpl<K, V> store) {
     return SdbTransactionStoreRefImpl<K, V>.txn(this, store);
   }
 }

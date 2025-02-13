@@ -29,11 +29,15 @@ class SdbOpenDatabaseImpl implements SdbOpenDatabase {
 
   /// Add a store.
   SdbOpenStoreRef<K, V> addStoreImpl<K extends KeyBase, V extends ValueBase>(
-      SdbStoreRefImpl<K, V> store,
-      {String? keyPath,
-      bool? autoIncrement}) {
-    var idbStore = db.idbDatabase.createObjectStore(store.name,
-        keyPath: keyPath, autoIncrement: autoIncrement ?? store.isIntKey);
+    SdbStoreRefImpl<K, V> store, {
+    String? keyPath,
+    bool? autoIncrement,
+  }) {
+    var idbStore = db.idbDatabase.createObjectStore(
+      store.name,
+      keyPath: keyPath,
+      autoIncrement: autoIncrement ?? store.isIntKey,
+    );
     var storeOpen = SdbOpenStoreRefImpl<K, V>(this, store, idbStore);
     stores.add(storeOpen);
     return storeOpen;
@@ -41,7 +45,8 @@ class SdbOpenDatabaseImpl implements SdbOpenDatabase {
 
   /// Add a store.
   SdbOpenStoreRef<K, V> getStoreImpl<K extends KeyBase, V extends ValueBase>(
-      SdbStoreRefImpl<K, V> store) {
+    SdbStoreRefImpl<K, V> store,
+  ) {
     var idbStore = idbTransaction.objectStore(store.name);
     var storeOpen = SdbOpenStoreRefImpl<K, V>(this, store, idbStore);
     return storeOpen;
@@ -49,8 +54,11 @@ class SdbOpenDatabaseImpl implements SdbOpenDatabase {
 }
 
 /// Open store reference internal extension.
-extension SdbOpenStoreRefInternalExtension<K extends KeyBase,
-    V extends ValueBase> on SdbOpenStoreRef<K, V> {
+extension SdbOpenStoreRefInternalExtension<
+  K extends KeyBase,
+  V extends ValueBase
+>
+    on SdbOpenStoreRef<K, V> {
   /// Open store reference implementation.
   SdbOpenStoreRefImpl<K, V> get impl => this as SdbOpenStoreRefImpl<K, V>;
 }
@@ -78,7 +86,9 @@ class SdbOpenStoreRefImpl<K extends KeyBase, V extends ValueBase>
 
   /// Create an index.
   SdbOpenIndexRef<K, V, I> createIndexImpl<I extends IndexBase>(
-      SdbIndexRefImpl<K, V, I> index, Object indexKeyPath) {
+    SdbIndexRefImpl<K, V, I> index,
+    Object indexKeyPath,
+  ) {
     var idbIndex = idbObjectStore.createIndex(index.name, indexKeyPath);
     var indexOpen = SdbOpenIndexRefImpl<K, V, I>(this, index, idbIndex);
 
@@ -88,8 +98,12 @@ class SdbOpenStoreRefImpl<K extends KeyBase, V extends ValueBase>
 }
 
 /// Open index reference implementation.
-class SdbOpenIndexRefImpl<K extends KeyBase, V extends ValueBase,
-    I extends IndexBase> implements SdbOpenIndexRef<K, V, I> {
+class SdbOpenIndexRefImpl<
+  K extends KeyBase,
+  V extends ValueBase,
+  I extends IndexBase
+>
+    implements SdbOpenIndexRef<K, V, I> {
   /// The IDB index.
   final idb.Index idbIndex;
 

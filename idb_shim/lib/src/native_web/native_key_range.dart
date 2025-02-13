@@ -15,16 +15,24 @@ idb.IDBKeyRange? toNativeKeyRange(KeyRange? common) {
   }
   if (common.lower != null) {
     if (common.upper != null) {
-      return idb.IDBKeyRange.bound(common.lower?.jsifyKey(),
-          common.upper?.jsifyKey(), common.lowerOpen, common.upperOpen);
+      return idb.IDBKeyRange.bound(
+        common.lower?.jsifyKey(),
+        common.upper?.jsifyKey(),
+        common.lowerOpen,
+        common.upperOpen,
+      );
     } else {
       return idb.IDBKeyRange.lowerBound(
-          common.lower?.jsifyKey(), common.lowerOpen);
+        common.lower?.jsifyKey(),
+        common.lowerOpen,
+      );
     }
   } else {
     // devPrint('upper ${common.upper} ${common.upperOpen}');
     return idb.IDBKeyRange.upperBound(
-        common.upper?.jsifyKey(), common.upperOpen);
+      common.upper?.jsifyKey(),
+      common.upperOpen,
+    );
   }
 }
 
@@ -44,7 +52,8 @@ JSAny? keyOrKeyRangeToNativeQuery({Object? key, KeyRange? range}) {
       }
       if (key is KeyRange) {
         throw ArgumentError(
-            'Invalid keyRange $key as key argument, use the range argument');
+          'Invalid keyRange $key as key argument, use the range argument',
+        );
       }
     }
     return key.jsifyKey();

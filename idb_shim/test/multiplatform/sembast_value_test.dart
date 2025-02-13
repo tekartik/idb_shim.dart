@@ -17,7 +17,7 @@ void main() {
         'int': 1,
         'list': [1, 2, 3],
         'map': {
-          'sub': [1, 2, 3]
+          'sub': [1, 2, 3],
         },
         'string': 'text',
         'dateTime': DateTime.fromMillisecondsSinceEpoch(1, isUtc: true),
@@ -29,7 +29,7 @@ void main() {
         'int': 1,
         'list': [1, 2, 3],
         'map': {
-          'sub': [1, 2, 3]
+          'sub': [1, 2, 3],
         },
         'string': 'text',
         'dateTime': Timestamp.fromMillisecondsSinceEpoch(1),
@@ -55,29 +55,35 @@ void main() {
             'test': [
               1,
               true,
-              [4.5]
-            ]
-          }
+              [4.5],
+            ],
+          },
         ],
         <String, Object?>{
           'test': [
             1,
             true,
-            [4.5]
-          ]
-        }
+            [4.5],
+          ],
+        },
       ];
       for (var value in identicals) {
         var encoded = value;
         encoded = toSembastValue(value);
 
-        expect(identical(encoded, value), isTrue,
-            reason:
-                '$value ${identityHashCode(value)} vs ${identityHashCode(encoded)}');
+        expect(
+          identical(encoded, value),
+          isTrue,
+          reason:
+              '$value ${identityHashCode(value)} vs ${identityHashCode(encoded)}',
+        );
         value = fromSembastValue(encoded);
-        expect(identical(encoded, value), isTrue,
-            reason:
-                '$value ${identityHashCode(value)} vs ${identityHashCode(encoded)}');
+        expect(
+          identical(encoded, value),
+          isTrue,
+          reason:
+              '$value ${identityHashCode(value)} vs ${identityHashCode(encoded)}',
+        );
       }
       var notIdenticals = [
         <Object?, Object?>{}, // being cast
@@ -85,21 +91,22 @@ void main() {
         DateTime.fromMillisecondsSinceEpoch(1, isUtc: true),
         [DateTime.fromMillisecondsSinceEpoch(1, isUtc: true)],
         <String, Object?>{
-          'test': DateTime.fromMillisecondsSinceEpoch(1, isUtc: true)
+          'test': DateTime.fromMillisecondsSinceEpoch(1, isUtc: true),
         },
         <String, Object?>{
-          'test': [
-            DateTime.fromMillisecondsSinceEpoch(1, isUtc: true),
-          ]
-        }
+          'test': [DateTime.fromMillisecondsSinceEpoch(1, isUtc: true)],
+        },
       ];
       for (var value in notIdenticals) {
         Object? encoded = value;
         encoded = toSembastValue(value);
         expect(fromSembastValue(encoded), value);
-        expect(!identical(encoded, value), isTrue,
-            reason:
-                '$value ${identityHashCode(value)} vs ${identityHashCode(encoded)}');
+        expect(
+          !identical(encoded, value),
+          isTrue,
+          reason:
+              '$value ${identityHashCode(value)} vs ${identityHashCode(encoded)}',
+        );
       }
     });
   });

@@ -29,12 +29,16 @@ class VersionChangeEventNative extends IdbVersionChangeEventBase {
   Object get target => request;
 
   @override
-  late Transaction transaction =
-      TransactionNative(database, _idbRequest.transaction!);
+  late Transaction transaction = TransactionNative(
+    database,
+    _idbRequest.transaction!,
+  );
 
   @override
-  late Database database =
-      DatabaseNative(factory, _idbRequest.result as idb.IDBDatabase);
+  late Database database = DatabaseNative(
+    factory,
+    _idbRequest.result as idb.IDBDatabase,
+  );
 
   VersionChangeEventNative(this.factory, this.idbVersionChangeEvent);
 }
@@ -49,14 +53,21 @@ class DatabaseNative extends IdbDatabaseBase {
   int get version => catchNativeError((() => idbDatabase.version));
 
   @override
-  ObjectStore createObjectStore(String name,
-      {Object? keyPath, bool? autoIncrement}) {
+  ObjectStore createObjectStore(
+    String name, {
+    Object? keyPath,
+    bool? autoIncrement,
+  }) {
     return catchNativeError(() {
-      return ObjectStoreNative(idbDatabase.createObjectStore(
+      return ObjectStoreNative(
+        idbDatabase.createObjectStore(
           name,
           idb.IDBObjectStoreParameters(
-              keyPath: keyPath?.jsifyValue(),
-              autoIncrement: autoIncrement ?? false)));
+            keyPath: keyPath?.jsifyValue(),
+            autoIncrement: autoIncrement ?? false,
+          ),
+        ),
+      );
     })!;
   }
 
@@ -70,8 +81,10 @@ class DatabaseNative extends IdbDatabaseBase {
     // simulate them!
     try {
       return catchNativeError(() {
-        final idbTransaction =
-            idbDatabase.transaction(storeNameOrStoreNames.jsifyValue(), mode);
+        final idbTransaction = idbDatabase.transaction(
+          storeNameOrStoreNames.jsifyValue(),
+          mode,
+        );
         return TransactionNative(this, idbTransaction);
       })!;
     } catch (e) {
@@ -148,9 +161,10 @@ class DatabaseNative extends IdbDatabaseBase {
       onVersionChangeController = StreamController<VersionChangeEvent>();
       idbDatabase.onversionchange =
           (idb.IDBVersionChangeEvent idbVersionChangeEvent) {
-        onVersionChangeController!
-            .add(VersionChangeEventNative(factory, idbVersionChangeEvent));
-      }.toJS;
+            onVersionChangeController!.add(
+              VersionChangeEventNative(factory, idbVersionChangeEvent),
+            );
+          }.toJS;
       onVersionChangeStream =
           onVersionChangeController!.stream.asBroadcastStream();
     }

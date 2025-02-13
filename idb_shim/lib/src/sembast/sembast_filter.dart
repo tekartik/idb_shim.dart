@@ -7,7 +7,11 @@ import 'package:idb_shim/src/sembast/sembast_import.dart' as sembast;
 
 /// keyPath must have been escaped before
 sembast.Filter keyCursorFilter(
-    dynamic keyPath, Object? key, KeyRange? range, bool multiEntry) {
+  dynamic keyPath,
+  Object? key,
+  KeyRange? range,
+  bool multiEntry,
+) {
   if (range != null) {
     return keyRangeFilter(keyPath, range, multiEntry);
   } else
@@ -130,7 +134,11 @@ bool upperMatchesSingleValue(dynamic upper, bool upperOpen, dynamic value) {
 }
 
 bool lowerMatchesValue(
-    dynamic lower, bool lowerOpen, dynamic value, bool multiEntry) {
+  dynamic lower,
+  bool lowerOpen,
+  dynamic value,
+  bool multiEntry,
+) {
   if (multiEntry && value is List) {
     for (var item in value) {
       if (lowerMatchesSingleValue(lower, lowerOpen, item)) {
@@ -143,7 +151,11 @@ bool lowerMatchesValue(
 }
 
 bool upperMatchesValue(
-    dynamic upper, bool upperOpen, dynamic value, bool multiEntry) {
+  dynamic upper,
+  bool upperOpen,
+  dynamic value,
+  bool multiEntry,
+) {
   if (multiEntry && value is List) {
     for (var item in value) {
       if (upperMatchesSingleValue(upper, upperOpen, item)) {
@@ -155,7 +167,10 @@ bool upperMatchesValue(
 }
 
 sembast.Filter keyRangeFilter(
-    Object? keyPath, KeyRange range, bool multiEntry) {
+  Object? keyPath,
+  KeyRange range,
+  bool multiEntry,
+) {
   keyPath ??= sembast.Field.key;
 
   if (keyPath is String) {
@@ -163,13 +178,21 @@ sembast.Filter keyRangeFilter(
       var value = snapshot[keyPath as String];
       if (range.lower != null) {
         if (!lowerMatchesValue(
-            range.lower, range.lowerOpen, value, multiEntry)) {
+          range.lower,
+          range.lowerOpen,
+          value,
+          multiEntry,
+        )) {
           return false;
         }
       }
       if (range.upper != null) {
         if (!upperMatchesValue(
-            range.upper, range.upperOpen, value, multiEntry)) {
+          range.upper,
+          range.upperOpen,
+          value,
+          multiEntry,
+        )) {
           return false;
         }
       }
@@ -180,16 +203,22 @@ sembast.Filter keyRangeFilter(
     var lowerList = range.lower as List?;
     var upperList = range.upper as List?;
     if (lowerList != null) {
-      assert(lowerList.length == keyPathList.length,
-          'keyPath and lower bound length must match');
+      assert(
+        lowerList.length == keyPathList.length,
+        'keyPath and lower bound length must match',
+      );
     }
     if (upperList != null) {
-      assert(upperList.length == keyPathList.length,
-          'keyPath and upper bound length must match');
+      assert(
+        upperList.length == keyPathList.length,
+        'keyPath and upper bound length must match',
+      );
     }
     return sembast.Filter.custom((snapshot) {
       final values = List.generate(
-          keyPathList.length, (i) => snapshot[keyPathList[i] as String]);
+        keyPathList.length,
+        (i) => snapshot[keyPathList[i] as String],
+      );
 
       // no null accepted
       for (var value in values) {
@@ -267,7 +296,7 @@ sembast.Filter _debugSingleFieldNotNullFilter(String keyPath) =>
     sembast.Filter.and([
       sembast.Filter.notEquals(keyPath, true),
       sembast.Filter.notEquals(keyPath, false),
-      _singleFieldKeyNotNullFilter(keyPath)
+      _singleFieldKeyNotNullFilter(keyPath),
     ]);
 
 @Deprecated('Dev only')
@@ -287,8 +316,11 @@ sembast.Filter storeKeyFilter(Object? keyPath, Object key) {
 
 /// The null value for the key actually means any but null...
 /// Key path must have been escaped before
-sembast.Filter keyFilter(dynamic keyPath, Object? key,
-    [bool multiEntry = false]) {
+sembast.Filter keyFilter(
+  dynamic keyPath,
+  Object? key, [
+  bool multiEntry = false,
+]) {
   if (keyPath is String) {
     if (multiEntry) {
       return sembast.Filter.custom((snapshot) {
@@ -320,14 +352,22 @@ sembast.Filter keyFilter(dynamic keyPath, Object? key,
     // No constraint on the key it just needs to exist
     // so every field must be non-null
     if (key == null) {
-      return sembast.Filter.and(List.generate(
-          keyList.length, (i) => keyFilter(keyList[i], null, multiEntry)));
+      return sembast.Filter.and(
+        List.generate(
+          keyList.length,
+          (i) => keyFilter(keyList[i], null, multiEntry),
+        ),
+      );
     } else {
       // The key must be a list too...
       if (key is List) {
         final valueList = key;
-        return sembast.Filter.and(List.generate(keyList.length,
-            (i) => keyFilter(keyList[i], valueList[i], multiEntry)));
+        return sembast.Filter.and(
+          List.generate(
+            keyList.length,
+            (i) => keyFilter(keyList[i], valueList[i], multiEntry),
+          ),
+        );
       } else {
         // Always false
         return sembast.Filter.custom((record) => false);
@@ -338,7 +378,10 @@ sembast.Filter keyFilter(dynamic keyPath, Object? key,
 }
 
 sembast.Filter keyOrRangeFilter(
-    dynamic keyPath, dynamic keyOrRange, bool multiEntry) {
+  dynamic keyPath,
+  dynamic keyOrRange,
+  bool multiEntry,
+) {
   if (keyOrRange is KeyRange) {
     return keyRangeFilter(keyPath, keyOrRange, multiEntry);
   } else {
@@ -351,8 +394,12 @@ sembast.Filter keyNotNullFilter(dynamic keyPath) {
     return sembast.Filter.notEquals(keyPath, null);
   } else if (keyPath is List) {
     final keyList = keyPath;
-    return sembast.Filter.and(List.generate(keyList.length,
-        (i) => sembast.Filter.notEquals(keyList[i] as String, null)));
+    return sembast.Filter.and(
+      List.generate(
+        keyList.length,
+        (i) => sembast.Filter.notEquals(keyList[i] as String, null),
+      ),
+    );
   }
   throw 'keyPath $keyPath not supported';
 }

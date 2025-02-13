@@ -67,7 +67,8 @@ void main() {
         expect(rawJisifiedDateTime, isA<DateTime>());
         // ignore: avoid_print
         print(
-            'rawJisifiedDateTime: $rawJisifiedDateTime ${rawJisifiedDateTime.runtimeType}');
+          'rawJisifiedDateTime: $rawJisifiedDateTime ${rawJisifiedDateTime.runtimeType}',
+        );
       } catch (e) {
         // ignore: avoid_print
         print('Temp DateTime().jisify bug fixed: $e');
@@ -105,7 +106,7 @@ void main() {
       expect(dartNumber, 1);
       var jsNumberFromDart = dartNumber.jsifyValue() as JSNumber;
       expect(jsNumberFromDart.toDartInt, 1);
-// Same as dartify
+      // Same as dartify
       dartNumber = jsNumber.dartify()!;
 
       if (idbIsRunningAsJavascript) {
@@ -123,7 +124,7 @@ void main() {
       expect(dartNumber, 1.5);
       var jsNumberFromDart = dartNumber.jsifyValue() as JSNumber;
       expect(jsNumberFromDart.toDartDouble, 1.5);
-// Same as dartify
+      // Same as dartify
       dartNumber = jsNumber.dartify()!;
       expect(dartNumber, isA<double>());
     });
@@ -135,7 +136,7 @@ void main() {
       expect(dartBoolean, true);
       var jsBooleanFromDart = dartBoolean.jsifyValue() as JSBoolean;
       expect(jsBooleanFromDart.toDart, true);
-// Same as dartify
+      // Same as dartify
       dartBoolean = jsBoolean.dartify()!;
       expect(dartBoolean, isA<bool>());
       expect(dartBoolean, true);
@@ -213,16 +214,16 @@ void main() {
                 [
                   [1],
                   [2, 1],
-                  {'sub2': 1}
+                  {'sub2': 1},
                 ],
                 [null],
-                'text'
-              ]
-            }
+                'text',
+              ],
+            },
           ],
           'testBytes': Uint8List.fromList([1, 2, 3]),
           'testDate': DateTime.fromMillisecondsSinceEpoch(1, isUtc: true),
-        }
+        },
       ];
 
       if (idbIsRunningAsJavascript) {

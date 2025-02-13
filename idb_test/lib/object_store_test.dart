@@ -78,8 +78,11 @@ void defineTests(TestContext ctx) {
             db.createObjectStore(testStoreName);
           }
 
-          var db = await idbFactory.open(dbName,
-              version: 1, onUpgradeNeeded: dbCreateStore);
+          var db = await idbFactory.open(
+            dbName,
+            version: 1,
+            onUpgradeNeeded: dbCreateStore,
+          );
           var txn = db.transaction(testStoreName, idbModeReadWrite);
           var store = txn.objectStore(testStoreName);
           await store.put('value', 'key');
@@ -96,8 +99,11 @@ void defineTests(TestContext ctx) {
               db.createObjectStore(testStoreName);
             }
 
-            db = await idbFactory.open(dbName,
-                version: 2, onUpgradeNeeded: dbDeleteAndCreateStore);
+            db = await idbFactory.open(
+              dbName,
+              version: 2,
+              onUpgradeNeeded: dbDeleteAndCreateStore,
+            );
             txn = db.transaction(testStoreName, idbModeReadOnly);
             store = txn.objectStore(testStoreName);
             expect(await store.getObject('key'), null);
@@ -121,8 +127,11 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName);
         }
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
       }
 
       test('properties', () async {
@@ -161,11 +170,17 @@ void defineTests(TestContext ctx) {
           expect(key, 123);
           return transaction!.completed.then((_) {
             dbCreateTransaction();
-            return objectStore.add(value, 123).then((_) {}, onError: (e) {
-              transaction = null;
-            }).then((_) {
-              expect(transaction, null);
-            });
+            return objectStore
+                .add(value, 123)
+                .then(
+                  (_) {},
+                  onError: (e) {
+                    transaction = null;
+                  },
+                )
+                .then((_) {
+                  expect(transaction, null);
+                });
           });
         });
       });
@@ -223,8 +238,10 @@ void defineTests(TestContext ctx) {
         expect(await objectStore.getAll(2, 1), isEmpty);
 
         expect(await objectStore.put('test2', 2), 2);
-        expect(
-            await objectStore.getAll(KeyRange.bound(1, 2)), ['test', 'test2']);
+        expect(await objectStore.getAll(KeyRange.bound(1, 2)), [
+          'test',
+          'test2',
+        ]);
         expect(await objectStore.getAllKeys(KeyRange.bound(1, 2)), [1, 2]);
         expect(await objectStore.getAll(KeyRange.bound(1, 2), 1), ['test']);
         expect(await objectStore.getAllKeys(KeyRange.bound(1, 2), 1), [1]);
@@ -244,8 +261,11 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
       }
 
       tearDown(dbTearDown);
@@ -275,30 +295,36 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value = <String, Object?>{};
-        return objectStore.add(value).then((key) {
-          expect(key, 1);
-        }).then((_) {
-          return objectStore.add(value).then((key) {
-            expect(key, 2);
-          });
-        });
+        return objectStore
+            .add(value)
+            .then((key) {
+              expect(key, 1);
+            })
+            .then((_) {
+              return objectStore.add(value).then((key) {
+                expect(key, 2);
+              });
+            });
       });
 
       test('add with key and next', () async {
         await dbSetUp();
         dbCreateTransaction();
         final value = <String, Object?>{};
-        return objectStore.add(value, 1234).then((key) {
-          expect(key, 1234);
-        }).then((_) {
-          return objectStore.add(value).then((key) {
-            if (ctx.isIdbSafari) {
-              expect(key, 1);
-            } else {
-              expect(key, 1235);
-            }
-          });
-        });
+        return objectStore
+            .add(value, 1234)
+            .then((key) {
+              expect(key, 1234);
+            })
+            .then((_) {
+              return objectStore.add(value).then((key) {
+                if (ctx.isIdbSafari) {
+                  expect(key, 1);
+                } else {
+                  expect(key, 1235);
+                }
+              });
+            });
       });
 
       // limitation, this crashes everywhere
@@ -322,21 +348,25 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value = <String, Object?>{};
-        return objectStore.add(value, 1234).then((key) {
-          expect(key, 1234);
-        }).then((_) {
-          return objectStore.add(value, 1232).then((key) {
-            expect(key, 1232);
-          });
-        }).then((_) {
-          return objectStore.add(value).then((key) {
-            if (ctx.isIdbSafari) {
-              expect(key, 1);
-            } else {
-              expect(key, 1235);
-            }
-          });
-        });
+        return objectStore
+            .add(value, 1234)
+            .then((key) {
+              expect(key, 1234);
+            })
+            .then((_) {
+              return objectStore.add(value, 1232).then((key) {
+                expect(key, 1232);
+              });
+            })
+            .then((_) {
+              return objectStore.add(value).then((key) {
+                if (ctx.isIdbSafari) {
+                  expect(key, 1);
+                } else {
+                  expect(key, 1235);
+                }
+              });
+            });
       });
 
       // limitation
@@ -444,13 +474,13 @@ void defineTests(TestContext ctx) {
         final value = <String, Object?>{};
         return objectStore.add(value).then((key1) {
           return objectStore.add(value).then((key2) {
-            return objectStore
-                .count(KeyRange.lowerBound(key1, true))
-                .then((int count) {
+            return objectStore.count(KeyRange.lowerBound(key1, true)).then((
+              int count,
+            ) {
               expect(count, 1);
-              return objectStore
-                  .count(KeyRange.lowerBound(key1))
-                  .then((int count) {
+              return objectStore.count(KeyRange.lowerBound(key1)).then((
+                int count,
+              ) {
                 expect(count, 2);
               });
             });
@@ -539,9 +569,9 @@ void defineTests(TestContext ctx) {
         return objectStore.add(value).then((key) {
           final newValue = cloneValue(value) as Map;
           newValue['test'] = 'new_value';
-          return objectStore
-              .put(newValue, (key as int) + 1)
-              .then((deleteResult) {
+          return objectStore.put(newValue, (key as int) + 1).then((
+            deleteResult,
+          ) {
             // check fist one still here
             return objectStore.getObject(key).then((valueRead) {
               expect(value, valueRead);
@@ -588,8 +618,11 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
       }
 
       tearDown(dbTearDown);
@@ -598,55 +631,64 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         late Object exception;
-        return objectStore.add({}, 1).catchError((Object e) {
-          // There must be an error!
-          exception = e;
-          return Object();
-        }).then((_) {
-          expect(isTestFailure(exception), isFalse);
-          if (!isWasmError(exception)) {
-            expect(isTransactionReadOnlyError(exception), isTrue);
-          }
-          // don't wait for transaction
-          transaction = null;
-        });
+        return objectStore
+            .add({}, 1)
+            .catchError((Object e) {
+              // There must be an error!
+              exception = e;
+              return Object();
+            })
+            .then((_) {
+              expect(isTestFailure(exception), isFalse);
+              if (!isWasmError(exception)) {
+                expect(isTransactionReadOnlyError(exception), isTrue);
+              }
+              // don't wait for transaction
+              transaction = null;
+            });
       });
 
       test('put', () async {
         await dbSetUp();
         dbCreateTransaction();
         late Object exception;
-        return objectStore.put({}, 1).catchError((Object e) {
-          // There must be an error!
-          exception = e;
-          return Object();
-        }).then((_) {
-          expect(isTestFailure(exception), isFalse);
-          if (!isWasmError(exception)) {
-            expect(isTransactionReadOnlyError(exception), isTrue);
-          }
+        return objectStore
+            .put({}, 1)
+            .catchError((Object e) {
+              // There must be an error!
+              exception = e;
+              return Object();
+            })
+            .then((_) {
+              expect(isTestFailure(exception), isFalse);
+              if (!isWasmError(exception)) {
+                expect(isTransactionReadOnlyError(exception), isTrue);
+              }
 
-          // don't wait for transaction
-          transaction = null;
-        });
+              // don't wait for transaction
+              transaction = null;
+            });
       });
 
       test('clear', () async {
         await dbSetUp();
         dbCreateTransaction();
         late Object exception;
-        return objectStore.clear().catchError((Object e) {
-          // There must be an error!
-          exception = e;
-        }).then((_) {
-          expect(isTestFailure(exception), isFalse);
-          if (!isWasmError(exception)) {
-            expect(isTransactionReadOnlyError(exception), isTrue);
-          }
+        return objectStore
+            .clear()
+            .catchError((Object e) {
+              // There must be an error!
+              exception = e;
+            })
+            .then((_) {
+              expect(isTestFailure(exception), isFalse);
+              if (!isWasmError(exception)) {
+                expect(isTransactionReadOnlyError(exception), isTrue);
+              }
 
-          // don't wait for transaction
-          transaction = null;
-        });
+              // don't wait for transaction
+              transaction = null;
+            });
       });
 
       test('delete', () async {
@@ -675,12 +717,18 @@ void defineTests(TestContext ctx) {
 
         void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
-          db.createObjectStore(testStoreName,
-              keyPath: keyPath, autoIncrement: true);
+          db.createObjectStore(
+            testStoreName,
+            keyPath: keyPath,
+            autoIncrement: true,
+          );
         }
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
       }
 
       tearDown(dbTearDown);
@@ -703,8 +751,10 @@ void defineTests(TestContext ctx) {
         final value = {'test': 'test_value'};
         var key = await objectStore.add(value);
         expect(key, 1);
-        expect(await objectStore.getObject(key),
-            {'test': 'test_value', keyPath: key});
+        expect(await objectStore.getObject(key), {
+          'test': 'test_value',
+          keyPath: key,
+        });
       });
 
       test('add_read_explicit_key', () async {
@@ -713,32 +763,35 @@ void defineTests(TestContext ctx) {
         final value = {'test': 'test_value', keyPath: 1};
         var key = await objectStore.add(value);
         expect(key, 1);
-        expect(await objectStore.getObject(key),
-            {'test': 'test_value', 'my_key': 1});
+        expect(await objectStore.getObject(key), {
+          'test': 'test_value',
+          'my_key': 1,
+        });
       });
 
       test('simple add with keyPath and next', () async {
         await dbSetUp();
         dbCreateTransaction();
         final value = {'test': 'test_value', keyPath: 123};
-        return objectStore.add(value).then((key) {
-          expect(key, 123);
-          return objectStore.getObject(key).then((valueRead) {
-            expect(value, valueRead);
-          });
-        }).then((_) {
-          final value = {
-            'test': 'test_value',
-          };
-          return objectStore.add(value).then((key) {
-            // On Safari this is 1
-            if (ctx.isIdbSafari) {
-              expect(key, 1);
-            } else {
-              expect(key, 124);
-            }
-          });
-        });
+        return objectStore
+            .add(value)
+            .then((key) {
+              expect(key, 123);
+              return objectStore.getObject(key).then((valueRead) {
+                expect(value, valueRead);
+              });
+            })
+            .then((_) {
+              final value = {'test': 'test_value'};
+              return objectStore.add(value).then((key) {
+                // On Safari this is 1
+                if (ctx.isIdbSafari) {
+                  expect(key, 1);
+                } else {
+                  expect(key, 124);
+                }
+              });
+            });
       });
 
       test('put with keyPath', () async {
@@ -755,26 +808,36 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value = {'test': 'test_value', keyPath: 123};
-        return objectStore.add(value, 123).then((_) {
-          fail('should fail');
-        }, onError: (e, st) {
-          // 'both key 123 and inline keyPath 123 are specified
-          //devPrint(e);
-          // mark transaction as null
-          transaction = null;
-        });
+        return objectStore
+            .add(value, 123)
+            .then(
+              (_) {
+                fail('should fail');
+              },
+              onError: (e, st) {
+                // 'both key 123 and inline keyPath 123 are specified
+                //devPrint(e);
+                // mark transaction as null
+                transaction = null;
+              },
+            );
       });
 
       test('put key and keyPath', () async {
         await dbSetUp();
         dbCreateTransaction();
         final value = {'test': 'test_value', keyPath: 123};
-        return objectStore.put(value, 123).then((_) {
-          fail('should fail');
-        }, onError: (e) {
-          //print(e);
-          transaction = null;
-        });
+        return objectStore
+            .put(value, 123)
+            .then(
+              (_) {
+                fail('should fail');
+              },
+              onError: (e) {
+                //print(e);
+                transaction = null;
+              },
+            );
       });
 
       test('put_with_key', () async {
@@ -782,8 +845,10 @@ void defineTests(TestContext ctx) {
         dbCreateTransaction();
         final value = {'test': 'test_value'};
         var id = await objectStore.put(value);
-        expect(await objectStore.getObject(id),
-            {'test': 'test_value', 'my_key': id});
+        expect(await objectStore.getObject(id), {
+          'test': 'test_value',
+          'my_key': id,
+        });
         final value2 = {'test2': 'test_value2'};
         try {
           await objectStore.put(value2, id);
@@ -807,8 +872,11 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, keyPath: keyPath);
         }
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
       }
 
       tearDown(dbTearDown);
@@ -853,8 +921,8 @@ void defineTests(TestContext ctx) {
         return objectStore.put(value).then((key) {
           expect(key, 'test_value');
           return objectStore.getObject(key).then((valueRead) {
-//               Map expectedValue = cloneValue(value);
-//               expectedValue[keyPath] = 1;
+            //               Map expectedValue = cloneValue(value);
+            //               expectedValue[keyPath] = 1;
             expect(valueRead, value);
           });
         });
@@ -865,18 +933,21 @@ void defineTests(TestContext ctx) {
         dbCreateTransaction();
         final value = {'dummy': 'test_value'};
         late Object exception;
-        return objectStore.add(value).catchError((Object e) {
-          // There must be an error!
-          exception = e;
-          return Object();
-        }).then((_) {
-          //expect(isTransactionReadOnlyError(e), isTrue);
-          //devPrint(e);
-          // IdbMemoryError(3): neither keyPath nor autoIncrement set and trying to add object without key
-          expect(isTestFailure(exception), isFalse);
-          //expect(e is DatabaseError, isTrue);
-          transaction = null;
-        });
+        return objectStore
+            .add(value)
+            .catchError((Object e) {
+              // There must be an error!
+              exception = e;
+              return Object();
+            })
+            .then((_) {
+              //expect(isTransactionReadOnlyError(e), isTrue);
+              //devPrint(e);
+              // IdbMemoryError(3): neither keyPath nor autoIncrement set and trying to add object without key
+              expect(isTestFailure(exception), isFalse);
+              //expect(e is DatabaseError, isTrue);
+              transaction = null;
+            });
       });
 
       test('put_null', () async {
@@ -884,18 +955,21 @@ void defineTests(TestContext ctx) {
         dbCreateTransaction();
         final value = {'dummy': 'test_value'};
         late Object exception;
-        return objectStore.put(value).catchError((Object e) {
-          // There must be an error!
+        return objectStore
+            .put(value)
+            .catchError((Object e) {
+              // There must be an error!
 
-          exception = e;
-          return Object();
-        }).then((_) {
-          //expect(isTransactionReadOnlyError(e), isTrue);
-          //devPrint(e);
-          expect(isTestFailure(exception), isFalse);
-          //expect(e is DatabaseError, isTrue);
-          transaction = null;
-        });
+              exception = e;
+              return Object();
+            })
+            .then((_) {
+              //expect(isTransactionReadOnlyError(e), isTrue);
+              //devPrint(e);
+              expect(isTestFailure(exception), isFalse);
+              //expect(e is DatabaseError, isTrue);
+              transaction = null;
+            });
       });
 
       test('add_twice', () async {
@@ -905,19 +979,22 @@ void defineTests(TestContext ctx) {
         late Object exception;
         return objectStore.add(value).then((key) {
           expect(key, 'test_value');
-          return objectStore.add(value).catchError((Object e) {
-            // There must be an error!
-            exception = e;
-            return Object();
-          }).then((_) {
-            //expect(isTransactionReadOnlyError(e), isTrue);
-            //devPrint(e);
-            // expect(e is DatabaseError, isTrue);
-            expect(isTestFailure(exception), isFalse);
+          return objectStore
+              .add(value)
+              .catchError((Object e) {
+                // There must be an error!
+                exception = e;
+                return Object();
+              })
+              .then((_) {
+                //expect(isTransactionReadOnlyError(e), isTrue);
+                //devPrint(e);
+                // expect(e is DatabaseError, isTrue);
+                expect(isTestFailure(exception), isFalse);
 
-            // in native completed will never succeed so remove it
-            transaction = null;
-          });
+                // in native completed will never succeed so remove it
+                transaction = null;
+              });
         });
       });
 
@@ -948,25 +1025,36 @@ void defineTests(TestContext ctx) {
         });
 
         Future testStore(IdbObjectStoreMeta storeMeta) {
-          return setUpSimpleStore(idbFactory,
-                  meta: storeMeta, dbName: testDbName)
+          return setUpSimpleStore(
+                idbFactory,
+                meta: storeMeta,
+                dbName: testDbName,
+              )
               .then((Database db) {
-            db.close();
-          }).then((_) async {
-            final db = await idbFactory.open(testDbName);
-            final transaction = db.transaction(storeMeta.name, idbModeReadOnly);
-            final objectStore = transaction.objectStore(storeMeta.name);
-            var readMeta = IdbObjectStoreMeta.fromObjectStore(objectStore);
+                db.close();
+              })
+              .then((_) async {
+                final db = await idbFactory.open(testDbName);
+                final transaction = db.transaction(
+                  storeMeta.name,
+                  idbModeReadOnly,
+                );
+                final objectStore = transaction.objectStore(storeMeta.name);
+                var readMeta = IdbObjectStoreMeta.fromObjectStore(objectStore);
 
-            // ie idb does not have autoIncrement
-            if (ctx.isIdbIe) {
-              readMeta = IdbObjectStoreMeta(readMeta.name, readMeta.keyPath,
-                  storeMeta.autoIncrement, readMeta.indecies.toList());
-            }
-            expect(readMeta, storeMeta);
-            await transaction.completed;
-            db.close();
-          });
+                // ie idb does not have autoIncrement
+                if (ctx.isIdbIe) {
+                  readMeta = IdbObjectStoreMeta(
+                    readMeta.name,
+                    readMeta.keyPath,
+                    storeMeta.autoIncrement,
+                    readMeta.indecies.toList(),
+                  );
+                }
+                expect(readMeta, storeMeta);
+                await transaction.completed;
+                db.close();
+              });
         }
 
         test('all', () {
@@ -997,8 +1085,11 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, keyPath: keyPath);
         }
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
       }
 
       tearDown(dbTearDown);
@@ -1019,7 +1110,7 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value = {
-          'my': {'key': 'test_value'}
+          'my': {'key': 'test_value'},
         };
         await objectStore.add(value);
         expect(await objectStore.getObject('test_value'), value);
@@ -1053,7 +1144,7 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value = {
-          'my': {'key': 'test_value'}
+          'my': {'key': 'test_value'},
         };
 
         try {
@@ -1088,8 +1179,11 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, keyPath: keyPath);
         }
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
       }
 
       test('add/get', () async {
@@ -1129,8 +1223,11 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, keyPath: keyPath);
         }
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
       }
 
       test('add/get', () async {
@@ -1193,16 +1290,21 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName2, autoIncrement: true);
         }
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
       }
 
       tearDown(dbTearDown);
 
       test('simple add_get', () async {
         await dbSetUp();
-        transaction =
-            db!.transaction([testStoreName, testStoreName2], idbModeReadWrite);
+        transaction = db!.transaction([
+          testStoreName,
+          testStoreName2,
+        ], idbModeReadWrite);
         var objectStore1 = transaction!.objectStore(testStoreName);
         var key1 = await objectStore1.add('test_value1');
         expect(key1, 1);
@@ -1211,8 +1313,10 @@ void defineTests(TestContext ctx) {
         expect(key2, 1);
         await transaction!.completed;
 
-        transaction =
-            db!.transaction([testStoreName, testStoreName2], idbModeReadOnly);
+        transaction = db!.transaction([
+          testStoreName,
+          testStoreName2,
+        ], idbModeReadOnly);
         objectStore1 = transaction!.objectStore(testStoreName);
         expect(await objectStore1.getObject(key1), 'test_value1');
         objectStore2 = transaction!.objectStore(testStoreName2);
@@ -1221,8 +1325,10 @@ void defineTests(TestContext ctx) {
 
       test('simple add_put_get', () async {
         await dbSetUp();
-        transaction =
-            db!.transaction([testStoreName, testStoreName2], idbModeReadWrite);
+        transaction = db!.transaction([
+          testStoreName,
+          testStoreName2,
+        ], idbModeReadWrite);
         var objectStore1 = transaction!.objectStore(testStoreName);
         var key1 = await objectStore1.add('test_value1');
         expect(key1, 1);
@@ -1231,16 +1337,20 @@ void defineTests(TestContext ctx) {
         expect(key2, 1);
         await transaction!.completed;
 
-        transaction =
-            db!.transaction([testStoreName, testStoreName2], idbModeReadWrite);
+        transaction = db!.transaction([
+          testStoreName,
+          testStoreName2,
+        ], idbModeReadWrite);
         objectStore1 = transaction!.objectStore(testStoreName);
         await objectStore1.put('update_value1', key1);
         objectStore2 = transaction!.objectStore(testStoreName2);
         await objectStore2.put('update_value2', key2);
         await transaction!.completed;
 
-        transaction =
-            db!.transaction([testStoreName, testStoreName2], idbModeReadOnly);
+        transaction = db!.transaction([
+          testStoreName,
+          testStoreName2,
+        ], idbModeReadOnly);
         objectStore1 = transaction!.objectStore(testStoreName);
         expect(await objectStore1.getObject(key1), 'update_value1');
         objectStore2 = transaction!.objectStore(testStoreName2);
@@ -1249,8 +1359,10 @@ void defineTests(TestContext ctx) {
 
       test('order_add_get', () async {
         await dbSetUp();
-        transaction =
-            db!.transaction([testStoreName, testStoreName2], idbModeReadWrite);
+        transaction = db!.transaction([
+          testStoreName,
+          testStoreName2,
+        ], idbModeReadWrite);
         var objectStore1 = transaction!.objectStore(testStoreName);
         var key1 = await objectStore1.add('test_value1');
         expect(key1, 1);
@@ -1265,8 +1377,10 @@ void defineTests(TestContext ctx) {
         expect(key1_2, 3);
         await transaction!.completed;
 
-        transaction =
-            db!.transaction([testStoreName, testStoreName2], idbModeReadOnly);
+        transaction = db!.transaction([
+          testStoreName,
+          testStoreName2,
+        ], idbModeReadOnly);
         objectStore1 = transaction!.objectStore(testStoreName);
         expect(await objectStore1.getObject(key1), 'test_value1');
         expect(await objectStore1.getObject(key1_1), 'test_value1_1');

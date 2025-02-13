@@ -48,7 +48,9 @@ class SdbRecordRefImpl<K extends KeyBase, V extends ValueBase>
 
   /// Delete a single record.
   Future<void> deleteImpl(SdbClient client) => client.handleDbOrTxn(
-      (db) => dbDeleteImpl(db), (txn) => txnDeleteImpl(txn.rawImpl));
+    (db) => dbDeleteImpl(db),
+    (txn) => txnDeleteImpl(txn.rawImpl),
+  );
 
   /// Delete a single record.
   Future<void> dbDeleteImpl(SdbDatabaseImpl db) {
@@ -64,7 +66,9 @@ class SdbRecordRefImpl<K extends KeyBase, V extends ValueBase>
 
   /// Put a single record.
   Future<void> putImpl(SdbClient client, V value) => client.handleDbOrTxn(
-      (db) => dbPutImpl(db, value), (txn) => txnPutImpl(txn.rawImpl, value));
+    (db) => dbPutImpl(db, value),
+    (txn) => txnPutImpl(txn.rawImpl, value),
+  );
 
   /// Put a single record.
   Future<void> dbPutImpl(SdbDatabaseImpl db, V value) {

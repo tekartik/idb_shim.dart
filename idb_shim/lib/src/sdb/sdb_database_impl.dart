@@ -34,9 +34,10 @@ class SdbDatabaseImpl implements SdbDatabase {
 
   /// Transaction.
   Future<T> inStoreTransactionImpl<T, K extends KeyBase, V extends ValueBase>(
-      SdbStoreRef<K, V> store,
-      SdbTransactionMode mode,
-      Future<T> Function(SdbSingleStoreTransaction<K, V> txn) callback) async {
+    SdbStoreRef<K, V> store,
+    SdbTransactionMode mode,
+    Future<T> Function(SdbSingleStoreTransaction<K, V> txn) callback,
+  ) async {
     var txnStore = SdbTransactionStoreRefImpl<K, V>(store.impl);
     var txn = SdbSingleStoreTransactionImpl(impl, mode, txnStore);
     return txn.run(callback);
@@ -44,9 +45,10 @@ class SdbDatabaseImpl implements SdbDatabase {
 
   /// Run a transaction.
   Future<T> inStoresTransactionImpl<T>(
-      List<SdbStoreRef> stores,
-      SdbTransactionMode mode,
-      Future<T> Function(SdbMultiStoreTransaction txn) callback) async {
+    List<SdbStoreRef> stores,
+    SdbTransactionMode mode,
+    Future<T> Function(SdbMultiStoreTransaction txn) callback,
+  ) async {
     var txn = SdbMultiStoreTransactionImpl(impl, mode, stores);
     return txn.run(callback);
   }

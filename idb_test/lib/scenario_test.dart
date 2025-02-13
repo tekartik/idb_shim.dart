@@ -23,8 +23,11 @@ void defineTests(TestContext ctx) {
           database.createObjectStore(testStoreName, autoIncrement: true);
         }
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
       }
 
       tearDown(() {
@@ -44,8 +47,11 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         var transaction = db.transaction(testStoreName, idbModeReadWrite);
         var objectStore = transaction.objectStore(testStoreName);
-        var key = await objectStore
-            .put({'name': 'name', 'delete': true, 'dirty': false});
+        var key = await objectStore.put({
+          'name': 'name',
+          'delete': true,
+          'dirty': false,
+        });
         await transaction.completed;
 
         transaction = db.transaction(testStoreName, idbModeReadWrite);

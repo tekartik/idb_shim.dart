@@ -15,11 +15,11 @@ class DatabaseLogger extends IdbDatabaseBase {
 
   IdbFactoryLogger get logger => factory as IdbFactoryLogger;
 
-  DatabaseLogger(
-      {required IdbFactoryLogger factory,
-      required this.idbDatabase,
-      required this.id})
-      : super(factory);
+  DatabaseLogger({
+    required IdbFactoryLogger factory,
+    required this.idbDatabase,
+    required this.id,
+  }) : super(factory);
 
   @override
   int get version => idbDatabase.version;
@@ -33,15 +33,20 @@ class DatabaseLogger extends IdbDatabaseBase {
   }
 
   @override
-  ObjectStore createObjectStore(String name,
-      {Object? keyPath, bool? autoIncrement}) {
-    log('createObjectStore($name${getPropertyMapText({
-          'keyPath': keyPath,
-          'autoIncrement': autoIncrement
-        }, true)})');
+  ObjectStore createObjectStore(
+    String name, {
+    Object? keyPath,
+    bool? autoIncrement,
+  }) {
+    log(
+      'createObjectStore($name${getPropertyMapText({'keyPath': keyPath, 'autoIncrement': autoIncrement}, true)})',
+    );
     try {
-      var store = idbDatabase.createObjectStore(name,
-          keyPath: keyPath, autoIncrement: autoIncrement);
+      var store = idbDatabase.createObjectStore(
+        name,
+        keyPath: keyPath,
+        autoIncrement: autoIncrement,
+      );
       return ObjectStoreLogger(this, null, store);
     } catch (e) {
       err('createObjectStore($name) failed $e');
@@ -53,7 +58,9 @@ class DatabaseLogger extends IdbDatabaseBase {
   Transaction transaction(storeNameOrStoreNames, String mode) {
     log('transaction $mode on $storeNameOrStoreNames');
     return TransactionLogger(
-        this, idbDatabase.transaction(storeNameOrStoreNames, mode));
+      this,
+      idbDatabase.transaction(storeNameOrStoreNames, mode),
+    );
   }
 
   @override

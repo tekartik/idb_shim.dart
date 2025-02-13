@@ -9,11 +9,15 @@ const int _version = 1;
 
 Future<Database> createAndOpenDb(IdbFactory idbFactory) {
   return idbFactory.deleteDatabase(_dbName).then((_) {
-    return idbFactory.open(_dbName, version: _version, onUpgradeNeeded: (e) {
-      // ignore: undefined_getter
-      var db = e.database;
-      db.createObjectStore(_storeName);
-    });
+    return idbFactory.open(
+      _dbName,
+      version: _version,
+      onUpgradeNeeded: (e) {
+        // ignore: undefined_getter
+        var db = e.database;
+        db.createObjectStore(_storeName);
+      },
+    );
   });
 }
 

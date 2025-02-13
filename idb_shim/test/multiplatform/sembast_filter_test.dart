@@ -9,9 +9,11 @@ import '../idb_test_common.dart';
 
 var _record = sdb.StoreRef<int, Object>.main().record(1);
 
-sdb.Filter keyRangeFilter(dynamic keyPath, KeyRange range,
-        [bool multiEntry = false]) =>
-    sembast_filter.keyRangeFilter(keyPath, range, multiEntry);
+sdb.Filter keyRangeFilter(
+  dynamic keyPath,
+  KeyRange range, [
+  bool multiEntry = false,
+]) => sembast_filter.keyRangeFilter(keyPath, range, multiEntry);
 
 /// key can be null
 sdb.Filter keyFilter(dynamic keyPath, Object? key, [bool multiEntry = false]) =>
@@ -19,7 +21,9 @@ sdb.Filter keyFilter(dynamic keyPath, Object? key, [bool multiEntry = false]) =>
 
 bool _fieldMatch(sdb.Filter filter, Object value) {
   return sdb.filterMatchesRecord(
-      filter, sdb.SembastRecordSnapshot(_record, value));
+    filter,
+    sdb.SembastRecordSnapshot(_record, value),
+  );
 }
 
 void main() {
@@ -59,15 +63,17 @@ void main() {
     test('keyFilterDotNull', () {
       var filter = keyFilter('my.name', null);
       expect(
-          _fieldMatch(filter, {
-            'my': {'name': null}
-          }),
-          isFalse);
+        _fieldMatch(filter, {
+          'my': {'name': null},
+        }),
+        isFalse,
+      );
       expect(
-          _fieldMatch(filter, {
-            'my': {'name': 1}
-          }),
-          isTrue);
+        _fieldMatch(filter, {
+          'my': {'name': 1},
+        }),
+        isTrue,
+      );
       expect(_fieldMatch(filter, {'dummy_empty': 1}), isFalse);
       expect(_fieldMatch(filter, {'my.name': null}), isFalse);
       expect(_fieldMatch(filter, {'my.name': 1}), isFalse);
@@ -75,15 +81,17 @@ void main() {
     test('keyFilterDotValue', () {
       var filter = keyFilter('my.name', 1);
       expect(
-          _fieldMatch(filter, {
-            'my': {'name': 1}
-          }),
-          isTrue);
+        _fieldMatch(filter, {
+          'my': {'name': 1},
+        }),
+        isTrue,
+      );
       expect(
-          _fieldMatch(filter, {
-            'my': {'name': 2}
-          }),
-          isFalse);
+        _fieldMatch(filter, {
+          'my': {'name': 2},
+        }),
+        isFalse,
+      );
       expect(_fieldMatch(filter, {'dummy_empty': 1}), isFalse);
       expect(_fieldMatch(filter, {'my.name': null}), isFalse);
       expect(_fieldMatch(filter, {'my.name': 1}), isFalse);
@@ -100,25 +108,30 @@ void main() {
     test('keyArrayRangeDottedFilter', () {
       var filter = keyRangeFilter('my.year', KeyRange.lowerBound(2018));
       expect(
-          _fieldMatch(filter, {
-            'my': {'year': 2018}
-          }),
-          isTrue);
+        _fieldMatch(filter, {
+          'my': {'year': 2018},
+        }),
+        isTrue,
+      );
       expect(
-          _fieldMatch(filter, {
-            'my': {'year': 2019}
-          }),
-          isTrue);
+        _fieldMatch(filter, {
+          'my': {'year': 2019},
+        }),
+        isTrue,
+      );
       expect(
-          _fieldMatch(filter, {
-            'my': {'year': 2017}
-          }),
-          isFalse);
+        _fieldMatch(filter, {
+          'my': {'year': 2017},
+        }),
+        isFalse,
+      );
     });
 
     test('keyArrayRangeFilter', () {
-      var filter =
-          keyRangeFilter(['year', 'name'], KeyRange.lowerBound([2018, 'John']));
+      var filter = keyRangeFilter([
+        'year',
+        'name',
+      ], KeyRange.lowerBound([2018, 'John']));
       expect(_fieldMatch(filter, {'year': 2019, 'name': 'Jack'}), isTrue);
       expect(_fieldMatch(filter, {'year': 2018, 'name': 'John'}), isTrue);
       expect(_fieldMatch(filter, {'year': 2018, 'name': 'Jack'}), isFalse);
@@ -129,14 +142,18 @@ void main() {
       expect(_fieldMatch(filter, {'year': 2018}), isFalse);
       expect(_fieldMatch(filter, {'year': 2019}), isFalse);
 
-      filter = keyRangeFilter(
-          ['year', 'name'], KeyRange.lowerBound([2018, 'John'], true));
+      filter = keyRangeFilter([
+        'year',
+        'name',
+      ], KeyRange.lowerBound([2018, 'John'], true));
       expect(_fieldMatch(filter, {'year': 2019, 'name': 'Jack'}), isTrue);
       expect(_fieldMatch(filter, {'year': 2018, 'name': 'JohnX'}), isTrue);
       expect(_fieldMatch(filter, {'year': 2018, 'name': 'John'}), isFalse);
 
-      filter = keyRangeFilter(
-          ['year', 'name'], KeyRange.upperBound([2018, 'John'], true));
+      filter = keyRangeFilter([
+        'year',
+        'name',
+      ], KeyRange.upperBound([2018, 'John'], true));
       expect(_fieldMatch(filter, {'year': 2019, 'name': 'Jack'}), isFalse);
       expect(_fieldMatch(filter, {'year': 2017, 'name': 'Jack'}), isTrue);
       expect(_fieldMatch(filter, {'year': 2018, 'name': 'Joha'}), isTrue);
@@ -148,10 +165,11 @@ void main() {
         var filter = keyFilter('value', 1, true);
         expect(_fieldMatch(filter, {'value': 1}), isTrue);
         expect(
-            _fieldMatch(filter, {
-              'value': [1, 2]
-            }),
-            isTrue);
+          _fieldMatch(filter, {
+            'value': [1, 2],
+          }),
+          isTrue,
+        );
         expect(_fieldMatch(filter, {'value': null}), isFalse);
         expect(_fieldMatch(filter, {'value': 3}), isFalse);
         expect(_fieldMatch(filter, 1), isFalse);
@@ -162,10 +180,11 @@ void main() {
         var filter = keyFilter('value', null, true);
         expect(_fieldMatch(filter, {'value': 1}), isTrue);
         expect(
-            _fieldMatch(filter, {
-              'value': [1, 2]
-            }),
-            isTrue);
+          _fieldMatch(filter, {
+            'value': [1, 2],
+          }),
+          isTrue,
+        );
         expect(_fieldMatch(filter, {'value': <int>[]}), isFalse);
         expect(_fieldMatch(filter, {'value': null}), isFalse);
         expect(_fieldMatch(filter, {'value': 3}), isTrue);
@@ -177,17 +196,19 @@ void main() {
         var filter = keyRangeFilter('value', KeyRange.lowerBound(2), true);
 
         expect(
-            _fieldMatch(filter, {
-              'value': [1, 2]
-            }),
-            isTrue);
+          _fieldMatch(filter, {
+            'value': [1, 2],
+          }),
+          isTrue,
+        );
         expect(_fieldMatch(filter, {'value': 1}), isFalse);
         expect(_fieldMatch(filter, {'value': 2}), isTrue);
         expect(
-            _fieldMatch(filter, {
-              'value': [0, 1]
-            }),
-            isFalse);
+          _fieldMatch(filter, {
+            'value': [0, 1],
+          }),
+          isFalse,
+        );
         expect(_fieldMatch(filter, {'value': null}), isFalse);
         expect(_fieldMatch(filter, {'value': 3}), isTrue);
         expect(_fieldMatch(filter, 1), isFalse);
@@ -195,72 +216,88 @@ void main() {
 
         filter = keyRangeFilter('value', KeyRange.lowerBound(2, false), true);
         expect(
-            _fieldMatch(filter, {
-              'value': [1, 2]
-            }),
-            isTrue);
+          _fieldMatch(filter, {
+            'value': [1, 2],
+          }),
+          isTrue,
+        );
 
         filter = keyRangeFilter('value', KeyRange.lowerBound(2, true), true);
         expect(
-            _fieldMatch(filter, {
-              'value': [1, 2]
-            }),
-            isFalse);
+          _fieldMatch(filter, {
+            'value': [1, 2],
+          }),
+          isFalse,
+        );
         expect(
-            _fieldMatch(filter, {
-              'value': [1, 3]
-            }),
-            isTrue);
+          _fieldMatch(filter, {
+            'value': [1, 3],
+          }),
+          isTrue,
+        );
       });
 
       test('keyArrayRangeFilter', () {
         var filter = keyRangeFilter(
-            ['year', 'name'], KeyRange.lowerBound([2018, 'John']), true);
+          ['year', 'name'],
+          KeyRange.lowerBound([2018, 'John']),
+          true,
+        );
         expect(
-            _fieldMatch(filter, {
-              'year': [2019],
-              'name': 'Jack'
-            }),
-            isTrue);
+          _fieldMatch(filter, {
+            'year': [2019],
+            'name': 'Jack',
+          }),
+          isTrue,
+        );
         expect(
-            _fieldMatch(filter, {
-              'year': [2018, 2016],
-              'name': 'John'
-            }),
-            isTrue);
+          _fieldMatch(filter, {
+            'year': [2018, 2016],
+            'name': 'John',
+          }),
+          isTrue,
+        );
         expect(
-            _fieldMatch(filter, {
-              'year': [2017, 2016],
-              'name': 'Jack'
-            }),
-            isFalse);
+          _fieldMatch(filter, {
+            'year': [2017, 2016],
+            'name': 'Jack',
+          }),
+          isFalse,
+        );
 
         filter = keyRangeFilter(
-            ['year', 'name'], KeyRange.upperBound([2018, 'John']), true);
+          ['year', 'name'],
+          KeyRange.upperBound([2018, 'John']),
+          true,
+        );
         expect(
-            _fieldMatch(filter, {
-              'year': [2018],
-              'name': 'Jack'
-            }),
-            isTrue);
+          _fieldMatch(filter, {
+            'year': [2018],
+            'name': 'Jack',
+          }),
+          isTrue,
+        );
         expect(
-            _fieldMatch(filter, {
-              'year': [2018, 2019],
-              'name': 'John'
-            }),
-            isFalse);
+          _fieldMatch(filter, {
+            'year': [2018, 2019],
+            'name': 'John',
+          }),
+          isFalse,
+        );
         expect(
-            _fieldMatch(filter, {
-              'year': [2019],
-              'name': 'John'
-            }),
-            isFalse);
+          _fieldMatch(filter, {
+            'year': [2019],
+            'name': 'John',
+          }),
+          isFalse,
+        );
         expect(
-            _fieldMatch(filter, {
-              'year': [2018],
-              'name': 'JohnX'
-            }),
-            isFalse);
+          _fieldMatch(filter, {
+            'year': [2018],
+            'name': 'JohnX',
+          }),
+          isFalse,
+        );
       });
     });
   });

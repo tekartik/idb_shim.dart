@@ -30,14 +30,19 @@ void defineTests() {
       checkKeyParamFail(DateTime.now());
     });
 
-    void checkKeyValueParamFail(
-        {Object? keyPath, dynamic key, dynamic value, bool? autoIncrement}) {
+    void checkKeyValueParamFail({
+      Object? keyPath,
+      dynamic key,
+      dynamic value,
+      bool? autoIncrement,
+    }) {
       try {
         checkKeyValueParam(
-            keyPath: keyPath,
-            key: key,
-            value: value,
-            autoIncrement: autoIncrement);
+          keyPath: keyPath,
+          key: key,
+          value: value,
+          autoIncrement: autoIncrement,
+        );
       } catch (_) {
         return;
       }
@@ -48,21 +53,35 @@ void defineTests() {
       // DataError: neither keyPath nor autoIncrement set and trying to add object without key.
       checkKeyValueParamFail(keyPath: ['my', 'key']);
       checkKeyValueParamFail(
-          keyPath: ['my', 'key'], value: {'my': 1, 'key': null});
+        keyPath: ['my', 'key'],
+        value: {'my': 1, 'key': null},
+      );
       checkKeyValueParamFail(keyPath: ['my', 'key'], value: {'my': 1});
       checkKeyValueParam(
-          keyPath: ['my', 'key'], value: {'my': 1, 'key': 'text'});
+        keyPath: ['my', 'key'],
+        value: {'my': 1, 'key': 'text'},
+      );
     });
     test('checkKeyValueParam', () {
       checkKeyValueParamFail(
-          keyPath: 'keyPath', key: 'key', value: <String, Object?>{});
+        keyPath: 'keyPath',
+        key: 'key',
+        value: <String, Object?>{},
+      );
       checkKeyValueParamFail(
-          keyPath: 'keyPath', key: 'key', value: {'keyPath': 'key'});
+        keyPath: 'keyPath',
+        key: 'key',
+        value: {'keyPath': 'key'},
+      );
       checkKeyValueParam(keyPath: 'keyPath', value: {'keyPath': 'key'});
       checkKeyValueParamFail(keyPath: 'keyPath', value: {'noKeyPath': 'key'});
-      checkKeyValueParamFail(keyPath: 'key.path', key: 'key', value: {
-        'key': {'path': 'key'}
-      });
+      checkKeyValueParamFail(
+        keyPath: 'key.path',
+        key: 'key',
+        value: {
+          'key': {'path': 'key'},
+        },
+      );
 
       try {
         checkKeyValueParam();

@@ -95,7 +95,7 @@ class SembastTestContext extends TestContext {
 
   sdb.DatabaseFactory? sdbFactory;
 
-// IdbFactorySembast get idbFactorySembast =>      super.getWrappedFactory<IdbFactorySembast>();
+  // IdbFactorySembast get idbFactorySembast =>      super.getWrappedFactory<IdbFactorySembast>();
 }
 
 class SembastMemoryTestContext extends SembastTestContext {
@@ -147,24 +147,36 @@ SembastFsTestContext idbMemoryFsContext = SembastMemoryFsTestContext();
 
 IdbFactory idbTestMemoryFactory = idbFactoryMemory;
 
-Future<Database> setUpSimpleStore(IdbFactory idbFactory, //
-    {String dbName = _testDbName,
-    IdbObjectStoreMeta? meta}) {
+Future<Database> setUpSimpleStore(
+  IdbFactory idbFactory, { //
+  String dbName = _testDbName,
+  IdbObjectStoreMeta? meta,
+}) {
   meta ??= idbSimpleObjectStoreMeta;
 
   return idbFactory.deleteDatabase(dbName).then((_) {
     void onUpgradeNeeded(VersionChangeEvent e) {
       final db = e.database;
-      final objectStore = db.createObjectStore(meta!.name,
-          keyPath: meta.keyPath, autoIncrement: meta.autoIncrement);
+      final objectStore = db.createObjectStore(
+        meta!.name,
+        keyPath: meta.keyPath,
+        autoIncrement: meta.autoIncrement,
+      );
       for (final indexMeta in meta.indecies) {
-        objectStore.createIndex(indexMeta.name!, indexMeta.keyPath,
-            unique: indexMeta.unique, multiEntry: indexMeta.multiEntry);
+        objectStore.createIndex(
+          indexMeta.name!,
+          indexMeta.keyPath,
+          unique: indexMeta.unique,
+          multiEntry: indexMeta.multiEntry,
+        );
       }
     }
 
-    return idbFactory.open(dbName,
-        version: 1, onUpgradeNeeded: onUpgradeNeeded);
+    return idbFactory.open(
+      dbName,
+      version: 1,
+      onUpgradeNeeded: onUpgradeNeeded,
+    );
   });
 }
 
@@ -209,8 +221,12 @@ bool isTestFailure(Object e) {
   return e is TestFailure;
 }
 
-void dbGroup(TestContext ctx, String description, dynamic Function() body,
-    [void Function(String description, void Function() body) group = group]) {
+void dbGroup(
+  TestContext ctx,
+  String description,
+  dynamic Function() body, [
+  void Function(String description, void Function() body) group = group,
+]) {
   group(description, () {
     _dbTestContext = ctx;
     body();
@@ -218,19 +234,24 @@ void dbGroup(TestContext ctx, String description, dynamic Function() body,
   });
 }
 
-void dbTest(String description, dynamic Function() body,
-    {
-    // void Function(String name, Function() body, {bool? solo})? test,
-    @Deprecated('Dev only') bool? solo}) {
+void dbTest(
+  String description,
+  dynamic Function() body, {
+  // void Function(String name, Function() body, {bool? solo})? test,
+  @Deprecated('Dev only') bool? solo,
+}) {
   //test ??= test_pkg.test as void Function(String, dynamic Function(), {bool? solo})?;
   // We save it for later
   // only valid during definition
   final ctx = _dbTestContext;
-  test(description, () async {
-    dbTestName = ctx!.dbName;
-    await ctx.factory.deleteDatabase(dbTestName);
-    await Future.value(body());
-  },
-      // ignore: deprecated_member_use, invalid_use_of_do_not_submit_member
-      solo: solo == true);
+  test(
+    description,
+    () async {
+      dbTestName = ctx!.dbName;
+      await ctx.factory.deleteDatabase(dbTestName);
+      await Future.value(body());
+    },
+    // ignore: deprecated_member_use, invalid_use_of_do_not_submit_member
+    solo: solo == true,
+  );
 }

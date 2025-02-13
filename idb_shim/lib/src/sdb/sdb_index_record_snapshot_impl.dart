@@ -5,15 +5,23 @@ import 'sdb_store.dart';
 import 'sdb_types.dart';
 
 /// Index record snapshot implementation.
-class SdbIndexRecordSnapshotImpl<K extends KeyBase, V extends ValueBase,
-        I extends IndexBase> extends SdbIndexRecordKeyImpl<K, V, I>
+class SdbIndexRecordSnapshotImpl<
+  K extends KeyBase,
+  V extends ValueBase,
+  I extends IndexBase
+>
+    extends SdbIndexRecordKeyImpl<K, V, I>
     implements SdbIndexRecordSnapshot<K, V, I> {
   @override
   final V value;
 
   /// Index record snapshot implementation.
   SdbIndexRecordSnapshotImpl(
-      super.index, super.key, this.value, super.indexKey);
+    super.index,
+    super.key,
+    this.value,
+    super.indexKey,
+  );
 
   @override
   String toString() =>
@@ -24,8 +32,12 @@ class SdbIndexRecordSnapshotImpl<K extends KeyBase, V extends ValueBase,
 }
 
 /// Index record snapshot implementation.
-class SdbIndexRecordKeyImpl<K extends KeyBase, V extends ValueBase,
-    I extends IndexBase> implements SdbIndexRecordKey<K, V, I> {
+class SdbIndexRecordKeyImpl<
+  K extends KeyBase,
+  V extends ValueBase,
+  I extends IndexBase
+>
+    implements SdbIndexRecordKey<K, V, I> {
   /// Index reference.
   @override
   final SdbIndexRefImpl<K, V, I> index;

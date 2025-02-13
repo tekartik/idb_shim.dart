@@ -15,8 +15,11 @@ abstract class SdbTransactionStoreRef<K extends KeyBase, V extends ValueBase> {
 }
 
 /// Transaction store actions.
-extension SdbTransactionStoreRefExtension<K extends KeyBase,
-    V extends ValueBase> on SdbTransactionStoreRef<K, V> {
+extension SdbTransactionStoreRefExtension<
+  K extends KeyBase,
+  V extends ValueBase
+>
+    on SdbTransactionStoreRef<K, V> {
   SdbTransactionStoreRefImpl<K, V> get _impl =>
       this as SdbTransactionStoreRefImpl<K, V>;
 
@@ -33,26 +36,41 @@ extension SdbTransactionStoreRefExtension<K extends KeyBase,
   Future<void> delete(K key) => _impl.deleteImpl(key);
 
   /// Find records.
-  Future<List<SdbRecordSnapshot<K, V>>> findRecords(
-          {SdbBoundaries<K>? boundaries, int? offset, int? limit}) =>
-      _impl.findRecordsImpl(
-          boundaries: boundaries, offset: offset, limit: limit);
+  Future<List<SdbRecordSnapshot<K, V>>> findRecords({
+    SdbBoundaries<K>? boundaries,
+    int? offset,
+    int? limit,
+  }) => _impl.findRecordsImpl(
+    boundaries: boundaries,
+    offset: offset,
+    limit: limit,
+  );
 
   /// Find record keys.
-  Future<List<SdbRecordKey<K, V>>> findRecordKeys(
-          {SdbBoundaries<K>? boundaries, int? offset, int? limit}) =>
-      _impl.findRecordKeysImpl(
-          boundaries: boundaries, offset: offset, limit: limit);
+  Future<List<SdbRecordKey<K, V>>> findRecordKeys({
+    SdbBoundaries<K>? boundaries,
+    int? offset,
+    int? limit,
+  }) => _impl.findRecordKeysImpl(
+    boundaries: boundaries,
+    offset: offset,
+    limit: limit,
+  );
 
   /// Count record.
   Future<int> count({SdbBoundaries<K>? boundaries}) =>
       _impl.countImpl(boundaries: boundaries);
 
   /// Delete records.
-  Future<void> deleteRecords(
-          {SdbBoundaries<K>? boundaries, int? offset, int? limit}) =>
-      _impl.deleteRecordsImpl(
-          boundaries: boundaries, offset: offset, limit: limit);
+  Future<void> deleteRecords({
+    SdbBoundaries<K>? boundaries,
+    int? offset,
+    int? limit,
+  }) => _impl.deleteRecordsImpl(
+    boundaries: boundaries,
+    offset: offset,
+    limit: limit,
+  );
 
   /// store name.
   String get name => store.name;
@@ -66,8 +84,11 @@ abstract class SdbSingleStoreTransaction<K extends KeyBase, V extends ValueBase>
 }
 
 /// Single store transaction extension.
-extension SdbSingleStoreTransactionExtension<K extends KeyBase,
-    V extends ValueBase> on SdbSingleStoreTransaction<K, V> {
+extension SdbSingleStoreTransactionExtension<
+  K extends KeyBase,
+  V extends ValueBase
+>
+    on SdbSingleStoreTransaction<K, V> {
   /// Get a single record.
   Future<SdbRecordSnapshot<K, V>?> getRecord(K key) => impl.getRecordImpl(key);
 
@@ -81,16 +102,26 @@ extension SdbSingleStoreTransactionExtension<K extends KeyBase,
   Future<void> delete(K key) => impl.deleteImpl(key);
 
   /// Find records.
-  Future<List<SdbRecordSnapshot<K, V>>> findRecords(
-          {SdbBoundaries<K>? boundaries, int? offset, int? limit}) =>
-      impl.findRecordsImpl(
-          boundaries: boundaries, offset: offset, limit: limit);
+  Future<List<SdbRecordSnapshot<K, V>>> findRecords({
+    SdbBoundaries<K>? boundaries,
+    int? offset,
+    int? limit,
+  }) => impl.findRecordsImpl(
+    boundaries: boundaries,
+    offset: offset,
+    limit: limit,
+  );
 
   /// Find record keys.
-  Future<List<SdbRecordKey<K, V>>> findRecordKeys(
-          {SdbBoundaries<K>? boundaries, int? offset, int? limit}) =>
-      impl.findRecordKeysImpl(
-          boundaries: boundaries, offset: offset, limit: limit);
+  Future<List<SdbRecordKey<K, V>>> findRecordKeys({
+    SdbBoundaries<K>? boundaries,
+    int? offset,
+    int? limit,
+  }) => impl.findRecordKeysImpl(
+    boundaries: boundaries,
+    offset: offset,
+    limit: limit,
+  );
 }
 
 /// Multi-store transaction.
@@ -100,6 +131,6 @@ abstract class SdbMultiStoreTransaction implements SdbTransaction {}
 extension SdbMultiStoreTransactionExtension on SdbMultiStoreTransaction {
   /// Get a transaction store.
   SdbTransactionStoreRef<K, V> txnStore<K extends KeyBase, V extends ValueBase>(
-          SdbStoreRef<K, V> store) =>
-      impl.txnStoreImpl<K, V>(store);
+    SdbStoreRef<K, V> store,
+  ) => impl.txnStoreImpl<K, V>(store);
 }

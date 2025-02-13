@@ -12,8 +12,10 @@ extension SdbClientInternalExtension on SdbClient {
   SdbTransactionImpl get txnImpl => this as SdbTransactionImpl;
 
   /// Handle db or transaction.
-  Future<T> handleDbOrTxn<T>(Future<T> Function(SdbDatabaseImpl db) dbFn,
-      Future<T> Function(SdbTransactionImpl txn) txnFn) {
+  Future<T> handleDbOrTxn<T>(
+    Future<T> Function(SdbDatabaseImpl db) dbFn,
+    Future<T> Function(SdbTransactionImpl txn) txnFn,
+  ) {
     if (this is SdbTransactionImpl) {
       return txnFn(txnImpl);
     } else {

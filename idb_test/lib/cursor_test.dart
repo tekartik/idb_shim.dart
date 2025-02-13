@@ -68,32 +68,38 @@ void defineTests(TestContext ctx) {
       key3 = await add('test3');
     }
 
-//    Future<List<TestIdNameRow>> _cursorToList(Stream<CursorWithValue> stream) {
-//      Completer completer = new Completer.sync();
-//      List<TestIdNameRow> list = new List();
-//      stream.listen((CursorWithValue cwv) {
-//        list.add(new TestIdNameRow(cwv));
-//      }).onDone(() {
-//        completer.complete(list);
-//      });
-//      return completer.future;
-//    }
+    //    Future<List<TestIdNameRow>> _cursorToList(Stream<CursorWithValue> stream) {
+    //      Completer completer = new Completer.sync();
+    //      List<TestIdNameRow> list = new List();
+    //      stream.listen((CursorWithValue cwv) {
+    //        list.add(new TestIdNameRow(cwv));
+    //      }).onDone(() {
+    //        completer.complete(list);
+    //      });
+    //      return completer.future;
+    //    }
 
     Future<List<TestIdNameRow>> testCursorToList(
-        Stream<CursorWithValue> stream) {
+      Stream<CursorWithValue> stream,
+    ) {
       final list = <TestIdNameRow>[];
-      return stream.listen((CursorWithValue cwv) {
-        list.add(TestIdNameRow(cwv));
-      }).asFuture(list);
+      return stream
+          .listen((CursorWithValue cwv) {
+            list.add(TestIdNameRow(cwv));
+          })
+          .asFuture(list);
     }
 
     Future<List<TestIdNameRow>> manualCursorToList(
-        Stream<CursorWithValue> stream) {
+      Stream<CursorWithValue> stream,
+    ) {
       final list = <TestIdNameRow>[];
-      return stream.listen((CursorWithValue cwv) {
-        list.add(TestIdNameRow(cwv));
-        cwv.next();
-      }).asFuture(list);
+      return stream
+          .listen((CursorWithValue cwv) {
+            list.add(TestIdNameRow(cwv));
+            cwv.next();
+          })
+          .asFuture(list);
     }
 
     group('key_path_with_dot', () {
@@ -107,8 +113,11 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, keyPath: keyPath);
         }
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
       }
 
       tearDown(dbTearDown);
@@ -117,25 +126,31 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         var value = {
-          'my': {'key': 'test_value'}
+          'my': {'key': 'test_value'},
         };
         await objectStore.add(value);
-        final stream =
-            objectStore.openCursor(autoAdvance: true, key: 'test_value');
+        final stream = objectStore.openCursor(
+          autoAdvance: true,
+          key: 'test_value',
+        );
         var count = 0;
         final completer = Completer<void>.sync();
-        stream.listen((CursorWithValue cwv) {
-          expect(cwv.value, value);
-          count++;
-        }).onDone(() {
-          completer.complete();
-        });
+        stream
+            .listen((CursorWithValue cwv) {
+              expect(cwv.value, value);
+              count++;
+            })
+            .onDone(() {
+              completer.complete();
+            });
         await completer.future;
         expect(count, 1);
         // Key cursor
         {
-          final stream =
-              objectStore.openKeyCursor(autoAdvance: true, key: 'test_value');
+          final stream = objectStore.openKeyCursor(
+            autoAdvance: true,
+            key: 'test_value',
+          );
           var count = 0;
           await stream.listen((Cursor cursor) {
             expect(cursor, isNot(const TypeMatcher<CursorWithValue>()));
@@ -150,8 +165,10 @@ void defineTests(TestContext ctx) {
 
         // Cancel subscription
         {
-          final stream =
-              objectStore.openCursor(autoAdvance: true, key: 'test_value');
+          final stream = objectStore.openCursor(
+            autoAdvance: true,
+            key: 'test_value',
+          );
 
           var subscription = stream.listen((cwv) {
             valueRead = true;
@@ -161,8 +178,10 @@ void defineTests(TestContext ctx) {
 
         // Cancel subscription no auto advance
         {
-          final stream =
-              objectStore.openCursor(autoAdvance: false, key: 'test_value');
+          final stream = objectStore.openCursor(
+            autoAdvance: false,
+            key: 'test_value',
+          );
 
           var subscription = stream.listen((cwv) {
             valueRead = true;
@@ -187,19 +206,16 @@ void defineTests(TestContext ctx) {
         var dbName = 'key_path_cursor_update.db';
         await idbFactory.deleteDatabase(dbName);
 
-        final db = await idbFactory.open(dbName, version: 1,
-            onUpgradeNeeded: (VersionChangeEvent change) {
-          change.database.createObjectStore('store1', keyPath: 'key');
-        });
+        final db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: (VersionChangeEvent change) {
+            change.database.createObjectStore('store1', keyPath: 'key');
+          },
+        );
         try {
-          final obj = <String, Object?>{
-            'key': 1,
-            'someval': 'lorem',
-          };
-          final obj2 = <String, Object?>{
-            'key': 1,
-            'someval': 'ipsem',
-          };
+          final obj = <String, Object?>{'key': 1, 'someval': 'lorem'};
+          final obj2 = <String, Object?>{'key': 1, 'someval': 'ipsem'};
           final t1 = db.transaction('store1', idbModeReadWrite);
           final store1 = t1.objectStore('store1');
           unawaited(store1.put(obj));
@@ -207,13 +223,15 @@ void defineTests(TestContext ctx) {
 
           final t2 = db.transaction('store1', idbModeReadWrite);
           final store2 = t2.objectStore('store1');
-          unawaited(store2.openCursor().forEach((cv) {
-            expect(cv.key, 1);
-            expect(cv.primaryKey, 1);
-            expect(cv.value, obj);
+          unawaited(
+            store2.openCursor().forEach((cv) {
+              expect(cv.key, 1);
+              expect(cv.primaryKey, 1);
+              expect(cv.value, obj);
 
-            cv.update(obj2);
-          }));
+              cv.update(obj2);
+            }),
+          );
           await t2.completed;
 
           final t3 = db.transaction('store1', idbModeReadWrite);
@@ -230,20 +248,20 @@ void defineTests(TestContext ctx) {
         var dbName = 'key_path_auto_cursor_update.db';
         await idbFactory.deleteDatabase(dbName);
 
-        final db = await idbFactory.open(dbName, version: 1,
-            onUpgradeNeeded: (VersionChangeEvent change) {
-          change.database
-              .createObjectStore('store1', keyPath: 'key', autoIncrement: true);
-        });
+        final db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: (VersionChangeEvent change) {
+            change.database.createObjectStore(
+              'store1',
+              keyPath: 'key',
+              autoIncrement: true,
+            );
+          },
+        );
         try {
-          final obj = <String, Object?>{
-            'key': 1,
-            'someval': 'lorem',
-          };
-          final obj2 = <String, Object?>{
-            'key': 1,
-            'someval': 'ipsem',
-          };
+          final obj = <String, Object?>{'key': 1, 'someval': 'lorem'};
+          final obj2 = <String, Object?>{'key': 1, 'someval': 'ipsem'};
           final t1 = db.transaction('store1', idbModeReadWrite);
           final store1 = t1.objectStore('store1');
           unawaited(store1.put(obj));
@@ -251,13 +269,15 @@ void defineTests(TestContext ctx) {
 
           final t2 = db.transaction('store1', idbModeReadWrite);
           final store2 = t2.objectStore('store1');
-          unawaited(store2.openCursor().forEach((cv) {
-            expect(cv.key, 1);
-            expect(cv.primaryKey, 1);
-            expect(cv.value, obj);
+          unawaited(
+            store2.openCursor().forEach((cv) {
+              expect(cv.key, 1);
+              expect(cv.primaryKey, 1);
+              expect(cv.value, obj);
 
-            cv.update(obj2);
-          }));
+              cv.update(obj2);
+            }),
+          );
           await t2.completed;
 
           final t3 = db.transaction('store1', idbModeReadOnly);
@@ -295,15 +315,18 @@ void defineTests(TestContext ctx) {
         var dbName = 'key_path_auto_cursor_delete.db';
         await idbFactory.deleteDatabase(dbName);
 
-        final db = await idbFactory.open(dbName, version: 1,
-            onUpgradeNeeded: (VersionChangeEvent change) {
-          change.database
-              .createObjectStore('store1', keyPath: 'key', autoIncrement: true);
-        });
-        final obj = <String, Object?>{
-          'key': 1,
-          'someval': 'lorem',
-        };
+        final db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: (VersionChangeEvent change) {
+            change.database.createObjectStore(
+              'store1',
+              keyPath: 'key',
+              autoIncrement: true,
+            );
+          },
+        );
+        final obj = <String, Object?>{'key': 1, 'someval': 'lorem'};
 
         final t1 = db.transaction('store1', idbModeReadWrite);
         final store1 = t1.objectStore('store1');
@@ -312,9 +335,9 @@ void defineTests(TestContext ctx) {
         Object? cursorException;
 
         try {
-          await store1
-              .openKeyCursor(autoAdvance: false)
-              .listen((Cursor cursor) async {
+          await store1.openKeyCursor(autoAdvance: false).listen((
+            Cursor cursor,
+          ) async {
             // This fails on Chrome, mimic on idb
             try {
               await cursor.delete().then((_) {
@@ -337,20 +360,20 @@ void defineTests(TestContext ctx) {
         var dbName = 'key_path_auto_cursor_update.db';
         await idbFactory.deleteDatabase(dbName);
 
-        final db = await idbFactory.open(dbName, version: 1,
-            onUpgradeNeeded: (VersionChangeEvent change) {
-          change.database
-              .createObjectStore('store1', keyPath: 'key', autoIncrement: true);
-        });
+        final db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: (VersionChangeEvent change) {
+            change.database.createObjectStore(
+              'store1',
+              keyPath: 'key',
+              autoIncrement: true,
+            );
+          },
+        );
         try {
-          final obj = <String, Object?>{
-            'key': 1,
-            'someval': 'lorem',
-          };
-          final obj2 = <String, Object?>{
-            'key': 1,
-            'someval': 'ipsem',
-          };
+          final obj = <String, Object?>{'key': 1, 'someval': 'lorem'};
+          final obj2 = <String, Object?>{'key': 1, 'someval': 'ipsem'};
           final t1 = db.transaction('store1', idbModeReadWrite);
           final store1 = t1.objectStore('store1');
           unawaited(store1.put(obj));
@@ -358,13 +381,15 @@ void defineTests(TestContext ctx) {
 
           final t2 = db.transaction('store1', idbModeReadWrite);
           final store2 = t2.objectStore('store1');
-          unawaited(store2.openCursor().forEach((cv) {
-            expect(cv.key, 1);
-            expect(cv.primaryKey, 1);
-            expect(cv.value, obj);
+          unawaited(
+            store2.openCursor().forEach((cv) {
+              expect(cv.key, 1);
+              expect(cv.primaryKey, 1);
+              expect(cv.value, obj);
 
-            cv.update(obj2);
-          }));
+              cv.update(obj2);
+            }),
+          );
           await t2.completed;
 
           final t3 = db.transaction('store1', idbModeReadOnly);
@@ -406,8 +431,11 @@ void defineTests(TestContext ctx) {
         db.createObjectStore(testStoreName, autoIncrement: true);
       }
 
-      db = await idbFactory.open(dbName,
-          version: 1, onUpgradeNeeded: onUpgradeNeeded);
+      db = await idbFactory.open(
+        dbName,
+        version: 1,
+        onUpgradeNeeded: onUpgradeNeeded,
+      );
     }
 
     group('non_auto', () {
@@ -419,46 +447,60 @@ void defineTests(TestContext ctx) {
         await fill3SampleRows();
 
         expect(
-            (await objectStore.openCursor().toRowList()).map((e) => e.value), [
-          {'name': 'test2'},
-          {'name': 'test1'},
-          {'name': 'test3'}
-        ]);
+          (await objectStore.openCursor().toRowList()).map((e) => e.value),
+          [
+            {'name': 'test2'},
+            {'name': 'test1'},
+            {'name': 'test3'},
+          ],
+        );
         expect(
-            (await objectStore.openCursor().toRowList(offset: 1))
-                .map((e) => e.value),
-            [
-              {'name': 'test1'},
-              {'name': 'test3'}
-            ]);
+          (await objectStore.openCursor().toRowList(
+            offset: 1,
+          )).map((e) => e.value),
+          [
+            {'name': 'test1'},
+            {'name': 'test3'},
+          ],
+        );
         expect(
-            (await objectStore.openCursor().toRowList(limit: 1))
-                .map((e) => e.value),
-            [
-              {'name': 'test2'},
-            ]);
+          (await objectStore.openCursor().toRowList(
+            limit: 1,
+          )).map((e) => e.value),
+          [
+            {'name': 'test2'},
+          ],
+        );
         expect(
-            (await objectStore.openCursor().toRowList(offset: 1, limit: 1))
-                .map((e) => e.value),
-            [
-              {'name': 'test1'},
-            ]);
+          (await objectStore.openCursor().toRowList(
+            offset: 1,
+            limit: 1,
+          )).map((e) => e.value),
+          [
+            {'name': 'test1'},
+          ],
+        );
         expect(
-            await objectStore.openCursor().toValueList(offset: 1, limit: 1), [
-          {'name': 'test1'},
-        ]);
+          await objectStore.openCursor().toValueList(offset: 1, limit: 1),
+          [
+            {'name': 'test1'},
+          ],
+        );
 
         expect(
-            await objectStore
-                .openCursor()
-                .toPrimaryKeyList(offset: 1, limit: 1),
-            [key2]);
+          await objectStore.openCursor().toPrimaryKeyList(offset: 1, limit: 1),
+          [key2],
+        );
         expect(
-            (await objectStore.openCursor().toKeyRowList(offset: 1, limit: 1))
-                .map((e) => e.key),
-            [key2]);
-        expect(await objectStore.openCursor().toKeyList(offset: 1, limit: 1),
-            [key2]);
+          (await objectStore.openCursor().toKeyRowList(
+            offset: 1,
+            limit: 1,
+          )).map((e) => e.key),
+          [key2],
+        );
+        expect(await objectStore.openCursor().toKeyList(offset: 1, limit: 1), [
+          key2,
+        ]);
       });
     });
     group('auto', () {
@@ -486,12 +528,14 @@ void defineTests(TestContext ctx) {
           final stream = objectStore.openCursor(autoAdvance: true);
           var count = 0;
           final completer = Completer<void>();
-          stream.listen((CursorWithValue cwv) {
-            expect((cwv.value as Map)[testNameField], 'test1');
-            count++;
-          }).onDone(() {
-            completer.complete();
-          });
+          stream
+              .listen((CursorWithValue cwv) {
+                expect((cwv.value as Map)[testNameField], 'test1');
+                count++;
+              })
+              .onDone(() {
+                completer.complete();
+              });
           return completer.future.then((_) {
             expect(count, 1);
           });
@@ -505,9 +549,9 @@ void defineTests(TestContext ctx) {
 
         var count = 0;
         var limit = 2;
-        objectStore
-            .openCursor(autoAdvance: false)
-            .listen((CursorWithValue cwv) {
+        objectStore.openCursor(autoAdvance: false).listen((
+          CursorWithValue cwv,
+        ) {
           if (++count < limit) {
             cwv.next();
           }
@@ -542,11 +586,14 @@ void defineTests(TestContext ctx) {
               .openCursor(autoAdvance: false)
               .listen((CursorWithValue cwv) {})
               .asFuture<void>()
-              .timeout(const Duration(milliseconds: 500), onTimeout: () {
-            // don't wait on the transaction
-            transaction = null;
-            return null;
-          });
+              .timeout(
+                const Duration(milliseconds: 500),
+                onTimeout: () {
+                  // don't wait on the transaction
+                  transaction = null;
+                  return null;
+                },
+              );
           expect(transaction, isNull);
         });
       });
@@ -559,10 +606,13 @@ void defineTests(TestContext ctx) {
               .openCursor(autoAdvance: null)
               .listen((CursorWithValue cwv) {})
               .asFuture<void>()
-              .timeout(const Duration(milliseconds: 500), onTimeout: () {
-            // don't wait on the transaction
-            transaction = null;
-          });
+              .timeout(
+                const Duration(milliseconds: 500),
+                onTimeout: () {
+                  // don't wait on the transaction
+                  transaction = null;
+                },
+              );
           expect(transaction, isNull);
         });
       });
@@ -570,8 +620,9 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         return fill3SampleRows().then((_) {
-          return manualCursorToList(objectStore.openCursor(autoAdvance: false))
-              .then((list) {
+          return manualCursorToList(
+            objectStore.openCursor(autoAdvance: false),
+          ).then((list) {
             expect(list[0].name, equals('test2'));
             expect(list[0].id, equals(1));
             expect(list[1].name, equals('test1'));
@@ -585,8 +636,9 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         return fill3SampleRows().then((_) {
-          return testCursorToList(objectStore.openCursor(autoAdvance: true))
-              .then((list) {
+          return testCursorToList(
+            objectStore.openCursor(autoAdvance: true),
+          ).then((list) {
             expect(list[0].name, equals('test2'));
             expect(list[0].id, equals(1));
             expect(list[1].name, equals('test1'));
@@ -594,43 +646,53 @@ void defineTests(TestContext ctx) {
             expect(list[2].id, equals(3));
             expect(list.length, 3);
 
-            return testCursorToList(objectStore.openCursor(
-                    range: KeyRange.bound(2, 3), autoAdvance: true))
-                .then((list) {
+            return testCursorToList(
+              objectStore.openCursor(
+                range: KeyRange.bound(2, 3),
+                autoAdvance: true,
+              ),
+            ).then((list) {
               expect(list.length, 2);
               expect(list[0].name, equals('test1'));
               expect(list[0].id, equals(2));
               expect(list[1].name, equals('test3'));
               expect(list[1].id, equals(3));
 
-              return testCursorToList(objectStore.openCursor(
-                      range: KeyRange.bound(1, 3, true, true),
-                      autoAdvance: true))
-                  .then((list) {
+              return testCursorToList(
+                objectStore.openCursor(
+                  range: KeyRange.bound(1, 3, true, true),
+                  autoAdvance: true,
+                ),
+              ).then((list) {
                 expect(list.length, 1);
                 expect(list[0].name, equals('test1'));
                 expect(list[0].id, equals(2));
 
-                return testCursorToList(objectStore.openCursor(
-                        range: KeyRange.lowerBound(2), autoAdvance: true))
-                    .then((list) {
+                return testCursorToList(
+                  objectStore.openCursor(
+                    range: KeyRange.lowerBound(2),
+                    autoAdvance: true,
+                  ),
+                ).then((list) {
                   expect(list.length, 2);
                   expect(list[0].name, equals('test1'));
                   expect(list[0].id, equals(2));
                   expect(list[1].name, equals('test3'));
                   expect(list[1].id, equals(3));
 
-                  return testCursorToList(objectStore.openCursor(
-                          range: KeyRange.upperBound(2, true),
-                          autoAdvance: true))
-                      .then((list) {
+                  return testCursorToList(
+                    objectStore.openCursor(
+                      range: KeyRange.upperBound(2, true),
+                      autoAdvance: true,
+                    ),
+                  ).then((list) {
                     expect(list.length, 1);
                     expect(list[0].name, equals('test2'));
                     expect(list[0].id, equals(1));
 
                     return testCursorToList(
-                            objectStore.openCursor(key: 2, autoAdvance: true))
-                        .then((list) {
+                      objectStore.openCursor(key: 2, autoAdvance: true),
+                    ).then((list) {
                       expect(list.length, 1);
                       expect(list[0].name, equals('test1'));
                       expect(list[0].id, equals(2));
@@ -667,7 +729,9 @@ void defineTests(TestContext ctx) {
         dbCreateTransaction();
         try {
           objectStore.openCursor(
-              autoAdvance: true, range: KeyRange.bound(1, 1, false, true));
+            autoAdvance: true,
+            range: KeyRange.bound(1, 1, false, true),
+          );
           fail('should fail');
         } catch (e) {
           // Chrome: DataError: Failed to execute 'bound' on 'IDBKeyRange': The lower key and upper key are equal and one of the bounds is open.
@@ -681,21 +745,22 @@ void defineTests(TestContext ctx) {
         dbCreateTransaction();
         await fill3SampleRows();
 
-        var list =
-            (await cursorToList(objectStore.openCursor(autoAdvance: true)))
-                .map((e) => e.value);
+        var list = (await cursorToList(
+          objectStore.openCursor(autoAdvance: true),
+        )).map((e) => e.value);
         expect(list, [
           {'name': 'test2'},
           {'name': 'test1'},
-          {'name': 'test3'}
+          {'name': 'test3'},
         ]);
         print('#3-');
-        list = (await cursorToList(objectStore.openCursor(autoAdvance: true)))
-            .map((e) => e.value);
+        list = (await cursorToList(
+          objectStore.openCursor(autoAdvance: true),
+        )).map((e) => e.value);
         expect(list, [
           {'name': 'test2'},
           {'name': 'test1'},
-          {'name': 'test3'}
+          {'name': 'test3'},
         ]);
         print('#4-');
         /*
@@ -712,11 +777,17 @@ void defineTests(TestContext ctx) {
         var dbName = await setupDeleteDb();
         await idbFactory.deleteDatabase(dbName);
 
-        return idbFactory.open(dbName, version: 1,
-            onUpgradeNeeded: (VersionChangeEvent change) {
-          change.database
-              .createObjectStore('store', keyPath: 'key', autoIncrement: true);
-        });
+        return idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: (VersionChangeEvent change) {
+            change.database.createObjectStore(
+              'store',
+              keyPath: 'key',
+              autoIncrement: true,
+            );
+          },
+        );
       }
 
       Future<Object> insert(Database db, Map<String, Object?> obj) async {
@@ -739,12 +810,14 @@ void defineTests(TestContext ctx) {
         final t = db.transaction('store', idbModeReadWrite);
         final store = t.objectStore('store');
 
-        unawaited(store.openCursor(autoAdvance: true).forEach((cv) {
-          // change: update the correct row
-          if (cv.key == obj['key']) {
-            cv.update(obj);
-          }
-        }));
+        unawaited(
+          store.openCursor(autoAdvance: true).forEach((cv) {
+            // change: update the correct row
+            if (cv.key == obj['key']) {
+              cv.update(obj);
+            }
+          }),
+        );
         await t.completed;
       }
 
@@ -816,8 +889,11 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, keyPath: keyPath);
         }
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
       }
 
       test('put/openCursor', () async {
@@ -826,15 +902,17 @@ void defineTests(TestContext ctx) {
         var map = {'my': 1, 'key': 'value'};
         var key = await objectStore.put(map);
         expect(key, [1, 'value']);
-        var keyRows =
-            await keyCursorToList(objectStore.openKeyCursor(autoAdvance: true));
+        var keyRows = await keyCursorToList(
+          objectStore.openKeyCursor(autoAdvance: true),
+        );
         var keyRow = keyRows.first;
 
         expect(keyRow.key, key);
         expect(keyRow.primaryKey, key);
 
-        var rows =
-            await cursorToList(objectStore.openCursor(autoAdvance: true));
+        var rows = await cursorToList(
+          objectStore.openCursor(autoAdvance: true),
+        );
         var row = rows.first;
 
         expect(row.key, key);
@@ -843,28 +921,41 @@ void defineTests(TestContext ctx) {
 
         var map2 = {'my': 1, 'key': 'value2'};
         var key2 = await objectStore.put(map2);
-        keyRows =
-            await keyCursorToList(objectStore.openKeyCursor(autoAdvance: true));
+        keyRows = await keyCursorToList(
+          objectStore.openKeyCursor(autoAdvance: true),
+        );
         expect(keyRows, hasLength(2));
         keyRow = keyRows.first;
         expect(keyRow.key, key);
         keyRow = keyRows[1];
         expect(keyRow.key, key2);
-        keyRows = await keyCursorToList(objectStore.openKeyCursor(
-            autoAdvance: true, range: KeyRange.lowerBound([1, 'value2'])));
+        keyRows = await keyCursorToList(
+          objectStore.openKeyCursor(
+            autoAdvance: true,
+            range: KeyRange.lowerBound([1, 'value2']),
+          ),
+        );
         expect(keyRows, hasLength(1));
 
         // Not supported
         // ignore: dead_code
         if (false) {
-          keyRows = await keyCursorToList(objectStore.openKeyCursor(
-              autoAdvance: true, range: KeyRange.lowerBound([1, null])));
+          keyRows = await keyCursorToList(
+            objectStore.openKeyCursor(
+              autoAdvance: true,
+              range: KeyRange.lowerBound([1, null]),
+            ),
+          );
           expect(keyRows, hasLength(2));
           var map3 = {'my': 2, 'key': 'value1'};
           // ignore: unused_local_variable
           var key3 = await objectStore.put(map3);
-          keyRows = await keyCursorToList(objectStore.openKeyCursor(
-              autoAdvance: true, range: KeyRange.lowerBound([2, null])));
+          keyRows = await keyCursorToList(
+            objectStore.openKeyCursor(
+              autoAdvance: true,
+              range: KeyRange.lowerBound([2, null]),
+            ),
+          );
           expect(keyRows, hasLength(1));
         }
 
@@ -872,12 +963,19 @@ void defineTests(TestContext ctx) {
         // ignore: unused_local_variable
         var key3 = await objectStore.put(map3);
 
-        var keys = await cursorToPrimaryKeyList(objectStore.openKeyCursor(
-            autoAdvance: true, range: KeyRange.lowerBound([1, ''])));
-        expect(keys, [key, key2, key3]);
-        keys = await cursorToKeyList(objectStore.openKeyCursor(
+        var keys = await cursorToPrimaryKeyList(
+          objectStore.openKeyCursor(
             autoAdvance: true,
-            range: KeyRange.bound([1, ''], [2, ''], false, true)));
+            range: KeyRange.lowerBound([1, '']),
+          ),
+        );
+        expect(keys, [key, key2, key3]);
+        keys = await cursorToKeyList(
+          objectStore.openKeyCursor(
+            autoAdvance: true,
+            range: KeyRange.bound([1, ''], [2, ''], false, true),
+          ),
+        );
         expect(keys, [key, key2]);
       });
 

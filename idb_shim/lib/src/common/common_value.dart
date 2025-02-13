@@ -11,13 +11,13 @@ dynamic encodeValue(dynamic value) {
     return null;
   }
   return json.encode(value);
-//  return JSON.encode(value, toEncodable: (nonEncodable) {
-//    //throw new JsonUnsupportedObjectError(nonEncodable, cause: "Cannot convert $nonEncodable (type: ${nonEncodable.runtimeType})");
-//    if (nonEncodable is DateTime) {
-//      return nonEncodable.toIso8601String();
-//    }
-//    return nonEncodable;
-//  });
+  //  return JSON.encode(value, toEncodable: (nonEncodable) {
+  //    //throw new JsonUnsupportedObjectError(nonEncodable, cause: "Cannot convert $nonEncodable (type: ${nonEncodable.runtimeType})");
+  //    if (nonEncodable is DateTime) {
+  //      return nonEncodable.toIso8601String();
+  //    }
+  //    return nonEncodable;
+  //  });
 }
 
 /// decode a value from JSON.
@@ -114,13 +114,19 @@ KeyRange compositeKeyRangeAt(KeyRange keyRange, int index) {
 
   if (lower is List) {
     if (upper is List) {
-      return KeyRange.bound(lower[index] as Object, upper[index] as Object,
-          keyRange.lowerOpen, keyRange.upperOpen);
+      return KeyRange.bound(
+        lower[index] as Object,
+        upper[index] as Object,
+        keyRange.lowerOpen,
+        keyRange.upperOpen,
+      );
     }
     return KeyRange.lowerBound(lower[index] as Object, keyRange.lowerOpen);
   }
   return KeyRange.upperBound(
-      (upper as List)[index] as Object, keyRange.upperOpen);
+    (upper as List)[index] as Object,
+    keyRange.upperOpen,
+  );
 }
 
 /// return a list if keyPath is an array
@@ -142,7 +148,6 @@ Set<Object?>? valueAsSet(dynamic value) {
 }
 
 @Deprecated('Use valueAsSet')
-
 /// Deprecated: Use valueAsSet
 Set? valueAsKeySet(dynamic value) => valueAsSet(value);
 
@@ -212,7 +217,9 @@ extension IdbValueMapExt on Map {
     } else if (keyPath is List) {
       final keyList = keyPath;
       var keys = List<Object?>.generate(
-          keyList.length, (i) => getFieldValue(keyPath[i] as String));
+        keyList.length,
+        (i) => getFieldValue(keyPath[i] as String),
+      );
       if (keys.where((element) => element == null).isNotEmpty) {
         /// the list cannot contain null values
         return null;
@@ -236,11 +243,17 @@ extension IdbValueMapExt on Map {
         }
         if (keyPath is! List<String>) {
           throw ArgumentError.value(
-              keyPath, 'keyPath', 'is not a list of string');
+            keyPath,
+            'keyPath',
+            'is not a list of string',
+          );
         }
         if (value.length != keyList.length) {
-          throw ArgumentError.value('$keyPath: $value', 'keyPath: value',
-              'length do not match (${keyList.length} vs ${value.length}');
+          throw ArgumentError.value(
+            '$keyPath: $value',
+            'keyPath: value',
+            'length do not match (${keyList.length} vs ${value.length}',
+          );
         }
       }
 

@@ -93,24 +93,36 @@ SembastFsTestContext idbMemoryFsContext = SembastMemoryFsTestContext();
 
 IdbFactory idbTestMemoryFactory = idbFactoryMemory;
 
-Future<Database> setUpSimpleStore(IdbFactory idbFactory, //
-    {String dbName = _testDbName,
-    IdbObjectStoreMeta? meta}) {
+Future<Database> setUpSimpleStore(
+  IdbFactory idbFactory, { //
+  String dbName = _testDbName,
+  IdbObjectStoreMeta? meta,
+}) {
   meta ??= idbSimpleObjectStoreMeta;
 
   return idbFactory.deleteDatabase(dbName).then((_) {
     void openOnUpgradeNeeded(VersionChangeEvent e) {
       final db = e.database;
-      final objectStore = db.createObjectStore(meta!.name,
-          keyPath: meta.keyPath!, autoIncrement: meta.autoIncrement);
+      final objectStore = db.createObjectStore(
+        meta!.name,
+        keyPath: meta.keyPath!,
+        autoIncrement: meta.autoIncrement,
+      );
       for (final indexMeta in meta.indecies) {
-        objectStore.createIndex(indexMeta.name!, indexMeta.keyPath,
-            unique: indexMeta.unique, multiEntry: indexMeta.multiEntry);
+        objectStore.createIndex(
+          indexMeta.name!,
+          indexMeta.keyPath,
+          unique: indexMeta.unique,
+          multiEntry: indexMeta.multiEntry,
+        );
       }
     }
 
-    return idbFactory.open(dbName,
-        version: 1, onUpgradeNeeded: openOnUpgradeNeeded);
+    return idbFactory.open(
+      dbName,
+      version: 1,
+      onUpgradeNeeded: openOnUpgradeNeeded,
+    );
   });
 }
 

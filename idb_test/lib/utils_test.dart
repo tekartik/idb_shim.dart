@@ -44,15 +44,21 @@ void defineTests(TestContext ctx) {
   }
 
   group('utils', () {
-    Future dbCheckExportImport(Database db, Map expectedExport,
-        Future Function(Database db) check) async {
+    Future dbCheckExportImport(
+      Database db,
+      Map expectedExport,
+      Future Function(Database db) check,
+    ) async {
       // export
       final export = await sdbExportDatabase(db);
       expect(export, expectedExport);
 
       // import
-      var importedDb =
-          await sdbImportDatabase(export, idbFactory, importedDbName);
+      var importedDb = await sdbImportDatabase(
+        export,
+        idbFactory,
+        importedDbName,
+      );
       // The name might be relative...
       expect(importedDb.name.endsWith(importedDbName), isTrue);
 
@@ -69,15 +75,21 @@ void defineTests(TestContext ctx) {
       importedDb.close();
     }
 
-    Future dbCheckExportImportLines(Database db, List expectedExportLines,
-        Future Function(Database db) check) async {
+    Future dbCheckExportImportLines(
+      Database db,
+      List expectedExportLines,
+      Future Function(Database db) check,
+    ) async {
       // export
       final export = await sdbExportDatabaseLines(db);
       expect(export, expectedExportLines);
 
       // import
-      var importedDb =
-          await sdbImportDatabase(export, idbFactory, importedDbName);
+      var importedDb = await sdbImportDatabase(
+        export,
+        idbFactory,
+        importedDbName,
+      );
       // The name might be relative...
       expect(importedDb.name.endsWith(importedDbName), isTrue);
 
@@ -98,15 +110,20 @@ void defineTests(TestContext ctx) {
       tearDown(dbTearDown);
 
       Future checkCopySchema(
-          Database db, Future Function(Database db) check) async {
+        Database db,
+        Future Function(Database db) check,
+      ) async {
         final dstDb = await copySchema(db, idbFactory, dstDbName!);
         expect(dstDb.name, dstDbName);
         await check(dstDb);
         dstDb.close();
       }
 
-      Future checkAll(Database db, Map expectedExport,
-          Future Function(Database database) check) async {
+      Future checkAll(
+        Database db,
+        Map expectedExport,
+        Future Function(Database database) check,
+      ) async {
         await check(db);
         await checkCopySchema(db, check);
         await dbCheckExportImport(db, expectedExport, check);
@@ -123,33 +140,36 @@ void defineTests(TestContext ctx) {
           expect(db.version, 1);
         }
 
-        await checkAll(
-            db!,
+        await checkAll(db!, {
+          'sembast_export': 1,
+          'version': 1,
+          'stores': [
             {
-              'sembast_export': 1,
-              'version': 1,
-              'stores': [
-                {
-                  'name': '_main',
-                  'keys': ['version'],
-                  'values': [1]
-                }
-              ]
+              'name': '_main',
+              'keys': ['version'],
+              'values': [1],
             },
-            dbCheck);
+          ],
+        }, dbCheck);
       });
 
       test('import version 2 and reopen', () async {
         await setupDeleteDb();
-        db = await idbFactory.open(srcDbName,
-            version: 2, onUpgradeNeeded: (_) {});
+        db = await idbFactory.open(
+          srcDbName,
+          version: 2,
+          onUpgradeNeeded: (_) {},
+        );
         expect(db!.version, 2);
         final export = await sdbExportDatabase(db!);
         db!.close();
 
         // import
-        var importedDb =
-            await sdbImportDatabase(export, idbFactory, importedDbName);
+        var importedDb = await sdbImportDatabase(
+          export,
+          idbFactory,
+          importedDbName,
+        );
         expect(importedDb.version, 2);
         //devPrint()
         final newExport = await sdbExportDatabase(db!);
@@ -162,8 +182,11 @@ void defineTests(TestContext ctx) {
 
       test('empty idbVersion 2', () async {
         await setupDeleteDb();
-        db = await idbFactory.open(srcDbName,
-            version: 2, onUpgradeNeeded: (_) {});
+        db = await idbFactory.open(
+          srcDbName,
+          version: 2,
+          onUpgradeNeeded: (_) {},
+        );
 
         Future dbCheck(Database db) async {
           expect(db.factory, idbFactory);
@@ -172,20 +195,17 @@ void defineTests(TestContext ctx) {
           expect(db.version, 2);
         }
 
-        await checkAll(
-            db!,
+        await checkAll(db!, {
+          'sembast_export': 1,
+          'version': 1,
+          'stores': [
             {
-              'sembast_export': 1,
-              'version': 1,
-              'stores': [
-                {
-                  'name': '_main',
-                  'keys': ['version'],
-                  'values': [2]
-                }
-              ]
+              'name': '_main',
+              'keys': ['version'],
+              'values': [2],
             },
-            dbCheck);
+          ],
+        }, dbCheck);
       });
 
       test('one_store', () async {
@@ -194,12 +214,18 @@ void defineTests(TestContext ctx) {
         void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
           //ObjectStore objectStore =
-          db.createObjectStore(testStoreName,
-              keyPath: testNameField, autoIncrement: true);
+          db.createObjectStore(
+            testStoreName,
+            keyPath: testNameField,
+            autoIncrement: true,
+          );
         }
 
-        db = await idbFactory.open(srcDbName,
-            version: 2, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          srcDbName,
+          version: 2,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
 
         Future dbCheck(Database db) async {
           expect(db.factory, idbFactory);
@@ -230,13 +256,13 @@ void defineTests(TestContext ctx) {
                 {
                   'name': 'test_store',
                   'keyPath': 'name',
-                  'autoIncrement': true
+                  'autoIncrement': true,
                 },
                 ['test_store'],
-                2
-              ]
-            }
-          ]
+                2,
+              ],
+            },
+          ],
         };
         if (ctx.isIdbIe) {
           ((((expectedExport['stores'] as List)[0] as Map)['values'] as List)[2]
@@ -257,16 +283,22 @@ void defineTests(TestContext ctx) {
           db.createObjectStore('store2');
         }
 
-        db = await idbFactory.open(srcDbName,
-            version: 2, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          srcDbName,
+          version: 2,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
 
         Future dbCheck(Database db) async {
           expect(db.factory, idbFactory);
           expect(
-              const UnorderedIterableEquality<String>()
-                  .equals(db.objectStoreNames, ['store1', 'store2', 'store3']),
-              isTrue,
-              reason: '${db.objectStoreNames}');
+            const UnorderedIterableEquality<String>().equals(
+              db.objectStoreNames,
+              ['store1', 'store2', 'store3'],
+            ),
+            isTrue,
+            reason: '${db.objectStoreNames}',
+          );
         }
 
         final expectedExport = <String, Object?>{
@@ -280,17 +312,17 @@ void defineTests(TestContext ctx) {
                 'store_store2',
                 'store_store3',
                 'stores',
-                'version'
+                'version',
               ],
               'values': [
                 {'name': 'store1'},
                 {'name': 'store2'},
                 {'name': 'store3'},
                 ['store1', 'store2', 'store3'],
-                2
-              ]
-            }
-          ]
+                2,
+              ],
+            },
+          ],
         };
         if (ctx.isIdbIe) {
           ((((expectedExport['stores'] as List)[0] as Map)['values'] as List)[2]
@@ -305,14 +337,23 @@ void defineTests(TestContext ctx) {
 
         void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
-          final objectStore =
-              db.createObjectStore(testStoreName, autoIncrement: true);
-          objectStore.createIndex(testNameIndex, testNameField,
-              unique: true, multiEntry: true);
+          final objectStore = db.createObjectStore(
+            testStoreName,
+            autoIncrement: true,
+          );
+          objectStore.createIndex(
+            testNameIndex,
+            testNameField,
+            unique: true,
+            multiEntry: true,
+          );
         }
 
-        db = await idbFactory.open(srcDbName,
-            version: 3, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          srcDbName,
+          version: 3,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
 
         Future dbCheck(Database db) async {
           expect(db.version, 3);
@@ -347,22 +388,25 @@ void defineTests(TestContext ctx) {
                       'name': 'name_index',
                       'keyPath': 'name',
                       'unique': true,
-                      'multiEntry': true
-                    }
-                  ]
+                      'multiEntry': true,
+                    },
+                  ],
                 },
                 ['test_store'],
-                3
-              ]
-            }
-          ]
+                3,
+              ],
+            },
+          ],
         };
         if (ctx.isIdbIe) {
           ((((expectedExport['stores'] as List)[0] as Map)['values'] as List)[2]
                   as Map)
               .remove('autoIncrement');
           ((((((expectedExport['stores'] as List)[0] as Map)['values']
-                  as List)[2] as Map)['indecies'] as List)[0] as Map)
+                              as List)[2]
+                          as Map)['indecies']
+                      as List)[0]
+                  as Map)
               .remove('multiEntry');
         }
         await checkAll(db!, expectedExport, dbCheck);
@@ -373,15 +417,21 @@ void defineTests(TestContext ctx) {
 
         void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
-          final objectStore =
-              db.createObjectStore(testStoreName, autoIncrement: true);
-          objectStore.createIndex(
-              testNameIndex, [testNameField, testNameField2],
-              unique: true);
+          final objectStore = db.createObjectStore(
+            testStoreName,
+            autoIncrement: true,
+          );
+          objectStore.createIndex(testNameIndex, [
+            testNameField,
+            testNameField2,
+          ], unique: true);
         }
 
-        db = await idbFactory.open(srcDbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          srcDbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
 
         Future dbCheck(Database db) async {
           expect(db.version, 1);
@@ -416,21 +466,24 @@ void defineTests(TestContext ctx) {
                       'name': 'name_index',
                       'keyPath': ['name', 'name_2'],
                       'unique': true,
-                    }
-                  ]
+                    },
+                  ],
                 },
                 ['test_store'],
-                1
-              ]
-            }
-          ]
+                1,
+              ],
+            },
+          ],
         };
         if (ctx.isIdbIe) {
           ((((expectedExport['stores'] as List)[0] as Map)['values'] as List)[2]
                   as Map)
               .remove('autoIncrement');
           ((((((expectedExport['stores'] as List)[0] as Map)['values']
-                  as List)[2] as Map)['indecies'] as List)[0] as Map)
+                              as List)[2]
+                          as Map)['indecies']
+                      as List)[0]
+                  as Map)
               .remove('multiEntry');
         }
         await checkAll(db!, expectedExport, dbCheck);
@@ -441,28 +494,43 @@ void defineTests(TestContext ctx) {
 
         void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
-          final objectStore =
-              db.createObjectStore(testStoreName, autoIncrement: true);
-          objectStore.createIndex(testNameIndex2, testNameField2,
-              unique: false, multiEntry: true);
-          objectStore.createIndex(testNameIndex, testNameField,
-              unique: true, multiEntry: true);
+          final objectStore = db.createObjectStore(
+            testStoreName,
+            autoIncrement: true,
+          );
+          objectStore.createIndex(
+            testNameIndex2,
+            testNameField2,
+            unique: false,
+            multiEntry: true,
+          );
+          objectStore.createIndex(
+            testNameIndex,
+            testNameField,
+            unique: true,
+            multiEntry: true,
+          );
         }
 
         print('1');
-        db = await idbFactory.open(srcDbName,
-            version: 4, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          srcDbName,
+          version: 4,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
 
         Future dbCheck(Database db) async {
           expect(db.version, 4);
           final txn = db.transaction(testStoreName, idbModeReadOnly);
           final store = txn.objectStore(testStoreName);
           expect(
-              const UnorderedIterableEquality<String>()
-                  .equals(store.indexNames, [testNameIndex2, testNameIndex]),
-              isTrue,
-              reason:
-                  '${store.indexNames} vs ${[testNameIndex2, testNameIndex]}');
+            const UnorderedIterableEquality<String>().equals(store.indexNames, [
+              testNameIndex2,
+              testNameIndex,
+            ]),
+            isTrue,
+            reason: '${store.indexNames} vs ${[testNameIndex2, testNameIndex]}',
+          );
           final index = store.index(testNameIndex);
           expect(index.name, testNameIndex);
           expect(index.keyPath, testNameField);
@@ -491,27 +559,30 @@ void defineTests(TestContext ctx) {
                       'name': 'name_index',
                       'keyPath': 'name',
                       'unique': true,
-                      'multiEntry': true
+                      'multiEntry': true,
                     },
                     {
                       'name': 'name_index_2',
                       'keyPath': 'name_2',
-                      'multiEntry': true
-                    }
-                  ]
+                      'multiEntry': true,
+                    },
+                  ],
                 },
                 ['test_store'],
-                4
-              ]
-            }
-          ]
+                4,
+              ],
+            },
+          ],
         };
         if (ctx.isIdbIe) {
           ((((expectedExport['stores'] as List)[0] as Map)['values'] as List)[2]
                   as Map)
               .remove('autoIncrement');
           ((((((expectedExport['stores'] as List)[0] as Map)['values']
-                  as List)[2] as Map)['indecies'] as List)[0] as Map)
+                              as List)[2]
+                          as Map)['indecies']
+                      as List)[0]
+                  as Map)
               .remove('multiEntry');
         }
         await checkAll(db!, expectedExport, dbCheck);
@@ -522,11 +593,12 @@ void defineTests(TestContext ctx) {
       tearDown(dbTearDown);
 
       Future dbCheckCopyStore(
-          Database srcDatabase,
-          String srcStoreName,
-          Database dstDatabase,
-          String dstStoreName,
-          Future Function(Database database, String name) check) async {
+        Database srcDatabase,
+        String srcStoreName,
+        Database dstDatabase,
+        String dstStoreName,
+        Future Function(Database database, String name) check,
+      ) async {
         await check(srcDatabase, srcStoreName);
         await copyStore(srcDatabase, srcStoreName, dstDatabase, dstStoreName);
         await check(dstDatabase, dstStoreName);
@@ -542,8 +614,11 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName2);
         }
 
-        db = await idbFactory.open(srcDbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          srcDbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
 
         Future dbCheck(Database db, String storeName) async {
           final txn = db.transaction(storeName, idbModeReadOnly);
@@ -557,7 +632,12 @@ void defineTests(TestContext ctx) {
         }
 
         await dbCheckCopyStore(
-            db!, testStoreName, db!, testStoreName2, dbCheck);
+          db!,
+          testStoreName,
+          db!,
+          testStoreName2,
+          dbCheck,
+        );
       });
 
       test('two_stores_one_record_each', () async {
@@ -571,12 +651,17 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName2);
         }
 
-        db = await idbFactory.open(srcDbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          srcDbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
 
         // put one in src and one in dst that should get deleted
-        final txn =
-            db!.transaction([testStoreName, testStoreName2], idbModeReadWrite);
+        final txn = db!.transaction([
+          testStoreName,
+          testStoreName2,
+        ], idbModeReadWrite);
         var store = txn.objectStore(testStoreName);
         await (store.put('value1', 'key1'));
         final store2 = txn.objectStore(testStoreName2);
@@ -595,7 +680,12 @@ void defineTests(TestContext ctx) {
         }
 
         await dbCheckCopyStore(
-            db!, testStoreName, db!, testStoreName2, dbCheck);
+          db!,
+          testStoreName,
+          db!,
+          testStoreName2,
+          dbCheck,
+        );
       });
     });
 
@@ -603,15 +693,20 @@ void defineTests(TestContext ctx) {
       tearDown(dbTearDown);
 
       Future checkCopyDatabase(
-          Database db, Future Function(Database database) check) async {
+        Database db,
+        Future Function(Database database) check,
+      ) async {
         final dstDb = await copyDatabase(db, idbFactory, dstDbName!);
         expect(dstDb.name, dstDbName);
         await check(dstDb);
         dstDb.close();
       }
 
-      Future checkAll(Database db, Map expectedExport,
-          Future Function(Database database) check) async {
+      Future checkAll(
+        Database db,
+        Map expectedExport,
+        Future Function(Database database) check,
+      ) async {
         await check(db);
         await checkCopyDatabase(db, check);
         await dbCheckExportImport(db, expectedExport, check);
@@ -628,28 +723,22 @@ void defineTests(TestContext ctx) {
           expect(db.version, 1);
         }
 
-        await checkAll(
-            db!,
+        await checkAll(db!, {
+          'sembast_export': 1,
+          'version': 1,
+          'stores': [
             {
-              'sembast_export': 1,
-              'version': 1,
-              'stores': [
-                {
-                  'name': '_main',
-                  'keys': ['version'],
-                  'values': [1]
-                }
-              ]
+              'name': '_main',
+              'keys': ['version'],
+              'values': [1],
             },
-            dbCheck);
-        await dbCheckExportImportLines(
-            db!,
-            [
-              {'sembast_export': 1, 'version': 1},
-              {'store': '_main'},
-              ['version', 1]
-            ],
-            dbCheck);
+          ],
+        }, dbCheck);
+        await dbCheckExportImportLines(db!, [
+          {'sembast_export': 1, 'version': 1},
+          {'store': '_main'},
+          ['version', 1],
+        ], dbCheck);
       });
 
       test('all_types', () async {
@@ -660,8 +749,11 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName);
         }
 
-        db = await idbFactory.open(srcDbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          srcDbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
         final txn = db!.transaction(testStoreName, idbModeReadWrite);
         final store = txn.objectStore(testStoreName);
         var map = {
@@ -677,10 +769,10 @@ void defineTests(TestContext ctx) {
             {
               'sub': [
                 {
-                  'inner': [7, 8, 9]
-                }
-              ]
-            }
+                  'inner': [7, 8, 9],
+                },
+              ],
+            },
           ],
         };
         await store.put(map, 'my_key');
@@ -710,8 +802,8 @@ void defineTests(TestContext ctx) {
               'values': [
                 {'name': 'test_store'},
                 ['test_store'],
-                1
-              ]
+                1,
+              ],
             },
             {
               'name': 'test_store',
@@ -730,56 +822,53 @@ void defineTests(TestContext ctx) {
                     {
                       'sub': [
                         {
-                          'inner': [7, 8, 9]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
+                          'inner': [7, 8, 9],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         };
         await dbCheckExportImport(db!, expectedExport, dbCheck);
-        await dbCheckExportImportLines(
-            db!,
-            [
-              {'sembast_export': 1, 'version': 1},
-              {'store': '_main'},
-              [
-                'store_test_store',
-                {'name': 'test_store'}
-              ],
-              [
-                'stores',
-                ['test_store']
-              ],
-              ['version', 1],
-              {'store': 'test_store'},
-              [
-                'my_key',
+        await dbCheckExportImportLines(db!, [
+          {'sembast_export': 1, 'version': 1},
+          {'store': '_main'},
+          [
+            'store_test_store',
+            {'name': 'test_store'},
+          ],
+          [
+            'stores',
+            ['test_store'],
+          ],
+          ['version', 1],
+          {'store': 'test_store'},
+          [
+            'my_key',
+            {
+              'my_bool': true,
+              'my_date': {'@Timestamp': '2020-10-27T13:14:15.999Z'},
+              'my_int': 1,
+              'my_double': 1.5,
+              'my_blob': {'@Blob': 'AQID'},
+              'my_string': 'some text',
+              'my_list': [4, 5, 6],
+              'my_map': {'sub': 73},
+              'my_complex': [
                 {
-                  'my_bool': true,
-                  'my_date': {'@Timestamp': '2020-10-27T13:14:15.999Z'},
-                  'my_int': 1,
-                  'my_double': 1.5,
-                  'my_blob': {'@Blob': 'AQID'},
-                  'my_string': 'some text',
-                  'my_list': [4, 5, 6],
-                  'my_map': {'sub': 73},
-                  'my_complex': [
+                  'sub': [
                     {
-                      'sub': [
-                        {
-                          'inner': [7, 8, 9]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            ],
-            dbCheck);
+                      'inner': [7, 8, 9],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        ], dbCheck);
       });
 
       // safari does not support multiple stores - fakes
@@ -793,12 +882,17 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName2);
         }
 
-        db = await idbFactory.open(srcDbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          srcDbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
 
         // put one in src and one in dst that should get deleted
-        final txn =
-            db!.transaction([testStoreName, testStoreName2], idbModeReadWrite);
+        final txn = db!.transaction([
+          testStoreName,
+          testStoreName2,
+        ], idbModeReadWrite);
         var store = txn.objectStore(testStoreName);
         // Put 2 before to check the order
         await (store.put('value2', 'key2'));
@@ -812,8 +906,10 @@ void defineTests(TestContext ctx) {
         //dstDb = await copyDatabase(db, idbFactory, _dstDbName);
 
         Future dbCheck(Database db) async {
-          final txn =
-              db.transaction([testStoreName, testStoreName2], idbModeReadOnly);
+          final txn = db.transaction([
+            testStoreName,
+            testStoreName2,
+          ], idbModeReadOnly);
           store = txn.objectStore(testStoreName);
           expect(await store.getObject('key1'), 'value1');
           expect(await store.getObject('key2'), 'value2');
@@ -829,65 +925,59 @@ void defineTests(TestContext ctx) {
           await txn.completed;
         }
 
-        await checkAll(
-            db!,
+        await checkAll(db!, {
+          'sembast_export': 1,
+          'version': 1,
+          'stores': [
             {
-              'sembast_export': 1,
-              'version': 1,
-              'stores': [
-                {
-                  'name': '_main',
-                  'keys': [
-                    'store_test_store',
-                    'store_test_store_2',
-                    'stores',
-                    'version'
-                  ],
-                  'values': [
-                    {'name': 'test_store'},
-                    {'name': 'test_store_2'},
-                    ['test_store', 'test_store_2'],
-                    1
-                  ]
-                },
-                {
-                  'name': 'test_store',
-                  'keys': ['key1', 'key2'],
-                  'values': ['value1', 'value2']
-                },
-                {
-                  'name': 'test_store_2',
-                  'keys': ['key3'],
-                  'values': ['value3']
-                }
-              ]
-            },
-            dbCheck);
-        await dbCheckExportImportLines(
-            db!,
-            [
-              {'sembast_export': 1, 'version': 1},
-              {'store': '_main'},
-              [
+              'name': '_main',
+              'keys': [
                 'store_test_store',
-                {'name': 'test_store'}
-              ],
-              [
                 'store_test_store_2',
-                {'name': 'test_store_2'}
-              ],
-              [
                 'stores',
-                ['test_store', 'test_store_2']
+                'version',
               ],
-              ['version', 1],
-              {'store': 'test_store'},
-              ['key1', 'value1'],
-              ['key2', 'value2'],
-              {'store': 'test_store_2'},
-              ['key3', 'value3']
-            ],
-            dbCheck);
+              'values': [
+                {'name': 'test_store'},
+                {'name': 'test_store_2'},
+                ['test_store', 'test_store_2'],
+                1,
+              ],
+            },
+            {
+              'name': 'test_store',
+              'keys': ['key1', 'key2'],
+              'values': ['value1', 'value2'],
+            },
+            {
+              'name': 'test_store_2',
+              'keys': ['key3'],
+              'values': ['value3'],
+            },
+          ],
+        }, dbCheck);
+        await dbCheckExportImportLines(db!, [
+          {'sembast_export': 1, 'version': 1},
+          {'store': '_main'},
+          [
+            'store_test_store',
+            {'name': 'test_store'},
+          ],
+          [
+            'store_test_store_2',
+            {'name': 'test_store_2'},
+          ],
+          [
+            'stores',
+            ['test_store', 'test_store_2'],
+          ],
+          ['version', 1],
+          {'store': 'test_store'},
+          ['key1', 'value1'],
+          ['key2', 'value2'],
+          {'store': 'test_store_2'},
+          ['key3', 'value3'],
+        ], dbCheck);
       });
 
       // safari does not support multiple stores - fakes
@@ -899,8 +989,11 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, keyPath: ['my', 'key']);
         }
 
-        db = await idbFactory.open(srcDbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          srcDbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
 
         // put one in src and one in dst that should get deleted
         final txn = db!.transaction(testStoreName, idbModeReadWrite);
@@ -923,58 +1016,52 @@ void defineTests(TestContext ctx) {
           await txn.completed;
         }
 
-        await checkAll(
-            db!,
+        await checkAll(db!, {
+          'sembast_export': 1,
+          'version': 1,
+          'stores': [
             {
-              'sembast_export': 1,
-              'version': 1,
-              'stores': [
+              'name': '_main',
+              'keys': ['store_test_store', 'stores', 'version'],
+              'values': [
                 {
-                  'name': '_main',
-                  'keys': ['store_test_store', 'stores', 'version'],
-                  'values': [
-                    {
-                      'name': 'test_store',
-                      'keyPath': ['my', 'key']
-                    },
-                    ['test_store'],
-                    1
-                  ]
+                  'name': 'test_store',
+                  'keyPath': ['my', 'key'],
                 },
-                {
-                  'name': 'test_store',
-                  'keys': [1],
-                  'values': [
-                    {'my': 1, 'key': 1}
-                  ]
-                }
-              ]
-            },
-            dbCheck);
-        await dbCheckExportImportLines(
-            db!,
-            [
-              {'sembast_export': 1, 'version': 1},
-              {'store': '_main'},
-              [
-                'store_test_store',
-                {
-                  'name': 'test_store',
-                  'keyPath': ['my', 'key']
-                }
-              ],
-              [
-                'stores',
-                ['test_store']
-              ],
-              ['version', 1],
-              {'store': 'test_store'},
-              [
+                ['test_store'],
                 1,
-                {'my': 1, 'key': 1}
-              ]
-            ],
-            dbCheck);
+              ],
+            },
+            {
+              'name': 'test_store',
+              'keys': [1],
+              'values': [
+                {'my': 1, 'key': 1},
+              ],
+            },
+          ],
+        }, dbCheck);
+        await dbCheckExportImportLines(db!, [
+          {'sembast_export': 1, 'version': 1},
+          {'store': '_main'},
+          [
+            'store_test_store',
+            {
+              'name': 'test_store',
+              'keyPath': ['my', 'key'],
+            },
+          ],
+          [
+            'stores',
+            ['test_store'],
+          ],
+          ['version', 1],
+          {'store': 'test_store'},
+          [
+            1,
+            {'my': 1, 'key': 1},
+          ],
+        ], dbCheck);
       });
     });
   });

@@ -15,8 +15,8 @@ abstract class SdbVersionChangeEvent {
 }
 
 /// Callback for [SdbOpenDatabase.onVersionChange].
-typedef SdbOnVersionChangeCallback = FutureOr<void> Function(
-    SdbVersionChangeEvent event);
+typedef SdbOnVersionChangeCallback =
+    FutureOr<void> Function(SdbVersionChangeEvent event);
 
 /// Version change implementation.
 class SdbVersionChangeEventImpl implements SdbVersionChangeEvent {

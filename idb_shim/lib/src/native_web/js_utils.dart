@@ -116,7 +116,8 @@ extension IDBJsifyExtension on Object {
       return value.toJS;
     }
     throw UnsupportedError(
-        'Unsupported value: $value (type: ${value.runtimeType})');
+      'Unsupported value: $value (type: ${value.runtimeType})',
+    );
   }
 }
 
@@ -167,7 +168,8 @@ extension IDBDartifyExtension on JSAny {
     }
 
     throw UnsupportedError(
-        'Unsupported keyPath: $value (type: ${value.runtimeType})');
+      'Unsupported keyPath: $value (type: ${value.runtimeType})',
+    );
   }
 
   /// Convert keyPath to [String] or [`List<String>`]
@@ -185,12 +187,16 @@ extension IDBDartifyExtension on JSAny {
     } else if (value.isJSObject) {
       if (value.isA<JSArray>()) {
         var jsArray = value as JSArray;
-        var list = List.generate(jsArray.idbShimLength,
-            (index) => jsArray.getProperty(index.toJS)?.dartifyValueStrict());
+        var list = List.generate(
+          jsArray.idbShimLength,
+          (index) => jsArray.getProperty(index.toJS)?.dartifyValueStrict(),
+        );
         return list;
       } else if (value.isA<JSDate>()) {
-        return DateTime.fromMillisecondsSinceEpoch((value as JSDate).getTime(),
-            isUtc: true);
+        return DateTime.fromMillisecondsSinceEpoch(
+          (value as JSDate).getTime(),
+          isUtc: true,
+        );
       } else if (value.isA<JSArrayBuffer>()) {
         return (value as JSArrayBuffer).toDart.asUint8List();
       } else if (value.isA<JSUint8Array>()) {
@@ -214,7 +220,8 @@ extension IDBDartifyExtension on JSAny {
       }
     }
     throw UnsupportedError(
-        'Unsupported value: $value (type: ${value.runtimeType})');
+      'Unsupported value: $value (type: ${value.runtimeType})',
+    );
   }
 }
 

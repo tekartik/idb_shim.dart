@@ -13,8 +13,11 @@ import 'sdb_transaction_store.dart';
 import 'sdb_types.dart';
 
 /// SimpleDb transaction internal extension.
-extension SdbSingleStoreTransactionInternalExtension<K extends KeyBase,
-    V extends ValueBase> on SdbSingleStoreTransaction<K, V> {
+extension SdbSingleStoreTransactionInternalExtension<
+  K extends KeyBase,
+  V extends ValueBase
+>
+    on SdbSingleStoreTransaction<K, V> {
   /// Single store transaction implementation.
   SdbSingleStoreTransactionImpl<K, V> get impl =>
       this as SdbSingleStoreTransactionImpl<K, V>;
@@ -22,19 +25,18 @@ extension SdbSingleStoreTransactionInternalExtension<K extends KeyBase,
 
 /// SimpleDb single store transaction implementation.
 class SdbSingleStoreTransactionImpl<K extends KeyBase, V extends ValueBase>
-    extends SdbTransactionImpl implements SdbSingleStoreTransaction<K, V> {
+    extends SdbTransactionImpl
+    implements SdbSingleStoreTransaction<K, V> {
   @override
   final SdbTransactionStoreRefImpl<K, V> txnStore;
 
   /// Single store transaction implementation.
-  SdbSingleStoreTransactionImpl(
-    super.db,
-    super.mode,
-    this.txnStore,
-  ) {
+  SdbSingleStoreTransactionImpl(super.db, super.mode, this.txnStore) {
     txnStore.transaction = this;
-    idbTransaction =
-        db.idbDatabase.transaction(txnStore.name, idbTransactionMode(mode));
+    idbTransaction = db.idbDatabase.transaction(
+      txnStore.name,
+      idbTransactionMode(mode),
+    );
   }
 
   /// Get a single record.
@@ -46,7 +48,8 @@ class SdbSingleStoreTransactionImpl<K extends KeyBase, V extends ValueBase>
 
   /// run in a transaction.
   Future<T> run<T>(
-      Future<T> Function(SdbSingleStoreTransaction<K, V> txn) callback) async {
+    Future<T> Function(SdbSingleStoreTransaction<K, V> txn) callback,
+  ) async {
     var result = callback(this);
     await completed;
     return result;
@@ -59,21 +62,34 @@ class SdbSingleStoreTransactionImpl<K extends KeyBase, V extends ValueBase>
   Future<void> deleteImpl(K key) => txnStore.delete(key);
 
   /// Find records.
-  Future<List<SdbRecordSnapshot<K, V>>> findRecordsImpl(
-          {SdbBoundaries<K>? boundaries, int? offset, int? limit}) =>
-      txnStore.findRecords(
-          boundaries: boundaries, offset: offset, limit: limit);
+  Future<List<SdbRecordSnapshot<K, V>>> findRecordsImpl({
+    SdbBoundaries<K>? boundaries,
+    int? offset,
+    int? limit,
+  }) => txnStore.findRecords(
+    boundaries: boundaries,
+    offset: offset,
+    limit: limit,
+  );
 
   /// Find records.
-  Future<List<SdbRecordKey<K, V>>> findRecordKeysImpl(
-          {SdbBoundaries<K>? boundaries, int? offset, int? limit}) =>
-      txnStore.findRecordKeys(
-          boundaries: boundaries, offset: offset, limit: limit);
+  Future<List<SdbRecordKey<K, V>>> findRecordKeysImpl({
+    SdbBoundaries<K>? boundaries,
+    int? offset,
+    int? limit,
+  }) => txnStore.findRecordKeys(
+    boundaries: boundaries,
+    offset: offset,
+    limit: limit,
+  );
 }
 
 /// Transaction store reference internal extension.
-extension SdbTransactionStoreRefInternalExtension<K extends KeyBase,
-    V extends ValueBase> on SdbTransactionStoreRef<K, V> {
+extension SdbTransactionStoreRefInternalExtension<
+  K extends KeyBase,
+  V extends ValueBase
+>
+    on SdbTransactionStoreRef<K, V> {
   /// Transaction store reference implementation.
   SdbTransactionStoreRefImpl<K, V> get impl =>
       this as SdbTransactionStoreRefImpl<K, V>;
@@ -128,7 +144,8 @@ class SdbTransactionStoreRefImpl<K extends KeyBase, V extends ValueBase>
       return (await idbObjectStore.add(value, key)) as K;
     } else {
       throw UnsupportedError(
-          'Key type $K not supported for add, please specify a key');
+        'Key type $K not supported for add, please specify a key',
+      );
     }
   }
 
@@ -143,12 +160,16 @@ class SdbTransactionStoreRefImpl<K extends KeyBase, V extends ValueBase>
   }
 
   /// Find records.
-  Future<List<SdbRecordSnapshot<K, V>>> findRecordsImpl(
-      {SdbBoundaries<K>? boundaries, int? offset, int? limit}) async {
+  Future<List<SdbRecordSnapshot<K, V>>> findRecordsImpl({
+    SdbBoundaries<K>? boundaries,
+    int? offset,
+    int? limit,
+  }) async {
     var cursor = idbObjectStore.openCursor(
-        autoAdvance: true,
-        direction: idb.idbDirectionNext,
-        range: idbKeyRangeFromBoundaries(boundaries));
+      autoAdvance: true,
+      direction: idb.idbDirectionNext,
+      range: idbKeyRangeFromBoundaries(boundaries),
+    );
     var rows = await idb.cursorToList(cursor, offset, limit);
     return rows.map((row) {
       var key = row.key as K;
@@ -158,12 +179,16 @@ class SdbTransactionStoreRefImpl<K extends KeyBase, V extends ValueBase>
   }
 
   /// Find record keys.
-  Future<List<SdbRecordKey<K, V>>> findRecordKeysImpl(
-      {SdbBoundaries<K>? boundaries, int? offset, int? limit}) async {
+  Future<List<SdbRecordKey<K, V>>> findRecordKeysImpl({
+    SdbBoundaries<K>? boundaries,
+    int? offset,
+    int? limit,
+  }) async {
     var cursor = idbObjectStore.openKeyCursor(
-        autoAdvance: true,
-        direction: idb.idbDirectionNext,
-        range: idbKeyRangeFromBoundaries(boundaries));
+      autoAdvance: true,
+      direction: idb.idbDirectionNext,
+      range: idbKeyRangeFromBoundaries(boundaries),
+    );
     var rows = await idb.keyCursorToList(cursor, offset, limit);
     return rows.map((row) {
       var key = row.key as K;
@@ -178,8 +203,11 @@ class SdbTransactionStoreRefImpl<K extends KeyBase, V extends ValueBase>
   }
 
   /// Delete records.
-  Future<void> deleteRecordsImpl(
-      {SdbBoundaries<K>? boundaries, int? offset, int? limit}) async {
+  Future<void> deleteRecordsImpl({
+    SdbBoundaries<K>? boundaries,
+    int? offset,
+    int? limit,
+  }) async {
     var keyRange = idbKeyRangeFromBoundaries(boundaries);
 
     if (offset == null && limit == null) {
@@ -190,7 +218,10 @@ class SdbTransactionStoreRefImpl<K extends KeyBase, V extends ValueBase>
       }
     } else {
       var cursor = idbObjectStore.openCursor(
-          autoAdvance: true, direction: idb.idbDirectionNext, range: keyRange);
+        autoAdvance: true,
+        direction: idb.idbDirectionNext,
+        range: keyRange,
+      );
       await streamWithOffsetAndLimit(cursor, offset, limit).listen((cursor) {
         cursor.delete();
       }).asFuture<void>();
@@ -217,19 +248,24 @@ class SdbMultiStoreTransactionImpl extends SdbTransactionImpl
   /// Multi store transaction implementation.
   SdbMultiStoreTransactionImpl(super.db, super.mode, this.stores) {
     idbTransaction = db.idbDatabase.transactionList(
-        stores.map((store) => store.name).toList(), idbTransactionMode(mode));
+      stores.map((store) => store.name).toList(),
+      idbTransactionMode(mode),
+    );
   }
 
   /// Get a transaction store.
-  SdbTransactionStoreRef<K, V>
-      txnStoreImpl<K extends KeyBase, V extends ValueBase>(
-          SdbStoreRef<K, V> store) {
+  SdbTransactionStoreRef<K, V> txnStoreImpl<
+    K extends KeyBase,
+    V extends ValueBase
+  >(SdbStoreRef<K, V> store) {
     var txnStore = _txnStoreMap[store];
     if (txnStore == null) {
       for (var existingStore in stores) {
         if (existingStore == store) {
-          txnStore = _txnStoreMap[store] =
-              SdbTransactionStoreRefImpl<K, V>(store.impl);
+          txnStore =
+              _txnStoreMap[store] = SdbTransactionStoreRefImpl<K, V>(
+                store.impl,
+              );
           txnStore.transaction = this;
           break;
         }
@@ -239,12 +275,14 @@ class SdbMultiStoreTransactionImpl extends SdbTransactionImpl
       return txnStore as SdbTransactionStoreRef<K, V>;
     }
     throw StateError(
-        'Store $store not found in transaction(${stores.map((e) => e.name).join(', ')})');
+      'Store $store not found in transaction(${stores.map((e) => e.name).join(', ')})',
+    );
   }
 
   /// Run in a transaction.
   Future<T> run<T>(
-      Future<T> Function(SdbMultiStoreTransaction txn) callback) async {
+    Future<T> Function(SdbMultiStoreTransaction txn) callback,
+  ) async {
     var result = callback(this);
     await completed;
     return result;

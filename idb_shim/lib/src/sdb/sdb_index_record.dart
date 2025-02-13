@@ -6,8 +6,11 @@ import 'sdb_store.dart';
 import 'sdb_types.dart';
 
 /// Index record reference.
-abstract class SdbIndexRecordRef<K extends KeyBase, V extends ValueBase,
-    I extends IndexBase> {
+abstract class SdbIndexRecordRef<
+  K extends KeyBase,
+  V extends ValueBase,
+  I extends IndexBase
+> {
   /// Index reference.
   SdbIndexRef<K, V, I> get index;
 
@@ -19,8 +22,12 @@ abstract class SdbIndexRecordRef<K extends KeyBase, V extends ValueBase,
 }
 
 /// Index record reference extension.
-extension SdbIndexRecordRefExtension<K extends KeyBase, V extends ValueBase,
-    I extends IndexBase> on SdbIndexRecordRef<K, V, I> {
+extension SdbIndexRecordRefExtension<
+  K extends KeyBase,
+  V extends ValueBase,
+  I extends IndexBase
+>
+    on SdbIndexRecordRef<K, V, I> {
   /// Get a single record.
   Future<SdbIndexRecordSnapshot<K, V, I>?> get(SdbClient client) =>
       impl.getImpl(client);

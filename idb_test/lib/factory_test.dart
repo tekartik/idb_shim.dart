@@ -37,13 +37,13 @@ void defineTests(TestContext ctx) {
       expect(idbFactory.cmp(3.64, 3.45), 1);
 
       expect(
-          idbFactory.cmp(
-              Uint8List.fromList([1, 2]), Uint8List.fromList([1, 3])),
-          -1);
+        idbFactory.cmp(Uint8List.fromList([1, 2]), Uint8List.fromList([1, 3])),
+        -1,
+      );
       expect(
-          idbFactory.cmp(
-              Uint8List.fromList([1, 3]), Uint8List.fromList([1, 2])),
-          1);
+        idbFactory.cmp(Uint8List.fromList([1, 3]), Uint8List.fromList([1, 2])),
+        1,
+      );
 
       var hasFailed = false;
 
@@ -60,8 +60,10 @@ void defineTests(TestContext ctx) {
       // Fail to compare DateTime
       hasFailed = false;
       try {
-        idbFactory.cmp(DateTime.fromMillisecondsSinceEpoch(1),
-            DateTime.fromMillisecondsSinceEpoch(2));
+        idbFactory.cmp(
+          DateTime.fromMillisecondsSinceEpoch(1),
+          DateTime.fromMillisecondsSinceEpoch(2),
+        );
       } catch (_) {
         // DataError: Failed to execute 'cmp' on 'IDBFactory': The parameter is not a valid key
         hasFailed = true;

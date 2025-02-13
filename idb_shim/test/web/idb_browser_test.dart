@@ -10,7 +10,9 @@ void main() {
       final native = idbFactoryNative;
 
       expect(
-          native.runtimeType.toString(), 'IdbFactoryNativeBrowserWrapperImpl');
+        native.runtimeType.toString(),
+        'IdbFactoryNativeBrowserWrapperImpl',
+      );
       expect(native, idbFactoryBrowser);
     });
 

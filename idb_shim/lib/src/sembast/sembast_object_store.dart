@@ -68,7 +68,8 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     if (keyPath != null) {
       if (key != null) {
         throw ArgumentError(
-            "The object store uses in-line keys and the key parameter '$key' was provided");
+          "The object store uses in-line keys and the key parameter '$key' was provided",
+        );
       }
       if (value is Map) {
         key = value.getKeyValue(keyPath);
@@ -77,7 +78,8 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
     if (key == null && (!autoIncrement)) {
       throw DatabaseError(
-          'neither keyPath nor autoIncrement set and trying to add object without key');
+        'neither keyPath nor autoIncrement set and trying to add object without key',
+      );
     }
 
     return key;
@@ -109,20 +111,24 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
         var fieldValue = value.getKeyValue(indexMeta.keyPath);
         if (fieldValue != null) {
           final finder = sembast.Finder(
-              filter: keyFilter(indexMeta.keyPath, fieldValue, false),
-              limit: 1);
-          futures.add(sembastStore
-              .findFirst(sembastClient, finder: finder)
-              .then((record) {
-            // not ourself
-            if ((record != null) &&
-                (record.key != key) //
-                &&
-                ((!indexMeta.multiEntry) && indexMeta.unique)) {
-              throw DatabaseError(
-                  "key '$fieldValue' already exists in $record for index $indexMeta");
-            }
-          }));
+            filter: keyFilter(indexMeta.keyPath, fieldValue, false),
+            limit: 1,
+          );
+          futures.add(
+            sembastStore.findFirst(sembastClient, finder: finder).then((
+              record,
+            ) {
+              // not ourself
+              if ((record != null) &&
+                  (record.key != key) //
+                  &&
+                  ((!indexMeta.multiEntry) && indexMeta.unique)) {
+                throw DatabaseError(
+                  "key '$fieldValue' already exists in $record for index $indexMeta",
+                );
+              }
+            }),
+          );
         }
       }
     }
@@ -161,8 +167,10 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   Future<Object?> txnCompositeFindIdByKey(Object key) async {
-    var existing = await sembastStore.findKey(sembastClient,
-        finder: compositeFindByKeyFinder(key));
+    var existing = await sembastStore.findKey(
+      sembastClient,
+      finder: compositeFindByKeyFinder(key),
+    );
     return existing;
   }
 
@@ -202,31 +210,39 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   @override
   Future<int> count([keyOrRange]) {
     return inTransaction(() {
-      return sembastStore.count(sembastClient,
-          filter: _storeKeyOrRangeFilter(keyOrRange));
+      return sembastStore.count(
+        sembastClient,
+        filter: _storeKeyOrRangeFilter(keyOrRange),
+      );
     });
   }
 
   @override
   Future<List<Object>> getAll([Object? query, int? count]) {
     return inTransaction(() async {
-      return (await txnGetAllSnapshots(query, count))
-          .map((r) => recordToValue(r)!)
-          .toList(growable: false);
+      return (await txnGetAllSnapshots(
+        query,
+        count,
+      )).map((r) => recordToValue(r)!).toList(growable: false);
     });
   }
 
-  Future<List<sembast.RecordSnapshot<Object, Object>>> txnGetAllSnapshots(
-      [Object? query, int? count]) async {
+  Future<List<sembast.RecordSnapshot<Object, Object>>> txnGetAllSnapshots([
+    Object? query,
+    int? count,
+  ]) async {
     return (await sembastStore.find(
       sembastClient,
-      finder:
-          sembast.Finder(filter: _storeKeyOrRangeFilter(query), limit: count),
+      finder: sembast.Finder(
+        filter: _storeKeyOrRangeFilter(query),
+        limit: count,
+      ),
     ));
   }
 
   Future<sembast.RecordSnapshot<Object, Object>?> txnCompositeGetSnapshot(
-      Object key) async {
+    Object key,
+  ) async {
     return (await sembastStore.findFirst(
       sembastClient,
       finder: compositeFindByKeyFinder(key),
@@ -237,8 +253,10 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   Future<List<Object>> txnGetAllIds([Object? query, int? count]) async {
     return (await sembastStore.findKeys(
       sembastClient,
-      finder:
-          sembast.Finder(filter: _storeKeyOrRangeFilter(query), limit: count),
+      finder: sembast.Finder(
+        filter: _storeKeyOrRangeFilter(query),
+        limit: count,
+      ),
     ));
   }
 
@@ -246,9 +264,10 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   Future<List<Object>> getAllKeys([Object? query, int? count]) {
     return inTransaction(() async {
       if (hasCompositeKey) {
-        var keys = (await txnGetAllSnapshots(query, count))
-            .map((r) => (r as Map).getKeyValue(keyPath)!)
-            .toList(growable: false);
+        var keys = (await txnGetAllSnapshots(
+          query,
+          count,
+        )).map((r) => (r as Map).getKeyValue(keyPath)!).toList(growable: false);
         return keys;
       }
       return await txnGetAllIds(query, count);
@@ -262,7 +281,8 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
       // // Native: InvalidAccessError: Failed to execute 'createIndex' on 'IDBObjectStore': The keyPath argument was an array and the multiEntry option is true.
       if (multiEntry ?? false) {
         throw DatabaseError(
-            'The keyPath argument $keyPath cannot be an array if the multiEntry option is true');
+          'The keyPath argument $keyPath cannot be an array if the multiEntry option is true',
+        );
       }
     }
     final indexMeta = IdbIndexMeta(name, keyPath, unique, multiEntry);
@@ -284,12 +304,17 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   Future<Object?> txnDelete(Object keyOrRange) {
     if (keyOrRange is KeyRange) {
-      return sembastStore.delete(sembastClient,
-          finder: sembast.Finder(
-              filter: keyRangeFilter(keyPath, keyOrRange, false)));
+      return sembastStore.delete(
+        sembastClient,
+        finder: sembast.Finder(
+          filter: keyRangeFilter(keyPath, keyOrRange, false),
+        ),
+      );
     } else if (hasCompositeKey) {
-      return sembastStore.delete(sembastClient,
-          finder: compositeFindByKeyFinder(keyOrRange));
+      return sembastStore.delete(
+        sembastClient,
+        finder: compositeFindByKeyFinder(keyOrRange),
+      );
     } else {
       return sembastStore.record(keyOrRange).delete(sembastClient);
     }
@@ -306,7 +331,8 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   Future<sembast.RecordSnapshot<Object, Object>?> txnGetSnapshot(
-      Object key) async {
+    Object key,
+  ) async {
     sembast.RecordSnapshot<Object, Object>? record;
     if (hasCompositeKey) {
       record = await txnCompositeGetSnapshot(key);
@@ -349,8 +375,12 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   dynamic get keyField => keyPath ?? sembast.Field.key;
 
   @override
-  Stream<CursorWithValue> openCursor(
-      {key, KeyRange? range, String? direction, bool? autoAdvance}) {
+  Stream<CursorWithValue> openCursor({
+    key,
+    KeyRange? range,
+    String? direction,
+    bool? autoAdvance,
+  }) {
     final cursorMeta = IdbCursorMeta(key, range, direction, autoAdvance);
     final ctlr = StoreCursorWithValueControllerSembast(this, cursorMeta);
 
@@ -362,8 +392,12 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   @override
-  Stream<Cursor> openKeyCursor(
-      {key, KeyRange? range, String? direction, bool? autoAdvance}) {
+  Stream<Cursor> openKeyCursor({
+    key,
+    KeyRange? range,
+    String? direction,
+    bool? autoAdvance,
+  }) {
     final cursorMeta = IdbCursorMeta(key, range, direction, autoAdvance);
     var ctlr = StoreKeyCursorControllerSembast(this, cursorMeta);
 

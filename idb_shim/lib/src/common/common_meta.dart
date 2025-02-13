@@ -112,7 +112,8 @@ class IdbDatabaseMeta {
   void createObjectStore(IdbObjectStoreMeta store) {
     if (versionChangeTransaction == null) {
       throw StateError(
-          'cannot create objectStore outside of a versionChangedEvent');
+        'cannot create objectStore outside of a versionChangedEvent',
+      );
     }
     versionChangeTransaction!.createdStores.add(store);
     putObjectStore(store);
@@ -121,7 +122,8 @@ class IdbDatabaseMeta {
   void deleteObjectStore(String storeName) {
     if (versionChangeTransaction == null) {
       throw StateError(
-          'cannot delete objectStore outside of a versionChangedEvent');
+        'cannot delete objectStore outside of a versionChangedEvent',
+      );
     }
     // Get the store and add it to the change list so that
     // we store object store on quit
@@ -131,7 +133,8 @@ class IdbDatabaseMeta {
       _stores.remove(storeName);
     } else {
       throw DatabaseStoreNotFoundError(
-          DatabaseStoreNotFoundError.storeMessage(storeName));
+        DatabaseStoreNotFoundError.storeMessage(storeName),
+      );
     }
   }
 
@@ -145,20 +148,23 @@ class IdbDatabaseMeta {
     if (storeNameOrStoreNames is String) {
       if (!_containsStore(storeNameOrStoreNames)) {
         throw DatabaseStoreNotFoundError(
-            DatabaseStoreNotFoundError.storeMessage(storeNameOrStoreNames));
+          DatabaseStoreNotFoundError.storeMessage(storeNameOrStoreNames),
+        );
       }
       return IdbTransactionMeta([storeNameOrStoreNames], mode);
     } else if (storeNameOrStoreNames is List) {
       if (storeNameOrStoreNames.isEmpty) {
         throw DatabaseError(
-            'InvalidAccessError: The storeNames parameter is empty');
+          'InvalidAccessError: The storeNames parameter is empty',
+        );
       }
       final list = storeNameOrStoreNames.cast<String>();
 
       for (final storeName in list) {
         if (!_containsStore(storeName)) {
           throw DatabaseStoreNotFoundError(
-              DatabaseStoreNotFoundError.storeMessage(storeNameOrStoreNames));
+            DatabaseStoreNotFoundError.storeMessage(storeNameOrStoreNames),
+          );
         }
       }
       return IdbTransactionMeta(storeNameOrStoreNames.cast<String>(), mode);
@@ -276,11 +282,14 @@ class IdbObjectStoreMeta {
   }
 
   IdbObjectStoreMeta.fromObjectStore(ObjectStore objectStore)
-      : this(objectStore.name, objectStore.keyPath, objectStore.autoIncrement);
+    : this(objectStore.name, objectStore.keyPath, objectStore.autoIncrement);
 
-  IdbObjectStoreMeta(this.name, this.keyPath, bool? autoIncrement,
-      [List<IdbIndexMeta>? indecies])
-      : autoIncrement = (autoIncrement == true) {
+  IdbObjectStoreMeta(
+    this.name,
+    this.keyPath,
+    bool? autoIncrement, [
+    List<IdbIndexMeta>? indecies,
+  ]) : autoIncrement = (autoIncrement == true) {
     if (indecies != null) {
       for (var indexMeta in indecies) {
         putIndex(indexMeta);
@@ -297,13 +306,13 @@ class IdbObjectStoreMeta {
   }
 
   IdbObjectStoreMeta.fromMap(Map<String, Object?> map) //
-      : this(
-            //
-            map[nameKey] as String, //
-            _keyPathAsStringOrList(map[keyPathKey]),
-            map[autoIncrementKey] as bool?,
-            IdbIndexMeta.fromMapList(
-                ((map[indeciesKey]) as List?)?.cast<Map>()));
+    : this(
+        //
+        map[nameKey] as String, //
+        _keyPathAsStringOrList(map[keyPathKey]),
+        map[autoIncrementKey] as bool?,
+        IdbIndexMeta.fromMapList(((map[indeciesKey]) as List?)?.cast<Map>()),
+      );
 
   IdbObjectStoreMeta clone() {
     return IdbObjectStoreMeta(name, keyPath, autoIncrement);
@@ -371,7 +380,7 @@ class IdbCursorMeta {
   String get direction => _ascending ? idbDirectionNext : idbDirectionPrev;
 
   IdbCursorMeta(this.key, this.range, String? direction, bool? autoAdvance)
-      : autoAdvance = autoAdvance ?? false {
+    : autoAdvance = autoAdvance ?? false {
     direction ??= idbDirectionNext;
 
     switch (direction) {
@@ -389,7 +398,8 @@ class IdbCursorMeta {
     }
     if (key is KeyRange) {
       throw ArgumentError(
-          'Invalid keyRange $key as key argument, use the range argument');
+        'Invalid keyRange $key as key argument, use the range argument',
+      );
     }
   }
 
@@ -441,8 +451,8 @@ class IdbIndexMeta {
   final bool multiEntry;
 
   IdbIndexMeta(this.name, this.keyPath, bool? unique, bool? multiEntry)
-      : multiEntry = (multiEntry == true),
-        unique = (unique == true);
+    : multiEntry = (multiEntry == true),
+      unique = (unique == true);
 
   static List<IdbIndexMeta>? fromMapList(List<Map>? list) {
     if (list == null) {
@@ -457,15 +467,16 @@ class IdbIndexMeta {
 
   factory IdbIndexMeta.fromMap(Map<String, Object?> map) {
     var meta = IdbIndexMeta(
-        map['name'] as String, //
-        _keyPathAsStringOrList(map['keyPath'] as Object),
-        map['unique'] as bool?, //
-        map['multiEntry'] as bool?);
+      map['name'] as String, //
+      _keyPathAsStringOrList(map['keyPath'] as Object),
+      map['unique'] as bool?, //
+      map['multiEntry'] as bool?,
+    );
     return meta;
   }
 
   IdbIndexMeta.fromIndex(Index index)
-      : this(index.name, index.keyPath, index.unique, index.multiEntry);
+    : this(index.name, index.keyPath, index.unique, index.multiEntry);
 
   Map toDebugMap() {
     return toMap();

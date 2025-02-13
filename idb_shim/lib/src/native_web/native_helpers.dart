@@ -14,28 +14,32 @@ import 'native_error.dart';
 /// Copied from dart sdk
 ///
 Stream<Cursor> cursorStreamFromResult(
-    idb.IDBRequest request, bool? autoAdvance) {
-// TODO: need to guarantee that the controller provides the values
-// immediately as waiting until the next tick will cause the transaction to
-// close.
+  idb.IDBRequest request,
+  bool? autoAdvance,
+) {
+  // TODO: need to guarantee that the controller provides the values
+  // immediately as waiting until the next tick will cause the transaction to
+  // close.
   var controller = StreamController<Cursor>(sync: true);
 
-//TODO: Report stacktrace once issue 4061 is resolved.
-  request.onerror = (idb.Event event) {
-    controller.addError(DatabaseErrorNative.domException(request.error!));
-  }.toJS;
+  //TODO: Report stacktrace once issue 4061 is resolved.
+  request.onerror =
+      (idb.Event event) {
+        controller.addError(DatabaseErrorNative.domException(request.error!));
+      }.toJS;
 
-  request.onsuccess = (idb.Event event) {
-    var cursor = request.result as idb.IDBCursor?;
-    if (cursor == null) {
-      controller.close();
-    } else {
-      controller.add(CursorNative(cursor));
-      if (autoAdvance == true && controller.hasListener) {
-        cursor.continue_();
-      }
-    }
-  }.toJS;
+  request.onsuccess =
+      (idb.Event event) {
+        var cursor = request.result as idb.IDBCursor?;
+        if (cursor == null) {
+          controller.close();
+        } else {
+          controller.add(CursorNative(cursor));
+          if (autoAdvance == true && controller.hasListener) {
+            cursor.continue_();
+          }
+        }
+      }.toJS;
   return controller.stream;
 }
 
@@ -45,35 +49,44 @@ Stream<Cursor> cursorStreamFromResult(
 /// Copied from dart sdk
 ///
 Stream<CursorWithValue> cursorWithValueStreamFromResult(
-    idb.IDBRequest request, bool? autoAdvance) {
+  idb.IDBRequest request,
+  bool? autoAdvance,
+) {
   // TODO: need to guarantee that the controller provides the values
   // immediately as waiting until the next tick will cause the transaction to
   // close.
   var controller = StreamController<CursorWithValue>(sync: true);
 
-  request.onerror = (idb.Event event) {
-    controller.addError(DatabaseErrorNative.domException(request.error!));
-  }.toJS;
+  request.onerror =
+      (idb.Event event) {
+        controller.addError(DatabaseErrorNative.domException(request.error!));
+      }.toJS;
 
-  request.onsuccess = (idb.Event event) {
-    var cursor = request.result as idb.IDBCursorWithValue?;
-    if (cursor == null) {
-      controller.close();
-    } else {
-      controller.add(CursorWithValueNative(cursor));
-      if (autoAdvance == true && controller.hasListener) {
-        cursor.continue_();
-      }
-    }
-  }.toJS;
+  request.onsuccess =
+      (idb.Event event) {
+        var cursor = request.result as idb.IDBCursorWithValue?;
+        if (cursor == null) {
+          controller.close();
+        } else {
+          controller.add(CursorWithValueNative(cursor));
+          if (autoAdvance == true && controller.hasListener) {
+            cursor.continue_();
+          }
+        }
+      }.toJS;
   return controller.stream;
 }
 
 ///
 /// Creates a stream of cursors over the records in this object store.
 ///
-Stream<Cursor> storeOpenKeyCursor(idb.IDBObjectStore objectStore,
-    {Object? key, KeyRange? range, String? direction, bool? autoAdvance}) {
+Stream<Cursor> storeOpenKeyCursor(
+  idb.IDBObjectStore objectStore, {
+  Object? key,
+  KeyRange? range,
+  String? direction,
+  bool? autoAdvance,
+}) {
   dynamic keyOrRange;
   if (key != null) {
     if (range != null) {
@@ -96,8 +109,11 @@ Stream<Cursor> storeOpenKeyCursor(idb.IDBObjectStore objectStore,
 ///
 /// [query] is a native query
 ///
-Future<List<Object>> storeGetAll(idb.IDBObjectStore objectStore,
-    [dynamic query, int? count]) async {
+Future<List<Object>> storeGetAll(
+  idb.IDBObjectStore objectStore, [
+  dynamic query,
+  int? count,
+]) async {
   return catchAsyncNativeError(() {
     idb.IDBRequest request;
     if (count != null) {
@@ -112,8 +128,11 @@ Future<List<Object>> storeGetAll(idb.IDBObjectStore objectStore,
 ///
 /// [query] is a native query
 ///
-Future<List<Object>> storeGetAllKeys(idb.IDBObjectStore objectStore,
-    [Object? query, int? count]) async {
+Future<List<Object>> storeGetAllKeys(
+  idb.IDBObjectStore objectStore, [
+  Object? query,
+  int? count,
+]) async {
   return catchAsyncNativeError(() {
     idb.IDBRequest request;
     if (count != null) {
@@ -128,8 +147,11 @@ Future<List<Object>> storeGetAllKeys(idb.IDBObjectStore objectStore,
 ///
 /// [query] is a native query
 ///
-Future<List<Object>> indexGetAll(idb.IDBIndex index,
-    [Object? query, int? count]) {
+Future<List<Object>> indexGetAll(
+  idb.IDBIndex index, [
+  Object? query,
+  int? count,
+]) {
   return catchAsyncNativeError(() {
     idb.IDBRequest request;
     if (count != null) {
@@ -144,8 +166,11 @@ Future<List<Object>> indexGetAll(idb.IDBIndex index,
 ///
 /// [query] is a native query
 ///
-Future<List<Object>> indexGetAllKeys(idb.IDBIndex index,
-    [Object? query, int? count]) {
+Future<List<Object>> indexGetAllKeys(
+  idb.IDBIndex index, [
+  Object? query,
+  int? count,
+]) {
   return catchAsyncNativeError(() {
     idb.IDBRequest request;
     if (count != null) {

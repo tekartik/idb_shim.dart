@@ -50,8 +50,11 @@ void defineTests(TestContext ctx) {
           db.createObjectStore(testStoreName, autoIncrement: true);
         }
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
       });
 
       tearDown(dbTearDown);
@@ -115,15 +118,15 @@ void defineTests(TestContext ctx) {
                 'sub': [
                   [
                     [1],
-                    [2, 1]
+                    [2, 1],
                   ],
                   [null],
-                  'text'
+                  'text',
                 ],
-                'null_sub': null
-              }
-            ]
-          }
+                'null_sub': null,
+              },
+            ],
+          },
         ];
         for (var value in allValues) {
           await testValue(value);
@@ -131,7 +134,7 @@ void defineTests(TestContext ctx) {
         await testValue([
           null,
           {'test': null},
-          ...allValues
+          ...allValues,
         ]);
       });
 

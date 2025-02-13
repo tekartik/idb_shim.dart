@@ -56,8 +56,11 @@ Object toSembastValue(Object value) {
   try {
     converted = _toSembastValue(value)!;
   } on ArgumentError catch (e) {
-    throw ArgumentError.value(e.invalidValue,
-        '${(e.invalidValue as Object).runtimeType} in $value', 'not supported');
+    throw ArgumentError.value(
+      e.invalidValue,
+      '${(e.invalidValue as Object).runtimeType} in $value',
+      'not supported',
+    );
   }
 
   /// Ensure root is Map<String, Object?> if only Map
@@ -108,8 +111,11 @@ Object fromSembastValue(Object value) {
   try {
     converted = _fromSembastValue(value)!;
   } on ArgumentError catch (e) {
-    throw ArgumentError.value(e.invalidValue,
-        '${(e.invalidValue as Object).runtimeType} in $value', 'not supported');
+    throw ArgumentError.value(
+      e.invalidValue,
+      '${(e.invalidValue as Object).runtimeType} in $value',
+      'not supported',
+    );
   }
 
   /// Ensure root is Map<String, Object?> if only Map

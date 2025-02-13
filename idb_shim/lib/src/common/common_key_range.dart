@@ -49,8 +49,12 @@ class IdbKeyRange implements KeyRange {
   }
 
   /// Creates a new key range with upper and lower bounds.
-  IdbKeyRange.bound(this._lowerBound, this._upperBound,
-      [bool lowerOpen = false, bool upperOpen = false]) {
+  IdbKeyRange.bound(
+    this._lowerBound,
+    this._upperBound, [
+    bool lowerOpen = false,
+    bool upperOpen = false,
+  ]) {
     _lowerBoundOpen = lowerOpen;
     _upperBoundOpen = upperOpen;
     _checkLowerBoundDef();
@@ -60,7 +64,8 @@ class IdbKeyRange implements KeyRange {
       // Extra compare value not keys as it might not be bounded
       if (compareValue(_lowerBound, _upperBound) == 0) {
         throw StateError(
-            'DataError: The lower key and upper key are equal and one of the bounds is open ($this)');
+          'DataError: The lower key and upper key are equal and one of the bounds is open ($this)',
+        );
       }
     }
   }
@@ -94,8 +99,10 @@ class IdbKeyRange implements KeyRange {
     } else if (value1 is List) {
       final list = value1;
       for (var i = 0; i < list.length; i++) {
-        var diff =
-            _compareValue(list[i] as Object, (value2 as List)[i] as Object);
+        var diff = _compareValue(
+          list[i] as Object,
+          (value2 as List)[i] as Object,
+        );
         if (diff != 0) {
           return diff;
         }
@@ -103,7 +110,8 @@ class IdbKeyRange implements KeyRange {
       return 0;
     } else {
       throw UnsupportedError(
-          "key '$value1' of type ${value1.runtimeType} not supported");
+        "key '$value1' of type ${value1.runtimeType} not supported",
+      );
     }
   }
 

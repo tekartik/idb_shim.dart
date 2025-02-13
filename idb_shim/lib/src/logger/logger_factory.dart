@@ -7,9 +7,7 @@ import 'package:idb_shim/src/common/common_factory.dart';
 import 'package:idb_shim/src/logger/logger_database.dart';
 import 'package:idb_shim/src/logger/logger_transaction.dart';
 
-enum IdbFactoryLoggerType {
-  all,
-}
+enum IdbFactoryLoggerType { all }
 
 /// Logger wrapper
 abstract class IdbFactoryLogger extends IdbFactory {
@@ -26,8 +24,10 @@ abstract class IdbFactoryLogger extends IdbFactory {
 }
 
 /// Get or create new logger
-IdbFactoryLogger getIdbFactoryLogger(IdbFactory factory,
-    {IdbFactoryLoggerType type = IdbFactoryLoggerType.all}) {
+IdbFactoryLogger getIdbFactoryLogger(
+  IdbFactory factory, {
+  IdbFactoryLoggerType type = IdbFactoryLoggerType.all,
+}) {
   if (factory is IdbFactoryWrapperImpl) {
     factory.type = type;
     return factory;
@@ -49,12 +49,17 @@ class _VersionChangeEventLogger implements VersionChangeEvent {
   final IdbFactoryLogger factory;
   final int id;
   @override
-  late final DatabaseLogger database =
-      DatabaseLogger(factory: factory, idbDatabase: delegate.database, id: id);
+  late final DatabaseLogger database = DatabaseLogger(
+    factory: factory,
+    idbDatabase: delegate.database,
+    id: id,
+  );
 
   @override
-  late final TransactionLogger transaction =
-      TransactionLogger(database, delegate.transaction);
+  late final TransactionLogger transaction = TransactionLogger(
+    database,
+    delegate.transaction,
+  );
 
   final VersionChangeEvent delegate;
 
@@ -104,24 +109,29 @@ class IdbFactoryWrapperImpl extends IdbFactoryBase implements IdbFactoryLogger {
   String get name => idbFactoryNameNative;
 
   @override
-  Future<Database> open(String dbName,
-      {int? version,
-      OnUpgradeNeededFunction? onUpgradeNeeded,
-      OnBlockedFunction? onBlocked}) async {
+  Future<Database> open(
+    String dbName, {
+    int? version,
+    OnUpgradeNeededFunction? onUpgradeNeeded,
+    OnBlockedFunction? onBlocked,
+  }) async {
     var id = ++_id;
-    log('opening $dbName${version != null ? ', version: $version' : ''}',
-        id: id);
+    log(
+      'opening $dbName${version != null ? ', version: $version' : ''}',
+      id: id,
+    );
     FutureOr<void> onUpgradeNeededLogger(VersionChangeEvent event) {
       log('onUpgradeNeeded $event', id: id);
       return onUpgradeNeeded!(_VersionChangeEventLogger(this, event, id));
     }
 
     try {
-      var db = await nativeFactory.open(dbName,
-          version: version,
-          onUpgradeNeeded:
-              onUpgradeNeeded != null ? onUpgradeNeededLogger : null,
-          onBlocked: onBlocked);
+      var db = await nativeFactory.open(
+        dbName,
+        version: version,
+        onUpgradeNeeded: onUpgradeNeeded != null ? onUpgradeNeededLogger : null,
+        onBlocked: onBlocked,
+      );
       log('opened $dbName');
       return DatabaseLogger(factory: this, idbDatabase: db, id: id);
     } catch (e) {
@@ -131,12 +141,16 @@ class IdbFactoryWrapperImpl extends IdbFactoryBase implements IdbFactoryLogger {
   }
 
   @override
-  Future<IdbFactory> deleteDatabase(String dbName,
-      {OnBlockedFunction? onBlocked}) async {
+  Future<IdbFactory> deleteDatabase(
+    String dbName, {
+    OnBlockedFunction? onBlocked,
+  }) async {
     log('deleting $dbName');
     try {
-      var result =
-          await nativeFactory.deleteDatabase(dbName, onBlocked: onBlocked);
+      var result = await nativeFactory.deleteDatabase(
+        dbName,
+        onBlocked: onBlocked,
+      );
       log('deleted $dbName');
       return result;
     } catch (e) {
@@ -180,9 +194,10 @@ extension IdbFactoryLoggerDebugExt on IdbFactory {
   ///
   /// [maxLogCount] default to 100
   @Deprecated('Debug/dev mode')
-  IdbFactory debugWrapInLogger(
-      {IdbFactoryLoggerType type = IdbFactoryLoggerType.all,
-      int? maxLogCount}) {
+  IdbFactory debugWrapInLogger({
+    IdbFactoryLoggerType type = IdbFactoryLoggerType.all,
+    int? maxLogCount,
+  }) {
     IdbFactoryLogger.debugMaxLogCount = maxLogCount ?? 100;
     var factory = getIdbFactoryLogger(this, type: type);
     return factory;

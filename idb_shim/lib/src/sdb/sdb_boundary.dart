@@ -45,13 +45,15 @@ abstract class SdbBoundaries<T extends Object> {
       DbBoundariesImpl(lower, upper);
 
   /// Create boundaries from an lower (included) and upper (excluded) boundary.
-  factory SdbBoundaries.values(T? lower, T? upper,
-          {bool? includeLower, bool? includeUpper}) =>
-      DbBoundariesImpl(
-          lower == null ? null : SdbLowerBoundary(lower, include: includeLower),
-          upper == null
-              ? null
-              : SdbUpperBoundary(upper, include: includeUpper));
+  factory SdbBoundaries.values(
+    T? lower,
+    T? upper, {
+    bool? includeLower,
+    bool? includeUpper,
+  }) => DbBoundariesImpl(
+    lower == null ? null : SdbLowerBoundary(lower, include: includeLower),
+    upper == null ? null : SdbUpperBoundary(upper, include: includeUpper),
+  );
 
   /// Lower only boundary.
   factory SdbBoundaries.lowerValue(T lower) =>

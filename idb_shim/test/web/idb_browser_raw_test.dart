@@ -18,9 +18,9 @@ void main() {
     late Object createObjectStoreError;
     // Open the database and create an object store
     var openRequest = window.indexedDB.open(dbName, 1);
-    EventStreamProviders.upgradeNeededEvent
-        .forTarget(openRequest)
-        .listen((IDBVersionChangeEvent event) {
+    EventStreamProviders.upgradeNeededEvent.forTarget(openRequest).listen((
+      IDBVersionChangeEvent event,
+    ) {
       var db = openRequest.result as IDBDatabase;
       db.createObjectStore('test');
 

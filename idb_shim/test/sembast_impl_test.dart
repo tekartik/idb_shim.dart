@@ -33,12 +33,18 @@ void main() {
 
         void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
-          db.createObjectStore(testStoreName,
-              keyPath: keyPath, autoIncrement: true);
+          db.createObjectStore(
+            testStoreName,
+            keyPath: keyPath,
+            autoIncrement: true,
+          );
         }
 
-        db = await idbFactory.open(dbName,
-            version: 1, onUpgradeNeeded: onUpgradeNeeded);
+        db = await idbFactory.open(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: onUpgradeNeeded,
+        );
       }
 
       tearDown(dbTearDown);
@@ -54,8 +60,8 @@ void main() {
           'name': 'test_store',
           'keys': [1],
           'values': [
-            {'test': 'test_value', 'my_key': 1}
-          ]
+            {'test': 'test_value', 'my_key': 1},
+          ],
         });
       });
 
@@ -69,8 +75,8 @@ void main() {
           'name': 'test_store',
           'keys': [1],
           'values': [
-            {'test': 'test_value', 'my_key': 1}
-          ]
+            {'test': 'test_value', 'my_key': 1},
+          ],
         });
       });
     });

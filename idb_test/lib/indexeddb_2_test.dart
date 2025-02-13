@@ -17,11 +17,15 @@ const String _dbName = 'Test2';
 const String _storeName = 'TEST';
 const int _version = 1;
 
-Future testReadWrite(idb.IdbFactory idbFactory, Object key, Object value,
-    Object? Function(Object? expected, Object? actual) check,
-    [String dbName = _dbName,
-    String storeName = _storeName,
-    int version = _version]) async {
+Future testReadWrite(
+  idb.IdbFactory idbFactory,
+  Object key,
+  Object value,
+  Object? Function(Object? expected, Object? actual) check, [
+  String dbName = _dbName,
+  String storeName = _storeName,
+  int version = _version,
+]) async {
   void createObjectStore(idb.VersionChangeEvent e) {
     e.database.createObjectStore(storeName);
     // expect(store, isNotNull);
@@ -32,8 +36,11 @@ Future testReadWrite(idb.IdbFactory idbFactory, Object key, Object value,
   await idbFactory.deleteDatabase(dbName);
 
   try {
-    db = await idbFactory.open(dbName,
-        version: version, onUpgradeNeeded: createObjectStore);
+    db = await idbFactory.open(
+      dbName,
+      version: version,
+      onUpgradeNeeded: createObjectStore,
+    );
     var transaction = db.transactionList([storeName], 'readwrite');
     // ignore: unawaited_futures
     transaction.objectStore(storeName).put(value, key);
@@ -96,15 +103,16 @@ void defineTests(TestContext ctx) {
     var l1 = [1, 2, 3];
     var l2 = [
       const [1, 2, 3],
-      const [1, 2, 3]
+      const [1, 2, 3],
     ];
     verifyGraph([l1, l1], l2);
     expect(
-        () => verifyGraph([
-              [1, 2, 3],
-              [1, 2, 3]
-            ], l2),
-        throwsA(anything));
+      () => verifyGraph([
+        [1, 2, 3],
+        [1, 2, 3],
+      ], l2),
+      throwsA(anything),
+    );
 
     verifyGraph(cyclicList, cyclicList);
   });
@@ -118,11 +126,11 @@ void defineTests(TestContext ctx) {
     go('test_simple_splay', obj4);
     go('const_array_1', const [
       [1],
-      [2]
+      [2],
     ]);
     skipGo('const_array_dag', const [
       [1],
-      [1]
+      [1],
     ]);
     skipGo('array_deferred_copy', [1, 2, 3, obj3, obj3, 6]);
     skipGo('array_deferred_copy_2', [
@@ -130,7 +138,7 @@ void defineTests(TestContext ctx) {
       2,
       3,
       [4, 5, obj3],
-      [obj3, 6]
+      [obj3, 6],
     ]);
     skipGo('cyclic_list', cyclicList);
     go('non-native lists', nonNativeListData);

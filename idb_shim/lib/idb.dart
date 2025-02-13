@@ -168,8 +168,12 @@ abstract class ObjectStore {
   /// Note that this method must be called only from a VersionChange transaction
   /// mode callback.
   ///
-  Index createIndex(String name, Object keyPath,
-      {bool? unique, bool? multiEntry});
+  Index createIndex(
+    String name,
+    Object keyPath, {
+    bool? unique,
+    bool? multiEntry,
+  });
 
   ///
   /// Creates a structured clone of the value, and stores the cloned value in
@@ -234,14 +238,22 @@ abstract class ObjectStore {
   ///
   /// Used for iterating through an object store with a cursor.
   ///
-  Stream<CursorWithValue> openCursor(
-      {Object? key, KeyRange? range, String? direction, bool? autoAdvance});
+  Stream<CursorWithValue> openCursor({
+    Object? key,
+    KeyRange? range,
+    String? direction,
+    bool? autoAdvance,
+  });
 
   ///
   /// Used for iterating through an object store with a key cursor.
   ///
-  Stream<Cursor> openKeyCursor(
-      {Object? key, KeyRange? range, String? direction, bool? autoAdvance});
+  Stream<Cursor> openKeyCursor({
+    Object? key,
+    KeyRange? range,
+    String? direction,
+    bool? autoAdvance,
+  });
 
   ///
   /// returns the total number of records that match the provided key or
@@ -310,8 +322,11 @@ abstract class Database {
   ///
   /// This method can be called only within a versionchange transaction.
   ///
-  ObjectStore createObjectStore(String name,
-      {Object? keyPath, bool? autoIncrement});
+  ObjectStore createObjectStore(
+    String name, {
+    Object? keyPath,
+    bool? autoIncrement,
+  });
 
   ///
   /// returns a transaction object (Transaction) containing the
@@ -423,12 +438,20 @@ abstract class Index {
   Future<Object?> getKey(Object key);
 
   /// Creates a cursor over the specified key range.
-  Stream<CursorWithValue> openCursor(
-      {Object? key, KeyRange? range, String? direction, bool? autoAdvance});
+  Stream<CursorWithValue> openCursor({
+    Object? key,
+    KeyRange? range,
+    String? direction,
+    bool? autoAdvance,
+  });
 
   /// Creates a key cursor over the specified key range.
-  Stream<Cursor> openKeyCursor(
-      {Object? key, KeyRange? range, String? direction, bool? autoAdvance});
+  Stream<Cursor> openKeyCursor({
+    Object? key,
+    KeyRange? range,
+    String? direction,
+    bool? autoAdvance,
+  });
 
   ///
   /// returns all objects in the index matching the specified parameter
@@ -536,8 +559,8 @@ abstract class VersionChangeEvent {
 abstract class Event {}
 
 /// OnUpgrade function.
-typedef OnUpgradeNeededFunction = FutureOr<void> Function(
-    VersionChangeEvent event);
+typedef OnUpgradeNeededFunction =
+    FutureOr<void> Function(VersionChangeEvent event);
 
 /// OnBlocked function.
 typedef OnBlockedFunction = void Function(Event event);
@@ -573,9 +596,12 @@ abstract class KeyRange {
       IdbKeyRange.upperBound(upperBound, open);
 
   /// Creates a new key range with upper and lower bounds.
-  factory KeyRange.bound(Object lowerBound, Object upperBound,
-          [bool lowerOpen = false, bool upperOpen = false]) =>
-      IdbKeyRange.bound(lowerBound, upperBound, lowerOpen, upperOpen);
+  factory KeyRange.bound(
+    Object lowerBound,
+    Object upperBound, [
+    bool lowerOpen = false,
+    bool upperOpen = false,
+  ]) => IdbKeyRange.bound(lowerBound, upperBound, lowerOpen, upperOpen);
 
   /// Lower bound of the key range.
   Object? get lower => null;
@@ -612,10 +638,12 @@ abstract class IdbFactory {
   ///
   /// May trigger upgradeneeded, blocked or versionchange events.
   ///
-  Future<Database> open(String dbName,
-      {int? version,
-      OnUpgradeNeededFunction? onUpgradeNeeded,
-      OnBlockedFunction? onBlocked});
+  Future<Database> open(
+    String dbName, {
+    int? version,
+    OnUpgradeNeededFunction? onUpgradeNeeded,
+    OnBlockedFunction? onBlocked,
+  });
 
   ///
   /// compares two values as keys to determine equality and ordering for
@@ -629,8 +657,10 @@ abstract class IdbFactory {
   ///  Will trigger an upgradedneeded event and, if any other tabs have open
   ///  connections to the database, a blocked event.
   ///
-  Future<IdbFactory> deleteDatabase(String name,
-      {OnBlockedFunction? onBlocked});
+  Future<IdbFactory> deleteDatabase(
+    String name, {
+    OnBlockedFunction? onBlocked,
+  });
 
   ///
   /// if getDatabaseNames can be called

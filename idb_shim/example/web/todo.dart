@@ -70,7 +70,7 @@ class TodoList {
     return store
         .put({
           'text': text,
-          'timeStamp': DateTime.now().millisecondsSinceEpoch.toString()
+          'timeStamp': DateTime.now().millisecondsSinceEpoch.toString(),
         })
         .then((_) => _getAllTodoItems())
         .catchError((e) => _onError);
@@ -103,8 +103,9 @@ class TodoList {
 
     var deleteControl = HTMLAnchorElement();
     deleteControl.text = '[Delete]';
-    deleteControl.onClick
-        .listen((e) => _deleteTodo(todoItem['timeStamp'] as String));
+    deleteControl.onClick.listen(
+      (e) => _deleteTodo(todoItem['timeStamp'] as String),
+    );
 
     var item = HTMLLIElement();
     item.appendChild(textDisplay);
@@ -144,7 +145,8 @@ Future<void> main() async {
   idbFactory = idb.getIdbFactory(idbFactoryName);
   if (idbFactory == null) {
     window.alert(
-        "No idbFactory of type '$idbFactoryName' supported on this browser");
+      "No idbFactory of type '$idbFactoryName' supported on this browser",
+    );
   } else {
     document.querySelector('#idb span')!.textContent =
         "Using '${idbFactory!.name}'";

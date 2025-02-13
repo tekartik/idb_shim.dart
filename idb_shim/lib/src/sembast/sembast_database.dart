@@ -28,8 +28,11 @@ class _SembastVersionChangeEvent extends IdbVersionChangeEventBase {
       request.transaction as TransactionSembast;
 
   _SembastVersionChangeEvent(
-      DatabaseSembast database, int? oldVersion, this.newVersion) //
-      : oldVersion = oldVersion ?? 0 {
+    DatabaseSembast database,
+    int? oldVersion,
+    this.newVersion,
+  ) //
+  : oldVersion = oldVersion ?? 0 {
     // handle = too to catch programatical errors
     if (this.oldVersion >= newVersion) {
       throw StateError('cannot downgrade from $oldVersion to $newVersion');
@@ -65,7 +68,9 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
   final mainStore = sembast.StoreRef<String, Object>.main();
 
   static Future<DatabaseSembast> fromDatabase(
-      IdbFactory factory, sembast.Database db) async {
+    IdbFactory factory,
+    sembast.Database db,
+  ) async {
     final idbDb = DatabaseSembast._(factory);
     idbDb.db = db;
     var version = await idbDb._readMetaVersion();
@@ -111,8 +116,9 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
       if (storeList != null) {
         // for now load all at once
         final storeNames = (storeList as List).cast<String>();
-        await _loadStoresMeta(storeNames)
-            .then((List<IdbObjectStoreMeta> storeMetas) {
+        await _loadStoresMeta(storeNames).then((
+          List<IdbObjectStoreMeta> storeMetas,
+        ) {
           storeMetas.forEach((IdbObjectStoreMeta store) {
             meta.putObjectStore(store);
           });
@@ -123,21 +129,27 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
   }
 
   Future<sembast.Database?> open(
-      int? newVersion, OnUpgradeNeededFunction? onUpgradeNeeded) async {
+    int? newVersion,
+    OnUpgradeNeededFunction? onUpgradeNeeded,
+  ) async {
     late int previousVersion;
 
     // devPrint('open ${onUpgradeNeeded} ${onUpgradeNeeded != null ? 'NOT NULL': 'NULL'}');
     if (sembastDebug) {
       idbLog(
-          'open $onUpgradeNeeded ${onUpgradeNeeded != null ? 'NOT NULL' : 'NULL'}');
+        'open $onUpgradeNeeded ${onUpgradeNeeded != null ? 'NOT NULL' : 'NULL'}',
+      );
     }
     // Open the sembast database
-    db = await sembastFactory.openDatabase(factory.getDbPath(name), version: 1,
-        onVersionChanged: (db, oldVersion, newVersion) {
-      if (sembastDebug) {
-        idbLog('changing ${db.path} $oldVersion -> $newVersion');
-      }
-    });
+    db = await sembastFactory.openDatabase(
+      factory.getDbPath(name),
+      version: 1,
+      onVersionChanged: (db, oldVersion, newVersion) {
+        if (sembastDebug) {
+          idbLog('changing ${db.path} $oldVersion -> $newVersion');
+        }
+      },
+    );
     try {
       previousVersion = await _readMetaVersion();
       // devPrint('Opening $name previous $previousVersion new $newVersion version $version');
@@ -150,17 +162,21 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
         late Set<IdbObjectStoreMeta> deletedStores;
 
         await meta.onUpgradeNeeded(() async {
-          versionChangeTransaction =
-              TransactionSembast(this, meta.versionChangeTransaction);
+          versionChangeTransaction = TransactionSembast(
+            this,
+            meta.versionChangeTransaction,
+          );
           // could be null when opening an empty database
           if (onUpgradeNeeded != null) {
             await onUpgradeNeeded(
-                _SembastVersionChangeEvent(this, previousVersion, newVersion!));
+              _SembastVersionChangeEvent(this, previousVersion, newVersion!),
+            );
           }
 
           await versionChangeTransaction!.completed;
-          changedStores =
-              Set.from(meta.versionChangeTransaction!.createdStores);
+          changedStores = Set.from(
+            meta.versionChangeTransaction!.createdStores,
+          );
           changedStores.addAll(meta.versionChangeTransaction!.updatedStores);
           deletedStores = meta.versionChangeTransaction!.deletedStores;
         });
@@ -175,10 +191,12 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
 
           // Handle deleted object store
           if (changedStores.isNotEmpty || deletedStores.isNotEmpty) {
-            await mainStore.record('stores').put(
-                txn,
-                List<String>.from(objectStoreNames)
-                  ..sort()); // Sort the names to always have the same export
+            await mainStore
+                .record('stores')
+                .put(
+                  txn,
+                  List<String>.from(objectStoreNames)..sort(),
+                ); // Sort the names to always have the same export
           }
 
           for (final storeMeta in changedStores) {
@@ -208,8 +226,11 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
   }
 
   @override
-  ObjectStore createObjectStore(String name,
-      {Object? keyPath, bool? autoIncrement}) {
+  ObjectStore createObjectStore(
+    String name, {
+    Object? keyPath,
+    bool? autoIncrement,
+  }) {
     final storeMeta = IdbObjectStoreMeta(name, keyPath, autoIncrement);
     meta.createObjectStore(storeMeta);
     return ObjectStoreSembast(versionChangeTransaction, storeMeta);

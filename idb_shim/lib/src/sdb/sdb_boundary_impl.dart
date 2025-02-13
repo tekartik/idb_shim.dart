@@ -81,13 +81,21 @@ idb.KeyRange? idbKeyRangeFromBoundaries(SdbBoundaries? boundaries) {
       return null;
     } else {
       return idb.KeyRange.upperBound(
-          indexKeyToIdbKey(upper.value), !upper.include);
+        indexKeyToIdbKey(upper.value),
+        !upper.include,
+      );
     }
   } else if (upper == null) {
     return idb.KeyRange.lowerBound(
-        indexKeyToIdbKey(lower.value), !lower.include);
+      indexKeyToIdbKey(lower.value),
+      !lower.include,
+    );
   } else {
-    return idb.KeyRange.bound(indexKeyToIdbKey(lower.value),
-        indexKeyToIdbKey(upper.value), !lower.include, !upper.include);
+    return idb.KeyRange.bound(
+      indexKeyToIdbKey(lower.value),
+      indexKeyToIdbKey(upper.value),
+      !lower.include,
+      !upper.include,
+    );
   }
 }

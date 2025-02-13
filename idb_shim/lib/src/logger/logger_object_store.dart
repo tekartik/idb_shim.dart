@@ -18,7 +18,10 @@ class ObjectStoreLogger extends ObjectStore {
   ObjectStore idbObjectStore;
 
   ObjectStoreLogger(
-      this.idbDatabaseLogger, this.idbTransactionLogger, this.idbObjectStore);
+    this.idbDatabaseLogger,
+    this.idbTransactionLogger,
+    this.idbObjectStore,
+  );
 
   void log(String message) {
     if (idbTransactionLogger != null) {
@@ -40,11 +43,17 @@ class ObjectStoreLogger extends ObjectStore {
   Index createIndex(String name, keyPath, {bool? unique, bool? multiEntry}) {
     var isUnique = unique ?? false;
     var isMultiEntry = multiEntry ?? false;
-    log('createIndex $name on ${this.name} keyPath $keyPath${(isUnique || isMultiEntry) ? ''
-        '(${isUnique ? 'unique' : ''}'
-        '${isMultiEntry ? (isUnique ? ', multi' : 'multi') : ''})' : ''}');
-    return idbObjectStore.createIndex(name, keyPath,
-        unique: unique, multiEntry: multiEntry);
+    log(
+      'createIndex $name on ${this.name} keyPath $keyPath${(isUnique || isMultiEntry) ? ''
+              '(${isUnique ? 'unique' : ''}'
+              '${isMultiEntry ? (isUnique ? ', multi' : 'multi') : ''})' : ''}',
+    );
+    return idbObjectStore.createIndex(
+      name,
+      keyPath,
+      unique: unique,
+      multiEntry: multiEntry,
+    );
   }
 
   @override
@@ -85,7 +94,9 @@ class ObjectStoreLogger extends ObjectStore {
   Future<Object> put(Object value, [Object? key]) async {
     try {
       var result = await idbObjectStore.put(value, key);
-      log('put(${_debugSafeValue(value)}${key != null ? ', ${_debugSafeKey(key)}' : ''}): ${_debugSafeValue(result)}');
+      log(
+        'put(${_debugSafeValue(value)}${key != null ? ', ${_debugSafeKey(key)}' : ''}): ${_debugSafeValue(result)}',
+      );
       return result;
     } catch (e) {
       err('put(${_debugSafeValue(value)}, ${_debugSafeKey(key)}) failed $e');
@@ -104,22 +115,30 @@ class ObjectStoreLogger extends ObjectStore {
   }
 
   @override
-  Stream<CursorWithValue> openCursor(
-          {key, KeyRange? range, String? direction, bool? autoAdvance}) =>
-      idbObjectStore.openCursor(
-          key: key,
-          range: range,
-          direction: direction, //
-          autoAdvance: autoAdvance);
+  Stream<CursorWithValue> openCursor({
+    key,
+    KeyRange? range,
+    String? direction,
+    bool? autoAdvance,
+  }) => idbObjectStore.openCursor(
+    key: key,
+    range: range,
+    direction: direction, //
+    autoAdvance: autoAdvance,
+  );
 
   @override
-  Stream<Cursor> openKeyCursor(
-          {key, KeyRange? range, String? direction, bool? autoAdvance}) =>
-      idbObjectStore.openKeyCursor(
-          key: key,
-          range: range,
-          direction: direction,
-          autoAdvance: autoAdvance);
+  Stream<Cursor> openKeyCursor({
+    key,
+    KeyRange? range,
+    String? direction,
+    bool? autoAdvance,
+  }) => idbObjectStore.openKeyCursor(
+    key: key,
+    range: range,
+    direction: direction,
+    autoAdvance: autoAdvance,
+  );
 
   @override
   Future<int> count([dynamic keyOrRange]) => idbObjectStore.count(keyOrRange);
