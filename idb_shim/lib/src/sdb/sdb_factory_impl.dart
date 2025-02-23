@@ -5,25 +5,30 @@ import 'sdb_database_impl.dart';
 import 'sdb_open_impl.dart';
 import 'sdb_version.dart';
 
+/// Compat
+typedef SdbFactoryImpl = SdbFactoryIdb;
+
 /// Sdb Factory implementation.
-class SdbFactoryImpl implements SdbFactory {
+class SdbFactoryIdb implements SdbFactory {
   /// IndexedDB factory.
   final idb.IdbFactory idbFactory;
 
   /// Sdb Factory implementation.
-  SdbFactoryImpl(this.idbFactory);
+  SdbFactoryIdb(this.idbFactory);
 
   /// Delete the database.
-  Future<void> deleteDatabaseImpl(String name) {
+  @override
+  Future<void> deleteDatabase(String name) {
     return idbFactory.deleteDatabase(name);
   }
 
   /// Open the database.
-  Future<SdbDatabase> openDatabaseImpl(
-    String name,
+  @override
+  Future<SdbDatabase> openDatabase(
+    String name, {
     int? version,
     SdbOnVersionChangeCallback? onVersionChange,
-  ) async {
+  }) async {
     final db = SdbDatabaseImpl(this, name, version);
     var onUpgradeNeeded =
         onVersionChange != null

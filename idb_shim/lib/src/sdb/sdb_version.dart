@@ -12,6 +12,13 @@ abstract class SdbVersionChangeEvent {
 
   /// The opened database.
   SdbOpenDatabase get db;
+
+  /// Event passed to [SdbOnVersionChangeCallback].
+  factory SdbVersionChangeEvent({
+    required SdbOpenDatabase db,
+    required int oldVersion,
+    required int newVersion,
+  }) => SdbVersionChangeEventImpl(db, oldVersion, newVersion);
 }
 
 /// Callback for [SdbOpenDatabase.onVersionChange].

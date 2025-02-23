@@ -1,10 +1,10 @@
+import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
 import 'package:idb_shim/src/utils/idb_utils.dart';
 
 import 'import_idb.dart' as idb;
 import 'sdb_boundary.dart';
 import 'sdb_boundary_impl.dart';
 import 'sdb_client.dart';
-import 'sdb_client_impl.dart';
 import 'sdb_database.dart';
 import 'sdb_database_impl.dart';
 import 'sdb_index.dart';

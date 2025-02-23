@@ -2,6 +2,7 @@ import 'package:idb_shim/src/sdb/sdb.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_store_impl.dart';
 
 import 'sdb_client.dart';
+// ignore: unused_import
 import 'sdb_client_impl.dart';
 import 'sdb_database_impl.dart';
 import 'sdb_record_snapshot_impl.dart';

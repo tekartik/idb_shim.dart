@@ -16,7 +16,7 @@ extension SdbDatabaseInternalExtension on SdbDatabase {
 }
 
 /// SimpleDb implementation.
-class SdbDatabaseImpl implements SdbDatabase {
+class SdbDatabaseImpl with SdbDatabaseDefaultMixin implements SdbDatabase {
   /// Factory.
   final SdbFactoryImpl factory;
 
@@ -33,7 +33,8 @@ class SdbDatabaseImpl implements SdbDatabase {
   SdbDatabaseImpl(this.factory, this.name, this.version);
 
   /// Transaction.
-  Future<T> inStoreTransactionImpl<T, K extends KeyBase, V extends ValueBase>(
+  @override
+  Future<T> inStoreTransaction<T, K extends KeyBase, V extends ValueBase>(
     SdbStoreRef<K, V> store,
     SdbTransactionMode mode,
     Future<T> Function(SdbSingleStoreTransaction<K, V> txn) callback,
@@ -41,6 +42,15 @@ class SdbDatabaseImpl implements SdbDatabase {
     var txnStore = SdbTransactionStoreRefImpl<K, V>(store.impl);
     var txn = SdbSingleStoreTransactionImpl(impl, mode, txnStore);
     return txn.run(callback);
+  }
+
+  @override
+  Future<T> inStoresTransaction<T, K extends KeyBase, V extends ValueBase>(
+    List<SdbStoreRef> stores,
+    SdbTransactionMode mode,
+    Future<T> Function(SdbMultiStoreTransaction txn) callback,
+  ) {
+    return inStoresTransactionImpl(stores, mode, callback);
   }
 
   /// Run a transaction.
@@ -54,7 +64,8 @@ class SdbDatabaseImpl implements SdbDatabase {
   }
 
   /// Close the database.
-  Future<void> closeImpl() async {
+  @override
+  Future<void> close() async {
     idbDatabase.close();
   }
 }

@@ -1,4 +1,6 @@
 import 'package:idb_shim/idb.dart' as idb;
+import 'package:idb_shim/src/sdb/sdb_client.dart';
+import 'package:idb_shim/src/sdb/sdb_database.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_store_impl.dart';
 
 import 'sdb_database_impl.dart';
@@ -13,7 +15,7 @@ extension SdbTransactionInternalExtension on SdbTransaction {
 }
 
 /// Transaction implementation.
-class SdbTransactionImpl implements SdbTransaction {
+class SdbTransactionImpl implements SdbTransaction, SdbClientInterface {
   /// Database.
   final SdbDatabaseImpl db;
 
@@ -35,6 +37,14 @@ class SdbTransactionImpl implements SdbTransaction {
     V extends ValueBase
   >(SdbStoreRefImpl<K, V> store) {
     return SdbTransactionStoreRefImpl<K, V>.txn(this, store);
+  }
+
+  @override
+  Future<T> clientHandleDbOrTxn<T>(
+    Future<T> Function(SdbDatabase db) dbFn,
+    Future<T> Function(SdbTransaction txn) txnFn,
+  ) {
+    return txnFn(this);
   }
 }
 

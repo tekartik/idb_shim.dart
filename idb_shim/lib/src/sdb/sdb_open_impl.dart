@@ -4,6 +4,7 @@ import 'sdb_database_impl.dart';
 import 'sdb_index.dart';
 import 'sdb_index_impl.dart';
 import 'sdb_open.dart';
+import 'sdb_store.dart';
 import 'sdb_store_impl.dart';
 import 'sdb_types.dart';
 
@@ -22,10 +23,29 @@ class SdbOpenDatabaseImpl implements SdbOpenDatabase {
   final idb.Transaction idbTransaction;
 
   /// Stores.
-  final stores = <SdbOpenStoreRefImpl>[];
+  final stores = <SdbOpenStoreRefIdb>[];
 
   /// Open database implementation.
   SdbOpenDatabaseImpl(this.db, this.idbTransaction);
+
+  /// Create a store.
+  /// auto increment is set to true if not set for int keys
+  @override
+  SdbOpenStoreRef<K, V> createStore<K extends KeyBase, V extends ValueBase>(
+    SdbStoreRef<K, V> store, {
+    String? keyPath,
+    bool? autoIncrement,
+  }) => impl.addStoreImpl<K, V>(
+    store.impl,
+    keyPath: keyPath,
+    autoIncrement: autoIncrement,
+  );
+
+  /// get an existing store.
+  @override
+  SdbOpenStoreRef<K, V> objectStore<K extends KeyBase, V extends ValueBase>(
+    SdbStoreRef<K, V> store,
+  ) => impl.getStoreImpl<K, V>(store.impl);
 
   /// Add a store.
   SdbOpenStoreRef<K, V> addStoreImpl<K extends KeyBase, V extends ValueBase>(
@@ -38,7 +58,7 @@ class SdbOpenDatabaseImpl implements SdbOpenDatabase {
       keyPath: keyPath,
       autoIncrement: autoIncrement ?? store.isIntKey,
     );
-    var storeOpen = SdbOpenStoreRefImpl<K, V>(this, store, idbStore);
+    var storeOpen = SdbOpenStoreRefIdb<K, V>(this, store, idbStore);
     stores.add(storeOpen);
     return storeOpen;
   }
@@ -48,7 +68,7 @@ class SdbOpenDatabaseImpl implements SdbOpenDatabase {
     SdbStoreRefImpl<K, V> store,
   ) {
     var idbStore = idbTransaction.objectStore(store.name);
-    var storeOpen = SdbOpenStoreRefImpl<K, V>(this, store, idbStore);
+    var storeOpen = SdbOpenStoreRefIdb<K, V>(this, store, idbStore);
     return storeOpen;
   }
 }
@@ -60,11 +80,11 @@ extension SdbOpenStoreRefInternalExtension<
 >
     on SdbOpenStoreRef<K, V> {
   /// Open store reference implementation.
-  SdbOpenStoreRefImpl<K, V> get impl => this as SdbOpenStoreRefImpl<K, V>;
+  SdbOpenStoreRefIdb<K, V> get impl => this as SdbOpenStoreRefIdb<K, V>;
 }
 
 /// Open store reference implementation.
-class SdbOpenStoreRefImpl<K extends KeyBase, V extends ValueBase>
+class SdbOpenStoreRefIdb<K extends KeyBase, V extends ValueBase>
     implements SdbOpenStoreRef<K, V> {
   /// The open database.
   final SdbOpenDatabase db;
@@ -79,7 +99,63 @@ class SdbOpenStoreRefImpl<K extends KeyBase, V extends ValueBase>
   final indexes = <SdbOpenIndexRefImpl>[];
 
   /// Open store reference implementation.
-  SdbOpenStoreRefImpl(this.db, this.store, this.idbObjectStore);
+  SdbOpenStoreRefIdb(this.db, this.store, this.idbObjectStore);
+
+  /// Create an index.
+  @override
+  SdbOpenIndexRef<K, V, I> createIndex<I extends IndexBase>(
+    SdbIndex1Ref<K, V, I> index,
+    String indexKeyPath,
+  ) => impl.createIndexImpl<I>(index.impl, indexKeyPath);
+
+  /// Create an index on 2 fields.
+  @override
+  SdbOpenIndexRef<K, V, (I1, I2)>
+  createIndex2<I1 extends IndexBase, I2 extends IndexBase>(
+    SdbIndex2Ref<K, V, I1, I2> index,
+    String indexKeyPath1,
+    String indexKeyPath2,
+  ) => impl.createIndexImpl<(I1, I2)>(index.impl, [
+    indexKeyPath1,
+    indexKeyPath2,
+  ]);
+
+  /// Create an index on 3 fields.
+  @override
+  SdbOpenIndexRef<K, V, (I1, I2, I3)> createIndex3<
+    I1 extends IndexBase,
+    I2 extends IndexBase,
+    I3 extends IndexBase
+  >(
+    SdbIndex3Ref<K, V, I1, I2, I3> index,
+    String indexKeyPath1,
+    String indexKeyPath2,
+    String indexKeyPath3,
+  ) => impl.createIndexImpl<(I1, I2, I3)>(index.impl, [
+    indexKeyPath1,
+    indexKeyPath2,
+    indexKeyPath3,
+  ]);
+
+  /// Create an index on 4 fields.
+  @override
+  SdbOpenIndexRef<K, V, (I1, I2, I3, I4)> createIndex4<
+    I1 extends IndexBase,
+    I2 extends IndexBase,
+    I3 extends IndexBase,
+    I4 extends IndexBase
+  >(
+    SdbIndex4Ref<K, V, I1, I2, I3, I4> index,
+    String indexKeyPath1,
+    String indexKeyPath2,
+    String indexKeyPath3,
+    String indexKeyPath4,
+  ) => impl.createIndexImpl<(I1, I2, I3, I4)>(index.impl, [
+    indexKeyPath1,
+    indexKeyPath2,
+    indexKeyPath3,
+    indexKeyPath4,
+  ]);
 
   /// The name of the store.
   String get name => store.name;
@@ -108,7 +184,7 @@ class SdbOpenIndexRefImpl<
   final idb.Index idbIndex;
 
   /// Open store reference.
-  final SdbOpenStoreRefImpl store;
+  final SdbOpenStoreRefIdb store;
 
   /// Index reference.
   final SdbIndexRef<K, V, I> index;

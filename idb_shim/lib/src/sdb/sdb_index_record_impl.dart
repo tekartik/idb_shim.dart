@@ -1,7 +1,6 @@
 import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
 
 import 'sdb_client.dart';
-import 'sdb_database.dart';
 import 'sdb_database_impl.dart';
 import 'sdb_index_impl.dart';
 import 'sdb_index_record.dart';

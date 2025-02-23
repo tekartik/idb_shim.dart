@@ -41,7 +41,7 @@ void defineAllTests(TestContext ctx) {
   utils_test.defineTests(ctx);
   exception_test.defineTests(ctx);
   type_test.defineTests(ctx);
-  simpleDbTest(ctx);
+  idbSimpleSdbTest(ctx);
   simpleDbIndexTest(ctx);
 
   group('indexeddb_1', () {

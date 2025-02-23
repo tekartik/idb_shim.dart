@@ -3,15 +3,33 @@ import 'package:idb_shim/sdb.dart';
 import 'idb_test_common.dart';
 
 void main() {
-  simpleDbTest(idbMemoryContext);
+  idbSimpleSdbTest(idbMemoryContext);
 }
 
 var testStore = SdbStoreRef<int, SdbModel>('test');
 
 var testStore2 = SdbStoreRef<String, SdbModel>('test2');
 
+class SdbTestContext {
+  final SdbFactory factory;
+
+  SdbTestContext(this.factory);
+}
+
+@Deprecated('Use idbSimpleDbTest')
 void simpleDbTest(TestContext ctx) {
+  idbSimpleSdbTest(ctx);
+}
+
+void idbSimpleSdbTest(TestContext ctx) {
   var factory = sdbFactoryFromIdb(ctx.factory);
+  simpleSdbTest(SdbTestContext(factory));
+}
+
+/// Simple SDB test
+void simpleSdbTest(SdbTestContext ctx) {
+  var factory = ctx.factory;
+
   group('sdb', () {
     test('open/close', () async {
       var db = await factory.openDatabase('test.db');

@@ -15,11 +15,7 @@ abstract class SdbStoreRef<K extends KeyBase, V extends ValueBase> {
 
   /// Store definition.
   factory SdbStoreRef(String name) => SdbStoreRefImpl(name);
-}
 
-/// Store methods.
-extension SdbStoreRefExtension<K extends KeyBase, V extends ValueBase>
-    on SdbStoreRef<K, V> {
   /// Add a single record.
   Future<K> add(SdbClient client, V value) => impl.addImpl(client, value);
 
@@ -104,3 +100,7 @@ extension SdbStoreRefExtension<K extends KeyBase, V extends ValueBase>
   SdbBoundary<K> upperBoundary(K value, {bool? include = false}) =>
       SdbUpperBoundary(value, include: include);
 }
+
+/// Store methods.
+extension SdbStoreRefExtension<K extends KeyBase, V extends ValueBase>
+    on SdbStoreRef<K, V> {}
