@@ -1,4 +1,4 @@
-import 'package:idb_shim/sdb.dart';
+import 'package:idb_shim/src/sdb/sdb_mixin.dart';
 
 /// Database client (db or transaction).
 abstract class SdbClient {}
@@ -16,4 +16,27 @@ abstract class SdbClientInterface {
       return dbFn(this as SdbDatabase);
     }
   }
+
+  /// Add a record.
+  Future<K> sdbAddImpl<K extends SdbKey, V extends SdbValue>(
+    SdbStoreRef<K, V> store,
+    V value,
+  );
+}
+
+/// Default mixin
+mixin SdbClientInterfaceDefaultMixin implements SdbClientInterface {
+  @override
+  Future<K> sdbAddImpl<K extends SdbKey, V extends SdbValue>(
+    SdbStoreRef<K, V> store,
+    V value,
+  ) {
+    throw UnimplementedError('$runtimeType.sdbAddImpl()');
+  }
+}
+
+/// Internal extension
+extension SdbClientExtensionPrv on SdbClient {
+  /// Internal interface.
+  SdbClientInterface get interface => this as SdbClientInterface;
 }

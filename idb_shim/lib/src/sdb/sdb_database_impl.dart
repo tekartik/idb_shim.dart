@@ -1,4 +1,5 @@
 import 'package:idb_shim/idb_shim.dart' as idb;
+import 'package:idb_shim/src/sdb/sdb_client.dart';
 
 import 'sdb_database.dart';
 import 'sdb_factory_impl.dart';
@@ -16,7 +17,9 @@ extension SdbDatabaseInternalExtension on SdbDatabase {
 }
 
 /// SimpleDb implementation.
-class SdbDatabaseImpl with SdbDatabaseDefaultMixin implements SdbDatabase {
+class SdbDatabaseImpl
+    with SdbClientInterfaceDefaultMixin, SdbDatabaseDefaultMixin
+    implements SdbDatabase, SdbClientInterface {
   /// Factory.
   final SdbFactoryImpl factory;
 
@@ -63,9 +66,29 @@ class SdbDatabaseImpl with SdbDatabaseDefaultMixin implements SdbDatabase {
     return txn.run(callback);
   }
 
+  @override
+  Future<T> clientHandleDbOrTxn<T>(
+    Future<T> Function(SdbDatabase db) dbFn,
+    Future<T> Function(SdbTransaction txn) txnFn,
+  ) {
+    return dbFn(this);
+  }
+
   /// Close the database.
   @override
   Future<void> close() async {
     idbDatabase.close();
+  }
+
+  @override
+  Future<K> sdbAddImpl<K extends SdbKey, V extends SdbValue>(
+    SdbStoreRef<K, V> store,
+    V value,
+  ) {
+    return inStoreTransaction<K, K, V>(store, SdbTransactionMode.readWrite, (
+      txn,
+    ) {
+      return txn.add(value);
+    });
   }
 }

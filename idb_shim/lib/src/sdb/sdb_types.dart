@@ -14,3 +14,9 @@ typedef IndexBase = Object;
 
 /// Model class.
 typedef SdbModel = Map<String, Object?>;
+
+/// Key type
+typedef SdbKey = Object;
+
+/// Value type
+typedef SdbValue = Object;

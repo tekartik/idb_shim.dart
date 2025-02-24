@@ -31,7 +31,8 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
 
   /// Add a single record.
   @override
-  Future<K> add(SdbClient client, V value) => impl.addImpl(client, value);
+  Future<K> add(SdbClient client, V value) =>
+      client.interface.sdbAddImpl<K, V>(this, value);
 
   /// Put a single record (when using inline keys)
   @override

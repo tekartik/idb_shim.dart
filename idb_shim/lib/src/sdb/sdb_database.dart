@@ -29,7 +29,7 @@ abstract class SdbDatabase implements SdbClient {
 extension SdbDatabaseExtension on SdbDatabase {}
 
 /// Default mixin
-mixin SdbDatabaseDefaultMixin implements SdbDatabase {
+mixin SdbDatabaseDefaultMixin implements SdbDatabase, SdbClientInterface {
   @override
   Future<void> close() {
     throw UnimplementedError('close');
@@ -51,5 +51,14 @@ mixin SdbDatabaseDefaultMixin implements SdbDatabase {
     Future<T> Function(SdbMultiStoreTransaction txn) callback,
   ) {
     throw UnimplementedError('inStoresTransaction');
+  }
+
+  @override
+  Future<T> clientHandleDbOrTxn<T>(
+    Future<T> Function(SdbDatabase db) dbFn,
+    Future<T> Function(SdbTransaction txn) txnFn,
+  ) {
+    // TODO: implement clientHandleDbOrTxn
+    throw UnimplementedError();
   }
 }
