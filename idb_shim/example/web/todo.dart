@@ -99,7 +99,7 @@ class TodoList {
 
   void _renderTodo(Map todoItem) {
     var textDisplay = HTMLSpanElement();
-    textDisplay.text = todoItem['text']?.toString() ?? '<no data>';
+    textDisplay.textContent = todoItem['text']?.toString() ?? '<no data>';
 
     var deleteControl = HTMLAnchorElement();
     deleteControl.text = '[Delete]';
