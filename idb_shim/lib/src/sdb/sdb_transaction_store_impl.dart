@@ -4,6 +4,8 @@ import 'package:idb_shim/src/utils/idb_utils.dart';
 import 'package:idb_shim/utils/idb_utils.dart' as idb;
 
 import 'sdb_boundary.dart';
+import 'sdb_filter.dart';
+import 'sdb_filter_impl.dart';
 import 'sdb_key_utils.dart';
 import 'sdb_record_snapshot.dart';
 import 'sdb_record_snapshot_impl.dart';
@@ -64,10 +66,14 @@ class SdbSingleStoreTransactionImpl<K extends KeyBase, V extends ValueBase>
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> findRecordsImpl({
     SdbBoundaries<K>? boundaries,
+
+    /// Optional filter, performed in memory
+    required SdbFilter? filter,
     int? offset,
     int? limit,
   }) => txnStore.findRecords(
     boundaries: boundaries,
+    filter: filter,
     offset: offset,
     limit: limit,
   );
@@ -159,9 +165,18 @@ class SdbTransactionStoreRefImpl<K extends KeyBase, V extends ValueBase>
     await idbObjectStore.delete(key);
   }
 
+  SdbRecordSnapshotImpl<K, V> _sdbRecordSnapshot(idb.CursorRow row) {
+    var key = row.primaryKey as K;
+    var value = row.value as V;
+    return SdbRecordSnapshotImpl<K, V>(store, key, value);
+  }
+
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> findRecordsImpl({
     SdbBoundaries<K>? boundaries,
+
+    /// Optional filter, performed in memory
+    required SdbFilter? filter,
     int? offset,
     int? limit,
   }) async {
@@ -170,12 +185,20 @@ class SdbTransactionStoreRefImpl<K extends KeyBase, V extends ValueBase>
       direction: idb.idbDirectionNext,
       range: idbKeyRangeFromBoundaries(boundaries),
     );
-    var rows = await idb.cursorToList(cursor, offset, limit);
-    return rows.map((row) {
-      var key = row.key as K;
-      var value = row.value as V;
-      return SdbRecordSnapshotImpl<K, V>(store, key, value);
-    }).toList();
+    if (filter == null) {
+      var rows = await idb.cursorToList(cursor, offset, limit);
+      return rows.map(_sdbRecordSnapshot).toList();
+    } else {
+      /// Non optimized
+      var rows = await idb.cursorToList(cursor);
+      rows.applyFilterOffsetAndLimit(filter, limit: limit, offset: offset);
+      return rows.map(_sdbRecordSnapshot).toList();
+    }
+  }
+
+  SdbRecordKey<K, V> _sdbRecordKey(idb.KeyCursorRow row) {
+    var key = row.key as K;
+    return SdbRecordKeyImpl<K, V>(store, key);
   }
 
   /// Find record keys.
@@ -190,11 +213,7 @@ class SdbTransactionStoreRefImpl<K extends KeyBase, V extends ValueBase>
       range: idbKeyRangeFromBoundaries(boundaries),
     );
     var rows = await idb.keyCursorToList(cursor, offset, limit);
-    return rows.map((row) {
-      var key = row.key as K;
-
-      return SdbRecordKeyImpl<K, V>(store, key);
-    }).toList();
+    return rows.map(_sdbRecordKey).toList();
   }
 
   /// Count records.

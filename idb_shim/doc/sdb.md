@@ -208,3 +208,21 @@ expect(books[1].value['title'], 'Hamlet');
 expect(books, hasLength(2));
 ```
 
+## Generic filters
+
+Generic filters (same as sembast) can be used to filter records by any field.
+However, they are less efficient than using indexes since records are loaded in memory when checking
+filters. Best is to filter by boundaries/indexes as much as possible.
+
+```dart
+// Search by generic filters (matching boundaries record are all loaded in memory)
+var indexBooksFiltered = await bookSerialIndex.findRecords(
+  db,
+  filter: SdbFilter.equals('title', 'Hamlet'),
+);
+print(indexBooksFiltered);
+// [Record(book, 3, {title: Hamlet, serial: serial0002}]
+expect(indexBooksFiltered[0].key, keyHamlet);
+expect(indexBooksFiltered[0].indexKey, 'serial0002');
+expect(indexBooksFiltered, hasLength(1));
+```

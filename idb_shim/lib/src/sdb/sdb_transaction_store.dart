@@ -1,4 +1,5 @@
 import 'sdb_boundary.dart';
+import 'sdb_filter.dart';
 import 'sdb_record_snapshot.dart';
 import 'sdb_store.dart';
 import 'sdb_transaction.dart';
@@ -38,10 +39,14 @@ extension SdbTransactionStoreRefExtension<
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> findRecords({
     SdbBoundaries<K>? boundaries,
+
+    /// Optional filter, performed in memory
+    required SdbFilter? filter,
     int? offset,
     int? limit,
   }) => _impl.findRecordsImpl(
     boundaries: boundaries,
+    filter: filter,
     offset: offset,
     limit: limit,
   );
@@ -104,10 +109,14 @@ extension SdbSingleStoreTransactionExtension<
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> findRecords({
     SdbBoundaries<K>? boundaries,
+
+    /// Optional filter, performed in memory
+    required SdbFilter? filter,
     int? offset,
     int? limit,
   }) => impl.findRecordsImpl(
     boundaries: boundaries,
+    filter: filter,
     offset: offset,
     limit: limit,
   );

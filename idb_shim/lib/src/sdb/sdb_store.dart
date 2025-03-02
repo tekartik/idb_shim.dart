@@ -1,5 +1,6 @@
 import 'sdb_boundary.dart';
 import 'sdb_client.dart';
+import 'sdb_filter.dart';
 import 'sdb_index.dart';
 import 'sdb_index_impl.dart';
 import 'sdb_record.dart';
@@ -25,12 +26,17 @@ abstract class SdbStoreRef<K extends KeyBase, V extends ValueBase> {
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> findRecords(
     SdbClient client, {
+
     SdbBoundaries<K>? boundaries,
+
+    /// Optional filter, performed in memory
+    SdbFilter? filter,
     int? offset,
     int? limit,
   }) => impl.findRecordsImpl(
     client,
     boundaries: boundaries,
+    filter: filter,
     offset: offset,
     limit: limit,
   );

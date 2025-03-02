@@ -107,6 +107,18 @@ void simpleDbDocTest() {
     var book = await bookSerialIndex.record('serial0002').get(db);
     expect(book!.value['title'], 'Hamlet');
 
+    print('# generic filter');
+    // Search by generic filters (matching boundaries record are all loaded in memory)
+    var booksFiltered = await bookStore.findRecords(
+      db,
+      filter: SdbFilter.equals('title', 'Hamlet'),
+    );
+    expect(booksFiltered, hasLength(1));
+    expect(booksFiltered[0].key, keyHamlet);
+    expect(booksFiltered[0].value['serial'], 'serial0002');
+    print(booksFiltered);
+
+    print('# boundaries');
     // Find >=serial0001 and <serial0003
     var books = await bookSerialIndex.findRecords(
       db,
@@ -143,6 +155,23 @@ void simpleDbDocTest() {
     expect(bookKeys[0].key, keyLePetitPrince);
     expect(bookKeys[0].indexKey, 'serial0001');
     expect(bookKeys, hasLength(2));
+
+    print('# index generic filter');
+
+    // Search by generic filters (matching boundaries record are all loaded in memory)
+    var indexBooksFiltered = await bookSerialIndex.findRecords(
+      db,
+      filter: SdbFilter.equals('title', 'Hamlet'),
+    );
+    print(indexBooksFiltered);
+    // [Record(book, 3, {title: Hamlet, serial: serial0002}]
+    expect(indexBooksFiltered[0].key, keyHamlet);
+    expect(indexBooksFiltered[0].indexKey, 'serial0002');
+    expect(indexBooksFiltered, hasLength(1));
+    var indexFirstItem = indexBooksFiltered.first;
+    expect(indexFirstItem.value['serial'], 'serial0002');
+    expect(indexFirstItem.key, isNot(indexFirstItem.indexKey));
+    expect(indexFirstItem.indexKey, 'serial0002');
 
     // Close the database
     await db.close();

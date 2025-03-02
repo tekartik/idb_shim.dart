@@ -7,6 +7,8 @@ export 'sdb_boundary.dart'
     show SdbBoundaries, SdbBoundary, SdbLowerBoundary, SdbUpperBoundary;
 export 'sdb_database.dart' show SdbDatabase, SdbDatabaseExtension;
 export 'sdb_factory.dart' show SdbFactory, SdbFactoryExtension;
+export 'sdb_filter.dart'
+    show SdbFilter, SdbFilterRecordSnapshot, SdbFilterRecordSnapshotExt;
 export 'sdb_index.dart'
     show
         SdbIndexRef,
@@ -27,7 +29,6 @@ export 'sdb_index_record_snapshot.dart'
         SdbIndexRecordSnapshotListExt,
         SdbIndexRecordKey,
         SdbIndexRecordKeyListExt;
-
 export 'sdb_open.dart'
     show
         SdbOpenDatabase,

@@ -1,5 +1,6 @@
 import 'sdb_boundary.dart';
 import 'sdb_client.dart';
+import 'sdb_filter.dart';
 import 'sdb_index_impl.dart';
 import 'sdb_index_record.dart';
 import 'sdb_index_record_impl.dart';
@@ -73,11 +74,15 @@ extension SdbIndexRefExtension<
   Future<List<SdbIndexRecordSnapshot<K, V, I>>> findRecords(
     SdbClient client, {
     SdbBoundaries<I>? boundaries,
+
+    /// Optional filter, performed in memory
+    SdbFilter? filter,
     int? offset,
     int? limit,
   }) => impl.findRecordsImpl(
     client,
     boundaries: boundaries,
+    filter: filter,
     offset: offset,
     limit: limit,
   );

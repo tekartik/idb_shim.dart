@@ -42,12 +42,17 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
   @override
   Future<List<SdbRecordSnapshot<K, V>>> findRecords(
     SdbClient client, {
+
     SdbBoundaries<K>? boundaries,
+
+    /// Optional filter, performed in memory
+    SdbFilter? filter,
     int? offset,
     int? limit,
   }) => impl.findRecordsImpl(
     client,
     boundaries: boundaries,
+    filter: filter,
     offset: offset,
     limit: limit,
   );
@@ -192,18 +197,23 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
   Future<List<SdbRecordSnapshot<K, V>>> findRecordsImpl(
     SdbClient client, {
     SdbBoundaries<K>? boundaries,
+
+    /// Optional filter, performed in memory
+    required SdbFilter? filter,
     int? offset,
     int? limit,
   }) => client.handleDbOrTxn(
     (db) => dbFindRecordsImpl(
       db,
       boundaries: boundaries,
+      filter: filter,
       offset: offset,
       limit: limit,
     ),
     (txn) => txnFindRecordsImpl(
       txn,
       boundaries: boundaries,
+      filter: filter,
       offset: offset,
       limit: limit,
     ),
@@ -213,6 +223,9 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
   Future<List<SdbRecordSnapshot<K, V>>> dbFindRecordsImpl(
     SdbDatabase db, {
     SdbBoundaries<K>? boundaries,
+
+    /// Optional filter, performed in memory
+    required SdbFilter? filter,
     int? offset,
     int? limit,
   }) {
@@ -220,6 +233,7 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
       return txnFindRecordsImpl(
         txn.rawImpl,
         boundaries: boundaries,
+        filter: filter,
         offset: offset,
         limit: limit,
       );
@@ -230,12 +244,20 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
   Future<List<SdbRecordSnapshot<K, V>>> txnFindRecordsImpl(
     SdbTransactionImpl txn, {
     SdbBoundaries<K>? boundaries,
+
+    /// Optional filter, performed in memory
+    required SdbFilter? filter,
     int? offset,
     int? limit,
   }) {
     return txn
         .storeImpl(this)
-        .findRecords(boundaries: boundaries, offset: offset, limit: limit);
+        .findRecords(
+          boundaries: boundaries,
+          filter: filter,
+          offset: offset,
+          limit: limit,
+        );
   }
 
   /// Find records keys.

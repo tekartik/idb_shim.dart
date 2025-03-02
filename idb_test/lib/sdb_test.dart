@@ -108,6 +108,55 @@ void simpleSdbTest(SdbTestContext ctx) {
      */
         await db.close();
       });
+      test('basic filter', () async {
+        await factory.deleteDatabase('test_basic_filter.db');
+        var db = await factory.openDatabase(
+          'test_basic_filter.db',
+          version: 1,
+          onVersionChange: (event) {
+            var oldVersion = event.oldVersion;
+            if (oldVersion < 1) {
+              event.db.createStore(testStore);
+            }
+          },
+        );
+        await db.inStoreTransaction(testStore, SdbTransactionMode.readWrite, (
+          txn,
+        ) async {
+          await txn.add({'test': 10});
+          await txn.add({'test': 20});
+          await txn.add({'test': 30});
+        });
+        var filter = SdbFilter.equals('test', 20);
+        var records = await testStore.findRecords(db, filter: filter);
+        expect(records.length, 1);
+        expect(records.keys, [2]);
+
+        /// Custom filter
+        var customEvaluated = false;
+        records = await testStore.findRecords(
+          db,
+          filter: SdbFilter.and([
+            filter,
+            SdbFilter.custom((snapshot) {
+              expect(customEvaluated, isFalse);
+              customEvaluated = true;
+              expect(snapshot.key, 2);
+              expect(snapshot.primaryKey, 2);
+              expect(
+                snapshot.indexKey,
+                2,
+              ); // Value could change but is what it is now...
+              return true;
+            }),
+          ]),
+        );
+        expect(customEvaluated, isTrue);
+        expect(records.keys, [2]);
+        await db.close();
+
+        await db.close();
+      });
       test('boundaries int', () async {
         await factory.deleteDatabase('test_boundaries.db');
         var db = await factory.openDatabase(

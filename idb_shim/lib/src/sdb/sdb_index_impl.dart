@@ -1,4 +1,5 @@
 import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
+import 'package:idb_shim/src/sdb/sdb_filter_impl.dart';
 import 'package:idb_shim/src/utils/idb_utils.dart';
 
 import 'import_idb.dart' as idb;
@@ -7,6 +8,7 @@ import 'sdb_boundary_impl.dart';
 import 'sdb_client.dart';
 import 'sdb_database.dart';
 import 'sdb_database_impl.dart';
+import 'sdb_filter.dart';
 import 'sdb_index.dart';
 import 'sdb_index_record_snapshot.dart';
 import 'sdb_index_record_snapshot_impl.dart';
@@ -103,18 +105,23 @@ class SdbIndexRefImpl<
   Future<List<SdbIndexRecordSnapshot<K, V, I>>> findRecordsImpl(
     SdbClient client, {
     SdbBoundaries<I>? boundaries,
+
+    /// Optional filter, performed in memory
+    required SdbFilter? filter,
     int? offset,
     int? limit,
   }) => client.handleDbOrTxn(
     (db) => dbFindRecordsImpl(
       db,
       boundaries: boundaries,
+      filter: filter,
       offset: offset,
       limit: limit,
     ),
     (txn) => txnFindRecordsImpl(
       txn,
       boundaries: boundaries,
+      filter: filter,
       offset: offset,
       limit: limit,
     ),
@@ -145,6 +152,9 @@ class SdbIndexRefImpl<
   Future<List<SdbIndexRecordSnapshot<K, V, I>>> dbFindRecordsImpl(
     SdbDatabaseImpl db, {
     SdbBoundaries<I>? boundaries,
+
+    /// Optional filter, performed in memory
+    required SdbFilter? filter,
     int? offset,
     int? limit,
   }) {
@@ -152,6 +162,7 @@ class SdbIndexRefImpl<
       return txnFindRecordsImpl(
         txn.rawImpl,
         boundaries: boundaries,
+        filter: filter,
         offset: offset,
         limit: limit,
       );
@@ -175,10 +186,22 @@ class SdbIndexRefImpl<
     });
   }
 
+  SdbIndexRecordSnapshotImpl<K, V, I> _sdbIndexRecordSnapshot(
+    idb.CursorRow row,
+  ) {
+    var key = row.primaryKey as K;
+    var indexKey = idbKeyToIndexKey<I>(row.key as Object);
+    var value = row.value as V;
+    return SdbIndexRecordSnapshotImpl<K, V, I>(this, key, value, indexKey);
+  }
+
   /// Find records.
   Future<List<SdbIndexRecordSnapshot<K, V, I>>> txnFindRecordsImpl(
     SdbTransactionImpl txn, {
     SdbBoundaries<I>? boundaries,
+
+    /// Optional filter, performed in memory
+    required SdbFilter? filter,
     int? offset,
     int? limit,
   }) async {
@@ -189,13 +212,15 @@ class SdbIndexRefImpl<
       direction: idb.idbDirectionNext,
       range: idbKeyRangeFromBoundaries(boundaries),
     );
-    var rows = await idb.cursorToList(cursor, offset, limit);
-    return rows.map((row) {
-      var key = row.primaryKey as K;
-      var indexKey = idbKeyToIndexKey<I>(row.key as Object);
-      var value = row.value as V;
-      return SdbIndexRecordSnapshotImpl<K, V, I>(this, key, value, indexKey);
-    }).toList();
+
+    if (filter == null) {
+      var rows = await idb.cursorToList(cursor, offset, limit);
+      return rows.map(_sdbIndexRecordSnapshot).toList();
+    } else {
+      var rows = await idb.cursorToList(cursor);
+      rows.applyFilterOffsetAndLimit(filter, limit: limit, offset: offset);
+      return rows.map(_sdbIndexRecordSnapshot).toList();
+    }
   }
 
   /// Find record keys.
