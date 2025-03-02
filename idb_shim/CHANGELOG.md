@@ -1,6 +1,6 @@
-## 2.6.3-0
+## 2.6.3
 
-* Open Sdb to other implementation
+* Open Sdb to other implementation and add filtering support
 
 ## 2.6.2
 
