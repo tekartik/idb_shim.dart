@@ -2,7 +2,7 @@ import 'package:idb_shim/src/logger/logger_utils.dart';
 import 'package:idb_shim/utils/idb_utils.dart' as idb;
 import 'package:sembast/sembast.dart' as sembast;
 // ignore: implementation_imports
-import 'package:sembast/src/filter_impl.dart' as sembast;
+import 'package:sembast/src/api/protected/filter.dart' as sembast;
 
 /// Private record snapshot for filter
 class SdbFilterRecordSnapshotPrv implements SdbFilterRecordSnapshot {
@@ -62,4 +62,4 @@ typedef SdbFilter = sembast.Filter;
 typedef SdbFilterRecordSnapshot = sembast.RecordSnapshot<Object?, Object?>;
 
 /// Private
-typedef SdbFilterPrv = sembast.SembastFilterBase;
+typedef SdbFilterPrv = sembast.SembastFilter;
