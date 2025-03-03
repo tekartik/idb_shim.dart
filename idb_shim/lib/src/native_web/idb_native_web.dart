@@ -17,6 +17,12 @@ bool get idbFactoryNativeSupported => idbFactoryWebSupported;
 /// Is false if IndexedDB is not supported
 bool get idbFactoryWebSupported => IdbFactoryNativeBrowserWrapperImpl.supported;
 
+/// True if native web worker factory is supported (to use in a web worker)
+///
+/// Is false if IndexedDB is not supported
+bool get idbFactoryWebWorkerSupported =>
+    IdbFactoryNativeBrowserWrapperImpl.supported;
+
 /// The native factory
 ///
 /// To use instead of html.window.indexedDB but provides the same API.
@@ -29,7 +35,14 @@ IdbFactory get idbFactoryNative => idbFactoryWeb;
 /// To use instead of html.window.indexedDB but provides the same API.
 ///
 /// throw if IndexedDB is not supported
-IdbFactory get idbFactoryWeb => idbFactoryNativeBrowserImpl;
+IdbFactory get idbFactoryWeb => idbFactoryBrowserWrapperImpl;
+
+/// The web worker factory
+///
+/// To use instead of self.indexedDB but provides the same API.
+///
+/// throw if IndexedDB is not supported
+IdbFactory get idbFactoryWebWorker => idbFactoryWebWorkerWrapperImpl;
 
 /// Wrap the window/service worker implementation
 ///

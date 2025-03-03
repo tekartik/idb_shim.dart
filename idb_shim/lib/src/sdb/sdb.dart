@@ -66,7 +66,12 @@ SdbFactory sdbFactoryFromIdb(idb.IdbFactory idbFactory) {
 final SdbFactory sdbFactoryMemory = sdbFactoryFromIdb(idb.idbFactoryMemory);
 
 /// Native (browser) factory.
-final SdbFactory sdbFactoryWeb = sdbFactoryFromIdb(idb.idbFactoryNative);
+final SdbFactory sdbFactoryWeb = sdbFactoryFromIdb(idb.idbFactoryWeb);
+
+/// Native (web worker) factory.
+final SdbFactory sdbFactoryWebWorker = sdbFactoryFromIdb(
+  idb.idbFactoryWebWorker,
+);
 
 /// Sembast io factory.
 final SdbFactory sdbFactoryIo = sdbFactoryFromIdb(idb.idbFactorySembastIo);

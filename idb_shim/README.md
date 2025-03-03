@@ -82,6 +82,10 @@ See [Usage in flutter](https://github.com/tekartik/idb_shim.dart/blob/master/idb
 The database is stored in the browser indexeddb. Like any other web storage, it is tied to the port. (i.e. localhost:8080 is different from localhost:8081).
 When debugging, you should use the same port to keep the same indexeddb database.
 
+### Service worker support.
+
+In web worker you should use `idbFactoryWebWorker` instead of `idbFactoryWeb` to access the indexedDB.
+
 ### Testing
 
 #### Testing with dartdevc

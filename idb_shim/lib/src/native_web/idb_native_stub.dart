@@ -9,11 +9,17 @@ IdbFactory get idbFactoryNative => idbUnimplementedStub('idbFactoryNative');
 /// The web factory
 IdbFactory get idbFactoryWeb => idbUnimplementedStub('idbFactoryWeb');
 
+/// The web worker
+IdbFactory get idbFactoryWebWorker =>
+    idbUnimplementedStub('idbFactoryWebWorker');
+
 bool get idbFactoryNativeSupported =>
     idbUnimplementedStub('idbFactoryNativeSupported');
 
 bool get idbFactoryWebSupported =>
     idbUnimplementedStub('idbFactoryWebSupported');
 
+bool get idbFactoryWebWorkerSupported =>
+    idbUnimplementedStub('idbFactoryWebWorkerSupported');
 IdbFactory idbFactoryFromIndexedDB(dynamic nativeIdbFactory) =>
     idbUnimplementedStub('idbFactoryFromIndexedDB');

@@ -9,4 +9,9 @@ library;
 export 'idb.dart';
 export 'idb_client_memory.dart' show idbFactoryMemory, idbFactoryMemoryFs;
 export 'src/native_web/idb_native.dart'
-    show idbFactoryNative, idbFactoryWeb, idbFactoryWebSupported;
+    show
+        idbFactoryNative,
+        idbFactoryWeb,
+        idbFactoryWebSupported,
+        idbFactoryWebWorker,
+        idbFactoryWebWorkerSupported;

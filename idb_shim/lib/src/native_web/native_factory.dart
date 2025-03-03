@@ -14,21 +14,12 @@ import 'native_database.dart';
 import 'native_error.dart';
 import 'native_event.dart';
 
-IdbFactory? _idbFactoryNativeBrowserImpl;
+/// Single instance
+final IdbFactory idbFactoryBrowserWrapperImpl =
+    IdbFactoryNativeBrowserWrapperImpl._();
 
-IdbFactory get idbFactoryNativeBrowserImpl =>
-    _idbFactoryNativeBrowserImpl ??= () {
-      return nativeIdbFactoryBrowserWrapperImpl;
-    }();
-
-native.IDBFactory? get nativeBrowserIdbFactory => idb.window.indexedDB;
-
-// Single instance
-IdbFactoryNativeBrowserWrapperImpl? _nativeIdbFactoryBrowserWrapperImpl;
-
-IdbFactoryNativeBrowserWrapperImpl get nativeIdbFactoryBrowserWrapperImpl =>
-    _nativeIdbFactoryBrowserWrapperImpl ??=
-        IdbFactoryNativeBrowserWrapperImpl._();
+final IdbFactory idbFactoryWebWorkerWrapperImpl =
+    IdbFactoryWebWorkerWrapperImpl._();
 
 /// Browser only
 class IdbFactoryNativeBrowserWrapperImpl extends IdbFactoryNativeWrapperImpl {
@@ -36,6 +27,19 @@ class IdbFactoryNativeBrowserWrapperImpl extends IdbFactoryNativeWrapperImpl {
 
   static bool get supported {
     return idb.IDBFactoryExt.supported;
+  }
+}
+
+/// Browser only
+class IdbFactoryWebWorkerWrapperImpl extends IdbFactoryNativeWrapperImpl {
+  IdbFactoryWebWorkerWrapperImpl._() : super(nativeWebWorkerIdbFactory!);
+  static bool get supported {
+    try {
+      nativeWebWorkerIdbFactory!;
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 }
 
@@ -150,3 +154,17 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
   @override
   bool get supportsDoubleKey => false;
 }
+
+/// WebWorker factory
+final _workerScope = (globalContext as native.DedicatedWorkerGlobalScope?);
+
+/// Worker native IDBFactory
+native.IDBFactory? get nativeWebWorkerIdbFactory => _workerScope?.indexedDB;
+
+/// Native browser IDBFactory
+native.IDBFactory? get nativeBrowserIdbFactory => idb.window.indexedDB;
+
+// // var
+// final _store = 'values';
+// var _database = () async {
+//   // var factory = idbFactoryFromIndexedDB(scope.indexedDB);
