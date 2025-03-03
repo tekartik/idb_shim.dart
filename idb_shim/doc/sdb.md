@@ -3,7 +3,10 @@
 SDB stands for Simple DB, it provides a dart API on top of indexed_db or sqlite.
 The API is similar to sembast but requires some schema configuration.
 - Each store must be declared and added once to a database.
-- Queries are limited to boundaries and indexes.
+- Efficient queries are limited to boundaries and indexes, sembast like filtering is done in memory.
+- Data is not preloaded in memory
+
+It provides an efficient simple database both on IO (when using sqflite) and web.
 
 ## Installation
 
@@ -144,6 +147,7 @@ The API is similar to sembast but:
 - no listener
 - simple query (using boundaries)
 - Index on up to 4 fields
+- Sembast like filtering is done in memory and requires loading the record first
 
 ### Transaction
 
