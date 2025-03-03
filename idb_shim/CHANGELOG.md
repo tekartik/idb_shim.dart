@@ -1,3 +1,7 @@
+## 2.6.4
+
+* Add Web worker support (`idbFactoryWebWorker`)
+
 ## 2.6.3+2
 
 * Open Sdb to other implementation and add filtering support
