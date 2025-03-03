@@ -7,26 +7,11 @@ SdbFilterPrv _filterPrv(SdbFilter filter) {
 }
 
 /// Check if a record cursor row matches a filter.
-bool sdbRecordRowMatchesFilter(idb.CursorRow row, SdbFilter filter) {
+bool sdbCursorWithValueMatchesFilter(
+  idb.CursorWithValue cwv,
+  SdbFilter filter,
+) {
   var filterPrv = _filterPrv(filter);
-  var filterRecordPrv = SdbFilterRecordSnapshotPrv(row);
+  var filterRecordPrv = SdbFilterRecordSnapshotPrv(cwv);
   return filterPrv.matchesRecord(filterRecordPrv);
-}
-
-/// Private extension to apply filter, offset and limit to a list of cursor rows.
-extension SdbCursorRowListPrvExt on List<idb.CursorRow> {
-  /// Apply filter, offset and limit.
-  void applyFilterOffsetAndLimit(
-    SdbFilter filter, {
-    required int? limit,
-    required int? offset,
-  }) {
-    removeWhere((row) => !sdbRecordRowMatchesFilter(row, filter));
-    if (offset != null) {
-      removeRange(0, offset);
-    }
-    if (limit != null && limit < length) {
-      removeRange(limit, length);
-    }
-  }
 }

@@ -1,5 +1,6 @@
 import 'package:idb_shim/src/sdb/sdb_boundary_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_impl.dart';
+import 'package:idb_shim/src/utils/cursor_utils.dart';
 import 'package:idb_shim/src/utils/idb_utils.dart';
 import 'package:idb_shim/utils/idb_utils.dart' as idb;
 
@@ -68,7 +69,7 @@ class SdbSingleStoreTransactionImpl<K extends KeyBase, V extends ValueBase>
     SdbBoundaries<K>? boundaries,
 
     /// Optional filter, performed in memory
-    required SdbFilter? filter,
+    SdbFilter? filter,
     int? offset,
     int? limit,
   }) => txnStore.findRecords(
@@ -176,24 +177,24 @@ class SdbTransactionStoreRefImpl<K extends KeyBase, V extends ValueBase>
     SdbBoundaries<K>? boundaries,
 
     /// Optional filter, performed in memory
-    required SdbFilter? filter,
+    SdbFilter? filter,
     int? offset,
     int? limit,
   }) async {
     var cursor = idbObjectStore.openCursor(
-      autoAdvance: true,
       direction: idb.idbDirectionNext,
       range: idbKeyRangeFromBoundaries(boundaries),
     );
-    if (filter == null) {
-      var rows = await idb.cursorToList(cursor, offset, limit);
-      return rows.map(_sdbRecordSnapshot).toList();
-    } else {
-      /// Non optimized
-      var rows = await idb.cursorToList(cursor);
-      rows.applyFilterOffsetAndLimit(filter, limit: limit, offset: offset);
-      return rows.map(_sdbRecordSnapshot).toList();
-    }
+
+    var rows = await cursor.toRowList(
+      offset: offset,
+      limit: limit,
+      matcher:
+          filter != null
+              ? (cwv) => sdbCursorWithValueMatchesFilter(cwv, filter)
+              : null,
+    );
+    return rows.map(_sdbRecordSnapshot).toList();
   }
 
   SdbRecordKey<K, V> _sdbRecordKey(idb.KeyCursorRow row) {

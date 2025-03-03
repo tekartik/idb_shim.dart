@@ -199,7 +199,7 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
     SdbBoundaries<K>? boundaries,
 
     /// Optional filter, performed in memory
-    required SdbFilter? filter,
+    SdbFilter? filter,
     int? offset,
     int? limit,
   }) => client.handleDbOrTxn(
@@ -225,7 +225,7 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
     SdbBoundaries<K>? boundaries,
 
     /// Optional filter, performed in memory
-    required SdbFilter? filter,
+    SdbFilter? filter,
     int? offset,
     int? limit,
   }) {
@@ -246,7 +246,7 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
     SdbBoundaries<K>? boundaries,
 
     /// Optional filter, performed in memory
-    required SdbFilter? filter,
+    SdbFilter? filter,
     int? offset,
     int? limit,
   }) {

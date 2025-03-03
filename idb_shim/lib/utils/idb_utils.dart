@@ -1,5 +1,6 @@
 library;
 
+import 'package:idb_shim/idb_shim.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
 import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/logger/logger_utils.dart';
@@ -152,28 +153,48 @@ Future<Database> copyDatabase(
 /// Convert an autoAdvance openCursor stream to a list.
 Future<List<T>> _autoCursorStreamToList<C extends Cursor, T>(
   Stream<C> stream,
-  T Function(C cursor) convert,
+  T? Function(C cursor) convert,
   int? offset,
   int? limit,
 ) {
-  return streamWithOffsetAndLimit(
-    stream,
-    offset,
-    limit,
-  ).map((cursor) => convert(cursor)).toList();
+  return streamWithOffsetAndLimit(stream, offset, limit)
+      .map((cursor) => convert(cursor))
+      .where((cursor) => cursor != null)
+      .map((cursor) => cursor!)
+      .toList();
 }
+
+/// Convert an autoAdvance openCursor stream to a list
+Future<List<CursorRow>> idbCursorToList(
+  Stream<CursorWithValue> stream, {
+  int? offset,
+  int? limit,
+}) => _autoCursorStreamToList(
+  stream,
+  (cwv) => CursorRow(cwv.key, cwv.primaryKey, cloneValue(cwv.value)),
+  offset,
+  limit,
+);
 
 /// Convert an autoAdvance openCursor stream to a list
 Future<List<CursorRow>> cursorToList(
   Stream<CursorWithValue> stream, [
   int? offset,
   int? limit,
-]) => _autoCursorStreamToList(
-  stream,
-  (cwv) => CursorRow(cwv.key, cwv.primaryKey, cloneValue(cwv.value)),
-  offset,
-  limit,
-);
+  IdbCursorWithValueMatcherFunction? matcher,
+]) {
+  CursorRow? getRow(CursorWithValue cwv) {
+    if (matcher != null) {
+      if (!matcher(cwv)) {
+        return null;
+      }
+    }
+    final row = CursorRow(cwv.key, cwv.primaryKey, cloneValue(cwv.value));
+    return row;
+  }
+
+  return _autoCursorStreamToList(stream, (cwv) => getRow(cwv), offset, limit);
+}
 
 /// Convert an autoAdvance openKeyCursor stream to a list
 Future<List<KeyCursorRow>> keyCursorToList(

@@ -41,7 +41,7 @@ extension SdbTransactionStoreRefExtension<
     SdbBoundaries<K>? boundaries,
 
     /// Optional filter, performed in memory
-    required SdbFilter? filter,
+    SdbFilter? filter,
     int? offset,
     int? limit,
   }) => _impl.findRecordsImpl(
@@ -111,7 +111,7 @@ extension SdbSingleStoreTransactionExtension<
     SdbBoundaries<K>? boundaries,
 
     /// Optional filter, performed in memory
-    required SdbFilter? filter,
+    SdbFilter? filter,
     int? offset,
     int? limit,
   }) => impl.findRecordsImpl(

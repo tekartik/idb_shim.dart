@@ -1,5 +1,6 @@
 import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_filter_impl.dart';
+import 'package:idb_shim/src/utils/cursor_utils.dart';
 import 'package:idb_shim/src/utils/idb_utils.dart';
 
 import 'import_idb.dart' as idb;
@@ -107,7 +108,7 @@ class SdbIndexRefImpl<
     SdbBoundaries<I>? boundaries,
 
     /// Optional filter, performed in memory
-    required SdbFilter? filter,
+    SdbFilter? filter,
     int? offset,
     int? limit,
   }) => client.handleDbOrTxn(
@@ -154,7 +155,7 @@ class SdbIndexRefImpl<
     SdbBoundaries<I>? boundaries,
 
     /// Optional filter, performed in memory
-    required SdbFilter? filter,
+    SdbFilter? filter,
     int? offset,
     int? limit,
   }) {
@@ -201,26 +202,34 @@ class SdbIndexRefImpl<
     SdbBoundaries<I>? boundaries,
 
     /// Optional filter, performed in memory
-    required SdbFilter? filter,
+    SdbFilter? filter,
     int? offset,
     int? limit,
   }) async {
     var idbObjectStore = txn.idbTransaction.objectStore(store.name);
     var idbIndex = idbObjectStore.index(name);
     var cursor = idbIndex.openCursor(
-      autoAdvance: true,
       direction: idb.idbDirectionNext,
       range: idbKeyRangeFromBoundaries(boundaries),
     );
-
-    if (filter == null) {
-      var rows = await idb.cursorToList(cursor, offset, limit);
-      return rows.map(_sdbIndexRecordSnapshot).toList();
-    } else {
-      var rows = await idb.cursorToList(cursor);
-      rows.applyFilterOffsetAndLimit(filter, limit: limit, offset: offset);
-      return rows.map(_sdbIndexRecordSnapshot).toList();
-    }
+    var rows = await cursor.toRowList(
+      limit: limit,
+      offset: offset,
+      matcher:
+          filter != null
+              ? (cwv) => sdbCursorWithValueMatchesFilter(cwv, filter)
+              : null,
+    );
+    /*
+    var rows = await idb.cursorToList(
+      cursor,
+      offset,
+      limit,
+      filter != null
+          ? (cwv) => sdbCursorWithValueMatchesFilter(cwv, filter)
+          : null,
+    );*/
+    return rows.map(_sdbIndexRecordSnapshot).toList();
   }
 
   /// Find record keys.
@@ -233,15 +242,13 @@ class SdbIndexRefImpl<
     var idbObjectStore = txn.idbTransaction.objectStore(store.name);
     var idbIndex = idbObjectStore.index(name);
     var cursor = idbIndex.openKeyCursor(
-      autoAdvance: true,
       direction: idb.idbDirectionNext,
       range: idbKeyRangeFromBoundaries(boundaries),
     );
-    var rows = await idb.keyCursorToList(cursor, offset, limit);
+    var rows = await cursor.toKeyRowList(limit: limit, offset: offset);
     return rows.map((row) {
       var key = row.primaryKey as K;
       var indexKey = idbKeyToIndexKey<I>(row.key as Object);
-
       return SdbIndexRecordKeyImpl<K, V, I>(this, key, indexKey);
     }).toList();
   }

@@ -446,36 +446,36 @@ void defineTests(TestContext ctx) {
         dbCreateTransaction();
         await fill3SampleRows();
 
+        expect((await objectStore.openCursor().toRowList()).values, [
+          {'name': 'test2'},
+          {'name': 'test1'},
+          {'name': 'test3'},
+        ]);
+        expect((await objectStore.openCursor().toRowList(offset: 1)).values, [
+          {'name': 'test1'},
+          {'name': 'test3'},
+        ]);
+        expect((await objectStore.openCursor().toRowList(limit: 1)).values, [
+          {'name': 'test2'},
+        ]);
+
         expect(
-          (await objectStore.openCursor().toRowList()).map((e) => e.value),
+          (await objectStore.openCursor().toRowList(
+            limit: 1,
+            matcher: (cwv) {
+              var map = cwv.value as Map;
+              return map['name'] != 'test1';
+            },
+          )).values,
           [
             {'name': 'test2'},
-            {'name': 'test1'},
-            {'name': 'test3'},
           ],
         );
         expect(
           (await objectStore.openCursor().toRowList(
             offset: 1,
-          )).map((e) => e.value),
-          [
-            {'name': 'test1'},
-            {'name': 'test3'},
-          ],
-        );
-        expect(
-          (await objectStore.openCursor().toRowList(
             limit: 1,
-          )).map((e) => e.value),
-          [
-            {'name': 'test2'},
-          ],
-        );
-        expect(
-          (await objectStore.openCursor().toRowList(
-            offset: 1,
-            limit: 1,
-          )).map((e) => e.value),
+          )).values,
           [
             {'name': 'test1'},
           ],

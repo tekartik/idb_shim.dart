@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/src/logger/logger_utils.dart';
 import 'package:idb_shim/src/native_web/js_utils.dart';
 
 import 'indexed_db_web.dart' as idb;
@@ -87,5 +88,10 @@ class CursorWithValueNative extends CursorWithValue {
   @override
   Future delete() {
     return _cwv.delete().future;
+  }
+
+  @override
+  String toString() {
+    return 'CursorWithValue(${logTruncateAny(primaryKey)}, ${logTruncateAny(key)}, ${logTruncateAny(value)}';
   }
 }

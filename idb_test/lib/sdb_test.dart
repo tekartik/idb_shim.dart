@@ -132,6 +132,12 @@ void simpleSdbTest(SdbTestContext ctx) {
         expect(records.length, 1);
         expect(records.keys, [2]);
 
+        records = await testStore.findRecords(
+          db,
+          filter: SdbFilter.notEquals('test', 20),
+        );
+        expect(records.keys, [1, 3]);
+
         /// Custom filter
         var customEvaluated = false;
         records = await testStore.findRecords(
@@ -139,6 +145,7 @@ void simpleSdbTest(SdbTestContext ctx) {
           filter: SdbFilter.and([
             filter,
             SdbFilter.custom((snapshot) {
+              //devPrint('snapshot: $snapshot');
               expect(customEvaluated, isFalse);
               customEvaluated = true;
               expect(snapshot.key, 2);

@@ -1,3 +1,4 @@
+import 'package:idb_shim/src/logger/logger_utils.dart';
 import 'package:idb_shim/utils/idb_utils.dart' as idb;
 import 'package:sembast/sembast.dart' as sembast;
 // ignore: implementation_imports
@@ -5,19 +6,20 @@ import 'package:sembast/src/filter_impl.dart' as sembast;
 
 /// Private record snapshot for filter
 class SdbFilterRecordSnapshotPrv implements SdbFilterRecordSnapshot {
-  final idb.CursorRow _cursorRow;
+  /// Cursor with value
+  final idb.CursorWithValue cwv;
 
   /// Primary key
-  Object? get primaryKey => _cursorRow.primaryKey;
+  Object? get primaryKey => cwv.primaryKey;
 
   /// Index key if any
-  Object? get indexKey => _cursorRow.key;
+  Object? get indexKey => cwv.key;
 
   /// Private record snapshot for filter
-  SdbFilterRecordSnapshotPrv(this._cursorRow);
+  SdbFilterRecordSnapshotPrv(this.cwv);
   @override
   Object? operator [](String field) {
-    var data = _cursorRow.value;
+    var data = cwv.value;
     if (data is Map) {
       return data[field];
     }
@@ -37,7 +39,11 @@ class SdbFilterRecordSnapshotPrv implements SdbFilterRecordSnapshot {
   sembast.RecordRef<Object?, Object?> get ref => throw UnimplementedError();
 
   @override
-  Object? get value => _cursorRow.value;
+  Object? get value => cwv.value;
+
+  @override
+  String toString() =>
+      'FilterRecordSnapshot(${logTruncateAny(primaryKey)}, ${logTruncateAny(indexKey)}, ${logTruncateAny(value)})';
 }
 
 /// Extension to allow getting the primary key for index requests
