@@ -4,6 +4,7 @@ import 'package:idb_shim/idb_io.dart';
 import 'package:idb_shim/sdb.dart';
 
 void main() async {
+  print('Stored in .local/tmp/out/my_records.db');
   final idbFactory = sdbFactoryFromIdb(
     getIdbFactoryPersistent('.local/tmp/out'),
   );
@@ -22,7 +23,27 @@ void main() async {
   // Add some data
   var key = await store.add(db, {'some': 'data'});
   final value = await store.record(key).get(db);
-
   print(value);
+  var foundRecords = await db.inStoreTransaction(
+    store,
+    SdbTransactionMode.readOnly,
+    (txn) {
+      return store.findRecords(txn, filter: SdbFilter.equals('some', 'data'));
+    },
+  );
+  for (var record in foundRecords) {
+    print(record);
+  }
+  foundRecords = await db.inStoreTransaction(
+    store,
+    SdbTransactionMode.readOnly,
+    (txn) {
+      return txn.txnStore.findRecords(filter: SdbFilter.equals('some', 'data'));
+    },
+  );
+  for (var record in foundRecords) {
+    print(record);
+  }
+
   await db.close();
 }
