@@ -156,7 +156,7 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
 }
 
 /// WebWorker factory
-final _workerScope = (globalContext as native.DedicatedWorkerGlobalScope?);
+final _workerScope = (globalContext as native.WorkerGlobalScope?);
 
 /// Worker native IDBFactory
 native.IDBFactory? get nativeWebWorkerIdbFactory => _workerScope?.indexedDB;

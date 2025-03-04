@@ -24,7 +24,7 @@ export 'package:web/web.dart'
         IDBFactory,
         DOMException,
         EventStreamProviders,
-        DedicatedWorkerGlobalScope;
+        WorkerGlobalScope;
 
 /// IDB upgrade needed event
 extension type IDBOnUpgradeNeededEvent._(JSObject _)
