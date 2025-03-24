@@ -1,5 +1,7 @@
 library;
 
+import 'package:idb_shim/utils/idb_cursor_utils.dart';
+
 import 'idb_test_common.dart';
 
 // so that this can be run directly
@@ -275,9 +277,49 @@ void defineTests(TestContext ctx) {
           );
           fail('should fail');
         } catch (e) {
+          print('error ${e.runtimeType}');
+          print('error $e');
           expect(e, isNot(const TypeMatcher<TestFailure>()));
         }
         expect(downgradeCalled, false);
+      }
+    });
+
+    test('openOnDowngradeDelete downgrade', () async {
+      await setupDeleteDb();
+
+      var db = await idbFactory.open(
+        dbName,
+        version: 2,
+        onUpgradeNeeded: (VersionChangeEvent e) async {
+          var db = e.database;
+          var store = db.createObjectStore('store');
+          await store.put('value2', 'key2');
+        },
+      );
+      Future<List<(Object, Object)>> getRows() async {
+        var store = db
+            .transaction('store', idbModeReadOnly)
+            .objectStore('store');
+
+        var cursor = store.openCursor(direction: idbDirectionNext);
+        return (await cursor.toRowList()).map((e) => (e.key, e.value)).toList();
+      }
+
+      expect(await getRows(), [('key2', 'value2')]);
+      db.close();
+      if (!ctx.isInMemory) {
+        db = await idbFactory.openOnDowngradeDelete(
+          dbName,
+          version: 1,
+          onUpgradeNeeded: (VersionChangeEvent e) async {
+            var db = e.database;
+            var store = db.createObjectStore('store');
+            await store.put('value1', 'key1');
+          },
+        );
+        expect(await getRows(), [('key1', 'value1')]);
+        db.close();
       }
     });
 

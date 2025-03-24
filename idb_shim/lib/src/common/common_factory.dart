@@ -37,3 +37,45 @@ abstract class IdbFactoryBase implements IdbFactory {
   /// Whether key as double are supported
   bool get supportsDoubleKey;
 }
+
+/// Helper extension
+extension IdbFactoryExt on IdbFactory {
+  /// Open a database and delete in case of downgrade.
+  Future<Database> openOnDowngradeDelete(
+    String name, {
+    int? version,
+    OnUpgradeNeededFunction? onUpgradeNeeded,
+    OnBlockedFunction? onBlocked,
+  }) async {
+    Future<Database> doOpen() {
+      return open(
+        name,
+        version: version,
+        onUpgradeNeeded: onUpgradeNeeded,
+        onBlocked: onBlocked,
+      );
+    }
+
+    if (version == null) {
+      return doOpen();
+    }
+    try {
+      return await doOpen();
+    } catch (e) {
+      // ignore: avoid_print
+      print('openOnDowngradeDelete: error ${e.runtimeType} $e');
+
+      /// There is no good way to detect a downgrade, try to open without version to check the version
+      var db = await open(name);
+      var isDowngrade = version < db.version;
+      db.close();
+
+      if (isDowngrade) {
+        await deleteDatabase(name);
+      } else {
+        rethrow;
+      }
+      return await doOpen();
+    }
+  }
+}

@@ -191,7 +191,7 @@ class SdbIndexRefImpl<
     idb.CursorRow row,
   ) {
     var key = row.primaryKey as K;
-    var indexKey = idbKeyToIndexKey<I>(row.key as Object);
+    var indexKey = idbKeyToIndexKey<I>(row.key);
     var value = row.value as V;
     return SdbIndexRecordSnapshotImpl<K, V, I>(this, key, value, indexKey);
   }
@@ -220,15 +220,7 @@ class SdbIndexRefImpl<
               ? (cwv) => sdbCursorWithValueMatchesFilter(cwv, filter)
               : null,
     );
-    /*
-    var rows = await idb.cursorToList(
-      cursor,
-      offset,
-      limit,
-      filter != null
-          ? (cwv) => sdbCursorWithValueMatchesFilter(cwv, filter)
-          : null,
-    );*/
+
     return rows.map(_sdbIndexRecordSnapshot).toList();
   }
 
@@ -248,7 +240,7 @@ class SdbIndexRefImpl<
     var rows = await cursor.toKeyRowList(limit: limit, offset: offset);
     return rows.map((row) {
       var key = row.primaryKey as K;
-      var indexKey = idbKeyToIndexKey<I>(row.key as Object);
+      var indexKey = idbKeyToIndexKey<I>(row.key);
       return SdbIndexRecordKeyImpl<K, V, I>(this, key, indexKey);
     }).toList();
   }

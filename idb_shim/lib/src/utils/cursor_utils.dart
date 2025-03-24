@@ -32,10 +32,10 @@ class IdbKeyCursorRow {
   ///
   /// This is the index key if the cursor is open on an index. Otherwise, it is
   /// the primary key.
-  final dynamic key;
+  final Object key;
 
   /// Cursory row primary key.
-  final dynamic primaryKey;
+  final Object primaryKey;
 
   @override
   String toString() {
