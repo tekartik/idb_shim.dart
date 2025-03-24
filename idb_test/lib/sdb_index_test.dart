@@ -3,14 +3,14 @@ import 'package:idb_shim/sdb.dart';
 import 'idb_test_common.dart';
 
 void main() {
-  simpleDbIndexTest(idbMemoryContext);
+  sdbIndexTests(idbMemoryContext);
 }
 
 var testStore = SdbStoreRef<int, SdbModel>('test');
 var testIndex = testStore.index<int>('myindex');
 var testStore2 = SdbStoreRef<String, SdbModel>('test2');
 
-void simpleDbIndexTest(TestContext ctx) {
+void sdbIndexTests(TestContext ctx) {
   var factory = sdbFactoryFromIdb(ctx.factory);
 
   group('sdb_index', () {

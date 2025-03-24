@@ -29,7 +29,7 @@ class SdbFactoryIdb implements SdbFactory {
     int? version,
     SdbOnVersionChangeCallback? onVersionChange,
   }) async {
-    final db = SdbDatabaseImpl(this, name, version);
+    final db = SdbDatabaseImpl(this, name);
     var onUpgradeNeeded =
         onVersionChange != null
             ? (idb.VersionChangeEvent event) async {

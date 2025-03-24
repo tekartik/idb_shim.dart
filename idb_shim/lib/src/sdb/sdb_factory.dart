@@ -35,20 +35,40 @@ abstract class SdbFactoryInterface {
 
 /// Sdb Factory extension.
 extension SdbFactoryExtension on SdbFactory {
-  /*
-  SdbFactoryImpl get _impl => this as SdbFactoryImpl;
-
-  /// [version] must be > 0
-  Future<SdbDatabase> openDatabase(
+  /// Open a database.
+  Future<SdbDatabase> openDatabaseOnDowngradeDelete(
     String name, {
     int? version,
     SdbOnVersionChangeCallback? onVersionChange,
-  }) {
-    return _impl.openDatabaseImpl(name, version, onVersionChange);
-  }
+  }) async {
+    Future<SdbDatabase> doOpen() {
+      return openDatabase(
+        name,
+        version: version,
+        onVersionChange: onVersionChange,
+      );
+    }
 
-  /// [version] must be > 0
-  Future<void> deleteDatabase(String name) async {
-    await _impl.deleteDatabaseImpl(name);
-  }*/
+    if (version == null) {
+      return doOpen();
+    }
+    try {
+      return await doOpen();
+    } catch (e) {
+      // ignore: avoid_print
+      print('openOnDowngradeDelete: error ${e.runtimeType} $e');
+
+      /// There is no good way to detect a downgrade, try to open without version to check the version
+      var db = await openDatabase(name);
+      var isDowngrade = version < db.version;
+      await db.close();
+
+      if (isDowngrade) {
+        await deleteDatabase(name);
+      } else {
+        rethrow;
+      }
+      return await doOpen();
+    }
+  }
 }

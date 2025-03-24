@@ -26,14 +26,15 @@ class SdbDatabaseImpl
   /// Name.
   final String name;
 
-  /// Version.
-  final int? version;
+  /// Version
+  @override
+  int get version => idbDatabase.version;
 
   /// Set after open.
   late idb.Database idbDatabase;
 
   /// SimpleDb implementation.
-  SdbDatabaseImpl(this.factory, this.name, this.version);
+  SdbDatabaseImpl(this.factory, this.name);
 
   /// Transaction.
   @override

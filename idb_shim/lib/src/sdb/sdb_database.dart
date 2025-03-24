@@ -21,6 +21,9 @@ abstract class SdbDatabase implements SdbClient {
     Future<T> Function(SdbMultiStoreTransaction txn) callback,
   );
 
+  /// Get the version of the database.
+  int get version;
+
   /// Close the database.
   Future<void> close();
 }
@@ -58,7 +61,9 @@ mixin SdbDatabaseDefaultMixin implements SdbDatabase, SdbClientInterface {
     Future<T> Function(SdbDatabase db) dbFn,
     Future<T> Function(SdbTransaction txn) txnFn,
   ) {
-    // TODO: implement clientHandleDbOrTxn
-    throw UnimplementedError();
+    throw UnimplementedError('clientHandleDbOrTxn');
   }
+
+  @override
+  int get version => throw UnimplementedError('version');
 }

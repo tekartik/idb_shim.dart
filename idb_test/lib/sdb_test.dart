@@ -16,11 +16,6 @@ class SdbTestContext {
   SdbTestContext(this.factory);
 }
 
-@Deprecated('Use idbSimpleDbTest')
-void simpleDbTest(TestContext ctx) {
-  idbSimpleSdbTest(ctx);
-}
-
 void idbSimpleSdbTest(TestContext ctx) {
   var factory = sdbFactoryFromIdb(ctx.factory);
   simpleSdbTest(SdbTestContext(factory));
