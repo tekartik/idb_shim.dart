@@ -1,3 +1,7 @@
+## 2.6.5
+
+* Add `openOnDowngradeDelete` to `IdbFactoryExt` to handle downgrade by deleting the database.
+
 ## 2.6.4+1
 
 * Add Web worker support (`idbFactoryWebWorker`)
