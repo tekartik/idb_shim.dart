@@ -1,6 +1,7 @@
-## 2.6.5
+## 2.6.5+1
 
-* Add `openOnDowngradeDelete` to `IdbFactoryExt` to handle downgrade by deleting the database.
+* Add `openOnDowngradeDelete` to `IdbFactory` to handle downgrade by deleting the database.
+* Add `openDatabaseOnDowngradeDelete` to `SdbFactory` to handle downgrade by deleting the database.
 
 ## 2.6.4+1
 
