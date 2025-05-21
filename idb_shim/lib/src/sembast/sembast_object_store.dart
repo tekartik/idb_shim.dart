@@ -96,7 +96,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   /// Only key the if key path is null
-  dynamic getUpdateKeyIfNeeded(value, [Object? key]) {
+  Object? getUpdateKeyIfNeeded(Object? value, [Object? key]) {
     if (keyPath == null) {
       return key;
     }
