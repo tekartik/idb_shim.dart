@@ -1,3 +1,7 @@
+## 2.6.6
+
+* Add `bool? descending` argument to all Sdb store and index APIs.
+
 ## 2.6.5+1
 
 * Add `openOnDowngradeDelete` to `IdbFactory` to handle downgrade by deleting the database.
