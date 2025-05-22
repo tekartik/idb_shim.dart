@@ -220,6 +220,14 @@ void sdbIndexTests(TestContext ctx) {
 
         keys = await testIndex.findRecordKeys(txn);
         expect(keys.keys, [1, 3]);
+
+        await testIndex.delete(txn, boundaries: boundaries);
+        keys = await testIndex.findRecordKeys(txn);
+        expect(keys.keys, [3]);
+
+        await testIndex.delete(txn);
+        keys = await testIndex.findRecordKeys(txn);
+        expect(keys.keys, isEmpty);
       });
 
       await db.close();

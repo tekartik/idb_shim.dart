@@ -294,6 +294,12 @@ void simpleSdbTest(SdbTestContext ctx) {
           );
           keys = await testStore.findRecordKeys(txn);
           expect(keys.keys, [1, 3]);
+          await testStore.delete(txn, boundaries: boundaries);
+          keys = await testStore.findRecordKeys(txn);
+          expect(keys.keys, [3]);
+          await testStore.delete(txn);
+          keys = await testStore.findRecordKeys(txn);
+          expect(keys, isEmpty);
         });
 
         await db.close();
