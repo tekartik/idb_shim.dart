@@ -79,12 +79,16 @@ extension SdbIndexRefExtension<
     SdbFilter? filter,
     int? offset,
     int? limit,
+
+    /// Optional descending order
+    bool? descending,
   }) => impl.findRecordsImpl(
     client,
     boundaries: boundaries,
     filter: filter,
     offset: offset,
     limit: limit,
+    descending: descending,
   );
 
   /// Find record keys.
@@ -93,11 +97,15 @@ extension SdbIndexRefExtension<
     SdbBoundaries<I>? boundaries,
     int? offset,
     int? limit,
+
+    /// Optional descending order
+    bool? descending,
   }) => impl.findRecordKeysImpl(
     client,
     boundaries: boundaries,
     offset: offset,
     limit: limit,
+    descending: descending,
   );
 
   /// Count records.
@@ -110,11 +118,15 @@ extension SdbIndexRefExtension<
     SdbBoundaries<I>? boundaries,
     int? offset,
     int? limit,
+
+    /// Optional descending order
+    bool? descending,
   }) => impl.deleteImpl(
     client,
     boundaries: boundaries,
     offset: offset,
     limit: limit,
+    descending: descending,
   );
 }
 

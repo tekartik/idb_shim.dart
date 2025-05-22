@@ -119,6 +119,27 @@ void sdbIndexTests(TestContext ctx) {
       var boundaries = SdbBoundaries(SdbLowerBoundary(1), SdbUpperBoundary(3));
       var records = await testIndex.findRecords(db, boundaries: boundaries);
       expect(records.length, 2);
+      records = await testIndex.findRecords(
+        db,
+        boundaries: boundaries,
+        limit: 1,
+      );
+      expect(records.keys, [1]);
+      records = await testIndex.findRecords(
+        db,
+        boundaries: boundaries,
+        limit: 1,
+        descending: true,
+      );
+      expect(records.keys, [2]);
+      records = await testIndex.findRecords(
+        db,
+        boundaries: boundaries,
+        limit: 1,
+        offset: 1,
+        descending: true,
+      );
+      expect(records.keys, [1]);
       var keys = await testIndex.findRecordKeys(db, boundaries: boundaries);
       expect(keys.length, 2);
       expect(await testIndex.count(db, boundaries: boundaries), 2);
@@ -157,13 +178,48 @@ void sdbIndexTests(TestContext ctx) {
         // Find/count
         var records = await testIndex.findRecords(txn, boundaries: boundaries);
         expect(records.length, 2);
+        records = await testIndex.findRecords(
+          txn,
+          boundaries: boundaries,
+          limit: 1,
+        );
+        expect(records.keys, [1]);
+        records = await testIndex.findRecords(
+          txn,
+          boundaries: boundaries,
+          limit: 1,
+          descending: true,
+        );
+        expect(records.keys, [2]);
+        records = await testIndex.findRecords(
+          txn,
+          boundaries: boundaries,
+          limit: 1,
+          descending: true,
+          offset: 1,
+        );
+        expect(records.keys, [1]);
         var keys = await testIndex.findRecordKeys(txn, boundaries: boundaries);
-        expect(keys.length, 2);
+        expect(keys.keys, [1, 2]);
+        keys = await testIndex.findRecordKeys(
+          txn,
+          boundaries: boundaries,
+          descending: true,
+          offset: 1,
+        );
+        expect(keys.keys, [1]);
         expect(await testIndex.count(txn, boundaries: boundaries), 2);
 
         // Delete
-        await testIndex.delete(txn, boundaries: boundaries);
-        expect(await testIndex.count(txn), 1);
+        await testIndex.delete(
+          txn,
+          boundaries: boundaries,
+          descending: true,
+          limit: 1,
+        );
+
+        keys = await testIndex.findRecordKeys(txn);
+        expect(keys.keys, [1, 3]);
       });
 
       await db.close();

@@ -1,5 +1,6 @@
 import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_filter_impl.dart';
+import 'package:idb_shim/src/sdb/sdb_utils.dart';
 import 'package:idb_shim/src/utils/cursor_utils.dart';
 import 'package:idb_shim/src/utils/idb_utils.dart';
 
@@ -111,6 +112,7 @@ class SdbIndexRefImpl<
     SdbFilter? filter,
     int? offset,
     int? limit,
+    bool? descending,
   }) => client.handleDbOrTxn(
     (db) => dbFindRecordsImpl(
       db,
@@ -118,6 +120,7 @@ class SdbIndexRefImpl<
       filter: filter,
       offset: offset,
       limit: limit,
+      descending: descending,
     ),
     (txn) => txnFindRecordsImpl(
       txn,
@@ -125,6 +128,7 @@ class SdbIndexRefImpl<
       filter: filter,
       offset: offset,
       limit: limit,
+      descending: descending,
     ),
   );
 
@@ -134,18 +138,21 @@ class SdbIndexRefImpl<
     SdbBoundaries<I>? boundaries,
     int? offset,
     int? limit,
+    bool? descending,
   }) => client.handleDbOrTxn(
     (db) => dbFindRecordKeysImpl(
       db,
       boundaries: boundaries,
       offset: offset,
       limit: limit,
+      descending: descending,
     ),
     (txn) => txnFindRecordKeysImpl(
       txn,
       boundaries: boundaries,
       offset: offset,
       limit: limit,
+      descending: descending,
     ),
   );
 
@@ -158,6 +165,7 @@ class SdbIndexRefImpl<
     SdbFilter? filter,
     int? offset,
     int? limit,
+    bool? descending,
   }) {
     return db.inStoreTransaction(store, SdbTransactionMode.readOnly, (txn) {
       return txnFindRecordsImpl(
@@ -166,6 +174,7 @@ class SdbIndexRefImpl<
         filter: filter,
         offset: offset,
         limit: limit,
+        descending: descending,
       );
     });
   }
@@ -176,6 +185,7 @@ class SdbIndexRefImpl<
     SdbBoundaries<I>? boundaries,
     int? offset,
     int? limit,
+    bool? descending,
   }) {
     return db.inStoreTransaction(store, SdbTransactionMode.readOnly, (txn) {
       return txnFindRecordKeysImpl(
@@ -183,6 +193,7 @@ class SdbIndexRefImpl<
         boundaries: boundaries,
         offset: offset,
         limit: limit,
+        descending: descending,
       );
     });
   }
@@ -205,11 +216,12 @@ class SdbIndexRefImpl<
     SdbFilter? filter,
     int? offset,
     int? limit,
+    bool? descending,
   }) async {
     var idbObjectStore = txn.idbTransaction.objectStore(store.name);
     var idbIndex = idbObjectStore.index(name);
     var cursor = idbIndex.openCursor(
-      direction: idb.idbDirectionNext,
+      direction: descendingToIdbDirection(descending),
       range: idbKeyRangeFromBoundaries(boundaries),
     );
     var rows = await cursor.toRowList(
@@ -230,11 +242,12 @@ class SdbIndexRefImpl<
     SdbBoundaries<I>? boundaries,
     int? offset,
     int? limit,
+    bool? descending,
   }) async {
     var idbObjectStore = txn.idbTransaction.objectStore(store.name);
     var idbIndex = idbObjectStore.index(name);
     var cursor = idbIndex.openKeyCursor(
-      direction: idb.idbDirectionNext,
+      direction: descendingToIdbDirection(descending),
       range: idbKeyRangeFromBoundaries(boundaries),
     );
     var rows = await cursor.toKeyRowList(limit: limit, offset: offset);
@@ -276,14 +289,21 @@ class SdbIndexRefImpl<
     SdbBoundaries<I>? boundaries,
     int? offset,
     int? limit,
+    bool? descending,
   }) => client.handleDbOrTxn(
-    (db) =>
-        dbDeleteImpl(db, boundaries: boundaries, offset: offset, limit: limit),
+    (db) => dbDeleteImpl(
+      db,
+      boundaries: boundaries,
+      offset: offset,
+      limit: limit,
+      descending: descending,
+    ),
     (txn) => txnDeleteImpl(
       txn,
       boundaries: boundaries,
       offset: offset,
       limit: limit,
+      descending: descending,
     ),
   );
 
@@ -293,6 +313,7 @@ class SdbIndexRefImpl<
     SdbBoundaries<I>? boundaries,
     int? offset,
     int? limit,
+    bool? descending,
   }) {
     return db.inStoreTransaction(store, SdbTransactionMode.readWrite, (txn) {
       return txnDeleteImpl(
@@ -300,6 +321,7 @@ class SdbIndexRefImpl<
         boundaries: boundaries,
         offset: offset,
         limit: limit,
+        descending: descending,
       );
     });
   }
@@ -310,13 +332,14 @@ class SdbIndexRefImpl<
     SdbBoundaries<I>? boundaries,
     int? offset,
     int? limit,
+    bool? descending,
   }) async {
     var idbObjectStore = txn.idbTransaction.objectStore(store.name);
     var idbIndex = idbObjectStore.index(name);
     // Need full cursor for delete
     var stream = idbIndex.openCursor(
       autoAdvance: true,
-      direction: idb.idbDirectionNext,
+      direction: descendingToIdbDirection(descending),
       range: idbKeyRangeFromBoundaries(boundaries),
     );
     await streamWithOffsetAndLimit(stream, offset, limit).listen((cursor) {

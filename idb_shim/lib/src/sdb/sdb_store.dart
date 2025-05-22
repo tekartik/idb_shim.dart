@@ -72,11 +72,15 @@ abstract class SdbStoreRef<K extends KeyBase, V extends ValueBase> {
     SdbBoundaries<K>? boundaries,
     int? offset,
     int? limit,
+
+    /// Optional descending order
+    bool? descending,
   }) => impl.deleteImpl(
     client,
     boundaries: boundaries,
     offset: offset,
     limit: limit,
+    descending: descending,
   );
 
   /// Record reference.

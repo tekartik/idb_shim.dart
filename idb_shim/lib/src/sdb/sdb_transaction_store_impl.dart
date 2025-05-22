@@ -1,5 +1,6 @@
 import 'package:idb_shim/src/sdb/sdb_boundary_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_impl.dart';
+import 'package:idb_shim/src/sdb/sdb_utils.dart';
 import 'package:idb_shim/src/utils/cursor_utils.dart';
 import 'package:idb_shim/src/utils/idb_utils.dart';
 import 'package:idb_shim/utils/idb_utils.dart' as idb;
@@ -88,10 +89,12 @@ class SdbSingleStoreTransactionImpl<K extends KeyBase, V extends ValueBase>
     SdbBoundaries<K>? boundaries,
     int? offset,
     int? limit,
+    bool? descending,
   }) => txnStore.findRecordKeys(
     boundaries: boundaries,
     offset: offset,
     limit: limit,
+    descending: descending,
   );
 }
 
@@ -187,8 +190,7 @@ class SdbTransactionStoreRefImpl<K extends KeyBase, V extends ValueBase>
     bool? descending,
   }) async {
     var cursor = idbObjectStore.openCursor(
-      direction:
-          (descending ?? false) ? idb.idbDirectionPrev : idb.idbDirectionNext,
+      direction: descendingToIdbDirection(descending),
       range: idbKeyRangeFromBoundaries(boundaries),
     );
 
@@ -217,8 +219,7 @@ class SdbTransactionStoreRefImpl<K extends KeyBase, V extends ValueBase>
   }) async {
     var cursor = idbObjectStore.openKeyCursor(
       autoAdvance: true,
-      direction:
-          (descending ?? false) ? idb.idbDirectionPrev : idb.idbDirectionNext,
+      direction: descendingToIdbDirection(descending),
       range: idbKeyRangeFromBoundaries(boundaries),
     );
     var rows = await idb.keyCursorToList(cursor, offset, limit);
@@ -235,6 +236,7 @@ class SdbTransactionStoreRefImpl<K extends KeyBase, V extends ValueBase>
     SdbBoundaries<K>? boundaries,
     int? offset,
     int? limit,
+    bool? descending,
   }) async {
     var keyRange = idbKeyRangeFromBoundaries(boundaries);
 
@@ -247,7 +249,7 @@ class SdbTransactionStoreRefImpl<K extends KeyBase, V extends ValueBase>
     } else {
       var cursor = idbObjectStore.openCursor(
         autoAdvance: true,
-        direction: idb.idbDirectionNext,
+        direction: descendingToIdbDirection(descending),
         range: keyRange,
       );
       await streamWithOffsetAndLimit(cursor, offset, limit).listen((cursor) {

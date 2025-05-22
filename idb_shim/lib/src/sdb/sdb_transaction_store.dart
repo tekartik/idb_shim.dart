@@ -79,10 +79,14 @@ extension SdbTransactionStoreRefExtension<
     SdbBoundaries<K>? boundaries,
     int? offset,
     int? limit,
+
+    /// Optional descending order
+    bool? descending,
   }) => _impl.deleteRecordsImpl(
     boundaries: boundaries,
     offset: offset,
     limit: limit,
+    descending: descending,
   );
 
   /// store name.
@@ -138,10 +142,12 @@ extension SdbSingleStoreTransactionExtension<
     SdbBoundaries<K>? boundaries,
     int? offset,
     int? limit,
+    bool? descending,
   }) => impl.findRecordKeysImpl(
     boundaries: boundaries,
     offset: offset,
     limit: limit,
+    descending: descending,
   );
 }
 

@@ -248,16 +248,52 @@ void simpleSdbTest(SdbTestContext ctx) {
             boundaries: boundaries,
           );
           expect(records.length, 2);
+          records = await testStore.findRecords(
+            txn,
+            boundaries: boundaries,
+            limit: 1,
+          );
+          expect(records.keys, [1]);
+          records = await testStore.findRecords(
+            txn,
+            boundaries: boundaries,
+            limit: 1,
+            descending: true,
+          );
+          expect(records.keys, [2]);
+          records = await testStore.findRecords(
+            txn,
+            boundaries: boundaries,
+            limit: 1,
+            descending: true,
+            offset: 1,
+          );
+          expect(records.keys, [1]);
+
           var keys = await testStore.findRecordKeys(
             txn,
             boundaries: boundaries,
           );
           expect(keys.keys, [1, 2]);
+          keys = await testStore.findRecordKeys(
+            txn,
+            boundaries: boundaries,
+            limit: 1,
+            offset: 1,
+            descending: true,
+          );
+          expect(keys.keys, [1]);
           var count = await testStore.count(txn, boundaries: boundaries);
           expect(count, 2);
 
-          await testStore.delete(txn, boundaries: boundaries);
-          expect(await testStore.count(txn), 1);
+          await testStore.delete(
+            txn,
+            boundaries: boundaries,
+            descending: true,
+            limit: 1,
+          );
+          keys = await testStore.findRecordKeys(txn);
+          expect(keys.keys, [1, 3]);
         });
 
         await db.close();

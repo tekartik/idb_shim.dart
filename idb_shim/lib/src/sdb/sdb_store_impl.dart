@@ -89,11 +89,13 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
     SdbBoundaries<K>? boundaries,
     int? offset,
     int? limit,
+    bool? descending,
   }) => impl.deleteImpl(
     client,
     boundaries: boundaries,
     offset: offset,
     limit: limit,
+    descending: descending,
   );
 
   /// Record reference.
@@ -372,14 +374,21 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
     SdbBoundaries<K>? boundaries,
     int? offset,
     int? limit,
+    bool? descending,
   }) => client.handleDbOrTxn(
-    (db) =>
-        dbDeleteImpl(db, boundaries: boundaries, offset: offset, limit: limit),
+    (db) => dbDeleteImpl(
+      db,
+      boundaries: boundaries,
+      offset: offset,
+      limit: limit,
+      descending: descending,
+    ),
     (txn) => txnDeleteImpl(
       txn,
       boundaries: boundaries,
       offset: offset,
       limit: limit,
+      descending: descending,
     ),
   );
 
@@ -389,6 +398,7 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
     SdbBoundaries<K>? boundaries,
     int? offset,
     int? limit,
+    bool? descending,
   }) {
     return db.inStoreTransaction(this, SdbTransactionMode.readWrite, (txn) {
       return txnDeleteImpl(
@@ -396,6 +406,7 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
         boundaries: boundaries,
         offset: offset,
         limit: limit,
+        descending: descending,
       );
     });
   }
@@ -406,9 +417,15 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
     SdbBoundaries<K>? boundaries,
     int? offset,
     int? limit,
+    bool? descending,
   }) {
     return txn
         .storeImpl(this)
-        .deleteRecords(boundaries: boundaries, offset: offset, limit: limit);
+        .deleteRecords(
+          boundaries: boundaries,
+          offset: offset,
+          limit: limit,
+          descending: descending,
+        );
   }
 }
