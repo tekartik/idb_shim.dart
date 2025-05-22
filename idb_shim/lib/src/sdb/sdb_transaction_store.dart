@@ -44,11 +44,15 @@ extension SdbTransactionStoreRefExtension<
     SdbFilter? filter,
     int? offset,
     int? limit,
+
+    /// Optional sort order
+    bool? descending,
   }) => _impl.findRecordsImpl(
     boundaries: boundaries,
     filter: filter,
     offset: offset,
     limit: limit,
+    descending: descending,
   );
 
   /// Find record keys.
@@ -56,10 +60,14 @@ extension SdbTransactionStoreRefExtension<
     SdbBoundaries<K>? boundaries,
     int? offset,
     int? limit,
+
+    /// Optional descending order
+    bool? descending,
   }) => _impl.findRecordKeysImpl(
     boundaries: boundaries,
     offset: offset,
     limit: limit,
+    descending: descending,
   );
 
   /// Count record.
@@ -114,11 +122,15 @@ extension SdbSingleStoreTransactionExtension<
     SdbFilter? filter,
     int? offset,
     int? limit,
+
+    /// Optional descending sort order
+    bool? descending,
   }) => impl.findRecordsImpl(
     boundaries: boundaries,
     filter: filter,
     offset: offset,
     limit: limit,
+    descending: descending,
   );
 
   /// Find record keys.

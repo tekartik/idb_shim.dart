@@ -49,12 +49,16 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
     SdbFilter? filter,
     int? offset,
     int? limit,
+
+    /// Optional sort order
+    bool? descending,
   }) => impl.findRecordsImpl(
     client,
     boundaries: boundaries,
     filter: filter,
     offset: offset,
     limit: limit,
+    descending: descending,
   );
 
   /// Find records.
@@ -64,11 +68,13 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
     SdbBoundaries<K>? boundaries,
     int? offset,
     int? limit,
+    bool? descending,
   }) => impl.findRecordKeysImpl(
     client,
     boundaries: boundaries,
     offset: offset,
     limit: limit,
+    descending: descending,
   );
 
   /// Count records.
@@ -202,6 +208,9 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
     SdbFilter? filter,
     int? offset,
     int? limit,
+
+    /// Optional sort order
+    bool? descending,
   }) => client.handleDbOrTxn(
     (db) => dbFindRecordsImpl(
       db,
@@ -209,6 +218,7 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
       filter: filter,
       offset: offset,
       limit: limit,
+      descending: descending,
     ),
     (txn) => txnFindRecordsImpl(
       txn,
@@ -216,6 +226,7 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
       filter: filter,
       offset: offset,
       limit: limit,
+      descending: descending,
     ),
   );
 
@@ -228,6 +239,9 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
     SdbFilter? filter,
     int? offset,
     int? limit,
+
+    /// Optional sort order
+    bool? descending,
   }) {
     return db.inStoreTransaction(this, SdbTransactionMode.readOnly, (txn) {
       return txnFindRecordsImpl(
@@ -236,6 +250,7 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
         filter: filter,
         offset: offset,
         limit: limit,
+        descending: descending,
       );
     });
   }
@@ -249,6 +264,9 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
     SdbFilter? filter,
     int? offset,
     int? limit,
+
+    /// Optional sort order
+    bool? descending,
   }) {
     return txn
         .storeImpl(this)
@@ -257,6 +275,7 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
           filter: filter,
           offset: offset,
           limit: limit,
+          descending: descending,
         );
   }
 
@@ -266,18 +285,23 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
     SdbBoundaries<K>? boundaries,
     int? offset,
     int? limit,
+
+    /// Optional descending order
+    bool? descending,
   }) => client.handleDbOrTxn(
     (db) => dbFindRecordKeysImpl(
       db,
       boundaries: boundaries,
       offset: offset,
       limit: limit,
+      descending: descending,
     ),
     (txn) => txnFindRecordKeysImpl(
       txn,
       boundaries: boundaries,
       offset: offset,
       limit: limit,
+      descending: descending,
     ),
   );
 
@@ -287,6 +311,9 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
     SdbBoundaries<K>? boundaries,
     int? offset,
     int? limit,
+
+    /// Optional descending order
+    bool? descending,
   }) {
     return db.inStoreTransaction(this, SdbTransactionMode.readOnly, (txn) {
       return txnFindRecordKeysImpl(
@@ -294,6 +321,7 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
         boundaries: boundaries,
         offset: offset,
         limit: limit,
+        descending: descending,
       );
     });
   }
@@ -304,10 +332,16 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
     SdbBoundaries<K>? boundaries,
     int? offset,
     int? limit,
+    bool? descending,
   }) {
     return txn
         .storeImpl(this)
-        .findRecordKeys(boundaries: boundaries, offset: offset, limit: limit);
+        .findRecordKeys(
+          boundaries: boundaries,
+          offset: offset,
+          limit: limit,
+          descending: descending,
+        );
   }
 
   /// Count records.

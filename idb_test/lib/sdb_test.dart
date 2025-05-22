@@ -184,8 +184,34 @@ void simpleSdbTest(SdbTestContext ctx) {
         );
         var records = await testStore.findRecords(db, boundaries: boundaries);
         expect(records.length, 2);
+        records = await testStore.findRecords(
+          db,
+          boundaries: boundaries,
+          limit: 1,
+        );
+        expect(records.keys, [1]);
+        records = await testStore.findRecords(
+          db,
+          boundaries: boundaries,
+          limit: 1,
+          descending: true,
+        );
+        expect(records.keys, [2]);
         var keys = await testStore.findRecordKeys(db, boundaries: boundaries);
         expect(keys.keys, [1, 2]);
+        keys = await testStore.findRecordKeys(
+          db,
+          boundaries: boundaries,
+          limit: 1,
+        );
+        expect(keys.keys, [1]);
+        keys = await testStore.findRecordKeys(
+          db,
+          boundaries: boundaries,
+          limit: 1,
+          descending: true,
+        );
+        expect(keys.keys, [2]);
         var count = await testStore.count(db, boundaries: boundaries);
         expect(count, 2);
 

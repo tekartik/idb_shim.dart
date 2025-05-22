@@ -33,12 +33,16 @@ abstract class SdbStoreRef<K extends KeyBase, V extends ValueBase> {
     SdbFilter? filter,
     int? offset,
     int? limit,
+
+    /// Optional sort order
+    bool? descending,
   }) => impl.findRecordsImpl(
     client,
     boundaries: boundaries,
     filter: filter,
     offset: offset,
     limit: limit,
+    descending: descending,
   );
 
   /// Find records.
@@ -47,11 +51,15 @@ abstract class SdbStoreRef<K extends KeyBase, V extends ValueBase> {
     SdbBoundaries<K>? boundaries,
     int? offset,
     int? limit,
+
+    /// Optional descending order
+    bool? descending,
   }) => impl.findRecordKeysImpl(
     client,
     boundaries: boundaries,
     offset: offset,
     limit: limit,
+    descending: descending,
   );
 
   /// Count records.

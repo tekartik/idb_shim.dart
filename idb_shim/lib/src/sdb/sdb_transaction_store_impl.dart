@@ -72,11 +72,15 @@ class SdbSingleStoreTransactionImpl<K extends KeyBase, V extends ValueBase>
     SdbFilter? filter,
     int? offset,
     int? limit,
+
+    /// Optional descending order
+    bool? descending,
   }) => txnStore.findRecords(
     boundaries: boundaries,
     filter: filter,
     offset: offset,
     limit: limit,
+    descending: descending,
   );
 
   /// Find records.
@@ -180,9 +184,11 @@ class SdbTransactionStoreRefImpl<K extends KeyBase, V extends ValueBase>
     SdbFilter? filter,
     int? offset,
     int? limit,
+    bool? descending,
   }) async {
     var cursor = idbObjectStore.openCursor(
-      direction: idb.idbDirectionNext,
+      direction:
+          (descending ?? false) ? idb.idbDirectionPrev : idb.idbDirectionNext,
       range: idbKeyRangeFromBoundaries(boundaries),
     );
 
@@ -207,10 +213,12 @@ class SdbTransactionStoreRefImpl<K extends KeyBase, V extends ValueBase>
     SdbBoundaries<K>? boundaries,
     int? offset,
     int? limit,
+    bool? descending,
   }) async {
     var cursor = idbObjectStore.openKeyCursor(
       autoAdvance: true,
-      direction: idb.idbDirectionNext,
+      direction:
+          (descending ?? false) ? idb.idbDirectionPrev : idb.idbDirectionNext,
       range: idbKeyRangeFromBoundaries(boundaries),
     );
     var rows = await idb.keyCursorToList(cursor, offset, limit);
