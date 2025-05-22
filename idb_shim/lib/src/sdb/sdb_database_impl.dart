@@ -1,5 +1,6 @@
 import 'package:idb_shim/idb_shim.dart' as idb;
 import 'package:idb_shim/src/sdb/sdb_client.dart';
+import 'package:meta/meta.dart';
 
 import 'sdb_database.dart';
 import 'sdb_factory_impl.dart';
@@ -14,6 +15,13 @@ import 'sdb_types.dart';
 extension SdbDatabaseInternalExtension on SdbDatabase {
   /// Database implementation.
   SdbDatabaseImpl get impl => this as SdbDatabaseImpl;
+}
+
+/// Helper idb extension.
+extension SdbDatabaseIdbExt on SdbDatabase {
+  /// Database implementation.
+  @visibleForTesting
+  idb.Database get rawIdb => impl.idbDatabase;
 }
 
 /// SimpleDb implementation.

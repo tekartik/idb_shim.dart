@@ -1,9 +1,8 @@
 import 'package:idb_shim/src/sdb/sdb.dart';
+import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_store_impl.dart';
 
-import 'sdb_client.dart';
 // ignore: unused_import
-import 'sdb_client_impl.dart';
 import 'sdb_database_impl.dart';
 import 'sdb_record_snapshot_impl.dart';
 import 'sdb_store_impl.dart';
@@ -45,6 +44,24 @@ class SdbRecordRefImpl<K extends KeyBase, V extends ValueBase>
   /// Get a single record.
   Future<SdbRecordSnapshotImpl<K, V>?> txnGetImpl(SdbTransactionImpl txn) {
     return txn.storeImpl(store).getRecordImpl(key);
+  }
+
+  /// Get a single record.
+  Future<bool> existsImpl(SdbClient client) => client.handleDbOrTxn(
+    (db) => dbExistsImpl(db),
+    (txn) => txnExistsImpl(txn.rawImpl),
+  );
+
+  /// Get a single record.
+  Future<bool> dbExistsImpl(SdbDatabaseImpl db) {
+    return db.inStoreTransaction(store, SdbTransactionMode.readOnly, (txn) {
+      return txn.impl.existsImpl(key);
+    });
+  }
+
+  /// Get a single record.
+  Future<bool> txnExistsImpl(SdbTransactionImpl txn) {
+    return txn.storeImpl(store).existsImpl(key);
   }
 
   /// Delete a single record.

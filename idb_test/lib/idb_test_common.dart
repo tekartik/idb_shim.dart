@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:dev_test/test.dart';
 import 'package:idb_shim/idb_client_logger.dart';
-import 'package:idb_shim/idb_client_memory.dart';
 import 'package:idb_shim/idb_client_sembast.dart';
 import 'package:idb_shim/src/common/common_factory.dart'; // ignore: implementation_imports
 import 'package:idb_shim/src/common/common_meta.dart'; // ignore: implementation_imports

@@ -1,17 +1,11 @@
 import 'sdb_client.dart';
 import 'sdb_record_impl.dart';
 import 'sdb_record_snapshot.dart';
-import 'sdb_store.dart';
 import 'sdb_types.dart';
 
 /// Record reference.
-abstract class SdbRecordRef<K extends KeyBase, V extends ValueBase> {
-  /// Store reference.
-  SdbStoreRef<K, V> get store;
-
-  /// Primary key.
-  K get key;
-}
+typedef SdbRecordRef<K extends KeyBase, V extends ValueBase> =
+    SdbRecordKey<K, V>;
 
 /// Store methods.
 extension SdbRecordRefExtension<K extends KeyBase, V extends ValueBase>
@@ -19,6 +13,9 @@ extension SdbRecordRefExtension<K extends KeyBase, V extends ValueBase>
   /// Get a single record.
   Future<SdbRecordSnapshot<K, V>?> get(SdbClient client) =>
       impl.getImpl(client);
+
+  /// Check if a record exists.
+  Future<bool> exists(SdbClient client) => impl.existsImpl(client);
 
   /// Get a single value, returns null if not found.
   Future<V?> getValue(SdbClient client) =>

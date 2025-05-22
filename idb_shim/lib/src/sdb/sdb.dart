@@ -5,7 +5,10 @@ import 'sdb_factory_impl.dart';
 
 export 'sdb_boundary.dart'
     show SdbBoundaries, SdbBoundary, SdbLowerBoundary, SdbUpperBoundary;
+export 'sdb_client.dart' show SdbClient;
+export 'sdb_client_impl.dart' show SdbClientExtension;
 export 'sdb_database.dart' show SdbDatabase, SdbDatabaseExtension;
+export 'sdb_database_impl.dart' show SdbDatabaseIdbExt;
 export 'sdb_factory.dart' show SdbFactory, SdbFactoryExtension;
 export 'sdb_filter.dart'
     show SdbFilter, SdbFilterRecordSnapshot, SdbFilterRecordSnapshotExt;
@@ -43,7 +46,8 @@ export 'sdb_record_snapshot.dart'
         SdbRecordKey,
         SdbRecordKeyListExt;
 export 'sdb_store.dart' show SdbStoreRef, SdbStoreRefExtension;
-export 'sdb_transaction.dart' show SdbTransaction, SdbTransactionMode;
+export 'sdb_transaction.dart'
+    show SdbTransaction, SdbTransactionMode, SdbTransactionExtension;
 export 'sdb_transaction.dart' show SdbTransaction;
 export 'sdb_transaction_store.dart'
     show
@@ -64,6 +68,10 @@ SdbFactory sdbFactoryFromIdb(idb.IdbFactory idbFactory) {
 
 /// Memory factory.
 final SdbFactory sdbFactoryMemory = sdbFactoryFromIdb(idb.idbFactoryMemory);
+
+/// New memory factory.
+SdbFactory newSdbFactoryMemory() =>
+    sdbFactoryFromIdb(idb.newIdbFactoryMemory());
 
 /// Native (browser) factory.
 final SdbFactory sdbFactoryWeb = sdbFactoryFromIdb(idb.idbFactoryWeb);

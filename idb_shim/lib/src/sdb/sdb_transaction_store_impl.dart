@@ -47,6 +47,12 @@ class SdbSingleStoreTransactionImpl<K extends KeyBase, V extends ValueBase>
   Future<SdbRecordSnapshotImpl<K, V>?> getRecordImpl(K key) =>
       txnStore.getRecordImpl(key);
 
+  /// Check if a record exists.
+  Future<bool> existsImpl(K key) async {
+    var record = await getRecordImpl(key);
+    return record != null;
+  }
+
   /// Add a record.
   Future<K> addImpl(V value) => txnStore.add(value);
 
@@ -141,6 +147,12 @@ class SdbTransactionStoreRefImpl<K extends KeyBase, V extends ValueBase>
       return SdbRecordSnapshotImpl<K, V>(store, key, fixResult<V>(result));
     }
     return null;
+  }
+
+  /// Check if a record exists.
+  Future<bool> existsImpl(K key) async {
+    var value = await getRecordImpl(key);
+    return value != null;
   }
 
   /// Add a record.

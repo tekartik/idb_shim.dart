@@ -4,6 +4,9 @@ import 'sdb_client.dart';
 import 'sdb_database_impl.dart';
 
 /// Database client (db or transaction).
+extension SdbClientExtension on SdbClient {}
+
+/// Database client (db or transaction).
 extension SdbClientInternalExtension on SdbClient {
   /// Database implementation.
   SdbDatabaseImpl get dbImpl => this as SdbDatabaseImpl;
