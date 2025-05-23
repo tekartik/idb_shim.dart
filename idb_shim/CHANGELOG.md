@@ -1,6 +1,8 @@
-## 2.6.6
+## 2.6.6+1
 
-* Add `bool? descending` argument to all Sdb store and index APIs.
+* sdb:
+  * Add `bool? descending` argument to all Sdb store and index APIs.
+  * Export `SdbKey`, `SdbClient`.
 
 ## 2.6.5+1
 
