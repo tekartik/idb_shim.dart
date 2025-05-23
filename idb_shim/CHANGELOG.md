@@ -1,8 +1,9 @@
-## 2.6.6+1
+## 2.6.6+2
 
 * sdb:
   * Add `bool? descending` argument to all Sdb store and index APIs.
-  * Export `SdbKey`, `SdbClient`.
+  * Export `SdbKey`, `SdbValue`, `SdbIndexKey`, `SdbClient`.
+  * Export `SdbOpenIndexRef`
 
 ## 2.6.5+1
 
