@@ -2,14 +2,14 @@ import 'sdb_store.dart';
 import 'sdb_types.dart';
 
 /// Record snapshot.
-abstract class SdbRecordSnapshot<K extends KeyBase, V extends ValueBase>
+abstract class SdbRecordSnapshot<K extends SdbKey, V extends SdbValue>
     extends SdbRecordKey<K, V> {
   /// Value.
   V get value;
 }
 
 /// Record snapshot.
-abstract class SdbRecordKey<K extends KeyBase, V extends ValueBase> {
+abstract class SdbRecordKey<K extends SdbKey, V extends SdbValue> {
   /// Store reference.
   SdbStoreRef<K, V> get store;
 
@@ -27,14 +27,14 @@ V fixResult<V>(Object result) {
 }
 
 /// Common extension
-extension SdbRecordSnapshotListExt<K extends KeyBase, V extends ValueBase>
+extension SdbRecordSnapshotListExt<K extends SdbKey, V extends SdbValue>
     on List<SdbRecordSnapshot<K, V>> {
   /// List of values
   List<V> get values => map((e) => e.value).toList();
 }
 
 /// Common extension
-extension SdbRecordKeyListExt<K extends KeyBase, V extends ValueBase>
+extension SdbRecordKeyListExt<K extends SdbKey, V extends SdbValue>
     on List<SdbRecordKey<K, V>> {
   /// List of primary keys
   List<K> get keys => map((e) => e.key).toList();

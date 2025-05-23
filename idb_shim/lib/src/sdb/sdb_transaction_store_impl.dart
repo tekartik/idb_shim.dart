@@ -18,8 +18,8 @@ import 'sdb_types.dart';
 
 /// SimpleDb transaction internal extension.
 extension SdbSingleStoreTransactionInternalExtension<
-  K extends KeyBase,
-  V extends ValueBase
+  K extends SdbKey,
+  V extends SdbValue
 >
     on SdbSingleStoreTransaction<K, V> {
   /// Single store transaction implementation.
@@ -28,7 +28,7 @@ extension SdbSingleStoreTransactionInternalExtension<
 }
 
 /// SimpleDb single store transaction implementation.
-class SdbSingleStoreTransactionImpl<K extends KeyBase, V extends ValueBase>
+class SdbSingleStoreTransactionImpl<K extends SdbKey, V extends SdbValue>
     extends SdbTransactionImpl
     implements SdbSingleStoreTransaction<K, V> {
   @override
@@ -106,8 +106,8 @@ class SdbSingleStoreTransactionImpl<K extends KeyBase, V extends ValueBase>
 
 /// Transaction store reference internal extension.
 extension SdbTransactionStoreRefInternalExtension<
-  K extends KeyBase,
-  V extends ValueBase
+  K extends SdbKey,
+  V extends SdbValue
 >
     on SdbTransactionStoreRef<K, V> {
   /// Transaction store reference implementation.
@@ -116,7 +116,7 @@ extension SdbTransactionStoreRefInternalExtension<
 }
 
 /// Transaction store reference implementation.
-class SdbTransactionStoreRefImpl<K extends KeyBase, V extends ValueBase>
+class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
     implements SdbTransactionStoreRef<K, V> {
   // Set later
   @override
@@ -157,6 +157,9 @@ class SdbTransactionStoreRefImpl<K extends KeyBase, V extends ValueBase>
 
   /// Add a record.
   Future<K> addImpl(V value) async {
+    if (idbObjectStore.keyPath != null) {
+      return (await idbObjectStore.add(value)) as K;
+    }
     if (K == int) {
       return (await idbObjectStore.add(value)) as K;
     } else if (K == String) {
@@ -296,10 +299,8 @@ class SdbMultiStoreTransactionImpl extends SdbTransactionImpl
   }
 
   /// Get a transaction store.
-  SdbTransactionStoreRef<K, V> txnStoreImpl<
-    K extends KeyBase,
-    V extends ValueBase
-  >(SdbStoreRef<K, V> store) {
+  SdbTransactionStoreRef<K, V>
+  txnStoreImpl<K extends SdbKey, V extends SdbValue>(SdbStoreRef<K, V> store) {
     var txnStore = _txnStoreMap[store];
     if (txnStore == null) {
       for (var existingStore in stores) {

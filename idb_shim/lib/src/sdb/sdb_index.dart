@@ -10,9 +10,9 @@ import 'sdb_types.dart';
 
 /// Index reference.
 abstract interface class SdbIndexRef<
-  K extends KeyBase,
-  V extends ValueBase,
-  I extends IndexBase
+  K extends SdbKey,
+  V extends SdbValue,
+  I extends SdbIndexKey
 > {
   /// Store reference.
   SdbStoreRef<K, V> get store;
@@ -23,47 +23,47 @@ abstract interface class SdbIndexRef<
 
 /// Index on 1 field
 abstract interface class SdbIndex1Ref<
-  K extends KeyBase,
-  V extends ValueBase,
-  I extends IndexBase
+  K extends SdbKey,
+  V extends SdbValue,
+  I extends SdbIndexKey
 >
     extends SdbIndexRef<K, V, I> {}
 
 /// Index on 2 fields
 abstract interface class SdbIndex2Ref<
-  K extends KeyBase,
-  V extends ValueBase,
-  I1 extends IndexBase,
-  I2 extends IndexBase
+  K extends SdbKey,
+  V extends SdbValue,
+  I1 extends SdbIndexKey,
+  I2 extends SdbIndexKey
 >
     extends SdbIndexRef<K, V, (I1, I2)> {}
 
 /// Index on 3 fields
 abstract interface class SdbIndex3Ref<
-  K extends KeyBase,
-  V extends ValueBase,
-  I1 extends IndexBase,
-  I2 extends IndexBase,
-  I3 extends IndexBase
+  K extends SdbKey,
+  V extends SdbValue,
+  I1 extends SdbIndexKey,
+  I2 extends SdbIndexKey,
+  I3 extends SdbIndexKey
 >
     extends SdbIndexRef<K, V, (I1, I2, I3)> {}
 
 /// Index on 4 fields
 abstract interface class SdbIndex4Ref<
-  K extends KeyBase,
-  V extends ValueBase,
-  I1 extends IndexBase,
-  I2 extends IndexBase,
-  I3 extends IndexBase,
-  I4 extends IndexBase
+  K extends SdbKey,
+  V extends SdbValue,
+  I1 extends SdbIndexKey,
+  I2 extends SdbIndexKey,
+  I3 extends SdbIndexKey,
+  I4 extends SdbIndexKey
 >
     extends SdbIndexRef<K, V, (I1, I2, I3, I4)> {}
 
 /// Index methods.
 extension SdbIndexRefExtension<
-  K extends KeyBase,
-  V extends ValueBase,
-  I extends IndexBase
+  K extends SdbKey,
+  V extends SdbValue,
+  I extends SdbIndexKey
 >
     on SdbIndexRef<K, V, I> {
   /// Record reference.
@@ -91,6 +91,29 @@ extension SdbIndexRefExtension<
     descending: descending,
   );
 
+  /// Find records.
+  Future<SdbIndexRecordSnapshot<K, V, I>?> findRecord(
+    SdbClient client, {
+    SdbBoundaries<I>? boundaries,
+
+    /// Optional filter, performed in memory
+    SdbFilter? filter,
+    int? offset,
+
+    /// Optional descending order
+    bool? descending,
+  }) async {
+    var records = await findRecords(
+      client,
+      boundaries: boundaries,
+      filter: filter,
+      offset: offset,
+      limit: 1,
+      descending: descending,
+    );
+    return records.firstOrNull;
+  }
+
   /// Find record keys.
   Future<List<SdbIndexRecordKey<K, V, I>>> findRecordKeys(
     SdbClient client, {
@@ -107,6 +130,28 @@ extension SdbIndexRefExtension<
     limit: limit,
     descending: descending,
   );
+
+  /// Find first record key.
+  Future<SdbIndexRecordKey<K, V, I>?> findRecordKey(
+    SdbClient client, {
+    SdbBoundaries<I>? boundaries,
+
+    /// Optional filter, performed in memory
+    SdbFilter? filter,
+    int? offset,
+
+    /// Optional descending order
+    bool? descending,
+  }) async {
+    var records = await findRecordKeys(
+      client,
+      boundaries: boundaries,
+      offset: offset,
+      limit: 1,
+      descending: descending,
+    );
+    return records.firstOrNull;
+  }
 
   /// Count records.
   Future<int> count(SdbClient client, {SdbBoundaries<I>? boundaries}) =>
@@ -132,9 +177,9 @@ extension SdbIndexRefExtension<
 
 /// Extension on index on 1 field.
 extension SdbIndex1RefExtension<
-  K extends KeyBase,
-  V extends ValueBase,
-  I extends IndexBase
+  K extends SdbKey,
+  V extends SdbValue,
+  I extends SdbIndexKey
 >
     on SdbIndex1Ref<K, V, I> {
   /// Lower boundary
@@ -148,10 +193,10 @@ extension SdbIndex1RefExtension<
 
 /// Extension on index on 2 fields.
 extension SdbIndex2RefExtension<
-  K extends KeyBase,
-  V extends ValueBase,
-  I1 extends IndexBase,
-  I2 extends IndexBase
+  K extends SdbKey,
+  V extends SdbValue,
+  I1 extends SdbIndexKey,
+  I2 extends SdbIndexKey
 >
     on SdbIndex2Ref<K, V, I1, I2> {
   /// Lower boundary
@@ -171,11 +216,11 @@ extension SdbIndex2RefExtension<
 
 /// Extension on index on 3 fields.
 extension SdbIndex3RefExtension<
-  K extends KeyBase,
-  V extends ValueBase,
-  I1 extends IndexBase,
-  I2 extends IndexBase,
-  I3 extends IndexBase
+  K extends SdbKey,
+  V extends SdbValue,
+  I1 extends SdbIndexKey,
+  I2 extends SdbIndexKey,
+  I3 extends SdbIndexKey
 >
     on SdbIndex3Ref<K, V, I1, I2, I3> {
   /// Lower boundary
@@ -197,12 +242,12 @@ extension SdbIndex3RefExtension<
 
 /// Extension on index on 4 fields.
 extension SdbIndex4RefExtension<
-  K extends KeyBase,
-  V extends ValueBase,
-  I1 extends IndexBase,
-  I2 extends IndexBase,
-  I3 extends IndexBase,
-  I4 extends IndexBase
+  K extends SdbKey,
+  V extends SdbValue,
+  I1 extends SdbIndexKey,
+  I2 extends SdbIndexKey,
+  I3 extends SdbIndexKey,
+  I4 extends SdbIndexKey
 >
     on SdbIndex4Ref<K, V, I1, I2, I3, I4> {
   /// Lower boundary

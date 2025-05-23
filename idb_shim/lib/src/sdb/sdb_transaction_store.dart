@@ -7,7 +7,7 @@ import 'sdb_transaction_store_impl.dart';
 import 'sdb_types.dart';
 
 /// Transaction store reference.
-abstract class SdbTransactionStoreRef<K extends KeyBase, V extends ValueBase> {
+abstract class SdbTransactionStoreRef<K extends SdbKey, V extends SdbValue> {
   /// Store reference.
   SdbStoreRef<K, V> get store;
 
@@ -16,16 +16,16 @@ abstract class SdbTransactionStoreRef<K extends KeyBase, V extends ValueBase> {
 }
 
 /// Transaction store actions.
-extension SdbTransactionStoreRefExtension<
-  K extends KeyBase,
-  V extends ValueBase
->
+extension SdbTransactionStoreRefExtension<K extends SdbKey, V extends SdbValue>
     on SdbTransactionStoreRef<K, V> {
   SdbTransactionStoreRefImpl<K, V> get _impl =>
       this as SdbTransactionStoreRefImpl<K, V>;
 
   /// Get a single record.
   Future<SdbRecordSnapshot<K, V>?> getRecord(K key) => _impl.getRecordImpl(key);
+
+  /// True if the record exists.
+  Future<bool> exists(K key) => _impl.existsImpl(key);
 
   /// Add.
   Future<K> add(V value) => _impl.addImpl(value);
@@ -91,10 +91,16 @@ extension SdbTransactionStoreRefExtension<
 
   /// store name.
   String get name => store.name;
+
+  /// Key Path.
+  Object? get keyPath => _impl.idbObjectStore.keyPath;
+
+  /// Auto increment.
+  bool get autoIncrement => _impl.idbObjectStore.autoIncrement;
 }
 
 /// Single store transaction.
-abstract class SdbSingleStoreTransaction<K extends KeyBase, V extends ValueBase>
+abstract class SdbSingleStoreTransaction<K extends SdbKey, V extends SdbValue>
     implements SdbTransaction {
   /// Transaction store reference.
   SdbTransactionStoreRef<K, V> get txnStore;
@@ -102,8 +108,8 @@ abstract class SdbSingleStoreTransaction<K extends KeyBase, V extends ValueBase>
 
 /// Single store transaction extension.
 extension SdbSingleStoreTransactionExtension<
-  K extends KeyBase,
-  V extends ValueBase
+  K extends SdbKey,
+  V extends SdbValue
 >
     on SdbSingleStoreTransaction<K, V> {
   /// Get a single record.
@@ -157,7 +163,7 @@ abstract class SdbMultiStoreTransaction implements SdbTransaction {}
 /// Transaction store actions.
 extension SdbMultiStoreTransactionExtension on SdbMultiStoreTransaction {
   /// Get a transaction store.
-  SdbTransactionStoreRef<K, V> txnStore<K extends KeyBase, V extends ValueBase>(
+  SdbTransactionStoreRef<K, V> txnStore<K extends SdbKey, V extends SdbValue>(
     SdbStoreRef<K, V> store,
   ) => impl.txnStoreImpl<K, V>(store);
 }

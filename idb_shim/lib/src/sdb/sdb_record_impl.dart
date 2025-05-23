@@ -7,17 +7,16 @@ import 'sdb_database_impl.dart';
 import 'sdb_record_snapshot_impl.dart';
 import 'sdb_store_impl.dart';
 import 'sdb_transaction_impl.dart';
-import 'sdb_types.dart';
 
 /// Record reference internal extension.
-extension SdbRecordRefInternalExtension<K extends KeyBase, V extends ValueBase>
+extension SdbRecordRefInternalExtension<K extends SdbKey, V extends SdbValue>
     on SdbRecordRef<K, V> {
   /// Record reference implementation.
   SdbRecordRefImpl<K, V> get impl => this as SdbRecordRefImpl<K, V>;
 }
 
 /// Record reference implementation.
-class SdbRecordRefImpl<K extends KeyBase, V extends ValueBase>
+class SdbRecordRefImpl<K extends SdbKey, V extends SdbValue>
     implements SdbRecordRef<K, V> {
   @override
   final SdbStoreRefImpl<K, V> store;

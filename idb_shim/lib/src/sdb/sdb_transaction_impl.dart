@@ -5,7 +5,6 @@ import 'package:idb_shim/src/sdb/sdb_transaction_store_impl.dart';
 
 import 'sdb_database_impl.dart';
 import 'sdb_store_impl.dart';
-import 'sdb_types.dart';
 
 /// SimpleDb transaction internal extension.
 extension SdbTransactionInternalExtension on SdbTransaction {
@@ -33,10 +32,8 @@ class SdbTransactionImpl
   SdbTransactionImpl(this.db, this.mode);
 
   /// Store implementation.
-  SdbTransactionStoreRefImpl<K, V> storeImpl<
-    K extends KeyBase,
-    V extends ValueBase
-  >(SdbStoreRefImpl<K, V> store) {
+  SdbTransactionStoreRefImpl<K, V>
+  storeImpl<K extends SdbKey, V extends SdbValue>(SdbStoreRefImpl<K, V> store) {
     return SdbTransactionStoreRefImpl<K, V>.txn(this, store);
   }
 

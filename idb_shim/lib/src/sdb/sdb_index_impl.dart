@@ -22,9 +22,9 @@ import 'sdb_types.dart';
 
 /// Index reference internal extension.
 extension SdbIndexRefInternalExtension<
-  K extends KeyBase,
-  V extends ValueBase,
-  I extends IndexBase
+  K extends SdbKey,
+  V extends SdbValue,
+  I extends SdbIndexKey
 >
     on SdbIndexRef<K, V, I> {
   /// Index reference implementation.
@@ -33,9 +33,9 @@ extension SdbIndexRefInternalExtension<
 
 /// Index on 1 field.
 class SdbIndex1RefImpl<
-  K extends KeyBase,
-  V extends ValueBase,
-  I extends IndexBase
+  K extends SdbKey,
+  V extends SdbValue,
+  I extends SdbIndexKey
 >
     extends SdbIndexRefImpl<K, V, I>
     implements SdbIndex1Ref<K, V, I> {
@@ -45,10 +45,10 @@ class SdbIndex1RefImpl<
 
 /// Index on 2 fields
 class SdbIndex2RefImpl<
-  K extends KeyBase,
-  V extends ValueBase,
-  I1 extends IndexBase,
-  I2 extends IndexBase
+  K extends SdbKey,
+  V extends SdbValue,
+  I1 extends SdbIndexKey,
+  I2 extends SdbIndexKey
 >
     extends SdbIndexRefImpl<K, V, (I1, I2)>
     implements SdbIndex2Ref<K, V, I1, I2> {
@@ -58,11 +58,11 @@ class SdbIndex2RefImpl<
 
 /// Index on 3 fields
 class SdbIndex3RefImpl<
-  K extends KeyBase,
-  V extends ValueBase,
-  I1 extends IndexBase,
-  I2 extends IndexBase,
-  I3 extends IndexBase
+  K extends SdbKey,
+  V extends SdbValue,
+  I1 extends SdbIndexKey,
+  I2 extends SdbIndexKey,
+  I3 extends SdbIndexKey
 >
     extends SdbIndexRefImpl<K, V, (I1, I2, I3)>
     implements SdbIndex3Ref<K, V, I1, I2, I3> {
@@ -72,12 +72,12 @@ class SdbIndex3RefImpl<
 
 /// Index on 4 fields
 class SdbIndex4RefImpl<
-  K extends KeyBase,
-  V extends ValueBase,
-  I1 extends IndexBase,
-  I2 extends IndexBase,
-  I3 extends IndexBase,
-  I4 extends IndexBase
+  K extends SdbKey,
+  V extends SdbValue,
+  I1 extends SdbIndexKey,
+  I2 extends SdbIndexKey,
+  I3 extends SdbIndexKey,
+  I4 extends SdbIndexKey
 >
     extends SdbIndexRefImpl<K, V, (I1, I2, I3, I4)>
     implements SdbIndex4Ref<K, V, I1, I2, I3, I4> {
@@ -87,9 +87,9 @@ class SdbIndex4RefImpl<
 
 /// Index reference extension.
 class SdbIndexRefImpl<
-  K extends KeyBase,
-  V extends ValueBase,
-  I extends IndexBase
+  K extends SdbKey,
+  V extends SdbValue,
+  I extends SdbIndexKey
 >
     implements SdbIndexRef<K, V, I> {
   @override

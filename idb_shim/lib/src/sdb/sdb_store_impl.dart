@@ -1,45 +1,31 @@
 import 'package:idb_shim/sdb.dart';
 import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
-import 'package:idb_shim/src/sdb/sdb_index_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_record_impl.dart';
 
 import 'sdb_client.dart';
 import 'sdb_database_impl.dart';
 import 'sdb_transaction_impl.dart';
-import 'sdb_types.dart';
 
 /// Store reference internal extension.
-extension SdbStoreRefInternalExtension<K extends KeyBase, V extends ValueBase>
+extension SdbStoreRefInternalExtension<K extends SdbKey, V extends SdbValue>
     on SdbStoreRef<K, V> {
   /// Store reference implementation.
   SdbStoreRefImpl<K, V> get impl => this as SdbStoreRefImpl<K, V>;
 }
 
 /// Store reference implementation.
-class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
-    implements SdbStoreRef<K, V> {
-  @override
-  final String name;
-
-  /// Store reference implementation.
-  SdbStoreRefImpl(this.name) {
-    if (!(K == int || K == String)) {
-      throw ArgumentError('K type $K must be int or String');
-    }
-  }
-
+extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
+    on SdbStoreRef<K, V> {
   /// Add a single record.
-  @override
+
   Future<K> add(SdbClient client, V value) =>
       client.interface.sdbAddImpl<K, V>(this, value);
 
   /// Put a single record (when using inline keys)
-  @override
   Future<K> put(SdbClient client, V value) => impl.putImpl(client, value);
 
   /// Find records.
-  @override
   Future<List<SdbRecordSnapshot<K, V>>> findRecords(
     SdbClient client, {
 
@@ -61,8 +47,31 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
     descending: descending,
   );
 
+  /// Find firest records
+  Future<SdbRecordSnapshot<K, V>?> findRecord(
+    SdbClient client, {
+
+    SdbBoundaries<K>? boundaries,
+
+    /// Optional filter, performed in memory
+    SdbFilter? filter,
+    int? offset,
+
+    /// Optional sort order
+    bool? descending,
+  }) async {
+    var records = await findRecords(
+      client,
+      boundaries: boundaries,
+      filter: filter,
+      offset: offset,
+      limit: 1,
+      descending: descending,
+    );
+    return records.firstOrNull;
+  }
+
   /// Find records.
-  @override
   Future<List<SdbRecordKey<K, V>>> findRecordKeys(
     SdbClient client, {
     SdbBoundaries<K>? boundaries,
@@ -78,12 +87,10 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
   );
 
   /// Count records.
-  @override
   Future<int> count(SdbClient client, {SdbBoundaries<K>? boundaries}) =>
       impl.countImpl(client, boundaries: boundaries);
 
   /// Delete records.
-  @override
   Future<void> delete(
     SdbClient client, {
     SdbBoundaries<K>? boundaries,
@@ -99,46 +106,21 @@ class SdbStoreRefImpl<K extends KeyBase, V extends ValueBase>
   );
 
   /// Record reference.
-  @override
   SdbRecordRef<K, V> record(K key) => SdbRecordRefImpl<K, V>(impl, key);
+}
 
-  /// Index reference on 1 field
+/// Store reference implementation.
+class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
+    implements SdbStoreRef<K, V> {
   @override
-  SdbIndex1Ref<K, V, I> index<I extends IndexBase>(String name) =>
-      SdbIndex1RefImpl<K, V, I>(impl, name);
+  final String name;
 
-  /// Index reference on 2 fields
-  @override
-  SdbIndex2Ref<K, V, I1, I2> index2<I1 extends IndexBase, I2 extends IndexBase>(
-    String name,
-  ) => SdbIndex2RefImpl<K, V, I1, I2>(impl, name);
-
-  /// Index reference on 3 fields
-  @override
-  SdbIndex3Ref<K, V, I1, I2, I3> index3<
-    I1 extends IndexBase,
-    I2 extends IndexBase,
-    I3 extends IndexBase
-  >(String name) => SdbIndex3RefImpl<K, V, I1, I2, I3>(impl, name);
-
-  /// Index reference on 4 fields
-  @override
-  SdbIndex4Ref<K, V, I1, I2, I3, I4> index4<
-    I1 extends IndexBase,
-    I2 extends IndexBase,
-    I3 extends IndexBase,
-    I4 extends IndexBase
-  >(String name) => SdbIndex4RefImpl<K, V, I1, I2, I3, I4>(impl, name);
-
-  /// Lower boundary
-  @override
-  SdbBoundary<K> lowerBoundary(K value, {bool? include = true}) =>
-      SdbLowerBoundary(value, include: include);
-
-  /// Upper boundary
-  @override
-  SdbBoundary<K> upperBoundary(K value, {bool? include = false}) =>
-      SdbUpperBoundary(value, include: include);
+  /// Store reference implementation.
+  SdbStoreRefImpl(this.name) {
+    if (!(K == int || K == String)) {
+      throw ArgumentError('K type $K must be int or String');
+    }
+  }
 
   /// True if the key is an int.
   bool get isIntKey => K == int;

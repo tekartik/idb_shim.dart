@@ -4,9 +4,9 @@ import 'sdb_types.dart';
 
 /// Index record snapshot.
 abstract class SdbIndexRecordSnapshot<
-  K extends KeyBase,
-  V extends ValueBase,
-  I extends IndexBase
+  K extends SdbKey,
+  V extends SdbValue,
+  I extends SdbIndexKey
 >
     extends SdbIndexRecordKey<K, V, I> {
   /// Value.
@@ -15,9 +15,9 @@ abstract class SdbIndexRecordSnapshot<
 
 /// Index record key.
 abstract class SdbIndexRecordKey<
-  K extends KeyBase,
-  V extends ValueBase,
-  I extends IndexBase
+  K extends SdbKey,
+  V extends SdbValue,
+  I extends SdbIndexKey
 > {
   /// Store reference.
   SdbStoreRef<K, V> get store;
@@ -34,9 +34,9 @@ abstract class SdbIndexRecordKey<
 
 /// Common extension
 extension SdbIndexRecordSnapshotListExt<
-  K extends KeyBase,
-  V extends ValueBase,
-  I extends IndexBase
+  K extends SdbKey,
+  V extends SdbValue,
+  I extends SdbIndexKey
 >
     on List<SdbIndexRecordSnapshot<K, V, I>> {
   /// List of values
@@ -45,9 +45,9 @@ extension SdbIndexRecordSnapshotListExt<
 
 /// Common extension
 extension SdbIndexRecordKeyListExt<
-  K extends KeyBase,
-  V extends ValueBase,
-  I extends IndexBase
+  K extends SdbKey,
+  V extends SdbValue,
+  I extends SdbIndexKey
 >
     on List<SdbIndexRecordKey<K, V, I>> {
   /// List of index keys

@@ -3,14 +3,10 @@ library;
 //typedef V = Map<String, Object?>;
 //typedef K = int;
 
-/// Key type.
-typedef KeyBase = Object;
-
 /// Value type.
-typedef ValueBase = Object;
 
 /// Index type.
-typedef IndexBase = Object;
+typedef SdbIndexKey = Object;
 
 /// Model class.
 typedef SdbModel = Map<String, Object?>;

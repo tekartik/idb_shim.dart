@@ -6,9 +6,9 @@ import 'sdb_types.dart';
 
 /// Index record snapshot implementation.
 class SdbIndexRecordSnapshotImpl<
-  K extends KeyBase,
-  V extends ValueBase,
-  I extends IndexBase
+  K extends SdbKey,
+  V extends SdbValue,
+  I extends SdbIndexKey
 >
     extends SdbIndexRecordKeyImpl<K, V, I>
     implements SdbIndexRecordSnapshot<K, V, I> {
@@ -33,9 +33,9 @@ class SdbIndexRecordSnapshotImpl<
 
 /// Index record snapshot implementation.
 class SdbIndexRecordKeyImpl<
-  K extends KeyBase,
-  V extends ValueBase,
-  I extends IndexBase
+  K extends SdbKey,
+  V extends SdbValue,
+  I extends SdbIndexKey
 >
     implements SdbIndexRecordKey<K, V, I> {
   /// Index reference.

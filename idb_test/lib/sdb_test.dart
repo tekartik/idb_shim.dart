@@ -333,6 +333,47 @@ void simpleSdbTest(SdbTestContext ctx) {
 
         await db.close();
       });
+      test('keyPath int auto', () async {
+        var dbName = 'test_key_path_auto_put_get.db';
+        await factory.deleteDatabase(dbName);
+        var db = await factory.openDatabase(
+          dbName,
+          version: 1,
+          onVersionChange: (event) {
+            var oldVersion = event.oldVersion;
+            if (oldVersion < 1) {
+              event.db.createStore(
+                testStore,
+                keyPath: 'id',
+                autoIncrement: true,
+              );
+            }
+          },
+        );
+        var key = await testStore.add(db, {'test': 1});
+        var readValue = await testStore.record(key).getValue(db);
+        expect(readValue, {'test': 1, 'id': key});
+        await db.close();
+      });
+      test('keyPath string', () async {
+        var dbName = 'test_key_path_put_get.db';
+        await factory.deleteDatabase(dbName);
+        var db = await factory.openDatabase(
+          dbName,
+          version: 1,
+          onVersionChange: (event) {
+            var oldVersion = event.oldVersion;
+            if (oldVersion < 1) {
+              event.db.createStore(testStore2, keyPath: 'id');
+            }
+          },
+        );
+        var key = await testStore2.add(db, {'test': 1, 'id': 'my_id'});
+        expect(key, 'my_id');
+        var readValue = await testStore2.record(key).getValue(db);
+        expect(readValue, {'test': 1, 'id': key});
+        await db.close();
+      });
     });
 
     test('multi store', () async {

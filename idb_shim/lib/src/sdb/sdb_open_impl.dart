@@ -31,7 +31,7 @@ class SdbOpenDatabaseImpl implements SdbOpenDatabase {
   /// Create a store.
   /// auto increment is set to true if not set for int keys
   @override
-  SdbOpenStoreRef<K, V> createStore<K extends KeyBase, V extends ValueBase>(
+  SdbOpenStoreRef<K, V> createStore<K extends SdbKey, V extends SdbValue>(
     SdbStoreRef<K, V> store, {
     String? keyPath,
     bool? autoIncrement,
@@ -43,12 +43,12 @@ class SdbOpenDatabaseImpl implements SdbOpenDatabase {
 
   /// get an existing store.
   @override
-  SdbOpenStoreRef<K, V> objectStore<K extends KeyBase, V extends ValueBase>(
+  SdbOpenStoreRef<K, V> objectStore<K extends SdbKey, V extends SdbValue>(
     SdbStoreRef<K, V> store,
   ) => impl.getStoreImpl<K, V>(store.impl);
 
   /// Add a store.
-  SdbOpenStoreRef<K, V> addStoreImpl<K extends KeyBase, V extends ValueBase>(
+  SdbOpenStoreRef<K, V> addStoreImpl<K extends SdbKey, V extends SdbValue>(
     SdbStoreRefImpl<K, V> store, {
     String? keyPath,
     bool? autoIncrement,
@@ -64,7 +64,7 @@ class SdbOpenDatabaseImpl implements SdbOpenDatabase {
   }
 
   /// Add a store.
-  SdbOpenStoreRef<K, V> getStoreImpl<K extends KeyBase, V extends ValueBase>(
+  SdbOpenStoreRef<K, V> getStoreImpl<K extends SdbKey, V extends SdbValue>(
     SdbStoreRefImpl<K, V> store,
   ) {
     var idbStore = idbTransaction.objectStore(store.name);
@@ -74,17 +74,14 @@ class SdbOpenDatabaseImpl implements SdbOpenDatabase {
 }
 
 /// Open store reference internal extension.
-extension SdbOpenStoreRefInternalExtension<
-  K extends KeyBase,
-  V extends ValueBase
->
+extension SdbOpenStoreRefInternalExtension<K extends SdbKey, V extends SdbValue>
     on SdbOpenStoreRef<K, V> {
   /// Open store reference implementation.
   SdbOpenStoreRefIdb<K, V> get impl => this as SdbOpenStoreRefIdb<K, V>;
 }
 
 /// Open store reference implementation.
-class SdbOpenStoreRefIdb<K extends KeyBase, V extends ValueBase>
+class SdbOpenStoreRefIdb<K extends SdbKey, V extends SdbValue>
     implements SdbOpenStoreRef<K, V> {
   /// The open database.
   final SdbOpenDatabase db;
@@ -103,7 +100,7 @@ class SdbOpenStoreRefIdb<K extends KeyBase, V extends ValueBase>
 
   /// Create an index.
   @override
-  SdbOpenIndexRef<K, V, I> createIndex<I extends IndexBase>(
+  SdbOpenIndexRef<K, V, I> createIndex<I extends SdbIndexKey>(
     SdbIndex1Ref<K, V, I> index,
     String indexKeyPath,
   ) => impl.createIndexImpl<I>(index.impl, indexKeyPath);
@@ -111,7 +108,7 @@ class SdbOpenStoreRefIdb<K extends KeyBase, V extends ValueBase>
   /// Create an index on 2 fields.
   @override
   SdbOpenIndexRef<K, V, (I1, I2)>
-  createIndex2<I1 extends IndexBase, I2 extends IndexBase>(
+  createIndex2<I1 extends SdbIndexKey, I2 extends SdbIndexKey>(
     SdbIndex2Ref<K, V, I1, I2> index,
     String indexKeyPath1,
     String indexKeyPath2,
@@ -123,9 +120,9 @@ class SdbOpenStoreRefIdb<K extends KeyBase, V extends ValueBase>
   /// Create an index on 3 fields.
   @override
   SdbOpenIndexRef<K, V, (I1, I2, I3)> createIndex3<
-    I1 extends IndexBase,
-    I2 extends IndexBase,
-    I3 extends IndexBase
+    I1 extends SdbIndexKey,
+    I2 extends SdbIndexKey,
+    I3 extends SdbIndexKey
   >(
     SdbIndex3Ref<K, V, I1, I2, I3> index,
     String indexKeyPath1,
@@ -140,10 +137,10 @@ class SdbOpenStoreRefIdb<K extends KeyBase, V extends ValueBase>
   /// Create an index on 4 fields.
   @override
   SdbOpenIndexRef<K, V, (I1, I2, I3, I4)> createIndex4<
-    I1 extends IndexBase,
-    I2 extends IndexBase,
-    I3 extends IndexBase,
-    I4 extends IndexBase
+    I1 extends SdbIndexKey,
+    I2 extends SdbIndexKey,
+    I3 extends SdbIndexKey,
+    I4 extends SdbIndexKey
   >(
     SdbIndex4Ref<K, V, I1, I2, I3, I4> index,
     String indexKeyPath1,
@@ -161,7 +158,7 @@ class SdbOpenStoreRefIdb<K extends KeyBase, V extends ValueBase>
   String get name => store.name;
 
   /// Create an index.
-  SdbOpenIndexRef<K, V, I> createIndexImpl<I extends IndexBase>(
+  SdbOpenIndexRef<K, V, I> createIndexImpl<I extends SdbIndexKey>(
     SdbIndexRefImpl<K, V, I> index,
     Object indexKeyPath,
   ) {
@@ -175,9 +172,9 @@ class SdbOpenStoreRefIdb<K extends KeyBase, V extends ValueBase>
 
 /// Open index reference implementation.
 class SdbOpenIndexRefImpl<
-  K extends KeyBase,
-  V extends ValueBase,
-  I extends IndexBase
+  K extends SdbKey,
+  V extends SdbValue,
+  I extends SdbIndexKey
 >
     implements SdbOpenIndexRef<K, V, I> {
   /// The IDB index.

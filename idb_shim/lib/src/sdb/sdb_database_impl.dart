@@ -46,7 +46,7 @@ class SdbDatabaseImpl
 
   /// Transaction.
   @override
-  Future<T> inStoreTransaction<T, K extends KeyBase, V extends ValueBase>(
+  Future<T> inStoreTransaction<T, K extends SdbKey, V extends SdbValue>(
     SdbStoreRef<K, V> store,
     SdbTransactionMode mode,
     Future<T> Function(SdbSingleStoreTransaction<K, V> txn) callback,
@@ -57,7 +57,7 @@ class SdbDatabaseImpl
   }
 
   @override
-  Future<T> inStoresTransaction<T, K extends KeyBase, V extends ValueBase>(
+  Future<T> inStoresTransaction<T, K extends SdbKey, V extends SdbValue>(
     List<SdbStoreRef> stores,
     SdbTransactionMode mode,
     Future<T> Function(SdbMultiStoreTransaction txn) callback,

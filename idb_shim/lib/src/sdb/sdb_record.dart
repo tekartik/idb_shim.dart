@@ -4,11 +4,10 @@ import 'sdb_record_snapshot.dart';
 import 'sdb_types.dart';
 
 /// Record reference.
-typedef SdbRecordRef<K extends KeyBase, V extends ValueBase> =
-    SdbRecordKey<K, V>;
+typedef SdbRecordRef<K extends SdbKey, V extends SdbValue> = SdbRecordKey<K, V>;
 
 /// Store methods.
-extension SdbRecordRefExtension<K extends KeyBase, V extends ValueBase>
+extension SdbRecordRefExtension<K extends SdbKey, V extends SdbValue>
     on SdbRecordRef<K, V> {
   /// Get a single record.
   Future<SdbRecordSnapshot<K, V>?> get(SdbClient client) =>

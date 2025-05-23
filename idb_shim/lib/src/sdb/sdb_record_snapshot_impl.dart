@@ -4,7 +4,7 @@ import 'sdb_store_impl.dart';
 import 'sdb_types.dart';
 
 /// Record snapshot implementation.
-class SdbRecordSnapshotImpl<K extends KeyBase, V extends ValueBase>
+class SdbRecordSnapshotImpl<K extends SdbKey, V extends SdbValue>
     extends SdbRecordKeyImpl<K, V>
     implements SdbRecordSnapshot<K, V> {
   @override
@@ -18,7 +18,7 @@ class SdbRecordSnapshotImpl<K extends KeyBase, V extends ValueBase>
 }
 
 /// Record key implementation.
-class SdbRecordKeyImpl<K extends KeyBase, V extends ValueBase>
+class SdbRecordKeyImpl<K extends SdbKey, V extends SdbValue>
     implements SdbRecordKey<K, V> {
   @override
   final SdbStoreRefImpl<K, V> store;

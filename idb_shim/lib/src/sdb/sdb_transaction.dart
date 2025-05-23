@@ -11,7 +11,7 @@ abstract class SdbTransaction implements SdbClient {}
 /// SimpleDb transaction extension.
 extension SdbTransactionExtension on SdbTransaction {
   /// transaction store.
-  SdbTransactionStoreRef<K, V> store<K extends KeyBase, V extends ValueBase>(
+  SdbTransactionStoreRef<K, V> store<K extends SdbKey, V extends SdbValue>(
     SdbStoreRef<K, V> store,
   ) => rawImpl.storeImpl<K, V>(store.impl);
 }
