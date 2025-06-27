@@ -7,3 +7,5 @@ export 'sdb_client.dart'
         SdbClientInterfaceDefaultMixin,
         SdbClientExtensionPrv;
 export 'sdb_database.dart' show SdbDatabaseDefaultMixin;
+export 'sdb_open.dart'
+    show SdbOpenDatabaseDefaultMixin, SdbOpenStoreRefDefaultMixin;
