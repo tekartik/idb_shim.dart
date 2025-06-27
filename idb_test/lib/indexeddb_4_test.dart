@@ -71,10 +71,9 @@ Future testRange(
 
   final txn = db.transaction(_storeName, 'readonly');
   final objectStore = txn.objectStore(_storeName);
-  var cursors =
-      objectStore
-          .openCursor(range: range as KeyRange, autoAdvance: true)
-          .asBroadcastStream();
+  var cursors = objectStore
+      .openCursor(range: range as KeyRange, autoAdvance: true)
+      .asBroadcastStream();
 
   int? lastKey;
   cursors.listen((cursor) {

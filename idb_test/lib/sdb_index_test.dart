@@ -312,8 +312,9 @@ void sdbIndexTests(TestContext ctx) {
         });
       });
 
-      var item =
-          (await itemTypeIdIndex.record(('cat', keyCatHarriet)).get(db))!;
+      var item = (await itemTypeIdIndex
+          .record(('cat', keyCatHarriet))
+          .get(db))!;
       expect(item.indexKey.$1, 'cat');
       expect(item.value['name'], 'Harriet');
 

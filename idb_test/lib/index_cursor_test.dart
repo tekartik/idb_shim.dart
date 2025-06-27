@@ -951,13 +951,12 @@ void defineTests(TestContext ctx) {
 
         var key = await objectStore.put({'f1': 1, 'f2': 2, 'f3': 3});
         final index = objectStore.index(testNameIndex);
-        var first =
-            await index
-                .openCursor(
-                  range: KeyRange.bound([1, 2, 0], [1, 2, 4.5]),
-                  direction: idbDirectionPrev,
-                )
-                .first;
+        var first = await index
+            .openCursor(
+              range: KeyRange.bound([1, 2, 0], [1, 2, 4.5]),
+              direction: idbDirectionPrev,
+            )
+            .first;
         expect(first.primaryKey, key);
         var key2 = await objectStore.put({'f1': 1, 'f2': 2, 'f3': 3});
         expect([key, key2], [1, 2]);
