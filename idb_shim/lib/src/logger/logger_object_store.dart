@@ -45,8 +45,8 @@ class ObjectStoreLogger extends ObjectStore {
     var isMultiEntry = multiEntry ?? false;
     log(
       'createIndex $name on ${this.name} keyPath $keyPath${(isUnique || isMultiEntry) ? ''
-              '(${isUnique ? 'unique' : ''}'
-              '${isMultiEntry ? (isUnique ? ', multi' : 'multi') : ''})' : ''}',
+                '(${isUnique ? 'unique' : ''}'
+                '${isMultiEntry ? (isUnique ? ', multi' : 'multi') : ''})' : ''}',
     );
     return idbObjectStore.createIndex(
       name,

@@ -145,8 +145,9 @@ class ObjectStoreNative extends ObjectStore {
       if (keyOrRange == null) {
         countFuture = idbObjectStore.count().dartFuture<int>();
       } else {
-        countFuture =
-            idbObjectStore.count(toNativeQuery(keyOrRange)).dartFuture<int>();
+        countFuture = idbObjectStore
+            .count(toNativeQuery(keyOrRange))
+            .dartFuture<int>();
       }
       return countFuture;
     });

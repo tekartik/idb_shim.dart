@@ -23,23 +23,21 @@ Stream<Cursor> cursorStreamFromResult(
   var controller = StreamController<Cursor>(sync: true);
 
   //TODO: Report stacktrace once issue 4061 is resolved.
-  request.onerror =
-      (idb.Event event) {
-        controller.addError(DatabaseErrorNative.domException(request.error!));
-      }.toJS;
+  request.onerror = (idb.Event event) {
+    controller.addError(DatabaseErrorNative.domException(request.error!));
+  }.toJS;
 
-  request.onsuccess =
-      (idb.Event event) {
-        var cursor = request.result as idb.IDBCursor?;
-        if (cursor == null) {
-          controller.close();
-        } else {
-          controller.add(CursorNative(cursor));
-          if (autoAdvance == true && controller.hasListener) {
-            cursor.continue_();
-          }
-        }
-      }.toJS;
+  request.onsuccess = (idb.Event event) {
+    var cursor = request.result as idb.IDBCursor?;
+    if (cursor == null) {
+      controller.close();
+    } else {
+      controller.add(CursorNative(cursor));
+      if (autoAdvance == true && controller.hasListener) {
+        cursor.continue_();
+      }
+    }
+  }.toJS;
   return controller.stream;
 }
 
@@ -57,23 +55,21 @@ Stream<CursorWithValue> cursorWithValueStreamFromResult(
   // close.
   var controller = StreamController<CursorWithValue>(sync: true);
 
-  request.onerror =
-      (idb.Event event) {
-        controller.addError(DatabaseErrorNative.domException(request.error!));
-      }.toJS;
+  request.onerror = (idb.Event event) {
+    controller.addError(DatabaseErrorNative.domException(request.error!));
+  }.toJS;
 
-  request.onsuccess =
-      (idb.Event event) {
-        var cursor = request.result as idb.IDBCursorWithValue?;
-        if (cursor == null) {
-          controller.close();
-        } else {
-          controller.add(CursorWithValueNative(cursor));
-          if (autoAdvance == true && controller.hasListener) {
-            cursor.continue_();
-          }
-        }
-      }.toJS;
+  request.onsuccess = (idb.Event event) {
+    var cursor = request.result as idb.IDBCursorWithValue?;
+    if (cursor == null) {
+      controller.close();
+    } else {
+      controller.add(CursorWithValueNative(cursor));
+      if (autoAdvance == true && controller.hasListener) {
+        cursor.continue_();
+      }
+    }
+  }.toJS;
   return controller.stream;
 }
 

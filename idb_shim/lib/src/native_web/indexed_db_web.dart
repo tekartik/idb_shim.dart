@@ -70,12 +70,11 @@ extension DOMStringListExt on DOMStringList {
 extension IDBRequestExt on IDBRequest {
   /// On error helper.
   void handleOnError(Completer<JSAny?> completer) {
-    onerror =
-        (Event event) {
-          if (!completer.isCompleted) {
-            completer.completeError(DatabaseErrorNative.domException(error!));
-          }
-        }.toJS;
+    onerror = (Event event) {
+      if (!completer.isCompleted) {
+        completer.completeError(DatabaseErrorNative.domException(error!));
+      }
+    }.toJS;
   }
 
   /*
@@ -90,12 +89,11 @@ extension IDBRequestExt on IDBRequest {
 
   /// On success helper.
   void handleOnSuccess(Completer<JSAny?> completer) {
-    onsuccess =
-        (Event event) {
-          if (!completer.isCompleted) {
-            completer.complete(result);
-          }
-        }.toJS;
+    onsuccess = (Event event) {
+      if (!completer.isCompleted) {
+        completer.complete(result);
+      }
+    }.toJS;
   }
 
   /// On success and error helper.

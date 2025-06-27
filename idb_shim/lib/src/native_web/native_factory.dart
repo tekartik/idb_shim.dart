@@ -75,10 +75,9 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
       openRequest = nativeFactory.open(dbName);
     }
     if (onBlocked != null) {
-      openRequest.onblocked =
-          (idb.Event event) {
-            onBlocked(EventNative(event));
-          }.toJS;
+      openRequest.onblocked = (idb.Event event) {
+        onBlocked(EventNative(event));
+      }.toJS;
     }
     FutureOr? onUpdateNeededFutureOr;
     Object? onUpdateNeededException;
@@ -123,10 +122,9 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
     var completer = Completer<JSAny?>.sync();
     var deleteRequest = nativeFactory.deleteDatabase(dbName);
     if (onBlocked != null) {
-      deleteRequest.onblocked =
-          (idb.Event event) {
-            onBlocked(EventNative(event));
-          }.toJS;
+      deleteRequest.onblocked = (idb.Event event) {
+        onBlocked(EventNative(event));
+      }.toJS;
     }
     deleteRequest.handleOnSuccessAndError(completer);
     return completer.future.then((_) => this);

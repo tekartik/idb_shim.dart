@@ -165,8 +165,8 @@ class DatabaseNative extends IdbDatabaseBase {
               VersionChangeEventNative(factory, idbVersionChangeEvent),
             );
           }.toJS;
-      onVersionChangeStream =
-          onVersionChangeController!.stream.asBroadcastStream();
+      onVersionChangeStream = onVersionChangeController!.stream
+          .asBroadcastStream();
     }
 
     return onVersionChangeStream!;

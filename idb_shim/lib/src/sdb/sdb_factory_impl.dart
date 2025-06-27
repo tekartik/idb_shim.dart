@@ -30,26 +30,25 @@ class SdbFactoryIdb implements SdbFactory {
     SdbOnVersionChangeCallback? onVersionChange,
   }) async {
     final db = SdbDatabaseImpl(this, name);
-    var onUpgradeNeeded =
-        onVersionChange != null
-            ? (idb.VersionChangeEvent event) async {
-              // print('onUpgradeNeeded: $event');
-              //var db = event.database;
-              var idbDatabase = event.database;
-              var idbTransaction = event.transaction;
-              final dbOpen = SdbOpenDatabaseImpl(db, idbTransaction);
-              db.idbDatabase = idbDatabase;
-              var oldVersion = event.oldVersion;
-              var newVersion = event.newVersion;
-              final dbVersionChangeEvent = SdbVersionChangeEventImpl(
-                dbOpen,
-                oldVersion,
-                newVersion,
-              );
+    var onUpgradeNeeded = onVersionChange != null
+        ? (idb.VersionChangeEvent event) async {
+            // print('onUpgradeNeeded: $event');
+            //var db = event.database;
+            var idbDatabase = event.database;
+            var idbTransaction = event.transaction;
+            final dbOpen = SdbOpenDatabaseImpl(db, idbTransaction);
+            db.idbDatabase = idbDatabase;
+            var oldVersion = event.oldVersion;
+            var newVersion = event.newVersion;
+            final dbVersionChangeEvent = SdbVersionChangeEventImpl(
+              dbOpen,
+              oldVersion,
+              newVersion,
+            );
 
-              await onVersionChange(dbVersionChangeEvent);
-            }
-            : null;
+            await onVersionChange(dbVersionChangeEvent);
+          }
+        : null;
     var idbDatabase = await idbFactory.open(
       name,
       version: version,

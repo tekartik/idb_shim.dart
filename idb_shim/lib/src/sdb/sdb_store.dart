@@ -20,10 +20,9 @@ extension SdbStoreRefExtension<K extends SdbKey, V extends SdbValue>
       SdbIndex1RefImpl<K, V, I>(impl, name);
 
   /// Index reference on 2 fields
-  SdbIndex2Ref<K, V, I1, I2> index2<
-    I1 extends SdbIndexKey,
-    I2 extends SdbIndexKey
-  >(String name) => SdbIndex2RefImpl<K, V, I1, I2>(impl, name);
+  SdbIndex2Ref<K, V, I1, I2>
+  index2<I1 extends SdbIndexKey, I2 extends SdbIndexKey>(String name) =>
+      SdbIndex2RefImpl<K, V, I1, I2>(impl, name);
 
   /// Index reference on 3 fields
   SdbIndex3Ref<K, V, I1, I2, I3> index3<

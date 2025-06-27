@@ -19,10 +19,8 @@ IdbFactory get idbFactorySembastMemoryFsImpl =>
 IdbFactory? _idbSembastMemoryFactoryImpl;
 
 /// Sembast memory based factory
-IdbFactory get idbFactorySembastMemoryImpl =>
-    _idbSembastMemoryFactoryImpl ??= IdbFactorySembast(
-      sembast.databaseFactoryMemory,
-    );
+IdbFactory get idbFactorySembastMemoryImpl => _idbSembastMemoryFactoryImpl ??=
+    IdbFactorySembast(sembast.databaseFactoryMemory);
 
 /// New Sembast memory based factory
 IdbFactory newIdbFactorySembastMemoryImpl() =>

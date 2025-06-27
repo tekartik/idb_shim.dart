@@ -36,8 +36,9 @@ class IndexNative extends Index {
       if (keyOrRange == null) {
         countFuture = idbIndex.count().dartFuture<int>();
       } else {
-        countFuture =
-            idbIndex.count(toNativeQuery(keyOrRange)).dartFuture<int>();
+        countFuture = idbIndex
+            .count(toNativeQuery(keyOrRange))
+            .dartFuture<int>();
       }
       return countFuture;
     });

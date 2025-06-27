@@ -212,10 +212,9 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
     var rows = await cursor.toRowList(
       offset: offset,
       limit: limit,
-      matcher:
-          filter != null
-              ? (cwv) => sdbCursorWithValueMatchesFilter(cwv, filter)
-              : null,
+      matcher: filter != null
+          ? (cwv) => sdbCursorWithValueMatchesFilter(cwv, filter)
+          : null,
     );
     return rows.map(_sdbRecordSnapshot).toList();
   }
@@ -305,10 +304,9 @@ class SdbMultiStoreTransactionImpl extends SdbTransactionImpl
     if (txnStore == null) {
       for (var existingStore in stores) {
         if (existingStore == store) {
-          txnStore =
-              _txnStoreMap[store] = SdbTransactionStoreRefImpl<K, V>(
-                store.impl,
-              );
+          txnStore = _txnStoreMap[store] = SdbTransactionStoreRefImpl<K, V>(
+            store.impl,
+          );
           txnStore.transaction = this;
           break;
         }

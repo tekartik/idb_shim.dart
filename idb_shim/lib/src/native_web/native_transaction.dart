@@ -23,28 +23,25 @@ class TransactionNative extends TransactionNativeBase {
 
   late final Completer _completer = () {
     var completer = Completer<JSAny?>.sync();
-    idbTransaction.onerror =
-        (idb.Event event) {
-          if (!completer.isCompleted) {
-            completer.completeError(
-              DatabaseErrorNative.domException(idbTransaction.error!),
-            );
-          }
-        }.toJS;
-    idbTransaction.onabort =
-        (idb.Event event) {
-          if (!completer.isCompleted) {
-            completer.completeError(
-              DatabaseErrorNative('abort', 'Transaction was aborted'),
-            );
-          }
-        }.toJS;
-    idbTransaction.oncomplete =
-        (idb.Event event) {
-          if (!completer.isCompleted) {
-            completer.complete();
-          }
-        }.toJS;
+    idbTransaction.onerror = (idb.Event event) {
+      if (!completer.isCompleted) {
+        completer.completeError(
+          DatabaseErrorNative.domException(idbTransaction.error!),
+        );
+      }
+    }.toJS;
+    idbTransaction.onabort = (idb.Event event) {
+      if (!completer.isCompleted) {
+        completer.completeError(
+          DatabaseErrorNative('abort', 'Transaction was aborted'),
+        );
+      }
+    }.toJS;
+    idbTransaction.oncomplete = (idb.Event event) {
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
+    }.toJS;
     return completer;
   }();
 

@@ -227,10 +227,9 @@ class SdbIndexRefImpl<
     var rows = await cursor.toRowList(
       limit: limit,
       offset: offset,
-      matcher:
-          filter != null
-              ? (cwv) => sdbCursorWithValueMatchesFilter(cwv, filter)
-              : null,
+      matcher: filter != null
+          ? (cwv) => sdbCursorWithValueMatchesFilter(cwv, filter)
+          : null,
     );
 
     return rows.map(_sdbIndexRecordSnapshot).toList();
