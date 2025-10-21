@@ -1,17 +1,10 @@
 // ignore_for_file: public_member_api_docs
 
 import 'dart:async';
-import 'dart:js_interop';
 
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/native_web/js_utils.dart';
 import 'indexed_db_web.dart' as idb;
-
-@JS('Object.keys')
-external JSArray _jsObjectKeys(JSAny object);
-
-List<String> jsObjectKeys(JSAny object) =>
-    _jsObjectKeys(object).toDart.cast<String>();
 
 T catchNativeError<T>(T Function() action) {
   try {

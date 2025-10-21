@@ -5,8 +5,30 @@ import 'dart:typed_data';
 import 'package:idb_shim/src/utils/env_utils.dart';
 
 /// Get object keys
+/// @deprecated
+JSArray<JSString> jsObjectKeys(JSObject object) => _jsObjectKeys(object);
+
 @JS('Object.keys')
-external JSArray jsObjectKeys(JSObject object);
+external JSArray<JSString> _jsObjectKeys(JSAny object);
+
+/// The Object.getOwnPropertyNames() static method returns an array
+/// of all properties (including non-enumerable properties except
+/// for those which use Symbol) found directly in a given object.
+@JS('Object.getOwnPropertyNames')
+external JSArray<JSString> _jsGetOwnPropertyNames(JSAny object);
+
+/// JavaScript Object extension
+extension JSObjectKeysExtension on JSAny {
+  /// Convert to Dart List
+  List<String> getOwnPropertyNames() {
+    return _jsGetOwnPropertyNames(this).toDartList();
+  }
+
+  /// Convert to Dart List
+  List<String> keys() {
+    return _jsObjectKeys(this).toDartList();
+  }
+}
 
 /// JavaScript Date
 @JS('Date')
@@ -29,6 +51,14 @@ extension JSArrayExtension on JSArray {
   /// Get the length of the array
   @JS('length')
   external int get idbShimLength;
+}
+
+/// Convert to a dart string list
+extension JSArrayStringConversion on JSArray<JSString> {
+  /// Convert to Dart `List<String>`
+  List<String> toDartList() {
+    return toDart.map((e) => e.toDart).toList();
+  }
 }
 
 /// JavaScript helpers
@@ -207,9 +237,7 @@ extension IDBDartifyExtension on JSAny {
         var object = <String, Object?>{};
         var keys = jsObjectKeys(jsObject).toDart;
         for (var key in keys) {
-          object[(key as JSString).toDart] = jsObject
-              .getProperty(key)
-              ?.dartifyValueStrict();
+          object[key.toDart] = jsObject.getProperty(key)?.dartifyValueStrict();
         }
         return object;
       } catch (_) {
