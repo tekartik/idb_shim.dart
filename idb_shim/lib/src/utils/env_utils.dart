@@ -2,7 +2,7 @@
 const idbIsRunningAsJavascript = identical(0, 0.0);
 
 /// Borrowed from flutter (isRunningAsJavascript is false in wasm)
-const bool kIdbDartIsWeb = bool.fromEnvironment('dart.library.js_util');
+const bool kIdbDartIsWeb = bool.fromEnvironment('dart.library.js_interop');
 
 bool? _isRelease;
 
