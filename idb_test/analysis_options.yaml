@@ -27,15 +27,12 @@ linter:
     - avoid_dynamic_calls
     - avoid_null_checks_in_equality_operators
     - avoid_slow_async_io
-    # - avoid_print
     - cancel_subscriptions
     - deprecated_member_use_from_same_package
     - directives_ordering
     - implicit_reopen
     - invalid_case_patterns
-    - iterable_contains_unrelated_type
     - library_names
-    - list_remove_unrelated_type
     - no_adjacent_strings_in_list
     - no_literal_bool_comparisons
     - no_self_assignments
@@ -50,7 +47,6 @@ linter:
     - test_types_in_equals
     - throw_in_finally
     - unawaited_futures
-    - unintended_html_in_doc_comment
     - unnecessary_statements
     # === doc rules ===
     # - public_member_api_docs
