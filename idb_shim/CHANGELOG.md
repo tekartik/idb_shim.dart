@@ -1,4 +1,4 @@
-## 2.6.7
+## 2.6.7+1
 
 * Requires dart 3.8
 * export extra sdb mixin
