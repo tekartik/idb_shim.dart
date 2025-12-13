@@ -62,11 +62,6 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
     OnUpgradeNeededFunction? onUpgradeNeeded,
     OnBlockedFunction? onBlocked,
   }) async {
-    if ((version == null) != (onUpgradeNeeded == null)) {
-      throw ArgumentError(
-        'version and onUpgradeNeeded must be specified together',
-      );
-    }
     var completer = Completer<JSAny>.sync();
     idb.IDBOpenDBRequest openRequest;
     if (version != null) {

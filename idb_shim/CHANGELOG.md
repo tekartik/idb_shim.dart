@@ -1,3 +1,8 @@
+## 2.7.0
+
+* Requires dart 3.10
+* Supports opening a database with either `version` or `unUpgadeNeeded` specified
+
 ## 2.6.7+1
 
 * Requires dart 3.8

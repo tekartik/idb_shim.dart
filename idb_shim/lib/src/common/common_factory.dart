@@ -22,13 +22,7 @@ abstract class IdbFactoryBase implements IdbFactory {
     int? version,
     OnUpgradeNeededFunction? onUpgradeNeeded,
   }) {
-    // check params
-    if (((version != null) || (onUpgradeNeeded != null)) &&
-        ((version == null) || (onUpgradeNeeded == null))) {
-      throw ArgumentError(
-        'version and onUpgradeNeeded must be specified together',
-      );
-    }
+    /// this does crash in native so keep it here too for all implementations
     if (version == 0) {
       throw ArgumentError('version cannot be 0');
     }

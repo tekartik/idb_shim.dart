@@ -61,18 +61,76 @@ void defineTests(TestContext ctx) {
     }, testOn: 'js');
     */
 
-    test('bad param with onUpgradeNeeded', () async {
+    test('onUpgradeNeeded no version', () async {
       await setupDeleteDb();
-      void emptyInitializeDatabase(VersionChangeEvent e) {}
+      var onVersionChangeCalled = false;
 
+      void onUpgradeNeeded(VersionChangeEvent e) {
+        onVersionChangeCalled = true;
+      }
+
+      var db = await idbFactory.open(dbName, onUpgradeNeeded: onUpgradeNeeded);
       try {
-        await idbFactory.open(dbName, onUpgradeNeeded: emptyInitializeDatabase);
-        fail('should fail');
-      } on ArgumentError catch (e) {
-        expect(
-          e.message,
-          'version and onUpgradeNeeded must be specified together',
-        );
+        expect(db.version, 1);
+        expect(onVersionChangeCalled, isTrue);
+      } finally {
+        db.close();
+      }
+      onVersionChangeCalled = false;
+      db = await idbFactory.open(dbName, onUpgradeNeeded: onUpgradeNeeded);
+      try {
+        expect(db.version, 1);
+        expect(onVersionChangeCalled, isFalse);
+      } finally {
+        db.close();
+      }
+    });
+
+    test('no onUpgradeNeeded version', () async {
+      await setupDeleteDb();
+
+      var db = await idbFactory.open(dbName, version: 2);
+      try {
+        expect(db.version, 2);
+      } finally {
+        db.close();
+      }
+      db = await idbFactory.open(dbName, version: 3);
+      try {
+        expect(db.version, 3);
+      } finally {
+        db.close();
+      }
+    });
+
+    test('onUpgradeNeeded version and no version', () async {
+      await setupDeleteDb();
+      var onVersionChangeCalled = false;
+
+      void onUpgradeNeeded(VersionChangeEvent e) {
+        onVersionChangeCalled = true;
+      }
+
+      var db = await idbFactory.open(dbName, version: 3);
+      try {
+        expect(db.version, 3);
+      } finally {
+        db.close();
+      }
+      onVersionChangeCalled = false;
+      db = await idbFactory.open(dbName, onUpgradeNeeded: onUpgradeNeeded);
+      try {
+        expect(db.version, 3);
+        expect(onVersionChangeCalled, isFalse);
+      } finally {
+        db.close();
+      }
+
+      db = await idbFactory.open(dbName, version: 4);
+      try {
+        expect(db.version, 4);
+      } finally {
+        db.close();
       }
     });
 
@@ -110,19 +168,6 @@ void defineTests(TestContext ctx) {
       }
     });
 
-    test('bad param with version', () async {
-      await setupDeleteDb();
-      try {
-        await idbFactory.open(dbName, version: 1);
-        fail('should fail');
-      } on ArgumentError catch (e) {
-        expect(
-          e.message,
-          'version and onUpgradeNeeded must be specified together',
-        );
-      }
-    });
-
     test('open with version 0', () async {
       await setupDeleteDb();
       var initCalled = false;
@@ -139,6 +184,7 @@ void defineTests(TestContext ctx) {
         );
         fail('should not open');
       } catch (e) {
+        // error Error: Failed to execute 'open' on 'IDBFactory': The version provided must not be 0.
         // cannot check type here...
         expect(initCalled, isFalse);
       }
