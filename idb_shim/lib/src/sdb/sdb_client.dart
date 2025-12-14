@@ -1,7 +1,13 @@
 import 'package:idb_shim/src/sdb/sdb_mixin.dart';
 
 /// Database client (db or transaction).
-abstract class SdbClient {}
+abstract class SdbClient implements SdbClientIdbInterface {}
+
+/// Database client idb interface
+abstract class SdbClientIdbInterface {
+  /// Object store names.
+  Iterable<String> get storeNames;
+}
 
 /// Internal interface
 abstract class SdbClientInterface {

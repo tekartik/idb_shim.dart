@@ -10,6 +10,7 @@ mixin SdbFactoryDefaultMixin implements SdbFactory {
     String name, {
     int? version,
     SdbOnVersionChangeCallback? onVersionChange,
+    SdbDatabaseSchema? schema,
   }) {
     throw UnsupportedError('openDatabase');
   }
@@ -26,7 +27,13 @@ abstract class SdbFactoryInterface {
   Future<SdbDatabase> openDatabase(
     String name, {
     int? version,
+
+    /// Either provide onVersionChange to handle schema changes
+    /// manually...
     SdbOnVersionChangeCallback? onVersionChange,
+
+    /// ...or provide a schema to have it applied automatically.
+    SdbDatabaseSchema? schema,
   });
 
   /// Delete a database.

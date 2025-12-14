@@ -3,6 +3,7 @@ import 'package:idb_shim/idb_shim.dart' as idb;
 import 'sdb.dart';
 import 'sdb_database_impl.dart';
 import 'sdb_open_impl.dart';
+import 'sdb_schema.dart';
 import 'sdb_version.dart';
 
 /// Compat
@@ -28,20 +29,49 @@ class SdbFactoryIdb implements SdbFactory {
     String name, {
     int? version,
     SdbOnVersionChangeCallback? onVersionChange,
+    SdbDatabaseSchema? schema,
   }) async {
-    final db = SdbDatabaseImpl(this, name);
+    if (schema != null) {
+      if (onVersionChange != null) {
+        throw StateError(
+          'Cannot provide both schema and onVersionChange callback',
+        );
+      }
+      return await openWithSchema(name, schema, version: version);
+    }
+    return await openDatabaseImpl(
+      name,
+      version: version,
+      onVersionChange: onVersionChange,
+    );
+  }
+
+  /// Open the database.
+  Future<SdbDatabase> openDatabaseImpl(
+    String name, {
+    int? version,
+    SdbOnVersionChangeCallback? onVersionChange,
+    SdbDatabaseSchema? schema,
+  }) async {
+    final db = SdbDatabaseImpl(this, name, schema: schema);
     var onUpgradeNeeded = onVersionChange != null
         ? (idb.VersionChangeEvent event) async {
             // print('onUpgradeNeeded: $event');
             //var db = event.database;
             var idbDatabase = event.database;
             var idbTransaction = event.transaction;
-            final dbOpen = SdbOpenDatabaseImpl(db, idbTransaction);
+
+            final sdbOpenDatabase = SdbOpenDatabaseImpl(db, idbTransaction);
+            final sdbOpenTransaction = SdbOpenTransactionImpl(
+              sdbOpenDatabase,
+              idbTransaction,
+            );
             db.idbDatabase = idbDatabase;
             var oldVersion = event.oldVersion;
             var newVersion = event.newVersion;
             final dbVersionChangeEvent = SdbVersionChangeEventImpl(
-              dbOpen,
+              sdbOpenDatabase,
+              sdbOpenTransaction,
               oldVersion,
               newVersion,
             );

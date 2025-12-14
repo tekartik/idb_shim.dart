@@ -1,5 +1,7 @@
 import 'package:idb_shim/idb.dart' as idb;
 import 'package:idb_shim/src/sdb/sdb_index.dart';
+import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
+import 'package:idb_shim/src/sdb/sdb_schema.dart';
 import 'package:meta/meta.dart';
 
 import 'sdb_transaction.dart';
@@ -25,22 +27,49 @@ abstract class SdbTransactionIndexRef<
     required SdbIndexRef<K, V, I> index,
     required SdbTransactionStoreRef<K, V> txnStore,
   }) {
-    return _SdbTransactionIndexRef<K, V, I>(ref: index, store: txnStore);
+    return _SdbTransactionIndexRefIdb<K, V, I>(ref: index, store: txnStore);
   }
 
   /// Transaction reference.
   SdbTransaction get transaction;
 
   /// Key Paths.
-  List<String> get keyPaths;
+  SdbKeyPath get keyPath;
+
+  /// Unique
+  bool get unique;
+
+  /// Multi entry
+  bool get multiEntry;
 }
 
-class _SdbTransactionIndexRef<
+/// Idb mixin for transaction index ref.
+mixin SdbTransactionIndexRefIdbMixin<
   K extends SdbKey,
   V extends SdbValue,
   I extends SdbIndexKey
 >
     implements SdbTransactionIndexRef<K, V, I> {
+  /// Idb index
+  idb.Index get idbIndex;
+
+  @override
+  SdbKeyPath get keyPath => idbKeyPathToSdbKeyPath(idbIndex.keyPath);
+
+  @override
+  bool get unique => idbIndex.unique;
+  @override
+  bool get multiEntry => idbIndex.multiEntry;
+}
+
+class _SdbTransactionIndexRefIdb<
+  K extends SdbKey,
+  V extends SdbValue,
+  I extends SdbIndexKey
+>
+    with SdbTransactionIndexRefIdbMixin<K, V, I>
+    implements SdbTransactionIndexRef<K, V, I> {
+  @override
   late final idb.Index idbIndex;
   @override
   final SdbTransactionStoreRef<K, V> store;
@@ -51,19 +80,7 @@ class _SdbTransactionIndexRef<
 
   SdbTransactionStoreRefImpl<K, V> get storeImpl =>
       store as SdbTransactionStoreRefImpl<K, V>;
-  _SdbTransactionIndexRef({required this.ref, required this.store}) {
+  _SdbTransactionIndexRefIdb({required this.ref, required this.store}) {
     idbIndex = storeImpl.idbObjectStore.index(ref.name);
-  }
-
-  @override
-  List<String> get keyPaths {
-    var keyPath = idbIndex.keyPath;
-    if (keyPath is String) {
-      return [keyPath];
-    } else if (keyPath is List) {
-      return List<String>.from(keyPath);
-    } else {
-      throw StateError('Invalid keyPath type: ${keyPath.runtimeType}');
-    }
   }
 }

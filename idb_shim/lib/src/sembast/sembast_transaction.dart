@@ -402,6 +402,11 @@ class TransactionSembast extends IdbTransactionBase
   }
 
   @override
+  Iterable<String> get objectStoreNames {
+    return meta!.storeNames;
+  }
+
+  @override
   void abort() {
     if (_debugTransaction) {
       idbLog('abort');

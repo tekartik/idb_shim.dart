@@ -62,4 +62,7 @@ class TransactionLogger extends IdbTransactionBase {
   void err(String message) {
     idbDatabaseLogger.err('t$id $message');
   }
+
+  @override
+  Iterable<String> get objectStoreNames => idbTransaction.objectStoreNames;
 }

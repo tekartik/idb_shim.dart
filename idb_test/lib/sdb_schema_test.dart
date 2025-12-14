@@ -25,17 +25,26 @@ void schemaSdbTest(SdbTestContext ctx) {
     test('migration', () async {
       var dbName = 'sdb_schema_test.db';
       await factory.deleteDatabase(dbName);
-      var db = await factory.openWithSchema(
+      var db = await factory.openDatabase(
         dbName,
-        SdbDatabaseSchema(version: 1, stores: [testStore.schema()]),
+        version: 1,
+        schema: SdbDatabaseSchema(stores: [testStore.schema()]),
+      );
+      expect(
+        await db.readSchemaDef(),
+        equals(
+          SdbDatabaseSchemaDef(
+            stores: [SdbStoreSchemaDef(name: testStore.name)],
+          ),
+        ),
       );
       await db.close();
 
       await expectLater(() async {
-        await factory.openWithSchema(
+        await factory.openDatabase(
           dbName,
-          SdbDatabaseSchema(
-            version: 1,
+          version: 1,
+          schema: SdbDatabaseSchema(
             stores: [
               testStore.schema(indexes: [testSchemaIndex1]),
             ],
@@ -43,21 +52,29 @@ void schemaSdbTest(SdbTestContext ctx) {
         );
       }, throwsA(isA<StateError>()));
 
-      db = await factory.openWithSchema(
+      db = await factory.openDatabase(
         dbName,
-        SdbDatabaseSchema(
-          version: 2,
+        version: 2,
+        schema: SdbDatabaseSchema(
           stores: [
             testStore.schema(indexes: [testSchemaIndex1]),
           ],
         ),
       );
+      expect((await db.readSchemaDef()).toDebugMap(), {
+        'stores': {
+          'test': {
+            'indexes': {
+              'index1': {'keyPath': 'field1'},
+            },
+          },
+        },
+      });
       await db.close();
       await expectLater(() async {
-        await factory.openWithSchema(
+        await factory.openDatabase(
           dbName,
-          SdbDatabaseSchema(
-            version: 2,
+          schema: SdbDatabaseSchema(
             stores: [
               testStore.schema(indexes: [testSchemaIndex1bis]),
             ],

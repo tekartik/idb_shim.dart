@@ -1,13 +1,6 @@
-import 'package:idb_shim/src/sdb/sdb_index.dart';
+import 'package:idb_shim/sdb.dart';
 
-import 'sdb_boundary.dart';
-import 'sdb_filter.dart';
-import 'sdb_record_snapshot.dart';
-import 'sdb_store.dart';
-import 'sdb_transaction.dart';
-import 'sdb_transaction_index.dart';
 import 'sdb_transaction_store_impl.dart';
-import 'sdb_types.dart';
 
 /// Transaction store reference.
 abstract class SdbTransactionStoreRef<K extends SdbKey, V extends SdbValue> {
@@ -18,7 +11,7 @@ abstract class SdbTransactionStoreRef<K extends SdbKey, V extends SdbValue> {
   SdbTransaction get transaction;
 
   /// Key Path.
-  String? get keyPath;
+  SdbKeyPath? get keyPath;
 
   /// Index names.
   Iterable<String> get indexNames;

@@ -1,3 +1,5 @@
+import 'package:idb_shim/src/utils/core_imports.dart';
+
 import 'sdb_client.dart';
 
 import 'sdb_store.dart';
@@ -11,14 +13,14 @@ abstract class SdbDatabase implements SdbClient {
   Future<T> inStoreTransaction<T, K extends SdbKey, V extends SdbValue>(
     SdbStoreRef<K, V> store,
     SdbTransactionMode mode,
-    Future<T> Function(SdbSingleStoreTransaction<K, V> txn) callback,
+    FutureOr<T> Function(SdbSingleStoreTransaction<K, V> txn) callback,
   );
 
   /// Run a transaction.
   Future<T> inStoresTransaction<T, K extends SdbKey, V extends SdbValue>(
     List<SdbStoreRef> stores,
     SdbTransactionMode mode,
-    Future<T> Function(SdbMultiStoreTransaction txn) callback,
+    FutureOr<T> Function(SdbMultiStoreTransaction txn) callback,
   );
 
   /// Get the version of the database.
@@ -26,9 +28,6 @@ abstract class SdbDatabase implements SdbClient {
 
   /// Close the database.
   Future<void> close();
-
-  /// Get the names of the object stores.
-  Iterable<String> get objectStoreNames;
 }
 
 /// SimpleDb methods.
@@ -45,7 +44,7 @@ mixin SdbDatabaseDefaultMixin implements SdbDatabase, SdbClientInterface {
   Future<T> inStoreTransaction<T, K extends SdbKey, V extends SdbValue>(
     SdbStoreRef<K, V> store,
     SdbTransactionMode mode,
-    Future<T> Function(SdbSingleStoreTransaction<K, V> txn) callback,
+    FutureOr<T> Function(SdbSingleStoreTransaction<K, V> txn) callback,
   ) {
     throw UnimplementedError('inStoreTransaction');
   }
@@ -54,7 +53,7 @@ mixin SdbDatabaseDefaultMixin implements SdbDatabase, SdbClientInterface {
   Future<T> inStoresTransaction<T, K extends SdbKey, V extends SdbValue>(
     List<SdbStoreRef<SdbKey, SdbValue>> stores,
     SdbTransactionMode mode,
-    Future<T> Function(SdbMultiStoreTransaction txn) callback,
+    FutureOr<T> Function(SdbMultiStoreTransaction txn) callback,
   ) {
     throw UnimplementedError('inStoresTransaction');
   }

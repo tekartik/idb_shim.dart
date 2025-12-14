@@ -15,7 +15,7 @@ extension SdbTransactionInternalExtension on SdbTransaction {
 /// Transaction implementation.
 class SdbTransactionImpl
     with SdbClientInterfaceDefaultMixin
-    implements SdbTransaction, SdbClientInterface {
+    implements SdbTransaction, SdbClientInterface, SdbClientIdbInterface {
   /// Database.
   final SdbDatabaseImpl db;
 
@@ -30,6 +30,10 @@ class SdbTransactionImpl
 
   /// Transaction implementation.
   SdbTransactionImpl(this.db, this.mode);
+
+  /// During open
+  SdbTransactionImpl.open(this.db, this.idbTransaction)
+    : mode = SdbTransactionMode.readWrite;
 
   /// Store implementation.
   SdbTransactionStoreRefImpl<K, V>
@@ -52,6 +56,9 @@ class SdbTransactionImpl
   ) {
     return storeImpl<K, V>(store.impl).add(value);
   }
+
+  @override
+  Iterable<String> get storeNames => idbTransaction.objectStoreNames;
 }
 
 /// Transaction mode conversion.

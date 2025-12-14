@@ -46,6 +46,13 @@ class TransactionNative extends TransactionNativeBase {
   }();
 
   @override
+  Iterable<String> get objectStoreNames {
+    return catchNativeError(() {
+      return idbTransaction.objectStoreNames.toStringIterable();
+    })!;
+  }
+
+  @override
   ObjectStore objectStore(String name) {
     return catchNativeError(() {
       final idbObjectStore = idbTransaction.objectStore(name);
@@ -117,4 +124,7 @@ class FakeMultiStoreTransactionNative extends TransactionNativeBase {
       idbLog('abort not supported in fake multistore transaction');
     }
   }
+
+  @override
+  Iterable<String> get objectStoreNames => _nativeDatabase.objectStoreNames;
 }

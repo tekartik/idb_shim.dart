@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:idb_shim/src/sdb/sdb_boundary_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_index.dart';
+import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
+import 'package:idb_shim/src/sdb/sdb_schema.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_utils.dart';
 import 'package:idb_shim/src/utils/cursor_utils.dart';
@@ -60,7 +64,7 @@ class SdbSingleStoreTransactionImpl<K extends SdbKey, V extends SdbValue>
 
   /// run in a transaction.
   Future<T> run<T>(
-    Future<T> Function(SdbSingleStoreTransaction<K, V> txn) callback,
+    FutureOr<T> Function(SdbSingleStoreTransaction<K, V> txn) callback,
   ) async {
     var result = callback(this);
     await completed;
@@ -117,8 +121,28 @@ extension SdbTransactionStoreRefInternalExtension<
       this as SdbTransactionStoreRefImpl<K, V>;
 }
 
+/// Transaction store reference implementation mixin.
+mixin SdbTransactionStoreRefImplMixin<K extends SdbKey, V extends SdbValue>
+    implements SdbTransactionStoreRef<K, V> {
+  /// idb object store.
+  idb.ObjectStore get idbObjectStore;
+
+  /// Put a record.
+  Future<void> putImpl(K? key, V value) async {
+    await idbObjectStore.put(value, key);
+  }
+
+  @override
+  SdbKeyPath? get keyPath =>
+      idbKeyPathToSdbKeyPathOrNull(idbObjectStore.keyPath);
+
+  @override
+  Iterable<String> get indexNames => idbObjectStore.indexNames;
+}
+
 /// Transaction store reference implementation.
 class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
+    with SdbTransactionStoreRefImplMixin<K, V>
     implements SdbTransactionStoreRef<K, V> {
   // Set later
   @override
@@ -135,6 +159,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
   idb.ObjectStore? _idbObjectStore;
 
   /// idb object store.
+  @override
   idb.ObjectStore get idbObjectStore =>
       _idbObjectStore ??= transaction.idbTransaction.objectStore(store.name);
 
@@ -178,11 +203,6 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
         'Key type $K not supported for add, please specify a key',
       );
     }
-  }
-
-  /// Put a record.
-  Future<void> putImpl(K? key, V value) async {
-    await idbObjectStore.put(value, key);
   }
 
   /// Delete a record.
@@ -274,13 +294,6 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
     }
   }
 
-  /// TODO check to assume a string part
-  @override
-  String? get keyPath => idbObjectStore.keyPath?.toString();
-
-  @override
-  Iterable<String> get indexNames => idbObjectStore.indexNames;
-
   @override
   SdbTransactionIndexRef<K, V, I> index<I extends SdbIndexKey>(
     SdbIndexRef<K, V, I> ref,
@@ -338,7 +351,7 @@ class SdbMultiStoreTransactionImpl extends SdbTransactionImpl
 
   /// Run in a transaction.
   Future<T> run<T>(
-    Future<T> Function(SdbMultiStoreTransaction txn) callback,
+    FutureOr<T> Function(SdbMultiStoreTransaction txn) callback,
   ) async {
     var result = await callback(this);
     await completed;

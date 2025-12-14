@@ -55,6 +55,13 @@ export 'sdb_schema.dart'
         SdbIndexSchema,
         SdbFactorySchemaExtension,
         SdbStoreRefSchemaExtension,
+        SchemaSdbDatabaseExtension,
+        SdbDatabaseSchemaDef,
+        SdbIndexSchemaDef,
+        SdbKeyPath,
+        SdbStoreSchemaDef,
+        SdbIndexSchemaExtension,
+        SdbKeyPathExtension,
         SdbIndexRefSchemaExtension;
 export 'sdb_store.dart' show SdbStoreRef, SdbStoreRefExtension;
 export 'sdb_store_impl.dart' show SdbStoreRefDbExtension;

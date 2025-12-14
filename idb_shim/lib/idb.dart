@@ -62,6 +62,9 @@ abstract class Transaction {
   ///
   Future<Database> get completed;
 
+  /// list of the names of object stores in the scope of this transaction.
+  Iterable<String> get objectStoreNames;
+
   /// Rolls back all the changes to objects in the database associated
   /// with this transaction.
   void abort();

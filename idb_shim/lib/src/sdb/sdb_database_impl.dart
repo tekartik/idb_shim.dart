@@ -1,15 +1,14 @@
+import 'dart:async';
+
 import 'package:idb_shim/idb_shim.dart' as idb;
+import 'package:idb_shim/sdb.dart';
 import 'package:idb_shim/src/sdb/sdb_client.dart';
 import 'package:meta/meta.dart';
 
 import 'sdb_database.dart';
 import 'sdb_factory_impl.dart';
-import 'sdb_store.dart';
 import 'sdb_store_impl.dart';
-import 'sdb_transaction.dart';
-import 'sdb_transaction_store.dart';
 import 'sdb_transaction_store_impl.dart';
-import 'sdb_types.dart';
 
 /// SimpleDb database internal extension.
 extension SdbDatabaseInternalExtension on SdbDatabase {
@@ -27,7 +26,7 @@ extension SdbDatabaseIdbExt on SdbDatabase {
 /// SimpleDb implementation.
 class SdbDatabaseImpl
     with SdbClientInterfaceDefaultMixin, SdbDatabaseDefaultMixin
-    implements SdbDatabase, SdbClientInterface {
+    implements SdbDatabase, SdbClientInterface, SdbClientIdbInterface {
   /// Factory.
   final SdbFactoryImpl factory;
 
@@ -41,18 +40,21 @@ class SdbDatabaseImpl
   /// Set after open.
   late idb.Database idbDatabase;
 
+  /// Optional schema.
+  SdbDatabaseSchema? schema;
+
   /// SimpleDb implementation.
-  SdbDatabaseImpl(this.factory, this.name);
+  SdbDatabaseImpl(this.factory, this.name, {required this.schema});
 
   @override
-  Iterable<String> get objectStoreNames => idbDatabase.objectStoreNames;
+  Iterable<String> get storeNames => idbDatabase.objectStoreNames;
 
   /// Transaction.
   @override
   Future<T> inStoreTransaction<T, K extends SdbKey, V extends SdbValue>(
     SdbStoreRef<K, V> store,
     SdbTransactionMode mode,
-    Future<T> Function(SdbSingleStoreTransaction<K, V> txn) callback,
+    FutureOr<T> Function(SdbSingleStoreTransaction<K, V> txn) callback,
   ) async {
     var txnStore = SdbTransactionStoreRefImpl<K, V>(store.impl);
     var txn = SdbSingleStoreTransactionImpl(impl, mode, txnStore);
@@ -63,7 +65,7 @@ class SdbDatabaseImpl
   Future<T> inStoresTransaction<T, K extends SdbKey, V extends SdbValue>(
     List<SdbStoreRef> stores,
     SdbTransactionMode mode,
-    Future<T> Function(SdbMultiStoreTransaction txn) callback,
+    FutureOr<T> Function(SdbMultiStoreTransaction txn) callback,
   ) {
     return inStoresTransactionImpl(stores, mode, callback);
   }
@@ -72,7 +74,7 @@ class SdbDatabaseImpl
   Future<T> inStoresTransactionImpl<T>(
     List<SdbStoreRef> stores,
     SdbTransactionMode mode,
-    Future<T> Function(SdbMultiStoreTransaction txn) callback,
+    FutureOr<T> Function(SdbMultiStoreTransaction txn) callback,
   ) {
     var txn = SdbMultiStoreTransactionImpl(impl, mode, stores);
     return txn.run(callback);

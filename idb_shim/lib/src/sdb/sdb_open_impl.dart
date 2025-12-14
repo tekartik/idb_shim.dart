@@ -1,12 +1,12 @@
 import 'package:idb_shim/idb.dart' as idb;
+import 'package:idb_shim/sdb.dart';
+import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
+import 'package:idb_shim/src/sdb/sdb_transaction_index.dart';
+import 'package:idb_shim/src/sdb/sdb_transaction_store_impl.dart';
 
 import 'sdb_database_impl.dart';
-import 'sdb_index.dart';
 import 'sdb_index_impl.dart';
-import 'sdb_open.dart';
-import 'sdb_store.dart';
 import 'sdb_store_impl.dart';
-import 'sdb_types.dart';
 
 /// Open database internal extension.
 extension SdbOpenDatabaseInternalExtension on SdbOpenDatabase {
@@ -20,20 +20,23 @@ class SdbOpenDatabaseImpl implements SdbOpenDatabase {
   final SdbDatabaseImpl db;
 
   /// IDB transaction.
-  final idb.Transaction idbTransaction;
+  idb.Transaction get _idbTransaction => _sdbOpenTransaction.idbTransaction;
+  late final SdbOpenTransactionImpl _sdbOpenTransaction;
 
   /// Stores.
   final stores = <SdbOpenStoreRefIdb>[];
 
   /// Open database implementation.
-  SdbOpenDatabaseImpl(this.db, this.idbTransaction);
+  SdbOpenDatabaseImpl(this.db, idb.Transaction idbTransaction) {
+    _sdbOpenTransaction = SdbOpenTransactionImpl(this, idbTransaction);
+  }
 
   /// Create a store.
   /// auto increment is set to true if not set for int keys
   @override
   SdbOpenStoreRef<K, V> createStore<K extends SdbKey, V extends SdbValue>(
     SdbStoreRef<K, V> store, {
-    String? keyPath,
+    Object? keyPath,
     bool? autoIncrement,
   }) => impl.addStoreImpl<K, V>(
     store.impl,
@@ -55,7 +58,7 @@ class SdbOpenDatabaseImpl implements SdbOpenDatabase {
   /// Add a store.
   SdbOpenStoreRef<K, V> addStoreImpl<K extends SdbKey, V extends SdbValue>(
     SdbStoreRefImpl<K, V> store, {
-    String? keyPath,
+    Object? keyPath,
     bool? autoIncrement,
   }) {
     var idbStore = db.idbDatabase.createObjectStore(
@@ -63,7 +66,11 @@ class SdbOpenDatabaseImpl implements SdbOpenDatabase {
       keyPath: keyPath,
       autoIncrement: autoIncrement ?? store.isIntKey,
     );
-    var storeOpen = SdbOpenStoreRefIdb<K, V>(this, store, idbStore);
+    var storeOpen = SdbOpenStoreRefIdb<K, V>(
+      _sdbOpenTransaction,
+      store,
+      idbStore,
+    );
     stores.add(storeOpen);
     return storeOpen;
   }
@@ -72,13 +79,39 @@ class SdbOpenDatabaseImpl implements SdbOpenDatabase {
   SdbOpenStoreRef<K, V> getStoreImpl<K extends SdbKey, V extends SdbValue>(
     SdbStoreRefImpl<K, V> store,
   ) {
-    var idbStore = idbTransaction.objectStore(store.name);
-    var storeOpen = SdbOpenStoreRefIdb<K, V>(this, store, idbStore);
+    var idbStore = _idbTransaction.objectStore(store.name);
+    var storeOpen = SdbOpenStoreRefIdb<K, V>(
+      _sdbOpenTransaction,
+      store,
+      idbStore,
+    );
     return storeOpen;
   }
 
   @override
-  Iterable<String> get objectStoreNames => db.objectStoreNames;
+  Iterable<String> get objectStoreNames => db.storeNames;
+}
+
+/// Open transaction.
+abstract class SdbOpenTransaction implements SdbTransaction {
+  /// Open database.
+  SdbOpenDatabase get db;
+}
+
+/// Open transaction internal extension.
+class SdbOpenTransactionImpl implements SdbOpenTransaction {
+  /// Database implementation.
+  @override
+  final SdbOpenDatabaseImpl db;
+
+  /// IDB transaction.
+  final idb.Transaction idbTransaction;
+
+  /// Open transaction implementation.
+  SdbOpenTransactionImpl(this.db, this.idbTransaction);
+
+  @override
+  Iterable<String> get storeNames => idbTransaction.objectStoreNames;
 }
 
 /// Open store reference internal extension.
@@ -90,77 +123,25 @@ extension SdbOpenStoreRefInternalExtension<K extends SdbKey, V extends SdbValue>
 
 /// Open store reference implementation.
 class SdbOpenStoreRefIdb<K extends SdbKey, V extends SdbValue>
+    with SdbTransactionStoreRefImplMixin<K, V>
     implements SdbOpenStoreRef<K, V> {
   /// The open database.
-  final SdbOpenDatabase db;
+  @override
+  final SdbOpenTransaction transaction;
 
   /// The store.
+  @override
   final SdbStoreRefImpl<K, V> store;
 
   /// The IDB object store.
+  @override
   final idb.ObjectStore idbObjectStore;
 
   /// The indexes.
   final indexes = <SdbOpenIndexRefImpl>[];
 
   /// Open store reference implementation.
-  SdbOpenStoreRefIdb(this.db, this.store, this.idbObjectStore);
-
-  /// Create an index.
-  @override
-  SdbOpenIndexRef<K, V, I> createIndex<I extends SdbIndexKey>(
-    SdbIndex1Ref<K, V, I> index,
-    String indexKeyPath,
-  ) => impl.createIndexImpl<I>(index.impl, indexKeyPath);
-
-  /// Create an index on 2 fields.
-  @override
-  SdbOpenIndexRef<K, V, (I1, I2)>
-  createIndex2<I1 extends SdbIndexKey, I2 extends SdbIndexKey>(
-    SdbIndex2Ref<K, V, I1, I2> index,
-    String indexKeyPath1,
-    String indexKeyPath2,
-  ) => impl.createIndexImpl<(I1, I2)>(index.impl, [
-    indexKeyPath1,
-    indexKeyPath2,
-  ]);
-
-  /// Create an index on 3 fields.
-  @override
-  SdbOpenIndexRef<K, V, (I1, I2, I3)> createIndex3<
-    I1 extends SdbIndexKey,
-    I2 extends SdbIndexKey,
-    I3 extends SdbIndexKey
-  >(
-    SdbIndex3Ref<K, V, I1, I2, I3> index,
-    String indexKeyPath1,
-    String indexKeyPath2,
-    String indexKeyPath3,
-  ) => impl.createIndexImpl<(I1, I2, I3)>(index.impl, [
-    indexKeyPath1,
-    indexKeyPath2,
-    indexKeyPath3,
-  ]);
-
-  /// Create an index on 4 fields.
-  @override
-  SdbOpenIndexRef<K, V, (I1, I2, I3, I4)> createIndex4<
-    I1 extends SdbIndexKey,
-    I2 extends SdbIndexKey,
-    I3 extends SdbIndexKey,
-    I4 extends SdbIndexKey
-  >(
-    SdbIndex4Ref<K, V, I1, I2, I3, I4> index,
-    String indexKeyPath1,
-    String indexKeyPath2,
-    String indexKeyPath3,
-    String indexKeyPath4,
-  ) => impl.createIndexImpl<(I1, I2, I3, I4)>(index.impl, [
-    indexKeyPath1,
-    indexKeyPath2,
-    indexKeyPath3,
-    indexKeyPath4,
-  ]);
+  SdbOpenStoreRefIdb(this.transaction, this.store, this.idbObjectStore);
 
   /// The name of the store.
   String get name => store.name;
@@ -170,7 +151,9 @@ class SdbOpenStoreRefIdb<K extends SdbKey, V extends SdbValue>
     SdbIndexRefImpl<K, V, I> index,
     Object indexKeyPath,
   ) {
-    var idbIndex = idbObjectStore.createIndex(index.name, indexKeyPath);
+    // Fix key path if needed
+    var keyPath = idbKeyPathFromAny(indexKeyPath);
+    var idbIndex = idbObjectStore.createIndex(index.name, keyPath);
     var indexOpen = SdbOpenIndexRefImpl<K, V, I>(this, index, idbIndex);
 
     indexes.add(indexOpen);
@@ -184,6 +167,18 @@ class SdbOpenStoreRefIdb<K extends SdbKey, V extends SdbValue>
   void deleteIndex(String indexName) {
     idbObjectStore.deleteIndex(indexName);
   }
+
+  @override
+  SdbOpenIndexRef<K, V, I> index<I extends SdbIndexKey>(
+    SdbIndexRef<SdbKey, SdbValue, SdbIndexKey> indexRef,
+  ) {
+    var idbIndex = idbObjectStore.index(name);
+    return SdbOpenIndexRefImpl<K, V, I>(
+      this,
+      indexRef as SdbIndexRefImpl<K, V, I>,
+      idbIndex,
+    );
+  }
 }
 
 /// Open index reference implementation.
@@ -192,16 +187,23 @@ class SdbOpenIndexRefImpl<
   V extends SdbValue,
   I extends SdbIndexKey
 >
+    with SdbTransactionIndexRefIdbMixin<K, V, I>
     implements SdbOpenIndexRef<K, V, I> {
   /// The IDB index.
+  @override
   final idb.Index idbIndex;
 
   /// Open store reference.
-  final SdbOpenStoreRefIdb store;
+  @override
+  final SdbOpenStoreRefIdb<K, V> store;
 
   /// Index reference.
-  final SdbIndexRef<K, V, I> index;
+  @override
+  final SdbIndexRef<K, V, I> ref;
 
   /// Open index reference implementation.
-  SdbOpenIndexRefImpl(this.store, this.index, this.idbIndex);
+  SdbOpenIndexRefImpl(this.store, this.ref, this.idbIndex);
+
+  @override
+  SdbOpenTransaction get transaction => store.transaction;
 }
