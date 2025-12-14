@@ -242,11 +242,6 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
   }
 
   @override
-  Iterable<String> get objectStoreNames {
-    return meta.objectStoreNames;
-  }
-
-  @override
   Stream<VersionChangeEvent> get onVersionChange {
     throw 'not implemented yet';
   }
