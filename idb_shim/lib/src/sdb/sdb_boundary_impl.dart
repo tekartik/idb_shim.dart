@@ -29,21 +29,18 @@ class DbBoundaryImpl<T extends Object>
   String toString() => '$value ${include ? '(included)' : '(excluded)'}';
 }
 
-/// Lower and upper boundaries implementation.
-class DbBoundariesImpl<T extends Object> implements SdbBoundaries<T> {
-  @override
-  final SdbBoundary<T>? lower;
-  @override
-  final SdbBoundary<T>? upper;
-
-  /// Lower and upper boundaries implementation.
-  DbBoundariesImpl(this.lower, this.upper);
-
+mixin _SdbBoundariesMixin<T extends Object> implements SdbBoundaries<T> {
   @override
   String toConditionString() {
     var sb = StringBuffer();
     if (lower != null) {
-      sb.write('${lower!.value} ${lower!.include ? '<=' : '<'} ');
+      var value = lower!.value;
+      if (value == upper?.value && lower!.include && upper!.include) {
+        // equal
+        sb.write('? == $value');
+        return sb.toString();
+      }
+      sb.write('$value ${lower!.include ? '<=' : '<'} ');
     }
     sb.write('?');
 
@@ -68,6 +65,36 @@ class DbBoundariesImpl<T extends Object> implements SdbBoundaries<T> {
     }
     return false;
   }
+}
+
+/// Single key boundaries implementation.
+class SdbSingleKeyBoundaries<T extends Object>
+    with _SdbBoundariesMixin<T>
+    implements SdbBoundaries<T> {
+  /// The single key.
+  final T key;
+
+  /// Single key boundaries implementation.
+  SdbSingleKeyBoundaries(this.key);
+
+  @override
+  late final lower = SdbLowerBoundary(key, include: true);
+
+  @override
+  late final upper = SdbUpperBoundary(key, include: true);
+}
+
+/// Lower and upper boundaries implementation.
+class SdbBoundariesImpl<T extends Object>
+    with _SdbBoundariesMixin<T>
+    implements SdbBoundaries<T> {
+  @override
+  final SdbBoundary<T>? lower;
+  @override
+  final SdbBoundary<T>? upper;
+
+  /// Lower and upper boundaries implementation.
+  SdbBoundariesImpl(this.lower, this.upper);
 }
 
 /// Convert boundaries to idb.KeyRange.

@@ -16,6 +16,15 @@ SdbKeyPath? idbKeyPathToSdbKeyPathOrNull(Object? idbKeyPath) {
 }
 
 /// Only handle String or List of String
+Object sdbKeyPathToIdbKeyPath(SdbKeyPath sdbKeyPath) {
+  if (sdbKeyPath.isSingle) {
+    return sdbKeyPath.keyPaths.first;
+  } else {
+    return sdbKeyPath.keyPaths;
+  }
+}
+
+/// Only handle String or List of String
 SdbKeyPath idbKeyPathToSdbKeyPath(Object idbKeyPath) {
   if (idbKeyPath is String) {
     return SdbKeyPath.single(idbKeyPath);
@@ -39,11 +48,10 @@ SdbKeyPath idbKeyPathToSdbKeyPath(Object idbKeyPath) {
 ///
 /// Returns String or `List<String>`
 Object idbKeyPathFromAny(Object keyPath) {
-  if (keyPath is SdbKeyPath) {
-    return keyPath.keyPaths;
-  } else {
+  if (keyPath is String) {
     return keyPath;
   }
+  return sdbKeyPathToIdbKeyPath(sdbKeyPathFromAny(keyPath));
 }
 
 /// Handle String, `List<String>` or SdbKeyPath

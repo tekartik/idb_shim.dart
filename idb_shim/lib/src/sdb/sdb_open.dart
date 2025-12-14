@@ -1,5 +1,4 @@
-import 'package:idb_shim/sdb.dart';
-
+import 'sdb.dart';
 import 'sdb_index_impl.dart';
 import 'sdb_open_impl.dart';
 // ignore: unused_import

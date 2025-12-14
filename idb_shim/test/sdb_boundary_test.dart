@@ -20,6 +20,7 @@ void main() {
       expect(SdbBoundaries.values(0, 1).toConditionString(), '0 <= ? < 1');
       expect(SdbBoundaries<int>(null, null).toConditionString(), '?');
       expect(SdbBoundaries.lowerValue(0).toConditionString(), '0 <= ?');
+      expect(SdbBoundaries.key(1).toConditionString(), '? == 1');
     });
   });
 }

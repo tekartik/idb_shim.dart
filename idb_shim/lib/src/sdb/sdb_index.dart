@@ -1,6 +1,7 @@
 import 'sdb_boundary.dart';
 import 'sdb_client.dart';
 import 'sdb_filter.dart';
+import 'sdb_find_options.dart';
 import 'sdb_index_impl.dart';
 import 'sdb_index_record.dart';
 import 'sdb_index_record_impl.dart';
@@ -82,13 +83,19 @@ extension SdbIndexRefExtension<
 
     /// Optional descending order
     bool? descending,
+
+    /// New api, takes precedence over filter, offset, limit, descending
+    SdbFindOptions? options,
   }) => impl.findRecordsImpl(
     client,
     boundaries: boundaries,
-    filter: filter,
-    offset: offset,
-    limit: limit,
-    descending: descending,
+    options: compatMergeFindOptions(
+      options,
+      limit: limit,
+      offset: offset,
+      descending: descending,
+      filter: filter,
+    ),
   );
 
   /// Find records.
@@ -99,17 +106,27 @@ extension SdbIndexRefExtension<
     /// Optional filter, performed in memory
     SdbFilter? filter,
     int? offset,
+    int? limit,
 
     /// Optional descending order
     bool? descending,
+
+    /// New api
+    SdbFindOptions? options,
   }) async {
+    options = compatMergeFindOptions(
+      options,
+      limit: limit,
+      offset: offset,
+      descending: descending,
+      filter: filter,
+    );
+    options = options.copyWith(limit: 1);
     var records = await findRecords(
       client,
       boundaries: boundaries,
-      filter: filter,
-      offset: offset,
-      limit: 1,
-      descending: descending,
+
+      options: options,
     );
     return records.firstOrNull;
   }
@@ -123,13 +140,25 @@ extension SdbIndexRefExtension<
 
     /// Optional descending order
     bool? descending,
-  }) => impl.findRecordKeysImpl(
-    client,
-    boundaries: boundaries,
-    offset: offset,
-    limit: limit,
-    descending: descending,
-  );
+
+    /// New api - filter is not support for key search
+    SdbFindOptions? options,
+  }) async {
+    options = compatMergeFindOptions(
+      options,
+      limit: limit,
+      offset: offset,
+      descending: descending,
+    );
+
+    /// If filter is used, needs to use findRecords instead
+
+    return impl.findRecordKeysImpl(
+      client,
+      boundaries: boundaries,
+      options: options,
+    );
+  }
 
   /// Find first record key.
   Future<SdbIndexRecordKey<K, V, I>?> findRecordKey(

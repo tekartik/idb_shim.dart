@@ -1,4 +1,5 @@
 import 'package:idb_shim/sdb.dart';
+import 'package:idb_shim/src/sdb/sdb_find_options.dart';
 
 import 'sdb_transaction_store_impl.dart';
 
@@ -54,13 +55,19 @@ extension SdbTransactionStoreRefExtension<K extends SdbKey, V extends SdbValue>
 
     /// Optional sort order
     bool? descending,
-  }) => _impl.findRecordsImpl(
-    boundaries: boundaries,
-    filter: filter,
-    offset: offset,
-    limit: limit,
-    descending: descending,
-  );
+
+    /// New API, suppercedes the other parameters
+    SdbFindOptions? options,
+  }) {
+    options = compatMergeFindOptions(
+      options,
+      limit: limit,
+      offset: offset,
+      descending: descending,
+      filter: filter,
+    );
+    return _impl.findRecordsImpl(boundaries: boundaries, options: options);
+  }
 
   /// Find record keys.
   Future<List<SdbRecordKey<K, V>>> findRecordKeys({
@@ -70,12 +77,18 @@ extension SdbTransactionStoreRefExtension<K extends SdbKey, V extends SdbValue>
 
     /// Optional descending order
     bool? descending,
-  }) => _impl.findRecordKeysImpl(
-    boundaries: boundaries,
-    offset: offset,
-    limit: limit,
-    descending: descending,
-  );
+
+    /// New API, suppercedes the other parameters
+    SdbFindOptions? options,
+  }) {
+    options = compatMergeFindOptions(
+      options,
+      limit: limit,
+      offset: offset,
+      descending: descending,
+    );
+    return _impl.findRecordKeysImpl(boundaries: boundaries, options: options);
+  }
 
   /// Count record.
   Future<int> count({SdbBoundaries<K>? boundaries}) =>

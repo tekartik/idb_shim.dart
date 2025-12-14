@@ -1,26 +1,19 @@
 import 'dart:async';
 
+import 'package:idb_shim/sdb.dart';
 import 'package:idb_shim/src/sdb/sdb_boundary_impl.dart';
-import 'package:idb_shim/src/sdb/sdb_index.dart';
 import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
-import 'package:idb_shim/src/sdb/sdb_schema.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_utils.dart';
 import 'package:idb_shim/src/utils/cursor_utils.dart';
 import 'package:idb_shim/src/utils/idb_utils.dart';
 import 'package:idb_shim/utils/idb_utils.dart' as idb;
 
-import 'sdb_boundary.dart';
-import 'sdb_filter.dart';
 import 'sdb_filter_impl.dart';
 import 'sdb_key_utils.dart';
 import 'sdb_record_snapshot.dart';
 import 'sdb_record_snapshot_impl.dart';
-import 'sdb_store.dart';
 import 'sdb_store_impl.dart';
-import 'sdb_transaction_index.dart';
-import 'sdb_transaction_store.dart';
-import 'sdb_types.dart';
 
 /// SimpleDb transaction internal extension.
 extension SdbSingleStoreTransactionInternalExtension<
@@ -219,13 +212,12 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> findRecordsImpl({
     SdbBoundaries<K>? boundaries,
-
-    /// Optional filter, performed in memory
-    SdbFilter? filter,
-    int? offset,
-    int? limit,
-    bool? descending,
+    required SdbFindOptions options,
   }) async {
+    var filter = options.filter;
+    var offset = options.offset;
+    var limit = options.limit;
+    var descending = options.descending;
     var cursor = idbObjectStore.openCursor(
       direction: descendingToIdbDirection(descending),
       range: idbKeyRangeFromBoundaries(boundaries),
@@ -249,10 +241,14 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
   /// Find record keys.
   Future<List<SdbRecordKey<K, V>>> findRecordKeysImpl({
     SdbBoundaries<K>? boundaries,
-    int? offset,
-    int? limit,
-    bool? descending,
+    required SdbFindOptions options,
   }) async {
+    if (options.filter != null) {
+      return findRecordsImpl(boundaries: boundaries, options: options);
+    }
+    var descending = options.descending;
+    var offset = options.offset;
+    var limit = options.limit;
     var cursor = idbObjectStore.openKeyCursor(
       autoAdvance: true,
       direction: descendingToIdbDirection(descending),

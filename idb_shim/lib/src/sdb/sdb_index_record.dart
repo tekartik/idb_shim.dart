@@ -1,11 +1,8 @@
-import 'sdb_client.dart';
-import 'sdb_index.dart';
+import 'sdb.dart';
 import 'sdb_index_record_impl.dart';
-import 'sdb_index_record_snapshot.dart';
-import 'sdb_store.dart';
-import 'sdb_types.dart';
 
-/// Index record reference.
+/// Index record reference at a given index key.
+/// An index key may refer to multiple records.
 abstract class SdbIndexRecordRef<
   K extends SdbKey,
   V extends SdbValue,
@@ -31,4 +28,28 @@ extension SdbIndexRecordRefExtension<
   /// Get a single record.
   Future<SdbIndexRecordSnapshot<K, V, I>?> get(SdbClient client) =>
       impl.getImpl(client);
+
+  SdbBoundaries<I> get _boundariesKey => SdbBoundaries.key(indexKey);
+
+  /// Find all records with this index key.
+  Future<List<SdbIndexRecordKey<K, V, I>>> findRecordKeys(
+    SdbClient client,
+    SdbFindOptions options,
+  ) => index.findRecordKeys(
+    client,
+    boundaries: _boundariesKey,
+    options: options,
+  );
+
+  /// Find all records with this index key.
+  Future<List<SdbIndexRecordSnapshot<K, V, I>>> findRecords(
+    SdbClient client, {
+    SdbFindOptions? options,
+  }) {
+    return index.findRecords(
+      client,
+      boundaries: _boundariesKey,
+      options: options,
+    );
+  }
 }

@@ -1,8 +1,8 @@
 import 'package:idb_shim/idb.dart' as idb;
-import 'package:idb_shim/sdb.dart';
 import 'package:idb_shim/src/sdb/sdb_client.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_store_impl.dart';
 
+import 'sdb.dart';
 import 'sdb_database_impl.dart';
 import 'sdb_store_impl.dart';
 

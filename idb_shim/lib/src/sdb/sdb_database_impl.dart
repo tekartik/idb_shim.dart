@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:idb_shim/idb_shim.dart' as idb;
 import 'package:idb_shim/sdb.dart';
 import 'package:idb_shim/src/sdb/sdb_client.dart';
+import 'package:idb_shim/src/sdb/sdb_database_impl.dart';
 import 'package:meta/meta.dart';
 
+import 'sdb.dart';
 import 'sdb_database.dart';
 import 'sdb_factory_impl.dart';
 import 'sdb_store_impl.dart';

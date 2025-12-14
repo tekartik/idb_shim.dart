@@ -1,8 +1,9 @@
-import 'package:idb_shim/sdb.dart';
 import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
+import 'package:idb_shim/src/sdb/sdb_find_options.dart';
 import 'package:idb_shim/src/sdb/sdb_record_impl.dart';
 
+import 'sdb.dart';
 import 'sdb_client.dart';
 import 'sdb_database_impl.dart';
 import 'sdb_transaction_impl.dart';
@@ -38,16 +39,25 @@ extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
 
     /// Optional sort order
     bool? descending,
-  }) => impl.findRecordsImpl(
-    client,
-    boundaries: boundaries,
-    filter: filter,
-    offset: offset,
-    limit: limit,
-    descending: descending,
-  );
 
-  /// Find firest records
+    /// New API, suppercedes the other parameters
+    SdbFindOptions? options,
+  }) {
+    options = compatMergeFindOptions(
+      options,
+      limit: limit,
+      offset: offset,
+      descending: descending,
+      filter: filter,
+    );
+    return impl.findRecordsImpl(
+      client,
+      boundaries: boundaries,
+      options: options,
+    );
+  }
+
+  /// Find first records
   Future<SdbRecordSnapshot<K, V>?> findRecord(
     SdbClient client, {
 
@@ -59,14 +69,22 @@ extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
 
     /// Optional sort order
     bool? descending,
+
+    /// New API, suppercedes the other parameters
+    SdbFindOptions? options,
   }) async {
+    options = compatMergeFindOptions(
+      options,
+
+      offset: offset,
+      descending: descending,
+      filter: filter,
+    );
+    options = options.copyWith(limit: 1);
     var records = await findRecords(
       client,
       boundaries: boundaries,
-      filter: filter,
-      offset: offset,
-      limit: 1,
-      descending: descending,
+      options: options,
     );
     return records.firstOrNull;
   }
@@ -187,54 +205,23 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
   Future<List<SdbRecordSnapshot<K, V>>> findRecordsImpl(
     SdbClient client, {
     SdbBoundaries<K>? boundaries,
-
-    /// Optional filter, performed in memory
-    SdbFilter? filter,
-    int? offset,
-    int? limit,
-
-    /// Optional sort order
-    bool? descending,
+    required SdbFindOptions options,
   }) => client.handleDbOrTxn(
-    (db) => dbFindRecordsImpl(
-      db,
-      boundaries: boundaries,
-      filter: filter,
-      offset: offset,
-      limit: limit,
-      descending: descending,
-    ),
-    (txn) => txnFindRecordsImpl(
-      txn,
-      boundaries: boundaries,
-      filter: filter,
-      offset: offset,
-      limit: limit,
-      descending: descending,
-    ),
+    (db) => dbFindRecordsImpl(db, boundaries: boundaries, options: options),
+    (txn) => txnFindRecordsImpl(txn, boundaries: boundaries, options: options),
   );
 
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> dbFindRecordsImpl(
     SdbDatabase db, {
     SdbBoundaries<K>? boundaries,
-
-    /// Optional filter, performed in memory
-    SdbFilter? filter,
-    int? offset,
-    int? limit,
-
-    /// Optional sort order
-    bool? descending,
+    required SdbFindOptions options,
   }) {
     return db.inStoreTransaction(this, SdbTransactionMode.readOnly, (txn) {
       return txnFindRecordsImpl(
         txn.rawImpl,
         boundaries: boundaries,
-        filter: filter,
-        offset: offset,
-        limit: limit,
-        descending: descending,
+        options: options,
       );
     });
   }
@@ -243,24 +230,11 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
   Future<List<SdbRecordSnapshot<K, V>>> txnFindRecordsImpl(
     SdbTransactionImpl txn, {
     SdbBoundaries<K>? boundaries,
-
-    /// Optional filter, performed in memory
-    SdbFilter? filter,
-    int? offset,
-    int? limit,
-
-    /// Optional sort order
-    bool? descending,
+    required SdbFindOptions options,
   }) {
     return txn
         .storeImpl(this)
-        .findRecords(
-          boundaries: boundaries,
-          filter: filter,
-          offset: offset,
-          limit: limit,
-          descending: descending,
-        );
+        .findRecords(boundaries: boundaries, options: options);
   }
 
   /// Find records keys.

@@ -42,7 +42,7 @@ abstract class SdbBoundaries<T extends Object> {
 
   /// Create boundaries from a lower and upper  boundary.
   factory SdbBoundaries(SdbBoundary<T>? lower, SdbBoundary<T>? upper) =>
-      DbBoundariesImpl(lower, upper);
+      SdbBoundariesImpl(lower, upper);
 
   /// Create boundaries from an lower (included) and upper (excluded) boundary.
   factory SdbBoundaries.values(
@@ -50,26 +50,32 @@ abstract class SdbBoundaries<T extends Object> {
     T? upper, {
     bool? includeLower,
     bool? includeUpper,
-  }) => DbBoundariesImpl(
+  }) => SdbBoundariesImpl(
     lower == null ? null : SdbLowerBoundary(lower, include: includeLower),
     upper == null ? null : SdbUpperBoundary(upper, include: includeUpper),
   );
 
   /// Lower only boundary.
   factory SdbBoundaries.lowerValue(T lower) =>
-      DbBoundariesImpl(SdbLowerBoundary(lower), null);
+      SdbBoundariesImpl(SdbLowerBoundary(lower), null);
 
   /// Lower only boundary.
   factory SdbBoundaries.lower(SdbBoundary<T>? lower) =>
-      DbBoundariesImpl(lower, null);
+      SdbBoundariesImpl(lower, null);
 
   /// Upper only boundary.
   factory SdbBoundaries.upperValue(T upper) =>
-      DbBoundariesImpl(null, SdbUpperBoundary(upper));
+      SdbBoundariesImpl(null, SdbUpperBoundary(upper));
 
   /// Upper only boundary.
   factory SdbBoundaries.upper(SdbBoundary<T>? upper) =>
-      DbBoundariesImpl(null, upper);
+      SdbBoundariesImpl(null, upper);
+
+  /// Single key boundary used in index search.
+  factory SdbBoundaries.key(T key) {
+    return SdbSingleKeyBoundaries(key);
+    //final keyBoundary SdbBoundary<T> boundary = SdbLowerBoundary<T>(key);
+  }
 
   /// Returns a string representation of the boundaries like '0 <= ? < 1'.
   String toConditionString();

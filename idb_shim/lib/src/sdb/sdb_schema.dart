@@ -1,10 +1,10 @@
-import 'package:idb_shim/sdb.dart';
 import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/sdb/sdb_factory_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:idb_shim/src/utils/env_utils.dart';
 
+import 'sdb.dart';
 import 'sdb_database_impl.dart';
 
 /// Store schema definition
