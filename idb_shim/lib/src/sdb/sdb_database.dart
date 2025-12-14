@@ -26,6 +26,9 @@ abstract class SdbDatabase implements SdbClient {
 
   /// Close the database.
   Future<void> close();
+
+  /// Get the names of the object stores.
+  Iterable<String> get objectStoreNames;
 }
 
 /// SimpleDb methods.

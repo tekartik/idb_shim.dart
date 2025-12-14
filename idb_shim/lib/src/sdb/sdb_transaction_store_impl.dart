@@ -1,4 +1,5 @@
 import 'package:idb_shim/src/sdb/sdb_boundary_impl.dart';
+import 'package:idb_shim/src/sdb/sdb_index.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_utils.dart';
 import 'package:idb_shim/src/utils/cursor_utils.dart';
@@ -13,6 +14,7 @@ import 'sdb_record_snapshot.dart';
 import 'sdb_record_snapshot_impl.dart';
 import 'sdb_store.dart';
 import 'sdb_store_impl.dart';
+import 'sdb_transaction_index.dart';
 import 'sdb_transaction_store.dart';
 import 'sdb_types.dart';
 
@@ -271,6 +273,20 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
       }).asFuture<void>();
     }
   }
+
+  /// TODO check to assume a string part
+  @override
+  String? get keyPath => idbObjectStore.keyPath?.toString();
+
+  @override
+  Iterable<String> get indexNames => idbObjectStore.indexNames;
+
+  @override
+  SdbTransactionIndexRef<K, V, I> index<I extends SdbIndexKey>(
+    SdbIndexRef<K, V, I> ref,
+  ) {
+    return SdbTransactionIndexRef<K, V, I>(index: ref, txnStore: this);
+  }
 }
 
 /// Multi store transaction internal extension.
@@ -324,7 +340,7 @@ class SdbMultiStoreTransactionImpl extends SdbTransactionImpl
   Future<T> run<T>(
     Future<T> Function(SdbMultiStoreTransaction txn) callback,
   ) async {
-    var result = callback(this);
+    var result = await callback(this);
     await completed;
     return result;
   }

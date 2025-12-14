@@ -1,6 +1,7 @@
 library;
 
 import 'package:idb_test/sdb_open_test.dart';
+import 'package:idb_test/sdb_schema_test.dart';
 import 'package:idb_test/sdb_test.dart';
 
 import 'cursor_test.dart' as cursor_test;
@@ -45,6 +46,7 @@ void defineAllTests(TestContext ctx) {
   idbSimpleSdbTest(ctx);
   sdbIndexTests(ctx);
   idbSdbOpenTests(ctx);
+  idbSchemaSdbTest(ctx);
 
   group('indexeddb_1', () {
     indexeddb_1_test.defineTests(ctx);

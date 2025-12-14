@@ -47,6 +47,11 @@ class SdbOpenDatabaseImpl implements SdbOpenDatabase {
     SdbStoreRef<K, V> store,
   ) => impl.getStoreImpl<K, V>(store.impl);
 
+  @override
+  void deleteStore(String storeName) {
+    db.idbDatabase.deleteObjectStore(storeName);
+  }
+
   /// Add a store.
   SdbOpenStoreRef<K, V> addStoreImpl<K extends SdbKey, V extends SdbValue>(
     SdbStoreRefImpl<K, V> store, {
@@ -71,6 +76,9 @@ class SdbOpenDatabaseImpl implements SdbOpenDatabase {
     var storeOpen = SdbOpenStoreRefIdb<K, V>(this, store, idbStore);
     return storeOpen;
   }
+
+  @override
+  Iterable<String> get objectStoreNames => db.objectStoreNames;
 }
 
 /// Open store reference internal extension.
@@ -167,6 +175,14 @@ class SdbOpenStoreRefIdb<K extends SdbKey, V extends SdbValue>
 
     indexes.add(indexOpen);
     return indexOpen;
+  }
+
+  @override
+  Iterable<String> get indexNames => idbObjectStore.indexNames;
+
+  @override
+  void deleteIndex(String indexName) {
+    idbObjectStore.deleteIndex(indexName);
   }
 }
 

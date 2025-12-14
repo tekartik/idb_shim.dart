@@ -44,6 +44,9 @@ class SdbDatabaseImpl
   /// SimpleDb implementation.
   SdbDatabaseImpl(this.factory, this.name);
 
+  @override
+  Iterable<String> get objectStoreNames => idbDatabase.objectStoreNames;
+
   /// Transaction.
   @override
   Future<T> inStoreTransaction<T, K extends SdbKey, V extends SdbValue>(
@@ -70,7 +73,7 @@ class SdbDatabaseImpl
     List<SdbStoreRef> stores,
     SdbTransactionMode mode,
     Future<T> Function(SdbMultiStoreTransaction txn) callback,
-  ) async {
+  ) {
     var txn = SdbMultiStoreTransactionImpl(impl, mode, stores);
     return txn.run(callback);
   }

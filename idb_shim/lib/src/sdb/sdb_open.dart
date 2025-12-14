@@ -20,6 +20,14 @@ abstract class SdbOpenDatabase {
   SdbOpenStoreRef<K, V> objectStore<K extends SdbKey, V extends SdbValue>(
     SdbStoreRef<K, V> store,
   );
+
+  ///
+  /// list of the names of the object stores currently in the connected database
+  ///
+  Iterable<String> get objectStoreNames;
+
+  /// Delete a store.
+  void deleteStore(String storeName);
 }
 
 /// Default mixin.
@@ -43,6 +51,9 @@ mixin SdbOpenDatabaseDefaultMixin implements SdbOpenDatabase {
 
 /// Store during open.
 abstract class SdbOpenStoreRef<K extends SdbKey, V extends SdbValue> {
+  /// List of index names.
+  Iterable<String> get indexNames;
+
   /// Create an index.
   SdbOpenIndexRef<K, V, I> createIndex<I extends SdbIndexKey>(
     SdbIndex1Ref<K, V, I> index,
@@ -94,6 +105,9 @@ abstract class SdbOpenStoreRef<K extends SdbKey, V extends SdbValue> {
     indexKeyPath3,
     indexKeyPath4,
   ]);
+
+  /// Delete an index.
+  void deleteIndex(String indexName);
 }
 
 /// Default open store ref mixin.
