@@ -12,7 +12,7 @@ class SdbStoreSchema {
   final String? keyPath;
 
   /// Auto increment
-  final bool? autoIncrement;
+  final bool autoIncrement;
 
   /// Indexes
   final List<SdbIndexSchema> indexes;
@@ -21,7 +21,7 @@ class SdbStoreSchema {
   SdbStoreSchema(
     this.ref, {
     this.keyPath,
-    this.autoIncrement,
+    this.autoIncrement = false,
     this.indexes = const [],
   });
 }
@@ -44,7 +44,7 @@ extension SdbStoreRefSchemaExtension on SdbStoreRef {
     return SdbStoreSchema(
       this,
       keyPath: keyPath,
-      autoIncrement: autoIncrement,
+      autoIncrement: autoIncrement ?? false,
       indexes: indexes ?? [],
     );
   }

@@ -189,11 +189,15 @@ void defineTests(TestContext ctx) {
 
         void onUpgradeNeeded(VersionChangeEvent e) {
           final db = e.database;
+          expect(db.objectStoreNames, isEmpty);
           final objectStore = db.createObjectStore(
             testStoreName,
             autoIncrement: true,
           );
+          expect(db.objectStoreNames, [testStoreName]);
+          expect(objectStore.indexNames, isEmpty);
           objectStore.createIndex(testNameIndex, testNameField, unique: true);
+          expect(objectStore.indexNames, [testNameIndex]);
         }
 
         db = await idbFactory.open(
@@ -207,6 +211,7 @@ void defineTests(TestContext ctx) {
 
       test('store_properties', () async {
         await dbSetUp();
+        expect(db!.objectStoreNames, [testStoreName]);
         dbCreateTransaction();
         expect(objectStore.indexNames, [testNameIndex]);
       });
