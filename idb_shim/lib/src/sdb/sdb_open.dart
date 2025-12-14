@@ -79,25 +79,34 @@ extension SdbOpenStoreRefExtension<K extends SdbKey, V extends SdbValue>
     SdbIndexRef<K, V, I> index,
 
     /// Can be String or `List<String>` or SdbKeyPath
-    Object indexKeyPath,
-  ) => impl.createIndexImpl<I>(index.impl, indexKeyPath);
+    Object indexKeyPath, {
+
+    /// Unique
+    bool? unique,
+  }) => impl.createIndexImpl<I>(index.impl, indexKeyPath, unique: unique);
 
   /// Create an index.
   SdbOpenIndexRef<K, V, I> createIndex1<I extends SdbIndexKey>(
     SdbIndex1Ref<K, V, I> index,
-    String indexKeyPath,
-  ) => impl.createIndexImpl<I>(index.impl, indexKeyPath);
+    String indexKeyPath, {
+
+    /// Unique
+    bool? unique,
+  }) => impl.createIndexImpl<I>(index.impl, indexKeyPath, unique: unique);
 
   /// Create an index on 2 fields.
   SdbOpenIndexRef<K, V, (I1, I2)>
   createIndex2<I1 extends SdbIndexKey, I2 extends SdbIndexKey>(
     SdbIndex2Ref<K, V, I1, I2> index,
     String indexKeyPath1,
-    String indexKeyPath2,
-  ) => impl.createIndexImpl<(I1, I2)>(index.impl, [
+    String indexKeyPath2, {
+
+    /// Unique
+    bool? unique,
+  }) => impl.createIndexImpl<(I1, I2)>(index.impl, [
     indexKeyPath1,
     indexKeyPath2,
-  ]);
+  ], unique: unique);
 
   /// Create an index on 3 fields.
   SdbOpenIndexRef<K, V, (I1, I2, I3)> createIndex3<
@@ -108,12 +117,13 @@ extension SdbOpenStoreRefExtension<K extends SdbKey, V extends SdbValue>
     SdbIndex3Ref<K, V, I1, I2, I3> index,
     String indexKeyPath1,
     String indexKeyPath2,
-    String indexKeyPath3,
-  ) => impl.createIndexImpl<(I1, I2, I3)>(index.impl, [
+    String indexKeyPath3, {
+    bool? unique,
+  }) => impl.createIndexImpl<(I1, I2, I3)>(index.impl, [
     indexKeyPath1,
     indexKeyPath2,
     indexKeyPath3,
-  ]);
+  ], unique: unique);
 
   /// Create an index on 4 fields.
   SdbOpenIndexRef<K, V, (I1, I2, I3, I4)> createIndex4<
@@ -126,11 +136,12 @@ extension SdbOpenStoreRefExtension<K extends SdbKey, V extends SdbValue>
     String indexKeyPath1,
     String indexKeyPath2,
     String indexKeyPath3,
-    String indexKeyPath4,
-  ) => impl.createIndexImpl<(I1, I2, I3, I4)>(index.impl, [
+    String indexKeyPath4, {
+    bool? unique,
+  }) => impl.createIndexImpl<(I1, I2, I3, I4)>(index.impl, [
     indexKeyPath1,
     indexKeyPath2,
     indexKeyPath3,
     indexKeyPath4,
-  ]);
+  ], unique: unique);
 }

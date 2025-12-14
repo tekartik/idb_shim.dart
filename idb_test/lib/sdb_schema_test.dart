@@ -8,8 +8,9 @@ void main() {
 }
 
 var testStore1 = SdbStoreRef<int, SdbModel>('store1');
+var testStore1Schema = testStore1.schema(autoIncrement: true);
 var testIndex1 = testStore1.index<int>('index1'); // On field 'field1'
-final testSchemaIndex1 = testIndex1.schema(keyPath: 'field1');
+final testSchemaIndex1 = testIndex1.schema(keyPath: 'field1', unique: true);
 final testSchemaIndex1bis = testIndex1.schema(keyPath: 'field2');
 
 void idbSchemaSdbTest(TestContext ctx) {
@@ -28,13 +29,15 @@ void schemaSdbTest(SdbTestContext ctx) {
       var db = await factory.openDatabase(
         dbName,
         version: 1,
-        schema: SdbDatabaseSchema(stores: [testStore.schema()]),
+        schema: SdbDatabaseSchema(stores: [testStore1Schema]),
       );
       expect(
         await db.readSchemaDef(),
         equals(
           SdbDatabaseSchemaDef(
-            stores: [SdbStoreSchemaDef(name: testStore.name)],
+            stores: [
+              SdbStoreSchemaDef(name: testStore1.name, autoIncrement: true),
+            ],
           ),
         ),
       );
@@ -46,7 +49,10 @@ void schemaSdbTest(SdbTestContext ctx) {
           version: 1,
           schema: SdbDatabaseSchema(
             stores: [
-              testStore.schema(indexes: [testSchemaIndex1]),
+              testStore1.schema(
+                autoIncrement: true,
+                indexes: [testSchemaIndex1],
+              ),
             ],
           ),
         );
@@ -57,19 +63,34 @@ void schemaSdbTest(SdbTestContext ctx) {
         version: 2,
         schema: SdbDatabaseSchema(
           stores: [
-            testStore.schema(indexes: [testSchemaIndex1]),
+            testStore1.schema(autoIncrement: true, indexes: [testSchemaIndex1]),
           ],
         ),
       );
       expect((await db.readSchemaDef()).toDebugMap(), {
         'stores': {
-          'test': {
+          'store1': {
+            'autoIncrement': true,
             'indexes': {
-              'index1': {'keyPath': 'field1'},
+              'index1': {'keyPath': 'field1', 'unique': true},
             },
           },
         },
       });
+      var key1 = await testStore1.add(db, {'field1': 1});
+      expect(key1, 1);
+      var key2 = await testStore1.add(db, {'field1': 2});
+      expect(key2, 2);
+      // ignore: dead_code
+      if (false) {
+        try {
+          await testStore1.add(db, {'field1': 1});
+          fail('Should fail unique index');
+        } catch (e) {
+          expect(e, isNot(isA<TestFailure>()));
+        }
+      }
+
       await db.close();
       await expectLater(() async {
         await factory.openDatabase(

@@ -305,10 +305,14 @@ extension SdbStoreRefSchemaExtension on SdbStoreRef {
 }
 
 /// Store schema extension on store ref
-extension SdbIndexRefSchemaExtension on SdbIndex1Ref {
+extension SdbIndexRefSchemaExtension on SdbIndexRef {
   /// Create store schema, keyPath is String, a `List<String>` or SdbKeyPath
-  SdbIndexSchema schema({required Object keyPath}) {
-    return SdbIndexSchema(this, sdbKeyPathFromAny(keyPath));
+  SdbIndexSchema schema({required Object keyPath, bool? unique}) {
+    return SdbIndexSchema(
+      this,
+      sdbKeyPathFromAny(keyPath),
+      unique: unique ?? false,
+    );
   }
 }
 
@@ -505,7 +509,7 @@ extension SdbFactorySchemaExtensionPrv on SdbFactory {
         var indexName = indexSchema.name;
         var unique = indexSchema.unique;
         if (!existingIndexNames.contains(indexName)) {
-          store.createIndex(indexRef, keyPath);
+          store.createIndex(indexRef, keyPath, unique: unique);
         } else {
           var index = store.index(indexRef);
           var existingKeyPath = index.keyPath;

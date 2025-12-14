@@ -150,11 +150,16 @@ class SdbOpenStoreRefIdb<K extends SdbKey, V extends SdbValue>
   /// Create an index.
   SdbOpenIndexRef<K, V, I> createIndexImpl<I extends SdbIndexKey>(
     SdbIndexRefImpl<K, V, I> index,
-    Object indexKeyPath,
-  ) {
+    Object indexKeyPath, {
+    required bool? unique,
+  }) {
     // Fix key path if needed
     var keyPath = idbKeyPathFromAny(indexKeyPath);
-    var idbIndex = idbObjectStore.createIndex(index.name, keyPath);
+    var idbIndex = idbObjectStore.createIndex(
+      index.name,
+      keyPath,
+      unique: unique,
+    );
     var indexOpen = SdbOpenIndexRefImpl<K, V, I>(this, index, idbIndex);
 
     indexes.add(indexOpen);

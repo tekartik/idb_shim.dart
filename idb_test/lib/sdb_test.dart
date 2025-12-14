@@ -7,6 +7,7 @@ void main() {
 }
 
 var testStore = SdbStoreRef<int, SdbModel>('test');
+var testStoreSchema = testStore.schema(autoIncrement: true);
 
 var testStore2 = SdbStoreRef<String, SdbModel>('test2');
 
