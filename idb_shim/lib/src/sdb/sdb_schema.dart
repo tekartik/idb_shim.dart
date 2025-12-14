@@ -238,7 +238,12 @@ extension SdbFactorySchemaExtension on SdbFactory {
       },
     );
     if (isDebug && !onVersionChangeCalled) {
-      await _onCheckSchema(db, schema);
+      try {
+        await _onCheckSchema(db, schema);
+      } catch (e) {
+        await db.close();
+        rethrow;
+      }
     }
     return db;
   }
