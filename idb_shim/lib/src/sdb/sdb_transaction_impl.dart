@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:idb_shim/idb.dart' as idb;
 import 'package:idb_shim/src/sdb/sdb_client.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_store_impl.dart';
@@ -59,6 +61,24 @@ class SdbTransactionImpl
 
   @override
   Iterable<String> get storeNames => idbTransaction.objectStoreNames;
+
+  /// run in a transaction.
+  Future<T> runCallback<T>(FutureOr<T> Function() callback) async {
+    T result;
+    try {
+      var rawResult = callback();
+
+      if (rawResult is Future) {
+        result = (await rawResult);
+      } else {
+        result = rawResult;
+      }
+    } finally {
+      // wait for completion
+      await completed;
+    }
+    return result;
+  }
 }
 
 /// Transaction mode conversion.

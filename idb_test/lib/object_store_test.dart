@@ -847,7 +847,7 @@ void defineTests(TestContext ctx) {
                 // 'both key 123 and inline keyPath 123 are specified
                 //devPrint(e);
                 // mark transaction as null
-                transaction = null;
+                allowTransactionAborted = true;
               },
             );
       });
@@ -864,7 +864,7 @@ void defineTests(TestContext ctx) {
               },
               onError: (e) {
                 //print(e);
-                transaction = null;
+                allowTransactionAborted = true;
               },
             );
       });
@@ -885,7 +885,7 @@ void defineTests(TestContext ctx) {
         } catch (e) {
           // DataError: Failed to execute 'put' on 'IDBObjectStore': The object store uses in-line keys and the key parameter was provided.
           expect(isTestFailure(e), isFalse);
-          transaction = null;
+          allowTransactionAborted = true;
         }
       });
     });
@@ -975,8 +975,7 @@ void defineTests(TestContext ctx) {
               //devPrint(e);
               // IdbMemoryError(3): neither keyPath nor autoIncrement set and trying to add object without key
               expect(isTestFailure(exception), isFalse);
-              //expect(e is DatabaseError, isTrue);
-              transaction = null;
+              allowTransactionAborted = true;
             });
       });
 
@@ -998,7 +997,7 @@ void defineTests(TestContext ctx) {
               //devPrint(e);
               expect(isTestFailure(exception), isFalse);
               //expect(e is DatabaseError, isTrue);
-              transaction = null;
+              allowTransactionAborted = true;
             });
       });
 
@@ -1023,7 +1022,7 @@ void defineTests(TestContext ctx) {
                 expect(isTestFailure(exception), isFalse);
 
                 // in native completed will never succeed so remove it
-                transaction = null;
+                allowTransactionAborted = true;
               });
         });
       });
