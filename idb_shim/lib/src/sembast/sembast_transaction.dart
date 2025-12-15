@@ -8,23 +8,67 @@ import 'package:idb_shim/src/common/common_transaction.dart';
 import 'package:idb_shim/src/sembast/sembast_database.dart';
 import 'package:idb_shim/src/sembast/sembast_object_store.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
-import 'package:idb_shim/src/utils/env_utils.dart';
 import 'package:sembast/sembast.dart' as sembast;
 
-bool _debugTransaction = false; // devWarning(true); // false;
+// bool _debugTransaction = devWarning(true);
+bool _debugTransaction = false;
 
-// _lazyMode is what indexeddb on chrome supports
-// supporting wait between calls
-// default is false to matche ie/safari strict behavior
-bool _transactionLazyMode = false;
+typedef Action<T> = FutureOr<T> Function();
 
-typedef Action = FutureOr Function();
+class _TransactionAction<T> {
+  final Action<T> action;
+  final completer = Completer<T>();
+  final bool doNotAbortOnError;
 
-// Failing
-bool newTransaction = false;
+  _TransactionAction(this.action, {required this.doNotAbortOnError});
+}
 
 Future<void> _delayedInit() async {
   await Future<void>.delayed(Duration.zero);
+}
+
+/// Lazey completer only created when needed (when completed is called)
+class _LazyCompleter<T> {
+  var _completed = false;
+  Object? _completedError;
+  T? _completedValue;
+  Completer<T>? _completer;
+
+  Future<T> get future {
+    if (_completed) {
+      if (_completedError != null) {
+        return Future<T>.error(_completedError!);
+      } else {
+        return Future<T>.value(_completedValue);
+      }
+    }
+    _completer ??= Completer<T>();
+    return _completer!.future;
+  }
+
+  void complete([T? value]) {
+    if (!_completed) {
+      _completed = true;
+      _completedValue = value;
+      var completer = _completer;
+      if (completer != null && !completer.isCompleted) {
+        completer.complete(value);
+      }
+    }
+  }
+
+  void completeError(Object error, [StackTrace? stackTrace]) {
+    if (!_completed) {
+      _completed = true;
+      _completedError = error;
+      var completer = _completer;
+      if (completer != null && !completer.isCompleted) {
+        _completer!.completeError(error, stackTrace);
+      }
+    }
+  }
+
+  bool get isCompleted => _completer?.isCompleted ?? false;
 }
 
 /// Transaction wrapper around a sembast transaction.
@@ -42,131 +86,34 @@ class TransactionSembast extends IdbTransactionBase
   static int _debugAllIds = 0;
   int? _debugId;
 
-  int _index = 0;
-  bool _inactive = false;
-
   var _aborted = false;
-  Exception? _endException;
-  // In case of an error it must be cancelled
 
-  // The outer result
-  final _completedCompleter = Completer<Database>.sync();
+  final _completerCompleter = _LazyCompleter<Database>();
 
-  @Deprecated('Use only in one place')
   void _complete() {
-    if (!_completedCompleter.isCompleted) {
-      if (_aborted) {
-        _completeError(newAbortException());
-      } else {
-        _completedCompleter.complete(database);
-      }
-    }
+    _completerCompleter.complete(database);
+    return;
   }
 
-  @Deprecated('Use only in one place')
   void _completeError(Object e, [StackTrace? st]) {
-    if (!_completedCompleter.isCompleted) {
-      _completedCompleter.completeError(e, st);
-    }
+    _completerCompleter.completeError(e, st);
   }
 
-  Future _execute(int i) {
-    if (_debugTransaction) {
-      idbLog('exec $i');
-    }
-    final completer = _completers[i];
-    final action = _actions[i] as Action;
-
-    // Time very important here
-    if (newTransaction) {
-      // Not working
-      return () async {
-        try {
-          dynamic result = action();
-          if (result is Future) {
-            result = await result;
-          }
-          if (_debugTransaction) {
-            idbLog('done $i');
-          }
-          completer.complete(result);
-        } catch (e, st) {
-          if (_debugTransaction) {
-            idbLog('err $i $e');
-          }
-          completer.completeError(e, st);
-        }
-      }();
-    } else {
-      // Yes!
-      return Future.sync(action)
-          .then((result) {
-            if (_debugTransaction) {
-              idbLog('done $i');
-            }
-            completer.complete(result);
-          })
-          .catchError((Object e, StackTrace st) {
-            //devPrint(' err $i');
-            if (_debugTransaction) {
-              idbLog('err $i $e');
-            }
-            completer.completeError(e, st);
-          });
-    }
+  void _log(String message) {
+    idbLog('txn $_debugId: $message');
   }
 
-  Future _next() {
-    if (_aborted) {
-      if (_debugTransaction) {
-        idbLog('throwing abort exception');
-      }
-      throw newAbortException('Transaction aborted');
-    }
-    if (_index < _actions.length) {
-      // Always try more
-      return _execute(_index++).then((_) {
-        return _next();
-      });
-    } else {
-      // Safari/IE crashs it a call is made
-      // after an async cycle
-      if (_debugTransaction) {
-        idbLog('transaction done?');
-      }
+  final _txnActions = <_TransactionAction>[];
 
-      // check next cycle too
-      // Make sure we run after all task and micro task
-      // this allows having multiple await between calls
-      // however any delayed action will be out of the transaction
-      // This fixes sample get/await/get
+  /// Only create when action is added
+  Future? _sembastTransaction;
 
-      Future checkNextAction() {
-        //return new Future<void>.value().then((_) {
-        if (_index < _actions.length) {
-          return _next();
-        }
-        if (_debugTransaction) {
-          idbLog('transaction done');
-        }
-        _inactive = true;
-        return Future.value(null);
-      }
+  /// Transaction is active until the sembast transaction is running
+  var _inactive = false;
 
-      if (_transactionLazyMode) {
-        return Future.delayed(const Duration(), checkNextAction);
-      } else {
-        // special wasm workaround
-        if (kIdbDartIsWeb && !idbIsRunningAsJavascript) {
-          return Future(checkNextAction);
-        }
-        return checkNextAction();
-      }
-    }
-  }
-
-  // Lazy execution of the first action
-  Future? _lazyExecution;
+  Object _newAbortException() => newAbortException();
+  Object _newDatabaseInactiveError() =>
+      DatabaseError('DatabaseInactiveError: transaction database closed');
 
   ///
   /// Create or execute the transaction.
@@ -175,89 +122,116 @@ class TransactionSembast extends IdbTransactionBase
   /// Since it must run everything in a single call, let all the actions
   /// in the first callback enqueue before running
   ///
-  Future<T> execute<T>(FutureOr<T> Function() action) {
-    final actionFuture = _enqueue(action);
-    _futures.add(actionFuture);
+  Future<T> execute<T>(
+    FutureOr<T> Function() action, {
+    bool? doNotAbordOnError,
+  }) {
+    try {
+      if (_aborted) {
+        throw _newAbortException();
+      }
+      if (_inactive) {
+        throw _newDatabaseInactiveError();
+      }
+      var txnAction = _TransactionAction(
+        action,
+        doNotAbortOnError: doNotAbordOnError ?? false,
+      );
 
-    if (_lazyExecution == null) {
-      // Short lifecycle experiment
-
-      //lazyExecution = new Future.delayed(new Duration(), () {
-
-      Future sembastAction() {
-        //assert(sembastDatabase.transaction == null);
-
-        // No return value here
-        return sembastDatabase
-            .transaction((txn) async {
+      _txnActions.add(txnAction);
+      return txnAction.completer.future;
+    } finally {
+      _sembastTransaction ??= () async {
+        try {
+          await sembastDatabase.transaction((txn) async {
+            try {
               // assign right away as this is tested
               sembastTransaction = txn;
-              // Do we care about the type here?
-              var result = await _next();
+              while (true) {
+                var actions = List.of(_txnActions);
+                _txnActions.clear();
+                for (var txnAction in actions) {
+                  if (_aborted) {
+                    if (_debugTransaction) {
+                      _log('aborting action exception');
+                    }
 
-              // If aborted throw an error exception so that saves are
-              // cancelled
-              if (_endException != null) {
-                throw _endException!;
+                    txnAction.completer.completeError(_newAbortException());
+                  }
+                  try {
+                    dynamic result = txnAction.action();
+                    if (result is Future) {
+                      result = await result;
+                    }
+                    if (_debugTransaction) {
+                      _log('done new action');
+                    }
+                    txnAction.completer.complete(result);
+                  } catch (e, st) {
+                    if (_debugTransaction) {
+                      _log(
+                        'err new action $e ${txnAction.doNotAbortOnError ? 'no abort' : 'abort'}',
+                      );
+                    }
+                    txnAction.completer.completeError(e, st);
+
+                    /// Abort on first error
+                    if (!txnAction.doNotAbortOnError) {
+                      abort();
+                    }
+                  }
+                }
+
+                if (_txnActions.isEmpty) {
+                  if (_debugTransaction) {
+                    _log('no action 1 left');
+                  }
+
+                  await _delayedInit();
+                  if (_txnActions.isEmpty) {
+                    if (_debugTransaction) {
+                      _log('no action 2 left, exiting');
+                    }
+                    break;
+                  }
+                }
               }
 
-              return result;
-            })
-            .whenComplete(() {
-              if (!_transactionCompleter.isCompleted) {
-                _transactionCompleter.complete();
+              /// Clear remainging actions
+              if (_aborted) {
+                if (_debugTransaction) {
+                  _log('throwing abort exception at end');
+                }
+                throw _newAbortException();
               }
+            } catch (e) {
+              // Errors are handled per action
               if (_debugTransaction) {
-                idbLog('txn end of sembast transaction');
+                _log('inner transaction error $e');
               }
-            })
-            .catchError((Object e) {
-              if (!_transactionCompleter.isCompleted) {
-                _transactionCompleter.completeError(e);
+              rethrow;
+            } finally {
+              /// Marked as inactive, no more action accepted
+              _inactive = true;
+
+              /// Complete remaining actions with abort error
+              var actions = List.of(_txnActions);
+              _txnActions.clear();
+              for (var txnAction in actions) {
+                txnAction.completer.completeError(_newAbortException());
               }
-            });
-      }
-      //lazyExecution = new Future.sync(() {
-      // don't return the result here
-
-      if (_transactionLazyMode) {
-        // old lazy mode
-        _lazyExecution = Future.microtask(sembastAction);
-      } else {
-        _lazyExecution = Future.sync(sembastAction);
-      }
-
-      //return lazyExecution;
+            }
+          });
+          _complete();
+        } catch (e) {
+          /// Important to catch outer transaction errors so that the future
+          /// does not complete with an error
+          /// print('outer transaction error $e');
+          _completeError(e);
+        }
+      }();
     }
-
-    return actionFuture;
   }
-
-  Future<T> _enqueue<T>(FutureOr<T> Function() action) {
-    if (_debugTransaction) {
-      idbLog('enqueueing${_inactive ? ' (inactive)' : ''} $_debugId');
-    }
-    if (_inactive) {
-      return Future.error(DatabaseError('TransactionInactiveError'));
-    }
-    // not lazy
-    var completer = Completer<T>.sync();
-    _completers.add(completer);
-    _actions.add(action);
-    //devPrint('push ${actions.length}');
-    //_next();
-    return completer.future.then((result) {
-      // re-push termination check
-      //print(result);
-      return result;
-    });
-  }
-
-  //sembast.Transaction sembastTransaction;
-  final _transactionCompleter = Completer<void>();
-  final _completers = <Completer>[];
-  final _actions = <Function>[];
-  final _futures = <Future>[];
 
   @override
   final IdbTransactionMeta? meta;
@@ -268,132 +242,41 @@ class TransactionSembast extends IdbTransactionBase
     if (_debugTransaction) {
       _debugId = ++_debugAllIds;
     }
-
-    // Trigger a timer to close the transaction if nothing happens
-    if (!_transactionLazyMode) {
-      // in 1.12, calling completed matched ie behavior
-      // simply call completed
-      // completed;
-
-      _delayedInit().then((_) async {
-        if (_debugTransaction) {
-          idbLog('Delayed init triggered');
-        }
-        // Lazy trigger completed.
-        try {
-          await _completed;
-        } catch (e) {
-          if (_debugTransaction) {
-            idbLog(
-              'Handle TransactionSembast constructor async completed error $e',
-            );
-          }
-        }
-        if (_debugTransaction) {
-          idbLog('completed aborted: $_aborted');
-        }
-        _inactive = true;
-
-        // Try a simple await to postpone the completed
-        await Future<void>.value();
-        // The only place to call it
-        // ignore: deprecated_member_use_from_same_package
-        _complete();
-      });
-    }
-  }
-
-  Future<void> get _completed async {
-    try {
-      if (_lazyExecution == null) {
-        if (_debugTransaction) {
-          idbLog('no lazy executor $_debugId...');
-        }
-        _inactive = true;
-      } else {
-        if (_debugTransaction) {
-          idbLog('lazy executor created $_debugId...');
-        }
-
-        // Old and new code
-
-        /*
-      // Timing is super important here
-
-      return _lazyExecution.then((_) {
-        return _transactionCompleter.future.then((_) {
-          return Future.wait(_futures).then((_) {
-            return database;
-          }).catchError((e, st) {
-            // catch any errors
-            // this is needed so that completed always complete
-            // without error
-            devPrint('_execute error $e');
-          });
-        });
-      });
-      */
-
-        // Tricky part experimented on 2020-11-01 with success
-        // with a sync completer
-        await _lazyExecution!.then((_) async {
-          try {
-            await Future.wait(<Future>[
-              _transactionCompleter.future,
-              ..._futures,
-            ]);
-          } catch (e) {
-            if (_debugTransaction) {
-              idbLog('Handling transaction error $e');
-            }
-            _endException = DatabaseException(e.toString());
-          }
-        });
-      }
-    } catch (e) {
+    () async {
       if (_debugTransaction) {
-        idbLog('Catch _completed exception $e');
+        _log('sembast new transaction constructor');
       }
-      rethrow;
-    }
+      if (_completerCompleter.isCompleted) {
+        return;
+      }
+      await _delayedInit();
+      if (_completerCompleter.isCompleted) {
+        return;
+      }
+      if (_sembastTransaction == null) {
+        if (_debugTransaction) {
+          _log('still no action?');
+        }
+        await _delayedInit();
+        if (_completerCompleter.isCompleted) {
+          return;
+        }
+        if (_debugTransaction) {
+          _log('Not started, exiting');
+        }
+        _inactive = true;
+        _complete();
+      }
+    }();
   }
 
   @override
   Future<Database> get completed async {
-    /*
-    if (_debugTransaction) {
-      print('completed $_debugId...');
+    if (_aborted) {
+      throw _newAbortException();
     }
-    Future<Database> _completed() => this._completed.whenComplete(() {
-          if (_debugTransaction) {
-            print(
-                'completed ${_completedCompleter.isCompleted}, aborted: $_aborted');
-          }
-          _inactive = true;
-        });
-    if (_isCompletedOrAborted) {
-      _complete();
-      return _completedCompleter.future;
-    }
-    // postpone to next 2 cycles to allow enqueing
-    // actions after completed has been called
-    //if (_transactionLazyMode) {
-    await Future<void>.value();
-    await _completed();
-
-     */
-    // postpone to next cycle to allow enqueing
-    await Future<void>.value();
-    try {
-      await _completed;
-    } catch (_) {}
-    return _completedCompleter.future;
+    return _completerCompleter.future;
   }
-
-  //    sembastTransaction == null ? new Future.value(database) : sembastTransaction.completed.then((_) {
-  //    // delay the completed event
-  //
-  //  });
 
   @override
   ObjectStore objectStore(String name) {
@@ -404,14 +287,10 @@ class TransactionSembast extends IdbTransactionBase
   @override
   void abort() {
     if (_debugTransaction) {
-      idbLog('abort');
+      _log('abort');
     }
-    _aborted = true;
-    _endException = newAbortException();
+    if (!_inactive) {
+      _aborted = true;
+    }
   }
-
-  //  @override
-  //  String toString() {
-  //    return
-  //  }
 }

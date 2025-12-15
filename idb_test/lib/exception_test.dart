@@ -58,6 +58,7 @@ void defineTests(TestContext ctx) {
             // devPrint('st: ${Trace.format(st)}');
             expect(st.toString(), contains('createObjectStore'));
           } else {
+            // ignore: avoid_print
             print('edge error: $e');
           }
           //devPrint(e);

@@ -345,7 +345,10 @@ void defineTests(TestContext ctx) {
         // indexed db throw the exception during completed too...
         try {
           await transaction!.completed;
-        } catch (_) {}
+        } catch (e) {
+          // ignore: dead_code
+          expect(e, isNot(const TypeMatcher<TestFailure>()));
+        }
         // create new transaction;
         dbCreateTransaction();
         index = objectStore.index(testNameIndex);
@@ -357,7 +360,9 @@ void defineTests(TestContext ctx) {
         if (ctx.isIdbSafari) {
           expect(count, 2);
         } else {
-          expect(count == 0 || count == 1, isTrue);
+          // To check where is 1?....
+          expect(count, 0);
+          // expect(count == 0 || count == 1, isTrue);
         }
       });
 

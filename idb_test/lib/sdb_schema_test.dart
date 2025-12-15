@@ -82,14 +82,14 @@ void schemaSdbTest(SdbTestContext ctx) {
       var key2 = await testStore1.add(db, {'field1': 2});
       expect(key2, 2);
       // ignore: dead_code
-      if (false) {
-        try {
-          await testStore1.add(db, {'field1': 1});
-          fail('Should fail unique index');
-        } catch (e) {
-          expect(e, isNot(isA<TestFailure>()));
-        }
+      try {
+        await testStore1.add(db, {'field1': 1});
+        fail('Should fail unique index');
+      } catch (e) {
+        expect(e, isNot(isA<TestFailure>()));
       }
+      var key4 = await testStore1.add(db, {'field1': 4});
+      expect(key4, 3);
 
       await db.close();
       await expectLater(() async {

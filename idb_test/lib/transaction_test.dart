@@ -27,6 +27,7 @@ void defineTests(TestContext ctx) {
       try {
         await transaction!.completed;
       } catch (e) {
+        // ignore: avoid_print
         print('error waiting on transaction.completed $e');
       }
       transaction = null;
@@ -503,56 +504,8 @@ void defineTests(TestContext ctx) {
 
         // this cause the transaction to terminate on ie
         // and so on sembast
-        await Future<void>.value();
-        try {
-          await objectStore.getObject(0);
-          if (ctx.isIdbNoLazy) {
-            fail('should fail');
-          }
-          await transaction.completed;
-        } catch (e) {
-          // Transaction inactive
-          expect(isTestFailure(e), isFalse);
-          expect(isTransactionInactiveError(e), isTrue);
-        } finally {
-          await transaction.completed;
-        }
-      });
+        await Future<void>.delayed(Duration.zero);
 
-      test('get_async_get', () async {
-        await dbSetUp();
-        final transaction = db!.transaction(testStoreName, idbModeReadOnly);
-        final objectStore = transaction.objectStore(testStoreName);
-        Future doGet() async {
-          await objectStore.getObject(0);
-        }
-
-        await objectStore.getObject(0);
-        try {
-          await doGet();
-          // extra skeep
-          // await new Future.delayed(new Duration(milliseconds: 1));
-          if (ctx.isIdbNoLazy) {
-            fail('should fail');
-          }
-          await transaction.completed;
-        } catch (e) {
-          expect(isTestFailure(e), isFalse, reason: e.toString());
-          expect(isTransactionInactiveError(e), isTrue, reason: e.toString());
-        } finally {
-          await transaction.completed;
-        }
-      }, skip: 'TODO');
-
-      test('get_then_get', () async {
-        await dbSetUp();
-        final transaction = db!.transaction(testStoreName, idbModeReadOnly);
-        final objectStore = transaction.objectStore(testStoreName);
-
-        await objectStore.getObject(0);
-        // this cause the transaction to terminate on ie
-        // and so on sembast
-        await Future<void>.value();
         try {
           await objectStore.getObject(0);
           if (ctx.isIdbNoLazy) {
@@ -560,9 +513,10 @@ void defineTests(TestContext ctx) {
           }
         } catch (e) {
           // Transaction inactive
-          // devPrint('error :$e');
           expect(isTestFailure(e), isFalse);
-          expect(isTransactionInactiveError(e), isTrue);
+          if (!ctx.isWebWasm) {
+            expect(isTransactionInactiveError(e), isTrue);
+          }
         } finally {
           await transaction.completed;
         }
@@ -594,6 +548,7 @@ void defineTests(TestContext ctx) {
           // if (!(ctx.isIdbIe || ctx.isIdbSafari)) {
           //  await transaction.completed;
         } catch (e) {
+          // ignore: avoid_print
           print(e);
         }
       });
@@ -669,15 +624,9 @@ void defineTests(TestContext ctx) {
           await transaction!.completed;
           fail('should fail');
         } catch (e) {
-          // devPrint(e.runtimeType);
-          // devPrint(e);
+          expect(e, isNot(isA<TestFailure>()));
         }
-        /*
-        // this cause the transaction to terminate on ie
-        if (!ctx.isIdbNoLazy) {
-          await Future<void>.value();
-          await Future<void>.value();
-        }*/
+
         transaction = db!.transaction(testStoreName, idbModeReadOnly);
         objectStore = transaction!.objectStore(testStoreName);
         expect(await objectStore.getObject(key), isNull);

@@ -512,7 +512,6 @@ void defineTests(TestContext ctx) {
           );
         }
 
-        print('1');
         db = await idbFactory.open(
           srcDbName,
           version: 4,

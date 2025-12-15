@@ -23,18 +23,39 @@ void defineTests(TestContext ctx) {
     objectStore = transaction!.objectStore(testStoreName);
   }
 
+  Future<void> dbCloseTransactionNoError() async {
+    if (transaction != null) {
+      try {
+        await transaction!.completed;
+      } catch (e) {
+        // ignore
+      }
+      transaction = null;
+    }
+  }
+
   // new
   late String dbName;
+  late bool allowTransactionAborted;
   // prepare for test
   Future setupDeleteDb() async {
     dbName = ctx.dbName;
     await idbFactory.deleteDatabase(dbName);
+    allowTransactionAborted = false;
   }
 
   // generic tearDown
   Future dbTearDown() async {
     if (transaction != null) {
-      await transaction!.completed;
+      try {
+        await transaction!.completed;
+      } catch (e) {
+        if (!allowTransactionAborted) {
+          rethrow;
+        }
+        // ignore: avoid_print
+        print('ignored transaction error $e');
+      }
       transaction = null;
     }
     if (db != null) {
@@ -111,8 +132,8 @@ void defineTests(TestContext ctx) {
             db.close();
           }
         });
-      } catch (e, s) {
-        print(s);
+      } catch (e) {
+        // print(s);
       }
     });
 
@@ -166,23 +187,23 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value = <String, Object?>{};
-        await objectStore.add(value, 123).then((key) {
-          expect(key, 123);
-          return transaction!.completed.then((_) {
-            dbCreateTransaction();
-            return objectStore
-                .add(value, 123)
-                .then(
-                  (_) {},
-                  onError: (e) {
-                    transaction = null;
-                  },
-                )
-                .then((_) {
-                  expect(transaction, null);
-                });
-          });
-        });
+        var key = await objectStore.add(value, 123);
+        expect(key, 123);
+        await transaction!.completed;
+        dbCreateTransaction();
+
+        await objectStore
+            .add(value, 123)
+            .then(
+              (_) {},
+              onError: (e) async {
+                await dbCloseTransactionNoError();
+                transaction = null;
+              },
+            )
+            .then((_) {
+              expect(transaction, null);
+            });
       });
 
       test('add/get string', () async {
@@ -338,6 +359,14 @@ void defineTests(TestContext ctx) {
           await objectStore.add(value, 1234);
           fail('should fail');
         } on DatabaseError catch (e) {
+          expect(isTestFailure(e), isFalse);
+        } catch (e) {
+          fail('should be DatabaseError $e');
+        }
+
+        try {
+          await transaction!.completed;
+        } catch (e) {
           expect(isTestFailure(e), isFalse);
         }
         // cancel transaction
@@ -899,9 +928,10 @@ void defineTests(TestContext ctx) {
         try {
           await objectStore.add(value);
           fail('should fail');
-        } catch (e) {
+        } catch (e, _) {
           expect(e, isNot(const TypeMatcher<TestFailure>()));
         }
+        allowTransactionAborted = true;
       });
 
       test('simple add_get', () async {
@@ -1104,6 +1134,7 @@ void defineTests(TestContext ctx) {
         } catch (e) {
           expect(e, isNot(const TypeMatcher<TestFailure>()));
         }
+        allowTransactionAborted = true;
       });
 
       test('add_with_key_path', () async {
@@ -1138,6 +1169,8 @@ void defineTests(TestContext ctx) {
           // Failed to execute 'add' on 'IDBObjectStore': The object store uses in-line keys and the key parameter was provided.
           // devPrint(_);
         }
+        // Although not needed in native as is is considered a developer bug
+        allowTransactionAborted = true;
       });
 
       test('put_with_key_and_key_path', () async {
@@ -1165,6 +1198,7 @@ void defineTests(TestContext ctx) {
           // devPrint(_);
         }
         // expect(await objectStore.getObject('test_value'), result);
+        allowTransactionAborted = true;
       });
     });
 

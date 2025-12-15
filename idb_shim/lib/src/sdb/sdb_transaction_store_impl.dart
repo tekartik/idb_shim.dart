@@ -59,7 +59,7 @@ class SdbSingleStoreTransactionImpl<K extends SdbKey, V extends SdbValue>
   Future<T> run<T>(
     FutureOr<T> Function(SdbSingleStoreTransaction<K, V> txn) callback,
   ) async {
-    var result = callback(this);
+    var result = await callback(this);
     await completed;
     return result;
   }
@@ -349,8 +349,20 @@ class SdbMultiStoreTransactionImpl extends SdbTransactionImpl
   Future<T> run<T>(
     FutureOr<T> Function(SdbMultiStoreTransaction txn) callback,
   ) async {
-    var result = await callback(this);
-    await completed;
+    T result;
+    try {
+      var rawResult = callback(this);
+
+      if (rawResult is Future) {
+        result = (await rawResult);
+      } else {
+        result = rawResult;
+      }
+    } finally {
+      // wait for completion
+      await completed;
+    }
+
     return result;
   }
 }

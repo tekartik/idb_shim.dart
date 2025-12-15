@@ -323,8 +323,8 @@ void defineTests(TestContext ctx) {
           );
           fail('should fail');
         } catch (e) {
-          print('error ${e.runtimeType}');
-          print('error $e');
+          // print('error ${e.runtimeType}');
+          // print('error $e');
           expect(e, isNot(const TypeMatcher<TestFailure>()));
         }
         expect(downgradeCalled, false);

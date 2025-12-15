@@ -61,7 +61,7 @@ class TestContext {
   bool get isWebWasm => kIdbDartIsWeb && !idbIsRunningAsJavascript;
 
   // ie don't except any pause between 2 calls
-  bool get isIdbNoLazy => !isWebWasm && (isIdbSembast || isIdbIe);
+  bool get isIdbNoLazy => (isIdbSembast || isIdbIe);
 
   bool get isInMemory => false;
 
@@ -81,9 +81,6 @@ class TestContext {
     if (idbFactory is IdbFactoryLogger) {
       return idbFactory.factory as T;
     }
-    print(idbFactory.name);
-    print(T);
-    print(idbFactory.runtimeType);
     throw 'no factory of type $T found';
   }
 }
@@ -126,8 +123,6 @@ class SembastFsTestContext extends SembastTestContext {
     if (idbFactory is IdbFactoryLogger) {
       return idbFactory.factory as IdbFactorySembast;
     }
-    print(idbFactory.name);
-    print(idbFactory.runtimeType);
     throw 'no factory of type IdbFactorySembast found';
   }
 }

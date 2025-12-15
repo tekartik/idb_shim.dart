@@ -45,7 +45,7 @@ abstract mixin class KeyCursorSembastMixin implements Cursor {
         throw StateError(
           'Cannot call cursor.delete when openKeyCursor is used, try openCursor instead',
         );
-      });
+      }, doNotAbordOnError: true);
     }
 
     var records = ctlr.records!;

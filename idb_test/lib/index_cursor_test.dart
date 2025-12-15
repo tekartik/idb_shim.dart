@@ -180,8 +180,9 @@ void defineTests(TestContext ctx) {
                 .index(testNameIndex)
                 .get(value);
             fail('should fail');
+            // ignore: unused_catch_clause
           } on DatabaseError catch (e) {
-            print(e);
+            // print(e);
             // DataError: Failed to execute 'get' on 'IDBIndex': The parameter is not a valid key.
           }
         } else {
@@ -394,7 +395,7 @@ void defineTests(TestContext ctx) {
               });
             } catch (e) {
               cursorException = e;
-              print('cursorException: $cursorException');
+              // print('cursorException: $cursorException');
               cursor.next();
             }
           }).asFuture<void>();
@@ -407,7 +408,7 @@ void defineTests(TestContext ctx) {
           expect(value, isNotNull);
           expect(cursorException, isNotNull);
         } catch (e) {
-          print(e);
+          // print(e);
           expect(e, isNot(isA<TestFailure>()));
         }
       }, skip: true); // Hangs on Chrome
@@ -1002,10 +1003,17 @@ void defineTests(TestContext ctx) {
         var key = await objectStore.put({'f1': 1, 'f2': 2, 'f3': 3});
         try {
           await objectStore.put({'f1': 1, 'f2': 2, 'f3': 3});
-          await transaction!.completed;
+
           fail('should fail');
         } on DatabaseError catch (_) {
-          // devPrint('error $e');
+        } catch (e) {
+          fail('should be DatabaseError $e');
+        }
+
+        try {
+          await transaction!.completed;
+        } catch (e) {
+          // print('error on complete $e');
         }
         transaction = null;
         expect([key], [1]);

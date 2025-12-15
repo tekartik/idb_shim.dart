@@ -48,5 +48,6 @@ linter:
     - throw_in_finally
     - unawaited_futures
     - unnecessary_statements
+    - avoid_print
     # === doc rules ===
     # - public_member_api_docs

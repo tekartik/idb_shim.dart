@@ -332,6 +332,7 @@ void defineTests(TestContext ctx) {
         final store1 = t1.objectStore('store1');
         unawaited(store1.put(obj));
 
+        // ignore: unused_local_variable
         Object? cursorException;
 
         try {
@@ -345,13 +346,13 @@ void defineTests(TestContext ctx) {
               });
             } catch (e) {
               cursorException = e;
-              print('cursorException: $cursorException');
+              // print('cursorException: $cursorException');
               cursor.next();
             }
           }).asFuture<void>();
           await t1.completed;
         } catch (e) {
-          print(e);
+          // print(e);
           expect(e, isNot(isA<TestFailure>()));
         }
       }); // Remove if it hangs on Chrome
@@ -735,7 +736,7 @@ void defineTests(TestContext ctx) {
           fail('should fail');
         } catch (e) {
           // Chrome: DataError: Failed to execute 'bound' on 'IDBKeyRange': The lower key and upper key are equal and one of the bounds is open.
-          print(e);
+          // print(e);
           expect(e, isNot(isA<TestFailure>()));
         }
       });
@@ -753,7 +754,6 @@ void defineTests(TestContext ctx) {
           {'name': 'test1'},
           {'name': 'test3'},
         ]);
-        print('#3-');
         list = (await cursorToList(
           objectStore.openCursor(autoAdvance: true),
         )).map((e) => e.value);
@@ -762,7 +762,6 @@ void defineTests(TestContext ctx) {
           {'name': 'test1'},
           {'name': 'test3'},
         ]);
-        print('#4-');
         /*
         list = (await cursorToList(objectStore.openCursor(), offset: 1)).map((e) => e.value);
         expect(list, [
@@ -868,8 +867,6 @@ void defineTests(TestContext ctx) {
           await update(db, {'key': key2, 'someval': 'ipsem'});
           final ret = await get(db, key);
           final ret2 = await get(db, key2);
-          print(ret);
-          print(ret2);
           expect(ret, equals({'key': key, 'someval': 'ipsem'}));
           expect(ret2, equals({'key': key2, 'someval': 'ipsem'}));
         } finally {
