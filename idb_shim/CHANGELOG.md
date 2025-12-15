@@ -1,6 +1,7 @@
-## 2.7.1-4
+## 2.7.1
 
-* wip SDB schema
+* Supports Sdb schema
+* Refactor sembast transaction implementation
 
 ## 2.7.0
 
