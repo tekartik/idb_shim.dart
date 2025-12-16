@@ -1,7 +1,8 @@
-## 2.7.1
+## 2.7.1+1
 
-* Supports Sdb schema
+* Supports Sdb schema and improve sdb api
 * Refactor sembast transaction implementation
+* Add find options to all queries
 
 ## 2.7.0
 
