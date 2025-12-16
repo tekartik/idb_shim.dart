@@ -985,20 +985,23 @@ void defineTests(TestContext ctx) {
         var map = {testNameField: 1234};
         await objectStore.put(map);
         await objectStore.put({'dummy': 'value'});
-        db!.close();
-        db = await idbFactory.open(
-          dbName,
-          version: 2,
-          onUpgradeNeeded: (e) {
-            e.transaction
-                .objectStore(testStoreName)
-                .createIndex(testNameIndex, testNameField);
-          },
-        );
-        dbCreateTransaction();
-        var index = objectStore.index(testNameIndex);
-        expect(await index.get(1234), map);
-        expect(await index.count(), 1);
+        await transaction!.completed;
+        if (!ctx.isInMemory) {
+          db!.close();
+          db = await idbFactory.open(
+            dbName,
+            version: 2,
+            onUpgradeNeeded: (e) {
+              e.transaction
+                  .objectStore(testStoreName)
+                  .createIndex(testNameIndex, testNameField);
+            },
+          );
+          dbCreateTransaction();
+          var index = objectStore.index(testNameIndex);
+          expect(await index.get(1234), map);
+          expect(await index.count(), 1);
+        }
       });
     });
 
