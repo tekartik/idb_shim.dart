@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
@@ -109,6 +110,16 @@ class SdbIndexRefImpl<
   );
 
   /// Find records.
+  Stream<SdbIndexRecordSnapshot<K, V, I>> streamRecordsImpl(
+    SdbClient client, {
+
+    required SdbFindOptions<I> options,
+  }) => client.handleDbOrTxn(
+    (db) => dbStreamRecordsImpl(db, options: options),
+    (txn) => txnStreamRecordsImpl(txn, options: options),
+  );
+
+  /// Find records.
   Future<List<SdbIndexRecordKey<K, V, I>>> findRecordKeysImpl(
     SdbClient client, {
 
@@ -129,6 +140,20 @@ class SdbIndexRefImpl<
     return db.inStoreTransaction(store, SdbTransactionMode.readOnly, (txn) {
       return txnFindRecordsImpl(txn.rawImpl, options: options);
     });
+  }
+
+  /// Find records.
+  Stream<SdbIndexRecordSnapshot<K, V, I>> dbStreamRecordsImpl(
+    SdbDatabaseImpl db, {
+
+    required SdbFindOptions<I> options,
+  }) {
+    var ctlr = StreamController<SdbIndexRecordSnapshot<K, V, I>>(sync: true);
+    db.inStoreTransaction(store, SdbTransactionMode.readOnly, (txn) async {
+      var stream = txnStreamRecordsImpl(txn.rawImpl, options: options);
+      await ctlr.addStream(stream);
+    });
+    return ctlr.stream;
   }
 
   /// Find record keys.
@@ -152,16 +177,14 @@ class SdbIndexRefImpl<
     return SdbIndexRecordSnapshotImpl<K, V, I>(this, key, value, indexKey);
   }
 
-  /// Find records.
-  Future<List<SdbIndexRecordSnapshot<K, V, I>>> txnFindRecordsImpl(
+  /// stream records.
+  Stream<IdbCursorWithValue> txnStreamCursorImpl(
     SdbTransactionImpl txn, {
 
     required SdbFindOptions<I> options,
-  }) async {
+  }) {
     var descending = options.descending;
-    var offset = options.offset;
-    var limit = options.limit;
-    var filter = options.filter;
+
     var boundaries = options.boundaries;
     var idbObjectStore = txn.idbTransaction.objectStore(store.name);
     var idbIndex = idbObjectStore.index(name);
@@ -169,6 +192,42 @@ class SdbIndexRefImpl<
       direction: descendingToIdbDirection(descending),
       range: idbKeyRangeFromBoundaries(boundaries),
     );
+    return cursor;
+  }
+
+  /// Find records.
+  Stream<SdbIndexRecordSnapshot<K, V, I>> txnStreamRecordsImpl(
+    SdbTransactionImpl txn, {
+
+    required SdbFindOptions<I> options,
+  }) {
+    var offset = options.offset;
+    var limit = options.limit;
+    var filter = options.filter;
+
+    var cursor = txnStreamCursorImpl(txn, options: options);
+    return cursor
+        .limitOffsetStream(
+          limit: limit,
+          offset: offset,
+          matcher: filter != null
+              ? (cwv) => sdbCursorWithValueMatchesFilter(cwv, filter)
+              : null,
+        )
+        .map(_sdbIndexRecordSnapshot);
+  }
+
+  /// Find records.
+  Future<List<SdbIndexRecordSnapshot<K, V, I>>> txnFindRecordsImpl(
+    SdbTransactionImpl txn, {
+
+    required SdbFindOptions<I> options,
+  }) async {
+    var offset = options.offset;
+    var limit = options.limit;
+    var filter = options.filter;
+
+    var cursor = txnStreamCursorImpl(txn, options: options);
     var rows = await cursor.toRowList(
       limit: limit,
       offset: offset,

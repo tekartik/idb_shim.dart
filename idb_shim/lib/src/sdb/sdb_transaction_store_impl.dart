@@ -74,6 +74,11 @@ class SdbSingleStoreTransactionImpl<K extends SdbKey, V extends SdbValue>
     required SdbFindOptions<K> options,
   }) => txnStore.findRecords(options: options);
 
+  /// Stream records.
+  Stream<SdbRecordSnapshot<K, V>> streamRecordsImpl({
+    required SdbFindOptions<K> options,
+  }) => txnStore.streamRecords(options: options);
+
   /// Find records.
   Future<List<SdbRecordKey<K, V>>> findRecordKeysImpl({
     required SdbFindOptions<K> options,
@@ -184,6 +189,31 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
     var key = row.primaryKey as K;
     var value = row.value as V;
     return SdbRecordSnapshotImpl<K, V>(store, key, value);
+  }
+
+  /// Stream records
+  Stream<SdbRecordSnapshot<K, V>> streamRecordsImpl({
+    required SdbFindOptions<K> options,
+  }) {
+    var filter = options.filter;
+    var offset = options.offset;
+    var limit = options.limit;
+    var descending = options.descending;
+    var boundaries = options.boundaries;
+    var cursor = idbObjectStore.openCursor(
+      direction: descendingToIdbDirection(descending),
+      range: idbKeyRangeFromBoundaries(boundaries),
+    );
+
+    return cursor
+        .limitOffsetStream(
+          offset: offset,
+          limit: limit,
+          matcher: filter != null
+              ? (cwv) => sdbCursorWithValueMatchesFilter(cwv, filter)
+              : null,
+        )
+        .map(_sdbRecordSnapshot);
   }
 
   /// Find records.

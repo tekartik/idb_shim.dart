@@ -101,6 +101,35 @@ extension SdbIndexRefExtension<
   );
 
   /// Find records.
+  Stream<SdbIndexRecordSnapshot<K, V, I>> streamRecords(
+    SdbClient client, {
+    SdbBoundaries<I>? boundaries,
+
+    /// Optional filter, performed in memory
+    SdbFilter? filter,
+    int? offset,
+    int? limit,
+
+    /// Optional descending order
+    bool? descending,
+
+    /// New api, takes precedence over filter, offset, limit, descending
+    SdbFindOptions<I>? options,
+  }) => impl.streamRecordsImpl(
+    client,
+
+    options: sdbFindOptionsMerge<I>(
+      options,
+      boundaries: boundaries,
+
+      limit: limit,
+      offset: offset,
+      descending: descending,
+      filter: filter,
+    ),
+  );
+
+  /// Find records.
   Future<SdbIndexRecordSnapshot<K, V, I>?> findRecord(
     SdbClient client, {
     SdbBoundaries<I>? boundaries,

@@ -43,6 +43,11 @@ extension SdbTransactionStoreRefExtension<K extends SdbKey, V extends SdbValue>
   /// Delete.
   Future<void> delete(K key) => _impl.deleteImpl(key);
 
+  /// Stream records.
+  Stream<SdbRecordSnapshot<K, V>> streamRecords({SdbFindOptions<K>? options}) {
+    return _impl.streamRecordsImpl(options: sdbFindOptionsMerge(options));
+  }
+
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> findRecords({
     SdbBoundaries<K>? boundaries,
@@ -183,6 +188,10 @@ extension SdbSingleStoreTransactionExtension<
       descending: descending,
     ),
   );
+
+  /// Find records.
+  Stream<SdbRecordSnapshot<K, V>> streamRecords({SdbFindOptions<K>? options}) =>
+      impl.streamRecordsImpl(options: sdbFindOptionsMerge(options));
 
   /// Find record keys.
   Future<List<SdbRecordKey<K, V>>> findRecordKeys({

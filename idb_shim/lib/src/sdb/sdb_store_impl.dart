@@ -1,6 +1,7 @@
 import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_record_impl.dart';
+import 'package:idb_shim/src/utils/core_imports.dart';
 
 import 'sdb.dart';
 import 'sdb_client.dart';
@@ -224,6 +225,16 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
   );
 
   /// Find records.
+  Stream<SdbRecordSnapshot<K, V>> streamRecordsImpl(
+    SdbClient client, {
+
+    required SdbFindOptions<K> options,
+  }) => client.handleDbOrTxn(
+    (db) => dbStreamRecordsImpl(db, options: options),
+    (txn) => txnStreamRecordsImpl(txn, options: options),
+  );
+
+  /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> dbFindRecordsImpl(
     SdbDatabase db, {
 
@@ -235,12 +246,34 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
   }
 
   /// Find records.
+  Stream<SdbRecordSnapshot<K, V>> dbStreamRecordsImpl(
+    SdbDatabaseImpl db, {
+
+    required SdbFindOptions<K> options,
+  }) {
+    var ctlr = StreamController<SdbRecordSnapshot<K, V>>(sync: true);
+    db.inStoreTransaction(this, SdbTransactionMode.readOnly, (txn) async {
+      var stream = txnStreamRecordsImpl(txn.rawImpl, options: options);
+      await ctlr.addStream(stream);
+    });
+    return ctlr.stream;
+  }
+
+  /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> txnFindRecordsImpl(
     SdbTransactionImpl txn, {
 
     required SdbFindOptions<K> options,
   }) {
     return txn.storeImpl(this).findRecords(options: options);
+  }
+
+  /// Find records.
+  Stream<SdbRecordSnapshot<K, V>> txnStreamRecordsImpl(
+    SdbTransactionImpl txn, {
+    required SdbFindOptions<K> options,
+  }) {
+    return txn.storeImpl(this).streamRecords(options: options);
   }
 
   /// Find records keys.
