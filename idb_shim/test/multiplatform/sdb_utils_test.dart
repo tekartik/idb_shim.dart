@@ -1,6 +1,5 @@
 import 'package:idb_shim/sdb.dart';
 import 'package:idb_shim/src/sdb/sdb_boundary_impl.dart';
-import 'package:idb_shim/src/sdb/sdb_find_options.dart';
 import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
 import 'package:test/test.dart';
 
@@ -40,14 +39,14 @@ void main() {
       );
     });
     test('none', () {
-      expect(compatMergeFindOptions(null), isNotNull);
+      expect(sdbFindOptionsMerge(null), isNotNull);
       var options = SdbFindOptions(limit: 10, descending: true);
-      expect(compatMergeFindOptions(options), same(options));
+      expect(sdbFindOptionsMerge(options), same(options));
       expect(
-        compatMergeFindOptions(options, limit: 5, descending: false, offset: 2),
+        sdbFindOptionsMerge(options, limit: 5, descending: false, offset: 2),
         same(options),
       );
-      options = compatMergeFindOptions(
+      options = sdbFindOptionsMerge(
         null,
         limit: 5,
         descending: false,

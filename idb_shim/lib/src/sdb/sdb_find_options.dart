@@ -72,7 +72,7 @@ class SdbFindOptions<K extends SdbKey> {
 
 /// Compatibility merge find options
 /// Never null
-SdbFindOptions<K> compatMergeFindOptions<K extends SdbKey>(
+SdbFindOptions<K> sdbFindOptionsMerge<K extends SdbKey>(
   SdbFindOptions<K>? options, {
   SdbBoundaries<K>? boundaries,
   int? limit,

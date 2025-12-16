@@ -89,7 +89,7 @@ extension SdbIndexRefExtension<
   }) => impl.findRecordsImpl(
     client,
 
-    options: compatMergeFindOptions<I>(
+    options: sdbFindOptionsMerge<I>(
       options,
       boundaries: boundaries,
 
@@ -116,7 +116,7 @@ extension SdbIndexRefExtension<
     /// New api
     SdbFindOptions<I>? options,
   }) async {
-    options = compatMergeFindOptions(
+    options = sdbFindOptionsMerge(
       options,
       limit: limit,
       offset: offset,
@@ -148,7 +148,7 @@ extension SdbIndexRefExtension<
     /// New api - filter is not support for key search
     SdbFindOptions<I>? options,
   }) async {
-    options = compatMergeFindOptions(
+    options = sdbFindOptionsMerge(
       boundaries: boundaries,
       options,
       filter: filter,
@@ -177,7 +177,7 @@ extension SdbIndexRefExtension<
     /// New API, supersedes the other parameters
     SdbFindOptions<I>? options,
   }) async {
-    options = compatMergeFindOptions(
+    options = sdbFindOptionsMerge(
       options,
       limit: null,
       filter: filter,
@@ -199,7 +199,7 @@ extension SdbIndexRefExtension<
     SdbFindOptions<I>? options,
   }) => impl.countImpl(
     client,
-    options: compatMergeFindOptions(options, boundaries: boundaries),
+    options: sdbFindOptionsMerge(options, boundaries: boundaries),
   );
 
   /// Delete records.
@@ -216,7 +216,7 @@ extension SdbIndexRefExtension<
     SdbFindOptions<I>? options,
   }) => impl.deleteImpl(
     client,
-    options: compatMergeFindOptions(
+    options: sdbFindOptionsMerge(
       options,
       boundaries: boundaries,
       limit: limit,

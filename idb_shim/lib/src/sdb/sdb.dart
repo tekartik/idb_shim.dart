@@ -12,7 +12,7 @@ export 'sdb_database_impl.dart' show SdbDatabaseIdbExt;
 export 'sdb_factory.dart' show SdbFactory, SdbFactoryExtension;
 export 'sdb_filter.dart'
     show SdbFilter, SdbFilterRecordSnapshot, SdbFilterRecordSnapshotExt;
-export 'sdb_find_options.dart' show SdbFindOptions;
+export 'sdb_find_options.dart' show SdbFindOptions, sdbFindOptionsMerge;
 export 'sdb_index.dart'
     show
         SdbIndexRef,

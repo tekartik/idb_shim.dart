@@ -1,6 +1,5 @@
 import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
-import 'package:idb_shim/src/sdb/sdb_find_options.dart';
 import 'package:idb_shim/src/sdb/sdb_record_impl.dart';
 
 import 'sdb.dart';
@@ -43,7 +42,7 @@ extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
     /// New API, supercedes the other parameters
     SdbFindOptions<K>? options,
   }) {
-    options = compatMergeFindOptions(
+    options = sdbFindOptionsMerge(
       options,
       boundaries: boundaries,
       limit: limit,
@@ -70,7 +69,7 @@ extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
     /// New API, supercedes the other parameters
     SdbFindOptions<K>? options,
   }) async {
-    options = compatMergeFindOptions(
+    options = sdbFindOptionsMerge(
       options,
       boundaries: boundaries,
       offset: offset,
@@ -94,7 +93,7 @@ extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
     SdbFindOptions<K>? options,
   }) => impl.findRecordKeysImpl(
     client,
-    options: compatMergeFindOptions(
+    options: sdbFindOptionsMerge(
       boundaries: boundaries,
       options,
       limit: limit,
@@ -112,7 +111,7 @@ extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
     SdbFindOptions<K>? options,
   }) => impl.countImpl(
     client,
-    options: compatMergeFindOptions(options, boundaries: boundaries),
+    options: sdbFindOptionsMerge(options, boundaries: boundaries),
   );
 
   /// Delete records.
@@ -127,7 +126,7 @@ extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
     SdbFindOptions<K>? options,
   }) => impl.deleteImpl(
     client,
-    options: compatMergeFindOptions(
+    options: sdbFindOptionsMerge(
       options,
       boundaries: boundaries,
       limit: limit,

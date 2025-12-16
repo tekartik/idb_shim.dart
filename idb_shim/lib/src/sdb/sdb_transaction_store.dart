@@ -1,5 +1,4 @@
 import 'package:idb_shim/sdb.dart';
-import 'package:idb_shim/src/sdb/sdb_find_options.dart';
 
 import 'sdb_transaction_store_impl.dart';
 
@@ -59,7 +58,7 @@ extension SdbTransactionStoreRefExtension<K extends SdbKey, V extends SdbValue>
     /// New API, supercedes the other parameters
     SdbFindOptions<K>? options,
   }) {
-    options = compatMergeFindOptions(
+    options = sdbFindOptionsMerge(
       options,
       boundaries: boundaries,
       limit: limit,
@@ -85,7 +84,7 @@ extension SdbTransactionStoreRefExtension<K extends SdbKey, V extends SdbValue>
     /// New API, supercedes the other parameters
     SdbFindOptions<K>? options,
   }) {
-    options = compatMergeFindOptions(
+    options = sdbFindOptionsMerge(
       boundaries: boundaries,
       options,
       limit: limit,
@@ -101,7 +100,7 @@ extension SdbTransactionStoreRefExtension<K extends SdbKey, V extends SdbValue>
     SdbBoundaries<K>? boundaries,
     SdbFindOptions<K>? options,
   }) => _impl.countImpl(
-    options: compatMergeFindOptions(options, boundaries: boundaries),
+    options: sdbFindOptionsMerge(options, boundaries: boundaries),
   );
 
   /// Delete records.
@@ -116,7 +115,7 @@ extension SdbTransactionStoreRefExtension<K extends SdbKey, V extends SdbValue>
     /// New API, supersedes the other parameters
     SdbFindOptions<K>? options,
   }) => _impl.deleteRecordsImpl(
-    options: compatMergeFindOptions(
+    options: sdbFindOptionsMerge(
       options,
       boundaries: boundaries,
       offset: offset,
@@ -175,7 +174,7 @@ extension SdbSingleStoreTransactionExtension<
     /// New API, supercedes the other parameters
     SdbFindOptions<K>? options,
   }) => impl.findRecordsImpl(
-    options: compatMergeFindOptions(
+    options: sdbFindOptionsMerge(
       options,
       boundaries: boundaries,
       filter: filter,
@@ -198,7 +197,7 @@ extension SdbSingleStoreTransactionExtension<
     /// New API, supercedes the other parameters
     SdbFindOptions<K>? options,
   }) => impl.findRecordKeysImpl(
-    options: compatMergeFindOptions(
+    options: sdbFindOptionsMerge(
       options,
       boundaries: boundaries,
       filter: filter,
