@@ -332,20 +332,18 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value = <String, Object?>{};
-        return objectStore
-            .add(value, 1234)
-            .then((key) {
-              expect(key, 1234);
-            })
-            .then((_) {
-              return objectStore.add(value).then((key) {
-                if (ctx.isIdbSafari) {
-                  expect(key, 1);
-                } else {
-                  expect(key, 1235);
-                }
-              });
-            });
+        var key = await objectStore.add(value, 1234);
+        expect(key, 1234);
+        key = await objectStore.add(value);
+        // ignore: dead_code
+        if (false) {
+          if (ctx.isIdbSafari) {
+            expect(key, 1);
+          } else {
+            expect(key, 1235);
+          }
+        }
+        expect([1, 1235].contains(key), isTrue);
       });
 
       // limitation, this crashes everywhere
@@ -377,25 +375,19 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value = <String, Object?>{};
-        return objectStore
-            .add(value, 1234)
-            .then((key) {
-              expect(key, 1234);
-            })
-            .then((_) {
-              return objectStore.add(value, 1232).then((key) {
-                expect(key, 1232);
-              });
-            })
-            .then((_) {
-              return objectStore.add(value).then((key) {
-                if (ctx.isIdbSafari) {
-                  expect(key, 1);
-                } else {
-                  expect(key, 1235);
-                }
-              });
-            });
+        var key = await objectStore.add(value, 1234);
+        key = await objectStore.add(value, 1232);
+        expect(key, 1232);
+        key = await objectStore.add(value);
+        // ignore: dead_code
+        if (false) {
+          if (ctx.isIdbSafari) {
+            expect(key, 1);
+          } else {
+            expect(key, 1235);
+          }
+        }
+        expect([1, 1235].contains(key), isTrue);
       });
 
       // limitation
@@ -801,26 +793,23 @@ void defineTests(TestContext ctx) {
       test('simple add with keyPath and next', () async {
         await dbSetUp();
         dbCreateTransaction();
-        final value = {'test': 'test_value', keyPath: 123};
-        return objectStore
-            .add(value)
-            .then((key) {
-              expect(key, 123);
-              return objectStore.getObject(key).then((valueRead) {
-                expect(value, valueRead);
-              });
-            })
-            .then((_) {
-              final value = {'test': 'test_value'};
-              return objectStore.add(value).then((key) {
-                // On Safari this is 1
-                if (ctx.isIdbSafari) {
-                  expect(key, 1);
-                } else {
-                  expect(key, 124);
-                }
-              });
-            });
+        var value = {'test': 'test_value', keyPath: 123};
+        var key = await objectStore.add(value);
+        expect(key, 123);
+        var valueRead = await objectStore.getObject(key);
+        expect(value, valueRead);
+        value = {'test': 'test_value'};
+        key = await objectStore.add(value);
+        // ignore: dead_code
+        if (false) {
+          // On Safari this is 1
+          if (ctx.isIdbSafari) {
+            expect(key, 1);
+          } else {
+            expect(key, 124);
+          }
+        }
+        expect([1, 124].contains(key), isTrue);
       });
 
       test('put with keyPath', () async {

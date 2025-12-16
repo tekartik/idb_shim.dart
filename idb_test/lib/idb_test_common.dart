@@ -49,6 +49,12 @@ class TestContext {
   static var _id = 0;
   late IdbFactory factory;
 
+  TestContext({IdbFactory? factory}) {
+    if (factory != null) {
+      this.factory = factory;
+    }
+  }
+
   /// Each time you call dbName, it generates one
   String get dbName => 'test${++_id}.db';
 
@@ -85,7 +91,22 @@ class TestContext {
   }
 }
 
+/// Sembast based implementation, set inMemory if a db is not available after close
 class SembastTestContext extends TestContext {
+  final bool? inMemory;
+  SembastTestContext({
+    sdb.DatabaseFactory? sembastDatabaseFactory,
+    this.inMemory,
+  }) {
+    if (sembastDatabaseFactory != null) {
+      sdbFactory = sembastDatabaseFactory;
+      factory = IdbFactorySembast(sembastDatabaseFactory);
+    }
+  }
+
+  @override
+  bool get isInMemory => inMemory ?? super.isInMemory;
+
   @override
   bool get isIdbSembast => true;
 

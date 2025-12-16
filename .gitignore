@@ -31,3 +31,4 @@ test_out
 *.iml
 .vscode/
 
+idb_test/_pubspec_overrides.yaml
