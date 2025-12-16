@@ -34,7 +34,7 @@ extension SdbIndexRecordRefExtension<
   /// Find all records with this index key.
   Future<List<SdbIndexRecordKey<K, V, I>>> findRecordKeys(
     SdbClient client,
-    SdbFindOptions options,
+    SdbFindOptions<I> options,
   ) => index.findRecordKeys(
     client,
     boundaries: _boundariesKey,
@@ -44,12 +44,17 @@ extension SdbIndexRecordRefExtension<
   /// Find all records with this index key.
   Future<List<SdbIndexRecordSnapshot<K, V, I>>> findRecords(
     SdbClient client, {
-    SdbFindOptions? options,
+    SdbFindOptions<I>? options,
   }) {
     return index.findRecords(
       client,
       boundaries: _boundariesKey,
       options: options,
     );
+  }
+
+  ///
+  Future<int> count(SdbClient client, {SdbFindOptions<I>? options}) {
+    return index.count(client, boundaries: _boundariesKey, options: options);
   }
 }

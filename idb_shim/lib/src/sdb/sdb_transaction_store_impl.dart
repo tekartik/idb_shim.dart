@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:idb_shim/sdb.dart';
 import 'package:idb_shim/src/sdb/sdb_boundary_impl.dart';
@@ -70,35 +71,13 @@ class SdbSingleStoreTransactionImpl<K extends SdbKey, V extends SdbValue>
 
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> findRecordsImpl({
-    SdbBoundaries<K>? boundaries,
-
-    /// Optional filter, performed in memory
-    SdbFilter? filter,
-    int? offset,
-    int? limit,
-
-    /// Optional descending order
-    bool? descending,
-  }) => txnStore.findRecords(
-    boundaries: boundaries,
-    filter: filter,
-    offset: offset,
-    limit: limit,
-    descending: descending,
-  );
+    required SdbFindOptions<K> options,
+  }) => txnStore.findRecords(options: options);
 
   /// Find records.
   Future<List<SdbRecordKey<K, V>>> findRecordKeysImpl({
-    SdbBoundaries<K>? boundaries,
-    int? offset,
-    int? limit,
-    bool? descending,
-  }) => txnStore.findRecordKeys(
-    boundaries: boundaries,
-    offset: offset,
-    limit: limit,
-    descending: descending,
-  );
+    required SdbFindOptions<K> options,
+  }) => txnStore.findRecordKeys(options: options);
 }
 
 /// Transaction store reference internal extension.
@@ -209,13 +188,13 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
 
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> findRecordsImpl({
-    SdbBoundaries<K>? boundaries,
-    required SdbFindOptions options,
+    required SdbFindOptions<K> options,
   }) async {
     var filter = options.filter;
     var offset = options.offset;
     var limit = options.limit;
     var descending = options.descending;
+    var boundaries = options.boundaries;
     var cursor = idbObjectStore.openCursor(
       direction: descendingToIdbDirection(descending),
       range: idbKeyRangeFromBoundaries(boundaries),
@@ -238,15 +217,15 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
 
   /// Find record keys.
   Future<List<SdbRecordKey<K, V>>> findRecordKeysImpl({
-    SdbBoundaries<K>? boundaries,
-    required SdbFindOptions options,
+    required SdbFindOptions<K> options,
   }) async {
     if (options.filter != null) {
-      return findRecordsImpl(boundaries: boundaries, options: options);
+      return findRecordsImpl(options: options);
     }
     var descending = options.descending;
     var offset = options.offset;
     var limit = options.limit;
+    var boundaries = options.boundaries;
     var cursor = idbObjectStore.openKeyCursor(
       autoAdvance: true,
       direction: descendingToIdbDirection(descending),
@@ -257,17 +236,41 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
   }
 
   /// Count records.
-  Future<int> countImpl({SdbBoundaries<K>? boundaries}) async {
-    return idbObjectStore.count(idbKeyRangeFromBoundaries(boundaries));
+  Future<int> countImpl({required SdbFindOptions<K> options}) async {
+    if (options.filter != null) {
+      // Slow
+      return (await findRecordsImpl(options: options)).length;
+    }
+    var boundaries = options.boundaries;
+    var count = await idbObjectStore.count(
+      idbKeyRangeFromBoundaries(boundaries),
+    );
+    var offset = options.offset;
+    var limit = options.limit;
+    if ((offset ?? -1) > 0) {
+      count = max(0, count - offset!);
+    }
+    if ((limit ?? -1) > 0) {
+      count = max(count, limit!);
+    }
+    return count;
   }
 
   /// Delete records.
-  Future<void> deleteRecordsImpl({
-    SdbBoundaries<K>? boundaries,
-    int? offset,
-    int? limit,
-    bool? descending,
-  }) async {
+  Future<void> deleteRecordsImpl({required SdbFindOptions<K> options}) async {
+    if (options.filter != null) {
+      // Slow
+      var records = await findRecordsImpl(options: options);
+      for (var record in records) {
+        await deleteImpl(record.key);
+      }
+      return;
+    }
+    var boundaries = options.boundaries;
+
+    var offset = options.offset;
+    var limit = options.limit;
+    var descending = options.descending;
     var keyRange = idbKeyRangeFromBoundaries(boundaries);
 
     if (offset == null && limit == null) {

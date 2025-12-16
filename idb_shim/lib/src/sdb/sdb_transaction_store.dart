@@ -56,43 +56,53 @@ extension SdbTransactionStoreRefExtension<K extends SdbKey, V extends SdbValue>
     /// Optional sort order
     bool? descending,
 
-    /// New API, suppercedes the other parameters
-    SdbFindOptions? options,
+    /// New API, supercedes the other parameters
+    SdbFindOptions<K>? options,
   }) {
     options = compatMergeFindOptions(
       options,
+      boundaries: boundaries,
       limit: limit,
       offset: offset,
       descending: descending,
       filter: filter,
     );
-    return _impl.findRecordsImpl(boundaries: boundaries, options: options);
+    return _impl.findRecordsImpl(options: options);
   }
 
   /// Find record keys.
   Future<List<SdbRecordKey<K, V>>> findRecordKeys({
     SdbBoundaries<K>? boundaries,
+
+    /// Optional filter, performed in memory
+    SdbFilter? filter,
     int? offset,
     int? limit,
 
     /// Optional descending order
     bool? descending,
 
-    /// New API, suppercedes the other parameters
-    SdbFindOptions? options,
+    /// New API, supercedes the other parameters
+    SdbFindOptions<K>? options,
   }) {
     options = compatMergeFindOptions(
+      boundaries: boundaries,
       options,
       limit: limit,
       offset: offset,
       descending: descending,
+      filter: filter,
     );
-    return _impl.findRecordKeysImpl(boundaries: boundaries, options: options);
+    return _impl.findRecordKeysImpl(options: options);
   }
 
   /// Count record.
-  Future<int> count({SdbBoundaries<K>? boundaries}) =>
-      _impl.countImpl(boundaries: boundaries);
+  Future<int> count({
+    SdbBoundaries<K>? boundaries,
+    SdbFindOptions<K>? options,
+  }) => _impl.countImpl(
+    options: compatMergeFindOptions(options, boundaries: boundaries),
+  );
 
   /// Delete records.
   Future<void> deleteRecords({
@@ -102,11 +112,17 @@ extension SdbTransactionStoreRefExtension<K extends SdbKey, V extends SdbValue>
 
     /// Optional descending order
     bool? descending,
+
+    /// New API, supersedes the other parameters
+    SdbFindOptions<K>? options,
   }) => _impl.deleteRecordsImpl(
-    boundaries: boundaries,
-    offset: offset,
-    limit: limit,
-    descending: descending,
+    options: compatMergeFindOptions(
+      options,
+      boundaries: boundaries,
+      offset: offset,
+      limit: limit,
+      descending: descending,
+    ),
   );
 
   /// store name.
@@ -155,25 +171,41 @@ extension SdbSingleStoreTransactionExtension<
 
     /// Optional descending sort order
     bool? descending,
+
+    /// New API, supercedes the other parameters
+    SdbFindOptions<K>? options,
   }) => impl.findRecordsImpl(
-    boundaries: boundaries,
-    filter: filter,
-    offset: offset,
-    limit: limit,
-    descending: descending,
+    options: compatMergeFindOptions(
+      options,
+      boundaries: boundaries,
+      filter: filter,
+      offset: offset,
+      limit: limit,
+      descending: descending,
+    ),
   );
 
   /// Find record keys.
   Future<List<SdbRecordKey<K, V>>> findRecordKeys({
     SdbBoundaries<K>? boundaries,
+
+    /// Optional filter, performed in memory
+    SdbFilter? filter,
     int? offset,
     int? limit,
     bool? descending,
+
+    /// New API, supercedes the other parameters
+    SdbFindOptions<K>? options,
   }) => impl.findRecordKeysImpl(
-    boundaries: boundaries,
-    offset: offset,
-    limit: limit,
-    descending: descending,
+    options: compatMergeFindOptions(
+      options,
+      boundaries: boundaries,
+      filter: filter,
+      offset: offset,
+      limit: limit,
+      descending: descending,
+    ),
   );
 }
 

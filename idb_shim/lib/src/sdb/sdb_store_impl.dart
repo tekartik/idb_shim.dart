@@ -40,21 +40,18 @@ extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
     /// Optional sort order
     bool? descending,
 
-    /// New API, suppercedes the other parameters
-    SdbFindOptions? options,
+    /// New API, supercedes the other parameters
+    SdbFindOptions<K>? options,
   }) {
     options = compatMergeFindOptions(
       options,
+      boundaries: boundaries,
       limit: limit,
       offset: offset,
       descending: descending,
       filter: filter,
     );
-    return impl.findRecordsImpl(
-      client,
-      boundaries: boundaries,
-      options: options,
-    );
+    return impl.findRecordsImpl(client, options: options);
   }
 
   /// Find first records
@@ -70,22 +67,18 @@ extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
     /// Optional sort order
     bool? descending,
 
-    /// New API, suppercedes the other parameters
-    SdbFindOptions? options,
+    /// New API, supercedes the other parameters
+    SdbFindOptions<K>? options,
   }) async {
     options = compatMergeFindOptions(
       options,
-
+      boundaries: boundaries,
       offset: offset,
       descending: descending,
       filter: filter,
     );
     options = options.copyWith(limit: 1);
-    var records = await findRecords(
-      client,
-      boundaries: boundaries,
-      options: options,
-    );
+    var records = await findRecords(client, options: options);
     return records.firstOrNull;
   }
 
@@ -96,17 +89,31 @@ extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
     int? offset,
     int? limit,
     bool? descending,
+
+    /// New API, supersedes the other parameters
+    SdbFindOptions<K>? options,
   }) => impl.findRecordKeysImpl(
     client,
-    boundaries: boundaries,
-    offset: offset,
-    limit: limit,
-    descending: descending,
+    options: compatMergeFindOptions(
+      boundaries: boundaries,
+      options,
+      limit: limit,
+      offset: offset,
+      descending: descending,
+    ),
   );
 
   /// Count records.
-  Future<int> count(SdbClient client, {SdbBoundaries<K>? boundaries}) =>
-      impl.countImpl(client, boundaries: boundaries);
+  Future<int> count(
+    SdbClient client, {
+    SdbBoundaries<K>? boundaries,
+
+    /// New API, supersedes the other parameters
+    SdbFindOptions<K>? options,
+  }) => impl.countImpl(
+    client,
+    options: compatMergeFindOptions(options, boundaries: boundaries),
+  );
 
   /// Delete records.
   Future<void> delete(
@@ -115,12 +122,18 @@ extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
     int? offset,
     int? limit,
     bool? descending,
+
+    /// New API, supersedes the other parameters
+    SdbFindOptions<K>? options,
   }) => impl.deleteImpl(
     client,
-    boundaries: boundaries,
-    offset: offset,
-    limit: limit,
-    descending: descending,
+    options: compatMergeFindOptions(
+      options,
+      boundaries: boundaries,
+      limit: limit,
+      offset: offset,
+      descending: descending,
+    ),
   );
 
   /// Record reference.
@@ -204,184 +217,108 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> findRecordsImpl(
     SdbClient client, {
-    SdbBoundaries<K>? boundaries,
-    required SdbFindOptions options,
+
+    required SdbFindOptions<K> options,
   }) => client.handleDbOrTxn(
-    (db) => dbFindRecordsImpl(db, boundaries: boundaries, options: options),
-    (txn) => txnFindRecordsImpl(txn, boundaries: boundaries, options: options),
+    (db) => dbFindRecordsImpl(db, options: options),
+    (txn) => txnFindRecordsImpl(txn, options: options),
   );
 
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> dbFindRecordsImpl(
     SdbDatabase db, {
-    SdbBoundaries<K>? boundaries,
-    required SdbFindOptions options,
+
+    required SdbFindOptions<K> options,
   }) {
     return db.inStoreTransaction(this, SdbTransactionMode.readOnly, (txn) {
-      return txnFindRecordsImpl(
-        txn.rawImpl,
-        boundaries: boundaries,
-        options: options,
-      );
+      return txnFindRecordsImpl(txn.rawImpl, options: options);
     });
   }
 
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> txnFindRecordsImpl(
     SdbTransactionImpl txn, {
-    SdbBoundaries<K>? boundaries,
-    required SdbFindOptions options,
+
+    required SdbFindOptions<K> options,
   }) {
-    return txn
-        .storeImpl(this)
-        .findRecords(boundaries: boundaries, options: options);
+    return txn.storeImpl(this).findRecords(options: options);
   }
 
   /// Find records keys.
   Future<List<SdbRecordKey<K, V>>> findRecordKeysImpl(
     SdbClient client, {
-    SdbBoundaries<K>? boundaries,
-    int? offset,
-    int? limit,
-
-    /// Optional descending order
-    bool? descending,
+    required SdbFindOptions<K> options,
   }) => client.handleDbOrTxn(
-    (db) => dbFindRecordKeysImpl(
-      db,
-      boundaries: boundaries,
-      offset: offset,
-      limit: limit,
-      descending: descending,
-    ),
-    (txn) => txnFindRecordKeysImpl(
-      txn,
-      boundaries: boundaries,
-      offset: offset,
-      limit: limit,
-      descending: descending,
-    ),
+    (db) => dbFindRecordKeysImpl(db, options: options),
+    (txn) => txnFindRecordKeysImpl(txn, options: options),
   );
 
   /// Find record keys.
   Future<List<SdbRecordKey<K, V>>> dbFindRecordKeysImpl(
     SdbDatabase db, {
-    SdbBoundaries<K>? boundaries,
-    int? offset,
-    int? limit,
-
-    /// Optional descending order
-    bool? descending,
+    required SdbFindOptions<K> options,
   }) {
     return db.inStoreTransaction(this, SdbTransactionMode.readOnly, (txn) {
-      return txnFindRecordKeysImpl(
-        txn.rawImpl,
-        boundaries: boundaries,
-        offset: offset,
-        limit: limit,
-        descending: descending,
-      );
+      return txnFindRecordKeysImpl(txn.rawImpl, options: options);
     });
   }
 
   /// Find record keys.
   Future<List<SdbRecordKey<K, V>>> txnFindRecordKeysImpl(
     SdbTransactionImpl txn, {
-    SdbBoundaries<K>? boundaries,
-    int? offset,
-    int? limit,
-    bool? descending,
+    required SdbFindOptions<K> options,
   }) {
-    return txn
-        .storeImpl(this)
-        .findRecordKeys(
-          boundaries: boundaries,
-          offset: offset,
-          limit: limit,
-          descending: descending,
-        );
+    return txn.storeImpl(this).findRecordKeys(options: options);
   }
 
   /// Count records.
-  Future<int> countImpl(SdbClient client, {SdbBoundaries<K>? boundaries}) =>
+  Future<int> countImpl(SdbClient client, {SdbFindOptions<K>? options}) =>
       client.handleDbOrTxn(
-        (db) => dbCountImpl(db, boundaries: boundaries),
-        (txn) => txnCountImpl(txn, boundaries: boundaries),
+        (db) => dbCountImpl(db, options: options),
+        (txn) => txnCountImpl(txn, options: options),
       );
 
   /// Count records.
-  Future<int> dbCountImpl(SdbDatabase db, {SdbBoundaries<K>? boundaries}) {
+  Future<int> dbCountImpl(SdbDatabase db, {SdbFindOptions<K>? options}) {
     return db.inStoreTransaction(this, SdbTransactionMode.readOnly, (txn) {
-      return txnCountImpl(txn.rawImpl, boundaries: boundaries);
+      return txnCountImpl(txn.rawImpl, options: options);
     });
   }
 
   /// Count records.
   Future<int> txnCountImpl(
     SdbTransactionImpl txn, {
-    SdbBoundaries<K>? boundaries,
+    SdbFindOptions<K>? options,
   }) {
-    return txn.storeImpl(this).count(boundaries: boundaries);
+    return txn.storeImpl(this).count(options: options);
   }
 
   /// Delete records.
   Future<void> deleteImpl(
     SdbClient client, {
-    SdbBoundaries<K>? boundaries,
-    int? offset,
-    int? limit,
-    bool? descending,
+    required SdbFindOptions<K> options,
   }) => client.handleDbOrTxn(
-    (db) => dbDeleteImpl(
-      db,
-      boundaries: boundaries,
-      offset: offset,
-      limit: limit,
-      descending: descending,
-    ),
-    (txn) => txnDeleteImpl(
-      txn,
-      boundaries: boundaries,
-      offset: offset,
-      limit: limit,
-      descending: descending,
-    ),
+    (db) => dbDeleteImpl(db, options: options),
+    (txn) => txnDeleteImpl(txn, options: options),
   );
 
   /// Find records.
   Future<void> dbDeleteImpl(
     SdbDatabase db, {
-    SdbBoundaries<K>? boundaries,
-    int? offset,
-    int? limit,
-    bool? descending,
+    required SdbFindOptions<K> options,
   }) {
     return db.inStoreTransaction(this, SdbTransactionMode.readWrite, (txn) {
-      return txnDeleteImpl(
-        txn.rawImpl,
-        boundaries: boundaries,
-        offset: offset,
-        limit: limit,
-        descending: descending,
-      );
+      return txnDeleteImpl(txn.rawImpl, options: options);
     });
   }
 
   /// Find records.
   Future<void> txnDeleteImpl(
     SdbTransactionImpl txn, {
-    SdbBoundaries<K>? boundaries,
-    int? offset,
-    int? limit,
-    bool? descending,
+
+    /// New API, supersedes the other parameters
+    SdbFindOptions<K>? options,
   }) {
-    return txn
-        .storeImpl(this)
-        .deleteRecords(
-          boundaries: boundaries,
-          offset: offset,
-          limit: limit,
-          descending: descending,
-        );
+    return txn.storeImpl(this).deleteRecords(options: options);
   }
 }

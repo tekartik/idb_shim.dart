@@ -85,12 +85,14 @@ extension SdbIndexRefExtension<
     bool? descending,
 
     /// New api, takes precedence over filter, offset, limit, descending
-    SdbFindOptions? options,
+    SdbFindOptions<I>? options,
   }) => impl.findRecordsImpl(
     client,
-    boundaries: boundaries,
-    options: compatMergeFindOptions(
+
+    options: compatMergeFindOptions<I>(
       options,
+      boundaries: boundaries,
+
       limit: limit,
       offset: offset,
       descending: descending,
@@ -112,7 +114,7 @@ extension SdbIndexRefExtension<
     bool? descending,
 
     /// New api
-    SdbFindOptions? options,
+    SdbFindOptions<I>? options,
   }) async {
     options = compatMergeFindOptions(
       options,
@@ -120,6 +122,7 @@ extension SdbIndexRefExtension<
       offset: offset,
       descending: descending,
       filter: filter,
+      boundaries: boundaries,
     );
     options = options.copyWith(limit: 1);
     var records = await findRecords(
@@ -137,15 +140,18 @@ extension SdbIndexRefExtension<
     SdbBoundaries<I>? boundaries,
     int? offset,
     int? limit,
+    SdbFilter? filter,
 
     /// Optional descending order
     bool? descending,
 
     /// New api - filter is not support for key search
-    SdbFindOptions? options,
+    SdbFindOptions<I>? options,
   }) async {
     options = compatMergeFindOptions(
+      boundaries: boundaries,
       options,
+      filter: filter,
       limit: limit,
       offset: offset,
       descending: descending,
@@ -153,11 +159,7 @@ extension SdbIndexRefExtension<
 
     /// If filter is used, needs to use findRecords instead
 
-    return impl.findRecordKeysImpl(
-      client,
-      boundaries: boundaries,
-      options: options,
-    );
+    return impl.findRecordKeysImpl(client, options: options);
   }
 
   /// Find first record key.
@@ -171,20 +173,34 @@ extension SdbIndexRefExtension<
 
     /// Optional descending order
     bool? descending,
+
+    /// New API, supersedes the other parameters
+    SdbFindOptions<I>? options,
   }) async {
-    var records = await findRecordKeys(
-      client,
+    options = compatMergeFindOptions(
+      options,
+      limit: null,
+      filter: filter,
       boundaries: boundaries,
       offset: offset,
-      limit: 1,
       descending: descending,
-    );
+    ).copyWith(limit: 1);
+    var records = await findRecordKeys(client, options: options);
     return records.firstOrNull;
   }
 
-  /// Count records.
-  Future<int> count(SdbClient client, {SdbBoundaries<I>? boundaries}) =>
-      impl.countImpl(client, boundaries: boundaries);
+  /// Count records with this index key
+  Future<int> count(
+    SdbClient client, {
+    SdbBoundaries<I>? boundaries,
+
+    /// New api supersede other param
+    ///
+    SdbFindOptions<I>? options,
+  }) => impl.countImpl(
+    client,
+    options: compatMergeFindOptions(options, boundaries: boundaries),
+  );
 
   /// Delete records.
   Future<void> delete(
@@ -195,12 +211,18 @@ extension SdbIndexRefExtension<
 
     /// Optional descending order
     bool? descending,
+
+    /// New API, supersedes the other parameters
+    SdbFindOptions<I>? options,
   }) => impl.deleteImpl(
     client,
-    boundaries: boundaries,
-    offset: offset,
-    limit: limit,
-    descending: descending,
+    options: compatMergeFindOptions(
+      options,
+      boundaries: boundaries,
+      limit: limit,
+      offset: offset,
+      descending: descending,
+    ),
   );
 }
 

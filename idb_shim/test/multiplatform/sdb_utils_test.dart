@@ -53,11 +53,13 @@ void main() {
         descending: false,
         offset: 2,
         filter: SdbFilter.equals('field', 1),
+        boundaries: SdbBoundaries.values(1, 10),
       );
       expect(options.limit, 5);
       expect(options.descending, false);
       expect(options.offset, 2);
       expect(options.filter, isA<SdbFilter>());
+      expect(options.boundaries, SdbBoundaries.values(1, 10));
     });
   });
 }

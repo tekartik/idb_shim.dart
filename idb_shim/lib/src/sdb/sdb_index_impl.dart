@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_filter_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_utils.dart';
@@ -99,57 +101,45 @@ class SdbIndexRefImpl<
   /// Find records.
   Future<List<SdbIndexRecordSnapshot<K, V, I>>> findRecordsImpl(
     SdbClient client, {
-    SdbBoundaries<I>? boundaries,
-    required SdbFindOptions options,
+
+    required SdbFindOptions<I> options,
   }) => client.handleDbOrTxn(
-    (db) => dbFindRecordsImpl(db, boundaries: boundaries, options: options),
-    (txn) => txnFindRecordsImpl(txn, boundaries: boundaries, options: options),
+    (db) => dbFindRecordsImpl(db, options: options),
+    (txn) => txnFindRecordsImpl(txn, options: options),
   );
 
   /// Find records.
   Future<List<SdbIndexRecordKey<K, V, I>>> findRecordKeysImpl(
     SdbClient client, {
-    SdbBoundaries<I>? boundaries,
 
-    required SdbFindOptions options,
+    required SdbFindOptions<I> options,
   }) {
     return client.handleDbOrTxn(
-      (db) =>
-          dbFindRecordKeysImpl(db, boundaries: boundaries, options: options),
-      (txn) =>
-          txnFindRecordKeysImpl(txn, boundaries: boundaries, options: options),
+      (db) => dbFindRecordKeysImpl(db, options: options),
+      (txn) => txnFindRecordKeysImpl(txn, options: options),
     );
   }
 
   /// Find records.
   Future<List<SdbIndexRecordSnapshot<K, V, I>>> dbFindRecordsImpl(
     SdbDatabaseImpl db, {
-    SdbBoundaries<I>? boundaries,
-    required SdbFindOptions options,
+
+    required SdbFindOptions<I> options,
   }) {
     return db.inStoreTransaction(store, SdbTransactionMode.readOnly, (txn) {
-      return txnFindRecordsImpl(
-        txn.rawImpl,
-        boundaries: boundaries,
-        options: options,
-      );
+      return txnFindRecordsImpl(txn.rawImpl, options: options);
     });
   }
 
   /// Find record keys.
   Future<List<SdbIndexRecordKey<K, V, I>>> dbFindRecordKeysImpl(
     SdbDatabaseImpl db, {
-    SdbBoundaries<I>? boundaries,
 
     /// filter ignored
-    required SdbFindOptions options,
+    required SdbFindOptions<I> options,
   }) {
     return db.inStoreTransaction(store, SdbTransactionMode.readOnly, (txn) {
-      return txnFindRecordKeysImpl(
-        txn.rawImpl,
-        boundaries: boundaries,
-        options: options,
-      );
+      return txnFindRecordKeysImpl(txn.rawImpl, options: options);
     });
   }
 
@@ -165,14 +155,14 @@ class SdbIndexRefImpl<
   /// Find records.
   Future<List<SdbIndexRecordSnapshot<K, V, I>>> txnFindRecordsImpl(
     SdbTransactionImpl txn, {
-    SdbBoundaries<I>? boundaries,
 
-    required SdbFindOptions options,
+    required SdbFindOptions<I> options,
   }) async {
     var descending = options.descending;
     var offset = options.offset;
     var limit = options.limit;
     var filter = options.filter;
+    var boundaries = options.boundaries;
     var idbObjectStore = txn.idbTransaction.objectStore(store.name);
     var idbIndex = idbObjectStore.index(name);
     var cursor = idbIndex.openCursor(
@@ -194,20 +184,16 @@ class SdbIndexRefImpl<
   /// If a filter the whole record is read and filter applied in memory.
   Future<List<SdbIndexRecordKey<K, V, I>>> txnFindRecordKeysImpl(
     SdbTransactionImpl txn, {
-    SdbBoundaries<I>? boundaries,
-    required SdbFindOptions options,
+    required SdbFindOptions<I> options,
   }) async {
     var filter = options.filter;
     if (filter != null) {
-      return await txnFindRecordsImpl(
-        txn,
-        boundaries: boundaries,
-        options: options,
-      );
+      return await txnFindRecordsImpl(txn, options: options);
     }
     var descending = options.descending;
     var offset = options.offset;
     var limit = options.limit;
+    var boundaries = options.boundaries;
     var idbObjectStore = txn.idbTransaction.objectStore(store.name);
     var idbIndex = idbObjectStore.index(name);
     var cursor = idbIndex.openKeyCursor(
@@ -223,81 +209,85 @@ class SdbIndexRefImpl<
   }
 
   /// Count records.
-  Future<int> countImpl(SdbClient client, {SdbBoundaries<I>? boundaries}) =>
-      client.handleDbOrTxn(
-        (db) => dbCountImpl(db, boundaries: boundaries),
-        (txn) => txnCountImpl(txn, boundaries: boundaries),
-      );
+  Future<int> countImpl(
+    SdbClient client, {
+    required SdbFindOptions<I> options,
+  }) => client.handleDbOrTxn(
+    (db) => dbCountImpl(db, options: options),
+    (txn) => txnCountImpl(txn, options: options),
+  );
 
   /// Count records.
-  Future<int> dbCountImpl(SdbDatabase db, {SdbBoundaries<I>? boundaries}) {
+  Future<int> dbCountImpl(
+    SdbDatabase db, {
+    required SdbFindOptions<I> options,
+  }) {
     return db.inStoreTransaction(store, SdbTransactionMode.readOnly, (txn) {
-      return txnCountImpl(txn.rawImpl, boundaries: boundaries);
+      return txnCountImpl(txn.rawImpl, options: options);
     });
   }
 
   /// Find record keys.
   Future<int> txnCountImpl(
     SdbTransactionImpl txn, {
-    SdbBoundaries<I>? boundaries,
+    required SdbFindOptions<I> options,
   }) async {
     var idbObjectStore = txn.idbTransaction.objectStore(store.name);
     var idbIndex = idbObjectStore.index(name);
-    var count = idbIndex.count(idbKeyRangeFromBoundaries(boundaries));
+    var filter = options.filter;
+    var boundaries = options.boundaries;
+    var limit = options.limit;
+    var offset = options.offset;
+    if (filter != null) {
+      var records = await txnFindRecordsImpl(txn, options: options);
+      return records.length;
+    }
+    var count = await idbIndex.count(idbKeyRangeFromBoundaries(boundaries));
+    if ((offset ?? -1) > 0) {
+      count = max(0, count - offset!);
+    }
+    if ((limit ?? -1) > 0) {
+      count = max(count, limit!);
+    }
+
     return count;
   }
 
   /// Delete records.
   Future<void> deleteImpl(
     SdbClient client, {
-    SdbBoundaries<I>? boundaries,
-    int? offset,
-    int? limit,
-    bool? descending,
+    required SdbFindOptions<I> options,
   }) => client.handleDbOrTxn(
-    (db) => dbDeleteImpl(
-      db,
-      boundaries: boundaries,
-      offset: offset,
-      limit: limit,
-      descending: descending,
-    ),
-    (txn) => txnDeleteImpl(
-      txn,
-      boundaries: boundaries,
-      offset: offset,
-      limit: limit,
-      descending: descending,
-    ),
+    (db) => dbDeleteImpl(db, options: options),
+    (txn) => txnDeleteImpl(txn, options: options),
   );
 
   /// Find records.
   Future<void> dbDeleteImpl(
     SdbDatabase db, {
-    SdbBoundaries<I>? boundaries,
-    int? offset,
-    int? limit,
-    bool? descending,
+    required SdbFindOptions<I> options,
   }) {
     return db.inStoreTransaction(store, SdbTransactionMode.readWrite, (txn) {
-      return txnDeleteImpl(
-        txn.rawImpl,
-        boundaries: boundaries,
-        offset: offset,
-        limit: limit,
-        descending: descending,
-      );
+      return txnDeleteImpl(txn.rawImpl, options: options);
     });
   }
 
   /// Delete records.
   Future<void> txnDeleteImpl(
     SdbTransactionImpl txn, {
-    SdbBoundaries<I>? boundaries,
-    int? offset,
-    int? limit,
-    bool? descending,
+    required SdbFindOptions<I> options,
   }) async {
+    if (options.filter != null) {
+      var records = await txnFindRecordKeysImpl(txn, options: options);
+      for (var record in records) {
+        await store.record(record.key).delete(txn);
+      }
+      return;
+    }
+    var descending = options.descending;
+    var offset = options.offset;
+    var limit = options.limit;
+    var boundaries = options.boundaries;
     var idbObjectStore = txn.idbTransaction.objectStore(store.name);
     var idbIndex = idbObjectStore.index(name);
     // Need full cursor for delete
