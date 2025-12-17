@@ -160,65 +160,121 @@ void simpleSdbTest(SdbTestContext ctx) {
 
         await db.close();
       });
-      test('boundaries int', () async {
-        await factory.deleteDatabase('test_boundaries.db');
-        var db = await factory.openDatabase(
-          'test_boundaries.db',
-          version: 1,
-          onVersionChange: (event) {
-            var oldVersion = event.oldVersion;
-            if (oldVersion < 1) {
-              event.db.createStore(testStore);
-            }
-          },
-        );
-        await db.inStoreTransaction(testStore, SdbTransactionMode.readWrite, (
-          txn,
-        ) async {
-          await txn.add({'test': 1});
-          await txn.add({'test': 2});
-          await txn.add({'test': 3});
+      group('boundaries int', () {
+        late SdbDatabase db;
+        tearDownAll(() async {
+          await db.close();
         });
-        var boundaries = SdbBoundaries(
-          SdbLowerBoundary(1),
-          SdbUpperBoundary(3),
-        );
-        var records = await testStore.findRecords(db, boundaries: boundaries);
-        expect(records.length, 2);
-        records = await testStore.findRecords(
-          db,
-          boundaries: boundaries,
-          limit: 1,
-        );
-        expect(records.keys, [1]);
-        records = await testStore.findRecords(
-          db,
-          boundaries: boundaries,
-          limit: 1,
-          descending: true,
-        );
-        expect(records.keys, [2]);
-        var keys = await testStore.findRecordKeys(db, boundaries: boundaries);
-        expect(keys.keys, [1, 2]);
-        keys = await testStore.findRecordKeys(
-          db,
-          boundaries: boundaries,
-          limit: 1,
-        );
-        expect(keys.keys, [1]);
-        keys = await testStore.findRecordKeys(
-          db,
-          boundaries: boundaries,
-          limit: 1,
-          descending: true,
-        );
-        expect(keys.keys, [2]);
-        var count = await testStore.count(db, boundaries: boundaries);
-        expect(count, 2);
+        setUpAll(() async {
+          await factory.deleteDatabase('test_boundaries.db');
+          db = await factory.openDatabase(
+            'test_boundaries.db',
+            version: 1,
+            onVersionChange: (event) {
+              var oldVersion = event.oldVersion;
+              if (oldVersion < 1) {
+                event.db.createStore(testStore);
+              }
+            },
+          );
+          await db.inStoreTransaction(testStore, SdbTransactionMode.readWrite, (
+            txn,
+          ) async {
+            await txn.add({'test': 1});
+            await txn.add({'test': 2});
+            await txn.add({'test': 3});
+          });
+        });
+        test('store stream', () async {
+          var boundaries = SdbBoundaries(
+            SdbLowerBoundary(1),
+            SdbUpperBoundary(3),
+          );
 
-        await testStore.delete(db, boundaries: boundaries);
-        expect(await testStore.count(db), 1);
-        await db.close();
+          var stream = testStore.streamRecords(db, boundaries: boundaries);
+          var records = await stream.toList();
+          expect(records.length, 2);
+          expect(records.map((e) => e.key), [1, 2]);
+
+          var ids = <int>[];
+          stream = testStore.streamRecords(db, boundaries: boundaries);
+          StreamSubscription? subscription;
+          var completer = Completer<void>();
+          subscription = stream.listen(
+            (record) {
+              ids.add(record.key);
+              subscription?.cancel();
+              if (!completer.isCompleted) {
+                completer.complete();
+              }
+            },
+            onDone: () {
+              if (!completer.isCompleted) {
+                completer.complete();
+              }
+            },
+            onError: (Object error) {
+              completer.completeError(error);
+            },
+          );
+          await completer.future;
+          expect(ids, [1]);
+        });
+
+        test('txn stream', () async {
+          await db.inStoreTransaction(testStore, SdbTransactionMode.readWrite, (
+            txn,
+          ) async {
+            var boundaries = SdbBoundaries(
+              SdbLowerBoundary(1),
+              SdbUpperBoundary(3),
+            );
+            var stream = testStore.streamRecords(txn, boundaries: boundaries);
+            var records = await stream.toList();
+            expect(records.length, 2);
+          });
+        });
+        test('boundaries int', () async {
+          var boundaries = SdbBoundaries(
+            SdbLowerBoundary(1),
+            SdbUpperBoundary(3),
+          );
+          var records = await testStore.findRecords(db, boundaries: boundaries);
+          expect(records.length, 2);
+          records = await testStore.findRecords(
+            db,
+            boundaries: boundaries,
+            limit: 1,
+          );
+          expect(records.keys, [1]);
+          records = await testStore.findRecords(
+            db,
+            boundaries: boundaries,
+            limit: 1,
+            descending: true,
+          );
+          expect(records.keys, [2]);
+          var keys = await testStore.findRecordKeys(db, boundaries: boundaries);
+          expect(keys.keys, [1, 2]);
+          keys = await testStore.findRecordKeys(
+            db,
+            boundaries: boundaries,
+            limit: 1,
+          );
+          expect(keys.keys, [1]);
+          keys = await testStore.findRecordKeys(
+            db,
+            boundaries: boundaries,
+            limit: 1,
+            descending: true,
+          );
+          expect(keys.keys, [2]);
+          var count = await testStore.count(db, boundaries: boundaries);
+          expect(count, 2);
+
+          await testStore.delete(db, boundaries: boundaries);
+          expect(await testStore.count(db), 1);
+        });
       });
 
       test('txn boundaries int', () async {

@@ -148,7 +148,7 @@ class SdbIndexRefImpl<
 
     required SdbFindOptions<I> options,
   }) {
-    var ctlr = StreamController<SdbIndexRecordSnapshot<K, V, I>>(sync: true);
+    var ctlr = SdbTxnStreamController<SdbIndexRecordSnapshot<K, V, I>>();
     db.inStoreTransaction(store, SdbTransactionMode.readOnly, (txn) async {
       var stream = txnStreamRecordsImpl(txn.rawImpl, options: options);
       await ctlr.addStream(stream);

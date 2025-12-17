@@ -54,6 +54,34 @@ extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
     return impl.findRecordsImpl(client, options: options);
   }
 
+  /// Find records.
+  Stream<SdbRecordSnapshot<K, V>> streamRecords(
+    SdbClient client, {
+
+    SdbBoundaries<K>? boundaries,
+
+    /// Optional filter, performed in memory
+    SdbFilter? filter,
+    int? offset,
+    int? limit,
+
+    /// Optional sort order
+    bool? descending,
+
+    /// New API, supercedes the other parameters
+    SdbFindOptions<K>? options,
+  }) {
+    options = sdbFindOptionsMerge(
+      options,
+      boundaries: boundaries,
+      limit: limit,
+      offset: offset,
+      descending: descending,
+      filter: filter,
+    );
+    return impl.streamRecordsImpl(client, options: options);
+  }
+
   /// Find first records
   Future<SdbRecordSnapshot<K, V>?> findRecord(
     SdbClient client, {
@@ -251,7 +279,8 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
 
     required SdbFindOptions<K> options,
   }) {
-    var ctlr = StreamController<SdbRecordSnapshot<K, V>>(sync: true);
+    var ctlr = SdbTxnStreamController<SdbRecordSnapshot<K, V>>();
+
     db.inStoreTransaction(this, SdbTransactionMode.readOnly, (txn) async {
       var stream = txnStreamRecordsImpl(txn.rawImpl, options: options);
       await ctlr.addStream(stream);
@@ -352,5 +381,48 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
     SdbFindOptions<K>? options,
   }) {
     return txn.storeImpl(this).deleteRecords(options: options);
+  }
+}
+
+/// Controller for streaming transaction results.
+class SdbTxnStreamController<T> {
+  void _onCancel() {
+    _subscription?.cancel();
+    _ctlr.close();
+  }
+
+  StreamSubscription? _subscription;
+  late final _ctlr = StreamController<T>(sync: true, onCancel: _onCancel);
+
+  /// Stream
+  Stream<T> get stream => _ctlr.stream;
+
+  /// Added stream.
+  Future<void> addStream(Stream<T> source) async {
+    var completer = Completer<void>();
+    _subscription = source.listen(
+      (event) {
+        _ctlr.add(event);
+      },
+      //cancelOnError: true,
+      onDone: () {
+        _ctlr.close();
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      },
+      onError: (Object e, StackTrace s) {
+        _ctlr.addError(e, s);
+        if (!completer.isCompleted) {
+          completer.completeError(e, s);
+        }
+      },
+    );
+    await completer.future;
+  }
+
+  /// Close the controller.
+  void close() {
+    _ctlr.close();
   }
 }

@@ -149,6 +149,41 @@ extension CursorStreamExt<C extends Cursor> on Stream<C> {
       );
 }
 
+class _CursorController<C extends Cursor, T> {
+  var canceled = false;
+  void onCancel() {
+    canceled = true;
+  }
+
+  late final ctlr = StreamController<T>(sync: true, onCancel: onCancel);
+  Stream<T> get stream => ctlr.stream;
+  void add(T value) {
+    if (!canceled) {
+      ctlr.add(value);
+    }
+  }
+
+  void addError(Object error, StackTrace stackTrace) {
+    if (!canceled) {
+      ctlr.addError(error, stackTrace);
+    }
+  }
+
+  void terminate(Cursor cursor) {
+    // Go far deep in the future, not a better trick yet
+    // With a value higher than 0xFFFFFFFF, it does not work on native: Error: Failed to execute 'advance' on 'IDBCursor': Value is outside the 'unsigned long' value range.
+    cursor.advance(0xFFFFFFFF);
+  }
+
+  void next(Cursor cursor) {
+    cursor.advance(1);
+  }
+
+  void close() {
+    ctlr.close();
+  }
+}
+
 /// Convert an openCursor stream to a list. Warning the cursor must not be auto-advanced !
 /// cursor is ran 1 by 1
 Stream<T> _cursorApplyFilterLimitOffset<C extends Cursor, T>(
@@ -160,7 +195,8 @@ Stream<T> _cursorApplyFilterLimitOffset<C extends Cursor, T>(
 }) {
   var count = 0;
   var offsetApplied = 0;
-  var ctlr = StreamController<T>(sync: true);
+
+  var ctlr = _CursorController<C, T>();
   stream.listen(
     (C cursor) {
       /// Convert first
@@ -172,7 +208,7 @@ Stream<T> _cursorApplyFilterLimitOffset<C extends Cursor, T>(
       // Apply offset and skip first if needed
       if ((offset ?? 0) > offsetApplied) {
         offsetApplied++;
-        cursor.advance(1);
+        ctlr.next(cursor);
         return;
       }
       ctlr.add(row);
@@ -180,12 +216,16 @@ Stream<T> _cursorApplyFilterLimitOffset<C extends Cursor, T>(
       // handle limit
       if (limit != null) {
         if (count >= limit) {
-          cursor.advance(0xFFFFFFFF);
+          ctlr.terminate(cursor);
           return;
         }
       }
 
-      cursor.advance(1);
+      if (ctlr.canceled) {
+        ctlr.terminate(cursor);
+      } else {
+        ctlr.next(cursor);
+      }
     },
     onDone: () {
       ctlr.close();
@@ -207,22 +247,27 @@ Stream<C> _cursorApplyLimitOffset<C extends Cursor>(
 }) {
   var first = true;
   var count = 0;
-  var ctlr = StreamController<C>();
+  var ctlr = _CursorController<C, C>();
   stream.listen(
     (C cursor) {
       if (first && (offset != null) && (offset != 0)) {
         first = false;
-        cursor.advance(offset);
+        if (ctlr.canceled) {
+          ctlr.terminate(cursor);
+        } else {
+          cursor.advance(offset);
+        }
       } else {
         if (limit == null || (count < limit)) {
           ctlr.add(cursor);
+          count++;
         }
         if (limit != null && count >= limit) {
-          // Go far deep in the future, not a better trick yet
-          // With a value higher than 0xFFFFFFFF, it does not work on native: Error: Failed to execute 'advance' on 'IDBCursor': Value is outside the 'unsigned long' value range.
-          cursor.advance(0xFFFFFFFF);
+          ctlr.terminate(cursor);
+        } else if (ctlr.canceled) {
+          ctlr.terminate(cursor);
         } else {
-          cursor.advance(1);
+          ctlr.next(cursor);
         }
       }
     },
