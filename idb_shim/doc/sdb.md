@@ -126,6 +126,38 @@ var db = await factory.openDatabase('book.db', version: 1, onVersionChange: (eve
 await db.close();
 ```
 
+Instead of `onVersionChange`, you can also specify a schema that will handle the migration for you, as long
+as you update the version number when the schema changes.
+
+```dart
+class SchoolDb {
+  final schoolStore = SdbStoreRef<String, SdbModel>('school');
+  final studentStore = SdbStoreRef<int, SdbModel>('student');
+
+  /// Index on studentStore for field 'schoolId'
+  late final studentSchoolIndex = studentStore.index<String>(
+    'school',
+  ); // On field 'schoolId'
+  late final schoolDbSchema = SdbDatabaseSchema(
+    stores: [
+      schoolStore.schema(),
+      studentStore.schema(
+        autoIncrement: true,
+        indexes: [studentSchoolIndex.schema(keyPath: 'schoolId')],
+      ),
+    ],
+  );
+  
+  Future<SdbDatabase> open(SdbFactory factory, String dbName) async {
+    return factory.openDatabase(
+      dbName,
+      version: 1,
+      schema: schoolDbSchema,
+    );
+  }
+}
+```
+
 ### Adding a record
 
 ```dart
@@ -167,6 +199,13 @@ await db.inStoreTransaction(bookStore, SdbTransactionMode.readWrite,
       .add(txn, {'title': 'Harry Potter', 'serial': 'serial0003'});
 });
 ```
+
+Recommendations:
+- Don't catch exceptions inside the transaction callback, let them propagate to abort the transaction.
+  Any exception will abort the transaction so catching them will likely lead to unexpected results.
+- Keep the transaction callback as short as possible
+- Don't do any async operation that does not involve reading or writing to the database inside the transaction
+
 ### Creating index
 
 ```dart
