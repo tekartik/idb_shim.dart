@@ -14,6 +14,15 @@ import '../idb_test_common.dart';
 var _extraDebug = false;
 // var _extraDebug = devWarning(true);
 
+Future<JSAny?> waitForSuccess(IDBRequest request) async {
+  await EventStreamProviders.successEvent.forTarget(request).first;
+  return request.result;
+}
+
+Future<void> waitForTransactionComplete(IDBTransaction transaction) async {
+  await EventStreamProviders.completeEvent.forTarget(transaction).first;
+}
+
 void main() {
   test('idb_browser_raw_test', () async {
     var dbName = 'test_raw.db';
