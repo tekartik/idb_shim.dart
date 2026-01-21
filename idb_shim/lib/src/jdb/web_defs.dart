@@ -1,7 +1,8 @@
-// ignore: unused_import
+/// compat.
+typedef NotificationRevision = JdbNotificationRevision;
 
 /// The storage revision.
-class NotificationRevision {
+class JdbNotificationRevision {
   /// Name of the database.
   final String name;
 
@@ -9,7 +10,7 @@ class NotificationRevision {
   final int revision;
 
   /// Revision for one storage
-  NotificationRevision(this.name, this.revision);
+  JdbNotificationRevision(this.name, this.revision);
 
   @override
   String toString() => '$name: $revision';
