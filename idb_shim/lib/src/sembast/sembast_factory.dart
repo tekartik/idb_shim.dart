@@ -118,3 +118,14 @@ class IdbFactorySembastImpl extends IdbFactoryBase
   @override
   String toString() => 'IdbFactorySembast($_databaseFactory)';
 }
+
+extension IdbFactorySembastExtension on IdbFactory {
+  /// Cast to Sembast factory
+  sembast.DatabaseFactory? get underlyingSembastFactoryOrNull {
+    final factory = this;
+    if (factory is IdbFactorySembast) {
+      return factory.sembastFactory;
+    }
+    return null;
+  }
+}

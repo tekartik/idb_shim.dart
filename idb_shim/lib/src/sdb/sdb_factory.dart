@@ -1,3 +1,6 @@
+import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/src/sdb/sdb_factory_impl.dart';
+
 import 'sdb.dart';
 
 /// Sdb Factory
@@ -42,6 +45,11 @@ abstract class SdbFactoryInterface {
 
 /// Sdb Factory extension.
 extension SdbFactoryExtension on SdbFactory {
+  SdbFactoryIdb get _factoryIdb => this as SdbFactoryIdb;
+
+  /// Get the underlying idbFactory.
+  IdbFactory get idbFactory => _factoryIdb.idbFactory;
+
   /// Open a database.
   Future<SdbDatabase> openDatabaseOnDowngradeDelete(
     String name, {

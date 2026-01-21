@@ -2,6 +2,7 @@
 library;
 
 import 'package:idb_shim/idb_browser.dart';
+import 'package:idb_shim/idb_client_sembast.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -14,6 +15,7 @@ void main() {
         'IdbFactoryNativeBrowserWrapperImpl',
       );
       expect(native, idbFactoryBrowser);
+      expect(native.underlyingSembastFactoryOrNull, isNull);
     });
 
     test('memory', () {
