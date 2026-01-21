@@ -382,6 +382,32 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
   }) {
     return txn.storeImpl(this).deleteRecords(options: options);
   }
+
+  /// Count records.
+  Future<T> inTransactionImpl<T>(
+    SdbDatabase db,
+    SdbTransactionMode mode,
+    Future<T> Function(SdbTransaction txn) fn,
+  ) {
+    return db.inStoreTransaction(this, mode, (txn) {
+      return fn(txn.rawImpl);
+    });
+  }
+
+  /// Count records.
+  Future<T> clientAutoTxnImpl<T>(
+    SdbClient client,
+    SdbTransactionMode mode,
+    Future<T> Function(SdbTransaction txn) fn,
+  ) async {
+    if (client is SdbDatabase) {
+      return await inTransactionImpl<T>(client, mode, fn);
+    } else if (client is SdbTransactionImpl) {
+      return fn(client);
+    } else {
+      throw ArgumentError('Invalid client type: ${client.runtimeType}');
+    }
+  }
 }
 
 /// Controller for streaming transaction results.

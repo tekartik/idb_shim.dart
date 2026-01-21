@@ -405,21 +405,48 @@ void sdbIndexTests(TestContext ctx) {
       late int key1;
       late int key2;
       late int key3;
+      late int key4;
       await db.inStoreTransaction(store, SdbTransactionMode.readWrite, (
         txn,
       ) async {
         key1 = await store.add(txn, {'col1': 'a', 'col2': 1, 'col3': 'i'});
         key2 = await store.add(txn, {'col1': 'b', 'col2': 1, 'col3': 'i'});
         key3 = await store.add(txn, {'col1': 'a', 'col2': 1, 'col3': 'j'});
+        key4 = await store.add(txn, {
+          'col1': 'a',
+          'col2': 1,
+          'col3': 'i',
+          'data': 'key4',
+        });
       });
 
-      var item = (await index.record(('a', 1, 'i')).get(db))!;
+      var keyA1i = ('a', 1, 'i');
+      var indexRecordRef = index.record(keyA1i);
+      expect(await indexRecordRef.getKey(db), key1);
+      expect(await indexRecordRef.findKeys(db), [key1, key4]);
+      expect(await indexRecordRef.findKeys(db, options: SdbFindOptions()), [
+        key1,
+        key4,
+      ]);
+      var item = (await indexRecordRef.get(db))!;
       expect(item.indexKey, ('a', 1, 'i'));
 
       var items = await index.findRecords(db);
-      expect(items.keys, [key1, key3, key2]);
-      expect(items.indexKeys, [('a', 1, 'i'), ('a', 1, 'j'), ('b', 1, 'i')]);
+      expect(items.keys, [key1, key4, key3, key2]);
+      expect(items.indexKeys, [
+        ('a', 1, 'i'),
+        ('a', 1, 'i'),
+        ('a', 1, 'j'),
+        ('b', 1, 'i'),
+      ]);
       // Close the database
+
+      await indexRecordRef.delete(db);
+      items = await index.findRecords(db);
+      expect(items.keys, [key3, key2]);
+      expect(items.indexKeys, [('a', 1, 'j'), ('b', 1, 'i')]);
+
+      expect(await indexRecordRef.getKey(db), isNull);
       await db.close();
     });
 

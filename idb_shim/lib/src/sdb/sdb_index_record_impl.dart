@@ -54,6 +54,10 @@ extension SdbIndexRecordRefImplExtension<
   Future<SdbIndexRecordSnapshotImpl<K, V, I>?> getImpl(SdbClient client) =>
       client.handleDbOrTxn(dbGetImpl, txnGetImpl);
 
+  /// Get a single record key.
+  Future<K?> getKeyImpl(SdbClient client) =>
+      client.handleDbOrTxn(dbGetKeyImpl, txnGetKeyImpl);
+
   /// Get a single record.
   Future<SdbIndexRecordSnapshotImpl<K, V, I>?> dbGetImpl(
     SdbDatabaseImpl db,
@@ -85,5 +89,23 @@ extension SdbIndexRecordRefImplExtension<
       }
     }
     return null;
+  }
+
+  /// Get a single record primary key.
+  Future<K?> dbGetKeyImpl(SdbDatabaseImpl db) async {
+    return await db.inStoreTransaction(store, SdbTransactionMode.readOnly, (
+      txn,
+    ) {
+      return txnGetKeyImpl(txn.rawImpl);
+    });
+  }
+
+  /// Get a single record primary key.
+  Future<K?> txnGetKeyImpl(SdbTransactionImpl txn) async {
+    var idbStore = txn.idbTransaction.objectStore(store.name);
+    var idbIndex = idbStore.index(index.name);
+    var idbIndexKey = indexKeyToIdbKey(indexKey);
+    var key = (await idbIndex.getKey(idbIndexKey)) as K?;
+    return key;
   }
 }

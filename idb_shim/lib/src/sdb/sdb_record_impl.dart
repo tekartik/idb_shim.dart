@@ -64,17 +64,11 @@ class SdbRecordRefImpl<K extends SdbKey, V extends SdbValue>
   }
 
   /// Delete a single record.
-  Future<void> deleteImpl(SdbClient client) => client.handleDbOrTxn(
-    (db) => dbDeleteImpl(db),
+  Future<void> deleteImpl(SdbClient client) => impl.store.clientAutoTxnImpl(
+    client,
+    SdbTransactionMode.readWrite,
     (txn) => txnDeleteImpl(txn.rawImpl),
   );
-
-  /// Delete a single record.
-  Future<void> dbDeleteImpl(SdbDatabaseImpl db) {
-    return db.inStoreTransaction(store, SdbTransactionMode.readWrite, (txn) {
-      return txn.delete(key);
-    });
-  }
 
   /// Delete a single record.
   Future<void> txnDeleteImpl(SdbTransactionImpl txn) {

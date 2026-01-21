@@ -286,6 +286,30 @@ class SdbIndexRefImpl<
     });
   }
 
+  /// Count records.
+  Future<T> dbAutoTxnImpl<T>(
+    SdbDatabase db,
+    Future<T> Function(SdbTransaction txn) fn,
+  ) {
+    return db.inStoreTransaction(store, SdbTransactionMode.readOnly, (txn) {
+      return fn(txn.rawImpl);
+    });
+  }
+
+  /// Count records.
+  Future<T> clientAutoTxnImpl<T>(
+    SdbClient client,
+    Future<T> Function(SdbTransaction txn) fn,
+  ) {
+    if (client is SdbDatabase) {
+      return dbAutoTxnImpl<T>(client, fn);
+    } else if (client is SdbTransactionImpl) {
+      return fn(client);
+    } else {
+      throw ArgumentError('Invalid client type: ${client.runtimeType}');
+    }
+  }
+
   /// Find record keys.
   Future<int> txnCountImpl(
     SdbTransactionImpl txn, {
