@@ -446,6 +446,8 @@ void sdbIndexTests(TestContext ctx) {
       expect(items.keys, [key3, key2]);
       expect(items.indexKeys, [('a', 1, 'j'), ('b', 1, 'i')]);
 
+      items = await index.findRecords(db, options: SdbFindOptions(boundaries: SdbBoundaries.lower(SdbLowerBoundary(('a' , 1, 'j'), include: false),)));
+      expect(items.indexKeys, [ ('b', 1, 'i')]);
       expect(await indexRecordRef.getKey(db), isNull);
       await db.close();
     });

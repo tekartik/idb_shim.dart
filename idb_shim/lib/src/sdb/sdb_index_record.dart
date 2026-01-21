@@ -61,7 +61,8 @@ extension SdbIndexRecordRefExtension<
   }
 
   SdbFindOptions<I> _mergeOptions(SdbFindOptions<I>? options) {
-    return sdbFindOptionsMerge(options, boundaries: _boundariesKey);
+    assert(options?.boundaries == null);
+    return sdbFindOptionsMerge(options).copyWith(boundaries: _boundariesKey);
   }
 
   /// Count all records with this index key.
