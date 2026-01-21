@@ -1,4 +1,4 @@
-## 2.8.0-2
+## 2.8.0
 
 * Import jdb support (from sembast_web)
 
