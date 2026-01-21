@@ -1,3 +1,7 @@
+## 2.8.0-1
+
+* Import jdb support (from sembast_web)
+
 ## 2.7.1+2
 
 * Supports Sdb schema and improve sdb api
