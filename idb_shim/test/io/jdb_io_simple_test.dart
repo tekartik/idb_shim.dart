@@ -7,7 +7,7 @@ import 'package:sembast/sembast.dart';
 
 import 'package:test/test.dart';
 
-var testPath = '.dart_tool/sembast_web/databases';
+var testPath = '.dart_tool/idb_shim/test/databases';
 
 Future main() async {
   var jdbFactory = JdbFactoryIdb(getIdbFactorySembastIo(testPath));
