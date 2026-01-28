@@ -1,7 +1,6 @@
+import 'package:idb_shim/sdb.dart';
+
 import 'import_idb.dart';
-import 'sdb_record_snapshot.dart';
-import 'sdb_store_impl.dart';
-import 'sdb_types.dart';
 
 /// Record snapshot implementation.
 class SdbRecordSnapshotImpl<K extends SdbKey, V extends SdbValue>
@@ -15,13 +14,25 @@ class SdbRecordSnapshotImpl<K extends SdbKey, V extends SdbValue>
 
   @override
   String toString() => 'Record(${store.name}, $key, ${logTruncateAny(value)}';
+
+  @override
+  SdbRecordSnapshot<RK, RV> cast<RK extends SdbKey, RV extends SdbValue>() {
+    if (this is SdbRecordSnapshot<RK, RV>) {
+      return this as SdbRecordSnapshot<RK, RV>;
+    }
+    return SdbRecordSnapshotImpl<RK, RV>(
+      store.cast<RK, RV>(),
+      key as RK,
+      value as RV,
+    );
+  }
 }
 
 /// Record key implementation.
 class SdbRecordKeyImpl<K extends SdbKey, V extends SdbValue>
-    implements SdbRecordKey<K, V> {
+    implements SdbRecordRef<K, V> {
   @override
-  final SdbStoreRefImpl<K, V> store;
+  final SdbStoreRef<K, V> store;
   @override
   final K key;
 
@@ -30,4 +41,9 @@ class SdbRecordKeyImpl<K extends SdbKey, V extends SdbValue>
 
   @override
   String toString() => 'RecordKey(${store.name}, $key)';
+
+  @override
+  SdbRecordRef<RK, RV> cast<RK extends SdbKey, RV extends SdbValue>() {
+    return store.cast<RK, RV>().record(key as RK);
+  }
 }

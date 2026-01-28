@@ -17,6 +17,9 @@ class SdbTestContext {
   SdbTestContext(this.factory);
 }
 
+/// Simple SDB test context using memory IdbFactory
+final sdbMemoryContext = SdbTestContext(sdbFactoryFromIdb(idbFactoryMemory));
+
 void idbSimpleSdbTest(TestContext ctx) {
   var factory = sdbFactoryFromIdb(ctx.factory);
   simpleSdbTest(SdbTestContext(factory));

@@ -7,6 +7,7 @@ import 'package:idb_shim/src/sdb/sdb_database_impl.dart';
 import 'package:meta/meta.dart';
 
 import 'sdb.dart';
+import 'sdb_changes_listener.dart';
 import 'sdb_database.dart';
 import 'sdb_factory_impl.dart';
 import 'sdb_store_impl.dart';
@@ -51,6 +52,9 @@ class SdbDatabaseImpl
   @override
   Iterable<String> get storeNames => idbDatabase.objectStoreNames;
 
+  /// Store change listeners
+  final changesListener = SdbDatabaseChangesListener();
+
   /// Transaction.
   @override
   Future<T> inStoreTransaction<T, K extends SdbKey, V extends SdbValue>(
@@ -58,8 +62,15 @@ class SdbDatabaseImpl
     SdbTransactionMode mode,
     FutureOr<T> Function(SdbSingleStoreTransaction<K, V> txn) callback,
   ) async {
+    var extraStoreNames = changesListener.storeGetExtraStoreNames(store);
+
     var txnStore = SdbTransactionStoreRefImpl<K, V>(store.impl);
-    var txn = SdbSingleStoreTransactionImpl(impl, mode, txnStore);
+    var txn = SdbSingleStoreTransactionImpl(
+      impl,
+      mode,
+      txnStore,
+      extraStoreNames: extraStoreNames,
+    );
     return txn.run(callback);
   }
 
@@ -78,7 +89,14 @@ class SdbDatabaseImpl
     SdbTransactionMode mode,
     FutureOr<T> Function(SdbMultiStoreTransaction txn) callback,
   ) {
-    var txn = SdbMultiStoreTransactionImpl(impl, mode, stores);
+    var extraStoreNames = changesListener.storesGetExtraStoreNames(stores);
+
+    var txn = SdbMultiStoreTransactionImpl(
+      impl,
+      mode,
+      stores,
+      extraStoreNames: extraStoreNames,
+    );
     return txn.run(callback);
   }
 

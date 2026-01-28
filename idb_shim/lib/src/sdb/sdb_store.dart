@@ -1,5 +1,6 @@
 import 'sdb.dart';
 import 'sdb_index_impl.dart';
+import 'sdb_record_impl.dart';
 import 'sdb_store_impl.dart';
 
 /// A simple db store definition.
@@ -9,6 +10,9 @@ abstract class SdbStoreRef<K extends SdbKey, V extends SdbValue> {
 
   /// Store definition.
   factory SdbStoreRef(String name) => SdbStoreRefImpl(name);
+
+  /// Cast if needed
+  SdbStoreRef<RK, RV> cast<RK extends SdbKey, RV extends SdbValue>();
 }
 
 /// Store methods.
@@ -45,4 +49,12 @@ extension SdbStoreRefExtension<K extends SdbKey, V extends SdbValue>
   /// Upper boundary
   SdbBoundary<K> upperBoundary(K value, {bool? include = false}) =>
       SdbUpperBoundary(value, include: include);
+
+  /// Record reference.
+  SdbRecordRef<K, V> record(K key) => SdbRecordRefImpl<K, V>(impl, key);
+
+  /// Create a reference to multiple records
+  ///
+  List<SdbRecordRef<K, V>> records(Iterable<K> keys) =>
+      keys.map((key) => record(key)).toList();
 }

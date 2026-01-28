@@ -1,10 +1,15 @@
 import 'dart:async';
 
 import 'package:idb_shim/idb.dart' as idb;
+import 'package:idb_shim/src/common/common_import.dart';
 import 'package:idb_shim/src/sdb/sdb_client.dart';
+import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_store_impl.dart';
+import 'package:idb_shim/src/utils/async_utils.dart';
+import 'package:idb_shim/src/utils/env_utils.dart';
 
 import 'sdb.dart';
+import 'sdb_changes_listener.dart';
 import 'sdb_database_impl.dart';
 import 'sdb_store_impl.dart';
 
@@ -18,6 +23,10 @@ extension SdbTransactionInternalExtension on SdbTransaction {
 class SdbTransactionImpl
     with SdbClientInterfaceDefaultMixin
     implements SdbTransaction, SdbClientInterface, SdbClientIdbInterface {
+  /// Extra store names to open in addition to listened stores.
+  /// during write transaction with changes listener.
+  final List<String>? extraStoreNames;
+
   /// Database.
   final SdbDatabaseImpl db;
 
@@ -31,10 +40,13 @@ class SdbTransactionImpl
   Future<void> get completed => idbTransaction.completed;
 
   /// Transaction implementation.
-  SdbTransactionImpl(this.db, this.mode);
+  SdbTransactionImpl(this.db, this.mode, {required this.extraStoreNames});
+
+  /// Changes during transaction, only if listened to.
+  SdbDatabaseTransactionChanges? changes;
 
   /// During open
-  SdbTransactionImpl.open(this.db, this.idbTransaction)
+  SdbTransactionImpl.open(this.db, this.idbTransaction, {this.extraStoreNames})
     : mode = SdbTransactionMode.readWrite;
 
   /// Store implementation.
@@ -66,12 +78,61 @@ class SdbTransactionImpl
   Future<T> runCallback<T>(FutureOr<T> Function() callback) async {
     T result;
     try {
+      /// Handle change listener
+      var dbImpl = this.dbImpl;
+      var changesListener = dbImpl.changesListener;
+      if (changesListener.hasListeners) {
+        changes = SdbDatabaseTransactionChanges();
+      }
+
       var rawResult = callback();
 
       if (rawResult is Future) {
         result = (await rawResult);
       } else {
         result = rawResult;
+      }
+
+      var txnChanges = changes;
+
+      /// Handle end of transaction change
+      if (txnChanges != null) {
+        while (txnChanges.hasChanges) {
+          try {
+            /// Get all changes
+            var storeChangesList = txnChanges.getAllStoreChanges().toList();
+            if (storeChangesList.isEmpty) {
+              break;
+            }
+
+            /// Clear changes
+            txnChanges.clearChanges();
+            var result = runSequentially(
+              storeChangesList.map((item) {
+                return () {
+                  var store = item.$1;
+                  var changes = item.$2;
+
+                  var recordChanges = changes.getChanges();
+                  var result = changesListener.handleStoreChanges(
+                    this,
+                    store,
+                    recordChanges,
+                  );
+                  return result;
+                };
+              }).toList(),
+            );
+            if (result is Future) {
+              await result;
+            }
+          } catch (e) {
+            if (isDebug) {
+              idbLog('Error handling changes listener: $e');
+            }
+            rethrow;
+          }
+        }
       }
     } finally {
       // wait for completion

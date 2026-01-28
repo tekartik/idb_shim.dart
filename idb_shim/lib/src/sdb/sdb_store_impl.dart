@@ -1,6 +1,5 @@
 import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
-import 'package:idb_shim/src/sdb/sdb_record_impl.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 
 import 'sdb.dart';
@@ -14,6 +13,10 @@ extension SdbStoreRefInternalExtension<K extends SdbKey, V extends SdbValue>
   /// Store reference implementation.
   SdbStoreRefImpl<K, V> get impl => this as SdbStoreRefImpl<K, V>;
 }
+
+/// Store reference implementation.
+extension SdbStoreRefExtension<K extends SdbKey, V extends SdbValue>
+    on SdbStoreRef<K, V> {}
 
 /// Store reference implementation.
 extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
@@ -164,8 +167,37 @@ extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
     ),
   );
 
-  /// Record reference.
-  SdbRecordRef<K, V> record(K key) => SdbRecordRefImpl<K, V>(impl, key);
+  /// Listen for changes on a given store.
+  ///
+  /// Note that you can perform changes in the callback using the transaction
+  /// provided. Also note that if you modify and already modified record,
+  /// the callback will be called again.
+  ///
+  /// To use with caution as it has a cost.
+  ///
+  /// Like transaction, it can run multiple times, so limit your changes to the
+  /// database.
+  void addOnChangesListener(
+    SdbDatabase database,
+    SdbTransactionRecordChangeListener<K, V> onChanges, {
+    List<String>? extraStoreNames,
+  }) {
+    database.impl.changesListener.addStoreChangesListener(
+      this,
+      onChanges,
+      extraStoreNames: extraStoreNames,
+    );
+  }
+
+  /// Stop listening for changes.
+  ///
+  /// Make sure the same callback is used than the one used in addOnChangesListener.
+  void removeOnChangesListener(
+    SdbDatabase database,
+    SdbTransactionRecordChangeListener<K, V> onChanges,
+  ) {
+    database.impl.changesListener.removeStoreChangesListener(this, onChanges);
+  }
 }
 
 /// Store reference implementation.
@@ -407,6 +439,15 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
     } else {
       throw ArgumentError('Invalid client type: ${client.runtimeType}');
     }
+  }
+
+  /// Cast if needed
+  @override
+  SdbStoreRef<RK, RV> cast<RK extends SdbKey, RV extends SdbValue>() {
+    if (this is SdbStoreRef<RK, RV>) {
+      return this as SdbStoreRef<RK, RV>;
+    }
+    return SdbStoreRef<RK, RV>(name);
   }
 }
 

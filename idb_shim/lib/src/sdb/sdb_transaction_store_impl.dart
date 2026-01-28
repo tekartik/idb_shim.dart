@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:idb_shim/sdb.dart';
 import 'package:idb_shim/src/sdb/sdb_boundary_impl.dart';
+import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_utils.dart';
@@ -35,10 +36,17 @@ class SdbSingleStoreTransactionImpl<K extends SdbKey, V extends SdbValue>
   final SdbTransactionStoreRefImpl<K, V> txnStore;
 
   /// Single store transaction implementation.
-  SdbSingleStoreTransactionImpl(super.db, super.mode, this.txnStore) {
+  SdbSingleStoreTransactionImpl(
+    super.db,
+    super.mode,
+    this.txnStore, {
+    required super.extraStoreNames,
+  }) {
     txnStore.transaction = this;
     idbTransaction = db.idbDatabase.transaction(
-      txnStore.name,
+      (mode == SdbTransactionMode.readWrite && extraStoreNames != null)
+          ? [txnStore.name, ...extraStoreNames!]
+          : txnStore.name,
       idbTransactionMode(mode),
     );
   }
@@ -104,7 +112,23 @@ mixin SdbTransactionStoreRefImplMixin<K extends SdbKey, V extends SdbValue>
 
   /// Put a record.
   Future<void> putImpl(K? key, V value) async {
-    await idbObjectStore.put(value, key);
+    var dbImpl = transaction.dbImpl;
+    var changesListener = dbImpl.changesListener;
+    var hasChangeListener = changesListener.storeHasChangeListener(store);
+    SdbRecordSnapshot<K, V>? oldSnapshot;
+    SdbRecordSnapshot<K, V>? newSnapshot;
+    if (hasChangeListener && key != null) {
+      oldSnapshot = await idbObjectStore.getRecordSnapshot(store, key);
+    }
+
+    /// If the record is successfully stored, then a success event is fired on the
+    /// returned request object with the result set to the key for the stored
+    var result = await idbObjectStore.put(value, key);
+    if (hasChangeListener) {
+      var recordKey = result as K;
+      newSnapshot = SdbRecordSnapshotImpl<K, V>(store, recordKey, value);
+      changesListener.addChange(transaction, oldSnapshot, newSnapshot);
+    }
   }
 
   @override
@@ -113,6 +137,23 @@ mixin SdbTransactionStoreRefImplMixin<K extends SdbKey, V extends SdbValue>
 
   @override
   Iterable<String> get indexNames => idbObjectStore.indexNames;
+}
+
+extension on idb.ObjectStore {
+  Future<SdbRecordSnapshotImpl<K, V>?> getRecordSnapshot<
+    K extends SdbKey,
+    V extends SdbValue
+  >(SdbStoreRef<K, V> store, K key) async {
+    var value = await getObject(key);
+    if (value != null) {
+      // cast the map if needed
+      if (value is Map && value is! Map<String, Object?>) {
+        value = value.cast<String, Object?>();
+      }
+      return SdbRecordSnapshotImpl<K, V>(store, key, fixResult<V>(value));
+    }
+    return null;
+  }
 }
 
 /// Transaction store reference implementation.
@@ -139,16 +180,8 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
       _idbObjectStore ??= transaction.idbTransaction.objectStore(store.name);
 
   /// Get a single record.
-  Future<SdbRecordSnapshotImpl<K, V>?> getRecordImpl(K key) async {
-    var result = await idbObjectStore.getObject(key);
-    if (result != null) {
-      // cast the map if needed
-      if (result is Map && store is! SdbModel) {
-        result = result.cast<String, Object?>();
-      }
-      return SdbRecordSnapshotImpl<K, V>(store, key, fixResult<V>(result));
-    }
-    return null;
+  Future<SdbRecordSnapshotImpl<K, V>?> getRecordImpl(K key) {
+    return idbObjectStore.getRecordSnapshot<K, V>(store, key);
   }
 
   /// Check if a record exists.
@@ -159,11 +192,28 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
 
   /// Add a record.
   Future<K> addImpl(V value) async {
+    var hasChangeListener = transaction.dbImpl.changesListener
+        .storeHasChangeListener(store);
+
+    K added(K key, V value) {
+      if (hasChangeListener) {
+        var newSnapshot = SdbRecordSnapshotImpl<K, V>(store, key, value);
+        transaction.dbImpl.changesListener.addChange(
+          transaction,
+          null,
+          newSnapshot,
+        );
+      }
+      return key;
+    }
+
     if (idbObjectStore.keyPath != null) {
-      return (await idbObjectStore.add(value)) as K;
+      var result = (await idbObjectStore.add(value)) as K;
+      return added(result, value);
     }
     if (K == int) {
-      return (await idbObjectStore.add(value)) as K;
+      var result = (await idbObjectStore.add(value)) as K;
+      return added(result, value);
     } else if (K == String) {
       String key;
       while (true) {
@@ -172,7 +222,8 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
           break;
         }
       }
-      return (await idbObjectStore.add(value, key)) as K;
+      var result = (await idbObjectStore.add(value, key)) as K;
+      return added(result, value);
     } else {
       throw UnsupportedError(
         'Key type $K not supported for add, please specify a key',
@@ -182,7 +233,17 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
 
   /// Delete a record.
   Future<void> deleteImpl(K key) async {
+    var dbImpl = transaction.dbImpl;
+    var changesListener = dbImpl.changesListener;
+    var hasChangeListener = changesListener.storeHasChangeListener(store);
+    SdbRecordSnapshot<K, V>? oldSnapshot;
+    if (hasChangeListener) {
+      oldSnapshot = await idbObjectStore.getRecordSnapshot(store, key);
+    }
     await idbObjectStore.delete(key);
+    if (hasChangeListener) {
+      changesListener.addChange(transaction, oldSnapshot, null);
+    }
   }
 
   SdbRecordSnapshotImpl<K, V> _sdbRecordSnapshot(idb.CursorRow row) {
@@ -288,7 +349,10 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
 
   /// Delete records.
   Future<void> deleteRecordsImpl({required SdbFindOptions<K> options}) async {
-    if (options.filter != null) {
+    var changesListener = transaction.dbImpl.changesListener;
+    var hasChangeListener = changesListener.storeHasChangeListener(store);
+
+    if (options.filter != null || hasChangeListener) {
       // Slow
       var records = await findRecordsImpl(options: options);
       for (var record in records) {
@@ -346,11 +410,17 @@ class SdbMultiStoreTransactionImpl extends SdbTransactionImpl
   final _txnStoreMap = <SdbStoreRef, SdbTransactionStoreRefImpl>{};
 
   /// Multi store transaction implementation.
-  SdbMultiStoreTransactionImpl(super.db, super.mode, this.stores) {
-    idbTransaction = db.idbDatabase.transactionList(
-      stores.map((store) => store.name).toList(),
-      idbTransactionMode(mode),
-    );
+  SdbMultiStoreTransactionImpl(
+    super.db,
+    super.mode,
+    this.stores, {
+    required super.extraStoreNames,
+  }) {
+    idbTransaction = db.idbDatabase.transactionList([
+      ...stores.map((store) => store.name),
+      if (mode == SdbTransactionMode.readWrite && extraStoreNames != null)
+        ...?extraStoreNames,
+    ], idbTransactionMode(mode));
   }
 
   /// Get a transaction store.

@@ -1,10 +1,23 @@
 import 'sdb_client.dart';
 import 'sdb_record_impl.dart';
 import 'sdb_record_snapshot.dart';
+import 'sdb_store.dart';
 import 'sdb_types.dart';
 
-/// Record reference.
-typedef SdbRecordRef<K extends SdbKey, V extends SdbValue> = SdbRecordKey<K, V>;
+/// Record ref (or key).
+abstract class SdbRecordRef<K extends SdbKey, V extends SdbValue> {
+  /// Store reference.
+  SdbStoreRef<K, V> get store;
+
+  /// Primary key.
+  K get key;
+
+  /// Cast if needed.
+  SdbRecordRef<RK, RV> cast<RK extends SdbKey, RV extends SdbValue>();
+}
+
+/// Record key (prefer SdbRecordRef).
+typedef SdbRecordKey<K extends SdbKey, V extends SdbValue> = SdbRecordRef<K, V>;
 
 /// Store methods.
 extension SdbRecordRefExtension<K extends SdbKey, V extends SdbValue>

@@ -92,4 +92,23 @@ class SdbRecordRefImpl<K extends SdbKey, V extends SdbValue>
   Future<void> txnPutImpl(SdbTransactionImpl txn, V value) {
     return txn.storeImpl(store).putImpl(key, value);
   }
+
+  @override
+  SdbRecordRef<RK, RV> cast<RK extends SdbKey, RV extends SdbValue>() {
+    if (this is SdbRecordRef<RK, RV>) {
+      return this as SdbRecordRef<RK, RV>;
+    }
+    return store.cast<RK, RV>().record(key as RK);
+  }
+
+  @override
+  int get hashCode => store.hashCode ^ key.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is SdbRecordRef) {
+      return store == other.store && key == other.key;
+    }
+    return false;
+  }
 }

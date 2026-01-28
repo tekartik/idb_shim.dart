@@ -40,12 +40,17 @@ export 'sdb_open.dart'
         SdbOpenStoreRef,
         SdbOpenStoreRefExtension,
         SdbOpenIndexRef;
-export 'sdb_record.dart' show SdbRecordRef, SdbRecordRefExtension;
+export 'sdb_record.dart' show SdbRecordRef, SdbRecordKey, SdbRecordRefExtension;
+export 'sdb_record_change.dart'
+    show
+        SdbRecordChange,
+        SdbRecordChangeExtension,
+        SdbTransactionRecordChangeListener;
 export 'sdb_record_snapshot.dart'
     show
         SdbRecordSnapshot,
         SdbRecordSnapshotListExt,
-        SdbRecordKey,
+        SdbRecordSnapshotExt,
         SdbRecordKeyListExt;
 export 'sdb_schema.dart'
     show

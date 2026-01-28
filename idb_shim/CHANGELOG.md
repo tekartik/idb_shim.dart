@@ -1,3 +1,7 @@
+## 2.8.2-1
+
+* Add onChange listener to SdbDatabase
+
 ## 2.8.1
 
 * Import jdb support (from sembast_web)

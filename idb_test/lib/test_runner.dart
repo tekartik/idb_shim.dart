@@ -1,5 +1,6 @@
 library;
 
+import 'package:idb_test/sdb_changes_listener_persistent_test.dart';
 import 'package:idb_test/sdb_open_test.dart';
 import 'package:idb_test/sdb_schema_test.dart';
 import 'package:idb_test/sdb_test.dart';
@@ -44,6 +45,7 @@ void defineAllTests(TestContext ctx) {
   exception_test.defineTests(ctx);
   type_test.defineTests(ctx);
   idbSimpleSdbTest(ctx);
+  defineIdbSdbChangesListenerTests(ctx);
   sdbIndexTests(ctx);
   idbSdbOpenTests(ctx);
   idbSchemaSdbTest(ctx);
