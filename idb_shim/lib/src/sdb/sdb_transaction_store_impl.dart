@@ -404,7 +404,7 @@ extension SdbMultiStoreTransactionInternalExtension
 class SdbMultiStoreTransactionImpl extends SdbTransactionImpl
     implements SdbMultiStoreTransaction {
   /// Stores.
-  List<SdbStoreRef> stores;
+  late List<String> _stores;
 
   /// Filled when requested.
   final _txnStoreMap = <SdbStoreRef, SdbTransactionStoreRefImpl>{};
@@ -413,14 +413,18 @@ class SdbMultiStoreTransactionImpl extends SdbTransactionImpl
   SdbMultiStoreTransactionImpl(
     super.db,
     super.mode,
-    this.stores, {
+    List<String> stores, {
     required super.extraStoreNames,
   }) {
-    idbTransaction = db.idbDatabase.transactionList([
-      ...stores.map((store) => store.name),
+    _stores = [
+      ...stores,
       if (mode == SdbTransactionMode.readWrite && extraStoreNames != null)
         ...?extraStoreNames,
-    ], idbTransactionMode(mode));
+    ];
+    idbTransaction = db.idbDatabase.transactionList(
+      _stores,
+      idbTransactionMode(mode),
+    );
   }
 
   /// Get a transaction store.
@@ -428,8 +432,8 @@ class SdbMultiStoreTransactionImpl extends SdbTransactionImpl
   txnStoreImpl<K extends SdbKey, V extends SdbValue>(SdbStoreRef<K, V> store) {
     var txnStore = _txnStoreMap[store];
     if (txnStore == null) {
-      for (var existingStore in stores) {
-        if (existingStore == store) {
+      for (var existingStore in _stores) {
+        if (existingStore == store.name) {
           txnStore = _txnStoreMap[store] = SdbTransactionStoreRefImpl<K, V>(
             store.impl,
           );
@@ -442,7 +446,7 @@ class SdbMultiStoreTransactionImpl extends SdbTransactionImpl
       return txnStore as SdbTransactionStoreRef<K, V>;
     }
     throw StateError(
-      'Store $store not found in transaction(${stores.map((e) => e.name).join(', ')})',
+      'Store $store not found in transaction(${_stores.join(', ')})',
     );
   }
 

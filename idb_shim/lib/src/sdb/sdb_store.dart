@@ -16,6 +16,12 @@ abstract class SdbStoreRef<K extends SdbKey, V extends SdbValue> {
 }
 
 /// Store methods.
+extension SdbStoreRefListExtension on List<SdbStoreRef> {
+  /// Store names
+  List<String> get names => map((s) => s.name).toList();
+}
+
+/// Store methods.
 extension SdbStoreRefExtension<K extends SdbKey, V extends SdbValue>
     on SdbStoreRef<K, V> {
   /// Index reference on 1 field

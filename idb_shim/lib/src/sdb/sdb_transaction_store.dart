@@ -31,6 +31,10 @@ extension SdbTransactionStoreRefExtension<K extends SdbKey, V extends SdbValue>
   /// Get a single record.
   Future<SdbRecordSnapshot<K, V>?> getRecord(K key) => _impl.getRecordImpl(key);
 
+  /// Get a single value.
+  Future<V?> getValue(K key) =>
+      getRecord(key).then((snapshot) => snapshot?.value);
+
   /// True if the record exists.
   Future<bool> exists(K key) => _impl.existsImpl(key);
 
@@ -223,7 +227,8 @@ abstract class SdbMultiStoreTransaction implements SdbTransaction {}
 /// Transaction store actions.
 extension SdbMultiStoreTransactionExtension on SdbMultiStoreTransaction {
   /// Get a transaction store.
+  @Deprecated('Use txn.store(store) instead')
   SdbTransactionStoreRef<K, V> txnStore<K extends SdbKey, V extends SdbValue>(
     SdbStoreRef<K, V> store,
-  ) => impl.txnStoreImpl<K, V>(store);
+  ) => impl.store<K, V>(store);
 }

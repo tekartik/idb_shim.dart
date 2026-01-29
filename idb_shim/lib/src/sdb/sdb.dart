@@ -70,7 +70,8 @@ export 'sdb_schema.dart'
         SdbIndexSchemaExtension,
         SdbKeyPathExtension,
         SdbIndexRefSchemaExtension;
-export 'sdb_store.dart' show SdbStoreRef, SdbStoreRefExtension;
+export 'sdb_store.dart'
+    show SdbStoreRef, SdbStoreRefExtension, SdbStoreRefListExtension;
 export 'sdb_store_impl.dart' show SdbStoreRefDbExtension;
 export 'sdb_transaction.dart'
     show SdbTransaction, SdbTransactionMode, SdbTransactionExtension;

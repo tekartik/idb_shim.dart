@@ -13,11 +13,20 @@ abstract class SdbDatabase implements SdbClient {
   );
 
   /// Run a transaction.
-  Future<T> inStoresTransaction<T, K extends SdbKey, V extends SdbValue>(
+  Future<T> inStoresTransaction<T>(
     List<SdbStoreRef> stores,
     SdbTransactionMode mode,
     FutureOr<T> Function(SdbMultiStoreTransaction txn) callback,
   );
+
+  /// Run a transaction.
+  /// Use either [storeNames] or [stores], mode default to read only
+  Future<T> inTransaction<T>({
+    List<String>? storeNames,
+    List<SdbStoreRef>? stores,
+    SdbTransactionMode? mode,
+    required FutureOr<T> Function(SdbTransaction txn) run,
+  });
 
   /// Get the version of the database.
   int get version;
@@ -52,7 +61,7 @@ mixin SdbDatabaseDefaultMixin implements SdbDatabase, SdbClientInterface {
   }
 
   @override
-  Future<T> inStoresTransaction<T, K extends SdbKey, V extends SdbValue>(
+  Future<T> inStoresTransaction<T>(
     List<SdbStoreRef<SdbKey, SdbValue>> stores,
     SdbTransactionMode mode,
     FutureOr<T> Function(SdbMultiStoreTransaction txn) callback,

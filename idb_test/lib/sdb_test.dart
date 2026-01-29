@@ -460,6 +460,13 @@ void simpleSdbTest(SdbTestContext ctx) {
           expect(key2.isNotEmpty, isTrue);
         },
       );
+      await db.inTransaction(
+        stores: [testStore, testStore2],
+        run: (txn) async {
+          var key = 1;
+          expect(await txn.store(testStore).getValue(key), {'test': 1});
+        },
+      );
 
       await db.close();
     });

@@ -223,12 +223,12 @@ class _AllStoresChangesListeners {
 /// Database listener.
 class SdbDatabaseChangesListener {
   /// Get store changes listener
-  SdbStoreChangesListeners? getStoreChangesListener(SdbStoreRef store) {
+  SdbStoreChangesListeners? getStoreChangesListener(String store) {
     var storeChangesListeners = _stores[store];
     return storeChangesListeners;
   }
 
-  final _stores = <SdbStoreRef, SdbStoreChangesListeners>{};
+  final _stores = <String, SdbStoreChangesListeners>{};
   _AllStoresChangesListeners? _allStoresChangesListenersOrNull;
   _AllStoresChangesListeners get _allStoresChangesListeners =>
       _allStoresChangesListenersOrNull!;
@@ -249,7 +249,7 @@ class SdbDatabaseChangesListener {
 
   /// true if it has a change listener for this store
   bool _hasStoreChangeListener(SdbStoreRef ref) =>
-      isNotEmpty && _stores.containsKey(ref);
+      isNotEmpty && _stores.containsKey(ref.name);
 
   /// Handle store changes
   FutureOr<void> handleStoreChanges(
@@ -257,7 +257,7 @@ class SdbDatabaseChangesListener {
     SdbStoreRef store,
     Iterable<SdbRecordChange> changes,
   ) {
-    var listener = getStoreChangesListener(store);
+    var listener = getStoreChangesListener(store.name);
 
     if (listener != null) {
       var steps = listener.onChanges.map((storeChangesListener) {
@@ -296,7 +296,7 @@ class SdbDatabaseChangesListener {
 
   /// Add a store change listener
   void addStoreChangesListener<K extends SdbKey, V extends SdbValue>(
-    SdbStoreRef<K, V> store,
+    String store,
     SdbTransactionRecordChangeListener<K, V> onChanges, {
     required List<String>? extraStoreNames,
   }) {
@@ -317,13 +317,13 @@ class SdbDatabaseChangesListener {
     SdbStoreRef<K, V> store,
     SdbTransactionRecordChangeListener<K, V> onChanges,
   ) {
-    var storeChangesListeners = _stores[store];
+    var storeChangesListeners = _stores[store.name];
     if (storeChangesListeners != null) {
       storeChangesListeners.onChanges.remove(
         _SdbStoreChangesListener<K, V>(onChanges, extraStoreNames: null),
       );
       if (storeChangesListeners.onChanges.isEmpty) {
-        _stores.remove(store);
+        _stores.remove(store.name);
       }
     }
   }
@@ -347,7 +347,7 @@ class SdbDatabaseChangesListener {
       return;
     }
 
-    var listener = getStoreChangesListener(store);
+    var listener = getStoreChangesListener(store.name);
     if (listener == null) {
       return;
     }
@@ -359,7 +359,7 @@ class SdbDatabaseChangesListener {
   }
 
   /// Get extra store names for a store transaction
-  List<String>? storeGetExtraStoreNames(SdbStoreRef store) {
+  List<String>? storeGetExtraStoreNames(String store) {
     var storeListeners = getStoreChangesListener(store);
     if (storeListeners != null) {
       var extraStoreNames = <String>{};
@@ -368,6 +368,7 @@ class SdbDatabaseChangesListener {
           extraStoreNames.addAll(listener.extraStoreNames!);
         }
       }
+      extraStoreNames.remove(store);
       if (extraStoreNames.isNotEmpty) {
         return extraStoreNames.toList();
       }
@@ -376,13 +377,11 @@ class SdbDatabaseChangesListener {
   }
 
   /// Stores extra store names for a store transaction
-  List<String>? storesGetExtraStoreNames(
-    List<SdbStoreRef<SdbKey, SdbValue>> stores,
-  ) {
+  List<String>? storesGetExtraStoreNames(List<String> stores) {
     if (!hasListeners) {
       return null;
     }
-    var existing = stores.map((e) => e.name).toSet();
+    var existing = stores.toSet();
     var allExtraStoreNames = <String>{};
     for (var store in stores) {
       var extraStoreNames = storeGetExtraStoreNames(store);

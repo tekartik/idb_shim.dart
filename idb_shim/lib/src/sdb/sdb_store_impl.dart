@@ -15,10 +15,6 @@ extension SdbStoreRefInternalExtension<K extends SdbKey, V extends SdbValue>
 }
 
 /// Store reference implementation.
-extension SdbStoreRefExtension<K extends SdbKey, V extends SdbValue>
-    on SdbStoreRef<K, V> {}
-
-/// Store reference implementation.
 extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
     on SdbStoreRef<K, V> {
   /// Add a single record.
@@ -183,7 +179,7 @@ extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
     List<String>? extraStoreNames,
   }) {
     database.impl.changesListener.addStoreChangesListener(
-      this,
+      name,
       onChanges,
       extraStoreNames: extraStoreNames,
     );

@@ -69,7 +69,7 @@ class SdbDatabaseImpl
     SdbTransactionMode mode,
     FutureOr<T> Function(SdbSingleStoreTransaction<K, V> txn) callback,
   ) async {
-    var extraStoreNames = changesListener.storeGetExtraStoreNames(store);
+    var extraStoreNames = changesListener.storeGetExtraStoreNames(store.name);
 
     var txnStore = SdbTransactionStoreRefImpl<K, V>(store.impl);
     var txn = SdbSingleStoreTransactionImpl(
@@ -82,7 +82,7 @@ class SdbDatabaseImpl
   }
 
   @override
-  Future<T> inStoresTransaction<T, K extends SdbKey, V extends SdbValue>(
+  Future<T> inStoresTransaction<T>(
     List<SdbStoreRef> stores,
     SdbTransactionMode mode,
     FutureOr<T> Function(SdbMultiStoreTransaction txn) callback,
@@ -96,15 +96,46 @@ class SdbDatabaseImpl
     SdbTransactionMode mode,
     FutureOr<T> Function(SdbMultiStoreTransaction txn) callback,
   ) {
-    var extraStoreNames = changesListener.storesGetExtraStoreNames(stores);
+    var extraStoreNames = changesListener.storesGetExtraStoreNames(
+      stores.names,
+    );
 
     var txn = SdbMultiStoreTransactionImpl(
       impl,
       mode,
-      stores,
+      stores.names,
       extraStoreNames: extraStoreNames,
     );
     return txn.run(callback);
+  }
+
+  /// Run a transaction.
+  /// Use either [storeNames] or [stores], mode default to read only
+  @override
+  Future<T> inTransaction<T>({
+    List<String>? storeNames,
+    List<SdbStoreRef>? stores,
+    SdbTransactionMode? mode,
+    required FutureOr<T> Function(SdbTransaction txn) run,
+  }) {
+    storeNames ??= stores?.map((e) => e.name).toList();
+    if (storeNames?.isNotEmpty ?? false) {
+      var extraStoreNames = changesListener.storesGetExtraStoreNames(
+        storeNames!,
+      );
+
+      var txn = SdbMultiStoreTransactionImpl(
+        impl,
+        mode ?? SdbTransactionMode.readOnly,
+        storeNames,
+        extraStoreNames: extraStoreNames,
+      );
+      return txn.run(run);
+    } else {
+      throw ArgumentError(
+        'Either storeNames ($storeNames) or stores ($stores) must be provided',
+      );
+    }
   }
 
   @override
