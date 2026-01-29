@@ -1,11 +1,7 @@
+import 'package:idb_shim/sdb.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 
 import 'sdb_client.dart';
-
-import 'sdb_store.dart';
-import 'sdb_transaction.dart';
-import 'sdb_transaction_store.dart';
-import 'sdb_types.dart';
 
 /// SimpleDb definition.
 abstract class SdbDatabase implements SdbClient {
@@ -25,6 +21,12 @@ abstract class SdbDatabase implements SdbClient {
 
   /// Get the version of the database.
   int get version;
+
+  /// Get the name of the database.
+  String get name;
+
+  /// Factory
+  SdbFactory get factory;
 
   /// Close the database.
   Future<void> close();

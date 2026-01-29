@@ -12,10 +12,16 @@ export 'package:idb_shim/idb_shim.dart';
 var _exportId = 0;
 String get _tempExportPath => 'sembast://tmp/idb_shim/${++_exportId}';
 
+/// Compat
+@Deprecated('Use idbExportDatabase')
+Future<Map<String, Object?>> sdbExportDatabase(Database db) async {
+  return idbExportDatabase(db);
+}
+
 ///
 /// export a database in a sdb export format
 ///
-Future<Map<String, Object?>> sdbExportDatabase(Database db) async {
+Future<Map<String, Object?>> idbExportDatabase(Database db) async {
   var srcIdbFactory = db.factory;
 
   sembast.Database? sdbDatabase;
@@ -35,12 +41,22 @@ Future<Map<String, Object?>> sdbExportDatabase(Database db) async {
   }
 }
 
+/// Compat
+@Deprecated('Use idbImportDatabase')
+Future<Database> sdbImportDatabase(
+  Object data,
+  IdbFactory dstFactory,
+  String dstDbName,
+) {
+  return idbImportDatabase(data, dstFactory, dstDbName);
+}
+
 ///
 /// Copy a database export (lines or map sembast export) to another
 ///
 /// return the opened database
 ///
-Future<Database> sdbImportDatabase(
+Future<Database> idbImportDatabase(
   Object data,
   IdbFactory dstFactory,
   String dstDbName,
@@ -69,10 +85,16 @@ Future<Database> sdbImportDatabase(
   }
 }
 
+/// Compat
+@Deprecated('Use idbExportDatabaseLines')
+Future<List<Object>> sdbExportDatabaseLines(Database db) async {
+  return idbExportDatabaseLines(db);
+}
+
 ///
 /// export a database in a sdb export format
 ///
-Future<List<Object>> sdbExportDatabaseLines(Database db) async {
+Future<List<Object>> idbExportDatabaseLines(Database db) async {
   var srcIdbFactory = db.factory;
 
   sembast.Database? sdbDatabase;

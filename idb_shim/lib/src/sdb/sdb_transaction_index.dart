@@ -30,6 +30,9 @@ abstract class SdbTransactionIndexRef<
     return _SdbTransactionIndexRefIdb<K, V, I>(ref: index, store: txnStore);
   }
 
+  /// Index name.
+  String get name;
+
   /// Transaction reference.
   SdbTransaction get transaction;
 
@@ -60,6 +63,9 @@ mixin SdbTransactionIndexRefIdbMixin<
   bool get unique => idbIndex.unique;
   @override
   bool get multiEntry => idbIndex.multiEntry;
+
+  @override
+  String get name => idbIndex.name;
 }
 
 class _SdbTransactionIndexRefIdb<

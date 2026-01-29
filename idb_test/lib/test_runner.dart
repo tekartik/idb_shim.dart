@@ -4,6 +4,7 @@ import 'package:idb_test/sdb_changes_listener_persistent_test.dart';
 import 'package:idb_test/sdb_open_test.dart';
 import 'package:idb_test/sdb_schema_test.dart';
 import 'package:idb_test/sdb_test.dart';
+import 'package:idb_test/sdb_utils_test.dart';
 
 import 'cursor_test.dart' as cursor_test;
 import 'database_test.dart' as database_test;
@@ -48,6 +49,7 @@ void defineAllTests(TestContext ctx) {
   defineIdbSdbChangesListenerTests(ctx);
   sdbIndexTests(ctx);
   idbSdbOpenTests(ctx);
+  idbSdbUtilsTests(ctx);
   idbSchemaSdbTest(ctx);
 
   group('indexeddb_1', () {

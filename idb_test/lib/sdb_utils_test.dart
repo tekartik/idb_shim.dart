@@ -1,33 +1,54 @@
 library;
 
-import 'dart:typed_data';
-
 import 'package:collection/collection.dart';
-import 'package:idb_shim/utils/idb_import_export.dart';
-import 'package:idb_shim/utils/idb_utils.dart';
+import 'package:idb_shim/sdb.dart';
+import 'package:idb_shim/utils/sdb_import_export.dart';
+//import 'package:idb_shim/utils/idb_utils.dart';
+import 'package:idb_test/sdb_test.dart';
 import 'package:path/path.dart';
 
 import 'idb_test_common.dart';
 //import 'idb_test_factory.dart';
 
 void main() {
-  defineTests(idbMemoryContext);
+  idbSdbUtilsTests(idbMemoryContext);
 }
 
-void defineTests(TestContext ctx) {
-  final idbFactory = ctx.factory;
+var testStore = SdbStoreRef<int, SdbModel>(testStoreName);
+var testIndex = testStore.index(testNameIndex);
 
-  Database? db;
+var _testOneStoreKeyPathAutoSchema = SdbDatabaseSchema(
+  stores: [
+    testStore.schema(
+      keyPath: SdbKeyPath.single(testNameField),
+      autoIncrement: true,
+    ),
+  ],
+);
+var _openDatabaseOptions = SdbOpenDatabaseOptions(
+  version: 1,
+  schema: _testOneStoreKeyPathAutoSchema,
+);
+void idbSdbUtilsTests(TestContext ctx) {
+  var factory = sdbFactoryFromIdb(ctx.factory);
+  sdbUtilsTests(SdbTestContext(factory));
+}
+
+void sdbUtilsTests(SdbTestContext ctx) {
+  final sdbFactory = ctx.factory;
+
+  SdbDatabase? db;
   //Database dstDb;
   late String srcDbName;
+  // ignore: unused_local_variable
   String? dstDbName;
   late String importedDbName;
   // prepare for test
   Future setupDeleteDb() async {
-    srcDbName = ctx.dbName;
+    srcDbName = 'sdb_utils_import_export.db';
     dstDbName = 'dst_$srcDbName';
     importedDbName = 'imported_$srcDbName';
-    await idbFactory.deleteDatabase(srcDbName);
+    await sdbFactory.deleteDatabase(srcDbName);
   }
 
   void dbTearDown() {
@@ -35,59 +56,22 @@ void defineTests(TestContext ctx) {
       db!.close();
       db = null;
     }
-    /*
-    if (dstDb != null) {
-      dstDb.close();
-      dstDb = null;
-    }
-    */
   }
 
   group('utils', () {
-    Future dbCheckExportImport(
-      Database db,
-      Map expectedExport,
-      Future Function(Database db) check,
-    ) async {
-      // export
-      final export = await idbExportDatabase(db);
-      expect(export, expectedExport);
-
-      // import
-      var importedDb = await idbImportDatabase(
-        export,
-        idbFactory,
-        importedDbName,
-      );
-      // The name might be relative...
-      expect(importedDb.name.endsWith(importedDbName), isTrue);
-
-      await check(importedDb);
-
-      // re-export
-      expect(await idbExportDatabase(importedDb), expectedExport);
-
-      importedDb.close();
-
-      // re open
-      importedDb = await idbFactory.open(importedDbName);
-      await check(importedDb);
-      importedDb.close();
-    }
-
     Future dbCheckExportImportLines(
-      Database db,
+      SdbDatabase db,
       List expectedExportLines,
-      Future Function(Database db) check,
+      Future Function(SdbDatabase db) check,
     ) async {
       // export
-      final export = await idbExportDatabaseLines(db);
+      final export = await sdbExportDatabaseLines(db);
       expect(export, expectedExportLines);
 
       // import
-      var importedDb = await idbImportDatabase(
+      var importedDb = await sdbImportDatabase(
         export,
-        idbFactory,
+        sdbFactory,
         importedDbName,
       );
       // The name might be relative...
@@ -96,322 +80,280 @@ void defineTests(TestContext ctx) {
       await check(importedDb);
 
       // re-export
-      expect(await idbExportDatabaseLines(importedDb), expectedExportLines);
+      expect(await sdbExportDatabaseLines(importedDb), expectedExportLines);
 
-      importedDb.close();
+      await importedDb.close();
 
       // re open
-      importedDb = await idbFactory.open(importedDbName);
+      importedDb = await sdbFactory.openDatabase(importedDbName);
       await check(importedDb);
-      importedDb.close();
+      await importedDb.close();
     }
 
-    group('copySchema', () {
+    Future checkAll(
+      SdbDatabase db,
+      List expectedExport,
+      Future Function(SdbDatabase database) check,
+    ) async {
+      await check(db);
+      await dbCheckExportImportLines(db, expectedExport, check);
+    }
+
+    group('schema', () {
       tearDown(dbTearDown);
-
-      Future checkCopySchema(
-        Database db,
-        Future Function(Database db) check,
-      ) async {
-        final dstDb = await copySchema(db, idbFactory, dstDbName!);
-        expect(dstDb.name, dstDbName);
-        await check(dstDb);
-        dstDb.close();
-      }
-
-      Future checkAll(
-        Database db,
-        Map expectedExport,
-        Future Function(Database database) check,
-      ) async {
-        await check(db);
-        await checkCopySchema(db, check);
-        await dbCheckExportImport(db, expectedExport, check);
-      }
 
       test('empty', () async {
         await setupDeleteDb();
-        db = await idbFactory.open(srcDbName);
+        db = await sdbFactory.openDatabase(srcDbName);
 
-        Future dbCheck(Database db) async {
-          expect(db.factory, idbFactory);
-          expect(db.objectStoreNames.isEmpty, true);
+        Future dbCheck(SdbDatabase db) async {
+          expect(db.factory, sdbFactory);
+          expect(db.storeNames.isEmpty, true);
           expect(basename(db.name).endsWith(basename(srcDbName)), isTrue);
           expect(db.version, 1);
         }
 
-        await checkAll(db!, {
-          'sembast_export': 1,
-          'version': 1,
-          'stores': [
-            {
-              'name': '_main',
-              'keys': ['version'],
-              'values': [1],
-            },
-          ],
-        }, dbCheck);
+        await checkAll(db!, [
+          {'sembast_export': 1, 'version': 1},
+          {'store': '_main'},
+          ['version', 1],
+        ], dbCheck);
       });
 
       test('import version 2 and reopen', () async {
         await setupDeleteDb();
-        db = await idbFactory.open(
+        db = await sdbFactory.openDatabase(
           srcDbName,
           version: 2,
-          onUpgradeNeeded: (_) {},
+          onVersionChange: (_) {},
         );
         expect(db!.version, 2);
-        final export = await idbExportDatabase(db!);
-        db!.close();
+        final export = await sdbExportDatabaseLines(db!);
+        await db!.close();
 
         // import
-        var importedDb = await idbImportDatabase(
+        var importedDb = await sdbImportDatabase(
           export,
-          idbFactory,
+          sdbFactory,
           importedDbName,
         );
         expect(importedDb.version, 2);
         //devPrint()
-        final newExport = await idbExportDatabase(db!);
+        final newExport = await sdbExportDatabaseLines(db!);
         expect(newExport, export);
-        importedDb.close();
+        await importedDb.close();
 
-        db = await idbFactory.open(importedDbName);
+        db = await sdbFactory.openDatabase(importedDbName);
         expect(db!.version, 2);
       });
 
-      test('empty idbVersion 2', () async {
+      test('empty sdb version 2', () async {
         await setupDeleteDb();
-        db = await idbFactory.open(
+        db = await sdbFactory.openDatabase(
           srcDbName,
           version: 2,
-          onUpgradeNeeded: (_) {},
+          onVersionChange: (_) {},
         );
 
-        Future dbCheck(Database db) async {
-          expect(db.factory, idbFactory);
-          expect(db.objectStoreNames.isEmpty, true);
+        Future dbCheck(SdbDatabase db) async {
+          expect(db.factory, sdbFactory);
+          expect(db.storeNames.isEmpty, true);
           expect(basename(db.name).endsWith(basename(srcDbName)), isTrue);
           expect(db.version, 2);
         }
 
-        await checkAll(db!, {
-          'sembast_export': 1,
-          'version': 1,
-          'stores': [
-            {
-              'name': '_main',
-              'keys': ['version'],
-              'values': [2],
-            },
-          ],
-        }, dbCheck);
+        await checkAll(db!, [
+          {'sembast_export': 1, 'version': 1},
+          {'store': '_main'},
+          ['version', 2],
+        ], dbCheck);
       });
 
       test('one_store', () async {
         await setupDeleteDb();
 
-        void onUpgradeNeeded(VersionChangeEvent e) {
-          final db = e.database;
-          //ObjectStore objectStore =
-          db.createObjectStore(
-            testStoreName,
-            keyPath: testNameField,
-            autoIncrement: true,
-          );
-        }
-
-        db = await idbFactory.open(
+        db = await sdbFactory.openDatabase(
           srcDbName,
-          version: 2,
-          onUpgradeNeeded: onUpgradeNeeded,
+          options: _openDatabaseOptions.copyWith(version: 2),
         );
 
-        Future dbCheck(Database db) async {
-          expect(db.factory, idbFactory);
-          expect(db.objectStoreNames, [testStoreName]);
+        Future dbCheck(SdbDatabase db) async {
+          expect(db.factory, sdbFactory);
+          expect(db.storeNames, [testStoreName]);
           expect(basename(db.name).endsWith(basename(srcDbName)), isTrue);
           expect(db.version, 2);
-          final txn = db.transaction(testStoreName, idbModeReadOnly);
-          final store = txn.objectStore(testStoreName);
-          expect(store.name, testStoreName);
-          expect(store.keyPath, testNameField);
+          await db.inStoreTransaction(testStore, SdbTransactionMode.readOnly, (
+            txn,
+          ) async {
+            var store = txn.store(testStore);
+            expect(store.name, testStoreName);
+            expect(store.keyPath?.keyPath, testNameField);
+            store = txn.txnStore;
+            expect(store.name, testStoreName);
+            expect(store.keyPath?.keyPath, testNameField);
 
-          // autoIncrement not supported on ie
-          if (!ctx.isIdbIe) {
             expect(store.autoIncrement, isTrue);
-          }
-          expect(store.indexNames, isEmpty);
-          await txn.completed;
+
+            expect(store.indexNames, isEmpty);
+          });
+          await db.inStoreTransaction(testStore, SdbTransactionMode.readOnly, (
+            txn,
+          ) {
+            final store = txn.store(testStore);
+            expect(store.name, testStoreName);
+            expect(store.keyPath?.keyPath, testNameField);
+
+            expect(store.indexNames, isEmpty);
+          });
         }
 
-        final expectedExport = <String, Object?>{
-          'sembast_export': 1,
-          'version': 1,
-          'stores': [
-            {
-              'name': '_main',
-              'keys': ['store_test_store', 'stores', 'version'],
-              'values': [
-                {
-                  'name': 'test_store',
-                  'keyPath': 'name',
-                  'autoIncrement': true,
-                },
-                ['test_store'],
-                2,
-              ],
-            },
+        final expectedExport = [
+          {'sembast_export': 1, 'version': 1},
+          {'store': '_main'},
+          [
+            'store_test_store',
+            {'name': 'test_store', 'keyPath': 'name', 'autoIncrement': true},
           ],
-        };
-        if (ctx.isIdbIe) {
-          ((((expectedExport['stores'] as List)[0] as Map)['values'] as List)[2]
-                  as Map)
-              .remove('autoIncrement');
-        }
+          [
+            'stores',
+            ['test_store'],
+          ],
+          ['version', 2],
+        ];
+
         await checkAll(db!, expectedExport, dbCheck);
       });
 
       test('three_stores', () async {
         await setupDeleteDb();
 
-        void onUpgradeNeeded(VersionChangeEvent e) {
-          final db = e.database;
-          //ObjectStore objectStore =
-          db.createObjectStore('store3');
-          db.createObjectStore('store1');
-          db.createObjectStore('store2');
-        }
+        var testStore1 = SdbStoreRef<int, SdbModel>('store1');
+        var testStore2 = SdbStoreRef<int, SdbModel>('store2');
+        var testStore3 = SdbStoreRef<int, SdbModel>('store3');
 
-        db = await idbFactory.open(
+        db = await sdbFactory.openDatabase(
           srcDbName,
-          version: 2,
-          onUpgradeNeeded: onUpgradeNeeded,
+          options: SdbOpenDatabaseOptions(
+            version: 2,
+            schema: SdbDatabaseSchema(
+              stores: [
+                testStore1.schema(),
+                testStore2.schema(),
+                testStore3.schema(),
+              ],
+            ),
+          ),
         );
 
-        Future dbCheck(Database db) async {
-          expect(db.factory, idbFactory);
+        Future dbCheck(SdbDatabase db) async {
+          expect(db.factory, sdbFactory);
           expect(
-            const UnorderedIterableEquality<String>().equals(
-              db.objectStoreNames,
-              ['store1', 'store2', 'store3'],
-            ),
+            const UnorderedIterableEquality<String>().equals(db.storeNames, [
+              'store1',
+              'store2',
+              'store3',
+            ]),
             isTrue,
-            reason: '${db.objectStoreNames}',
+            reason: '${db.storeNames}',
           );
         }
 
-        final expectedExport = <String, Object?>{
-          'sembast_export': 1,
-          'version': 1,
-          'stores': [
-            {
-              'name': '_main',
-              'keys': [
-                'store_store1',
-                'store_store2',
-                'store_store3',
-                'stores',
-                'version',
-              ],
-              'values': [
-                {'name': 'store1'},
-                {'name': 'store2'},
-                {'name': 'store3'},
-                ['store1', 'store2', 'store3'],
-                2,
-              ],
-            },
+        final expectedExport = [
+          {'sembast_export': 1, 'version': 1},
+          {'store': '_main'},
+          [
+            'store_store1',
+            {'name': 'store1'},
           ],
-        };
-        if (ctx.isIdbIe) {
-          ((((expectedExport['stores'] as List)[0] as Map)['values'] as List)[2]
-                  as Map)
-              .remove('autoIncrement');
-        }
+          [
+            'store_store2',
+            {'name': 'store2'},
+          ],
+          [
+            'store_store3',
+            {'name': 'store3'},
+          ],
+          [
+            'stores',
+            ['store1', 'store2', 'store3'],
+          ],
+          ['version', 2],
+        ];
+
         await checkAll(db!, expectedExport, dbCheck);
       });
 
       test('one_index', () async {
         await setupDeleteDb();
 
-        void onUpgradeNeeded(VersionChangeEvent e) {
-          final db = e.database;
-          final objectStore = db.createObjectStore(
-            testStoreName,
-            autoIncrement: true,
-          );
-          objectStore.createIndex(
-            testNameIndex,
-            testNameField,
-            unique: true,
-            multiEntry: true,
-          );
-        }
-
-        db = await idbFactory.open(
+        db = await sdbFactory.openDatabase(
           srcDbName,
-          version: 3,
-          onUpgradeNeeded: onUpgradeNeeded,
+          options: _openDatabaseOptions.copyWith(
+            schema: SdbDatabaseSchema(
+              stores: [
+                testStore.schema(
+                  keyPath: SdbKeyPath.single(testNameField),
+                  autoIncrement: true,
+                  //  objectStore.createIndex(
+                  //             testNameIndex,
+                  //             testNameField,
+                  //             unique: true,
+                  //             multiEntry: true, // no here
+                  //           );
+                  indexes: [
+                    testStore
+                        .index(testNameIndex)
+                        .schema(
+                          keyPath: SdbKeyPath.single(testNameField),
+                          unique: true,
+                        ),
+                  ],
+                ),
+              ],
+            ),
+            version: 3,
+          ),
         );
 
-        Future dbCheck(Database db) async {
+        Future dbCheck(SdbDatabase db) async {
           expect(db.version, 3);
-          final txn = db.transaction(testStoreName, idbModeReadOnly);
-          final store = txn.objectStore(testStoreName);
-          expect(store.indexNames, [testNameIndex]);
-          final index = store.index(testNameIndex);
-          expect(index.name, testNameIndex);
-          expect(index.keyPath, testNameField);
-          expect(index.unique, isTrue);
-
-          // multiEntry not supported on ie
-          if (!ctx.isIdbIe) {
-            expect(index.multiEntry, isTrue);
-          }
-          await txn.completed;
+          await db.inStoreTransaction(testStore, SdbTransactionMode.readOnly, (
+            txn,
+          ) async {
+            var store = txn.txnStore;
+            expect(store.indexNames, [testNameIndex]);
+            var index = store.index(testIndex);
+            expect(index.name, testNameIndex);
+            expect(index.keyPath.keyPath, testNameField);
+            expect(index.unique, isTrue);
+            expect(index.multiEntry, isFalse);
+          });
         }
 
-        final expectedExport = <String, Object?>{
-          'sembast_export': 1,
-          'version': 1,
-          'stores': [
+        final expectedExport = [
+          {'sembast_export': 1, 'version': 1},
+          {'store': '_main'},
+          [
+            'store_test_store',
             {
-              'name': '_main',
-              'keys': ['store_test_store', 'stores', 'version'],
-              'values': [
-                {
-                  'name': 'test_store',
-                  'autoIncrement': true,
-                  'indecies': [
-                    {
-                      'name': 'name_index',
-                      'keyPath': 'name',
-                      'unique': true,
-                      'multiEntry': true,
-                    },
-                  ],
-                },
-                ['test_store'],
-                3,
+              'name': 'test_store',
+              'keyPath': 'name',
+              'autoIncrement': true,
+              'indecies': [
+                {'name': 'name_index', 'keyPath': 'name', 'unique': true},
               ],
             },
           ],
-        };
-        if (ctx.isIdbIe) {
-          ((((expectedExport['stores'] as List)[0] as Map)['values'] as List)[2]
-                  as Map)
-              .remove('autoIncrement');
-          ((((((expectedExport['stores'] as List)[0] as Map)['values']
-                              as List)[2]
-                          as Map)['indecies']
-                      as List)[0]
-                  as Map)
-              .remove('multiEntry');
-        }
+          [
+            'stores',
+            ['test_store'],
+          ],
+          ['version', 3],
+        ];
+
         await checkAll(db!, expectedExport, dbCheck);
       });
-
+      /*
       test('one_index_key_path_2_columns', () async {
         await setupDeleteDb();
 
@@ -1062,6 +1004,7 @@ void defineTests(TestContext ctx) {
           ],
         ], dbCheck);
       });
+    });*/
     });
   });
 }

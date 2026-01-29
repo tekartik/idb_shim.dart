@@ -9,7 +9,8 @@ export 'sdb_client.dart' show SdbClient;
 export 'sdb_client_impl.dart' show SdbClientExtension;
 export 'sdb_database.dart' show SdbDatabase, SdbDatabaseExtension;
 export 'sdb_database_impl.dart' show SdbDatabaseIdbExt;
-export 'sdb_factory.dart' show SdbFactory, SdbFactoryExtension;
+export 'sdb_factory.dart'
+    show SdbFactory, SdbFactoryExtension, SdbOpenDatabaseOptions;
 export 'sdb_filter.dart'
     show SdbFilter, SdbFilterRecordSnapshot, SdbFilterRecordSnapshotExt;
 export 'sdb_find_options.dart' show SdbFindOptions, sdbFindOptionsMerge;

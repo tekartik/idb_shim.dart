@@ -443,5 +443,5 @@ class JdbDatabaseIdb implements jdb.JdbDatabase {
 
   /// Export the database using sdb format
   Future<Map> sdbExportDatabase() async =>
-      import_export.sdbExportDatabase(_idbDatabase);
+      import_export.idbExportDatabase(_idbDatabase);
 }

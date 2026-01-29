@@ -233,6 +233,8 @@ extension SdbStoreSchemaExtension on SdbStoreSchema {
 abstract class SdbKeyPath {
   /// Key paths (1 or more, never empty)
   List<String> get keyPaths; // Never empty
+  /// Single key path
+  String get keyPath; // Only for single key path, throws if multi
   /// Create single key path
   factory SdbKeyPath.single(String keyPath) => _SdbKeySinglePath(keyPath);
 
@@ -271,6 +273,7 @@ extension SdbKeyPathExtension on SdbKeyPath {
 }
 
 class _SdbKeySinglePath extends _SdbKeyPathBase {
+  @override
   final String keyPath;
 
   _SdbKeySinglePath(this.keyPath);
@@ -285,6 +288,11 @@ class _SdbKeyMultiPath extends _SdbKeyPathBase {
   _SdbKeyMultiPath(this.keyPaths) {
     assert(keyPaths.length >= 2);
   }
+
+  @override
+  String get keyPath => throw StateError(
+    'Multi key paths $keyPaths single key access not supported',
+  );
 }
 
 /// Store schema extension on store ref
@@ -534,10 +542,13 @@ extension SdbFactorySchemaExtensionPrv on SdbFactory {
   /// Get the database schema.
   Future<SdbDatabase> openWithSchema(
     String name,
-    SdbDatabaseSchema schema, {
-    int? version,
-  }) async {
+    SdbOpenDatabaseOptions options,
+  ) async {
     var onVersionChangeCalled = false;
+    var schema = options.schema!;
+    // version could be null even when the schema is specified
+    // this could work for an openDatabase that already exists.
+    var version = options.version;
     var db = await _impl.openDatabaseImpl(
       name,
       version: version,

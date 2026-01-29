@@ -27,17 +27,22 @@ class SdbFactoryIdb implements SdbFactory {
   @override
   Future<SdbDatabase> openDatabase(
     String name, {
+    SdbOpenDatabaseOptions? options,
     int? version,
     SdbOnVersionChangeCallback? onVersionChange,
     SdbDatabaseSchema? schema,
   }) async {
+    options ??= SdbOpenDatabaseOptions();
+    options = options.copyWith(version: version, schema: schema);
+    schema = options.schema;
+    version = options.version;
     if (schema != null) {
       if (onVersionChange != null) {
         throw StateError(
           'Cannot provide both schema and onVersionChange callback',
         );
       }
-      return await openWithSchema(name, schema, version: version);
+      return await openWithSchema(name, options);
     }
     return await openDatabaseImpl(
       name,

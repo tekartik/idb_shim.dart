@@ -31,10 +31,12 @@ class SdbDatabaseImpl
     with SdbClientInterfaceDefaultMixin, SdbDatabaseDefaultMixin
     implements SdbDatabase, SdbClientInterface, SdbClientIdbInterface {
   /// Factory.
+  @override
   final SdbFactoryImpl factory;
 
   /// Name.
-  final String name;
+  @override
+  late final String name;
 
   /// Version
   @override
@@ -48,6 +50,11 @@ class SdbDatabaseImpl
 
   /// SimpleDb implementation.
   SdbDatabaseImpl(this.factory, this.name, {required this.schema});
+
+  /// SimpleDb implementation.
+  SdbDatabaseImpl.idbDatabase(this.factory, this.idbDatabase) {
+    name = idbDatabase.name;
+  }
 
   @override
   Iterable<String> get storeNames => idbDatabase.objectStoreNames;

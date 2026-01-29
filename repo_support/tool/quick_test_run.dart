@@ -2,6 +2,7 @@ import 'package:path/path.dart';
 import 'package:process_run/shell.dart';
 
 Future main() async {
+  var sw = Stopwatch()..start();
   var shell = Shell();
 
   shell = shell.pushd(join('..', 'idb_shim'));
@@ -17,8 +18,10 @@ dart test -p vm test/multiplatform
 
 dart pub get
 dart test -p vm test/io/test_runner_client_sembast_io_test.dart
-dart test -p chrome test/web/test_runner_client_native_test.dart
+dart test -p chrome test/web/test_runner_client_native_web_test.dart
 
     ''');
   shell = shell.popd();
+  sw.stop();
+  print('Quick test total time: ${sw.elapsed}');
 }

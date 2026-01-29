@@ -92,13 +92,30 @@ void schemaSdbTest(SdbTestContext ctx) {
       expect(key4, 3);
 
       await db.close();
+
+      // Reopen with no changes and no version specified!
+      db = await factory.openDatabase(
+        dbName,
+        // no version and no schema change
+        // version: 2,
+        schema: SdbDatabaseSchema(
+          stores: [
+            testStore1.schema(autoIncrement: true, indexes: [testSchemaIndex1]),
+          ],
+        ),
+      );
+      await db.close();
       await expectLater(() async {
         await factory.openDatabase(
           dbName,
-          schema: SdbDatabaseSchema(
-            stores: [
-              testStore.schema(indexes: [testSchemaIndex1bis]),
-            ],
+          options: SdbOpenDatabaseOptions(
+            // No version bump here to test that schema does not changed
+            // version: 3,
+            schema: SdbDatabaseSchema(
+              stores: [
+                testStore.schema(indexes: [testSchemaIndex1bis]),
+              ],
+            ),
           ),
         );
       }, throwsA(isA<StateError>()));

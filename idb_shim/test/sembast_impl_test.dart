@@ -56,7 +56,7 @@ void main() {
         final value = {'test': 'test_value'};
         var key = await objectStore.add(value);
         expect(key, 1);
-        expect(((await sdbExportDatabase(db))['stores'] as List)[1], {
+        expect(((await idbExportDatabase(db))['stores'] as List)[1], {
           'name': 'test_store',
           'keys': [1],
           'values': [
@@ -71,7 +71,7 @@ void main() {
         final value = {'test': 'test_value', keyPath: 1};
         var key = await objectStore.add(value);
         expect(key, 1);
-        expect(((await sdbExportDatabase(db))['stores'] as List)[1], {
+        expect(((await idbExportDatabase(db))['stores'] as List)[1], {
           'name': 'test_store',
           'keys': [1],
           'values': [
