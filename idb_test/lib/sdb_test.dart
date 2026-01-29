@@ -454,8 +454,8 @@ void simpleSdbTest(SdbTestContext ctx) {
         [testStore, testStore2],
         SdbTransactionMode.readWrite,
         (txn) async {
-          var key = await txn.txnStore(testStore).add({'test': 1});
-          var key2 = await txn.txnStore(testStore2).add({'test': 2});
+          var key = await txn.store(testStore).add({'test': 1});
+          var key2 = await txn.store(testStore2).add({'test': 2});
           expect(key, 1);
           expect(key2.isNotEmpty, isTrue);
         },
