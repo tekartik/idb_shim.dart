@@ -1,8 +1,17 @@
 import 'package:idb_shim/sdb.dart';
 
+/// Record key (returns by getKey store methods).
+abstract class SdbRecordKey<K extends SdbKey, V extends SdbValue> {
+  /// Record ref.
+  SdbRecordRef<K, V> get ref;
+
+  /// Cast if needed.
+  SdbRecordKey<RK, RV> cast<RK extends SdbKey, RV extends SdbValue>();
+}
+
 /// Record snapshot.
 abstract class SdbRecordSnapshot<K extends SdbKey, V extends SdbValue>
-    extends SdbRecordRef<K, V> {
+    implements SdbRecordKey<K, V> {
   /// Value.
   V get value;
 
@@ -27,19 +36,29 @@ extension SdbRecordSnapshotListExt<K extends SdbKey, V extends SdbValue>
   List<V> get values => map((e) => e.value).toList();
 
   /// List of refs
-  List<SdbRecordRef> get refs => map((e) => e.ref).toList();
+  List<SdbRecordRef<K, V>> get refs => map((e) => e.ref).toList();
+
+  /// List of primary keys
+  List<K> get keys => map((e) => e.key).toList();
 }
 
-/// Common extension
+/// Common snapshot extension
 extension SdbRecordSnapshotExt<K extends SdbKey, V extends SdbValue>
-    on SdbRecordSnapshot<K, V> {
-  /// Get the record ref
-  SdbRecordRef<K, V> get ref => store.record(key);
+    on SdbRecordSnapshot<K, V> {}
+
+/// Common key extension
+extension SdbRecordKeyExt<K extends SdbKey, V extends SdbValue>
+    on SdbRecordKey<K, V> {
+  /// Get the record key
+  K get key => ref.key;
+
+  /// Get the store
+  SdbStoreRef<K, V> get store => ref.store;
 }
 
 /// Common extension
 extension SdbRecordKeyListExt<K extends SdbKey, V extends SdbValue>
-    on Iterable<SdbRecordRef<K, V>> {
+    on Iterable<SdbRecordKey<K, V>> {
   /// List of primary keys
   List<K> get keys => map((e) => e.key).toList();
 }

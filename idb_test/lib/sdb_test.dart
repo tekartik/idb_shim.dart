@@ -60,6 +60,11 @@ void simpleSdbTest(SdbTestContext ctx) {
         expect(await testStore.record(key).getValue(db), {'test': 1});
         record = (await testStore.record(key2).get(db))!;
         expect(record.value, {'test': 2});
+
+        /// Try to use the ref of the snapshot
+        var readRecordRef = record.ref;
+        expect(readRecordRef, testStore.record(key2));
+
         expect(await testStore.record(3).get(db), isNull);
         await testStore.record(key).delete(db);
         expect(await testStore.record(key).get(db), isNull);

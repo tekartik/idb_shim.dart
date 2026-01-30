@@ -4,46 +4,44 @@ import 'import_idb.dart';
 
 /// Record snapshot implementation.
 class SdbRecordSnapshotImpl<K extends SdbKey, V extends SdbValue>
-    extends SdbRecordKeyImpl<K, V>
     implements SdbRecordSnapshot<K, V> {
+  @override
+  final SdbRecordRef<K, V> ref;
   @override
   final V value;
 
   /// Record snapshot implementation.
-  SdbRecordSnapshotImpl(super.store, super.key, this.value);
+  SdbRecordSnapshotImpl(this.ref, this.value);
 
   @override
-  String toString() => 'Record(${store.name}, $key, ${logTruncateAny(value)}';
+  String toString() => 'Record($ref, ${logTruncateAny(value)}';
 
   @override
   SdbRecordSnapshot<RK, RV> cast<RK extends SdbKey, RV extends SdbValue>() {
     if (this is SdbRecordSnapshot<RK, RV>) {
       return this as SdbRecordSnapshot<RK, RV>;
     }
-    return SdbRecordSnapshotImpl<RK, RV>(
-      store.cast<RK, RV>(),
-      key as RK,
-      value as RV,
-    );
+    return SdbRecordSnapshotImpl<RK, RV>(ref.cast<RK, RV>(), value as RV);
   }
 }
 
 /// Record key implementation.
 class SdbRecordKeyImpl<K extends SdbKey, V extends SdbValue>
-    implements SdbRecordRef<K, V> {
+    implements SdbRecordKey<K, V> {
   @override
-  final SdbStoreRef<K, V> store;
-  @override
-  final K key;
+  final SdbRecordRef<K, V> ref;
 
   /// Record key implementation.
-  SdbRecordKeyImpl(this.store, this.key);
+  SdbRecordKeyImpl(this.ref);
 
   @override
-  String toString() => 'RecordKey(${store.name}, $key)';
+  String toString() => 'RecordKey($ref)';
 
   @override
-  SdbRecordRef<RK, RV> cast<RK extends SdbKey, RV extends SdbValue>() {
-    return store.cast<RK, RV>().record(key as RK);
+  SdbRecordKey<RK, RV> cast<RK extends SdbKey, RV extends SdbValue>() {
+    if (this is SdbRecordKey<RK, RV>) {
+      return this as SdbRecordKey<RK, RV>;
+    }
+    return SdbRecordKeyImpl(ref.cast<RK, RV>());
   }
 }

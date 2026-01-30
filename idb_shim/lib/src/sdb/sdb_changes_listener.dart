@@ -113,7 +113,7 @@ class SdbStoreTransactionChanges with SdbStoreTransactionChangesMixin {
 
   /// Get the record ref.
   SdbRecordRef getRecordRef(int index) =>
-      (_txnNewSnapshot[index] ?? _txnOldSnapshot[index])!;
+      (_txnNewSnapshot[index] ?? _txnOldSnapshot[index])!.ref;
 }
 
 /// All transaction

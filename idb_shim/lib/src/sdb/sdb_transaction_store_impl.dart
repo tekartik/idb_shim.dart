@@ -126,7 +126,7 @@ mixin SdbTransactionStoreRefImplMixin<K extends SdbKey, V extends SdbValue>
     var result = await idbObjectStore.put(value, key);
     if (hasChangeListener) {
       var recordKey = result as K;
-      newSnapshot = SdbRecordSnapshotImpl<K, V>(store, recordKey, value);
+      newSnapshot = SdbRecordSnapshotImpl<K, V>(store.record(recordKey), value);
       changesListener.addChange(transaction, oldSnapshot, newSnapshot);
     }
   }
@@ -150,7 +150,10 @@ extension on idb.ObjectStore {
       if (value is Map && value is! Map<String, Object?>) {
         value = value.cast<String, Object?>();
       }
-      return SdbRecordSnapshotImpl<K, V>(store, key, fixResult<V>(value));
+      return SdbRecordSnapshotImpl<K, V>(
+        store.record(key),
+        fixResult<V>(value),
+      );
     }
     return null;
   }
@@ -197,7 +200,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
 
     K added(K key, V value) {
       if (hasChangeListener) {
-        var newSnapshot = SdbRecordSnapshotImpl<K, V>(store, key, value);
+        var newSnapshot = SdbRecordSnapshotImpl<K, V>(store.record(key), value);
         transaction.dbImpl.changesListener.addChange(
           transaction,
           null,
@@ -249,7 +252,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
   SdbRecordSnapshotImpl<K, V> _sdbRecordSnapshot(idb.CursorRow row) {
     var key = row.primaryKey as K;
     var value = row.value as V;
-    return SdbRecordSnapshotImpl<K, V>(store, key, value);
+    return SdbRecordSnapshotImpl<K, V>(store.record(key), value);
   }
 
   /// Stream records
@@ -303,7 +306,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
 
   SdbRecordKey<K, V> _sdbRecordKey(idb.KeyCursorRow row) {
     var key = row.key as K;
-    return SdbRecordKeyImpl<K, V>(store, key);
+    return SdbRecordKeyImpl<K, V>(store.record(key));
   }
 
   /// Find record keys.
@@ -311,7 +314,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
     required SdbFindOptions<K> options,
   }) async {
     if (options.filter != null) {
-      return findRecordsImpl(options: options);
+      return (await findRecordsImpl(options: options));
     }
     var descending = options.descending;
     var offset = options.offset;
@@ -356,7 +359,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
       // Slow
       var records = await findRecordsImpl(options: options);
       for (var record in records) {
-        await deleteImpl(record.key);
+        await deleteImpl(record.ref.key);
       }
       return;
     }

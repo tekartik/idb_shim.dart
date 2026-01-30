@@ -16,9 +16,6 @@ abstract class SdbRecordRef<K extends SdbKey, V extends SdbValue> {
   SdbRecordRef<RK, RV> cast<RK extends SdbKey, RV extends SdbValue>();
 }
 
-/// Record key (prefer SdbRecordRef).
-typedef SdbRecordKey<K extends SdbKey, V extends SdbValue> = SdbRecordRef<K, V>;
-
 /// Store methods.
 extension SdbRecordRefExtension<K extends SdbKey, V extends SdbValue>
     on SdbRecordRef<K, V> {
@@ -38,4 +35,11 @@ extension SdbRecordRefExtension<K extends SdbKey, V extends SdbValue>
 
   /// Put a single record.
   Future<void> put(SdbClient client, V value) => impl.putImpl(client, value);
+}
+
+/// Common extension
+extension SdbRecordRefIterableExtension<K extends SdbKey, V extends SdbValue>
+    on Iterable<SdbRecordRef<K, V>> {
+  /// List of primary keys
+  List<K> get keys => map((e) => e.key).toList();
 }
