@@ -30,6 +30,16 @@ abstract class SdbOpenDatabase {
   void deleteStore(String storeName);
 }
 
+/// Open transaction.
+abstract class SdbOpenTransaction implements SdbTransaction {
+  /// Compat
+  @Deprecated('Use openDatabase instead')
+  SdbOpenDatabase get db;
+
+  /// Open database.
+  SdbOpenDatabase get openDatabase;
+}
+
 /// Default mixin.
 mixin SdbOpenDatabaseDefaultMixin implements SdbOpenDatabase {
   @override

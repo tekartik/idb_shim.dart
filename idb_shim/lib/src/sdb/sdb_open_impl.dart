@@ -93,23 +93,21 @@ class SdbOpenDatabaseImpl implements SdbOpenDatabase {
   Iterable<String> get objectStoreNames => db.storeNames;
 }
 
-/// Open transaction.
-abstract class SdbOpenTransaction implements SdbTransaction {
-  /// Open database.
-  SdbOpenDatabase get db;
-}
-
 /// Open transaction internal extension.
 class SdbOpenTransactionImpl implements SdbOpenTransaction {
+  /// Compat, deprecated.
+  @override
+  SdbOpenDatabaseImpl get db => openDatabase;
+
   /// Database implementation.
   @override
-  final SdbOpenDatabaseImpl db;
+  final SdbOpenDatabaseImpl openDatabase;
 
   /// IDB transaction.
   final idb.Transaction idbTransaction;
 
   /// Open transaction implementation.
-  SdbOpenTransactionImpl(this.db, this.idbTransaction);
+  SdbOpenTransactionImpl(this.openDatabase, this.idbTransaction);
 
   @override
   Iterable<String> get storeNames => idbTransaction.objectStoreNames;

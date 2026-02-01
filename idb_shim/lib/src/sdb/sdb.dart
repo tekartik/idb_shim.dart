@@ -38,6 +38,7 @@ export 'sdb_open.dart'
     show
         SdbOpenDatabase,
         SdbOpenDatabaseExtension,
+        SdbOpenTransaction,
         SdbOpenStoreRef,
         SdbOpenStoreRefExtension,
         SdbOpenIndexRef;

@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:idb_shim/src/sdb/sdb_open_impl.dart';
-
 import 'sdb_open.dart';
 
 /// Event passed to [SdbOnVersionChangeCallback].
