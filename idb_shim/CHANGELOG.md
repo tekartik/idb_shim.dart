@@ -1,4 +1,4 @@
-## 2.8.2
+## 2.8.2+1
 
 * Add onChange listener to SdbDatabase
 * Add sdb import/export helpers
