@@ -112,7 +112,7 @@ Supported types:
 * `null` is no longer supported as a document value (although map field can be null though).
 
 Limitations
-* Cyclic dependecy are not supported (per JSON serialization)
+* Cyclic dependency are not supported (per JSON serialization)
 * Large float are not converted to int (native indexeddb implementation does this)
 * Don't create an index on boolean value. IndexedDB does not support that, however sembast implementation allows it (this could change). This will only be prevented in debug.
 

@@ -143,6 +143,7 @@ void defineTests(TestContext ctx) {
         // date time is read as utc
         var key = await objectStore.add(DateTime.fromMillisecondsSinceEpoch(1));
         var read = await objectStore.getObject(key);
+        expect(read, isA<DateTime>());
         expect(read, DateTime.fromMillisecondsSinceEpoch(1, isUtc: true));
       });
 

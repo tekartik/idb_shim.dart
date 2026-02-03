@@ -1,0 +1,4 @@
+{"version":1,"sembast":1}
+{"key":"version","value":1}
+{"key":"stores","value":["store1"]}
+{"key":"store_store1","value":{"name":"store1"}}

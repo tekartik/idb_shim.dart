@@ -188,7 +188,7 @@ class JdbDatabaseIdb implements jdb.JdbDatabase {
           (await objectStore.add(<String, Object?>{
                 idbStoreKey: store,
                 idbKeyKey: key,
-                if (value != null) idbValueKey: value,
+                idbValueKey: ?value,
                 if (jdbWriteEntry.deleted) idbDeletedKey: 1,
               }))
               as int;

@@ -176,7 +176,7 @@ class SdbOpenStoreRefIdb<K extends SdbKey, V extends SdbValue>
   SdbOpenIndexRef<K, V, I> index<I extends SdbIndexKey>(
     SdbIndexRef<SdbKey, SdbValue, SdbIndexKey> indexRef,
   ) {
-    var idbIndex = idbObjectStore.index(name);
+    var idbIndex = idbObjectStore.index(indexRef.name);
     return SdbOpenIndexRefImpl<K, V, I>(
       this,
       indexRef as SdbIndexRefImpl<K, V, I>,

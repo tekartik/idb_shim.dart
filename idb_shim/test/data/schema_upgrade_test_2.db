@@ -1,0 +1,5 @@
+{"version":1,"sembast":1}
+{"key":"version","value":2}
+{"key":"stores","value":["store1","store2"]}
+{"key":"store_store1","value":{"name":"store1"}}
+{"key":"store_store2","value":{"name":"store2","keyPath":"id","autoIncrement":true,"indecies":[{"name":"index2","keyPath":"my_field"}]}}
