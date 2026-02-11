@@ -33,3 +33,11 @@ I idbKeyToIndexKey<I>(Object idbKey) {
     return idbKey as I;
   }
 }
+
+/// Check that K is a valid SdbKey type
+void sdbCheckKeyType<K>() {
+  // We tolerate Object as dynamic
+  if (!(K == int || K == String || K == Object)) {
+    throw ArgumentError('K type $K must be int or String');
+  }
+}

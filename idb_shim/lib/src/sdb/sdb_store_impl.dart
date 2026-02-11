@@ -1,5 +1,6 @@
 import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
+import 'package:idb_shim/src/sdb/sdb_key_utils.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 
 import 'sdb.dart';
@@ -204,9 +205,7 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
 
   /// Store reference implementation.
   SdbStoreRefImpl(this.name) {
-    if (!(K == int || K == String)) {
-      throw ArgumentError('K type $K must be int or String');
-    }
+    sdbCheckKeyType<K>();
   }
 
   /// True if the key is an int.

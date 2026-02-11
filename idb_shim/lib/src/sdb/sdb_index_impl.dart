@@ -36,7 +36,9 @@ class SdbIndex1RefImpl<
     extends SdbIndexRefImpl<K, V, I>
     implements SdbIndex1Ref<K, V, I> {
   /// Index on 1 field.
-  SdbIndex1RefImpl(super.store, super.name);
+  SdbIndex1RefImpl(super.store, super.name) {
+    sdbCheckKeyType<I>();
+  }
 }
 
 /// Index on 2 fields
@@ -49,7 +51,10 @@ class SdbIndex2RefImpl<
     extends SdbIndexRefImpl<K, V, (I1, I2)>
     implements SdbIndex2Ref<K, V, I1, I2> {
   /// Index on 2 fields.
-  SdbIndex2RefImpl(super.store, super.name);
+  SdbIndex2RefImpl(super.store, super.name) {
+    sdbCheckKeyType<I1>();
+    sdbCheckKeyType<I2>();
+  }
 }
 
 /// Index on 3 fields
@@ -63,7 +68,11 @@ class SdbIndex3RefImpl<
     extends SdbIndexRefImpl<K, V, (I1, I2, I3)>
     implements SdbIndex3Ref<K, V, I1, I2, I3> {
   /// Index on 3 fields.
-  SdbIndex3RefImpl(super.store, super.name);
+  SdbIndex3RefImpl(super.store, super.name) {
+    sdbCheckKeyType<I1>();
+    sdbCheckKeyType<I2>();
+    sdbCheckKeyType<I3>();
+  }
 }
 
 /// Index on 4 fields
@@ -78,7 +87,12 @@ class SdbIndex4RefImpl<
     extends SdbIndexRefImpl<K, V, (I1, I2, I3, I4)>
     implements SdbIndex4Ref<K, V, I1, I2, I3, I4> {
   /// Index on 4 fields.
-  SdbIndex4RefImpl(super.store, super.name);
+  SdbIndex4RefImpl(super.store, super.name) {
+    sdbCheckKeyType<I1>();
+    sdbCheckKeyType<I2>();
+    sdbCheckKeyType<I3>();
+    sdbCheckKeyType<I4>();
+  }
 }
 
 /// Index reference extension.
