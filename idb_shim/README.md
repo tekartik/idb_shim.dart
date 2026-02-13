@@ -18,6 +18,30 @@ It exposes the standard IndexedDB concepts:
 
 All operations are asynchronous and return Future.
 
+
+## SDB (simple db)
+
+Opinionated strong typed api based on idb database, which is currrently
+the main available options for local storage on web with an easy support on desktop
+using sqlite. Basically the lowest common denominator between indexed db and sqlite. idb_shim for io only include a sembast based implementation
+(which is ok for testing).
+
+Include [`idb_sqlite`](https://pub.dev/packages/idb_sqflite) for a solid cross process safe io implementation.
+
+SDB (Simple DB) is a lightweight database abstraction layer for Dart that provides a unified API over IndexedDB (for web) and SQLite (for mobile and desktop). It is designed to be a simple, efficient, and cross-platform solution for data persistence.
+
+The API is inspired by `sembast` but with a stronger emphasis on schema definition and type safety. Key features include:
+
+- **Schema-First:** You must define your database schema, including stores and indexes, before using it. This ensures data consistency and helps prevent common errors.
+- **Type-Safe:** The API is designed to be type-safe, allowing you to specify the key and value types for your stores.
+- **Cross-Platform:** SDB works seamlessly on the web, mobile (iOS, Android), and desktop (Windows, Linux, macOS).
+- **Efficient Queries:** Supports efficient queries using key ranges (boundaries) and indexes. In-memory filtering is also available for more complex queries.
+- **Pay-as-you-go:** Data is not preloaded into memory, making it efficient for large datasets.
+
+More information here: [sdb](https://github.com/tekartik/idb_shim.dart/blob/master/idb_shim/doc/sdb.md)
+
+## IndexedDB Shim
+
 * On the web (Wasm compatible, using `dart:js_interop`) it is a thin layer on top of indexed_db Web API.
 * On IO (and in memory), a sembast implementation (useful for testing) is provided but prefer `idb_sqflite` for a solid
   cross-process safe io implementation.
@@ -431,14 +455,3 @@ Limitations:
 - DateTime is converted manually to support `DateTime` (although not supported in Firefox)
 - So for compatibility, data is jsified and dartified using custom encoder. To see if this could be removed in the
   future.
-
-#### SDB (sdb)
-
-Experimental opinionated strong typed api based on idb database, which is currrently
-the main available options for locale storage on web with an easy support on desktop
-using sqlite. Basically the lowest common denominator. idb_shim only include a sembast based implementation (which is ok
-for testing but does not bring any good benefit, just use sembast directly as it works on all platforms).
-
-Include `idb_sqlite` for a solid cross process safe io implementation.
-
-More information here: [sdb](https://github.com/tekartik/idb_shim.dart/blob/master/idb_shim/doc/sdb.md)
