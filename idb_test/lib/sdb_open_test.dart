@@ -59,5 +59,34 @@ void sdbOpenTests(SdbTestContext ctx) {
       expect((await testStore.findRecords(db)).keys, [1]);
       await db.close();
     });
+    test('openDatabaseOnDowngradeDelete schema downgrade', () async {
+      var dbName = 'sdb_schema downgrade_test.db';
+      await factory.deleteDatabase(dbName);
+      var db = await factory.openDatabaseOnDowngradeDelete(
+        dbName,
+        options: SdbOpenDatabaseOptions(
+          version: 2,
+          schema: SdbDatabaseSchema(stores: [testStoreSchema]),
+        ),
+      );
+      expect(db.version, 2);
+      await testStore.record(2).put(db, {'test': 2});
+      expect((await testStore.findRecords(db)).keys, [2]);
+
+      // Downgrade
+      await db.close();
+      db = await factory.openDatabaseOnDowngradeDelete(
+        dbName,
+        options: SdbOpenDatabaseOptions(
+          version: 1,
+          schema: SdbDatabaseSchema(stores: [testStoreSchema]),
+        ),
+      );
+      expect(db.version, 1);
+      await testStore.record(1).put(db, {'test': 1});
+      // First item (key 2) has been removed!
+      expect((await testStore.findRecords(db)).keys, [1]);
+      await db.close();
+    });
   });
 }

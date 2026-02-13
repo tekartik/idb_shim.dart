@@ -3,16 +3,35 @@ import 'package:idb_shim/src/utils/core_imports.dart';
 
 import 'sdb_client.dart';
 
-/// SimpleDb definition.
+/// SimpleDb database.
+///
+/// A database is a collection of stores.
+/// The database has a version.
+/// The database has a name.
+/// The database has a factory.
+///
+/// A database can be opened using [SdbFactory.openDatabase].
+///
+/// A database can be closed using [SdbDatabase.close].
 abstract class SdbDatabase implements SdbClient {
-  /// Run a transaction.
+  /// Run a transaction on a single store.
+  ///
+  /// [store] is the store to run the transaction on.
+  /// [mode] is the transaction mode, either [SdbTransactionMode.readOnly] or
+  /// [SdbTransactionMode.readWrite].
+  /// [callback] is the function to run in the transaction.
   Future<T> inStoreTransaction<T, K extends SdbKey, V extends SdbValue>(
     SdbStoreRef<K, V> store,
     SdbTransactionMode mode,
     FutureOr<T> Function(SdbSingleStoreTransaction<K, V> txn) callback,
   );
 
-  /// Run a transaction.
+  /// Run a transaction on multiple stores.
+  ///
+  /// [stores] is the list of stores to run the transaction on.
+  /// [mode] is the transaction mode, either [SdbTransactionMode.readOnly] or
+  /// [SdbTransactionMode.readWrite].
+  /// [callback] is the function to run in the transaction.
   Future<T> inStoresTransaction<T>(
     List<SdbStoreRef> stores,
     SdbTransactionMode mode,

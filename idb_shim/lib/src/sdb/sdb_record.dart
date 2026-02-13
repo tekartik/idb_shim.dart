@@ -4,7 +4,9 @@ import 'sdb_record_snapshot.dart';
 import 'sdb_store.dart';
 import 'sdb_types.dart';
 
-/// Record ref (or key).
+/// A reference to a record in a store.
+///
+/// It contains the store and the key of the record.
 abstract class SdbRecordRef<K extends SdbKey, V extends SdbValue> {
   /// Store reference.
   SdbStoreRef<K, V> get store;
@@ -16,10 +18,13 @@ abstract class SdbRecordRef<K extends SdbKey, V extends SdbValue> {
   SdbRecordRef<RK, RV> cast<RK extends SdbKey, RV extends SdbValue>();
 }
 
-/// Store methods.
+/// Record reference extension.
 extension SdbRecordRefExtension<K extends SdbKey, V extends SdbValue>
     on SdbRecordRef<K, V> {
-  /// Get a single record.
+  /// Get a single record snapshot.
+  ///
+  /// If the record does not exist, the snapshot will have `exists` set to
+  /// `false`.
   Future<SdbRecordSnapshot<K, V>?> get(SdbClient client) =>
       impl.getImpl(client);
 
@@ -33,11 +38,11 @@ extension SdbRecordRefExtension<K extends SdbKey, V extends SdbValue>
   /// Delete a single record.
   Future<void> delete(SdbClient client) => impl.deleteImpl(client);
 
-  /// Put a single record.
+  /// Put a single record (insert or update).
   Future<void> put(SdbClient client, V value) => impl.putImpl(client, value);
 }
 
-/// Common extension
+/// Record reference list extension.
 extension SdbRecordRefIterableExtension<K extends SdbKey, V extends SdbValue>
     on Iterable<SdbRecordRef<K, V>> {
   /// List of primary keys

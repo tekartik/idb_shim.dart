@@ -3,7 +3,13 @@ import 'sdb_index_impl.dart';
 import 'sdb_record_impl.dart';
 import 'sdb_store_impl.dart';
 
-/// A simple db store definition.
+/// A reference to a store.
+///
+/// A store is a collection of records.
+/// A store has a name.
+///
+/// A store can be created using [SdbDatabase.inTransaction] and
+/// [SdbTransaction.getStore].
 abstract class SdbStoreRef<K extends SdbKey, V extends SdbValue> {
   /// Store name.
   String get name;
@@ -15,13 +21,13 @@ abstract class SdbStoreRef<K extends SdbKey, V extends SdbValue> {
   SdbStoreRef<RK, RV> cast<RK extends SdbKey, RV extends SdbValue>();
 }
 
-/// Store methods.
+/// Store list extension.
 extension SdbStoreRefListExtension on List<SdbStoreRef> {
   /// Store names
   List<String> get names => map((s) => s.name).toList();
 }
 
-/// Store methods.
+/// Store reference extension.
 extension SdbStoreRefExtension<K extends SdbKey, V extends SdbValue>
     on SdbStoreRef<K, V> {
   /// Index reference on 1 field
