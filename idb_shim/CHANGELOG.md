@@ -1,7 +1,8 @@
-## 2.8.2+2
+## 2.8.2+3
 
 * Add onChange listener to SdbDatabase
 * Add sdb import/export helpers
+* Add options to `SdbFactory.openDatabaseOnDowngradeDelete` to support schema.
 
 ## 2.8.1
 
