@@ -1,5 +1,4 @@
 /// In memory implementation.
-/// {@canonicalFor sembast_memory_compat.idbMemoryFactory}
 library;
 
 import 'package:idb_shim/idb_client.dart';

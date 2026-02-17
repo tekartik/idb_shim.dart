@@ -9,5 +9,3 @@
 library;
 
 export 'package:idb_shim/src/sdb.dart';
-
-export 'idb_shim.dart';

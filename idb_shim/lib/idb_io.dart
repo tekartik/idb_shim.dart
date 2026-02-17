@@ -1,9 +1,11 @@
-library;
-
 import 'package:idb_shim/idb_client_sembast.dart';
 import 'package:sembast/sembast_io.dart';
 
-export 'idb_client_sembast.dart' show idbFactorySembastMemory;
+/// @nodoc
+export 'idb_client_sembast.dart'
+    show
+        /// @nodoc
+        idbFactorySembastMemory;
 export 'idb_shim.dart';
 
 IdbFactory? _idbFactorySembastIo;

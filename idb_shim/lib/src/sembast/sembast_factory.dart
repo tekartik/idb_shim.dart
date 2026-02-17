@@ -1,4 +1,5 @@
-// ignore_for_file: public_member_api_docs
+/// @nodoc
+library;
 
 import 'package:idb_shim/idb_client_sembast.dart';
 import 'package:idb_shim/src/common/common_factory.dart';
@@ -7,10 +8,13 @@ import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:path/path.dart';
 import 'package:sembast/sembast_memory.dart' as sembast;
 
+/// Debug sembast implementation
 bool sembastDebug = false; // devWarning(true);
 
 /// Special factory in memory but supporting writing on a virtual file system (in memory too)
 IdbFactory? _idbFactorySembastMemoryFsImpl;
+
+/// Special factory in memory but supporting writing on a virtual file system (in memory too)
 IdbFactory get idbFactorySembastMemoryFsImpl =>
     _idbFactorySembastMemoryFsImpl ??= IdbFactorySembast(
       sembast.databaseFactoryMemoryFs,
@@ -26,6 +30,7 @@ IdbFactory get idbFactorySembastMemoryImpl => _idbSembastMemoryFactoryImpl ??=
 IdbFactory newIdbFactorySembastMemoryImpl() =>
     IdbFactorySembast(sembast.newDatabaseFactoryMemory());
 
+/// Idb factory on top of Sembast
 class IdbFactorySembastImpl extends IdbFactoryBase
     implements IdbFactorySembast {
   final sembast.DatabaseFactory _databaseFactory;
@@ -44,6 +49,7 @@ class IdbFactorySembastImpl extends IdbFactoryBase
   @override
   bool get persistent => _databaseFactory.hasStorage;
 
+  /// Create a sembast-based factory on a given top path.
   IdbFactorySembastImpl(this._databaseFactory, [this._path]);
 
   @override
@@ -119,6 +125,7 @@ class IdbFactorySembastImpl extends IdbFactoryBase
   String toString() => 'IdbFactorySembast($_databaseFactory)';
 }
 
+/// Idb factory on sembast etension
 extension IdbFactorySembastExtension on IdbFactory {
   /// Cast to Sembast factory
   sembast.DatabaseFactory? get underlyingSembastFactoryOrNull {

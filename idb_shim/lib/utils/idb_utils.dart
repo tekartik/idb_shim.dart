@@ -7,13 +7,24 @@ import 'package:idb_shim/src/logger/logger_utils.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:idb_shim/src/utils/env_utils.dart';
 import 'package:idb_shim/src/utils/idb_utils.dart';
+import 'package:idb_shim/utils/idb_cursor_utils.dart'
+    show CursorRow, KeyCursorRow;
 
-import 'idb_cursor_utils.dart';
+//import 'idb_cursor_utils.dart';
 
 export 'package:idb_shim/idb_shim.dart';
+export 'package:idb_shim/utils/idb_cursor_utils.dart'
+    show CursorRow, KeyCursorRow;
 
-export 'idb_cursor_utils.dart' show CursorRow, KeyCursorRow;
-
+/*
+/// @nodoc
+export 'package:idb_shim/src/utils/cursor_utils.dart'
+    show
+        /// @nodoc
+        CursorRow,
+        /// @nodoc
+        KeyCursorRow;
+*/
 class _SchemaMeta {
   List<IdbObjectStoreMeta> stores = [];
 }

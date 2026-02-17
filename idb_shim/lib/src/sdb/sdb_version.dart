@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'sdb_open.dart';
+import 'package:idb_shim/idb_sdb.dart';
 
 /// Event passed to [SdbOnVersionChangeCallback].
 abstract class SdbVersionChangeEvent {
@@ -25,7 +25,7 @@ abstract class SdbVersionChangeEvent {
   }) => SdbVersionChangeEventImpl(db, transaction, oldVersion, newVersion);
 }
 
-/// Callback for [SdbOpenDatabase.onVersionChange].
+/// Callback for [SdbFactory.openDatabase].
 typedef SdbOnVersionChangeCallback =
     FutureOr<void> Function(SdbVersionChangeEvent event);
 

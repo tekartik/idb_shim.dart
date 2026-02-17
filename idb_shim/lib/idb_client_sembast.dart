@@ -1,4 +1,5 @@
 /// Sembast based implementation.
+/// {@canonicalFor sembast_factory.IdbFactorySembastExtension}
 library;
 
 import 'dart:async';
@@ -8,7 +9,12 @@ import 'package:idb_shim/src/common/common_factory.dart';
 import 'package:idb_shim/src/sembast/sembast_factory.dart';
 import 'package:sembast/sembast.dart' as sdb;
 export 'idb_shim.dart';
-export 'src/sembast/sembast_factory.dart' show IdbFactorySembastExtension;
+
+/// @nodoc
+export 'src/sembast/sembast_factory.dart'
+    show
+        /// @nodoc
+        IdbFactorySembastExtension;
 
 /// Sembast factory name.
 const idbFactoryNameSembast = 'sembast';

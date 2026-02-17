@@ -1,9 +1,3 @@
-/// {@canonicalFor idb_shim.error.DatabaseIndexNotFoundError}
-/// {@canonicalFor idb_shim.error.DatabaseInvalidKeyError}
-/// {@canonicalFor idb_shim.error.DatabaseNoKeyError}
-/// {@canonicalFor idb_shim.error.DatabaseReadOnlyError}
-/// {@canonicalFor idb_shim.error.DatabaseStoreNotFoundError}
-/// {@canonicalFor idb_shim.error.DatabaseTransactionStoreNotFoundError}
 library;
 
 export 'idb.dart';

@@ -9,7 +9,7 @@ import 'sdb_store_impl.dart';
 /// A store has a name.
 ///
 /// A store can be created using [SdbDatabase.inTransaction] and
-/// [SdbTransaction.getStore].
+/// [SdbTransactionExtension.store].
 abstract class SdbStoreRef<K extends SdbKey, V extends SdbValue> {
   /// Store name.
   String get name;

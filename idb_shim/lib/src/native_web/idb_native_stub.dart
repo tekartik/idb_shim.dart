@@ -21,5 +21,5 @@ bool get idbFactoryWebSupported =>
 
 bool get idbFactoryWebWorkerSupported =>
     idbUnimplementedStub('idbFactoryWebWorkerSupported');
-IdbFactory idbFactoryFromIndexedDB(dynamic nativeIdbFactory) =>
+IdbFactory idbFactoryFromIndexedDBImpl(dynamic nativeIdbFactory) =>
     idbUnimplementedStub('idbFactoryFromIndexedDB');

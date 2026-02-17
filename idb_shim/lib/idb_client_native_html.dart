@@ -1,4 +1,3 @@
-/// {@canonicalFor idb_shim.src.native.idb_native_web.idbFactoryFromIndexedDB}
 /// Legacy API
 library;
 
