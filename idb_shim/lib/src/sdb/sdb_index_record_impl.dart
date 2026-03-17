@@ -1,13 +1,11 @@
-import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
+import 'package:idb_shim/src/sdb/sdb_store_impl.dart';
+import 'package:idb_shim/src/sdb/sdb_utils.dart';
 
 import 'sdb_client.dart';
-import 'sdb_database_impl.dart';
 import 'sdb_index_impl.dart';
 import 'sdb_index_record.dart';
 import 'sdb_index_record_snapshot_impl.dart';
 import 'sdb_key_utils.dart';
-import 'sdb_record_snapshot.dart';
-import 'sdb_store.dart';
 import 'sdb_transaction.dart';
 import 'sdb_transaction_impl.dart';
 import 'sdb_types.dart';
@@ -40,7 +38,7 @@ class SdbIndexRecordRefImpl<
   SdbIndexRecordRefImpl(this.index, this.indexKey);
 
   @override
-  SdbStoreRef<K, V> get store => index.store;
+  SdbStoreRefImpl<K, V> get store => index.store;
 }
 
 /// Index record reference extension.
@@ -52,22 +50,18 @@ extension SdbIndexRecordRefImplExtension<
     on SdbIndexRecordRef<K, V, I> {
   /// Get a single record.
   Future<SdbIndexRecordSnapshotImpl<K, V, I>?> getImpl(SdbClient client) =>
-      client.handleDbOrTxn(dbGetImpl, txnGetImpl);
+      impl.store.clientAutoTxnImpl(
+        client,
+        SdbTransactionMode.readOnly,
+        (txn) => txnGetImpl(txn.rawImpl),
+      );
 
   /// Get a single record key.
-  Future<K?> getKeyImpl(SdbClient client) =>
-      client.handleDbOrTxn(dbGetKeyImpl, txnGetKeyImpl);
-
-  /// Get a single record.
-  Future<SdbIndexRecordSnapshotImpl<K, V, I>?> dbGetImpl(
-    SdbDatabaseImpl db,
-  ) async {
-    return await db.inStoreTransaction(store, SdbTransactionMode.readOnly, (
-      txn,
-    ) {
-      return txnGetImpl(txn.rawImpl);
-    });
-  }
+  Future<K?> getKeyImpl(SdbClient client) => impl.store.clientAutoTxnImpl(
+    client,
+    SdbTransactionMode.readOnly,
+    (txn) => txnGetKeyImpl(txn.rawImpl),
+  );
 
   /// Get a single record.
   Future<SdbIndexRecordSnapshotImpl<K, V, I>?> txnGetImpl(
@@ -83,21 +77,12 @@ extension SdbIndexRecordRefImplExtension<
         return SdbIndexRecordSnapshotImpl<K, V, I>(
           index.impl,
           key as K,
-          fixResult<V>(result),
+          idbToSdbValue<V>(result),
           indexKey,
         );
       }
     }
     return null;
-  }
-
-  /// Get a single record primary key.
-  Future<K?> dbGetKeyImpl(SdbDatabaseImpl db) async {
-    return await db.inStoreTransaction(store, SdbTransactionMode.readOnly, (
-      txn,
-    ) {
-      return txnGetKeyImpl(txn.rawImpl);
-    });
   }
 
   /// Get a single record primary key.

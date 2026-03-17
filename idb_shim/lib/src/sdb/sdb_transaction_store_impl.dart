@@ -13,7 +13,6 @@ import 'package:idb_shim/utils/idb_utils.dart' as idb;
 
 import 'sdb_filter_impl.dart';
 import 'sdb_key_utils.dart';
-import 'sdb_record_snapshot.dart';
 import 'sdb_record_snapshot_impl.dart';
 import 'sdb_store_impl.dart';
 
@@ -118,12 +117,12 @@ mixin SdbTransactionStoreRefImplMixin<K extends SdbKey, V extends SdbValue>
     SdbRecordSnapshot<K, V>? oldSnapshot;
     SdbRecordSnapshot<K, V>? newSnapshot;
     if (hasChangeListener && key != null) {
-      oldSnapshot = await idbObjectStore.getRecordSnapshot(store, key);
+      oldSnapshot = await idbObjectStore.getSdbRecordSnapshot(store, key);
     }
 
     /// If the record is successfully stored, then a success event is fired on the
     /// returned request object with the result set to the key for the stored
-    var result = await idbObjectStore.put(value, key);
+    var result = await idbObjectStore.put(sdbToIdbValue(value), key);
     if (hasChangeListener) {
       var recordKey = result as K;
       newSnapshot = SdbRecordSnapshotImpl<K, V>(store.record(recordKey), value);
@@ -140,19 +139,15 @@ mixin SdbTransactionStoreRefImplMixin<K extends SdbKey, V extends SdbValue>
 }
 
 extension on idb.ObjectStore {
-  Future<SdbRecordSnapshotImpl<K, V>?> getRecordSnapshot<
+  Future<SdbRecordSnapshotImpl<K, V>?> getSdbRecordSnapshot<
     K extends SdbKey,
     V extends SdbValue
   >(SdbStoreRef<K, V> store, K key) async {
     var value = await getObject(key);
     if (value != null) {
-      // cast the map if needed
-      if (value is Map && value is! Map<String, Object?>) {
-        value = value.cast<String, Object?>();
-      }
       return SdbRecordSnapshotImpl<K, V>(
         store.record(key),
-        fixResult<V>(value),
+        idbToSdbValue(value) as V,
       );
     }
     return null;
@@ -184,12 +179,12 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
 
   /// Get a single record.
   Future<SdbRecordSnapshotImpl<K, V>?> getRecordImpl(K key) {
-    return idbObjectStore.getRecordSnapshot<K, V>(store, key);
+    return idbObjectStore.getSdbRecordSnapshot<K, V>(store, key);
   }
 
   /// Check if a record exists.
   Future<bool> existsImpl(K key) async {
-    var value = await getRecordImpl(key);
+    var value = await idbObjectStore.getObject(key);
     return value != null;
   }
 
@@ -210,12 +205,13 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
       return key;
     }
 
+    var idbValue = sdbToIdbValue(value);
     if (idbObjectStore.keyPath != null) {
-      var result = (await idbObjectStore.add(value)) as K;
+      var result = (await idbObjectStore.add(idbValue)) as K;
       return added(result, value);
     }
     if (K == int) {
-      var result = (await idbObjectStore.add(value)) as K;
+      var result = (await idbObjectStore.add(idbValue)) as K;
       return added(result, value);
     } else if (K == String) {
       String key;
@@ -225,7 +221,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
           break;
         }
       }
-      var result = (await idbObjectStore.add(value, key)) as K;
+      var result = (await idbObjectStore.add(idbValue, key)) as K;
       return added(result, value);
     } else {
       throw UnsupportedError(
@@ -241,7 +237,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
     var hasChangeListener = changesListener.storeHasChangeListener(store);
     SdbRecordSnapshot<K, V>? oldSnapshot;
     if (hasChangeListener) {
-      oldSnapshot = await idbObjectStore.getRecordSnapshot(store, key);
+      oldSnapshot = await idbObjectStore.getSdbRecordSnapshot(store, key);
     }
     await idbObjectStore.delete(key);
     if (hasChangeListener) {
@@ -251,7 +247,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
 
   SdbRecordSnapshotImpl<K, V> _sdbRecordSnapshot(idb.CursorRow row) {
     var key = row.primaryKey as K;
-    var value = row.value as V;
+    var value = idbToSdbValue(row.value) as V;
     return SdbRecordSnapshotImpl<K, V>(store.record(key), value);
   }
 

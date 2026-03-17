@@ -29,6 +29,10 @@ extension SdbIndexRecordRefExtension<
   Future<SdbIndexRecordSnapshot<K, V, I>?> get(SdbClient client) =>
       impl.getImpl(client);
 
+  /// Get a single record value.
+  Future<V?> getValue(SdbClient client) async =>
+      (await impl.getImpl(client))?.value;
+
   /// Get a single record key.
   Future<K?> getKey(SdbClient client) => impl.getKeyImpl(client);
 

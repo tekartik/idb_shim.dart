@@ -1,4 +1,5 @@
 import 'package:idb_shim/src/logger/logger_utils.dart';
+import 'package:idb_shim/src/sdb/sdb_utils.dart';
 import 'package:idb_shim/utils/idb_utils.dart' as idb;
 import 'package:sembast/sembast.dart' as sembast;
 // ignore: implementation_imports
@@ -7,19 +8,19 @@ import 'package:sembast/src/api/protected/filter.dart' as sembast;
 /// Private record snapshot for filter
 class SdbFilterRecordSnapshotPrv implements SdbFilterRecordSnapshot {
   /// Cursor with value
-  final idb.CursorWithValue cwv;
+  final idb.CursorWithValue _cwv;
 
   /// Primary key
-  Object? get primaryKey => cwv.primaryKey;
+  Object? get primaryKey => _cwv.primaryKey;
 
   /// Index key if any
-  Object? get indexKey => cwv.key;
+  Object? get indexKey => _cwv.key;
 
   /// Private record snapshot for filter
-  SdbFilterRecordSnapshotPrv(this.cwv);
+  SdbFilterRecordSnapshotPrv(this._cwv);
   @override
   Object? operator [](String field) {
-    var data = cwv.value;
+    var data = value;
     if (data is Map) {
       return data[field];
     }
@@ -39,7 +40,7 @@ class SdbFilterRecordSnapshotPrv implements SdbFilterRecordSnapshot {
   sembast.RecordRef<Object?, Object?> get ref => throw UnimplementedError();
 
   @override
-  Object? get value => cwv.value;
+  late final Object? value = idbToSdbValueOrNull(_cwv.value);
 
   @override
   String toString() =>

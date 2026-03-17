@@ -118,9 +118,11 @@ class SdbIndexRefImpl<
     SdbClient client, {
 
     required SdbFindOptions<I> options,
-  }) => client.handleDbOrTxn(
-    (db) => dbFindRecordsImpl(db, options: options),
-    (txn) => txnFindRecordsImpl(txn, options: options),
+  }) => impl.store.clientAutoTxnImpl(
+    client,
+    SdbTransactionMode.readOnly,
+
+    (txn) => txnFindRecordsImpl(txn.rawImpl, options: options),
   );
 
   /// Find records.
@@ -138,23 +140,11 @@ class SdbIndexRefImpl<
     SdbClient client, {
 
     required SdbFindOptions<I> options,
-  }) {
-    return client.handleDbOrTxn(
-      (db) => dbFindRecordKeysImpl(db, options: options),
-      (txn) => txnFindRecordKeysImpl(txn, options: options),
-    );
-  }
-
-  /// Find records.
-  Future<List<SdbIndexRecordSnapshot<K, V, I>>> dbFindRecordsImpl(
-    SdbDatabaseImpl db, {
-
-    required SdbFindOptions<I> options,
-  }) {
-    return db.inStoreTransaction(store, SdbTransactionMode.readOnly, (txn) {
-      return txnFindRecordsImpl(txn.rawImpl, options: options);
-    });
-  }
+  }) => impl.store.clientAutoTxnImpl(
+    client,
+    SdbTransactionMode.readOnly,
+    (txn) => txnFindRecordKeysImpl(txn.rawImpl, options: options),
+  );
 
   /// Find records.
   Stream<SdbIndexRecordSnapshot<K, V, I>> dbStreamRecordsImpl(
@@ -170,24 +160,12 @@ class SdbIndexRefImpl<
     return ctlr.stream;
   }
 
-  /// Find record keys.
-  Future<List<SdbIndexRecordKey<K, V, I>>> dbFindRecordKeysImpl(
-    SdbDatabaseImpl db, {
-
-    /// filter ignored
-    required SdbFindOptions<I> options,
-  }) {
-    return db.inStoreTransaction(store, SdbTransactionMode.readOnly, (txn) {
-      return txnFindRecordKeysImpl(txn.rawImpl, options: options);
-    });
-  }
-
   SdbIndexRecordSnapshotImpl<K, V, I> _sdbIndexRecordSnapshot(
     idb.CursorRow row,
   ) {
     var key = row.primaryKey as K;
     var indexKey = idbKeyToIndexKey<I>(row.key);
-    var value = row.value as V;
+    var value = idbToSdbValue(row.value) as V;
     return SdbIndexRecordSnapshotImpl<K, V, I>(this, key, value, indexKey);
   }
 
@@ -285,20 +263,11 @@ class SdbIndexRefImpl<
   Future<int> countImpl(
     SdbClient client, {
     required SdbFindOptions<I> options,
-  }) => client.handleDbOrTxn(
-    (db) => dbCountImpl(db, options: options),
-    (txn) => txnCountImpl(txn, options: options),
+  }) => impl.store.clientAutoTxnImpl(
+    client,
+    SdbTransactionMode.readOnly,
+    (txn) => txnCountImpl(txn.rawImpl, options: options),
   );
-
-  /// Count records.
-  Future<int> dbCountImpl(
-    SdbDatabase db, {
-    required SdbFindOptions<I> options,
-  }) {
-    return db.inStoreTransaction(store, SdbTransactionMode.readOnly, (txn) {
-      return txnCountImpl(txn.rawImpl, options: options);
-    });
-  }
 
   /// Count records.
   Future<T> dbAutoTxnImpl<T>(
@@ -354,9 +323,10 @@ class SdbIndexRefImpl<
   Future<void> deleteImpl(
     SdbClient client, {
     required SdbFindOptions<I> options,
-  }) => client.handleDbOrTxn(
-    (db) => dbDeleteImpl(db, options: options),
-    (txn) => txnDeleteImpl(txn, options: options),
+  }) => impl.store.clientAutoTxnImpl(
+    client,
+    SdbTransactionMode.readWrite,
+    (txn) => txnDeleteImpl(txn.rawImpl, options: options),
   );
 
   /// Find records.

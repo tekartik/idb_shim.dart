@@ -1,3 +1,7 @@
+## 2.8.3-1
+
+* Add built-in `SdbTimestamp` and `SdbBlob` to Sdb database
+
 ## 2.8.2+4
 
 * Add onChange listener to SdbDatabase

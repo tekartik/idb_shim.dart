@@ -81,7 +81,7 @@ void defineTests(TestContext ctx) {
         await completer.future;
       }
 
-      Future testValue(Object value) async {
+      Future<void> testValue<V extends Object>(V value) async {
         dbCreateTransaction();
         // Write
         var key = await objectStore.add(value) as int;
@@ -136,6 +136,24 @@ void defineTests(TestContext ctx) {
           {'test': null},
           ...allValues,
         ]);
+      });
+      test('all_types', () async {
+        // int
+        await testValue(1);
+        // string
+        await testValue('test');
+        // bool
+        await testValue(true);
+        // double
+        await testValue(1.5);
+        // map
+        await testValue<Map<String, Object?>>({'test': 1, 'other': true});
+        // list
+        await testValue<List<Object?>>(['test', 1, 'other', true]);
+        // uint8list
+        await testValue(Uint8List.fromList([1, 2, 3]));
+        // datetime
+        await testValue(DateTime.timestamp());
       });
 
       test('dateTime', () async {

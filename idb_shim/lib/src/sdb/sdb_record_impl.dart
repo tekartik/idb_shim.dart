@@ -1,6 +1,4 @@
 import 'package:idb_shim/src/sdb/sdb.dart';
-import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
-import 'package:idb_shim/src/sdb/sdb_transaction_store_impl.dart';
 
 // ignore: unused_import
 import 'sdb_database_impl.dart';
@@ -30,15 +28,12 @@ class SdbRecordRefImpl<K extends SdbKey, V extends SdbValue>
   String toString() => 'Record(${store.name}, $key)';
 
   /// Get a single record.
-  Future<SdbRecordSnapshotImpl<K, V>?> getImpl(SdbClient client) => client
-      .handleDbOrTxn((db) => dbGetImpl(db), (txn) => txnGetImpl(txn.rawImpl));
-
-  /// Get a single record.
-  Future<SdbRecordSnapshotImpl<K, V>?> dbGetImpl(SdbDatabaseImpl db) {
-    return db.inStoreTransaction(store, SdbTransactionMode.readOnly, (txn) {
-      return txn.impl.getRecordImpl(key);
-    });
-  }
+  Future<SdbRecordSnapshotImpl<K, V>?> getImpl(SdbClient client) =>
+      impl.store.clientAutoTxnImpl(
+        client,
+        SdbTransactionMode.readOnly,
+        (txn) => txnGetImpl(txn.rawImpl),
+      );
 
   /// Get a single record.
   Future<SdbRecordSnapshotImpl<K, V>?> txnGetImpl(SdbTransactionImpl txn) {
@@ -46,17 +41,11 @@ class SdbRecordRefImpl<K extends SdbKey, V extends SdbValue>
   }
 
   /// Get a single record.
-  Future<bool> existsImpl(SdbClient client) => client.handleDbOrTxn(
-    (db) => dbExistsImpl(db),
+  Future<bool> existsImpl(SdbClient client) => impl.store.clientAutoTxnImpl(
+    client,
+    SdbTransactionMode.readOnly,
     (txn) => txnExistsImpl(txn.rawImpl),
   );
-
-  /// Get a single record.
-  Future<bool> dbExistsImpl(SdbDatabaseImpl db) {
-    return db.inStoreTransaction(store, SdbTransactionMode.readOnly, (txn) {
-      return txn.impl.existsImpl(key);
-    });
-  }
 
   /// Get a single record.
   Future<bool> txnExistsImpl(SdbTransactionImpl txn) {
@@ -76,17 +65,12 @@ class SdbRecordRefImpl<K extends SdbKey, V extends SdbValue>
   }
 
   /// Put a single record.
-  Future<void> putImpl(SdbClient client, V value) => client.handleDbOrTxn(
-    (db) => dbPutImpl(db, value),
-    (txn) => txnPutImpl(txn.rawImpl, value),
-  );
-
-  /// Put a single record.
-  Future<void> dbPutImpl(SdbDatabaseImpl db, V value) {
-    return db.inStoreTransaction(store, SdbTransactionMode.readWrite, (txn) {
-      return txn.put(key, value);
-    });
-  }
+  Future<void> putImpl(SdbClient client, V value) =>
+      impl.store.clientAutoTxnImpl(
+        client,
+        SdbTransactionMode.readWrite,
+        (txn) => txnPutImpl(txn.rawImpl, value),
+      );
 
   /// Put a single record.
   Future<void> txnPutImpl(SdbTransactionImpl txn, V value) {

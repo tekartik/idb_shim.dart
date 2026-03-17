@@ -226,19 +226,11 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
   }
 
   /// Add a single record.
-  Future<K> addImpl(SdbClient client, V value) => client.handleDbOrTxn(
-    (db) => dbAddImpl(db, value),
+  Future<K> addImpl(SdbClient client, V value) => clientAutoTxnImpl(
+    client,
+    SdbTransactionMode.readWrite,
     (txn) => txnAddImpl(txn.rawImpl, value),
   );
-
-  /// Add a single record.
-  Future<K> dbAddImpl(SdbDatabaseImpl db, V value) {
-    return db.inStoreTransaction<K, K, V>(this, SdbTransactionMode.readWrite, (
-      txn,
-    ) {
-      return txn.add(value);
-    });
-  }
 
   /// Add a single record.
   Future<K> txnAddImpl(SdbTransactionImpl txn, V value) {
@@ -246,19 +238,11 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
   }
 
   /// Put a single record (inline keys)
-  Future<K> putImpl(SdbClient client, V value) => client.handleDbOrTxn(
-    (db) => dbPutImpl(db, value),
+  Future<K> putImpl(SdbClient client, V value) => clientAutoTxnImpl(
+    client,
+    SdbTransactionMode.readWrite,
     (txn) => txnPutImpl(txn.rawImpl, value),
   );
-
-  /// Put a single record (inline keys)
-  Future<K> dbPutImpl(SdbDatabaseImpl db, V value) {
-    return db.inStoreTransaction<K, K, V>(this, SdbTransactionMode.readWrite, (
-      txn,
-    ) {
-      return txnPutImpl(txn.rawImpl, value);
-    });
-  }
 
   /// Put a single record (inline keys)
   Future<K> txnPutImpl(SdbTransactionImpl txn, V value) {
@@ -274,9 +258,10 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
     SdbClient client, {
 
     required SdbFindOptions<K> options,
-  }) => client.handleDbOrTxn(
-    (db) => dbFindRecordsImpl(db, options: options),
-    (txn) => txnFindRecordsImpl(txn, options: options),
+  }) => clientAutoTxnImpl(
+    client,
+    SdbTransactionMode.readOnly,
+    (txn) => txnFindRecordsImpl(txn.rawImpl, options: options),
   );
 
   /// Find records.
@@ -288,17 +273,6 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
     (db) => dbStreamRecordsImpl(db, options: options),
     (txn) => txnStreamRecordsImpl(txn, options: options),
   );
-
-  /// Find records.
-  Future<List<SdbRecordSnapshot<K, V>>> dbFindRecordsImpl(
-    SdbDatabase db, {
-
-    required SdbFindOptions<K> options,
-  }) {
-    return db.inStoreTransaction(this, SdbTransactionMode.readOnly, (txn) {
-      return txnFindRecordsImpl(txn.rawImpl, options: options);
-    });
-  }
 
   /// Find records.
   Stream<SdbRecordSnapshot<K, V>> dbStreamRecordsImpl(
@@ -336,20 +310,11 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
   Future<List<SdbRecordKey<K, V>>> findRecordKeysImpl(
     SdbClient client, {
     required SdbFindOptions<K> options,
-  }) => client.handleDbOrTxn(
-    (db) => dbFindRecordKeysImpl(db, options: options),
-    (txn) => txnFindRecordKeysImpl(txn, options: options),
+  }) => clientAutoTxnImpl(
+    client,
+    SdbTransactionMode.readOnly,
+    (txn) => txnFindRecordKeysImpl(txn.rawImpl, options: options),
   );
-
-  /// Find record keys.
-  Future<List<SdbRecordKey<K, V>>> dbFindRecordKeysImpl(
-    SdbDatabase db, {
-    required SdbFindOptions<K> options,
-  }) {
-    return db.inStoreTransaction(this, SdbTransactionMode.readOnly, (txn) {
-      return txnFindRecordKeysImpl(txn.rawImpl, options: options);
-    });
-  }
 
   /// Find record keys.
   Future<List<SdbRecordKey<K, V>>> txnFindRecordKeysImpl(
@@ -361,17 +326,11 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
 
   /// Count records.
   Future<int> countImpl(SdbClient client, {SdbFindOptions<K>? options}) =>
-      client.handleDbOrTxn(
-        (db) => dbCountImpl(db, options: options),
-        (txn) => txnCountImpl(txn, options: options),
+      clientAutoTxnImpl(
+        client,
+        SdbTransactionMode.readOnly,
+        (txn) => txnCountImpl(txn.rawImpl, options: options),
       );
-
-  /// Count records.
-  Future<int> dbCountImpl(SdbDatabase db, {SdbFindOptions<K>? options}) {
-    return db.inStoreTransaction(this, SdbTransactionMode.readOnly, (txn) {
-      return txnCountImpl(txn.rawImpl, options: options);
-    });
-  }
 
   /// Count records.
   Future<int> txnCountImpl(
@@ -385,9 +344,10 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
   Future<void> deleteImpl(
     SdbClient client, {
     required SdbFindOptions<K> options,
-  }) => client.handleDbOrTxn(
-    (db) => dbDeleteImpl(db, options: options),
-    (txn) => txnDeleteImpl(txn, options: options),
+  }) => clientAutoTxnImpl(
+    client,
+    SdbTransactionMode.readWrite,
+    (txn) => txnDeleteImpl(txn.rawImpl, options: options),
   );
 
   /// Find records.

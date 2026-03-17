@@ -1,8 +1,8 @@
 library;
 
 import 'package:idb_shim/src/cursor.dart';
+import 'package:idb_shim/src/sdb/sdb_utils.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
-import 'package:sembast/utils/value_utils.dart';
 
 export 'package:idb_shim/idb_shim.dart';
 
@@ -64,7 +64,7 @@ extension CursorWithValueStreamExt on Stream<CursorWithValue> {
       if (matcher != null && !matcher(cwv)) {
         return null;
       }
-      var value = cloneValue(cwv.value);
+      var value = idbCloneValue(cwv.value);
       return CursorRow(cwv.key, cwv.primaryKey, value);
     }
 
@@ -77,7 +77,7 @@ extension CursorWithValueStreamExt on Stream<CursorWithValue> {
   }
 
   CursorRow _cwvToRow(CursorWithValue cwv) {
-    var value = cloneValue(cwv.value);
+    var value = idbCloneValue(cwv.value);
     return CursorRow(cwv.key, cwv.primaryKey, value);
   }
 
