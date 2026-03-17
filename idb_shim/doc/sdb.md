@@ -233,7 +233,7 @@ var books = await serialIndex.findRecords(db,
     boundaries: SdbBoundaries.values('SN10000', 'SN20000'));
 ```
 
-### 7. Generic Filters
+### Generic Filters
 
 SDB also provides generic filters, similar to `sembast`, for more complex queries. However, these filters are less 
 efficient than using indexes because they require loading records into memory to perform the filtering.
@@ -247,3 +247,22 @@ var filteredBooks = await bookSerialIndex.findRecords(
   filter: SdbFilter.equals('title', 'Hamlet'),
 );
 ```
+
+### Supported types
+
+- All idb types:
+  - `int`
+  - `String`
+  - `Uint8List`
+  - `DateTime`
+  - `bool`
+  - `num`
+  - `double`
+  - `List`
+  - `Map`
+- Added built-in types:
+  - `SdbBlob`
+  - `SdbTimestamp`
+  - `SdbModel` (map)
+
+For compatibility, only fields with type `int` or `String` can be indexed.
