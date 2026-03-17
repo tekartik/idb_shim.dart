@@ -1,4 +1,4 @@
-## 2.8.3-1
+## 2.8.3
 
 * Add built-in `SdbTimestamp` and `SdbBlob` to Sdb database
 
