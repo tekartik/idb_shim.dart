@@ -39,15 +39,17 @@ void simpleDbDocTest() {
     // Open the database
     var db = await factory.openDatabase(
       path,
-      version: 1,
-      onVersionChange: (event) {
-        var db = event.db;
-        var oldVersion = event.oldVersion;
-        if (oldVersion < 1) {
-          // Create the book store
-          db.createStore(bookStore);
-        }
-      },
+      options: SdbOpenDatabaseOptions(
+        version: 1,
+        onVersionChange: (event) {
+          var db = event.db;
+          var oldVersion = event.oldVersion;
+          if (oldVersion < 1) {
+            // Create the book store
+            db.createStore(bookStore);
+          }
+        },
+      ),
     );
     // ...access the database.
     // Add a record and get its key (int here)
@@ -63,19 +65,21 @@ void simpleDbDocTest() {
 
     db = await factory.openDatabase(
       path,
-      version: 2,
-      onVersionChange: (event) {
-        var db = event.db;
-        var oldVersion = event.oldVersion;
-        if (oldVersion < 1) {
-          // Create the book store
-          var openStoreRef = db.createStore(bookStore);
-          openStoreRef.createIndex(bookSerialIndex, 'serial');
-        } else if (oldVersion < 2) {
-          var openStoreRef = db.objectStore(bookStore);
-          openStoreRef.createIndex(bookSerialIndex, 'serial');
-        }
-      },
+      options: SdbOpenDatabaseOptions(
+        version: 2,
+        onVersionChange: (event) {
+          var db = event.db;
+          var oldVersion = event.oldVersion;
+          if (oldVersion < 1) {
+            // Create the book store
+            var openStoreRef = db.createStore(bookStore);
+            openStoreRef.createIndex(bookSerialIndex, 'serial');
+          } else if (oldVersion < 2) {
+            var openStoreRef = db.objectStore(bookStore);
+            openStoreRef.createIndex(bookSerialIndex, 'serial');
+          }
+        },
+      ),
     );
     late int keyLePetitPrince;
     late int keyHamlet;
@@ -182,27 +186,29 @@ void simpleDbDocTest() {
 
     db = await factory.openDatabase(
       path,
-      version: 3,
-      onVersionChange: (event) {
-        var db = event.db;
-        var oldVersion = event.oldVersion;
-        if (oldVersion < 1) {
-          // Create the book store
-          var openStoreRef = db.createStore(bookStore);
-          openStoreRef.createIndex(bookSerialIndex, 'serial');
-        } else if (oldVersion < 2) {
-          var openStoreRef = db.objectStore(bookStore);
-          openStoreRef.createIndex(bookSerialIndex, 'serial');
-        }
-        if (oldVersion < 3) {
-          var openStoreRef = db.createStore(
-            petStore,
-            keyPath: 'id',
-            autoIncrement: true,
-          );
-          openStoreRef.createIndex2(petTypeIdIndex, 'type', 'id');
-        }
-      },
+      options: SdbOpenDatabaseOptions(
+        version: 3,
+        onVersionChange: (event) {
+          var db = event.db;
+          var oldVersion = event.oldVersion;
+          if (oldVersion < 1) {
+            // Create the book store
+            var openStoreRef = db.createStore(bookStore);
+            openStoreRef.createIndex(bookSerialIndex, 'serial');
+          } else if (oldVersion < 2) {
+            var openStoreRef = db.objectStore(bookStore);
+            openStoreRef.createIndex(bookSerialIndex, 'serial');
+          }
+          if (oldVersion < 3) {
+            var openStoreRef = db.createStore(
+              petStore,
+              keyPath: 'id',
+              autoIncrement: true,
+            );
+            openStoreRef.createIndex2(petTypeIdIndex, 'type', 'id');
+          }
+        },
+      ),
     );
 
     late int keyCatAlbert;

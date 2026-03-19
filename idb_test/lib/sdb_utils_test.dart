@@ -124,8 +124,7 @@ void sdbUtilsTests(SdbTestContext ctx) {
         await setupDeleteDb();
         db = await sdbFactory.openDatabase(
           srcDbName,
-          version: 2,
-          onVersionChange: (_) {},
+          options: SdbOpenDatabaseOptions(version: 2, onVersionChange: (_) {}),
         );
         expect(db!.version, 2);
         final export = await sdbExportDatabaseLines(db!);
@@ -138,8 +137,7 @@ void sdbUtilsTests(SdbTestContext ctx) {
           importedDbName,
         );
         expect(importedDb.version, 2);
-        //devPrint()
-        final newExport = await sdbExportDatabaseLines(db!);
+        final newExport = await sdbExportDatabaseLines(importedDb);
         expect(newExport, export);
         await importedDb.close();
 
@@ -151,8 +149,7 @@ void sdbUtilsTests(SdbTestContext ctx) {
         await setupDeleteDb();
         db = await sdbFactory.openDatabase(
           srcDbName,
-          version: 2,
-          onVersionChange: (_) {},
+          options: SdbOpenDatabaseOptions(version: 2, onVersionChange: (_) {}),
         );
 
         Future dbCheck(SdbDatabase db) async {

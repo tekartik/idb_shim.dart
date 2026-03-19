@@ -28,14 +28,16 @@ void sdbOpenTests(SdbTestContext ctx) {
       await factory.deleteDatabase(dbName);
       var db = await factory.openDatabaseOnDowngradeDelete(
         dbName,
-        version: 2,
-        onVersionChange: (event) {
-          var oldVersion = event.oldVersion;
-          expect(oldVersion, 0);
-          if (oldVersion < 2) {
-            event.db.createStore(testStore);
-          }
-        },
+        options: SdbOpenDatabaseOptions(
+          version: 2,
+          onVersionChange: (event) {
+            var oldVersion = event.oldVersion;
+            expect(oldVersion, 0);
+            if (oldVersion < 2) {
+              event.db.createStore(testStore);
+            }
+          },
+        ),
       );
       expect(db.version, 2);
       await testStore.record(2).put(db, {'test': 2});
@@ -45,13 +47,15 @@ void sdbOpenTests(SdbTestContext ctx) {
       await db.close();
       db = await factory.openDatabaseOnDowngradeDelete(
         dbName,
-        version: 1,
-        onVersionChange: (event) {
-          var oldVersion = event.oldVersion;
-          if (oldVersion < 1) {
-            event.db.createStore(testStore);
-          }
-        },
+        options: SdbOpenDatabaseOptions(
+          version: 1,
+          onVersionChange: (event) {
+            var oldVersion = event.oldVersion;
+            if (oldVersion < 1) {
+              event.db.createStore(testStore);
+            }
+          },
+        ),
       );
       expect(db.version, 1);
       await testStore.record(1).put(db, {'test': 1});

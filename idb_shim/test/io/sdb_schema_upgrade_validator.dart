@@ -129,8 +129,7 @@ class SdbSchemaUpgradeValidator {
     var factory = sdbFactoryIo;
     var db = await factory.openDatabase(
       workDbPath,
-      version: version,
-      schema: schema,
+      options: SdbOpenDatabaseOptions(version: version, schema: schema),
     );
     await db.close();
     var newContent = await _getContent(workDbPath);

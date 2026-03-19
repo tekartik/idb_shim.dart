@@ -28,8 +28,10 @@ void schemaSdbTest(SdbTestContext ctx) {
       await factory.deleteDatabase(dbName);
       var db = await factory.openDatabase(
         dbName,
-        version: 1,
-        schema: SdbDatabaseSchema(stores: [testStore1Schema]),
+        options: SdbOpenDatabaseOptions(
+          version: 1,
+          schema: SdbDatabaseSchema(stores: [testStore1Schema]),
+        ),
       );
       expect(
         await db.readSchemaDef(),
@@ -46,7 +48,24 @@ void schemaSdbTest(SdbTestContext ctx) {
       await expectLater(() async {
         await factory.openDatabase(
           dbName,
-          version: 1,
+          options: SdbOpenDatabaseOptions(
+            version: 1,
+            schema: SdbDatabaseSchema(
+              stores: [
+                testStore1.schema(
+                  autoIncrement: true,
+                  indexes: [testSchemaIndex1],
+                ),
+              ],
+            ),
+          ),
+        );
+      }, throwsA(isA<StateError>()));
+
+      db = await factory.openDatabase(
+        dbName,
+        options: SdbOpenDatabaseOptions(
+          version: 2,
           schema: SdbDatabaseSchema(
             stores: [
               testStore1.schema(
@@ -55,16 +74,6 @@ void schemaSdbTest(SdbTestContext ctx) {
               ),
             ],
           ),
-        );
-      }, throwsA(isA<StateError>()));
-
-      db = await factory.openDatabase(
-        dbName,
-        version: 2,
-        schema: SdbDatabaseSchema(
-          stores: [
-            testStore1.schema(autoIncrement: true, indexes: [testSchemaIndex1]),
-          ],
         ),
       );
       expect((await db.readSchemaDef()).toDebugMap(), {
@@ -96,12 +105,17 @@ void schemaSdbTest(SdbTestContext ctx) {
       // Reopen with no changes and no version specified!
       db = await factory.openDatabase(
         dbName,
-        // no version and no schema change
-        // version: 2,
-        schema: SdbDatabaseSchema(
-          stores: [
-            testStore1.schema(autoIncrement: true, indexes: [testSchemaIndex1]),
-          ],
+        options: SdbOpenDatabaseOptions(
+          // no version and no schema change
+          // version: 2,
+          schema: SdbDatabaseSchema(
+            stores: [
+              testStore1.schema(
+                autoIncrement: true,
+                indexes: [testSchemaIndex1],
+              ),
+            ],
+          ),
         ),
       );
       await db.close();

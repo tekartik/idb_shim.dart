@@ -39,13 +39,15 @@ void simpleSdbTest(SdbTestContext ctx) {
         await factory.deleteDatabase('test_put_get.db');
         var db = await factory.openDatabase(
           'test_put_get.db',
-          version: 1,
-          onVersionChange: (event) {
-            var oldVersion = event.oldVersion;
-            if (oldVersion < 1) {
-              event.db.createStore(testStore);
-            }
-          },
+          options: SdbOpenDatabaseOptions(
+            version: 1,
+            onVersionChange: (event) {
+              var oldVersion = event.oldVersion;
+              if (oldVersion < 1) {
+                event.db.createStore(testStore);
+              }
+            },
+          ),
         );
         var key = await testStore.add(db, {'test': 1});
         expect(key, 1);
@@ -78,13 +80,15 @@ void simpleSdbTest(SdbTestContext ctx) {
         await factory.deleteDatabase('test_put_get.db');
         var db = await factory.openDatabase(
           'test_put_get.db',
-          version: 1,
-          onVersionChange: (event) {
-            var oldVersion = event.oldVersion;
-            if (oldVersion < 1) {
-              event.db.createStore(testStore);
-            }
-          },
+          options: SdbOpenDatabaseOptions(
+            version: 1,
+            onVersionChange: (event) {
+              var oldVersion = event.oldVersion;
+              if (oldVersion < 1) {
+                event.db.createStore(testStore);
+              }
+            },
+          ),
         );
         await db.inStoreTransaction(testStore, SdbTransactionMode.readWrite, (
           txn,
@@ -116,13 +120,15 @@ void simpleSdbTest(SdbTestContext ctx) {
         await factory.deleteDatabase('test_basic_filter.db');
         var db = await factory.openDatabase(
           'test_basic_filter.db',
-          version: 1,
-          onVersionChange: (event) {
-            var oldVersion = event.oldVersion;
-            if (oldVersion < 1) {
-              event.db.createStore(testStore);
-            }
-          },
+          options: SdbOpenDatabaseOptions(
+            version: 1,
+            onVersionChange: (event) {
+              var oldVersion = event.oldVersion;
+              if (oldVersion < 1) {
+                event.db.createStore(testStore);
+              }
+            },
+          ),
         );
         await db.inStoreTransaction(testStore, SdbTransactionMode.readWrite, (
           txn,
@@ -165,8 +171,6 @@ void simpleSdbTest(SdbTestContext ctx) {
         expect(customEvaluated, isTrue);
         expect(records.keys, [2]);
         await db.close();
-
-        await db.close();
       });
       group('boundaries int', () {
         late SdbDatabase db;
@@ -177,13 +181,15 @@ void simpleSdbTest(SdbTestContext ctx) {
           await factory.deleteDatabase('test_boundaries.db');
           db = await factory.openDatabase(
             'test_boundaries.db',
-            version: 1,
-            onVersionChange: (event) {
-              var oldVersion = event.oldVersion;
-              if (oldVersion < 1) {
-                event.db.createStore(testStore);
-              }
-            },
+            options: SdbOpenDatabaseOptions(
+              version: 1,
+              onVersionChange: (event) {
+                var oldVersion = event.oldVersion;
+                if (oldVersion < 1) {
+                  event.db.createStore(testStore);
+                }
+              },
+            ),
           );
           await db.inStoreTransaction(testStore, SdbTransactionMode.readWrite, (
             txn,
@@ -289,13 +295,15 @@ void simpleSdbTest(SdbTestContext ctx) {
         await factory.deleteDatabase('test_boundaries.db');
         var db = await factory.openDatabase(
           'test_boundaries.db',
-          version: 1,
-          onVersionChange: (event) {
-            var oldVersion = event.oldVersion;
-            if (oldVersion < 1) {
-              event.db.createStore(testStore);
-            }
-          },
+          options: SdbOpenDatabaseOptions(
+            version: 1,
+            onVersionChange: (event) {
+              var oldVersion = event.oldVersion;
+              if (oldVersion < 1) {
+                event.db.createStore(testStore);
+              }
+            },
+          ),
         );
         await db.inStoreTransaction(testStore, SdbTransactionMode.readWrite, (
           txn,
@@ -376,13 +384,15 @@ void simpleSdbTest(SdbTestContext ctx) {
         await factory.deleteDatabase('test_put_get.db');
         var db = await factory.openDatabase(
           'test_put_get.db',
-          version: 1,
-          onVersionChange: (event) {
-            var oldVersion = event.oldVersion;
-            if (oldVersion < 1) {
-              event.db.createStore(testStore2);
-            }
-          },
+          options: SdbOpenDatabaseOptions(
+            version: 1,
+            onVersionChange: (event) {
+              var oldVersion = event.oldVersion;
+              if (oldVersion < 1) {
+                event.db.createStore(testStore2);
+              }
+            },
+          ),
         );
         var key = await testStore2.add(db, {'test': 1});
         expect(key.isNotEmpty, isTrue);
@@ -403,17 +413,19 @@ void simpleSdbTest(SdbTestContext ctx) {
         await factory.deleteDatabase(dbName);
         var db = await factory.openDatabase(
           dbName,
-          version: 1,
-          onVersionChange: (event) {
-            var oldVersion = event.oldVersion;
-            if (oldVersion < 1) {
-              event.db.createStore(
-                testStore,
-                keyPath: 'id',
-                autoIncrement: true,
-              );
-            }
-          },
+          options: SdbOpenDatabaseOptions(
+            version: 1,
+            onVersionChange: (event) {
+              var oldVersion = event.oldVersion;
+              if (oldVersion < 1) {
+                event.db.createStore(
+                  testStore,
+                  keyPath: 'id',
+                  autoIncrement: true,
+                );
+              }
+            },
+          ),
         );
         var key = await testStore.add(db, {'test': 1});
         var readValue = await testStore.record(key).getValue(db);
@@ -425,13 +437,15 @@ void simpleSdbTest(SdbTestContext ctx) {
         await factory.deleteDatabase(dbName);
         var db = await factory.openDatabase(
           dbName,
-          version: 1,
-          onVersionChange: (event) {
-            var oldVersion = event.oldVersion;
-            if (oldVersion < 1) {
-              event.db.createStore(testStore2, keyPath: 'id');
-            }
-          },
+          options: SdbOpenDatabaseOptions(
+            version: 1,
+            onVersionChange: (event) {
+              var oldVersion = event.oldVersion;
+              if (oldVersion < 1) {
+                event.db.createStore(testStore2, keyPath: 'id');
+              }
+            },
+          ),
         );
         var key = await testStore2.add(db, {'test': 1, 'id': 'my_id'});
         expect(key, 'my_id');
@@ -446,14 +460,16 @@ void simpleSdbTest(SdbTestContext ctx) {
       await factory.deleteDatabase(dbName);
       var db = await factory.openDatabase(
         dbName,
-        version: 1,
-        onVersionChange: (event) {
-          var oldVersion = event.oldVersion;
-          if (oldVersion < 1) {
-            event.db.createStore(testStore);
-            event.db.createStore(testStore2);
-          }
-        },
+        options: SdbOpenDatabaseOptions(
+          version: 1,
+          onVersionChange: (event) {
+            var oldVersion = event.oldVersion;
+            if (oldVersion < 1) {
+              event.db.createStore(testStore);
+              event.db.createStore(testStore2);
+            }
+          },
+        ),
       );
       await db.inStoresTransaction(
         [testStore, testStore2],

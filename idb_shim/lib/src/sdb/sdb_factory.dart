@@ -143,16 +143,15 @@ abstract class SdbFactoryInterface {
     /// Options for opening a Sdb database (prefer options over version and schema).
     SdbOpenDatabaseOptions? options,
 
-    /// The version of the database, prefer options
-    int? version,
+    /// Compat, version
+    @Deprecated('Use options instead') int? version,
 
-    /// compat: provide onVersionChange to handle schema changes or initialization
-    /// Prefer options
+    /// Compat, onVersionChange
+    @Deprecated('Use options instead')
     SdbOnVersionChangeCallback? onVersionChange,
 
-    /// compat: provide a schema to have it applied automatically.
-    /// Prefer options
-    SdbDatabaseSchema? schema,
+    /// Compat, schema
+    @Deprecated('Use options instead') SdbDatabaseSchema? schema,
   });
 
   /// Delete a database.
@@ -175,14 +174,20 @@ extension SdbFactoryExtension on SdbFactory {
 
     /// Options for opening a Sdb database (prefer options over version and schema).
     SdbOpenDatabaseOptions? options,
-    int? version,
+
+    /// Compat
+    @Deprecated('Use options instead') int? version,
+    @Deprecated('Use options instead')
+    /// Compat
     SdbOnVersionChangeCallback? onVersionChange,
   }) async {
     Future<SdbDatabase> doOpen() {
       return openDatabase(
         name,
         options: options,
+        // ignore: deprecated_member_use_from_same_package
         version: version,
+        // ignore: deprecated_member_use_from_same_package
         onVersionChange: onVersionChange,
       );
     }

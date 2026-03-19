@@ -26,9 +26,11 @@ void defineSdbChangesListenerTests(SdbTestContext ctx) {
       await factory.deleteDatabase(dbName);
       var db = await factory.openDatabase(
         dbName,
-        version: 1,
-        schema: SdbDatabaseSchema(
-          stores: [store.schema(autoIncrement: true), storeDup.schema()],
+        options: SdbOpenDatabaseOptions(
+          version: 1,
+          schema: SdbDatabaseSchema(
+            stores: [store.schema(autoIncrement: true), storeDup.schema()],
+          ),
         ),
       );
 

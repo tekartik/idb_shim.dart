@@ -10,8 +10,12 @@ void main() {
     setUp(() async {
       db = await newSdbFactoryMemory().openDatabase(
         'test.db',
-        version: 1,
-        schema: SdbDatabaseSchema(stores: [store.schema(autoIncrement: true)]),
+        options: SdbOpenDatabaseOptions(
+          version: 1,
+          schema: SdbDatabaseSchema(
+            stores: [store.schema(autoIncrement: true)],
+          ),
+        ),
       );
     });
     tearDown(() async {

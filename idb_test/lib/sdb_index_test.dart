@@ -19,13 +19,15 @@ void sdbIndexTests(TestContext ctx) {
       await factory.deleteDatabase(dbName);
       var db = await factory.openDatabase(
         dbName,
-        version: 1,
-        onVersionChange: (event) {
-          if (event.oldVersion < 1) {
-            var store = event.db.createStore(testStore);
-            store.createIndex(testIndex, 'field');
-          }
-        },
+        options: SdbOpenDatabaseOptions(
+          version: 1,
+          onVersionChange: (event) {
+            if (event.oldVersion < 1) {
+              var store = event.db.createStore(testStore);
+              store.createIndex(testIndex, 'field');
+            }
+          },
+        ),
       );
       await testStore.add(db, {'field': 1234});
       // ignore: omit_local_variable_types
@@ -42,14 +44,16 @@ void sdbIndexTests(TestContext ctx) {
       await factory.deleteDatabase('filter_int.db');
       var db = await factory.openDatabase(
         'filter_int.db',
-        version: 1,
-        onVersionChange: (event) {
-          var oldVersion = event.oldVersion;
-          if (oldVersion < 1) {
-            var store = event.db.createStore(testStore);
-            store.createIndex(testIndex, 'test');
-          }
-        },
+        options: SdbOpenDatabaseOptions(
+          version: 1,
+          onVersionChange: (event) {
+            var oldVersion = event.oldVersion;
+            if (oldVersion < 1) {
+              var store = event.db.createStore(testStore);
+              store.createIndex(testIndex, 'test');
+            }
+          },
+        ),
       );
       await db.inStoreTransaction(testStore, SdbTransactionMode.readWrite, (
         txn,
@@ -105,14 +109,16 @@ void sdbIndexTests(TestContext ctx) {
         await factory.deleteDatabase('test_boundaries.db');
         db = await factory.openDatabase(
           'test_boundaries.db',
-          version: 1,
-          onVersionChange: (event) {
-            var oldVersion = event.oldVersion;
-            if (oldVersion < 1) {
-              var store = event.db.createStore(testStore);
-              store.createIndex(testIndex, 'test');
-            }
-          },
+          options: SdbOpenDatabaseOptions(
+            version: 1,
+            onVersionChange: (event) {
+              var oldVersion = event.oldVersion;
+              if (oldVersion < 1) {
+                var store = event.db.createStore(testStore);
+                store.createIndex(testIndex, 'test');
+              }
+            },
+          ),
         );
         await db.inStoreTransaction(testStore, SdbTransactionMode.readWrite, (
           txn,
@@ -248,24 +254,28 @@ void sdbIndexTests(TestContext ctx) {
       await factory.deleteDatabase(dbName);
       var db = await factory.openDatabase(
         dbName,
-        version: 1,
-        onVersionChange: (event) {
-          if (event.oldVersion < 1) {
-            event.db.createStore(testStore);
-          }
-        },
+        options: SdbOpenDatabaseOptions(
+          version: 1,
+          onVersionChange: (event) {
+            if (event.oldVersion < 1) {
+              event.db.createStore(testStore);
+            }
+          },
+        ),
       );
       await testStore.add(db, {'field': 1234});
       await db.close();
       db = await factory.openDatabase(
         dbName,
-        version: 2,
-        onVersionChange: (event) {
-          if (event.oldVersion < 2) {
-            var store = event.db.objectStore(testStore);
-            store.createIndex(testIndex, 'field');
-          }
-        },
+        options: SdbOpenDatabaseOptions(
+          version: 2,
+          onVersionChange: (event) {
+            if (event.oldVersion < 2) {
+              var store = event.db.objectStore(testStore);
+              store.createIndex(testIndex, 'field');
+            }
+          },
+        ),
       );
       var snapshot = (await testIndex.record(1234).get(db))!;
       expect(snapshot.key, 1);
@@ -288,19 +298,21 @@ void sdbIndexTests(TestContext ctx) {
 
       var db = await factory.openDatabase(
         dbName,
-        version: 1,
-        onVersionChange: (event) {
-          var db = event.db;
-          var oldVersion = event.oldVersion;
-          if (oldVersion < 1) {
-            var openStoreRef = db.createStore(
-              itemStore,
-              keyPath: 'id',
-              autoIncrement: true,
-            );
-            openStoreRef.createIndex2(itemTypeIdIndex, 'type', 'id');
-          }
-        },
+        options: SdbOpenDatabaseOptions(
+          version: 1,
+          onVersionChange: (event) {
+            var db = event.db;
+            var oldVersion = event.oldVersion;
+            if (oldVersion < 1) {
+              var openStoreRef = db.createStore(
+                itemStore,
+                keyPath: 'id',
+                autoIncrement: true,
+              );
+              openStoreRef.createIndex2(itemTypeIdIndex, 'type', 'id');
+            }
+          },
+        ),
       );
 
       late int keyCatAlbert;
@@ -387,19 +399,21 @@ void sdbIndexTests(TestContext ctx) {
 
       var db = await factory.openDatabase(
         dbName,
-        version: 1,
-        onVersionChange: (event) {
-          var db = event.db;
-          var oldVersion = event.oldVersion;
-          if (oldVersion < 1) {
-            var openStoreRef = db.createStore(
-              store,
-              keyPath: 'id',
-              autoIncrement: true,
-            );
-            openStoreRef.createIndex3(index, 'col1', 'col2', 'col3');
-          }
-        },
+        options: SdbOpenDatabaseOptions(
+          version: 1,
+          onVersionChange: (event) {
+            var db = event.db;
+            var oldVersion = event.oldVersion;
+            if (oldVersion < 1) {
+              var openStoreRef = db.createStore(
+                store,
+                keyPath: 'id',
+                autoIncrement: true,
+              );
+              openStoreRef.createIndex3(index, 'col1', 'col2', 'col3');
+            }
+          },
+        ),
       );
 
       late int key1;
@@ -470,19 +484,21 @@ void sdbIndexTests(TestContext ctx) {
 
       var db = await factory.openDatabase(
         dbName,
-        version: 1,
-        onVersionChange: (event) {
-          var db = event.db;
-          var oldVersion = event.oldVersion;
-          if (oldVersion < 1) {
-            var openStoreRef = db.createStore(
-              store,
-              keyPath: 'id',
-              autoIncrement: true,
-            );
-            openStoreRef.createIndex4(index, 'col1', 'col2', 'col3', 'col4');
-          }
-        },
+        options: SdbOpenDatabaseOptions(
+          version: 1,
+          onVersionChange: (event) {
+            var db = event.db;
+            var oldVersion = event.oldVersion;
+            if (oldVersion < 1) {
+              var openStoreRef = db.createStore(
+                store,
+                keyPath: 'id',
+                autoIncrement: true,
+              );
+              openStoreRef.createIndex4(index, 'col1', 'col2', 'col3', 'col4');
+            }
+          },
+        ),
       );
 
       late int key1;
