@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:idb_shim/sdb.dart';
-import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
+import 'package:idb_shim/src/sdb/sdb_transaction_impl.dart';
 import 'package:idb_shim/src/utils/async_utils.dart';
 
 /// Transaction record change implementation
@@ -352,7 +352,7 @@ class SdbDatabaseChangesListener {
       return;
     }
 
-    var changes = transaction.txnImpl.changes;
+    var changes = transaction.rawImpl.changes;
     if (changes != null && (oldSnapshot != null || newSnapshot != null)) {
       changes.addChange(oldSnapshot, newSnapshot);
     }

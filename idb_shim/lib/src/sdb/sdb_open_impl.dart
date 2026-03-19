@@ -1,7 +1,9 @@
 import 'package:idb_shim/idb.dart' as idb;
 import 'package:idb_shim/sdb.dart';
+import 'package:idb_shim/src/sdb/sdb_changes_listener.dart';
 
 import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
+import 'package:idb_shim/src/sdb/sdb_transaction_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_index.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_store_impl.dart';
 
@@ -94,16 +96,14 @@ class SdbOpenDatabaseImpl implements SdbOpenDatabase {
 }
 
 /// Open transaction internal extension.
-class SdbOpenTransactionImpl implements SdbOpenTransaction {
-  /// Compat, deprecated.
-  @override
-  SdbOpenDatabaseImpl get db => openDatabase;
-
+class SdbOpenTransactionImpl extends SdbTransactionImpl
+    implements SdbOpenTransaction {
   /// Database implementation.
   @override
   final SdbOpenDatabaseImpl openDatabase;
 
   /// IDB transaction.
+  @override
   final idb.Transaction idbTransaction;
 
   /// Open transaction implementation.
@@ -111,6 +111,15 @@ class SdbOpenTransactionImpl implements SdbOpenTransaction {
 
   @override
   Iterable<String> get storeNames => idbTransaction.objectStoreNames;
+
+  @override
+  SdbDatabaseTransactionChanges? get changes => null;
+
+  @override
+  SdbDatabaseChangesListener? get changesListener => null;
+
+  @override
+  SdbTransactionMode get mode => SdbTransactionMode.readWrite;
 }
 
 /// Open store reference internal extension.

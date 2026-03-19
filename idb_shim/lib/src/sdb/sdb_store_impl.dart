@@ -389,7 +389,7 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
   ) async {
     if (client is SdbDatabase) {
       return await inTransactionImpl<T>(client, mode, fn);
-    } else if (client is SdbTransactionImpl) {
+    } else if (client is SdbTransaction) {
       return fn(client);
     } else {
       throw ArgumentError('Invalid client type: ${client.runtimeType}');

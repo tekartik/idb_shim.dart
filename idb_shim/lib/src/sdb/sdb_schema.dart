@@ -1,8 +1,6 @@
 import 'package:idb_shim/src/common/common_value.dart';
-import 'package:idb_shim/src/sdb/sdb_factory_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
-import 'package:idb_shim/src/utils/env_utils.dart';
 
 import 'sdb.dart';
 import 'sdb_database_impl.dart';
@@ -388,80 +386,38 @@ extension SdbDatabaseSchemaExtension on SdbDatabaseSchema {
 /// Factory schema extension
 extension SdbFactorySchemaExtension on SdbFactory {}
 
-/// Factory schema extension
-extension SdbFactorySchemaExtensionPrv on SdbFactory {
-  SdbFactoryImpl get _impl => this as SdbFactoryIdb;
-  static Future<void> _onCheckSchema(
-    SdbDatabase db,
-    SdbDatabaseSchema schema,
-  ) async {
-    var storeNames = db.storeNames.toSet();
-    var storeSchemas = schema.stores;
-    // To find the delete ones first
-    var schemaStoreNames = schema.storeNames.toSet();
+/// Factory schema extension (private)
+extension SdbFactorySchemaExtensionPrv on SdbFactory {}
 
-    if (!valueSetEquals(storeNames, schemaStoreNames)) {
-      throw StateError(
-        'Database schema does not match. Expected stores: $schemaStoreNames, found stores: $storeNames'
-        ', update database version to force update',
-      );
+/// Database schema extension on database
+extension SchemaSdbDatabaseExtension on SdbDatabase {
+  SdbDatabaseImpl get _impl => this as SdbDatabaseImpl;
+
+  /// Read the database schema definition
+  Future<SdbDatabaseSchemaDef> readSchemaDef() {
+    var schema = _impl.schema;
+    if (schema == null) {
+      throw StateError('Database was not opened with a schema');
     }
-    return await db.inStoresTransaction(
-      schema.storeRefs,
+
+    var stores = storeNames;
+    return inStoresTransaction(
+      stores
+          .map((storeName) => schema.findStoreSchema(storeName))
+          .map((schema) => schema.ref)
+          .toList(),
       SdbTransactionMode.readOnly,
-      (txn) async {
-        /// Delete stores not in schema
-        for (var storeSchema in storeSchemas) {
-          var store = txn.store(storeSchema.ref);
-          var storeKeyPath = store.keyPath; // Access to ensure store exists
-          var storeSchemaKeyPath = storeSchema.keyPath;
-          if (storeKeyPath != storeSchemaKeyPath) {
-            throw StateError(
-              'Key path mismatch for store ${storeSchema.ref.name}: expected $storeSchemaKeyPath'
-              ', update database version to force update',
-            );
-          }
-          if (store.autoIncrement != storeSchema.autoIncrement) {
-            throw StateError(
-              'Auto increment mismatch for store ${storeSchema.ref.name}: expected ${storeSchema.autoIncrement}'
-              ', update database version to force update',
-            );
-          }
-
-          var schemaIndexes = storeSchema.indexes;
-          var schemaIndexNames = storeSchema.indexNames.toSet();
-          var indexNames = store.indexNames.toSet();
-
-          if (!valueSetEquals(indexNames, schemaIndexNames)) {
-            throw StateError(
-              'Store index schema does not match in store ${store.name}.'
-              ' Expected indexes: $schemaIndexNames, found indexes: $indexNames'
-              ', update database version to force update',
-            );
-          }
-
-          /// Delete index not in schema
-
-          for (var indexSchema in schemaIndexes) {
-            var indexRef = indexSchema.ref;
-            var keyPath = indexSchema.keyPath;
-            var index = store.index(indexRef);
-            if (keyPath != index.keyPath) {
-              throw StateError(
-                'Index key path mismatch for index ${indexRef.name} in store ${store.name}:'
-                ' expected ${indexSchema.keyPath} was ${index.keyPath}'
-                ', update database version to force update',
-              );
-            }
-          }
-        }
+      (txn) {
+        return txnReadSchemaDef(txn);
       },
     );
-
-    // Implement schema upgrade logic here using the provided schema
   }
+}
 
-  static void _onApplySchema(
+/// Private Database schema extension on database
+extension SchemaSdbDatabasePrvExtension on SdbDatabase {
+  /// Apply the schema change
+  static void applySchema(
     SdbVersionChangeEvent event,
     SdbDatabaseSchema schema,
   ) {
@@ -539,64 +495,6 @@ extension SdbFactorySchemaExtensionPrv on SdbFactory {
     }
   }
 
-  /// Get the database schema.
-  Future<SdbDatabase> openWithSchema(
-    String name,
-    SdbOpenDatabaseOptions options,
-  ) async {
-    var onVersionChangeCalled = false;
-    var schema = options.schema!;
-    // version could be null even when the schema is specified
-    // this could work for an openDatabase that already exists.
-    var version = options.version;
-    var db = await _impl.openDatabaseImpl(
-      name,
-      version: version,
-      onVersionChange: (event) {
-        onVersionChangeCalled = true;
-        _onApplySchema(event, schema);
-      },
-      schema: schema,
-    );
-    if (isDebug && !onVersionChangeCalled) {
-      try {
-        await _onCheckSchema(db, schema);
-      } catch (e) {
-        await db.close();
-        rethrow;
-      }
-    }
-    return db;
-  }
-}
-
-/// Database schema extension on database
-extension SchemaSdbDatabaseExtension on SdbDatabase {
-  SdbDatabaseImpl get _impl => this as SdbDatabaseImpl;
-
-  /// Read the database schema definition
-  Future<SdbDatabaseSchemaDef> readSchemaDef() {
-    var schema = _impl.schema;
-    if (schema == null) {
-      throw StateError('Database was not opened with a schema');
-    }
-
-    var stores = storeNames;
-    return inStoresTransaction(
-      stores
-          .map((storeName) => schema.findStoreSchema(storeName))
-          .map((schema) => schema.ref)
-          .toList(),
-      SdbTransactionMode.readOnly,
-      (txn) {
-        return txnReadSchemaDef(txn);
-      },
-    );
-  }
-}
-
-/// Private Database schema extension on database
-extension SchemaSdbDatabasePrvExtension on SdbDatabase {
   /// Read the database schema definition
   SdbDatabaseSchemaDef txnReadSchemaDef(SdbTransaction txn) {
     var schema = _impl.schema!;
@@ -628,6 +526,72 @@ extension SchemaSdbDatabasePrvExtension on SdbDatabase {
       );
     });
     return SdbDatabaseSchemaDef(stores: storesDefs.toList());
+  }
+
+  /// Check schema (debug only)
+  Future<void> checkSchema(SdbDatabaseSchema schema) async {
+    var storeNames = this.storeNames.toSet();
+    var storeSchemas = schema.stores;
+    // To find the delete ones first
+    var schemaStoreNames = schema.storeNames.toSet();
+
+    if (!valueSetEquals(storeNames, schemaStoreNames)) {
+      throw StateError(
+        'Database schema does not match. Expected stores: $schemaStoreNames, found stores: $storeNames'
+        ', update database version to force update',
+      );
+    }
+    return await inStoresTransaction(schema.storeRefs, SdbTransactionMode.readOnly, (
+      txn,
+    ) async {
+      /// Delete stores not in schema
+      for (var storeSchema in storeSchemas) {
+        var store = txn.store(storeSchema.ref);
+        var storeKeyPath = store.keyPath; // Access to ensure store exists
+        var storeSchemaKeyPath = storeSchema.keyPath;
+        if (storeKeyPath != storeSchemaKeyPath) {
+          throw StateError(
+            'Key path mismatch for store ${storeSchema.ref.name}: expected $storeSchemaKeyPath'
+            ', update database version to force update',
+          );
+        }
+        if (store.autoIncrement != storeSchema.autoIncrement) {
+          throw StateError(
+            'Auto increment mismatch for store ${storeSchema.ref.name}: expected ${storeSchema.autoIncrement}'
+            ', update database version to force update',
+          );
+        }
+
+        var schemaIndexes = storeSchema.indexes;
+        var schemaIndexNames = storeSchema.indexNames.toSet();
+        var indexNames = store.indexNames.toSet();
+
+        if (!valueSetEquals(indexNames, schemaIndexNames)) {
+          throw StateError(
+            'Store index schema does not match in store ${store.name}.'
+            ' Expected indexes: $schemaIndexNames, found indexes: $indexNames'
+            ', update database version to force update',
+          );
+        }
+
+        /// Delete index not in schema
+
+        for (var indexSchema in schemaIndexes) {
+          var indexRef = indexSchema.ref;
+          var keyPath = indexSchema.keyPath;
+          var index = store.index(indexRef);
+          if (keyPath != index.keyPath) {
+            throw StateError(
+              'Index key path mismatch for index ${indexRef.name} in store ${store.name}:'
+              ' expected ${indexSchema.keyPath} was ${index.keyPath}'
+              ', update database version to force update',
+            );
+          }
+        }
+      }
+    });
+
+    // Implement schema upgrade logic here using the provided schema
   }
 }
 

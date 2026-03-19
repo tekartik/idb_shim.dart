@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:idb_shim/idb.dart' as idb;
 import 'package:idb_shim/src/common/common_import.dart';
 import 'package:idb_shim/src/sdb/sdb_client.dart';
-import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_store_impl.dart';
 import 'package:idb_shim/src/utils/async_utils.dart';
 import 'package:idb_shim/src/utils/env_utils.dart';
@@ -19,8 +18,26 @@ extension SdbTransactionInternalExtension on SdbTransaction {
   SdbTransactionImpl get rawImpl => this as SdbTransactionImpl;
 }
 
+/// Common transaction impl (between SdbTransactionImpl and SdbOpenTransactionImpl
+abstract class SdbTransactionImpl implements SdbTransaction {
+  /// Changes during transaction, only if listened to, null during open
+  SdbDatabaseTransactionChanges? get changes;
+
+  /// The underlying idb transaction
+  idb.Transaction get idbTransaction;
+
+  /// Change listener, null during open
+  SdbDatabaseChangesListener? get changesListener;
+
+  /// Store implementation.
+  SdbTransactionStoreRefImpl<K, V>
+  storeImpl<K extends SdbKey, V extends SdbValue>(SdbStoreRefImpl<K, V> store) {
+    return SdbTransactionStoreRefImpl<K, V>.txn(this, store);
+  }
+}
+
 /// Transaction implementation.
-class SdbTransactionImpl
+class SdbDatabaseTransactionImpl extends SdbTransactionImpl
     with SdbClientInterfaceDefaultMixin
     implements SdbTransaction, SdbClientInterface, SdbClientIdbInterface {
   /// Extra store names to open in addition to listened stores.
@@ -31,29 +48,26 @@ class SdbTransactionImpl
   final SdbDatabaseImpl db;
 
   /// Mode.
+  @override
   final SdbTransactionMode mode;
 
   /// idb transaction.
+  @override
   late idb.Transaction idbTransaction;
 
   /// Completed future.
   Future<void> get completed => idbTransaction.completed;
 
   /// Transaction implementation.
-  SdbTransactionImpl(this.db, this.mode, {required this.extraStoreNames});
+  SdbDatabaseTransactionImpl(
+    this.db,
+    this.mode, {
+    required this.extraStoreNames,
+  });
 
   /// Changes during transaction, only if listened to.
+  @override
   SdbDatabaseTransactionChanges? changes;
-
-  /// During open
-  SdbTransactionImpl.open(this.db, this.idbTransaction, {this.extraStoreNames})
-    : mode = SdbTransactionMode.readWrite;
-
-  /// Store implementation.
-  SdbTransactionStoreRefImpl<K, V>
-  storeImpl<K extends SdbKey, V extends SdbValue>(SdbStoreRefImpl<K, V> store) {
-    return SdbTransactionStoreRefImpl<K, V>.txn(this, store);
-  }
 
   @override
   Future<T> clientHandleDbOrTxn<T>(
@@ -79,8 +93,7 @@ class SdbTransactionImpl
     T result;
     try {
       /// Handle change listener
-      var dbImpl = this.dbImpl;
-      var changesListener = dbImpl.changesListener;
+      var changesListener = this.changesListener;
       if (changesListener.hasListeners) {
         changes = SdbDatabaseTransactionChanges();
       }
@@ -140,6 +153,9 @@ class SdbTransactionImpl
     }
     return result;
   }
+
+  @override
+  SdbDatabaseChangesListener get changesListener => db.changesListener;
 }
 
 /// Transaction mode conversion.

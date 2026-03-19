@@ -32,10 +32,6 @@ abstract class SdbOpenDatabase {
 
 /// Open transaction.
 abstract class SdbOpenTransaction implements SdbTransaction {
-  /// Compat
-  @Deprecated('Use openDatabase instead')
-  SdbOpenDatabase get db;
-
   /// Open database.
   SdbOpenDatabase get openDatabase;
 }

@@ -30,6 +30,9 @@ extension SdbDatabaseIdbExt on SdbDatabase {
 class SdbDatabaseImpl
     with SdbClientInterfaceDefaultMixin, SdbDatabaseDefaultMixin
     implements SdbDatabase, SdbClientInterface, SdbClientIdbInterface {
+  /// Open options
+  final SdbOpenDatabaseOptions? openOptions;
+
   /// Factory.
   @override
   final SdbFactoryImpl factory;
@@ -46,13 +49,14 @@ class SdbDatabaseImpl
   late idb.Database idbDatabase;
 
   /// Optional schema.
-  SdbDatabaseSchema? schema;
+  SdbDatabaseSchema? get schema => openOptions?.schema;
 
   /// SimpleDb implementation.
-  SdbDatabaseImpl(this.factory, this.name, {required this.schema});
+  SdbDatabaseImpl(this.factory, this.name, {required this.openOptions});
 
   /// SimpleDb implementation.
-  SdbDatabaseImpl.idbDatabase(this.factory, this.idbDatabase) {
+  SdbDatabaseImpl.idbDatabase(this.factory, this.idbDatabase)
+    : openOptions = null {
     name = idbDatabase.name;
   }
 

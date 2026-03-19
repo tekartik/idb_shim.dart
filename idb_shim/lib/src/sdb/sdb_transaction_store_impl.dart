@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:idb_shim/sdb.dart';
 import 'package:idb_shim/src/sdb/sdb_boundary_impl.dart';
-import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_utils.dart';
@@ -29,7 +28,7 @@ extension SdbSingleStoreTransactionInternalExtension<
 
 /// SimpleDb single store transaction implementation.
 class SdbSingleStoreTransactionImpl<K extends SdbKey, V extends SdbValue>
-    extends SdbTransactionImpl
+    extends SdbDatabaseTransactionImpl
     implements SdbSingleStoreTransaction<K, V> {
   @override
   final SdbTransactionStoreRefImpl<K, V> txnStore;
@@ -111,9 +110,9 @@ mixin SdbTransactionStoreRefImplMixin<K extends SdbKey, V extends SdbValue>
 
   /// Put a record.
   Future<void> putImpl(K? key, V value) async {
-    var dbImpl = transaction.dbImpl;
-    var changesListener = dbImpl.changesListener;
-    var hasChangeListener = changesListener.storeHasChangeListener(store);
+    var changesListener = transaction.rawImpl.changesListener;
+    var hasChangeListener =
+        changesListener?.storeHasChangeListener(store) ?? false;
     SdbRecordSnapshot<K, V>? oldSnapshot;
     SdbRecordSnapshot<K, V>? newSnapshot;
     if (hasChangeListener && key != null) {
@@ -126,7 +125,7 @@ mixin SdbTransactionStoreRefImplMixin<K extends SdbKey, V extends SdbValue>
     if (hasChangeListener) {
       var recordKey = result as K;
       newSnapshot = SdbRecordSnapshotImpl<K, V>(store.record(recordKey), value);
-      changesListener.addChange(transaction, oldSnapshot, newSnapshot);
+      changesListener?.addChange(transaction, oldSnapshot, newSnapshot);
     }
   }
 
@@ -190,17 +189,13 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
 
   /// Add a record.
   Future<K> addImpl(V value) async {
-    var hasChangeListener = transaction.dbImpl.changesListener
-        .storeHasChangeListener(store);
+    var hasChangeListener =
+        transaction.changesListener?.storeHasChangeListener(store) ?? false;
 
     K added(K key, V value) {
       if (hasChangeListener) {
         var newSnapshot = SdbRecordSnapshotImpl<K, V>(store.record(key), value);
-        transaction.dbImpl.changesListener.addChange(
-          transaction,
-          null,
-          newSnapshot,
-        );
+        transaction.changesListener?.addChange(transaction, null, newSnapshot);
       }
       return key;
     }
@@ -232,16 +227,16 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
 
   /// Delete a record.
   Future<void> deleteImpl(K key) async {
-    var dbImpl = transaction.dbImpl;
-    var changesListener = dbImpl.changesListener;
-    var hasChangeListener = changesListener.storeHasChangeListener(store);
+    var changesListener = transaction.changesListener;
+    var hasChangeListener =
+        changesListener?.storeHasChangeListener(store) ?? false;
     SdbRecordSnapshot<K, V>? oldSnapshot;
     if (hasChangeListener) {
       oldSnapshot = await idbObjectStore.getSdbRecordSnapshot(store, key);
     }
     await idbObjectStore.delete(key);
     if (hasChangeListener) {
-      changesListener.addChange(transaction, oldSnapshot, null);
+      changesListener?.addChange(transaction, oldSnapshot, null);
     }
   }
 
@@ -348,8 +343,9 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
 
   /// Delete records.
   Future<void> deleteRecordsImpl({required SdbFindOptions<K> options}) async {
-    var changesListener = transaction.dbImpl.changesListener;
-    var hasChangeListener = changesListener.storeHasChangeListener(store);
+    var changesListener = transaction.changesListener;
+    var hasChangeListener =
+        changesListener?.storeHasChangeListener(store) ?? false;
 
     if (options.filter != null || hasChangeListener) {
       // Slow
@@ -400,7 +396,7 @@ extension SdbMultiStoreTransactionInternalExtension
 }
 
 /// Multi store transaction implementation.
-class SdbMultiStoreTransactionImpl extends SdbTransactionImpl
+class SdbMultiStoreTransactionImpl extends SdbDatabaseTransactionImpl
     implements SdbMultiStoreTransaction {
   /// Stores.
   late List<String> _stores;

@@ -39,21 +39,41 @@ abstract class SdbOpenDatabaseOptions {
   /// The schema of the database.
   SdbDatabaseSchema? get schema;
 
+  /// provide onVersionChange to handle schema changes or initialization
+  /// manually, this is called after automatic schema change
+  SdbOnVersionChangeCallback? get onVersionChange;
+
   /// Options for opening a Sdb database.
-  factory SdbOpenDatabaseOptions({int? version, SdbDatabaseSchema? schema}) =>
-      _SdbOpenDatabaseOptions(version: version, schema: schema);
+  factory SdbOpenDatabaseOptions({
+    int? version,
+    SdbDatabaseSchema? schema,
+    SdbOnVersionChangeCallback? onVersionChange,
+  }) => _SdbOpenDatabaseOptions(
+    version: version,
+    schema: schema,
+    onVersionChange: onVersionChange,
+  );
 
   /// Copy with new values.
-  SdbOpenDatabaseOptions copyWith({int? version, SdbDatabaseSchema? schema});
+  SdbOpenDatabaseOptions copyWith({
+    int? version,
+    SdbDatabaseSchema? schema,
+    SdbOnVersionChangeCallback? onVersionChange,
+  });
 }
 
 /// Options for opening a Sdb database.
 class _SdbOpenDatabaseOptions implements SdbOpenDatabaseOptions {
   @override
-  SdbOpenDatabaseOptions copyWith({int? version, SdbDatabaseSchema? schema}) {
+  SdbOpenDatabaseOptions copyWith({
+    int? version,
+    SdbDatabaseSchema? schema,
+    SdbOnVersionChangeCallback? onVersionChange,
+  }) {
     return _SdbOpenDatabaseOptions(
       version: version ?? this.version,
       schema: schema ?? this.schema,
+      onVersionChange: onVersionChange ?? this.onVersionChange,
     );
   }
 
@@ -65,8 +85,12 @@ class _SdbOpenDatabaseOptions implements SdbOpenDatabaseOptions {
   @override
   final SdbDatabaseSchema? schema;
 
+  /// The version change callback.
+  @override
+  final SdbOnVersionChangeCallback? onVersionChange;
+
   /// Options for opening a Sdb database.
-  _SdbOpenDatabaseOptions({this.version, this.schema});
+  _SdbOpenDatabaseOptions({this.version, this.schema, this.onVersionChange});
 }
 
 /// Sdb Factory interface.
@@ -122,11 +146,11 @@ abstract class SdbFactoryInterface {
     /// The version of the database, prefer options
     int? version,
 
-    /// Either provide onVersionChange to handle schema changes
-    /// manually...
+    /// compat: provide onVersionChange to handle schema changes or initialization
+    /// Prefer options
     SdbOnVersionChangeCallback? onVersionChange,
 
-    /// ...or provide a schema to have it applied automatically.
+    /// compat: provide a schema to have it applied automatically.
     /// Prefer options
     SdbDatabaseSchema? schema,
   });

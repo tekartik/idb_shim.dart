@@ -1,4 +1,5 @@
 import 'package:idb_shim/idb_shim.dart' as idb;
+import 'package:idb_shim/src/utils/env_utils.dart';
 
 import 'sdb.dart';
 import 'sdb_database_impl.dart';
@@ -33,34 +34,52 @@ class SdbFactoryIdb implements SdbFactory {
     SdbDatabaseSchema? schema,
   }) async {
     options ??= SdbOpenDatabaseOptions();
-    options = options.copyWith(version: version, schema: schema);
-    schema = options.schema;
-    version = options.version;
-    if (schema != null) {
-      if (onVersionChange != null) {
-        throw StateError(
-          'Cannot provide both schema and onVersionChange callback',
-        );
-      }
-      return await openWithSchema(name, options);
-    }
-    return await openDatabaseImpl(
-      name,
+    options = options.copyWith(
       version: version,
+      schema: schema,
       onVersionChange: onVersionChange,
     );
+    return await openDatabaseImpl(name, options);
   }
 
   /// Open the database.
   Future<SdbDatabase> openDatabaseImpl(
-    String name, {
-    int? version,
-    SdbOnVersionChangeCallback? onVersionChange,
-    SdbDatabaseSchema? schema,
-  }) async {
-    final db = SdbDatabaseImpl(this, name, schema: schema);
-    var onUpgradeNeeded = onVersionChange != null
-        ? (idb.VersionChangeEvent event) async {
+    String name,
+    SdbOpenDatabaseOptions options,
+  ) async {
+    final db = SdbDatabaseImpl(this, name, openOptions: options);
+
+    var onUpgradeNeededCalled = false;
+    var schema = options.schema;
+    var onVersionChange = options.onVersionChange;
+    // version could be null even when the schema is specified
+    // this could work for an openDatabase that already exists.
+    var version = options.version;
+    /*
+    var db = await _impl.openDatabaseImpl(
+      name,
+      version: version,
+      onVersionChange: (event) {
+        onVersionChangeCalled = true;
+        applySchema(event, schema);
+      },
+      schema: schema,
+    );
+    if (isDebug && !onVersionChangeCalled) {
+      try {
+        await checkSchema(db, schema);
+      } catch (e) {
+        await db.close();
+        rethrow;
+      }
+    }
+    return db;
+
+     */
+
+    var onUpgradeNeeded = (onVersionChange != null || schema != null)
+        ? (idb.VersionChangeEvent event) {
+            onUpgradeNeededCalled = true;
             // print('onUpgradeNeeded: $event');
             //var db = event.database;
             var idbDatabase = event.database;
@@ -80,8 +99,15 @@ class SdbFactoryIdb implements SdbFactory {
               oldVersion,
               newVersion,
             );
-
-            await onVersionChange(dbVersionChangeEvent);
+            if (schema != null) {
+              SchemaSdbDatabasePrvExtension.applySchema(
+                dbVersionChangeEvent,
+                schema,
+              );
+            }
+            if (onVersionChange != null) {
+              return onVersionChange(dbVersionChangeEvent);
+            }
           }
         : null;
     var idbDatabase = await idbFactory.open(
@@ -90,6 +116,14 @@ class SdbFactoryIdb implements SdbFactory {
       onUpgradeNeeded: onUpgradeNeeded,
     );
     db.idbDatabase = idbDatabase;
+    if (isDebug && schema != null && !onUpgradeNeededCalled) {
+      try {
+        await db.checkSchema(schema);
+      } catch (e) {
+        await db.close();
+        rethrow;
+      }
+    }
     return db;
   }
 }

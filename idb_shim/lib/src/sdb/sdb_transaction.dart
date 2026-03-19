@@ -6,7 +6,11 @@ import 'sdb_transaction_store.dart';
 import 'sdb_types.dart';
 
 /// SimpleDb transaction.
-abstract class SdbTransaction implements SdbClient {}
+abstract class SdbTransaction implements SdbClient {
+  /// current mode for accessing the data in the object stores in the scope of
+  /// the transaction
+  SdbTransactionMode get mode;
+}
 
 /// SimpleDb transaction extension.
 extension SdbTransactionExtension on SdbTransaction {
