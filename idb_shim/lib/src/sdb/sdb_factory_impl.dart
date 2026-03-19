@@ -29,9 +29,16 @@ class SdbFactoryIdb implements SdbFactory {
   Future<SdbDatabase> openDatabase(
     String name, {
     SdbOpenDatabaseOptions? options,
-    int? version,
+
+    /// Compat, version
+    @Deprecated('Use options instead') int? version,
+
+    /// Compat, onVersionChange
+    @Deprecated('Use options instead')
     SdbOnVersionChangeCallback? onVersionChange,
-    SdbDatabaseSchema? schema,
+
+    /// Compat, schema
+    @Deprecated('Use options instead') SdbDatabaseSchema? schema,
   }) async {
     options ??= SdbOpenDatabaseOptions();
     options = options.copyWith(

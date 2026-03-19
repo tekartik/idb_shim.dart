@@ -1,3 +1,9 @@
+## 2.8.4-1
+
+* sdb: Allow both `schema` and `onVersionChange` in open options
+* sdb: deprecated params on `SdbFactory.openDatabase` and prefer open options
+* sdb: fix, allow manipulating data during open
+
 ## 2.8.3
 
 * Add built-in `SdbTimestamp` and `SdbBlob` to Sdb database
