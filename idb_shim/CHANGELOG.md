@@ -1,8 +1,8 @@
-## 2.8.4-1
+## 2.8.4
 
 * sdb: Allow both `schema` and `onVersionChange` in open options
 * sdb: deprecated params on `SdbFactory.openDatabase` and prefer open options
-* sdb: fix, allow manipulating data during open
+* sdb: fix `onVersionChange` transaction, allowing manipulating data during open
 
 ## 2.8.3
 
