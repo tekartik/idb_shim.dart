@@ -65,7 +65,7 @@ class _SdbStoreChangesListener<K extends SdbKey, V extends SdbValue> {
 
   @override
   bool operator ==(Object other) {
-    return (other is _SdbStoreChangesListener) &&
+    return (other is _SdbStoreChangesListener<K, V>) &&
         other.onChangeListener == onChangeListener;
   }
 }

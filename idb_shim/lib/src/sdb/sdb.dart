@@ -34,6 +34,12 @@ export 'sdb_index_record_snapshot.dart'
         SdbIndexRecordSnapshotListExt,
         SdbIndexRecordKey,
         SdbIndexRecordKeyListExt;
+export 'sdb_on_snapshot.dart'
+    show
+        SdbIndexRecordRefExtensionOnSnapshot,
+        SdbIndexRefExtensionOnSnapshots,
+        SdbRecordRefExtensionOnSnapshot,
+        SdbStoreRefExtensionOnSnapshots;
 export 'sdb_open.dart'
     show
         SdbOpenDatabase,
