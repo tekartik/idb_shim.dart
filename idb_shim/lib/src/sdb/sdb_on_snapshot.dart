@@ -6,6 +6,7 @@ import 'package:idb_shim/sdb.dart';
 extension SdbStoreRefExtensionOnSnapshots<K extends SdbKey, V extends SdbValue>
     on SdbStoreRef<K, V> {
   /// Reads the data and set a listener to redo the query on changes.
+  /// It only tracks changes in the current isolate/tab.
   Stream<List<SdbRecordSnapshot<K, V>>> onSnapshots(
     SdbDatabase db, {
     SdbFindOptions<K>? options,
@@ -47,6 +48,7 @@ extension SdbIndexRefExtensionOnSnapshots<
 >
     on SdbIndexRef<K, V, IK> {
   /// Reads the data and set a listener to redo the query on changes.
+  /// It only tracks changes in the current isolate/tab.
   Stream<List<SdbIndexRecordSnapshot<K, V, IK>>> onSnapshots(
     SdbDatabase db, {
     SdbFindOptions<IK>? options,
@@ -84,6 +86,7 @@ extension SdbIndexRefExtensionOnSnapshots<
 extension SdbRecordRefExtensionOnSnapshot<K extends SdbKey, V extends SdbValue>
     on SdbRecordRef<K, V> {
   /// Reads the data and set a listener to redo the query on changes.
+  /// It only tracks changes in the current isolate/tab.
   Stream<SdbRecordSnapshot<K, V>?> onSnapshot(SdbDatabase db) {
     late StreamController<SdbRecordSnapshot<K, V>?> controller;
     void addSnapshot() {
@@ -126,6 +129,7 @@ extension SdbIndexRecordRefExtensionOnSnapshot<
 >
     on SdbIndexRecordRef<K, V, IK> {
   /// Reads the data and set a listener to redo the query on changes.
+  /// It only tracks changes in the current isolate/tab.
   Stream<SdbIndexRecordSnapshot<K, V, IK>?> onSnapshot(SdbDatabase db) {
     late StreamController<SdbIndexRecordSnapshot<K, V, IK>?> controller;
     void addSnapshot() {

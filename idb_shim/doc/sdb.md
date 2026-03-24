@@ -60,7 +60,7 @@ The `SdbDatabaseSchema` defines the structure of your database, including the st
 
 Now that you understand the core concepts, let's see how to use SDB in practice.
 
-### 1. Choosing a Factory
+### Choosing a Factory
 
 The first step is to choose the appropriate factory for your platform. Here's how you can do it:
 
@@ -86,7 +86,7 @@ if (kSdbDartIsWeb) {
 }
 ```
 
-### 2. Defining the Schema
+### Defining the Schema
 
 Next, you need to define the schema for your database. This involves creating store references and defining their properties.
 
@@ -97,7 +97,7 @@ A good practice is to use an `int` as the key and `SdbModel` (a type alias for `
 var bookStore = SdbStoreRef<int, SdbModel>('books');
 ```
 
-### 3. Opening a Database
+### Opening a Database
 
 To open a database, you need to provide a name, a version, and an `onVersionChange` callback to create or migrate the schema.
 
@@ -149,7 +149,7 @@ class MyAppDatabase {
 }
 ```
 
-### 4. Adding and Reading Data
+### Adding and Reading Data
 
 Once the database is open, you can add, read, update, and delete data.
 
@@ -174,7 +174,34 @@ print(snapshot?.key);   // The record's key
 print(snapshot?.value); // The record's data: {'title': 'The Hitchhiker\'s Guide to the Galaxy'}
 ```
 
-### 5. Using Transactions
+### Tracking record changes.
+
+You can track changes on a single record (current isolate or tab only)
+
+```dart
+var recordRef = bookStore.record(key);
+var subscription = recordRef.onSnapshot(db).listen((snapshot) {
+   print(snapshot?.key);   // The record's key
+   print(snapshot?.value); // The record's data: {'title': 'The Hitchhiker\'s Guide to the Galaxy'}
+});
+...
+subscription.cancel();
+```
+
+You can also track change on a store (current isolate or tab only)
+
+```dart
+var subscription = bookStore.onSnapshots(db).listen((snapshots) {
+  for (var snapshot in snapshots) {
+    print(snapshot.key);   // The record's key
+    print(snapshot.value); // The record's data
+  }
+});
+```
+
+Similarly, you can track changes on an index record or query.
+
+### Using Transactions
 
 All database operations in SDB are performed within a transaction. This ensures data consistency and atomicity.
 
@@ -193,7 +220,7 @@ await db.inStoreTransaction(bookStore, SdbTransactionMode.readWrite, (txn) async
 - **Let exceptions propagate:** Do not catch exceptions within a transaction. Any unhandled exception will automatically abort the transaction and roll back any changes.
 - **Avoid exceptions**: Instead of relying for unique constraint, read the db first.
 
-### 6. Working with Indexes
+### Working with Indexes
 
 Indexes are essential for efficient querying of your data. You can create indexes on one or more fields in a store.
 

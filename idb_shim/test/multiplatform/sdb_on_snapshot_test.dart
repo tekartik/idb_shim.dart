@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:idb_shim/sdb.dart';
+import 'package:idb_shim/src/sdb/sdb_database_impl.dart'
+    show SdbDatabaseInternalExtension;
 import 'package:test/test.dart';
 
 final testStore = SdbStoreRef<int, String>('test');
@@ -76,7 +78,9 @@ Future<void> main() async {
       await completed();
       expect(snapshots.last, null);
 
+      expect(db.impl.changesListener.isEmpty, isFalse);
       await subscription.cancel();
+      expect(db.impl.changesListener.isEmpty, isTrue);
     });
 
     test('onSnapshots', () async {
@@ -117,7 +121,9 @@ Future<void> main() async {
       await completed();
       expect(snapshotsList.last, hasLength(1));
 
+      expect(db.impl.changesListener.isEmpty, isFalse);
       await subscription.cancel();
+      expect(db.impl.changesListener.isEmpty, isTrue);
     });
 
     test('onIndexSnapshot', () async {
@@ -153,7 +159,9 @@ Future<void> main() async {
       await completed();
       expect(snapshots.last, null);
 
+      expect(db.impl.changesListener.isEmpty, isFalse);
       await subscription.cancel();
+      expect(db.impl.changesListener.isEmpty, isTrue);
     });
 
     test('onIndexSnapshots', () async {
@@ -197,14 +205,9 @@ Future<void> main() async {
       await completed();
       expect(snapshotsList.last, hasLength(1));
 
+      expect(db.impl.changesListener.isEmpty, isFalse);
       await subscription.cancel();
-    });
-
-    test('sdb original', () async {
-      var record = testStore.record(1);
-      await record.put(db, 'text1');
-
-      expect(await record.getValue(db), 'text1');
+      expect(db.impl.changesListener.isEmpty, isTrue);
     });
   });
 }
