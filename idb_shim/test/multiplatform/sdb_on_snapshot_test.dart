@@ -13,8 +13,10 @@ Future<void> main() async {
     late SdbDatabase db;
 
     setUp(() async {
+      var dbName = 'on_snapshot_test.db';
+      await sdbFactoryMemory.deleteDatabase(dbName);
       db = await sdbFactoryMemory.openDatabase(
-        'test',
+        dbName,
         options: SdbOpenDatabaseOptions(
           version: 1,
           schema: SdbDatabaseSchema(
@@ -126,7 +128,7 @@ Future<void> main() async {
       expect(db.impl.changesListener.isEmpty, isTrue);
     });
 
-    test('onIndexSnapshot', () async {
+    test('onIndexRecordSnapshot', () async {
       var indexRecord = testIndex.record('text1');
 
       var snapshots = <SdbIndexRecordSnapshot<int, SdbModel, String>?>[];
@@ -158,6 +160,52 @@ Future<void> main() async {
       await testModelStore.record(1).delete(db);
       await completed();
       expect(snapshots.last, null);
+
+      expect(db.impl.changesListener.isEmpty, isFalse);
+      await subscription.cancel();
+      expect(db.impl.changesListener.isEmpty, isTrue);
+    });
+
+    test('onIndexRecordSnapshots', () async {
+      var indexRecord = testIndex.record('text1');
+
+      var snapshotsList =
+          <List<SdbIndexRecordSnapshot<int, SdbModel, String>>>[];
+      var subscription = indexRecord.onSnapshots(db).listen((snapshots) {
+        snapshotsList.add(snapshots);
+        complete();
+      });
+
+      // Initial empty
+      newCompleter();
+      await completed();
+      expect(snapshotsList.last, isEmpty);
+
+      // Add 1 matching index key
+      newCompleter();
+      await testModelStore.record(1).put(db, {'test_index': 'text1'});
+      await completed();
+      expect(snapshotsList.last, hasLength(1));
+      expect(snapshotsList.last.first.value['test_index'], 'text1');
+
+      // Add 2 matching different index key (should not affect this stream)
+      newCompleter();
+      await testModelStore.record(2).put(db, {'test_index': 'text2'});
+      await completed();
+      expect(snapshotsList.last, hasLength(1));
+
+      // Update 1 to not match anymore
+      newCompleter();
+      await testModelStore.record(1).put(db, {'test_index': 'text2'});
+      await completed();
+      expect(snapshotsList.last, isEmpty);
+
+      // Update 2 to match
+      newCompleter();
+      await testModelStore.record(2).put(db, {'test_index': 'text1'});
+      await completed();
+      expect(snapshotsList.last, hasLength(1));
+      expect(snapshotsList.last.first.key, 2);
 
       expect(db.impl.changesListener.isEmpty, isFalse);
       await subscription.cancel();

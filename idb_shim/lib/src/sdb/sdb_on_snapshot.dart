@@ -158,4 +158,38 @@ extension SdbIndexRecordRefExtensionOnSnapshot<
     );
     return controller.stream;
   }
+
+  /// Reads the data and set a listener to redo the query on changes.
+  /// It only tracks changes in the current isolate/tab.
+  Stream<List<SdbIndexRecordSnapshot<K, V, IK>>> onSnapshots(
+    SdbDatabase db, {
+    SdbFindOptions<IK>? options,
+  }) {
+    late StreamController<List<SdbIndexRecordSnapshot<K, V, IK>>> controller;
+    void addSnapshots() {
+      findRecords(db, options: options).then((snapshots) {
+        if (!controller.isClosed) {
+          controller.add(snapshots);
+        }
+      });
+    }
+
+    FutureOr<void> onChange(
+      SdbTransaction transaction,
+      List<SdbRecordChange<K, V>> changes,
+    ) {
+      addSnapshots();
+    }
+
+    controller = StreamController<List<SdbIndexRecordSnapshot<K, V, IK>>>(
+      onListen: () {
+        addSnapshots();
+        store.addOnChangesListener(db, onChange);
+        controller.onCancel = () {
+          store.removeOnChangesListener(db, onChange);
+        };
+      },
+    );
+    return controller.stream;
+  }
 }
