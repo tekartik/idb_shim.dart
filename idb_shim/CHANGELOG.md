@@ -1,3 +1,7 @@
+## 2.8.5
+
+* sdb: Add `onSnapshot` and `onSnapshots` support for stores, records, and indexes.
+
 ## 2.8.4+1
 
 * sdb: Allow both `schema` and `onVersionChange` in open options
