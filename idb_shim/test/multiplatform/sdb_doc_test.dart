@@ -1,12 +1,10 @@
 // ignore_for_file: avoid_print
 
-import 'package:idb_shim/idb_client_logger.dart';
 import 'package:idb_shim/sdb/sdb.dart';
 import 'package:path/path.dart';
 import 'package:test/test.dart';
 
 void main() {
-  IdbFactoryLogger.debugMaxLogCount = 100;
   simpleDbDocTest();
 }
 
@@ -26,6 +24,10 @@ void simpleDbDocTest() {
       // Io factory, prefer using sdbFactorySqflite though.
       factory = sdbFactoryIo;
     }
+
+    // Debug only wrap in logger to see what it happening
+    // ignore: invalid_use_of_do_not_submit_member
+    factory = factory.debugWrapInLogger();
 
     // Our book store/table
     var bookStore = SdbStoreRef<int, SdbModel>('book');

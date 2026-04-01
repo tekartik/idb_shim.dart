@@ -22,20 +22,20 @@ class ObjectStoreLogger extends ObjectStore {
     this.idbTransactionLogger,
     this.idbObjectStore,
   );
-
+  String _storeMessage(String message) => "'${idbObjectStore.name}' $message";
   void log(String message) {
     if (idbTransactionLogger != null) {
-      idbTransactionLogger?.log(message);
+      idbTransactionLogger?.log(_storeMessage(message));
     } else if (idbDatabaseLogger != null) {
-      idbDatabaseLogger?.log(message);
+      idbDatabaseLogger?.log(_storeMessage(message));
     }
   }
 
   void err(String message) {
     if (idbTransactionLogger != null) {
-      idbTransactionLogger?.err(message);
+      idbTransactionLogger?.err(_storeMessage(message));
     } else if (idbDatabaseLogger != null) {
-      idbDatabaseLogger?.err(message);
+      idbDatabaseLogger?.err(_storeMessage(message));
     }
   }
 
@@ -59,7 +59,6 @@ class ObjectStoreLogger extends ObjectStore {
   @override
   void deleteIndex(String name) {
     log('deleteIndex($name');
-
     idbObjectStore.deleteIndex(name);
   }
 
@@ -67,10 +66,12 @@ class ObjectStoreLogger extends ObjectStore {
   Future<Object> add(Object value, [Object? key]) async {
     try {
       var result = await idbObjectStore.add(value, key);
-      log('add($value${key != null ? ', $key' : ''}): $result');
+      log(
+        'add(${_debugSafeValue(value)}${key != null ? ', $key' : ''}): $result',
+      );
       return result;
     } catch (e) {
-      err('add($value, $key) failed $e');
+      err('add(${_debugSafeValue(value)}, $key) failed $e');
       rethrow;
     }
   }
@@ -78,17 +79,28 @@ class ObjectStoreLogger extends ObjectStore {
   // Not async please for ie!
   @override
   Future<Object?> getObject(Object key) {
-    return idbObjectStore.getObject(key);
+    return idbObjectStore
+        .getObject(key)
+        .then((value) {
+          log('get(${_debugSafeKey(key)}: ${_debugSafeValue(value)}');
+          return value;
+        })
+        .onError((err, st) {
+          log('get(${_debugSafeKey(key)}) failed $err');
+          return err;
+        });
   }
 
   @override
-  Future clear() {
-    return idbObjectStore.clear();
+  Future<void> clear() {
+    return idbObjectStore.clear().then((_) {
+      log('clear');
+    });
   }
 
   String _debugSafeKey(Object? key) => logTruncateAny(key ?? '<null key>');
 
-  String _debugSafeValue(Object? value) => logTruncateAny(value);
+  String _debugSafeValue(Object? value) => logTruncateAny(value, len: 256);
 
   @override
   Future<Object> put(Object value, [Object? key]) async {

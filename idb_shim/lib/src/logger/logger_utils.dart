@@ -12,8 +12,8 @@ String getPropertyMapText(Map map, [bool addComma = false]) {
   return '${addComma ? ', ' : ''}$map';
 }
 
-String logTruncateAny(Object? value) {
-  return logTruncate(value?.toString() ?? '<null>');
+String logTruncateAny(Object? value, {int len = 128}) {
+  return logTruncate(value?.toString() ?? '<null>', len: 128);
 }
 
 String logTruncate(String text, {int len = 128}) {

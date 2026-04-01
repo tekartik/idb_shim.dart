@@ -12,6 +12,8 @@ In `pubspec.yaml`:
 dependencies:
   idb_shim: any
   idb_sqflite: any
+  # Here we use sqflite but it can be any implementation - such as sqflite_common_ffi
+  sqflite: any
 ```
 
 ```dart

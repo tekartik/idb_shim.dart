@@ -1,4 +1,5 @@
 /// Legacy API
+@Deprecated('2026-04-01: Use idb_client_native.dart')
 library;
 
 import 'package:idb_shim/src/utils/unimplemented_stub.dart';

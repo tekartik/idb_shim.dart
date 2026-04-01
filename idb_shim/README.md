@@ -18,7 +18,6 @@ It exposes the standard IndexedDB concepts:
 
 All operations are asynchronous and return Future.
 
-
 ## SDB (simple db)
 
 Opinionated strong typed api based on idb database, which is currrently
@@ -44,7 +43,8 @@ More information here: [sdb](https://github.com/tekartik/idb_shim.dart/blob/mast
 
 * On the web (Wasm compatible, using `dart:js_interop`) it is a thin layer on top of indexed_db Web API.
 * On IO (and in memory), a sembast implementation (useful for testing) is provided but prefer `idb_sqflite` for a solid
-  cross-process safe io implementation.
+  cross-process safe io implementation. The `sembast` dependency is only present to provide a default IO implementation. On the web, the database is not loaded
+  in memory and sembast is not used.
 
 Its goal is to support the initial indexed_db api with very few changes as well as setting the base
 for other implementation (idb_sqflite on top of sqflite for example).

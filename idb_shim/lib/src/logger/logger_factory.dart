@@ -28,11 +28,11 @@ IdbFactoryLogger getIdbFactoryLogger(
   IdbFactory factory, {
   IdbFactoryLoggerType type = IdbFactoryLoggerType.all,
 }) {
-  if (factory is IdbFactoryWrapperImpl) {
+  if (factory is IdbFactoryLoggerImpl) {
     factory.type = type;
     return factory;
   }
-  return IdbFactoryWrapperImpl(factory);
+  return IdbFactoryLoggerImpl(factory);
 }
 
 int _logCount = 0;
@@ -42,7 +42,7 @@ bool get _incrementAndShouldLog {
   if (IdbFactoryLogger.debugMaxLogCount != null) {
     return _logCount <= IdbFactoryLogger.debugMaxLogCount!;
   }
-  return false;
+  return true;
 }
 
 class _VersionChangeEventLogger implements VersionChangeEvent {
@@ -79,7 +79,7 @@ class _VersionChangeEventLogger implements VersionChangeEvent {
 }
 
 /// Wrapper for window.indexedDB and worker self.indexedDB
-class IdbFactoryWrapperImpl extends IdbFactoryBase implements IdbFactoryLogger {
+class IdbFactoryLoggerImpl extends IdbFactoryBase implements IdbFactoryLogger {
   final IdbFactory nativeFactory;
   static int _id = 0;
 
@@ -101,8 +101,8 @@ class IdbFactoryWrapperImpl extends IdbFactoryBase implements IdbFactoryLogger {
   @override
   bool get persistent => true;
 
-  IdbFactoryWrapperImpl(this.nativeFactory) {
-    assert(nativeFactory is! IdbFactoryWrapperImpl);
+  IdbFactoryLoggerImpl(this.nativeFactory) {
+    assert(nativeFactory is! IdbFactoryLoggerImpl);
   }
 
   @override
@@ -188,17 +188,19 @@ class IdbFactoryWrapperImpl extends IdbFactoryBase implements IdbFactoryLogger {
 
 /// Debug extension for Logger.
 extension IdbFactoryLoggerDebugExt on IdbFactory {
-  /// Quick logger wrapper, useful in unit test.
+  /// Quick logger wrapper, useful in unit test or dev mode.
   ///
-  /// idbFactory = idbFactory.debugQuickLoggerWrapper()
+  /// idbFactory = idbFactory.debugWrapInLogger()
   ///
-  /// [maxLogCount] default to 100
+  /// [maxLogCount] optional
   @Deprecated('Debug/dev mode')
   IdbFactory debugWrapInLogger({
     IdbFactoryLoggerType type = IdbFactoryLoggerType.all,
     int? maxLogCount,
   }) {
-    IdbFactoryLogger.debugMaxLogCount = maxLogCount ?? 100;
+    if (maxLogCount != null) {
+      IdbFactoryLogger.debugMaxLogCount = maxLogCount;
+    }
     var factory = getIdbFactoryLogger(this, type: type);
     return factory;
   }
