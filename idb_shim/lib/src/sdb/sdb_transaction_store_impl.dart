@@ -134,6 +134,9 @@ mixin SdbTransactionStoreRefImplMixin<K extends SdbKey, V extends SdbValue>
       idbKeyPathToSdbKeyPathOrNull(idbObjectStore.keyPath);
 
   @override
+  bool get autoIncrement => idbObjectStore.autoIncrement;
+
+  @override
   Iterable<String> get indexNames => idbObjectStore.indexNames;
 }
 

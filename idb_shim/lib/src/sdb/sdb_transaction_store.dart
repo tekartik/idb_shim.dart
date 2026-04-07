@@ -13,6 +13,9 @@ abstract class SdbTransactionStoreRef<K extends SdbKey, V extends SdbValue> {
   /// Key Path.
   SdbKeyPath? get keyPath;
 
+  /// Auto increment
+  bool get autoIncrement;
+
   /// Index names.
   Iterable<String> get indexNames;
 

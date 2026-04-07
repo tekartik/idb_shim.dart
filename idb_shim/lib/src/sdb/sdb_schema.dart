@@ -449,10 +449,17 @@ extension SchemaSdbDatabasePrvExtension on SdbDatabase {
         );
       } else {
         store = db.objectStore(storeRef);
-        var schemaKeyPath = storeSchema.keyPath;
+        var schemaKeyPath = store.keyPath;
+
         if (schemaKeyPath != storeSchema.keyPath) {
           throw StateError(
-            'Key path change not supported for store ${storeRef.name}',
+            'Key path change not supported for store ${storeRef.name} - delete and re-create the store',
+          );
+        }
+        var autoIncrement = store.autoIncrement;
+        if (autoIncrement != storeSchema.autoIncrement) {
+          throw StateError(
+            'Auto increment change not supported for store ${storeRef.name} - delete and re-create the store',
           );
         }
       }

@@ -23,7 +23,31 @@ void schemaSdbTest(SdbTestContext ctx) {
   var factory = ctx.factory;
 
   group('sdb_schema', () {
-    test('migration', () async {
+    test('adding auto increment migration', () async {
+      var dbName = 'sdb_schema_non_auto_to_auto_test.db';
+      await factory.deleteDatabase(dbName);
+      var db = await factory.openDatabase(
+        dbName,
+        options: SdbOpenDatabaseOptions(
+          version: 1,
+          schema: SdbDatabaseSchema(stores: [testStore1.schema()]),
+        ),
+      );
+      await db.close();
+
+      await expectLater(() async {
+        await factory.openDatabase(
+          dbName,
+          options: SdbOpenDatabaseOptions(
+            version: 2,
+            schema: SdbDatabaseSchema(
+              stores: [testStore1.schema(autoIncrement: true)],
+            ),
+          ),
+        );
+      }, throwsA(isA<StateError>()));
+    });
+    test('various migration', () async {
       var dbName = 'sdb_schema_test.db';
       await factory.deleteDatabase(dbName);
       var db = await factory.openDatabase(
