@@ -1,4 +1,4 @@
-## 2.8.5+1
+## 2.8.5+2
 
 * sdb: Add `onSnapshot` and `onSnapshots` support for stores, records, and indexes.
 
