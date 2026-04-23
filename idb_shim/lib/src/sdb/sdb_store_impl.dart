@@ -20,7 +20,7 @@ extension SdbStoreRefInternalExtension<K extends SdbKey, V extends SdbValue>
 /// Store reference implementation.
 extension SdbStoreRefDbInternalExtension<K extends SdbKey, V extends SdbValue>
     on SdbStoreRef<K, V> {
-  /// Do no use yet
+  /// Do not use yet
   @internal
   /// if client is a transaction it must match the transaction mode
   /// requiring write mode if the transaction is ready only will fail
