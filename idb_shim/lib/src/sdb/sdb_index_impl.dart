@@ -78,7 +78,7 @@ class SdbIndex2RefImpl<
   @override
   (I1, I2) indexIdbToSdbKeyValue(Object key) {
     var list = key as List;
-    return (idbToSdbSimpleKeyValue(list[0]), idbToSdbSimpleKeyValue(list[1]));
+    return (idbToSdbSimpleKeyValue<I1>(list[0]), idbToSdbSimpleKeyValue<I2>(list[1]));
   }
 
   @override
