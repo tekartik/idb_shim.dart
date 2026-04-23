@@ -65,6 +65,7 @@ void sdbUtilsTests(SdbTestContext ctx) {
       await db.compatMigrate1To2();
       var export = await sdbExportDatabaseLines(db);
       expect(export, expectedExportLines);
+      await db.close();
     }
 
     Future dbCheckExportImportLines(
