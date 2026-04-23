@@ -1,6 +1,7 @@
 import 'package:idb_shim/idb.dart' as idb;
 import 'package:idb_shim/sdb.dart';
 import 'package:idb_shim/src/sdb/sdb_changes_listener.dart';
+import 'package:idb_shim/src/sdb/sdb_client.dart';
 
 import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_impl.dart';
@@ -97,7 +98,7 @@ class SdbOpenDatabaseImpl implements SdbOpenDatabase {
 
 /// Open transaction internal extension.
 class SdbOpenTransactionImpl extends SdbTransactionImpl
-    implements SdbOpenTransaction {
+    implements SdbOpenTransaction, SdbClientInterface {
   /// Database implementation.
   @override
   final SdbOpenDatabaseImpl openDatabase;
@@ -120,6 +121,22 @@ class SdbOpenTransactionImpl extends SdbTransactionImpl
 
   @override
   SdbTransactionMode get mode => SdbTransactionMode.readWrite;
+
+  @override
+  Future<T> clientHandleDbOrTxn<T>(
+    Future<T> Function(SdbDatabase db) dbFn,
+    Future<T> Function(SdbTransaction txn) txnFn,
+  ) {
+    return txnFn(this);
+  }
+
+  @override
+  Future<K> sdbAddImpl<K extends SdbKey, V extends SdbValue>(
+    SdbStoreRef<K, V> store,
+    V value,
+  ) {
+    return storeImpl<K, V>(store.impl).add(value);
+  }
 }
 
 /// Open store reference internal extension.
