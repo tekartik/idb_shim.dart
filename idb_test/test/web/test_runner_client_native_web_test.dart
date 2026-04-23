@@ -14,7 +14,7 @@ void main() {
       test(
         'idb native web supported',
         () {},
-        skip: 'idb native hweb not supported',
+        skip: 'idb native web not supported',
       );
     }
   });

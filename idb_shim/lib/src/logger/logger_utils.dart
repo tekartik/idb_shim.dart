@@ -13,7 +13,15 @@ String getPropertyMapText(Map map, [bool addComma = false]) {
 }
 
 String logTruncateAny(Object? value, {int len = 128}) {
-  return logTruncate(value?.toString() ?? '<null>', len: 128);
+  try {
+    return logTruncate(value?.toString() ?? '<null>', len: 128);
+  } catch (e) {
+    try {
+      return 'log_error_${logTruncate(e.toString())}';
+    } catch (e2) {
+      return 'log_error (len=$len)';
+    }
+  }
 }
 
 String logTruncate(String text, {int len = 128}) {

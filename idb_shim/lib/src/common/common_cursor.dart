@@ -1,3 +1,4 @@
+import 'package:idb_shim/src/logger/logger_utils.dart';
 import 'package:idb_shim/src/sdb/sdb_utils.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:idb_shim/utils/idb_cursor_utils.dart' as idb;
@@ -23,6 +24,11 @@ class IdbCursorRowImpl implements idb.CursorRow {
 
   @override
   final Object value;
+
+  @override
+  String toString() {
+    return 'IdbCursorRow(${logTruncateAny(primaryKey)}, ${logTruncateAny(key)}, ${logTruncateAny(value)})';
+  }
 }
 
 /// Convert an openCursor stream to a list. Warning the cursor must not be auto-advanced !

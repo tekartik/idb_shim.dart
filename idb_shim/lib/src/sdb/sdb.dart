@@ -115,6 +115,11 @@ SdbFactory sdbFactoryFromIdb(idb.IdbFactory idbFactory) {
 /// Memory factory.
 final SdbFactory sdbFactoryMemory = sdbFactoryFromIdb(idb.idbFactoryMemory);
 
+/// Memory factory.
+final SdbFactory sdbFactoryMemoryJdb = sdbFactoryFromIdb(
+  idb.newIdbFactoryMemory(),
+);
+
 /// New memory factory.
 SdbFactory newSdbFactoryMemory() =>
     sdbFactoryFromIdb(idb.newIdbFactoryMemory());

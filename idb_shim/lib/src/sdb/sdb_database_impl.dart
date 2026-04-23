@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:idb_shim/idb_shim.dart' as idb;
 import 'package:idb_shim/sdb.dart';
+import 'package:idb_shim/src/logger/logger_utils.dart';
 import 'package:idb_shim/src/sdb/sdb_client.dart';
 import 'package:idb_shim/src/sdb/sdb_database_impl.dart';
 import 'package:meta/meta.dart';
@@ -167,4 +168,8 @@ class SdbDatabaseImpl
       return txn.add(value);
     });
   }
+
+  @override
+  String toString() =>
+      'SdbDatabase(name: ${logTruncateAny(name)}, version: ${logTruncateAny(version)} ${logTruncateAny(idbDatabase.objectStoreNames)})';
 }
