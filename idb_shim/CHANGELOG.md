@@ -1,4 +1,4 @@
-## 2.9.0-2
+## 2.9.0
 
 * sdb: Add support for `SdbTimestamp` in index
 * sdb: new internal format for timestamp, migration with helper
