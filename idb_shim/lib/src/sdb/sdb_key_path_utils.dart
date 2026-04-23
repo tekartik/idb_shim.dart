@@ -64,3 +64,29 @@ SdbKeyPath sdbKeyPathFromAny(Object keyPath) {
     return idbKeyPathToSdbKeyPath(keyPath);
   }
 }
+
+/// Handle String, SdbKeyPath
+///
+/// Returns SdbKeyPath
+SdbKeyPath sdbKeySinglePathFromAny(Object keyPath) {
+  if (keyPath is SdbKeyPath) {
+    assert(keyPath.isSingle);
+    return keyPath;
+  } else if (keyPath is String) {
+    return SdbKeyPath.single(keyPath);
+  }
+  throw ArgumentError('Expected SdbKeyPath single or string');
+}
+
+/// Handle String, SdbKeyPath
+///
+/// Returns SdbKeyPath
+SdbKeyPath sdbKeyMultiPathFromAny(Object keyPath) {
+  if (keyPath is SdbKeyPath) {
+    assert(keyPath.isMulti);
+    return keyPath;
+  } else if (keyPath is List<String>) {
+    return SdbKeyPath.multi(keyPath);
+  }
+  throw ArgumentError('Expected SdbKeyPath multi or list of string');
+}

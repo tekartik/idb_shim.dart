@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/src/common/common_validation.dart';
 import 'package:idb_shim/src/utils/env_utils.dart';
 import 'package:sembast/utils/type_adapter.dart';
 
@@ -25,6 +26,12 @@ bool isBasicIdbTypeOrNull(Object? value) {
   return false;
 }
 
+/// Internal extension
+extension SdbSembastTypeAdapter on SembastTypeAdapter {
+  /// key in the converted map
+  String get mapKey => '\$$name';
+}
+
 final _adapters = sembastDefaultTypeAdapters;
 final _adapterMap = () {
   var map = <String, SembastTypeAdapter<Object, String>>{
@@ -32,6 +39,28 @@ final _adapterMap = () {
   };
   return map;
 }();
+
+final _adapterTypeMap = <Type, SembastTypeAdapter<Object, Object>>{
+  SdbTimestamp: sembastTimestampAdapter,
+};
+
+/// Get adapter for type
+SembastTypeAdapter<T, Object>? getAdapterForType<T>() {
+  return _adapterTypeMap[T] as SembastTypeAdapter<T, Object>?;
+}
+
+/// Is basic sdb type or null
+bool isBasicSdbTypeOrNull(Object? value) {
+  return isBasicIdbTypeOrNull(value);
+}
+
+/// Is basic sdb type
+bool isBasicSdbType(Object? value) {
+  if (value == null) {
+    return false;
+  }
+  return isBasicIdbTypeOrNull(value);
+}
 
 /// Sdb to idb value with type adapter support
 Object? sdbToIdbValueOrNull(Object? value) {
@@ -63,7 +92,7 @@ Object? sdbToIdbValueOrNull(Object? value) {
   }
   for (var adapter in _adapters) {
     if (adapter.isType(value)) {
-      return <String, Object?>{'@${adapter.name}': adapter.encode(value!)};
+      return <String, Object?>{adapter.mapKey: adapter.encode(value!)};
     }
   }
   throw ArgumentError.value(value);
@@ -123,6 +152,24 @@ Object? idbToSdbValueOrNull(Object? value) {
   throw ArgumentError.value(value);
 }
 
+/// Simple key value
+I idbToSdbSimpleKeyValue<I>(Object? key) {
+  return idbToSdbSimpleKeyValueOrNull<I>(key) as I;
+}
+
+/// Idb to sdb value
+I? idbToSdbSimpleKeyValueOrNull<I>(Object? value) {
+  // single timestamp key
+  var adapter = getAdapterForType<I>();
+  if (adapter != null) {
+    return adapter.decode(value.toString());
+  }
+  if (isBasicSdbType(value)) {
+    return value as I;
+  }
+  throw ArgumentError.value(value);
+}
+
 /// Idb to sdb for non null values
 V idbToSdbValue<V>(Object value) {
   var result = idbToSdbValueOrNull(value)!;
@@ -137,7 +184,9 @@ bool _looksLikeCustomType(Map map) {
   if (map.length == 1) {
     var key = map.keys.first;
     if (key is String) {
-      return key.startsWith('@');
+      return key.startsWith(r'$') ||
+          // compat
+          key.startsWith('@');
     }
     throw ArgumentError.value(key);
   }
@@ -163,4 +212,42 @@ Object? idbCloneValueOrNull(Object? value) {
 /// Clone a value.
 SdbValue idbCloneValue(SdbValue value) {
   return idbCloneValueOrNull(value)!;
+}
+
+/// Check an sdb index key param
+bool sdbIsValidIndexKeyParam(Object? key) {
+  if (isValidKeyParam(key)) {
+    return true;
+  }
+  return (key is SdbTimestamp);
+}
+
+/// Check an sdb index key param
+void sdbCheckIndexKeyParam(Object? key) {
+  if (!sdbIsValidIndexKeyParam(key)) {
+    throw DatabaseInvalidKeyError(key);
+  }
+}
+
+/// sdb index key value to idb key value
+Object sdbToIndexKeyValue(Object? value) {
+  return sdbToIndexKeyValueOrNull(value)!;
+}
+
+/// Sdb to idb value with type adapter support
+Object? sdbToIndexKeyValueOrNull(Object? value) {
+  return sdbToSimpleValueOrNull(value);
+}
+
+/// Sdb to idb value with type adapter support
+Object? sdbToSimpleValueOrNull(Object? value) {
+  if (isBasicIdbTypeOrNull(value)) {
+    return value;
+  }
+  for (var adapter in _adapters) {
+    if (adapter.isType(value)) {
+      return adapter.encode(value!);
+    }
+  }
+  throw ArgumentError.value(value);
 }

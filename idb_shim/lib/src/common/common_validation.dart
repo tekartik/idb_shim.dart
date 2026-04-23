@@ -1,23 +1,48 @@
-// ignore_for_file: public_member_api_docs
-
 library;
 
 import 'package:idb_shim/idb_client.dart';
+import 'package:idb_shim/sdb/sdb.dart';
 import 'package:idb_shim/src/common/common_error.dart';
 import 'package:idb_shim/src/common/common_value.dart';
 
+/// Check a primary key param
 void checkKeyParam(Object? key) {
-  if (key == null) {
-    throw DatabaseNoKeyError();
+  if (!isValidKeyParam(key)) {
+    throw DatabaseInvalidKeyError(key);
   }
-  if (!(key is String || key is num)) {
-    if (key is List && key.isNotEmpty) {
-      final keyList = key;
-      for (var item in keyList) {
-        checkKeyParam(item);
+}
+
+/// Check a primary key param
+bool isValidKeyParam(Object? key) {
+  if (key == null) {
+    return false;
+  }
+  if (key is String || key is num) {
+    return true;
+  }
+  if (key is List && key.isNotEmpty) {
+    final keyList = key;
+    for (var item in keyList) {
+      if (!isValidKeyParam(item)) {
+        return false;
       }
-      return;
     }
+    return true;
+  }
+  return false;
+}
+
+/// Check an sdb index key param
+bool sdbIsValidIndexKeyParam(Object? key) {
+  if (isValidKeyParam(key)) {
+    return true;
+  }
+  return (key is SdbTimestamp);
+}
+
+/// Check an sdb index key param
+void sdbCheckIndexKeyParam(Object? key) {
+  if (!sdbIsValidIndexKeyParam(key)) {
     throw DatabaseInvalidKeyError(key);
   }
 }

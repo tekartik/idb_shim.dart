@@ -1,3 +1,5 @@
+import 'package:idb_shim/idb_sdb.dart';
+import 'package:idb_shim/src/sdb/sdb_utils.dart';
 // ignore: implementation_imports
 import 'package:sembast/src/api/protected/key_utils.dart' as key_utils;
 
@@ -5,32 +7,24 @@ import 'package:sembast/src/api/protected/key_utils.dart' as key_utils;
 String generateStringKey() => key_utils.generateStringKey();
 
 /// Convert an indexKey (that can be a record)
-Object indexKeyToIdbKey(Object indexKey) {
+Object sdbIndexKeyToIdbKey(Object indexKey) {
   if (indexKey is (Object?, Object?, Object?, Object?)) {
-    return [indexKey.$1, indexKey.$2, indexKey.$3, indexKey.$4];
+    return [
+      sdbToIndexKeyValue(indexKey.$1),
+      sdbToIndexKeyValue(indexKey.$2),
+      sdbToIndexKeyValue(indexKey.$3),
+      sdbToIndexKeyValue(indexKey.$4),
+    ];
   } else if (indexKey is (Object?, Object?, Object?)) {
-    return [indexKey.$1, indexKey.$2, indexKey.$3];
+    return [
+      sdbToIndexKeyValue(indexKey.$1),
+      sdbToIndexKeyValue(indexKey.$2),
+      sdbToIndexKeyValue(indexKey.$3),
+    ];
   } else if (indexKey is (Object?, Object?)) {
-    return [indexKey.$1, indexKey.$2];
+    return [sdbToIndexKeyValue(indexKey.$1), sdbToIndexKeyValue(indexKey.$2)];
   } else {
-    return indexKey;
-  }
-}
-
-/// Convert an idbKey (list) to an indexKey (record)
-I idbKeyToIndexKey<I>(Object idbKey) {
-  if (idbKey is List) {
-    if (idbKey.length == 4) {
-      return (idbKey[0], idbKey[1], idbKey[2], idbKey[3]) as I;
-    } else if (idbKey.length == 3) {
-      return (idbKey[0], idbKey[1], idbKey[2]) as I;
-    } else if (idbKey.length == 2) {
-      return (idbKey[0], idbKey[1]) as I;
-    } else {
-      throw StateError('keys with ${idbKey.length} fields keys are supported');
-    }
-  } else {
-    return idbKey as I;
+    return sdbToIndexKeyValue(indexKey);
   }
 }
 
@@ -39,5 +33,13 @@ void sdbCheckKeyType<K>() {
   // We tolerate Object as dynamic
   if (!(K == int || K == String || K == Object)) {
     throw ArgumentError('K type $K must be int or String');
+  }
+}
+
+/// Check that K is a valid index SdbKey type
+void sdbCheckIndexKeyType<K>() {
+  // We tolerate Object as dynamic
+  if (!(K == int || K == String || K == Object || K == SdbTimestamp)) {
+    throw ArgumentError('K type $K must be int, String or SdbTimestamp');
   }
 }

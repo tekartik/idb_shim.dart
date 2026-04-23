@@ -1,5 +1,6 @@
 import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
+import 'package:idb_shim/src/sdb/sdb_cursor.dart';
 import 'package:idb_shim/src/sdb/sdb_key_utils.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 
@@ -25,6 +26,22 @@ extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
 
   /// Put a single record (when using inline keys)
   Future<K> put(SdbClient client, V value) => impl.putImpl(client, value);
+
+  /// if client is a transaction it must match the transaction mode
+  /// requiring write mode if the transaction is ready only will fail
+  Future<void> handleRecords(
+    SdbClient client, {
+    SdbTransactionMode? mode,
+    SdbFindOptions<K>? options,
+    required SdbCursorRowHandler handler,
+  }) async {
+    await impl.handleRecordsImpl(
+      client,
+      mode: mode ?? SdbTransactionMode.readOnly,
+      options: options ?? SdbFindOptions(),
+      handler: handler,
+    );
+  }
 
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> findRecords(
@@ -265,6 +282,19 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
   );
 
   /// Find records.
+  Future<void> handleRecordsImpl(
+    SdbClient client, {
+    required SdbTransactionMode mode,
+    required SdbFindOptions<K> options,
+    required SdbCursorRowHandler<K> handler,
+  }) => clientAutoTxnImpl(
+    client,
+    mode,
+    (txn) =>
+        txnHandleRecordsImpl(txn.rawImpl, options: options, handler: handler),
+  );
+
+  /// Find records.
   Stream<SdbRecordSnapshot<K, V>> streamRecordsImpl(
     SdbClient client, {
 
@@ -296,6 +326,17 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
     required SdbFindOptions<K> options,
   }) {
     return txn.storeImpl(this).findRecords(options: options);
+  }
+
+  /// Find records.
+  Future<void> txnHandleRecordsImpl(
+    SdbTransactionImpl txn, {
+    required SdbCursorRowHandler<K> handler,
+    required SdbFindOptions<K> options,
+  }) {
+    return txn
+        .storeImpl(this)
+        .handleRecordsImpl(options: options, handler: handler);
   }
 
   /// Find records.

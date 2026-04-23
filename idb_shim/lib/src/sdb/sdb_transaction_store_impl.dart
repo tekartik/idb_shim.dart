@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:idb_shim/sdb.dart';
 import 'package:idb_shim/src/sdb/sdb_boundary_impl.dart';
+import 'package:idb_shim/src/sdb/sdb_cursor.dart';
 import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_utils.dart';
@@ -272,6 +273,29 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
               : null,
         )
         .map(_sdbRecordSnapshot);
+  }
+
+  /// Handle records
+  Future<void> handleRecordsImpl({
+    required SdbFindOptions<K> options,
+    required SdbCursorRowHandler<K> handler,
+  }) {
+    // var filter = options.filter;
+    var offset = options.offset;
+    var limit = options.limit;
+    var descending = options.descending;
+    var boundaries = options.boundaries;
+    var cursor = idbObjectStore.openCursor(
+      direction: descendingToIdbDirection(descending),
+      range: idbKeyRangeFromBoundaries(boundaries),
+    );
+    var openCursor = SdbOpenCursorImpl<K, V>(
+      idbStream: cursor,
+      handler: handler,
+      offset: offset,
+      limit: limit,
+    );
+    return openCursor.done;
   }
 
   /// Find records.

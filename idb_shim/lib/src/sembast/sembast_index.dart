@@ -39,7 +39,7 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   }
 
   @override
-  Future get(key) {
+  Future get(Object key) {
     checkKeyParam(key);
     return inTransaction(() {
       final finder = sembast.Finder(
@@ -57,7 +57,7 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   }
 
   @override
-  Future getKey(key) {
+  Future getKey(Object key) {
     checkKeyParam(key);
     return inTransaction(() {
       final finder = sembast.Finder(

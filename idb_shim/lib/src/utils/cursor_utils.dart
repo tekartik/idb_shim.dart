@@ -1,7 +1,7 @@
 library;
 
+import 'package:idb_shim/src/common/common_cursor.dart';
 import 'package:idb_shim/src/cursor.dart';
-import 'package:idb_shim/src/sdb/sdb_utils.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 
 export 'package:idb_shim/idb_shim.dart';
@@ -13,7 +13,7 @@ typedef CursorRow = IdbCursorRow;
 typedef KeyCursorRow = IdbKeyCursorRow;
 
 /// Cursor row.
-class IdbCursorRow extends KeyCursorRow {
+abstract class IdbCursorRow extends KeyCursorRow {
   /// Cursor row value.
   final Object value;
 
@@ -54,6 +54,17 @@ extension IdbCursorRowIterableExt on Iterable<IdbCursorRow> {
 
 /// Extension on `Stream<Cursor>`. Cursor must not be in auto-advanced mode.
 extension CursorWithValueStreamExt on Stream<CursorWithValue> {
+  CursorRow _cursorRow(CursorWithValue cwv) {
+    return IdbCursorRowImpl(cwv);
+  }
+
+  /// Map cursor to rows
+  Stream<CursorRow> mapRows({IdbCursorWithValueMatcherFunction? matcher}) {
+    return where(
+      (cwv) => matcher == null || matcher(cwv),
+    ).map((cwv) => _cursorRow(cwv));
+  }
+
   /// Convert an openCursor stream to a list.
   Future<List<CursorRow>> toRowList({
     int? limit,
@@ -64,8 +75,7 @@ extension CursorWithValueStreamExt on Stream<CursorWithValue> {
       if (matcher != null && !matcher(cwv)) {
         return null;
       }
-      var value = idbCloneValue(cwv.value);
-      return CursorRow(cwv.key, cwv.primaryKey, value);
+      return _cursorRow(cwv);
     }
 
     return _cursorStreamToList(
@@ -77,8 +87,7 @@ extension CursorWithValueStreamExt on Stream<CursorWithValue> {
   }
 
   CursorRow _cwvToRow(CursorWithValue cwv) {
-    var value = idbCloneValue(cwv.value);
-    return CursorRow(cwv.key, cwv.primaryKey, value);
+    return IdbCursorRowImpl(cwv);
   }
 
   /// filter out.
@@ -149,41 +158,6 @@ extension CursorStreamExt<C extends Cursor> on Stream<C> {
       );
 }
 
-class _CursorController<C extends Cursor, T> {
-  var canceled = false;
-  void onCancel() {
-    canceled = true;
-  }
-
-  late final ctlr = StreamController<T>(sync: true, onCancel: onCancel);
-  Stream<T> get stream => ctlr.stream;
-  void add(T value) {
-    if (!canceled) {
-      ctlr.add(value);
-    }
-  }
-
-  void addError(Object error, StackTrace stackTrace) {
-    if (!canceled) {
-      ctlr.addError(error, stackTrace);
-    }
-  }
-
-  void terminate(Cursor cursor) {
-    // Go far deep in the future, not a better trick yet
-    // With a value higher than 0xFFFFFFFF, it does not work on native: Error: Failed to execute 'advance' on 'IDBCursor': Value is outside the 'unsigned long' value range.
-    cursor.advance(0xFFFFFFFF);
-  }
-
-  void next(Cursor cursor) {
-    cursor.advance(1);
-  }
-
-  void close() {
-    ctlr.close();
-  }
-}
-
 /// Convert an openCursor stream to a list. Warning the cursor must not be auto-advanced !
 /// cursor is ran 1 by 1
 Stream<T> _cursorApplyFilterLimitOffset<C extends Cursor, T>(
@@ -193,39 +167,13 @@ Stream<T> _cursorApplyFilterLimitOffset<C extends Cursor, T>(
   int? offset,
   int? limit,
 }) {
-  var count = 0;
-  var offsetApplied = 0;
+  final ctlr = LimitOffsetControllerImpl<C, T>(offset: offset, limit: limit);
 
-  var ctlr = _CursorController<C, T>();
   stream.listen(
     (C cursor) {
       /// Convert first
       var row = convert(cursor);
-      if (row == null) {
-        cursor.advance(1);
-        return;
-      }
-      // Apply offset and skip first if needed
-      if ((offset ?? 0) > offsetApplied) {
-        offsetApplied++;
-        ctlr.next(cursor);
-        return;
-      }
-      ctlr.add(row);
-      count++;
-      // handle limit
-      if (limit != null) {
-        if (count >= limit) {
-          ctlr.terminate(cursor);
-          return;
-        }
-      }
-
-      if (ctlr.canceled) {
-        ctlr.terminate(cursor);
-      } else {
-        ctlr.next(cursor);
-      }
+      ctlr.next(cursor, row);
     },
     onDone: () {
       ctlr.close();
@@ -247,7 +195,7 @@ Stream<C> _cursorApplyLimitOffset<C extends Cursor>(
 }) {
   var first = true;
   var count = 0;
-  var ctlr = _CursorController<C, C>();
+  var ctlr = CursorControllerImpl<C, C>();
   stream.listen(
     (C cursor) {
       if (first && (offset != null) && (offset != 0)) {

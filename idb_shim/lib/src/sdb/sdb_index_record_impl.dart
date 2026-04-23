@@ -69,7 +69,7 @@ extension SdbIndexRecordRefImplExtension<
   ) async {
     var idbStore = txn.idbTransaction.objectStore(store.name);
     var idbIndex = idbStore.index(index.name);
-    var idbIndexKey = indexKeyToIdbKey(indexKey);
+    var idbIndexKey = sdbIndexKeyToIdbKey(indexKey);
     var key = await idbIndex.getKey(idbIndexKey);
     if (key != null) {
       var result = await idbStore.getObject(key);
@@ -89,7 +89,7 @@ extension SdbIndexRecordRefImplExtension<
   Future<K?> txnGetKeyImpl(SdbTransactionImpl txn) async {
     var idbStore = txn.idbTransaction.objectStore(store.name);
     var idbIndex = idbStore.index(index.name);
-    var idbIndexKey = indexKeyToIdbKey(indexKey);
+    var idbIndexKey = sdbIndexKeyToIdbKey(indexKey);
     var key = (await idbIndex.getKey(idbIndexKey)) as K?;
     return key;
   }

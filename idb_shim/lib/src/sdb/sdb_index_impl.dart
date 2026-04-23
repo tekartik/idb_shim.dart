@@ -3,6 +3,8 @@ import 'dart:math';
 
 import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_filter_impl.dart';
+import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
+import 'package:idb_shim/src/sdb/sdb_schema.dart';
 import 'package:idb_shim/src/sdb/sdb_utils.dart';
 import 'package:idb_shim/src/utils/cursor_utils.dart';
 import 'package:idb_shim/src/utils/idb_utils.dart';
@@ -35,9 +37,26 @@ class SdbIndex1RefImpl<
 >
     extends SdbIndexRefImpl<K, V, I>
     implements SdbIndex1Ref<K, V, I> {
+  /// Create store schema, keyPath is String, a `List<String>` or SdbKeyPath
+  @override
+  SdbIndexSchema indexSchema({required Object keyPath, bool? unique}) {
+    var single = sdbKeySinglePathFromAny(keyPath);
+    return SdbIndexSchema(
+      this,
+      SdbKeyPath.single(sdbKeyPath<I>(single.keyPath)),
+      unique: unique ?? false,
+    );
+  }
+
+  /// Convert idb key to index key.
+  @override
+  I indexIdbToSdbKeyValue(Object key) {
+    return idbToSdbSimpleKeyValue<I>(key);
+  }
+
   /// Index on 1 field.
   SdbIndex1RefImpl(super.store, super.name) {
-    sdbCheckKeyType<I>();
+    sdbCheckIndexKeyType<I>();
   }
 }
 
@@ -52,8 +71,27 @@ class SdbIndex2RefImpl<
     implements SdbIndex2Ref<K, V, I1, I2> {
   /// Index on 2 fields.
   SdbIndex2RefImpl(super.store, super.name) {
-    sdbCheckKeyType<I1>();
-    sdbCheckKeyType<I2>();
+    sdbCheckIndexKeyType<I1>();
+    sdbCheckIndexKeyType<I2>();
+  }
+
+  @override
+  (I1, I2) indexIdbToSdbKeyValue(Object key) {
+    var list = key as List;
+    return (idbToSdbSimpleKeyValue(list[0]), idbToSdbSimpleKeyValue(list[1]));
+  }
+
+  @override
+  SdbIndexSchema indexSchema({required Object keyPath, bool? unique}) {
+    var multi = sdbKeyMultiPathFromAny(keyPath);
+    return SdbIndexSchema(
+      this,
+      SdbKeyPath.multi([
+        sdbKeyPath<I1>(multi.keyPaths[0]),
+        sdbKeyPath<I2>(multi.keyPaths[1]),
+      ]),
+      unique: unique ?? false,
+    );
   }
 }
 
@@ -69,9 +107,33 @@ class SdbIndex3RefImpl<
     implements SdbIndex3Ref<K, V, I1, I2, I3> {
   /// Index on 3 fields.
   SdbIndex3RefImpl(super.store, super.name) {
-    sdbCheckKeyType<I1>();
-    sdbCheckKeyType<I2>();
-    sdbCheckKeyType<I3>();
+    sdbCheckIndexKeyType<I1>();
+    sdbCheckIndexKeyType<I2>();
+    sdbCheckIndexKeyType<I3>();
+  }
+
+  @override
+  SdbIndexSchema indexSchema({required Object keyPath, bool? unique}) {
+    var multi = sdbKeyMultiPathFromAny(keyPath);
+    return SdbIndexSchema(
+      this,
+      SdbKeyPath.multi([
+        sdbKeyPath<I1>(multi.keyPaths[0]),
+        sdbKeyPath<I2>(multi.keyPaths[1]),
+        sdbKeyPath<I3>(multi.keyPaths[2]),
+      ]),
+      unique: unique ?? false,
+    );
+  }
+
+  @override
+  (I1, I2, I3) indexIdbToSdbKeyValue(Object key) {
+    var list = key as List;
+    return (
+      idbToSdbSimpleKeyValue(list[0]),
+      idbToSdbSimpleKeyValue(list[1]),
+      idbToSdbSimpleKeyValue(list[2]),
+    );
   }
 }
 
@@ -88,20 +150,51 @@ class SdbIndex4RefImpl<
     implements SdbIndex4Ref<K, V, I1, I2, I3, I4> {
   /// Index on 4 fields.
   SdbIndex4RefImpl(super.store, super.name) {
-    sdbCheckKeyType<I1>();
-    sdbCheckKeyType<I2>();
-    sdbCheckKeyType<I3>();
-    sdbCheckKeyType<I4>();
+    sdbCheckIndexKeyType<I1>();
+    sdbCheckIndexKeyType<I2>();
+    sdbCheckIndexKeyType<I3>();
+    sdbCheckIndexKeyType<I4>();
+  }
+
+  @override
+  SdbIndexSchema indexSchema({required Object keyPath, bool? unique}) {
+    var multi = sdbKeyMultiPathFromAny(keyPath);
+    return SdbIndexSchema(
+      this,
+      SdbKeyPath.multi([
+        sdbKeyPath<I1>(multi.keyPaths[0]),
+        sdbKeyPath<I2>(multi.keyPaths[1]),
+        sdbKeyPath<I3>(multi.keyPaths[2]),
+        sdbKeyPath<I4>(multi.keyPaths[3]),
+      ]),
+      unique: unique ?? false,
+    );
+  }
+
+  @override
+  (I1, I2, I3, I4) indexIdbToSdbKeyValue(Object key) {
+    var list = key as List;
+    return (
+      idbToSdbSimpleKeyValue(list[0]),
+      idbToSdbSimpleKeyValue(list[1]),
+      idbToSdbSimpleKeyValue(list[2]),
+      idbToSdbSimpleKeyValue(list[3]),
+    );
   }
 }
 
 /// Index reference extension.
-class SdbIndexRefImpl<
+abstract class SdbIndexRefImpl<
   K extends SdbKey,
   V extends SdbValue,
   I extends SdbIndexKey
 >
     implements SdbIndexRef<K, V, I> {
+  /// Convert idb key to index key.
+  I indexIdbToSdbKeyValue(Object key);
+
+  /// Index schema to implement
+  SdbIndexSchema indexSchema({required Object keyPath, bool? unique});
   @override
   final SdbStoreRefImpl<K, V> store;
   @override
@@ -164,7 +257,7 @@ class SdbIndexRefImpl<
     idb.CursorRow row,
   ) {
     var key = row.primaryKey as K;
-    var indexKey = idbKeyToIndexKey<I>(row.key);
+    var indexKey = indexIdbToSdbKeyValue(row.key);
     var value = idbToSdbValue(row.value) as V;
     return SdbIndexRecordSnapshotImpl<K, V, I>(this, key, value, indexKey);
   }
@@ -254,7 +347,7 @@ class SdbIndexRefImpl<
     var rows = await cursor.toKeyRowList(limit: limit, offset: offset);
     return rows.map((row) {
       var key = row.primaryKey as K;
-      var indexKey = idbKeyToIndexKey<I>(row.key);
+      var indexKey = indexIdbToSdbKeyValue(row.key);
       return SdbIndexRecordKeyImpl<K, V, I>(this, key, indexKey);
     }).toList();
   }
