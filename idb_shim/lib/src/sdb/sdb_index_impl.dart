@@ -130,9 +130,9 @@ class SdbIndex3RefImpl<
   (I1, I2, I3) indexIdbToSdbKeyValue(Object key) {
     var list = key as List;
     return (
-      idbToSdbSimpleKeyValue(list[0]),
-      idbToSdbSimpleKeyValue(list[1]),
-      idbToSdbSimpleKeyValue(list[2]),
+      idbToSdbSimpleKeyValue<I1>(list[0]),
+      idbToSdbSimpleKeyValue<I2>(list[1]),
+      idbToSdbSimpleKeyValue<I3>(list[2]),
     );
   }
 }
