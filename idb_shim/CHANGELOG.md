@@ -1,3 +1,8 @@
+## 2.9.0-1
+
+* sdb: Add support for `SdbTimestamp` in index
+* sdb: new internal format for timestamp, migration with helper
+
 ## 2.8.5+2
 
 * sdb: Add `onSnapshot` and `onSnapshots` support for stores, records, and indexes.
