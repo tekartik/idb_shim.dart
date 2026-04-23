@@ -278,9 +278,9 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
   /// Handle records
   Future<void> handleRecordsImpl({
     required SdbFindOptions<K> options,
-    required SdbCursorRowHandler<K> handler,
+    required SdbCursorRowHandler<K, V> handler,
   }) {
-    // var filter = options.filter;
+    var filter = options.filter;
     var offset = options.offset;
     var limit = options.limit;
     var descending = options.descending;
@@ -294,6 +294,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
       handler: handler,
       offset: offset,
       limit: limit,
+      filter: filter,
     );
     return openCursor.done;
   }

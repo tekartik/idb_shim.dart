@@ -36,6 +36,7 @@ export 'sdb_index_record_snapshot.dart'
         SdbIndexRecordSnapshotListExt,
         SdbIndexRecordKey,
         SdbIndexRecordKeyListExt;
+export 'sdb_internal_migration.dart' show SdbClientMigrationExtension;
 export 'sdb_on_snapshot.dart'
     show
         SdbIndexRecordRefExtensionOnSnapshot,

@@ -11,7 +11,7 @@ import 'idb_test_common.dart';
 //import 'idb_test_factory.dart';
 
 void main() {
-  idbSdbUtilsTests(idbMemoryContext);
+  idbSdbFormatTests(idbMemoryContext);
 }
 
 var testStore = SdbStoreRef<int, SdbModel>(testStoreName);
@@ -29,7 +29,7 @@ var _openDatabaseOptions = SdbOpenDatabaseOptions(
   version: 1,
   schema: _testOneStoreKeyPathAutoSchema,
 );
-void idbSdbUtilsTests(TestContext ctx) {
+void idbSdbFormatTests(TestContext ctx) {
   var factory = sdbFactoryFromIdb(ctx.factory);
   sdbUtilsTests(SdbTestContext(factory));
 }
@@ -59,9 +59,10 @@ void sdbUtilsTests(SdbTestContext ctx) {
     }
   }
 
-  group('utils', () {
-    Future dbCheckImport(List importLines, List expectedExportLines) async {
+  group('format', () {
+    Future dbCheckImport1To2(List importLines, List expectedExportLines) async {
       var db = await sdbImportDatabase(importLines, sdbFactory, importedDbName);
+      await db.compatMigrate1To2();
       var export = await sdbExportDatabaseLines(db);
       expect(export, expectedExportLines);
     }
@@ -284,7 +285,8 @@ void sdbUtilsTests(SdbTestContext ctx) {
         ];
 
         await checkAll(db!, expectedExport, (_) async {});
-        await dbCheckImport(exportV1, expectedExport);
+        await dbCheckImport1To2(exportV1, expectedExport);
+        await dbCheckImport1To2(expectedExport, expectedExport);
       });
       test('one_record', () async {
         await setupDeleteDb();
@@ -342,9 +344,7 @@ void sdbUtilsTests(SdbTestContext ctx) {
           [
             1,
             {
-              'timestamp': {
-                '@': {'@Timestamp': '1970-01-01T00:00:01.000Z'},
-              },
+              'timestamp': {r'$Timestamp': '1970-01-01T00:00:01.000Z'},
               'name': 1,
             },
           ],

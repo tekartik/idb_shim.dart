@@ -58,13 +58,6 @@ extension CursorWithValueStreamExt on Stream<CursorWithValue> {
     return IdbCursorRowImpl(cwv);
   }
 
-  /// Map cursor to rows
-  Stream<CursorRow> mapRows({IdbCursorWithValueMatcherFunction? matcher}) {
-    return where(
-      (cwv) => matcher == null || matcher(cwv),
-    ).map((cwv) => _cursorRow(cwv));
-  }
-
   /// Convert an openCursor stream to a list.
   Future<List<CursorRow>> toRowList({
     int? limit,

@@ -64,8 +64,20 @@ void main() {
     test('sdbToIdbValue', () {
       expect(sdbToIdbValue(1), 1);
       expect(sdbToIdbValue(SdbTimestamp(1, 2000)), {
-        '@Timestamp': '1970-01-01T00:00:01.000002Z',
+        r'$Timestamp': '1970-01-01T00:00:01.000002Z',
       });
+      expect(
+        idbToSdbValue<SdbTimestamp>({
+          r'$Timestamp': '1970-01-01T00:00:01.000002Z',
+        }),
+        SdbTimestamp(1, 2000),
+      );
+      expect(
+        idbToSdbValue<SdbTimestamp>({
+          r'@Timestamp': '1970-01-01T00:00:01.000002Z',
+        }),
+        SdbTimestamp(1, 2000),
+      );
     });
     test('sdbIsValidIndexKeyParam', () {
       expect(sdbIsValidIndexKeyParam(DateTime.now()), false);

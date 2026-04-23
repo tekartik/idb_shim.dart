@@ -3,6 +3,7 @@ import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_cursor.dart';
 import 'package:idb_shim/src/sdb/sdb_key_utils.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
+import 'package:meta/meta.dart';
 
 import 'sdb.dart';
 import 'sdb_client.dart';
@@ -17,6 +18,28 @@ extension SdbStoreRefInternalExtension<K extends SdbKey, V extends SdbValue>
 }
 
 /// Store reference implementation.
+extension SdbStoreRefDbInternalExtension<K extends SdbKey, V extends SdbValue>
+    on SdbStoreRef<K, V> {
+  /// Do no use yet
+  @internal
+  /// if client is a transaction it must match the transaction mode
+  /// requiring write mode if the transaction is ready only will fail
+  Future<void> handleRecords(
+    SdbClient client, {
+    SdbTransactionMode? mode,
+    SdbFindOptions<K>? options,
+    required SdbCursorRowHandler<K, V> handler,
+  }) async {
+    await impl.handleRecordsImpl(
+      client,
+      mode: mode ?? SdbTransactionMode.readOnly,
+      options: options ?? SdbFindOptions(),
+      handler: handler,
+    );
+  }
+}
+
+/// Store reference implementation.
 extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
     on SdbStoreRef<K, V> {
   /// Add a single record.
@@ -26,22 +49,6 @@ extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
 
   /// Put a single record (when using inline keys)
   Future<K> put(SdbClient client, V value) => impl.putImpl(client, value);
-
-  /// if client is a transaction it must match the transaction mode
-  /// requiring write mode if the transaction is ready only will fail
-  Future<void> handleRecords(
-    SdbClient client, {
-    SdbTransactionMode? mode,
-    SdbFindOptions<K>? options,
-    required SdbCursorRowHandler handler,
-  }) async {
-    await impl.handleRecordsImpl(
-      client,
-      mode: mode ?? SdbTransactionMode.readOnly,
-      options: options ?? SdbFindOptions(),
-      handler: handler,
-    );
-  }
 
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> findRecords(
@@ -286,7 +293,7 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
     SdbClient client, {
     required SdbTransactionMode mode,
     required SdbFindOptions<K> options,
-    required SdbCursorRowHandler<K> handler,
+    required SdbCursorRowHandler<K, V> handler,
   }) => clientAutoTxnImpl(
     client,
     mode,
@@ -331,7 +338,7 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
   /// Find records.
   Future<void> txnHandleRecordsImpl(
     SdbTransactionImpl txn, {
-    required SdbCursorRowHandler<K> handler,
+    required SdbCursorRowHandler<K, V> handler,
     required SdbFindOptions<K> options,
   }) {
     return txn

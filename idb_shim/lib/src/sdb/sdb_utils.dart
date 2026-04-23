@@ -110,6 +110,7 @@ Object? idbToSdbValueOrNull(Object? value) {
   } else if (value is Map) {
     var map = value;
     if (_looksLikeCustomType(map)) {
+      // Works for $Type and @Type (compat)
       var type = (map.keys.first as String).substring(1);
       if (type == '') {
         return map.values.first as Object;
