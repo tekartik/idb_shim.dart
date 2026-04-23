@@ -11,7 +11,7 @@ import 'idb_test_common.dart';
 //import 'idb_test_factory.dart';
 
 void main() {
-  idbSdbUtilsTests(idbMemoryContext);
+  idbSdbFormatTests(idbMemoryContext);
 }
 
 var testStore = SdbStoreRef<int, SdbModel>(testStoreName);
@@ -29,7 +29,7 @@ var _openDatabaseOptions = SdbOpenDatabaseOptions(
   version: 1,
   schema: _testOneStoreKeyPathAutoSchema,
 );
-void idbSdbUtilsTests(TestContext ctx) {
+void idbSdbFormatTests(TestContext ctx) {
   var factory = sdbFactoryFromIdb(ctx.factory);
   sdbUtilsTests(SdbTestContext(factory));
 }
@@ -48,6 +48,7 @@ void sdbUtilsTests(SdbTestContext ctx) {
     srcDbName = 'sdb_utils_import_export.db';
     dstDbName = 'dst_$srcDbName';
     importedDbName = 'imported_$srcDbName';
+    await sdbFactory.deleteDatabase(importedDbName);
     await sdbFactory.deleteDatabase(srcDbName);
   }
 
@@ -58,7 +59,15 @@ void sdbUtilsTests(SdbTestContext ctx) {
     }
   }
 
-  group('utils', () {
+  group('format', () {
+    Future dbCheckImport1To2(List importLines, List expectedExportLines) async {
+      var db = await sdbImportDatabase(importLines, sdbFactory, importedDbName);
+      await db.compatMigrate1To2();
+      var export = await sdbExportDatabaseLines(db);
+      expect(export, expectedExportLines);
+      await db.close();
+    }
+
     Future dbCheckExportImportLines(
       SdbDatabase db,
       List expectedExportLines,
@@ -221,6 +230,65 @@ void sdbUtilsTests(SdbTestContext ctx) {
         await checkAll(db!, expectedExport, dbCheck);
       });
 
+      test('one_timestamp_record', () async {
+        await setupDeleteDb();
+
+        db = await sdbFactory.openDatabase(
+          srcDbName,
+          options: _openDatabaseOptions,
+        );
+
+        await testStore.add(db!, {'timestamp': SdbTimestamp(1, 0)});
+
+        final exportV1 = [
+          {'sembast_export': 1, 'version': 1},
+          {'store': '_main'},
+          [
+            'store_test_store',
+            {'name': 'test_store', 'keyPath': 'name', 'autoIncrement': true},
+          ],
+          [
+            'stores',
+            ['test_store'],
+          ],
+          ['version', 1],
+          {'store': 'test_store'},
+          [
+            1,
+            {
+              'timestamp': {
+                '@': {'@Timestamp': '1970-01-01T00:00:01.000Z'},
+              },
+              'name': 1,
+            },
+          ],
+        ];
+        final expectedExport = [
+          {'sembast_export': 1, 'version': 1},
+          {'store': '_main'},
+          [
+            'store_test_store',
+            {'name': 'test_store', 'keyPath': 'name', 'autoIncrement': true},
+          ],
+          [
+            'stores',
+            ['test_store'],
+          ],
+          ['version', 1],
+          {'store': 'test_store'},
+          [
+            1,
+            {
+              'timestamp': {r'$Timestamp': '1970-01-01T00:00:01.000Z'},
+              'name': 1,
+            },
+          ],
+        ];
+
+        await checkAll(db!, expectedExport, (_) async {});
+        await dbCheckImport1To2(exportV1, expectedExport);
+        await dbCheckImport1To2(expectedExport, expectedExport);
+      });
       test('one_record', () async {
         await setupDeleteDb();
 
@@ -277,9 +345,7 @@ void sdbUtilsTests(SdbTestContext ctx) {
           [
             1,
             {
-              'timestamp': {
-                '@': {'@Timestamp': '1970-01-01T00:00:01.000Z'},
-              },
+              'timestamp': {r'$Timestamp': '1970-01-01T00:00:01.000Z'},
               'name': 1,
             },
           ],

@@ -1,5 +1,6 @@
 library;
 
+import 'package:idb_shim/idb_sdb.dart';
 import 'package:idb_shim/src/common/common_error.dart';
 import 'package:idb_shim/src/common/common_validation.dart';
 
@@ -48,6 +49,15 @@ void defineTests() {
       }
       fail('$key should fail');
     }
+
+    test('isValidKeyParam', () {
+      expect(isValidKeyParam(DateTime.now()), false);
+      expect(isValidKeyParam(SdbTimestamp.now()), false);
+      expect(isValidKeyParam(null), false);
+      expect(isValidKeyParam(''), true);
+      expect(isValidKeyParam('a'), true);
+      expect(isValidKeyParam(0), true);
+    });
 
     test('composite checkKeyValueParam', () {
       // DataError: neither keyPath nor autoIncrement set and trying to add object without key.

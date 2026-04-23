@@ -11,7 +11,7 @@ var testIndex = testStore.index<int>('myindex');
 var testStore2 = SdbStoreRef<String, SdbModel>('test2');
 
 void sdbIndexTests(TestContext ctx) {
-  var factory = sdbFactoryFromIdb(ctx.factory);
+  var factory = sdbFactoryFromIdb(ctx.factory); //.debugWrapInLogger();
 
   group('sdb_index', () {
     test('basic', () async {
@@ -539,6 +539,125 @@ void sdbIndexTests(TestContext ctx) {
       ]);
       // Close the database
       await db.close();
+    });
+    test('timestamp index', () async {
+      var dbName = 'test_timestamp_index.db';
+      await factory.deleteDatabase(dbName);
+
+      // Our item store/table
+      var itemStore = SdbStoreRef<int, SdbModel>('item');
+      // Index on 'timestamp' field
+      var timestampIndex = itemStore.index<SdbTimestamp>('timestamp');
+      late SdbDatabase db;
+      Future<void> open() async {
+        db = await factory.openDatabase(
+          dbName,
+
+          options: SdbOpenDatabaseOptions(
+            version: 1,
+            schema: SdbDatabaseSchema(
+              stores: [
+                itemStore.schema(
+                  autoIncrement: true,
+                  indexes: [timestampIndex.schema(keyPath: 'timestamp')],
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      await open();
+      var timestamp = SdbTimestamp(1, 0);
+      var timestamp2 = SdbTimestamp(2, 0);
+      var item = SdbModel.from({'name': 'item_1', 'timestamp': timestamp});
+      var item2 = SdbModel.from({'name': 'item_2', 'timestamp': timestamp2});
+      var key2 = await itemStore.add(db, item2);
+      var key = await itemStore.add(db, item);
+
+      expect((await timestampIndex.record(timestamp).get(db))?.key, key);
+      expect((await timestampIndex.findRecords(db)).keys, [key, key2]);
+      expect(
+        (await timestampIndex.findRecords(
+          db,
+          options: SdbFindOptions(
+            boundaries: SdbBoundaries.lower(SdbLowerBoundary(timestamp2)),
+          ),
+        )).keys,
+        [key2],
+      );
+      await db.close();
+      await open();
+      expect(
+        (await timestampIndex.findRecords(
+          db,
+          options: SdbFindOptions(
+            boundaries: SdbBoundaries.lower(SdbLowerBoundary(timestamp2)),
+          ),
+        )).keys,
+        [key2],
+      );
+      await db.close();
+    });
+    test('timestamp2 index', () async {
+      var dbName = 'test_timestamp2_index.db';
+      await factory.deleteDatabase(dbName);
+
+      // Our item store/table
+      var itemStore = SdbStoreRef<int, SdbModel>('item');
+      // Index on 'tag', 'timestamp' field
+      var index = itemStore.index2<String, SdbTimestamp>('timestamp');
+
+      var db = await factory.openDatabase(
+        dbName,
+
+        options: SdbOpenDatabaseOptions(
+          version: 1,
+          schema: SdbDatabaseSchema(
+            stores: [
+              itemStore.schema(
+                autoIncrement: true,
+                indexes: [index.schema2('tag', 'timestamp')],
+              ),
+            ],
+          ),
+        ),
+      );
+      var timestamp = SdbTimestamp(1, 0);
+      var timestamp2 = SdbTimestamp(2, 0);
+      var item = SdbModel.from({
+        'name': 'item_1',
+        'timestamp': timestamp,
+        'tag': 'a',
+      });
+      var item2 = SdbModel.from({
+        'name': 'item_2',
+        'timestamp': timestamp2,
+        'tag': 'b',
+      });
+      var item3 = SdbModel.from({
+        'name': 'item_2',
+        'timestamp': timestamp2,
+        'tag': 'a',
+      });
+      var key2 = await itemStore.add(db, item2);
+      var key = await itemStore.add(db, item);
+      var key3 = await itemStore.add(db, item3);
+
+      expect((await index.record2('a', timestamp).get(db))?.key, key);
+      expect((await index.record(('a', timestamp2)).get(db))?.key, key3);
+      expect((await index.findRecords(db)).keys, [key, key3, key2]);
+      expect(
+        (await index.findRecords(
+          db,
+          options: SdbFindOptions(
+            boundaries: SdbBoundaries.lower(
+              SdbLowerBoundary(('a', timestamp2)),
+            ),
+          ),
+        )).keys,
+        [key3, key2],
+      );
     });
   });
 }

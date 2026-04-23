@@ -10,7 +10,10 @@ import 'sdb.dart';
 /// for a more robust iOS/Android/Desktop implementation.
 /// For testing, use [sdbFactoryMemory] or [newSdbFactoryMemory] to create a
 /// factory in memory
-abstract class SdbFactory implements SdbFactoryInterface {}
+abstract class SdbFactory implements SdbFactoryInterface {
+  /// Debugging purpose
+  String get name;
+}
 
 /// Mixin helper for default implementation.
 mixin SdbFactoryDefaultMixin implements SdbFactory {
@@ -29,6 +32,9 @@ mixin SdbFactoryDefaultMixin implements SdbFactory {
   Future<void> deleteDatabase(String name) async {
     throw UnsupportedError('deleteDatabase');
   }
+
+  @override
+  String toString() => 'SdbFactory($name)';
 }
 
 /// Options for opening a Sdb database.
@@ -200,11 +206,17 @@ extension SdbFactoryExtension on SdbFactory {
       return await doOpen();
     } catch (e) {
       // ignore: avoid_print
-      print('openOnDowngradeDelete: error ${e.runtimeType} $e');
+      print(
+        'openOnDowngradeDelete(=> $version, $name)}: error ${e.runtimeType} $e, trying opening',
+      );
 
       /// There is no good way to detect a downgrade, try to open without version to check the version
       var db = await openDatabase(name);
       var isDowngrade = version < db.version;
+      // ignore: avoid_print
+      print(
+        'openOnDowngradeDelete(${db.version} => $version)}${isDowngrade ? ' downgrade deleting $name' : ' not expected'}',
+      );
       await db.close();
 
       if (isDowngrade) {

@@ -1,5 +1,7 @@
 import 'package:idb_shim/src/common/common_value.dart';
+import 'package:idb_shim/src/sdb/sdb_index_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
+import 'package:idb_shim/src/sdb/sdb_utils.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 
 import 'sdb.dart';
@@ -311,12 +313,117 @@ extension SdbStoreRefSchemaExtension on SdbStoreRef {
 }
 
 /// Store schema extension on store ref
-extension SdbIndexRefSchemaExtension on SdbIndexRef {
+extension SdbIndexRefSchemaExtension<
+  K extends SdbKey,
+  V extends SdbValue,
+  I extends SdbIndexKey
+>
+    on SdbIndexRef<K, V, I> {
   /// Create store schema, keyPath is String, a `List<String>` or SdbKeyPath
   SdbIndexSchema schema({required Object keyPath, bool? unique}) {
+    return impl.indexSchema(keyPath: keyPath, unique: unique);
+  }
+}
+
+/// Fix sdb key path for the given type
+String sdbKeyPath<I>(String keyPath) {
+  var adapter = getAdapterForType<I>();
+  if (adapter != null) {
+    return '$keyPath.${adapter.mapKey}';
+  } else {
+    return keyPath;
+  }
+}
+
+/// Store schema extension on store ref
+extension SdbIndex1RefSchemaExtension<
+  K extends SdbKey,
+  V extends SdbValue,
+  I extends SdbIndexKey
+>
+    on SdbIndex1Ref<K, V, I> {
+  /// Create store schema, keyPath is String, a `List<String>` or SdbKeyPath
+  SdbIndexSchema schema1(String keyPath, {bool? unique}) {
     return SdbIndexSchema(
       this,
-      sdbKeyPathFromAny(keyPath),
+      SdbKeyPath.single(sdbKeyPath<I>(keyPath)),
+      unique: unique ?? false,
+    );
+  }
+}
+
+/// Store schema extension on store ref
+extension SdbIndex2RefSchemaExtension<
+  K extends SdbKey,
+  V extends SdbValue,
+  I1 extends SdbIndexKey,
+  I2 extends SdbIndexKey
+>
+    on SdbIndex2Ref<K, V, I1, I2> {
+  /// Create store schema, keyPath is String, a `List<String>` or SdbKeyPath
+  SdbIndexSchema schema2(String keyPath1, String keyPath2, {bool? unique}) {
+    return SdbIndexSchema(
+      this,
+      SdbKeyPath.multi([sdbKeyPath<I1>(keyPath1), sdbKeyPath<I2>(keyPath2)]),
+      unique: unique ?? false,
+    );
+  }
+}
+
+/// Store schema extension on store ref
+extension SdbIndex3RefSchemaExtension<
+  K extends SdbKey,
+  V extends SdbValue,
+  I1 extends SdbIndexKey,
+  I2 extends SdbIndexKey,
+  I3 extends SdbIndexKey
+>
+    on SdbIndex3Ref<K, V, I1, I2, I3> {
+  /// Create store schema, keyPath is String, a `List<String>` or SdbKeyPath
+  SdbIndexSchema schema3(
+    String keyPath1,
+    String keyPath2,
+    String keyPath3, {
+    bool? unique,
+  }) {
+    return SdbIndexSchema(
+      this,
+      SdbKeyPath.multi([
+        sdbKeyPath<I1>(keyPath1),
+        sdbKeyPath<I2>(keyPath2),
+        sdbKeyPath<I3>(keyPath3),
+      ]),
+      unique: unique ?? false,
+    );
+  }
+}
+
+/// Store schema extension on store ref
+extension SdbIndex4RefSchemaExtension<
+  K extends SdbKey,
+  V extends SdbValue,
+  I1 extends SdbIndexKey,
+  I2 extends SdbIndexKey,
+  I3 extends SdbIndexKey,
+  I4 extends SdbIndexKey
+>
+    on SdbIndex4Ref<K, V, I1, I2, I3, I4> {
+  /// Create store schema, keyPath is String, a `List<String>` or SdbKeyPath
+  SdbIndexSchema schema4(
+    String keyPath1,
+    String keyPath2,
+    String keyPath3,
+    String keyPath4, {
+    bool? unique,
+  }) {
+    return SdbIndexSchema(
+      this,
+      SdbKeyPath.multi([
+        sdbKeyPath<I1>(keyPath1),
+        sdbKeyPath<I2>(keyPath2),
+        sdbKeyPath<I3>(keyPath3),
+        sdbKeyPath<I4>(keyPath4),
+      ]),
       unique: unique ?? false,
     );
   }

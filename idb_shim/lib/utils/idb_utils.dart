@@ -1,8 +1,8 @@
 library;
 
 import 'package:idb_shim/idb_shim.dart';
+import 'package:idb_shim/src/common/common_cursor.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
-import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/logger/logger_utils.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:idb_shim/src/utils/env_utils.dart';
@@ -182,7 +182,7 @@ Future<List<CursorRow>> idbCursorToList(
   int? limit,
 }) => _autoCursorStreamToList(
   stream,
-  (cwv) => CursorRow(cwv.key, cwv.primaryKey, cloneValue(cwv.value)),
+  (cwv) => IdbCursorRowImpl(cwv),
   offset,
   limit,
 );
@@ -200,7 +200,7 @@ Future<List<CursorRow>> cursorToList(
         return null;
       }
     }
-    final row = CursorRow(cwv.key, cwv.primaryKey, cloneValue(cwv.value));
+    final row = IdbCursorRowImpl(cwv);
     return row;
   }
 

@@ -1,11 +1,11 @@
 library;
 
 import 'package:idb_test/sdb_changes_listener_persistent_test.dart';
+import 'package:idb_test/sdb_format_test.dart';
 import 'package:idb_test/sdb_open_test.dart';
 import 'package:idb_test/sdb_schema_test.dart';
 import 'package:idb_test/sdb_test.dart';
 import 'package:idb_test/sdb_type_test.dart';
-import 'package:idb_test/sdb_utils_test.dart';
 
 import 'cursor_test.dart' as cursor_test;
 import 'database_test.dart' as database_test;
@@ -30,6 +30,16 @@ import 'transaction_test.dart' as transaction_test;
 import 'type_test.dart' as type_test;
 import 'utils_test.dart' as utils_test;
 
+void defineAllSdbTests(TestContext ctx) {
+  idbSimpleSdbTest(ctx);
+  defineIdbSdbChangesListenerTests(ctx);
+  sdbIndexTests(ctx);
+  idbSdbTypeTest(ctx);
+  idbSdbOpenTests(ctx);
+  idbSdbFormatTests(ctx);
+  idbSchemaSdbTest(ctx);
+}
+
 void defineAllTests(TestContext ctx) {
   database_test.defineTests(ctx);
   index_cursor_test.defineTests(ctx);
@@ -46,13 +56,7 @@ void defineAllTests(TestContext ctx) {
   utils_test.defineTests(ctx);
   exception_test.defineTests(ctx);
   type_test.defineTests(ctx);
-  idbSimpleSdbTest(ctx);
-  defineIdbSdbChangesListenerTests(ctx);
-  sdbIndexTests(ctx);
-  idbSdbTypeTest(ctx);
-  idbSdbOpenTests(ctx);
-  idbSdbUtilsTests(ctx);
-  idbSchemaSdbTest(ctx);
+  defineAllSdbTests(ctx);
 
   group('indexeddb_1', () {
     indexeddb_1_test.defineTests(ctx);

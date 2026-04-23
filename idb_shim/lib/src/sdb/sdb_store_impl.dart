@@ -1,7 +1,9 @@
 import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
+import 'package:idb_shim/src/sdb/sdb_cursor.dart';
 import 'package:idb_shim/src/sdb/sdb_key_utils.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
+import 'package:meta/meta.dart';
 
 import 'sdb.dart';
 import 'sdb_client.dart';
@@ -13,6 +15,28 @@ extension SdbStoreRefInternalExtension<K extends SdbKey, V extends SdbValue>
     on SdbStoreRef<K, V> {
   /// Store reference implementation.
   SdbStoreRefImpl<K, V> get impl => this as SdbStoreRefImpl<K, V>;
+}
+
+/// Store reference implementation.
+extension SdbStoreRefDbInternalExtension<K extends SdbKey, V extends SdbValue>
+    on SdbStoreRef<K, V> {
+  /// Do not use yet
+  @internal
+  /// if client is a transaction it must match the transaction mode
+  /// requiring write mode if the transaction is ready only will fail
+  Future<void> handleRecords(
+    SdbClient client, {
+    SdbTransactionMode? mode,
+    SdbFindOptions<K>? options,
+    required SdbCursorRowHandler<K, V> handler,
+  }) async {
+    await impl.handleRecordsImpl(
+      client,
+      mode: mode ?? SdbTransactionMode.readOnly,
+      options: options ?? SdbFindOptions(),
+      handler: handler,
+    );
+  }
 }
 
 /// Store reference implementation.
@@ -265,6 +289,19 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
   );
 
   /// Find records.
+  Future<void> handleRecordsImpl(
+    SdbClient client, {
+    required SdbTransactionMode mode,
+    required SdbFindOptions<K> options,
+    required SdbCursorRowHandler<K, V> handler,
+  }) => clientAutoTxnImpl(
+    client,
+    mode,
+    (txn) =>
+        txnHandleRecordsImpl(txn.rawImpl, options: options, handler: handler),
+  );
+
+  /// Find records.
   Stream<SdbRecordSnapshot<K, V>> streamRecordsImpl(
     SdbClient client, {
 
@@ -296,6 +333,17 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
     required SdbFindOptions<K> options,
   }) {
     return txn.storeImpl(this).findRecords(options: options);
+  }
+
+  /// Find records.
+  Future<void> txnHandleRecordsImpl(
+    SdbTransactionImpl txn, {
+    required SdbCursorRowHandler<K, V> handler,
+    required SdbFindOptions<K> options,
+  }) {
+    return txn
+        .storeImpl(this)
+        .handleRecordsImpl(options: options, handler: handler);
   }
 
   /// Find records.

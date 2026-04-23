@@ -262,6 +262,10 @@ extension SdbIndex1RefExtension<
   I extends SdbIndexKey
 >
     on SdbIndex1Ref<K, V, I> {
+  /// Record reference.
+  SdbIndexRecordRef<K, V, I> record1(I indexKey) =>
+      SdbIndexRecordRefImpl<K, V, I>(impl, indexKey);
+
   /// Lower boundary
   SdbBoundary<I> lowerBoundary(I value, {bool? include = true}) =>
       SdbLowerBoundary(value, include: include);
@@ -279,6 +283,10 @@ extension SdbIndex2RefExtension<
   I2 extends SdbIndexKey
 >
     on SdbIndex2Ref<K, V, I1, I2> {
+  /// Record reference.
+  SdbIndexRecordRef<K, V, (I1, I2)> record2(I1 index1Key, I2 index2Key) =>
+      SdbIndexRecordRefImpl<K, V, (I1, I2)>(impl, (index1Key, index2Key));
+
   /// Lower boundary
   SdbBoundary<(I1, I2)> lowerBoundary(
     I1 value1,

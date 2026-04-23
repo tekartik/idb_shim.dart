@@ -10,6 +10,7 @@ abstract class SdbClientIdbInterface {
 }
 
 /// Internal interface
+/// Shared by SdbDatabase
 abstract class SdbClientInterface {
   /// Handle db or transaction.
   Future<T> clientHandleDbOrTxn<T>(

@@ -1,4 +1,5 @@
 import 'package:idb_shim/idb_shim.dart' as idb;
+import 'package:idb_shim/src/sdb/sdb_factory.dart';
 import 'package:idb_shim/src/utils/env_utils.dart';
 
 import 'sdb.dart';
@@ -11,7 +12,10 @@ import 'sdb_version.dart';
 typedef SdbFactoryImpl = SdbFactoryIdb;
 
 /// Sdb Factory implementation.
-class SdbFactoryIdb implements SdbFactory {
+class SdbFactoryIdb with SdbFactoryDefaultMixin implements SdbFactory {
+  @override
+  String get name => 'idb-${idbFactory.name}';
+
   /// IndexedDB factory.
   final idb.IdbFactory idbFactory;
 

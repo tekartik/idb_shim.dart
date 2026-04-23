@@ -36,6 +36,7 @@ export 'sdb_index_record_snapshot.dart'
         SdbIndexRecordSnapshotListExt,
         SdbIndexRecordKey,
         SdbIndexRecordKeyListExt;
+export 'sdb_internal_migration.dart' show SdbClientMigrationExtension;
 export 'sdb_on_snapshot.dart'
     show
         SdbIndexRecordRefExtensionOnSnapshot,
@@ -81,7 +82,11 @@ export 'sdb_schema.dart'
         SdbStoreSchemaDef,
         SdbIndexSchemaExtension,
         SdbKeyPathExtension,
-        SdbIndexRefSchemaExtension;
+        SdbIndexRefSchemaExtension,
+        SdbIndex1RefSchemaExtension,
+        SdbIndex2RefSchemaExtension,
+        SdbIndex3RefSchemaExtension,
+        SdbIndex4RefSchemaExtension;
 export 'sdb_store.dart'
     show SdbStoreRef, SdbStoreRefExtension, SdbStoreRefListExtension;
 export 'sdb_store_impl.dart' show SdbStoreRefDbExtension;
@@ -109,6 +114,11 @@ SdbFactory sdbFactoryFromIdb(idb.IdbFactory idbFactory) {
 
 /// Memory factory.
 final SdbFactory sdbFactoryMemory = sdbFactoryFromIdb(idb.idbFactoryMemory);
+
+/// Memory factory.
+final SdbFactory sdbFactoryMemoryJdb = sdbFactoryFromIdb(
+  idb.newIdbFactoryMemory(),
+);
 
 /// New memory factory.
 SdbFactory newSdbFactoryMemory() =>
