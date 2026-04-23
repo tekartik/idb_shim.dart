@@ -160,6 +160,9 @@ I idbToSdbSimpleKeyValue<I>(Object? key) {
 
 /// Idb to sdb value
 I? idbToSdbSimpleKeyValueOrNull<I>(Object? value) {
+  if (value == null) {
+    return null;
+  }
   // single timestamp key
   var adapter = getAdapterForType<I>();
   if (adapter != null) {
