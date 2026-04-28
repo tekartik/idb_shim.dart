@@ -1,6 +1,6 @@
-## 2.9.1-1
+## 2.9.1
 
-* sdb: Allow raw and codec support
+* sdb: Allow raw data and codec support
 
 ## 2.9.0
 
