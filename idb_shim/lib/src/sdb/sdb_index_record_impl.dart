@@ -1,5 +1,5 @@
+import 'package:idb_shim/src/sdb/sdb_codec.dart';
 import 'package:idb_shim/src/sdb/sdb_store_impl.dart';
-import 'package:idb_shim/src/sdb/sdb_utils.dart';
 
 import 'sdb_client.dart';
 import 'sdb_index_impl.dart';
@@ -69,7 +69,8 @@ extension SdbIndexRecordRefImplExtension<
   ) async {
     var idbStore = txn.idbTransaction.objectStore(store.name);
     var idbIndex = idbStore.index(index.name);
-    var idbIndexKey = sdbIndexKeyToIdbKey(indexKey);
+    var codec = txn.codec;
+    var idbIndexKey = sdbIndexKeyToIdbKey(codec, indexKey);
     var key = await idbIndex.getKey(idbIndexKey);
     if (key != null) {
       var result = await idbStore.getObject(key);
@@ -77,7 +78,7 @@ extension SdbIndexRecordRefImplExtension<
         return SdbIndexRecordSnapshotImpl<K, V, I>(
           index.impl,
           key as K,
-          idbToSdbValue<V>(result),
+          codec.decode<V>(result),
           indexKey,
         );
       }
@@ -89,7 +90,7 @@ extension SdbIndexRecordRefImplExtension<
   Future<K?> txnGetKeyImpl(SdbTransactionImpl txn) async {
     var idbStore = txn.idbTransaction.objectStore(store.name);
     var idbIndex = idbStore.index(index.name);
-    var idbIndexKey = sdbIndexKeyToIdbKey(indexKey);
+    var idbIndexKey = sdbIndexKeyToIdbKey(txn.codec, indexKey);
     var key = (await idbIndex.getKey(idbIndexKey)) as K?;
     return key;
   }

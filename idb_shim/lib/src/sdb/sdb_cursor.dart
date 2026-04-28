@@ -38,6 +38,9 @@ class SdbOpenCursorImpl<K extends SdbKey, V extends SdbValue>
   /// Filter
   final SdbFilter? filter;
 
+  /// Codec to us
+  final SdbCodec codec;
+
   /// Create an open cursor implementation.
   SdbOpenCursorImpl({
     required this.handler,
@@ -45,6 +48,7 @@ class SdbOpenCursorImpl<K extends SdbKey, V extends SdbValue>
     this.offset,
     this.limit,
     this.filter,
+    required this.codec,
   }) {
     void clean() {
       _subscription?.cancel();
@@ -61,7 +65,11 @@ class SdbOpenCursorImpl<K extends SdbKey, V extends SdbValue>
               idbStream,
               (cursor) async {
                 if (filter != null) {
-                  if (!sdbCursorWithValueMatchesFilter(cursor, filter!)) {
+                  if (!sdbCursorWithValueMatchesFilter(
+                    cursor,
+                    filter!,
+                    codec,
+                  )) {
                     return null;
                   }
                 }

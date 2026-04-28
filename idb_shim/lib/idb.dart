@@ -139,6 +139,11 @@ abstract class ObjectStore {
   Future<Object?> getObject(Object key);
 
   ///
+  /// returns the key selected by the specified key, null if not found.
+  ///
+  Future<Object?> getKey(Object key);
+
+  ///
   /// deletes the object store records by key or key range.
   ///
   Future<void> delete(Object keyOrRange);

@@ -29,6 +29,10 @@ var _openDatabaseOptions = SdbOpenDatabaseOptions(
   version: 1,
   schema: _testOneStoreKeyPathAutoSchema,
 );
+var _openDatabaseOptionsCodecNone = _openDatabaseOptions.copyWith(
+  codec: SdbCodec.none,
+);
+
 void idbSdbFormatTests(TestContext ctx) {
   var factory = sdbFactoryFromIdb(ctx.factory);
   sdbUtilsTests(SdbTestContext(factory));
@@ -71,8 +75,9 @@ void sdbUtilsTests(SdbTestContext ctx) {
     Future dbCheckExportImportLines(
       SdbDatabase db,
       List expectedExportLines,
-      Future Function(SdbDatabase db) check,
-    ) async {
+      Future Function(SdbDatabase db) check, {
+      SdbCodec? codec,
+    }) async {
       // export
       final export = await sdbExportDatabaseLines(db);
       expect(export, expectedExportLines);
@@ -82,6 +87,7 @@ void sdbUtilsTests(SdbTestContext ctx) {
         export,
         sdbFactory,
         importedDbName,
+        codec: codec,
       );
       // The name might be relative...
       expect(importedDb.name.endsWith(importedDbName), isTrue);
@@ -102,13 +108,100 @@ void sdbUtilsTests(SdbTestContext ctx) {
     Future checkAll(
       SdbDatabase db,
       List expectedExport,
-      Future Function(SdbDatabase database) check,
-    ) async {
+      Future Function(SdbDatabase database) check, {
+      SdbCodec? codec,
+    }) async {
       await check(db);
-      await dbCheckExportImportLines(db, expectedExport, check);
+      await dbCheckExportImportLines(db, expectedExport, check, codec: codec);
     }
 
-    group('schema', () {
+    group('schema codec none', () {
+      tearDown(dbTearDown);
+
+      test('empty', () async {
+        await setupDeleteDb();
+        db = await sdbFactory.openDatabase(
+          srcDbName,
+          options: SdbOpenDatabaseOptions(codec: SdbCodec.none),
+        );
+
+        Future dbCheck(SdbDatabase db) async {
+          expect(db.factory, sdbFactory);
+          expect(db.storeNames.isEmpty, true);
+          expect(basename(db.name).endsWith(basename(srcDbName)), isTrue);
+          expect(db.version, 1);
+        }
+
+        await checkAll(db!, [
+          {'sembast_export': 1, 'version': 1},
+          {'store': '_main'},
+          ['version', 1],
+        ], dbCheck);
+      });
+
+      test('one_record', () async {
+        await setupDeleteDb();
+
+        db = await sdbFactory.openDatabase(
+          srcDbName,
+          options: _openDatabaseOptionsCodecNone,
+        );
+
+        await testStore.add(db!, {'test': 2});
+
+        Future dbCheck(SdbDatabase db) async {
+          expect(db.factory, sdbFactory);
+          expect(db.storeNames, [testStoreName]);
+          expect(basename(db.name).endsWith(basename(srcDbName)), isTrue);
+          expect(db.version, 1);
+          await db.inStoreTransaction(testStore, SdbTransactionMode.readOnly, (
+            txn,
+          ) async {
+            var store = txn.store(testStore);
+            expect(store.name, testStoreName);
+            expect(store.keyPath?.keyPath, testNameField);
+            store = txn.txnStore;
+            expect(store.name, testStoreName);
+            expect(store.keyPath?.keyPath, testNameField);
+
+            expect(store.autoIncrement, isTrue);
+
+            expect(store.indexNames, isEmpty);
+          });
+          await db.inStoreTransaction(testStore, SdbTransactionMode.readOnly, (
+            txn,
+          ) {
+            final store = txn.store(testStore);
+            expect(store.name, testStoreName);
+            expect(store.keyPath?.keyPath, testNameField);
+
+            expect(store.indexNames, isEmpty);
+          });
+        }
+
+        final expectedExport = [
+          {'sembast_export': 1, 'version': 1},
+          {'store': '_main'},
+          [
+            'store_test_store',
+            {'name': 'test_store', 'keyPath': 'name', 'autoIncrement': true},
+          ],
+          [
+            'stores',
+            ['test_store'],
+          ],
+          ['version', 1],
+          {'store': 'test_store'},
+          [
+            1,
+            {'test': 2, 'name': 1},
+          ],
+        ];
+
+        await checkAll(db!, expectedExport, dbCheck, codec: SdbCodec.none);
+      });
+    });
+    group('schema code default', () {
       tearDown(dbTearDown);
 
       test('empty', () async {

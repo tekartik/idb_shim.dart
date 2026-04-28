@@ -174,12 +174,14 @@ void defineTests(TestContext ctx) {
         await dbSetUp();
         dbCreateTransaction();
         final value = <Object?, Object?>{};
-        return objectStore.add(value, 123).then((key) {
+        await objectStore.add(value, 123).then((key) {
           expect(key, 123);
           return objectStore.getObject(key).then((readValue) {
             expect(readValue, value);
           });
         });
+        expect(await objectStore.getKey(123), 123);
+        expect(await objectStore.getKey(124), isNull);
       });
 
       // not working in js firefox
@@ -776,6 +778,8 @@ void defineTests(TestContext ctx) {
           'test': 'test_value',
           keyPath: key,
         });
+        expect(await objectStore.getKey(key), key);
+        expect(await objectStore.getKey(124), isNull);
       });
 
       test('add_read_explicit_key', () async {

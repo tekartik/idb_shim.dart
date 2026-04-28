@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
+import 'package:idb_shim/src/sdb/sdb_codec.dart';
 import 'package:idb_shim/src/sdb/sdb_filter_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
-import 'package:idb_shim/src/sdb/sdb_schema.dart';
 import 'package:idb_shim/src/sdb/sdb_utils.dart';
 import 'package:idb_shim/src/utils/cursor_utils.dart';
 import 'package:idb_shim/src/utils/idb_utils.dart';
@@ -43,15 +43,15 @@ class SdbIndex1RefImpl<
     var single = sdbKeySinglePathFromAny(keyPath);
     return SdbIndexSchema(
       this,
-      SdbKeyPath.single(sdbKeyPath<I>(single.keyPath)),
+      SdbKeyPath.single(SdbCodec.defaultCodec.sdbKeyPath<I>(single.keyPath)),
       unique: unique ?? false,
     );
   }
 
-  /// Convert idb key to index key.
+  /// Convert idb key (typically direct in to index key.
   @override
-  I indexIdbToSdbKeyValue(Object key) {
-    return idbToSdbSimpleKeyValue<I>(key);
+  I indexIdbToSdbKeyValue(SdbCodec codec, Object key) {
+    return codec.decodeKeyValue<I>(key);
   }
 
   /// Index on 1 field.
@@ -76,11 +76,11 @@ class SdbIndex2RefImpl<
   }
 
   @override
-  (I1, I2) indexIdbToSdbKeyValue(Object key) {
-    var list = key as List;
+  (I1, I2) indexIdbToSdbKeyValue(SdbCodec codec, Object key) {
+    var list = (key as List).cast<Object>();
     return (
-      idbToSdbSimpleKeyValue<I1>(list[0]),
-      idbToSdbSimpleKeyValue<I2>(list[1]),
+      codec.decodeKeyValue<I1>(list[0]),
+      codec.decodeKeyValue<I2>(list[1]),
     );
   }
 
@@ -90,8 +90,8 @@ class SdbIndex2RefImpl<
     return SdbIndexSchema(
       this,
       SdbKeyPath.multi([
-        sdbKeyPath<I1>(multi.keyPaths[0]),
-        sdbKeyPath<I2>(multi.keyPaths[1]),
+        SdbCodec.defaultCodec.sdbKeyPath<I1>(multi.keyPaths[0]),
+        SdbCodec.defaultCodec.sdbKeyPath<I2>(multi.keyPaths[1]),
       ]),
       unique: unique ?? false,
     );
@@ -121,21 +121,21 @@ class SdbIndex3RefImpl<
     return SdbIndexSchema(
       this,
       SdbKeyPath.multi([
-        sdbKeyPath<I1>(multi.keyPaths[0]),
-        sdbKeyPath<I2>(multi.keyPaths[1]),
-        sdbKeyPath<I3>(multi.keyPaths[2]),
+        SdbCodec.defaultCodec.sdbKeyPath<I1>(multi.keyPaths[0]),
+        SdbCodec.defaultCodec.sdbKeyPath<I2>(multi.keyPaths[1]),
+        SdbCodec.defaultCodec.sdbKeyPath<I3>(multi.keyPaths[2]),
       ]),
       unique: unique ?? false,
     );
   }
 
   @override
-  (I1, I2, I3) indexIdbToSdbKeyValue(Object key) {
-    var list = key as List;
+  (I1, I2, I3) indexIdbToSdbKeyValue(SdbCodec codec, Object key) {
+    var list = (key as List).cast<Object>();
     return (
-      idbToSdbSimpleKeyValue<I1>(list[0]),
-      idbToSdbSimpleKeyValue<I2>(list[1]),
-      idbToSdbSimpleKeyValue<I3>(list[2]),
+      codec.decodeKeyValue<I1>(list[0]),
+      codec.decodeKeyValue<I2>(list[1]),
+      codec.decodeKeyValue<I3>(list[2]),
     );
   }
 }
@@ -165,23 +165,23 @@ class SdbIndex4RefImpl<
     return SdbIndexSchema(
       this,
       SdbKeyPath.multi([
-        sdbKeyPath<I1>(multi.keyPaths[0]),
-        sdbKeyPath<I2>(multi.keyPaths[1]),
-        sdbKeyPath<I3>(multi.keyPaths[2]),
-        sdbKeyPath<I4>(multi.keyPaths[3]),
+        SdbCodec.defaultCodec.sdbKeyPath<I1>(multi.keyPaths[0]),
+        SdbCodec.defaultCodec.sdbKeyPath<I2>(multi.keyPaths[1]),
+        SdbCodec.defaultCodec.sdbKeyPath<I3>(multi.keyPaths[2]),
+        SdbCodec.defaultCodec.sdbKeyPath<I4>(multi.keyPaths[3]),
       ]),
       unique: unique ?? false,
     );
   }
 
   @override
-  (I1, I2, I3, I4) indexIdbToSdbKeyValue(Object key) {
-    var list = key as List;
+  (I1, I2, I3, I4) indexIdbToSdbKeyValue(SdbCodec codec, Object key) {
+    var list = (key as List).cast<Object>();
     return (
-      idbToSdbSimpleKeyValue<I1>(list[0]),
-      idbToSdbSimpleKeyValue<I2>(list[1]),
-      idbToSdbSimpleKeyValue<I3>(list[2]),
-      idbToSdbSimpleKeyValue<I4>(list[3]),
+      codec.decodeKeyValue<I1>(list[0]),
+      codec.decodeKeyValue<I2>(list[1]),
+      codec.decodeKeyValue<I3>(list[2]),
+      codec.decodeKeyValue<I4>(list[3]),
     );
   }
 }
@@ -194,7 +194,7 @@ abstract class SdbIndexRefImpl<
 >
     implements SdbIndexRef<K, V, I> {
   /// Convert idb key to index key.
-  I indexIdbToSdbKeyValue(Object key);
+  I indexIdbToSdbKeyValue(SdbCodec codec, Object key);
 
   /// Index schema to implement
   SdbIndexSchema indexSchema({required Object keyPath, bool? unique});
@@ -257,11 +257,12 @@ abstract class SdbIndexRefImpl<
   }
 
   SdbIndexRecordSnapshotImpl<K, V, I> _sdbIndexRecordSnapshot(
+    SdbCodec codec,
     idb.CursorRow row,
   ) {
     var key = row.primaryKey as K;
-    var indexKey = indexIdbToSdbKeyValue(row.key);
-    var value = idbToSdbValue(row.value) as V;
+    var indexKey = indexIdbToSdbKeyValue(codec, row.key);
+    var value = codec.decode<V>(row.value);
     return SdbIndexRecordSnapshotImpl<K, V, I>(this, key, value, indexKey);
   }
 
@@ -278,7 +279,7 @@ abstract class SdbIndexRefImpl<
     var idbIndex = idbObjectStore.index(name);
     var cursor = idbIndex.openCursor(
       direction: descendingToIdbDirection(descending),
-      range: idbKeyRangeFromBoundaries(boundaries),
+      range: idbKeyRangeFromBoundaries(txn.codec, boundaries),
     );
     return cursor;
   }
@@ -299,10 +300,10 @@ abstract class SdbIndexRefImpl<
           limit: limit,
           offset: offset,
           matcher: filter != null
-              ? (cwv) => sdbCursorWithValueMatchesFilter(cwv, filter)
+              ? (cwv) => sdbCursorWithValueMatchesFilter(cwv, filter, txn.codec)
               : null,
         )
-        .map(_sdbIndexRecordSnapshot);
+        .map((row) => _sdbIndexRecordSnapshot(txn.codec, row));
   }
 
   /// Find records.
@@ -320,11 +321,11 @@ abstract class SdbIndexRefImpl<
       limit: limit,
       offset: offset,
       matcher: filter != null
-          ? (cwv) => sdbCursorWithValueMatchesFilter(cwv, filter)
+          ? (cwv) => sdbCursorWithValueMatchesFilter(cwv, filter, txn.codec)
           : null,
     );
 
-    return rows.map(_sdbIndexRecordSnapshot).toList();
+    return rows.map((row) => _sdbIndexRecordSnapshot(txn.codec, row)).toList();
   }
 
   /// Find record keys.
@@ -345,12 +346,12 @@ abstract class SdbIndexRefImpl<
     var idbIndex = idbObjectStore.index(name);
     var cursor = idbIndex.openKeyCursor(
       direction: descendingToIdbDirection(descending),
-      range: idbKeyRangeFromBoundaries(boundaries),
+      range: idbKeyRangeFromBoundaries(txn.codec, boundaries),
     );
     var rows = await cursor.toKeyRowList(limit: limit, offset: offset);
     return rows.map((row) {
       var key = row.primaryKey as K;
-      var indexKey = indexIdbToSdbKeyValue(row.key);
+      var indexKey = indexIdbToSdbKeyValue(txn.codec, row.key);
       return SdbIndexRecordKeyImpl<K, V, I>(this, key, indexKey);
     }).toList();
   }
@@ -404,7 +405,9 @@ abstract class SdbIndexRefImpl<
       var records = await txnFindRecordsImpl(txn, options: options);
       return records.length;
     }
-    var count = await idbIndex.count(idbKeyRangeFromBoundaries(boundaries));
+    var count = await idbIndex.count(
+      idbKeyRangeFromBoundaries(txn.codec, boundaries),
+    );
     if ((offset ?? -1) > 0) {
       count = max(0, count - offset!);
     }
@@ -457,7 +460,7 @@ abstract class SdbIndexRefImpl<
     var stream = idbIndex.openCursor(
       autoAdvance: true,
       direction: descendingToIdbDirection(descending),
-      range: idbKeyRangeFromBoundaries(boundaries),
+      range: idbKeyRangeFromBoundaries(txn.codec, boundaries),
     );
     await streamWithOffsetAndLimit(stream, offset, limit).listen((cursor) {
       cursor.delete();

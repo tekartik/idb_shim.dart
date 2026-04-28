@@ -69,6 +69,15 @@ class ObjectStoreNative extends ObjectStore {
   }
 
   @override
+  Future<Object?> getKey(Object key) {
+    return catchAsyncNativeError(() {
+      return idbObjectStore
+          .getKey(key.jsifyKey())
+          .dartFutureNullable<Object?>();
+    });
+  }
+
+  @override
   Future clear() {
     return catchAsyncNativeError(() {
       return idbObjectStore.clear().future;

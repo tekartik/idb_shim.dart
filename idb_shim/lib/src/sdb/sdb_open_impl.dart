@@ -137,6 +137,12 @@ class SdbOpenTransactionImpl extends SdbTransactionImpl
   ) {
     return storeImpl<K, V>(store.impl).add(value);
   }
+
+  @override
+  SdbDatabase get db => openDatabase.db;
+
+  @override
+  SdbCodec get codec => db.impl.codec;
 }
 
 /// Open store reference internal extension.

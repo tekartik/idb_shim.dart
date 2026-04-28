@@ -16,6 +16,9 @@ import 'sdb_store_impl.dart';
 extension SdbTransactionInternalExtension on SdbTransaction {
   /// Transaction implementation.
   SdbTransactionImpl get rawImpl => this as SdbTransactionImpl;
+
+  /// Codec used
+  SdbCodec get codec => db.impl.codec;
 }
 
 /// Common transaction impl (between SdbTransactionImpl and SdbOpenTransactionImpl
@@ -45,6 +48,7 @@ class SdbDatabaseTransactionImpl extends SdbTransactionImpl
   final List<String>? extraStoreNames;
 
   /// Database.
+  @override
   final SdbDatabaseImpl db;
 
   /// Mode.
@@ -156,6 +160,9 @@ class SdbDatabaseTransactionImpl extends SdbTransactionImpl
 
   @override
   SdbDatabaseChangesListener get changesListener => db.changesListener;
+
+  @override
+  SdbCodec get codec => db.codec;
 }
 
 /// Transaction mode conversion.

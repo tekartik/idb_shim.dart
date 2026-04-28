@@ -1,4 +1,5 @@
 import 'package:idb_shim/utils/idb_utils.dart' as idb;
+import '../../sdb.dart';
 import 'sdb_filter.dart';
 
 SdbFilterPrv _filterPrv(SdbFilter filter) {
@@ -9,8 +10,9 @@ SdbFilterPrv _filterPrv(SdbFilter filter) {
 bool sdbCursorWithValueMatchesFilter(
   idb.CursorWithValue cwv,
   SdbFilter filter,
+  SdbCodec codec,
 ) {
   var filterPrv = _filterPrv(filter);
-  var filterRecordPrv = SdbFilterRecordSnapshotPrv(cwv);
+  var filterRecordPrv = SdbFilterRecordSnapshotPrv(cwv, codec);
   return filterPrv.matchesRecord(filterRecordPrv);
 }

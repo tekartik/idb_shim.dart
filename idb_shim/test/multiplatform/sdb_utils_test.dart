@@ -8,13 +8,26 @@ import 'package:test/test.dart';
 
 void main() {
   group('boundaries', () {
-    test('idbKeyRangeFromBoundaries', () async {
-      var keyRange = idbKeyRangeFromBoundaries(SdbBoundaries.values(1, 3));
+    test('idbKeyRangeFromBoundaries simple', () async {
+      var codec = SdbCodec.none;
+      var keyRange = idbKeyRangeFromBoundaries(
+        codec,
+        SdbBoundaries.values(1, 3),
+      );
       expect(keyRange.toString(), 'kr[1-3[');
       keyRange = idbKeyRangeFromBoundaries(
+        codec,
         SdbBoundaries.values((1, ''), (3, 'test'), includeLower: false),
       );
       expect(keyRange.toString(), 'kr][1, ]-[3, test][');
+    });
+    test('idbKeyRangeFromBoundaries two', () async {
+      var codec = SdbCodec.defaultCodec;
+      var keyRange = idbKeyRangeFromBoundaries(
+        codec,
+        SdbBoundaries.values((SdbTimestamp(1, 2000), 1), null),
+      );
+      expect(keyRange.toString(), 'kr[[1970-01-01T00:00:01.000002Z, 1]-...');
     });
   });
   test('keypath', () {
@@ -61,24 +74,7 @@ void main() {
       expect(options.filter, isA<SdbFilter>());
       expect(options.boundaries, SdbBoundaries.values(1, 10));
     });
-    test('sdbToIdbValue', () {
-      expect(sdbToIdbValue(1), 1);
-      expect(sdbToIdbValue(SdbTimestamp(1, 2000)), {
-        r'$Timestamp': '1970-01-01T00:00:01.000002Z',
-      });
-      expect(
-        idbToSdbValue<SdbTimestamp>({
-          r'$Timestamp': '1970-01-01T00:00:01.000002Z',
-        }),
-        SdbTimestamp(1, 2000),
-      );
-      expect(
-        idbToSdbValue<SdbTimestamp>({
-          r'@Timestamp': '1970-01-01T00:00:01.000002Z',
-        }),
-        SdbTimestamp(1, 2000),
-      );
-    });
+
     test('sdbIsValidIndexKeyParam', () {
       expect(sdbIsValidIndexKeyParam(DateTime.now()), false);
       expect(sdbIsValidIndexKeyParam(SdbTimestamp.now()), true);

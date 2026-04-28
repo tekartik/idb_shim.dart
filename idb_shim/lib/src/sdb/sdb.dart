@@ -7,6 +7,7 @@ export 'sdb_boundary.dart'
     show SdbBoundaries, SdbBoundary, SdbLowerBoundary, SdbUpperBoundary;
 export 'sdb_client.dart' show SdbClient;
 export 'sdb_client_impl.dart' show SdbClientExtension;
+export 'sdb_codec.dart' show SdbCodec;
 export 'sdb_database.dart' show SdbDatabase, SdbDatabaseExtension;
 export 'sdb_database_impl.dart' show SdbDatabaseIdbExt;
 export 'sdb_factory.dart'

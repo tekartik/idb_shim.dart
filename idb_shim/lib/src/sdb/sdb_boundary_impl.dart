@@ -1,6 +1,6 @@
 import 'package:idb_shim/idb.dart' as idb;
 
-import 'sdb_boundary.dart';
+import '../../sdb.dart';
 import 'sdb_key_utils.dart';
 
 /// Lower or upper boundary implementation.
@@ -98,7 +98,10 @@ class SdbBoundariesImpl<T extends Object>
 }
 
 /// Convert boundaries to idb.KeyRange.
-idb.KeyRange? idbKeyRangeFromBoundaries(SdbBoundaries? boundaries) {
+idb.KeyRange? idbKeyRangeFromBoundaries(
+  SdbCodec codec,
+  SdbBoundaries? boundaries,
+) {
   var lower = boundaries?.lower;
   var upper = boundaries?.upper;
   if (boundaries == null) {
@@ -108,19 +111,19 @@ idb.KeyRange? idbKeyRangeFromBoundaries(SdbBoundaries? boundaries) {
       return null;
     } else {
       return idb.KeyRange.upperBound(
-        sdbIndexKeyToIdbKey(upper.value),
+        sdbIndexKeyToIdbKey(codec, upper.value),
         !upper.include,
       );
     }
   } else if (upper == null) {
     return idb.KeyRange.lowerBound(
-      sdbIndexKeyToIdbKey(lower.value),
+      sdbIndexKeyToIdbKey(codec, lower.value),
       !lower.include,
     );
   } else {
     return idb.KeyRange.bound(
-      sdbIndexKeyToIdbKey(lower.value),
-      sdbIndexKeyToIdbKey(upper.value),
+      sdbIndexKeyToIdbKey(codec, lower.value),
+      sdbIndexKeyToIdbKey(codec, upper.value),
       !lower.include,
       !upper.include,
     );

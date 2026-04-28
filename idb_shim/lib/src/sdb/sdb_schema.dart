@@ -1,7 +1,6 @@
 import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/sdb/sdb_index_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
-import 'package:idb_shim/src/sdb/sdb_utils.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 
 import 'sdb.dart';
@@ -325,16 +324,6 @@ extension SdbIndexRefSchemaExtension<
   }
 }
 
-/// Fix sdb key path for the given type
-String sdbKeyPath<I>(String keyPath) {
-  var adapter = getAdapterForType<I>();
-  if (adapter != null) {
-    return '$keyPath.${adapter.mapKey}';
-  } else {
-    return keyPath;
-  }
-}
-
 /// Store schema extension on store ref
 extension SdbIndex1RefSchemaExtension<
   K extends SdbKey,
@@ -346,7 +335,7 @@ extension SdbIndex1RefSchemaExtension<
   SdbIndexSchema schema1(String keyPath, {bool? unique}) {
     return SdbIndexSchema(
       this,
-      SdbKeyPath.single(sdbKeyPath<I>(keyPath)),
+      SdbKeyPath.single(SdbCodec.defaultCodec.sdbKeyPath<I>(keyPath)),
       unique: unique ?? false,
     );
   }
@@ -364,7 +353,10 @@ extension SdbIndex2RefSchemaExtension<
   SdbIndexSchema schema2(String keyPath1, String keyPath2, {bool? unique}) {
     return SdbIndexSchema(
       this,
-      SdbKeyPath.multi([sdbKeyPath<I1>(keyPath1), sdbKeyPath<I2>(keyPath2)]),
+      SdbKeyPath.multi([
+        SdbCodec.defaultCodec.sdbKeyPath<I1>(keyPath1),
+        SdbCodec.defaultCodec.sdbKeyPath<I2>(keyPath2),
+      ]),
       unique: unique ?? false,
     );
   }
@@ -389,9 +381,9 @@ extension SdbIndex3RefSchemaExtension<
     return SdbIndexSchema(
       this,
       SdbKeyPath.multi([
-        sdbKeyPath<I1>(keyPath1),
-        sdbKeyPath<I2>(keyPath2),
-        sdbKeyPath<I3>(keyPath3),
+        SdbCodec.defaultCodec.sdbKeyPath<I1>(keyPath1),
+        SdbCodec.defaultCodec.sdbKeyPath<I2>(keyPath2),
+        SdbCodec.defaultCodec.sdbKeyPath<I3>(keyPath3),
       ]),
       unique: unique ?? false,
     );
@@ -419,10 +411,10 @@ extension SdbIndex4RefSchemaExtension<
     return SdbIndexSchema(
       this,
       SdbKeyPath.multi([
-        sdbKeyPath<I1>(keyPath1),
-        sdbKeyPath<I2>(keyPath2),
-        sdbKeyPath<I3>(keyPath3),
-        sdbKeyPath<I4>(keyPath4),
+        SdbCodec.defaultCodec.sdbKeyPath<I1>(keyPath1),
+        SdbCodec.defaultCodec.sdbKeyPath<I2>(keyPath2),
+        SdbCodec.defaultCodec.sdbKeyPath<I3>(keyPath3),
+        SdbCodec.defaultCodec.sdbKeyPath<I4>(keyPath4),
       ]),
       unique: unique ?? false,
     );

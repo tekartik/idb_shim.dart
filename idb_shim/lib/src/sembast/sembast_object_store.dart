@@ -353,6 +353,15 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   @override
+  Future<Object?> getKey(Object key) {
+    checkKeyParam(key);
+    return inTransaction(() async {
+      var record = await txnGetSnapshot(key);
+      return record?.key;
+    });
+  }
+
+  @override
   Index index(String name) {
     final indexMeta = meta!.index(name);
     return IndexSembast(this, indexMeta);

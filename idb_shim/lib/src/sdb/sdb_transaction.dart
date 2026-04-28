@@ -1,15 +1,16 @@
-import 'sdb_client.dart';
-import 'sdb_store.dart';
+import 'package:idb_shim/idb_sdb.dart';
+
 import 'sdb_store_impl.dart';
 import 'sdb_transaction_impl.dart';
-import 'sdb_transaction_store.dart';
-import 'sdb_types.dart';
 
 /// SimpleDb transaction.
 abstract class SdbTransaction implements SdbClient {
   /// current mode for accessing the data in the object stores in the scope of
   /// the transaction
   SdbTransactionMode get mode;
+
+  /// the database connection with which this transaction is associated.
+  SdbDatabase get db;
 }
 
 /// SimpleDb transaction extension.

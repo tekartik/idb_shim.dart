@@ -49,15 +49,20 @@ abstract class SdbOpenDatabaseOptions {
   /// manually, this is called after automatic schema change
   SdbOnVersionChangeCallback? get onVersionChange;
 
+  /// Codec used
+  SdbCodec? get codec;
+
   /// Options for opening a Sdb database.
   factory SdbOpenDatabaseOptions({
     int? version,
     SdbDatabaseSchema? schema,
     SdbOnVersionChangeCallback? onVersionChange,
+    SdbCodec? codec,
   }) => _SdbOpenDatabaseOptions(
     version: version,
     schema: schema,
     onVersionChange: onVersionChange,
+    codec: codec,
   );
 
   /// Copy with new values.
@@ -65,6 +70,7 @@ abstract class SdbOpenDatabaseOptions {
     int? version,
     SdbDatabaseSchema? schema,
     SdbOnVersionChangeCallback? onVersionChange,
+    SdbCodec? codec,
   });
 }
 
@@ -75,11 +81,13 @@ class _SdbOpenDatabaseOptions implements SdbOpenDatabaseOptions {
     int? version,
     SdbDatabaseSchema? schema,
     SdbOnVersionChangeCallback? onVersionChange,
+    SdbCodec? codec,
   }) {
     return _SdbOpenDatabaseOptions(
       version: version ?? this.version,
       schema: schema ?? this.schema,
       onVersionChange: onVersionChange ?? this.onVersionChange,
+      codec: codec ?? this.codec,
     );
   }
 
@@ -95,8 +103,17 @@ class _SdbOpenDatabaseOptions implements SdbOpenDatabaseOptions {
   @override
   final SdbOnVersionChangeCallback? onVersionChange;
 
+  /// Codec used, default to SdbCodec.defaultCodec
+  @override
+  final SdbCodec? codec;
+
   /// Options for opening a Sdb database.
-  _SdbOpenDatabaseOptions({this.version, this.schema, this.onVersionChange});
+  _SdbOpenDatabaseOptions({
+    this.version,
+    this.schema,
+    this.onVersionChange,
+    this.codec,
+  });
 }
 
 /// Sdb Factory interface.

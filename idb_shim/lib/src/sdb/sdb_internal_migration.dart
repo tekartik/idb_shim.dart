@@ -1,7 +1,9 @@
 import 'package:collection/collection.dart';
+import 'package:idb_shim/src/sdb/sdb_client.dart';
+import 'package:idb_shim/src/sdb/sdb_codec.dart';
 import 'package:idb_shim/src/sdb/sdb_cursor.dart';
+import 'package:idb_shim/src/sdb/sdb_database_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_store_impl.dart';
-import 'package:idb_shim/src/sdb/sdb_utils.dart';
 import 'package:meta/meta.dart';
 
 import '../../sdb.dart';
@@ -15,9 +17,9 @@ var _version1 = 1;
 var _version2 = 2;
 
 /// Migrate raw value new format
-Object rawValueCompatMigrate1To2(Object value) {
-  var sdbValue = idbToSdbValue<Object>(value);
-  var idbValue = sdbToIdbValue(sdbValue);
+Object rawValueCompatMigrate1To2(SdbCodec codec, Object value) {
+  var sdbValue = codec.decode<Object>(value);
+  var idbValue = codec.encode(sdbValue);
   return idbValue;
 }
 
@@ -45,7 +47,10 @@ extension SdbClientMigrationExtension on SdbClient {
         mode: SdbTransactionMode.readWrite,
         handler: (row) {
           var initial = row.rawValue;
-          var migrated = rawValueCompatMigrate1To2(row.rawValue);
+          var migrated = rawValueCompatMigrate1To2(
+            interface.db.impl.codec,
+            row.rawValue,
+          );
           if (!migrateValuesAreEqual(migrated, initial)) {
             row.update(migrated);
           }

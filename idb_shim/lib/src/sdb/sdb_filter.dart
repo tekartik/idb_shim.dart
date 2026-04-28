@@ -1,12 +1,15 @@
 import 'package:idb_shim/src/logger/logger_utils.dart';
-import 'package:idb_shim/src/sdb/sdb_utils.dart';
 import 'package:idb_shim/utils/idb_utils.dart' as idb;
 import 'package:sembast/sembast.dart' as sembast;
 // ignore: implementation_imports
 import 'package:sembast/src/api/protected/filter.dart' as sembast;
 
+import 'sdb_codec.dart';
+
 /// Private record snapshot for filter
 class SdbFilterRecordSnapshotPrv implements SdbFilterRecordSnapshot {
+  final SdbCodec _codec;
+
   /// Cursor with value
   final idb.CursorWithValue _cwv;
 
@@ -17,7 +20,7 @@ class SdbFilterRecordSnapshotPrv implements SdbFilterRecordSnapshot {
   Object? get indexKey => _cwv.key;
 
   /// Private record snapshot for filter
-  SdbFilterRecordSnapshotPrv(this._cwv);
+  SdbFilterRecordSnapshotPrv(this._cwv, this._codec);
   @override
   Object? operator [](String field) {
     var data = value;
@@ -39,8 +42,9 @@ class SdbFilterRecordSnapshotPrv implements SdbFilterRecordSnapshot {
   @override
   sembast.RecordRef<Object?, Object?> get ref => throw UnimplementedError();
 
+  /// Can be null for cursor without values
   @override
-  late final Object? value = idbToSdbValueOrNull(_cwv.value);
+  late final Object? value = _codec.decode<Object>(_cwv.value);
 
   @override
   String toString() =>

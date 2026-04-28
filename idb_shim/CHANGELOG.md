@@ -1,3 +1,7 @@
+## 2.9.1-1
+
+* sdb: Allow raw and codec support
+
 ## 2.9.0
 
 * sdb: Add support for `SdbTimestamp` in index

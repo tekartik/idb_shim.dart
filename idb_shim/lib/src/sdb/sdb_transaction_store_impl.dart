@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:idb_shim/sdb.dart';
 import 'package:idb_shim/src/sdb/sdb_boundary_impl.dart';
+import 'package:idb_shim/src/sdb/sdb_codec.dart';
 import 'package:idb_shim/src/sdb/sdb_cursor.dart';
 import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_impl.dart';
@@ -116,13 +117,18 @@ mixin SdbTransactionStoreRefImplMixin<K extends SdbKey, V extends SdbValue>
         changesListener?.storeHasChangeListener(store) ?? false;
     SdbRecordSnapshot<K, V>? oldSnapshot;
     SdbRecordSnapshot<K, V>? newSnapshot;
+    var codec = transaction.codec;
     if (hasChangeListener && key != null) {
-      oldSnapshot = await idbObjectStore.getSdbRecordSnapshot(store, key);
+      oldSnapshot = await idbObjectStore.getSdbRecordSnapshot(
+        store,
+        key,
+        codec,
+      );
     }
 
     /// If the record is successfully stored, then a success event is fired on the
     /// returned request object with the result set to the key for the stored
-    var result = await idbObjectStore.put(sdbToIdbValue(value), key);
+    var result = await idbObjectStore.put(codec.encode(value), key);
     if (hasChangeListener) {
       var recordKey = result as K;
       newSnapshot = SdbRecordSnapshotImpl<K, V>(store.record(recordKey), value);
@@ -145,12 +151,13 @@ extension on idb.ObjectStore {
   Future<SdbRecordSnapshotImpl<K, V>?> getSdbRecordSnapshot<
     K extends SdbKey,
     V extends SdbValue
-  >(SdbStoreRef<K, V> store, K key) async {
+  >(SdbStoreRef<K, V> store, K key, SdbCodec codec) async {
     var value = await getObject(key);
+
     if (value != null) {
       return SdbRecordSnapshotImpl<K, V>(
         store.record(key),
-        idbToSdbValue(value) as V,
+        codec.decode<V>(value),
       );
     }
     return null;
@@ -182,7 +189,8 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
 
   /// Get a single record.
   Future<SdbRecordSnapshotImpl<K, V>?> getRecordImpl(K key) {
-    return idbObjectStore.getSdbRecordSnapshot<K, V>(store, key);
+    var codec = transaction.codec;
+    return idbObjectStore.getSdbRecordSnapshot<K, V>(store, key, codec);
   }
 
   /// Check if a record exists.
@@ -204,7 +212,8 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
       return key;
     }
 
-    var idbValue = sdbToIdbValue(value);
+    var codec = transaction.codec;
+    var idbValue = codec.encode(value);
     if (idbObjectStore.keyPath != null) {
       var result = (await idbObjectStore.add(idbValue)) as K;
       return added(result, value);
@@ -235,8 +244,13 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
     var hasChangeListener =
         changesListener?.storeHasChangeListener(store) ?? false;
     SdbRecordSnapshot<K, V>? oldSnapshot;
+    var codec = transaction.codec;
     if (hasChangeListener) {
-      oldSnapshot = await idbObjectStore.getSdbRecordSnapshot(store, key);
+      oldSnapshot = await idbObjectStore.getSdbRecordSnapshot(
+        store,
+        key,
+        codec,
+      );
     }
     await idbObjectStore.delete(key);
     if (hasChangeListener) {
@@ -246,7 +260,8 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
 
   SdbRecordSnapshotImpl<K, V> _sdbRecordSnapshot(idb.CursorRow row) {
     var key = row.primaryKey as K;
-    var value = idbToSdbValue(row.value) as V;
+    var codec = transaction.codec;
+    var value = codec.decode<V>(row.value);
     return SdbRecordSnapshotImpl<K, V>(store.record(key), value);
   }
 
@@ -254,6 +269,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
   Stream<SdbRecordSnapshot<K, V>> streamRecordsImpl({
     required SdbFindOptions<K> options,
   }) {
+    var codec = transaction.codec;
     var filter = options.filter;
     var offset = options.offset;
     var limit = options.limit;
@@ -261,7 +277,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
     var boundaries = options.boundaries;
     var cursor = idbObjectStore.openCursor(
       direction: descendingToIdbDirection(descending),
-      range: idbKeyRangeFromBoundaries(boundaries),
+      range: idbKeyRangeFromBoundaries(codec, boundaries),
     );
 
     return cursor
@@ -269,7 +285,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
           offset: offset,
           limit: limit,
           matcher: filter != null
-              ? (cwv) => sdbCursorWithValueMatchesFilter(cwv, filter)
+              ? (cwv) => sdbCursorWithValueMatchesFilter(cwv, filter, codec)
               : null,
         )
         .map(_sdbRecordSnapshot);
@@ -285,9 +301,10 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
     var limit = options.limit;
     var descending = options.descending;
     var boundaries = options.boundaries;
+    var codec = transaction.codec;
     var cursor = idbObjectStore.openCursor(
       direction: descendingToIdbDirection(descending),
-      range: idbKeyRangeFromBoundaries(boundaries),
+      range: idbKeyRangeFromBoundaries(codec, boundaries),
     );
     var openCursor = SdbOpenCursorImpl<K, V>(
       idbStream: cursor,
@@ -295,6 +312,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
       offset: offset,
       limit: limit,
       filter: filter,
+      codec: codec,
     );
     return openCursor.done;
   }
@@ -308,16 +326,17 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
     var limit = options.limit;
     var descending = options.descending;
     var boundaries = options.boundaries;
+    var codec = transaction.codec;
     var cursor = idbObjectStore.openCursor(
       direction: descendingToIdbDirection(descending),
-      range: idbKeyRangeFromBoundaries(boundaries),
+      range: idbKeyRangeFromBoundaries(codec, boundaries),
     );
 
     var rows = await cursor.toRowList(
       offset: offset,
       limit: limit,
       matcher: filter != null
-          ? (cwv) => sdbCursorWithValueMatchesFilter(cwv, filter)
+          ? (cwv) => sdbCursorWithValueMatchesFilter(cwv, filter, codec)
           : null,
     );
     return rows.map(_sdbRecordSnapshot).toList();
@@ -339,10 +358,11 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
     var offset = options.offset;
     var limit = options.limit;
     var boundaries = options.boundaries;
+    var codec = transaction.codec;
     var cursor = idbObjectStore.openKeyCursor(
       autoAdvance: true,
       direction: descendingToIdbDirection(descending),
-      range: idbKeyRangeFromBoundaries(boundaries),
+      range: idbKeyRangeFromBoundaries(codec, boundaries),
     );
     var rows = await idb.keyCursorToList(cursor, offset, limit);
     return rows.map(_sdbRecordKey).toList();
@@ -354,9 +374,10 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
       // Slow
       return (await findRecordsImpl(options: options)).length;
     }
+    var codec = transaction.codec;
     var boundaries = options.boundaries;
     var count = await idbObjectStore.count(
-      idbKeyRangeFromBoundaries(boundaries),
+      idbKeyRangeFromBoundaries(codec, boundaries),
     );
     var offset = options.offset;
     var limit = options.limit;
@@ -388,7 +409,8 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
     var offset = options.offset;
     var limit = options.limit;
     var descending = options.descending;
-    var keyRange = idbKeyRangeFromBoundaries(boundaries);
+    var codec = transaction.codec;
+    var keyRange = idbKeyRangeFromBoundaries(codec, boundaries);
 
     if (offset == null && limit == null) {
       if (keyRange == null) {

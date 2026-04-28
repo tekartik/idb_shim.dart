@@ -29,6 +29,12 @@ abstract class SdbClientInterface {
     SdbStoreRef<K, V> store,
     V value,
   );
+
+  /// Get the underlying database
+  SdbDatabase get db;
+
+  /// Get the codec
+  SdbCodec get codec;
 }
 
 /// Default mixin

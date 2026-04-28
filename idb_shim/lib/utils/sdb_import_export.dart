@@ -23,9 +23,14 @@ Future<List<Object>> sdbExportDatabaseLines(SdbDatabase db) async {
 Future<SdbDatabase> sdbImportDatabase(
   Object data,
   SdbFactory dstFactory,
-  String dstDbName,
-) async {
+  String dstDbName, {
+  SdbCodec? codec,
+}) async {
   var idbFactory = dstFactory.idbFactory;
   var idbDatabase = await idbImportDatabase(data, idbFactory, dstDbName);
-  return SdbDatabaseImpl.idbDatabase(dstFactory as SdbFactoryImpl, idbDatabase);
+  return SdbDatabaseImpl.idbDatabase(
+    dstFactory as SdbFactoryImpl,
+    idbDatabase,
+    codec: codec,
+  );
 }

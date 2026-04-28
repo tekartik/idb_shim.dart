@@ -174,4 +174,18 @@ class ObjectStoreLogger extends ObjectStore {
 
   @override
   List<String> get indexNames => idbObjectStore.indexNames;
+
+  @override
+  Future<Object?> getKey(Object key) {
+    return idbObjectStore
+        .getKey(key)
+        .then((keyFound) {
+          log('getKey(${_debugSafeKey(key)}: ${_debugSafeValue(keyFound)}');
+          return keyFound;
+        })
+        .onError((err, st) {
+          log('get(${_debugSafeKey(key)}) failed $err');
+          return err;
+        });
+  }
 }

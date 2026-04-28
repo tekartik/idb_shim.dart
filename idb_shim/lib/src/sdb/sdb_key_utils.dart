@@ -1,5 +1,5 @@
 import 'package:idb_shim/idb_sdb.dart';
-import 'package:idb_shim/src/sdb/sdb_utils.dart';
+import 'package:idb_shim/src/sdb/sdb_codec.dart';
 // ignore: implementation_imports
 import 'package:sembast/src/api/protected/key_utils.dart' as key_utils;
 
@@ -7,24 +7,24 @@ import 'package:sembast/src/api/protected/key_utils.dart' as key_utils;
 String generateStringKey() => key_utils.generateStringKey();
 
 /// Convert an indexKey (that can be a record)
-Object sdbIndexKeyToIdbKey(Object indexKey) {
+Object sdbIndexKeyToIdbKey(SdbCodec codec, Object indexKey) {
+  Object encode(Object? object) {
+    return codec.encodeKeyValue(object!);
+  }
+
   if (indexKey is (Object?, Object?, Object?, Object?)) {
     return [
-      sdbToIndexKeyValue(indexKey.$1),
-      sdbToIndexKeyValue(indexKey.$2),
-      sdbToIndexKeyValue(indexKey.$3),
-      sdbToIndexKeyValue(indexKey.$4),
+      encode(indexKey.$1),
+      encode(indexKey.$2),
+      encode(indexKey.$3),
+      encode(indexKey.$4),
     ];
   } else if (indexKey is (Object?, Object?, Object?)) {
-    return [
-      sdbToIndexKeyValue(indexKey.$1),
-      sdbToIndexKeyValue(indexKey.$2),
-      sdbToIndexKeyValue(indexKey.$3),
-    ];
+    return [encode(indexKey.$1), encode(indexKey.$2), encode(indexKey.$3)];
   } else if (indexKey is (Object?, Object?)) {
-    return [sdbToIndexKeyValue(indexKey.$1), sdbToIndexKeyValue(indexKey.$2)];
+    return [encode(indexKey.$1), encode(indexKey.$2)];
   } else {
-    return sdbToIndexKeyValue(indexKey);
+    return encode(indexKey);
   }
 }
 

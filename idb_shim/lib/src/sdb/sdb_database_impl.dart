@@ -49,15 +49,21 @@ class SdbDatabaseImpl
   /// Set after open.
   late idb.Database idbDatabase;
 
+  /// Codec used
+  @override
+  SdbCodec codec;
+
   /// Optional schema.
   SdbDatabaseSchema? get schema => openOptions?.schema;
 
   /// SimpleDb implementation.
-  SdbDatabaseImpl(this.factory, this.name, {required this.openOptions});
+  SdbDatabaseImpl(this.factory, this.name, {required this.openOptions})
+    : codec = openOptions?.codec ?? SdbCodec.defaultCodec;
 
   /// SimpleDb implementation.
-  SdbDatabaseImpl.idbDatabase(this.factory, this.idbDatabase)
-    : openOptions = null {
+  SdbDatabaseImpl.idbDatabase(this.factory, this.idbDatabase, {SdbCodec? codec})
+    : openOptions = null,
+      codec = codec ?? SdbCodec.defaultCodec {
     name = idbDatabase.name;
   }
 
@@ -172,4 +178,7 @@ class SdbDatabaseImpl
   @override
   String toString() =>
       'SdbDatabase(name: ${logTruncateAny(name)}, version: ${logTruncateAny(version)} ${logTruncateAny(idbDatabase.objectStoreNames)})';
+
+  @override
+  SdbDatabase get db => this;
 }

@@ -4,16 +4,18 @@ import 'package:test/test.dart';
 
 void main() {
   group('format', () {
-    test('format', () {});
     group('1 to 2', () {
       test('timestamp migration', () {
+        var codec = SdbCodec.defaultCodec;
         var now = SdbTimestamp.now();
         expect(
-          rawValueCompatMigrate1To2({'@Timestamp': now.toIso8601String()}),
+          rawValueCompatMigrate1To2(codec, {
+            '@Timestamp': now.toIso8601String(),
+          }),
           {r'$Timestamp': now.toIso8601String()},
         );
         expect(
-          rawValueCompatMigrate1To2([
+          rawValueCompatMigrate1To2(codec, [
             [
               {
                 'timestamp': [
@@ -34,20 +36,28 @@ void main() {
         );
         var value = {'@Timestamp': now.toIso8601String()};
         expect(
-          migrateValuesAreEqual(rawValueCompatMigrate1To2(value), value),
+          migrateValuesAreEqual(rawValueCompatMigrate1To2(codec, value), value),
           isFalse,
         );
         value = {r'$Timestamp': now.toIso8601String()};
         expect(
-          migrateValuesAreEqual(rawValueCompatMigrate1To2(value), value),
+          migrateValuesAreEqual(rawValueCompatMigrate1To2(codec, value), value),
           isTrue,
         );
       });
-      test('migration', () {
+      test('migration codec none', () {
+        var codec = SdbCodec.none;
         var value = {'test': 1};
         expect(
-          migrateValuesAreEqual(rawValueCompatMigrate1To2(value), value),
+          migrateValuesAreEqual(rawValueCompatMigrate1To2(codec, value), value),
           isTrue,
+        );
+        var now = SdbTimestamp.now();
+        expect(
+          rawValueCompatMigrate1To2(codec, {
+            '@Timestamp': now.toIso8601String(),
+          }),
+          {r'@Timestamp': now.toIso8601String()},
         );
       });
     });
