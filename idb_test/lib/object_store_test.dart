@@ -535,7 +535,14 @@ void defineTests(TestContext ctx) {
         });
       });
 
-      test('delete empty', () async {
+      test('empty delete dummy', () async {
+        var key = 9456897;
+        await dbSetUp();
+        dbCreateTransaction();
+        await objectStore.delete(key);
+      });
+
+      test('get empty', () async {
         await dbSetUp();
         dbCreateTransaction();
         return objectStore.getObject(1234).then((value) {
