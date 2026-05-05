@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:idb_shim/sdb.dart';
 import 'package:idb_test/sdb_test.dart';
 
@@ -114,6 +115,29 @@ void sdbTypeTest(SdbTestContext ctx) {
       readValue = (await typeModelIndex.findRecord(
         db,
         options: SdbFindOptions(boundaries: SdbBoundaries.key(key)),
+      ))!.value['value'];
+      expect(readValue, value);
+      expect(readValue, isA<T>());
+
+      // Using filter
+      readValue = (await typeModelStore.findRecord(
+        db,
+        options: SdbFindOptions(filter: SdbFilter.equals('value', value)),
+      ))!.value['value'];
+      expect(readValue, value);
+      expect(readValue, isA<T>());
+
+      // Using filter custom
+      readValue = (await typeModelStore.findRecord(
+        db,
+        options: SdbFindOptions(
+          filter: SdbFilter.custom((record) {
+            var recordValue = (record.value as SdbModel)['value'];
+            return (value is List || value is Map)
+                ? const DeepCollectionEquality().equals(recordValue, value)
+                : recordValue == value;
+          }),
+        ),
       ))!.value['value'];
       expect(readValue, value);
       expect(readValue, isA<T>());
@@ -237,6 +261,14 @@ void sdbTypeTest(SdbTestContext ctx) {
       readValue = (await typeModelIndex.findRecord(
         db,
         options: SdbFindOptions(boundaries: SdbBoundaries.key(key)),
+      ))!.value['value'];
+      expect(readValue, value);
+      expect(readValue, isA<T>());
+
+      // Using filter
+      readValue = (await typeModelStore.findRecord(
+        db,
+        options: SdbFindOptions(filter: SdbFilter.equals('value', value)),
       ))!.value['value'];
       expect(readValue, value);
       expect(readValue, isA<T>());
