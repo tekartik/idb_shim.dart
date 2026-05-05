@@ -455,6 +455,117 @@ void simpleSdbTest(SdbTestContext ctx) {
       });
     });
 
+    group('iterate', () {
+      late SdbDatabase db;
+
+      setUp(() async {
+        await factory.deleteDatabase('test_iterate.db');
+        db = await factory.openDatabase(
+          'test_iterate.db',
+          options: SdbOpenDatabaseOptions(
+            version: 1,
+            onVersionChange: (event) {
+              if (event.oldVersion < 1) {
+                event.db.createStore(testStore);
+              }
+            },
+          ),
+        );
+        await db.inStoreTransaction(testStore, SdbTransactionMode.readWrite, (
+          txn,
+        ) async {
+          await txn.add({'value': 1});
+          await txn.add({'value': 2});
+          await txn.add({'value': 3});
+        });
+      });
+
+      tearDown(() async {
+        await db.close();
+      });
+
+      test('all', () async {
+        var count = 0;
+        await testStore.iterate(
+          db,
+          onRow: (row) {
+            count++;
+            return true;
+          },
+        );
+        expect(count, 3);
+      });
+
+      test('stop early', () async {
+        var count = 0;
+        await testStore.iterate(
+          db,
+          onRow: (row) {
+            count++;
+            return count < 2;
+          },
+        );
+        expect(count, 2);
+      });
+
+      test('update', () async {
+        await testStore.iterate(
+          db,
+          mode: SdbTransactionMode.readWrite,
+          onRow: (row) async {
+            await row.update({'value': 99});
+            return true;
+          },
+        );
+        var records = await testStore.findRecords(db);
+        expect(records.map((r) => r.value['value']).toList(), [99, 99, 99]);
+      });
+
+      test('with limit', () async {
+        var count = 0;
+        await testStore.iterate(
+          db,
+          options: SdbFindOptions(limit: 2),
+          onRow: (row) {
+            count++;
+            return true;
+          },
+        );
+        expect(count, 2);
+      });
+
+      test('with boundaries', () async {
+        var count = 0;
+        await testStore.iterate(
+          db,
+          options: SdbFindOptions(
+            boundaries: SdbBoundaries(SdbLowerBoundary(1), SdbUpperBoundary(3)),
+          ),
+          onRow: (row) {
+            count++;
+            return true;
+          },
+        );
+        expect(count, 2);
+      });
+
+      test('in transaction', () async {
+        var count = 0;
+        await db.inStoreTransaction(testStore, SdbTransactionMode.readOnly, (
+          txn,
+        ) async {
+          await testStore.iterate(
+            txn,
+            onRow: (row) {
+              count++;
+              return true;
+            },
+          );
+        });
+        expect(count, 3);
+      });
+    });
+
     test('multi store', () async {
       var dbName = 'test_multi_store.db';
       await factory.deleteDatabase(dbName);

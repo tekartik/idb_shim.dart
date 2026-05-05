@@ -13,6 +13,7 @@ import 'import_idb.dart' as idb;
 import 'sdb.dart';
 import 'sdb_boundary_impl.dart';
 import 'sdb_database_impl.dart';
+import 'sdb_index_cursor.dart';
 import 'sdb_index_record_snapshot_impl.dart';
 import 'sdb_key_utils.dart';
 import 'sdb_store_impl.dart';
@@ -360,7 +361,7 @@ abstract class SdbIndexRefImpl<
   Future<int> countImpl(
     SdbClient client, {
     required SdbFindOptions<I> options,
-  }) => impl.store.clientAutoTxnImpl(
+  }) => clientAutoTxnImpl(
     client,
     SdbTransactionMode.readOnly,
     (txn) => txnCountImpl(txn.rawImpl, options: options),
@@ -369,25 +370,23 @@ abstract class SdbIndexRefImpl<
   /// Count records.
   Future<T> dbAutoTxnImpl<T>(
     SdbDatabase db,
+    SdbTransactionMode mode,
     Future<T> Function(SdbTransaction txn) fn,
   ) {
-    return db.inStoreTransaction(store, SdbTransactionMode.readOnly, (txn) {
-      return fn(txn.rawImpl);
-    });
+    return impl.store.dbAutoTxnImpl(db, mode, fn);
   }
 
   /// Count records.
   Future<T> clientAutoTxnImpl<T>(
     SdbClient client,
+    SdbTransactionMode? mode,
     Future<T> Function(SdbTransaction txn) fn,
   ) {
-    if (client is SdbDatabase) {
-      return dbAutoTxnImpl<T>(client, fn);
-    } else if (client is SdbTransactionImpl) {
-      return fn(client);
-    } else {
-      throw ArgumentError('Invalid client type: ${client.runtimeType}');
-    }
+    return impl.store.clientAutoTxnImpl(
+      client,
+      mode ?? SdbTransactionMode.readOnly,
+      fn,
+    );
   }
 
   /// Find record keys.
@@ -466,4 +465,47 @@ abstract class SdbIndexRefImpl<
       cursor.delete();
     }).asFuture<void>();
   }
+
+  /// Iterate records
+  ///
+  Future<void> txnIterateImpl(
+    SdbTransactionImpl txn, {
+    required SdbFindOptions<K> options,
+    required SdbIndexCursorRowHandler<K, V, I> handler,
+  }) {
+    var filter = options.filter;
+    var offset = options.offset;
+    var limit = options.limit;
+    var descending = options.descending;
+    var boundaries = options.boundaries;
+    var codec = txn.codec;
+    var idbObjectStore = txn.idbTransaction.objectStore(store.name);
+    var idbIndex = idbObjectStore.index(name);
+    // Need full cursor for delete
+    var cursor = idbIndex.openCursor(
+      direction: descendingToIdbDirection(descending),
+      range: idbKeyRangeFromBoundaries(codec, boundaries),
+    );
+    var openCursor = SdbIndexOpenCursorImpl<K, V, I>(
+      idbStream: cursor,
+      handler: handler,
+      offset: offset,
+      limit: limit,
+      filter: filter,
+      codec: codec,
+    );
+    return openCursor.done;
+  }
+
+  /// Count records.
+  Future<void> clientIterateImpl(
+    SdbClient client, {
+    required SdbTransactionMode mode,
+    required SdbFindOptions<K> options,
+    required SdbIndexCursorRowHandler<K, V, I> handler,
+  }) => clientAutoTxnImpl(
+    client,
+    mode,
+    (txn) => txnIterateImpl(txn.rawImpl, options: options, handler: handler),
+  );
 }

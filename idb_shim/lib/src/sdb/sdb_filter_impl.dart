@@ -1,5 +1,5 @@
 import 'package:idb_shim/utils/idb_utils.dart' as idb;
-import '../../sdb.dart';
+import 'sdb.dart';
 import 'sdb_filter.dart';
 
 SdbFilterPrv _filterPrv(SdbFilter filter) {

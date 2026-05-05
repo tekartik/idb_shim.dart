@@ -8,6 +8,7 @@ export 'sdb_boundary.dart'
 export 'sdb_client.dart' show SdbClient;
 export 'sdb_client_impl.dart' show SdbClientExtension;
 export 'sdb_codec.dart' show SdbCodec;
+export 'sdb_cursor.dart' show SdbCursorRow, SdbCursorRowHandler;
 export 'sdb_database.dart' show SdbDatabase, SdbDatabaseExtension;
 export 'sdb_database_impl.dart' show SdbDatabaseIdbExt;
 export 'sdb_factory.dart'
@@ -29,6 +30,7 @@ export 'sdb_index.dart'
         SdbIndex2RefExtension,
         SdbIndex3RefExtension,
         SdbIndex4RefExtension;
+export 'sdb_index_cursor.dart' show SdbIndexCursorRow, SdbIndexCursorRowHandler;
 export 'sdb_index_record.dart'
     show SdbIndexRecordRef, SdbIndexRecordRefExtension;
 export 'sdb_index_record_snapshot.dart'

@@ -2,7 +2,7 @@ import 'package:idb_shim/src/sdb/sdb_utils.dart';
 import 'package:idb_shim/src/utils/env_utils.dart';
 import 'package:sembast/utils/type_adapter.dart';
 
-import '../../sdb/sdb.dart';
+import 'sdb.dart';
 
 /// Optional codec to use when opening a database
 class SdbCodec {

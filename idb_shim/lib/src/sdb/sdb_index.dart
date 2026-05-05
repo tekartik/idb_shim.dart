@@ -1,13 +1,6 @@
-import 'sdb_boundary.dart';
-import 'sdb_client.dart';
-import 'sdb_filter.dart';
-import 'sdb_find_options.dart';
+import 'sdb.dart';
 import 'sdb_index_impl.dart';
-import 'sdb_index_record.dart';
 import 'sdb_index_record_impl.dart';
-import 'sdb_index_record_snapshot.dart';
-import 'sdb_store.dart';
-import 'sdb_types.dart';
 
 /// Index reference.
 abstract interface class SdbIndexRef<
@@ -253,6 +246,25 @@ extension SdbIndexRefExtension<
       descending: descending,
     ),
   );
+
+  /// if client is a transaction it must match the transaction mode
+  /// requiring write mode if the transaction is ready only will fail
+  /// return true to continue iteration.
+  ///
+  /// in [onRow] Like for transaction, no lengthy operation but access to database.
+  Future<void> iterate(
+    SdbClient client, {
+    SdbTransactionMode? mode,
+    SdbFindOptions<K>? options,
+    required SdbIndexCursorRowHandler<K, V, I> onRow,
+  }) async {
+    await impl.clientIterateImpl(
+      client,
+      mode: mode ?? SdbTransactionMode.readOnly,
+      options: options ?? SdbFindOptions(),
+      handler: onRow,
+    );
+  }
 }
 
 /// Extension on index on 1 field.

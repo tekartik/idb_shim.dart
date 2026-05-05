@@ -292,7 +292,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
   }
 
   /// Handle records
-  Future<void> handleRecordsImpl({
+  Future<void> iterateImpl({
     required SdbFindOptions<K> options,
     required SdbCursorRowHandler<K, V> handler,
   }) {

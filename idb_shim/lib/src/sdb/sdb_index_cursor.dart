@@ -1,5 +1,6 @@
 import 'package:idb_shim/src/common/common_cursor.dart';
 import 'package:idb_shim/src/logger/logger_utils.dart';
+import 'package:idb_shim/src/sdb/sdb_cursor.dart';
 import 'package:idb_shim/src/sdb/sdb_filter_impl.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 
@@ -7,64 +8,32 @@ import 'import_idb.dart' as idb;
 import 'sdb.dart';
 
 /// Cursor row handler. Return true to continue, false to stop
-typedef SdbCursorRowHandler<K extends SdbKey, V extends SdbValue> =
-    FutureOr<bool> Function(SdbCursorRow<K, V> row);
+typedef SdbIndexCursorRowHandler<
+  K extends SdbKey,
+  V extends SdbValue,
+  I extends SdbIndexKey
+> = FutureOr<bool> Function(SdbIndexCursorRow<K, V, I> row);
 
 /// SimpleDb cursor.
-abstract class SdbCursor<K extends SdbKey, V extends SdbValue> {}
-
-/// Base for SdbOpenCursorImpl and SdbIndexOpenCursorImpl
-abstract class SdbRawOpenBursorBase {
-  /// Limit
-  final int? offset;
-
-  /// Offset
-  final int? limit;
-
-  /// Filter
-  final SdbFilter? filter;
-
-  /// The underlying idb stream.
-  final Stream<idb.IdbCursorWithValue> idbStream;
-
-  /// Codec to us
-  final SdbCodec codec;
-
-  /// Cursor subscription
-  StreamSubscription? cursorSubscription;
-
-  /// Done completer
-  final doneCompleter = Completer<void>.sync();
-
-  /// Done future
-  late final done = doneCompleter.future;
-
-  void clean() {
-    cursorSubscription?.cancel();
-    if (!doneCompleter.isCompleted) {
-      doneCompleter.complete();
-    }
-  }
-
-  /// Create an open cursor implementation.
-  SdbRawOpenBursorBase({
-    required this.offset,
-    required this.limit,
-    required this.idbStream,
-    required this.codec,
-    required this.filter,
-  });
-}
+abstract class SdbIndexCursor<
+  K extends SdbKey,
+  V extends SdbValue,
+  I extends SdbIndexKey
+> {}
 
 /// SimpleDb open cursor implementation.
-class SdbOpenCursorImpl<K extends SdbKey, V extends SdbValue>
+class SdbIndexOpenCursorImpl<
+  K extends SdbKey,
+  V extends SdbValue,
+  I extends SdbIndexKey
+>
     extends SdbRawOpenBursorBase
-    implements SdbCursor<K, V> {
+    implements SdbIndexCursor<K, V, I> {
   /// The handler for each row.
-  final SdbCursorRowHandler<K, V> handler;
+  final SdbIndexCursorRowHandler<K, V, I> handler;
 
   /// Create an open cursor implementation.
-  SdbOpenCursorImpl({
+  SdbIndexOpenCursorImpl({
     required this.handler,
     required super.idbStream,
     super.offset,
@@ -75,7 +44,7 @@ class SdbOpenCursorImpl<K extends SdbKey, V extends SdbValue>
     cursorSubscription =
         cursorApplyFilterLimitOffset<
               idb.IdbCursorWithValue,
-              SdbCursorRow<K, V>
+              SdbIndexCursorRow<K, V, I>
             >(
               idbStream,
               (cursor) async {
@@ -88,7 +57,7 @@ class SdbOpenCursorImpl<K extends SdbKey, V extends SdbValue>
                     return null;
                   }
                 }
-                final row = SdbCursorRowImpl<K, V>(cwv: cursor);
+                final row = SdbIndexCursorRowImpl<K, V, I>(cwv: cursor);
                 var result = handler(row);
                 bool doContinue;
                 if (result is Future) {
@@ -117,15 +86,24 @@ class SdbOpenCursorImpl<K extends SdbKey, V extends SdbValue>
 }
 
 /// SimpleDb cursor row.
-abstract class SdbCursorRow<K extends SdbKey, V extends SdbValue> {
+abstract class SdbIndexCursorRow<
+  K extends SdbKey,
+  V extends SdbValue,
+  I extends SdbIndexKey
+> {
   /// Update the data at the current cursor position.
   Future<void> update(Object data);
 }
 
 /// Internal extension
-extension SdbCursorRowInternalExt<K extends SdbKey, V extends SdbValue>
-    on SdbCursorRow<K, V> {
-  SdbCursorRowImpl<K, V> get _impl => this as SdbCursorRowImpl<K, V>;
+extension SdbIndexCursorRowInternalExt<
+  K extends SdbKey,
+  V extends SdbValue,
+  I extends SdbIndexKey
+>
+    on SdbIndexCursorRow<K, V, I> {
+  SdbIndexCursorRowImpl<K, V, I> get _impl =>
+      this as SdbIndexCursorRowImpl<K, V, I>;
 
   /// Raw idb value
   Object get rawValue => _impl.cwv.value;
@@ -135,8 +113,12 @@ extension SdbCursorRowInternalExt<K extends SdbKey, V extends SdbValue>
 }
 
 /// SimpleDb cursor row internal implementation.
-class SdbCursorRowImpl<K extends SdbKey, V extends SdbValue>
-    implements SdbCursorRow<K, V> {
+class SdbIndexCursorRowImpl<
+  K extends SdbKey,
+  V extends SdbValue,
+  I extends SdbIndexKey
+>
+    implements SdbIndexCursorRow<K, V, I> {
   /// The underlying idb cursor with value.
   final idb.IdbCursorWithValue cwv;
 
@@ -146,7 +128,7 @@ class SdbCursorRowImpl<K extends SdbKey, V extends SdbValue>
   }
 
   /// Create a cursor row implementation.
-  SdbCursorRowImpl({required this.cwv});
+  SdbIndexCursorRowImpl({required this.cwv});
 
   @override
   String toString() => 'SdbCursorRow(${logTruncateAny(cwv.key)})';

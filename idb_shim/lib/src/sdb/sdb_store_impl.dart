@@ -1,6 +1,5 @@
 import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
-import 'package:idb_shim/src/sdb/sdb_cursor.dart';
 import 'package:idb_shim/src/sdb/sdb_key_utils.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:meta/meta.dart';
@@ -22,6 +21,7 @@ extension SdbStoreRefDbInternalExtension<K extends SdbKey, V extends SdbValue>
     on SdbStoreRef<K, V> {
   /// Do not use yet
   @internal
+  @Deprecated('Use iterate instead')
   /// if client is a transaction it must match the transaction mode
   /// requiring write mode if the transaction is ready only will fail
   Future<void> handleRecords(
@@ -30,7 +30,7 @@ extension SdbStoreRefDbInternalExtension<K extends SdbKey, V extends SdbValue>
     SdbFindOptions<K>? options,
     required SdbCursorRowHandler<K, V> handler,
   }) async {
-    await impl.handleRecordsImpl(
+    await impl.clientIterateImpl(
       client,
       mode: mode ?? SdbTransactionMode.readOnly,
       options: options ?? SdbFindOptions(),
@@ -49,6 +49,25 @@ extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
 
   /// Put a single record (when using inline keys)
   Future<K> put(SdbClient client, V value) => impl.putImpl(client, value);
+
+  /// if client is a transaction it must match the transaction mode
+  /// requiring write mode if the transaction is ready only will fail
+  /// return true to continue iteration.
+  ///
+  /// in [onRow] Like for transaction, no lengthy operation but access to database.
+  Future<void> iterate(
+    SdbClient client, {
+    SdbTransactionMode? mode,
+    SdbFindOptions<K>? options,
+    required SdbCursorRowHandler<K, V> onRow,
+  }) async {
+    await impl.clientIterateImpl(
+      client,
+      mode: mode ?? SdbTransactionMode.readOnly,
+      options: options ?? SdbFindOptions(),
+      handler: onRow,
+    );
+  }
 
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> findRecords(
@@ -289,7 +308,7 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
   );
 
   /// Find records.
-  Future<void> handleRecordsImpl(
+  Future<void> clientIterateImpl(
     SdbClient client, {
     required SdbTransactionMode mode,
     required SdbFindOptions<K> options,
@@ -297,8 +316,7 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
   }) => clientAutoTxnImpl(
     client,
     mode,
-    (txn) =>
-        txnHandleRecordsImpl(txn.rawImpl, options: options, handler: handler),
+    (txn) => txnIterateImpl(txn.rawImpl, options: options, handler: handler),
   );
 
   /// Find records.
@@ -336,14 +354,12 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
   }
 
   /// Find records.
-  Future<void> txnHandleRecordsImpl(
+  Future<void> txnIterateImpl(
     SdbTransactionImpl txn, {
     required SdbCursorRowHandler<K, V> handler,
     required SdbFindOptions<K> options,
   }) {
-    return txn
-        .storeImpl(this)
-        .handleRecordsImpl(options: options, handler: handler);
+    return txn.storeImpl(this).iterateImpl(options: options, handler: handler);
   }
 
   /// Find records.
@@ -429,7 +445,16 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
     });
   }
 
-  /// Count records.
+  /// Auto transaction
+  Future<T> dbAutoTxnImpl<T>(
+    SdbDatabase db,
+    SdbTransactionMode mode,
+    Future<T> Function(SdbTransaction txn) fn,
+  ) {
+    return inTransactionImpl<T>(db, mode, fn);
+  }
+
+  /// Auto transaction
   Future<T> clientAutoTxnImpl<T>(
     SdbClient client,
     SdbTransactionMode mode,

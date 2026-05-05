@@ -249,6 +249,103 @@ void sdbIndexTests(TestContext ctx) {
       }, skip: true);
     });
 
+    group('iterate', () {
+      late SdbDatabase db;
+
+      setUp(() async {
+        await factory.deleteDatabase('test_index_iterate.db');
+        db = await factory.openDatabase(
+          'test_index_iterate.db',
+          options: SdbOpenDatabaseOptions(
+            version: 1,
+            onVersionChange: (event) {
+              if (event.oldVersion < 1) {
+                var store = event.db.createStore(testStore);
+                store.createIndex(testIndex, 'test');
+              }
+            },
+          ),
+        );
+        await db.inStoreTransaction(testStore, SdbTransactionMode.readWrite, (
+          txn,
+        ) async {
+          await txn.add({'test': 10});
+          await txn.add({'test': 20});
+          await txn.add({'test': 30});
+        });
+      });
+
+      tearDown(() async {
+        await db.close();
+      });
+
+      test('all', () async {
+        var count = 0;
+        await testIndex.iterate(
+          db,
+          onRow: (row) {
+            count++;
+            return true;
+          },
+        );
+        expect(count, 3);
+      });
+
+      test('stop early', () async {
+        var count = 0;
+        await testIndex.iterate(
+          db,
+          onRow: (row) {
+            count++;
+            return count < 2;
+          },
+        );
+        expect(count, 2);
+      });
+
+      test('update', () async {
+        await testIndex.iterate(
+          db,
+          mode: SdbTransactionMode.readWrite,
+          onRow: (row) async {
+            await row.update({'test': 99});
+            return true;
+          },
+        );
+        var records = await testStore.findRecords(db);
+        expect(records.map((r) => r.value['test']).toList(), [99, 99, 99]);
+      });
+
+      test('with limit', () async {
+        var count = 0;
+        await testIndex.iterate(
+          db,
+          options: SdbFindOptions(limit: 2),
+          onRow: (row) {
+            count++;
+            return true;
+          },
+        );
+        expect(count, 2);
+      });
+
+      test('in transaction', () async {
+        var count = 0;
+        await db.inStoreTransaction(testStore, SdbTransactionMode.readOnly, (
+          txn,
+        ) async {
+          await testIndex.iterate(
+            txn,
+            onRow: (row) {
+              count++;
+              return true;
+            },
+          );
+        });
+        expect(count, 3);
+      });
+    });
+
     test('schema', () async {
       var dbName = 'test_schema.db';
       await factory.deleteDatabase(dbName);

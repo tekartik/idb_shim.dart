@@ -1,6 +1,6 @@
 import 'package:idb_shim/idb.dart' as idb;
 
-import '../../sdb.dart';
+import 'sdb.dart';
 import 'sdb_key_utils.dart';
 
 /// Lower or upper boundary implementation.

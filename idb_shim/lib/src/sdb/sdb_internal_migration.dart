@@ -3,10 +3,9 @@ import 'package:idb_shim/src/sdb/sdb_client.dart';
 import 'package:idb_shim/src/sdb/sdb_codec.dart';
 import 'package:idb_shim/src/sdb/sdb_cursor.dart';
 import 'package:idb_shim/src/sdb/sdb_database_impl.dart';
-import 'package:idb_shim/src/sdb/sdb_store_impl.dart';
 import 'package:meta/meta.dart';
 
-import '../../sdb.dart';
+import 'sdb.dart';
 
 /// version1: Initial format with Timestamp and Blob encoding
 // ignore: unused_element
@@ -42,10 +41,10 @@ extension SdbClientMigrationExtension on SdbClient {
     stores ??= List.of(storeNames);
     for (final storeName in stores) {
       var store = SdbStoreRef<Object, Object>(storeName);
-      await store.handleRecords(
+      await store.iterate(
         this,
         mode: SdbTransactionMode.readWrite,
-        handler: (row) {
+        onRow: (row) {
           var initial = row.rawValue;
           var migrated = rawValueCompatMigrate1To2(
             interface.db.impl.codec,

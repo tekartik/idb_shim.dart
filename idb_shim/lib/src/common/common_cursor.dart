@@ -1,9 +1,8 @@
+import 'package:idb_shim/idb_client.dart' as idb;
 import 'package:idb_shim/src/logger/logger_utils.dart';
 import 'package:idb_shim/src/sdb/sdb_utils.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:idb_shim/utils/idb_cursor_utils.dart' as idb;
-
-import '../../idb_client.dart' as idb;
 
 /// Internal implementation of [idb.CursorRow].
 class IdbCursorRowImpl implements idb.CursorRow {
