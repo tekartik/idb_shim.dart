@@ -39,6 +39,7 @@ abstract class SdbRawOpenBursorBase {
   /// Done future
   late final done = doneCompleter.future;
 
+  /// Close the subscription
   void clean() {
     cursorSubscription?.cancel();
     if (!doneCompleter.isCompleted) {

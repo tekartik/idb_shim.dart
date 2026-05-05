@@ -275,6 +275,10 @@ var filteredBooks = await bookSerialIndex.findRecords(
 );
 ```
 
+### Iterating over records
+
+For cursor-based iteration — useful for large datasets or in-place updates — see [sdb_iterate.md](sdb_iterate.md).
+
 ### Supported types
 
 - All idb types:

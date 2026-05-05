@@ -1,3 +1,7 @@
+## 2.9.2-1
+
+* adb: Add `iterate` on Store and Cursor.
+
 ## 2.9.1
 
 * sdb: Allow raw data and codec support
