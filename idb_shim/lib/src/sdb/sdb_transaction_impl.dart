@@ -11,6 +11,7 @@ import 'sdb.dart';
 import 'sdb_changes_listener.dart';
 import 'sdb_database_impl.dart';
 import 'sdb_store_impl.dart';
+import 'sdb_web_notification.dart';
 
 /// SimpleDb transaction internal extension.
 extension SdbTransactionInternalExtension on SdbTransaction {
@@ -31,6 +32,9 @@ abstract class SdbTransactionImpl implements SdbTransaction {
 
   /// Change listener, null during open
   SdbDatabaseChangesListener? get changesListener;
+
+  /// Called when a write is performed on [storeName]. No-op by default.
+  void noteWriteToStore(String storeName) {}
 
   /// Store implementation.
   SdbTransactionStoreRefImpl<K, V>
@@ -72,6 +76,14 @@ class SdbDatabaseTransactionImpl extends SdbTransactionImpl
   /// Changes during transaction, only if listened to.
   @override
   SdbDatabaseTransactionChanges? changes;
+
+  /// Store names that were actually written to during this transaction.
+  Set<String>? _writtenStoreNames;
+
+  @override
+  void noteWriteToStore(String storeName) {
+    (_writtenStoreNames ??= {}).add(storeName);
+  }
 
   @override
   Future<T> clientHandleDbOrTxn<T>(
@@ -154,6 +166,10 @@ class SdbDatabaseTransactionImpl extends SdbTransactionImpl
     } finally {
       // wait for completion
       await completed;
+    }
+    var writtenNames = _writtenStoreNames;
+    if (writtenNames != null && writtenNames.isNotEmpty) {
+      sdbBroadcastStoreChanges(db.name, writtenNames.toList());
     }
     return result;
   }

@@ -13,6 +13,7 @@ import 'sdb_database.dart';
 import 'sdb_factory_impl.dart';
 import 'sdb_store_impl.dart';
 import 'sdb_transaction_store_impl.dart';
+import 'sdb_web_notification.dart';
 
 /// SimpleDb database internal extension.
 extension SdbDatabaseInternalExtension on SdbDatabase {
@@ -72,6 +73,32 @@ class SdbDatabaseImpl
 
   /// Store change listeners
   final changesListener = SdbDatabaseChangesListener();
+
+  /// Simulate a cross-tab notification for [storeNames]. For testing only.
+  @visibleForTesting
+  void simulateExternalStoreChanges(List<String> storeNames) {
+    _externalChangesController?.add(storeNames);
+  }
+
+  StreamController<List<String>>? _externalChangesController;
+  StreamSubscription<(String, List<String>)>? _externalChangesSubscription;
+
+  /// Stream of store names changed by another tab. Lazily starts the
+  /// BroadcastChannel listener when first subscribed to.
+  Stream<List<String>> get externalStoreChanges {
+    _externalChangesController ??= StreamController<List<String>>.broadcast(
+      onListen: () {
+        _externalChangesSubscription = sdbExternalStoreChangesStream
+            .where((event) => event.$1 == name)
+            .listen((event) => _externalChangesController?.add(event.$2));
+      },
+      onCancel: () {
+        _externalChangesSubscription?.cancel();
+        _externalChangesSubscription = null;
+      },
+    );
+    return _externalChangesController!.stream;
+  }
 
   /// Transaction.
   @override

@@ -1,17 +1,19 @@
 import 'dart:async';
 
 import 'package:idb_shim/sdb.dart';
+import 'package:idb_shim/src/sdb/sdb_database_impl.dart';
 
 /// Snapshots extension on store.
 extension SdbStoreRefExtensionOnSnapshots<K extends SdbKey, V extends SdbValue>
     on SdbStoreRef<K, V> {
-  /// Reads the data and set a listener to redo the query on changes.
-  /// It only tracks changes in the current isolate/tab.
+  /// Reads the data and set a listener to redo the query on changes,
+  /// including changes made in other browser tabs.
   Stream<List<SdbRecordSnapshot<K, V>>> onSnapshots(
     SdbDatabase db, {
     SdbFindOptions<K>? options,
   }) {
     late StreamController<List<SdbRecordSnapshot<K, V>>> controller;
+    StreamSubscription<List<String>>? externalSub;
     void addSnapshots() {
       findRecords(db, options: options).then((snapshots) {
         if (!controller.isClosed) {
@@ -31,7 +33,12 @@ extension SdbStoreRefExtensionOnSnapshots<K extends SdbKey, V extends SdbValue>
       onListen: () {
         addSnapshots();
         addOnChangesListener(db, onChange);
+        externalSub = db.impl.externalStoreChanges
+            .where((storeNames) => storeNames.contains(name))
+            .listen((_) => addSnapshots());
         controller.onCancel = () {
+          externalSub?.cancel();
+          externalSub = null;
           removeOnChangesListener(db, onChange);
         };
       },
@@ -47,13 +54,14 @@ extension SdbIndexRefExtensionOnSnapshots<
   IK extends SdbIndexKey
 >
     on SdbIndexRef<K, V, IK> {
-  /// Reads the data and set a listener to redo the query on changes.
-  /// It only tracks changes in the current isolate/tab.
+  /// Reads the data and set a listener to redo the query on changes,
+  /// including changes made in other browser tabs.
   Stream<List<SdbIndexRecordSnapshot<K, V, IK>>> onSnapshots(
     SdbDatabase db, {
     SdbFindOptions<IK>? options,
   }) {
     late StreamController<List<SdbIndexRecordSnapshot<K, V, IK>>> controller;
+    StreamSubscription<List<String>>? externalSub;
     void addSnapshots() {
       findRecords(db, options: options).then((snapshots) {
         if (!controller.isClosed) {
@@ -73,7 +81,12 @@ extension SdbIndexRefExtensionOnSnapshots<
       onListen: () {
         addSnapshots();
         store.addOnChangesListener(db, onChange);
+        externalSub = db.impl.externalStoreChanges
+            .where((storeNames) => storeNames.contains(store.name))
+            .listen((_) => addSnapshots());
         controller.onCancel = () {
+          externalSub?.cancel();
+          externalSub = null;
           store.removeOnChangesListener(db, onChange);
         };
       },
@@ -85,10 +98,11 @@ extension SdbIndexRefExtensionOnSnapshots<
 /// Snapshot extension on record.
 extension SdbRecordRefExtensionOnSnapshot<K extends SdbKey, V extends SdbValue>
     on SdbRecordRef<K, V> {
-  /// Reads the data and set a listener to redo the query on changes.
-  /// It only tracks changes in the current isolate/tab.
+  /// Reads the data and set a listener to redo the query on changes,
+  /// including changes made in other browser tabs.
   Stream<SdbRecordSnapshot<K, V>?> onSnapshot(SdbDatabase db) {
     late StreamController<SdbRecordSnapshot<K, V>?> controller;
+    StreamSubscription<List<String>>? externalSub;
     void addSnapshot() {
       get(db).then((snapshot) {
         if (!controller.isClosed) {
@@ -112,7 +126,14 @@ extension SdbRecordRefExtensionOnSnapshot<K extends SdbKey, V extends SdbValue>
       onListen: () {
         addSnapshot();
         store.addOnChangesListener(db, onChange);
+        // Cross-tab: re-fetch the record when any change in this store arrives
+        // from another tab. We cannot filter by key at this level.
+        externalSub = db.impl.externalStoreChanges
+            .where((storeNames) => storeNames.contains(store.name))
+            .listen((_) => addSnapshot());
         controller.onCancel = () {
+          externalSub?.cancel();
+          externalSub = null;
           store.removeOnChangesListener(db, onChange);
         };
       },
@@ -128,10 +149,11 @@ extension SdbIndexRecordRefExtensionOnSnapshot<
   IK extends SdbIndexKey
 >
     on SdbIndexRecordRef<K, V, IK> {
-  /// Reads the data and set a listener to redo the query on changes.
-  /// It only tracks changes in the current isolate/tab.
+  /// Reads the data and set a listener to redo the query on changes,
+  /// including changes made in other browser tabs.
   Stream<SdbIndexRecordSnapshot<K, V, IK>?> onSnapshot(SdbDatabase db) {
     late StreamController<SdbIndexRecordSnapshot<K, V, IK>?> controller;
+    StreamSubscription<List<String>>? externalSub;
     void addSnapshot() {
       get(db).then((snapshot) {
         if (!controller.isClosed) {
@@ -151,7 +173,12 @@ extension SdbIndexRecordRefExtensionOnSnapshot<
       onListen: () {
         addSnapshot();
         index.store.addOnChangesListener(db, onChange);
+        externalSub = db.impl.externalStoreChanges
+            .where((storeNames) => storeNames.contains(index.store.name))
+            .listen((_) => addSnapshot());
         controller.onCancel = () {
+          externalSub?.cancel();
+          externalSub = null;
           index.store.removeOnChangesListener(db, onChange);
         };
       },
@@ -159,13 +186,14 @@ extension SdbIndexRecordRefExtensionOnSnapshot<
     return controller.stream;
   }
 
-  /// Reads the data and set a listener to redo the query on changes.
-  /// It only tracks changes in the current isolate/tab.
+  /// Reads the data and set a listener to redo the query on changes,
+  /// including changes made in other browser tabs.
   Stream<List<SdbIndexRecordSnapshot<K, V, IK>>> onSnapshots(
     SdbDatabase db, {
     SdbFindOptions<IK>? options,
   }) {
     late StreamController<List<SdbIndexRecordSnapshot<K, V, IK>>> controller;
+    StreamSubscription<List<String>>? externalSub;
     void addSnapshots() {
       findRecords(db, options: options).then((snapshots) {
         if (!controller.isClosed) {
@@ -185,7 +213,12 @@ extension SdbIndexRecordRefExtensionOnSnapshot<
       onListen: () {
         addSnapshots();
         store.addOnChangesListener(db, onChange);
+        externalSub = db.impl.externalStoreChanges
+            .where((storeNames) => storeNames.contains(store.name))
+            .listen((_) => addSnapshots());
         controller.onCancel = () {
+          externalSub?.cancel();
+          externalSub = null;
           store.removeOnChangesListener(db, onChange);
         };
       },

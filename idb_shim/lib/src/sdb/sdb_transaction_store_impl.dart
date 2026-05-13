@@ -129,6 +129,7 @@ mixin SdbTransactionStoreRefImplMixin<K extends SdbKey, V extends SdbValue>
     /// If the record is successfully stored, then a success event is fired on the
     /// returned request object with the result set to the key for the stored
     var result = await idbObjectStore.put(codec.encode(value), key);
+    transaction.rawImpl.noteWriteToStore(store.name);
     if (hasChangeListener) {
       var recordKey = result as K;
       newSnapshot = SdbRecordSnapshotImpl<K, V>(store.record(recordKey), value);
@@ -205,6 +206,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
         transaction.changesListener?.storeHasChangeListener(store) ?? false;
 
     K added(K key, V value) {
+      transaction.rawImpl.noteWriteToStore(store.name);
       if (hasChangeListener) {
         var newSnapshot = SdbRecordSnapshotImpl<K, V>(store.record(key), value);
         transaction.changesListener?.addChange(transaction, null, newSnapshot);
@@ -253,6 +255,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
       );
     }
     await idbObjectStore.delete(key);
+    transaction.rawImpl.noteWriteToStore(store.name);
     if (hasChangeListener) {
       changesListener?.addChange(transaction, oldSnapshot, null);
     }
@@ -418,6 +421,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
       } else {
         await idbObjectStore.delete(keyRange);
       }
+      transaction.rawImpl.noteWriteToStore(store.name);
     } else {
       var cursor = idbObjectStore.openCursor(
         autoAdvance: true,
@@ -427,6 +431,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
       await streamWithOffsetAndLimit(cursor, offset, limit).listen((cursor) {
         cursor.delete();
       }).asFuture<void>();
+      transaction.rawImpl.noteWriteToStore(store.name);
     }
   }
 
