@@ -1,6 +1,7 @@
-## 2.9.2-1
+## 2.9.2
 
-* adb: Add `iterate` on Store and Cursor.
+* sdb: Add `iterate` on Store and Cursor.
+* sdb: Add cross tab synchronization on the web
 
 ## 2.9.1
 
