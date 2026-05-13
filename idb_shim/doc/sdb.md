@@ -12,6 +12,13 @@ The API is inspired by `sembast` but with a stronger emphasis on schema definiti
 
 This document provides a comprehensive guide to using SDB in your Dart and Flutter applications.
 
+* [notepad_sdb](https://github.com/alextekartik/flutter_app_example/tree/master/notepad_sdb): Simple flutter notepad
+  working on all platforms (web/mobile/desktop)
+  ([online demo](https://notepad_sdb.surge.sh))
+* [demo_sdb](https://github.com/alextekartik/flutter_app_example/tree/master/demo_sdb): Simplest counter persistent app
+  working on all platforms (web/mobile/desktop)
+  ([online demo](https://demo_sdb.surge.sh))
+
 ## Installation
 
 To get started with SDB, add the `idb_shim` package to your `pubspec.yaml` file:

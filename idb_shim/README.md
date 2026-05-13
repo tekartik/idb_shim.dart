@@ -20,12 +20,12 @@ All operations are asynchronous and return Future.
 
 ## SDB (simple db)
 
-Opinionated strong typed api based on idb database, which is currrently
+Opinionated strong typed api based on idb database, which is currently
 the main available options for local storage on web with an easy support on desktop
 using sqlite. Basically the lowest common denominator between indexed db and sqlite. idb_shim for io only include a sembast based implementation
 (which is ok for testing).
 
-Include [`idb_sqlite`](https://pub.dev/packages/idb_sqflite) for a solid cross process safe io implementation.
+Include [`idb_sqlite`](https://pub.dev/packages/idb_sqflite) for a solid cross-process safe io implementation.
 
 SDB (Simple DB) is a lightweight database abstraction layer for Dart that provides a unified API over IndexedDB (for web) and SQLite (for mobile and desktop). It is designed to be a simple, efficient, and cross-platform solution for data persistence.
 
@@ -38,6 +38,13 @@ The API is inspired by `sembast` but with a stronger emphasis on schema definiti
 - **Pay-as-you-go:** Data is not preloaded into memory, making it efficient for large datasets.
 
 More information here: [sdb](https://github.com/tekartik/idb_shim.dart/blob/master/idb_shim/doc/sdb.md)
+
+* [notepad_sdb](https://github.com/alextekartik/flutter_app_example/tree/master/notepad_sdb): Simple flutter notepad
+  working on all platforms (web/mobile/desktop)
+  ([online demo](https://notepad_sdb.surge.sh))
+* [demo_sdb](https://github.com/alextekartik/flutter_app_example/tree/master/demo_sdb): Simplest counter persistent app
+  working on all platforms (web/mobile/desktop)
+  ([online demo](https://demo_sdb.surge.sh))
 
 ## IndexedDB Shim
 
