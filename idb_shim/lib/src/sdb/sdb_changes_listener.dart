@@ -7,7 +7,6 @@ import 'package:idb_shim/src/utils/async_utils.dart';
 /// Transaction record change implementation
 class SdbTransactionRecordChange<K extends SdbKey, V extends SdbValue>
     implements SdbRecordChange<K, V> {
-
   /// Transaction record change implementation.
   SdbTransactionRecordChange(this.oldSnapshot, this.newSnapshot);
   @override
@@ -35,12 +34,12 @@ class SdbTransactionRecordChange<K extends SdbKey, V extends SdbValue>
 
 /// Store change listener.
 class _SdbStoreChangesListener<K extends SdbKey, V extends SdbValue> {
-
   /// Store change listener.
   _SdbStoreChangesListener(
     this.onChangeListener, {
     required this.extraStoreNames,
   });
+
   /// The listener
   final SdbTransactionRecordChangeListener<K, V> onChangeListener;
 
@@ -118,7 +117,6 @@ class SdbStoreTransactionChanges with SdbStoreTransactionChangesMixin {
 
 /// All transaction
 class SdbDatabaseTransactionChanges {
-
   // ignore: public_member_api_docs
   SdbDatabaseTransactionChanges();
   final _stores = <SdbStoreRef, SdbStoreTransactionChanges>{};
@@ -157,9 +155,9 @@ class SdbDatabaseTransactionChanges {
 
 /// Store changes listeners.
 class SdbStoreChangesListeners {
-
   /// Store changes listeners.
   SdbStoreChangesListeners({this.extraStoreNames});
+
   /// List of change listeners.
   final onChanges = <_SdbStoreChangesListener?>[];
 
@@ -168,7 +166,6 @@ class SdbStoreChangesListeners {
 }
 
 class _StoreTransactionChanges with SdbStoreTransactionChangesMixin {
-
   _StoreTransactionChanges({
     required this.onChanges,
     required this.excludedStoreNames,

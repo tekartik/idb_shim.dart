@@ -13,7 +13,6 @@ typedef SdbFactoryImpl = SdbFactoryIdb;
 
 /// Sdb Factory implementation.
 class SdbFactoryIdb with SdbFactoryDefaultMixin implements SdbFactory {
-
   /// Sdb Factory implementation.
   SdbFactoryIdb(this.idbFactory);
   @override

@@ -38,11 +38,11 @@ class SdbIndex1RefImpl<
 >
     extends SdbIndexRefImpl<K, V, I>
     implements SdbIndex1Ref<K, V, I> {
-
   /// Index on 1 field.
   SdbIndex1RefImpl(super.store, super.name) {
     sdbCheckIndexKeyType<I>();
   }
+
   /// Create store schema, keyPath is String, a `List<String>` or SdbKeyPath
   @override
   SdbIndexSchema indexSchema({required Object keyPath, bool? unique}) {
@@ -194,9 +194,9 @@ abstract class SdbIndexRefImpl<
   I extends SdbIndexKey
 >
     implements SdbIndexRef<K, V, I> {
-
   /// Index reference implementation.
   SdbIndexRefImpl(this.store, this.name);
+
   /// Convert idb key to index key.
   I indexIdbToSdbKeyValue(SdbCodec codec, Object key);
 

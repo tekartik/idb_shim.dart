@@ -437,9 +437,9 @@ abstract class Index {
 /// operation on a database is done using a request.
 ///
 abstract class Request {
-
   /// Create a request on a given database and transaction.
   Request(this.result, this.transaction);
+
   /// The target database.
   Database result;
 
@@ -624,9 +624,9 @@ abstract class IdbFactory {
 /// Generic database error.
 ///
 class DatabaseError extends Error {
-
   /// Create a database error with a message.
   DatabaseError(this._message);
+
   /// Error message.
   String get message => _message;
   final String _message;

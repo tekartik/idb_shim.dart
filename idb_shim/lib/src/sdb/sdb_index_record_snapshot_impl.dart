@@ -12,7 +12,6 @@ class SdbIndexRecordSnapshotImpl<
 >
     extends SdbIndexRecordKeyImpl<K, V, I>
     implements SdbIndexRecordSnapshot<K, V, I> {
-
   /// Index record snapshot implementation.
   SdbIndexRecordSnapshotImpl(
     super.index,
@@ -38,9 +37,9 @@ class SdbIndexRecordKeyImpl<
   I extends SdbIndexKey
 >
     implements SdbIndexRecordKey<K, V, I> {
-
   /// Index record snapshot implementation.
   SdbIndexRecordKeyImpl(this.index, this.key, this.indexKey);
+
   /// Index reference.
   @override
   final SdbIndexRefImpl<K, V, I> index;

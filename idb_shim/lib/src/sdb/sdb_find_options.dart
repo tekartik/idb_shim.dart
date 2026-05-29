@@ -2,7 +2,6 @@ import 'package:idb_shim/sdb.dart';
 
 /// Common find options, boundaries key
 class SdbFindOptions<K extends SdbKey> {
-
   /// Common find options
   SdbFindOptions({
     this.boundaries,
@@ -11,6 +10,7 @@ class SdbFindOptions<K extends SdbKey> {
     this.offset,
     this.descending,
   });
+
   /// Optional bounderies, when supported
   final SdbBoundaries<K>? boundaries;
 

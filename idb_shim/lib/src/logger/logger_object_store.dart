@@ -10,12 +10,12 @@ import 'logger_index.dart';
 import 'logger_utils.dart';
 
 class ObjectStoreLogger extends ObjectStore {
-
   ObjectStoreLogger(
     this.idbDatabaseLogger,
     this.idbTransactionLogger,
     this.idbObjectStore,
   );
+
   /// Specified during open.
   final DatabaseLogger? idbDatabaseLogger;
 

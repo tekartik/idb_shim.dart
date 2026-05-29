@@ -34,7 +34,6 @@ abstract class SdbUpperBoundary<T extends Object> extends SdbBoundary<T> {
 
 /// Lower and upper boundaries.
 abstract class SdbBoundaries<T extends Object> {
-
   /// Create boundaries from a lower and upper  boundary.
   factory SdbBoundaries(SdbBoundary<T>? lower, SdbBoundary<T>? upper) =>
       SdbBoundariesImpl(lower, upper);
@@ -71,6 +70,7 @@ abstract class SdbBoundaries<T extends Object> {
     return SdbSingleKeyBoundaries(key);
     //final keyBoundary SdbBoundary<T> boundary = SdbLowerBoundary<T>(key);
   }
+
   /// Lower boundary.
   SdbBoundary<T>? get lower;
 

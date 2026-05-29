@@ -47,13 +47,13 @@ abstract class SdbTransactionImpl implements SdbTransaction {
 class SdbDatabaseTransactionImpl extends SdbTransactionImpl
     with SdbClientInterfaceDefaultMixin
     implements SdbTransaction, SdbClientInterface, SdbClientIdbInterface {
-
   /// Transaction implementation.
   SdbDatabaseTransactionImpl(
     this.db,
     this.mode, {
     required this.extraStoreNames,
   });
+
   /// Extra store names to open in addition to listened stores.
   /// during write transaction with changes listener.
   final List<String>? extraStoreNames;

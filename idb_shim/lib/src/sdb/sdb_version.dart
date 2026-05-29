@@ -4,7 +4,6 @@ import 'package:idb_shim/idb_sdb.dart';
 
 /// Event passed to [SdbOnVersionChangeCallback].
 abstract class SdbVersionChangeEvent {
-
   /// Event passed to [SdbOnVersionChangeCallback].
   factory SdbVersionChangeEvent({
     required SdbOpenDatabase db,
@@ -12,6 +11,7 @@ abstract class SdbVersionChangeEvent {
     required int oldVersion,
     required int newVersion,
   }) => SdbVersionChangeEventImpl(db, transaction, oldVersion, newVersion);
+
   /// The old version, 0 if new
   int get oldVersion;
 
@@ -31,7 +31,6 @@ typedef SdbOnVersionChangeCallback =
 
 /// Version change implementation.
 class SdbVersionChangeEventImpl implements SdbVersionChangeEvent {
-
   /// Version change implementation.
   SdbVersionChangeEventImpl(
     this.db,

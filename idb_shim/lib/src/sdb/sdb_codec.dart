@@ -93,7 +93,6 @@ class _SdbCodecDefault extends _SdbCodecWithAdapters {
 }
 
 abstract class _SdbCodecWithAdapters implements SdbCodec, SdbCodecInterface {
-
   _SdbCodecWithAdapters({required this.adapters});
   final List<SembastTypeAdapter<Object, String>> adapters;
   late final _adapterMap = () {

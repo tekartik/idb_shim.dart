@@ -33,7 +33,6 @@ IdbFactory newIdbFactorySembastMemoryImpl() =>
 /// Idb factory on top of Sembast
 class IdbFactorySembastImpl extends IdbFactoryBase
     implements IdbFactorySembast {
-
   /// Create a sembast-based factory on a given top path.
   IdbFactorySembastImpl(this._databaseFactory, [this._path]);
   final sembast.DatabaseFactory _databaseFactory;

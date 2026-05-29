@@ -14,7 +14,6 @@ import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:sembast/sembast.dart' as sembast;
 
 class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
-
   ObjectStoreSembast(this.transaction, this.meta) {
     // Don't compute sembastStore yet we don't have the transaction
     /*

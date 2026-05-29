@@ -15,7 +15,6 @@ abstract class SdbCursor<K extends SdbKey, V extends SdbValue> {}
 
 /// Base for SdbOpenCursorImpl and SdbIndexOpenCursorImpl
 abstract class SdbRawOpenBursorBase {
-
   /// Create an open cursor implementation.
   SdbRawOpenBursorBase({
     required this.offset,
@@ -24,6 +23,7 @@ abstract class SdbRawOpenBursorBase {
     required this.codec,
     required this.filter,
   });
+
   /// Limit
   final int? offset;
 
@@ -61,7 +61,6 @@ abstract class SdbRawOpenBursorBase {
 class SdbOpenCursorImpl<K extends SdbKey, V extends SdbValue>
     extends SdbRawOpenBursorBase
     implements SdbCursor<K, V> {
-
   /// Create an open cursor implementation.
   SdbOpenCursorImpl({
     required this.handler,
@@ -113,6 +112,7 @@ class SdbOpenCursorImpl<K extends SdbKey, V extends SdbValue>
               },
             );
   }
+
   /// The handler for each row.
   final SdbCursorRowHandler<K, V> handler;
 }
@@ -138,9 +138,9 @@ extension SdbCursorRowInternalExt<K extends SdbKey, V extends SdbValue>
 /// SimpleDb cursor row internal implementation.
 class SdbCursorRowImpl<K extends SdbKey, V extends SdbValue>
     implements SdbCursorRow<K, V> {
-
   /// Create a cursor row implementation.
   SdbCursorRowImpl({required this.cwv});
+
   /// The underlying idb cursor with value.
   final idb.IdbCursorWithValue cwv;
 

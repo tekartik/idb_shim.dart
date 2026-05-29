@@ -3,9 +3,9 @@ typedef NotificationRevision = JdbNotificationRevision;
 
 /// The storage revision.
 class JdbNotificationRevision {
-
   /// Revision for one storage
   JdbNotificationRevision(this.name, this.revision);
+
   /// Name of the database.
   final String name;
 

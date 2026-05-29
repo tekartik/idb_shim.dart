@@ -243,7 +243,6 @@ extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
 /// Store reference implementation.
 class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
     implements SdbStoreRef<K, V> {
-
   /// Store reference implementation.
   SdbStoreRefImpl(this.name) {
     sdbCheckKeyType<K>();

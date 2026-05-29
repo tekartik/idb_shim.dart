@@ -9,10 +9,10 @@ import 'package:sembast/utils/sembast_import_export.dart';
 
 /// Validate database schema upgrades by comparing database content.
 class SdbSchemaUpgradeValidator {
-
   /// Create a validator for the given database [name].
   SdbSchemaUpgradeValidator({String? path, required this.name})
     : path = path ?? join('test', 'data');
+
   /// Database name.
   final String name;
 

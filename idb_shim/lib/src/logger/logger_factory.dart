@@ -46,7 +46,6 @@ bool get _incrementAndShouldLog {
 }
 
 class _VersionChangeEventLogger implements VersionChangeEvent {
-
   _VersionChangeEventLogger(this.factory, this.delegate, this.id);
   final IdbFactoryLogger factory;
   final int id;
@@ -80,7 +79,6 @@ class _VersionChangeEventLogger implements VersionChangeEvent {
 
 /// Wrapper for window.indexedDB and worker self.indexedDB
 class IdbFactoryLoggerImpl extends IdbFactoryBase implements IdbFactoryLogger {
-
   IdbFactoryLoggerImpl(this.nativeFactory) {
     assert(nativeFactory is! IdbFactoryLoggerImpl);
   }

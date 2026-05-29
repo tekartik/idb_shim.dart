@@ -16,7 +16,6 @@ extension SdbRecordRefInternalExtension<K extends SdbKey, V extends SdbValue>
 /// Record reference implementation.
 class SdbRecordRefImpl<K extends SdbKey, V extends SdbValue>
     implements SdbRecordRef<K, V> {
-
   /// Record reference implementation.
   SdbRecordRefImpl(this.store, this.key);
   @override

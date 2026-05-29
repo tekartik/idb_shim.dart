@@ -18,7 +18,6 @@ abstract mixin class TransactionWithMetaMixin implements Transaction {
 }
 
 class IdbTransactionMeta {
-
   IdbTransactionMeta(this.storeNames, this.mode);
   String mode;
   List<String> storeNames;
@@ -38,7 +37,6 @@ class IdbTransactionMeta {
 }
 
 class IdbVersionChangeTransactionMeta extends IdbTransactionMeta {
-
   IdbVersionChangeTransactionMeta() : super([], idbModeReadWrite);
   // index deleted during onUpgradeNeeded
   final createdIndexes = <String, List<IdbIndexMeta>>{};
@@ -91,7 +89,6 @@ abstract mixin class DatabaseWithMetaMixin implements Database {
 }
 
 class IdbDatabaseMeta {
-
   IdbDatabaseMeta([this.version]);
   late String name;
   int? version;
@@ -234,7 +231,6 @@ abstract mixin class ObjectStoreWithMetaMixin {
 
 /// IndexedDB object store meta data is loaded only once
 class IdbObjectStoreMeta {
-
   IdbObjectStoreMeta(
     this.name,
     this.keyPath,
@@ -259,6 +255,7 @@ class IdbObjectStoreMeta {
         map[autoIncrementKey] as bool?,
         IdbIndexMeta.fromMapList(((map[indeciesKey]) as List?)?.cast<Map>()),
       );
+
   /// Name key.
   static const String nameKey = 'name';
   static const String keyPathKey = 'keyPath';
@@ -378,7 +375,6 @@ class IdbObjectStoreMeta {
 }
 
 class IdbCursorMeta {
-
   IdbCursorMeta(this.key, this.range, String? direction, bool? autoAdvance)
     : autoAdvance = autoAdvance ?? false {
     direction ??= idbDirectionNext;
@@ -454,7 +450,6 @@ abstract mixin class IndexWithMetaMixin {
 }
 
 class IdbIndexMeta {
-
   IdbIndexMeta(this.name, this.keyPath, bool? unique, bool? multiEntry)
     : multiEntry = (multiEntry == true),
       unique = (unique == true);

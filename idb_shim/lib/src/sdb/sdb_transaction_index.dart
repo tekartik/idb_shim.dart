@@ -15,7 +15,6 @@ abstract class SdbTransactionIndexRef<
   V extends SdbValue,
   I extends SdbIndexKey
 > {
-
   /// Create transaction index reference.
   @protected
   factory SdbTransactionIndexRef({
@@ -24,6 +23,7 @@ abstract class SdbTransactionIndexRef<
   }) {
     return _SdbTransactionIndexRefIdb<K, V, I>(ref: index, store: txnStore);
   }
+
   /// transaction store reference.
   SdbTransactionStoreRef<K, V> get store;
 

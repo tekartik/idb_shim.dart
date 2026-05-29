@@ -57,7 +57,6 @@ Future<T> catchAsyncNativeError<T>(Future<T> Function() action) async {
 }
 
 class DatabaseErrorNative extends DatabaseError {
-
   DatabaseErrorNative(this.name, String message) : super(message);
 
   DatabaseErrorNative.domException(idb.DOMException exception)

@@ -8,7 +8,6 @@ import 'sdb_codec.dart';
 
 /// Private record snapshot for filter
 class SdbFilterRecordSnapshotPrv implements SdbFilterRecordSnapshot {
-
   /// Private record snapshot for filter
   SdbFilterRecordSnapshotPrv(this._cwv, this._codec);
   final SdbCodec _codec;

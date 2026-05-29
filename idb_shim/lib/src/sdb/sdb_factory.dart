@@ -39,7 +39,6 @@ mixin SdbFactoryDefaultMixin implements SdbFactory {
 
 /// Options for opening a Sdb database.
 abstract class SdbOpenDatabaseOptions {
-
   /// Options for opening a Sdb database.
   factory SdbOpenDatabaseOptions({
     int? version,
@@ -52,6 +51,7 @@ abstract class SdbOpenDatabaseOptions {
     onVersionChange: onVersionChange,
     codec: codec,
   );
+
   /// The version of the database.
   int? get version;
 
@@ -76,7 +76,6 @@ abstract class SdbOpenDatabaseOptions {
 
 /// Options for opening a Sdb database.
 class _SdbOpenDatabaseOptions implements SdbOpenDatabaseOptions {
-
   /// Options for opening a Sdb database.
   _SdbOpenDatabaseOptions({
     this.version,

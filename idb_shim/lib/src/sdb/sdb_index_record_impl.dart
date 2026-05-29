@@ -29,7 +29,6 @@ class SdbIndexRecordRefImpl<
   I extends SdbIndexKey
 >
     implements SdbIndexRecordRef<K, V, I> {
-
   /// Index record reference implementation.
   SdbIndexRecordRefImpl(this.index, this.indexKey);
   @override

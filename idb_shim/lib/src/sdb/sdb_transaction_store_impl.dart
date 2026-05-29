@@ -32,7 +32,6 @@ extension SdbSingleStoreTransactionInternalExtension<
 class SdbSingleStoreTransactionImpl<K extends SdbKey, V extends SdbValue>
     extends SdbDatabaseTransactionImpl
     implements SdbSingleStoreTransaction<K, V> {
-
   /// Single store transaction implementation.
   SdbSingleStoreTransactionImpl(
     super.db,
@@ -169,7 +168,6 @@ extension on idb.ObjectStore {
 class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
     with SdbTransactionStoreRefImplMixin<K, V>
     implements SdbTransactionStoreRef<K, V> {
-
   /// Transaction reference implementation.
   SdbTransactionStoreRefImpl(this.store);
 
@@ -453,7 +451,6 @@ extension SdbMultiStoreTransactionInternalExtension
 /// Multi store transaction implementation.
 class SdbMultiStoreTransactionImpl extends SdbDatabaseTransactionImpl
     implements SdbMultiStoreTransaction {
-
   /// Multi store transaction implementation.
   SdbMultiStoreTransactionImpl(
     super.db,
@@ -471,6 +468,7 @@ class SdbMultiStoreTransactionImpl extends SdbDatabaseTransactionImpl
       idbTransactionMode(mode),
     );
   }
+
   /// Stores.
   late List<String> _stores;
 

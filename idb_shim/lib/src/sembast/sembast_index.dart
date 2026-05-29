@@ -10,7 +10,6 @@ import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:sembast/sembast.dart' as sembast;
 
 class IndexSembast extends Index with IndexWithMetaMixin {
-
   IndexSembast(this.store, this.meta);
   final ObjectStoreSembast store;
   @override

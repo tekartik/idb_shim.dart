@@ -32,7 +32,6 @@ extension SdbDatabaseIdbExt on SdbDatabase {
 class SdbDatabaseImpl
     with SdbClientInterfaceDefaultMixin, SdbDatabaseDefaultMixin
     implements SdbDatabase, SdbClientInterface, SdbClientIdbInterface {
-
   /// SimpleDb implementation.
   SdbDatabaseImpl(this.factory, this.name, {required this.openOptions})
     : codec = openOptions?.codec ?? SdbCodec.defaultCodec;
@@ -43,6 +42,7 @@ class SdbDatabaseImpl
       codec = codec ?? SdbCodec.defaultCodec {
     name = idbDatabase.name;
   }
+
   /// Open options
   final SdbOpenDatabaseOptions? openOptions;
 

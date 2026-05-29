@@ -17,7 +17,6 @@ abstract class TransactionNativeBase extends IdbTransactionBase {
 }
 
 class TransactionNative extends TransactionNativeBase {
-
   TransactionNative(super.database, this.idbTransaction);
   idb.IDBTransaction idbTransaction;
 
@@ -77,7 +76,6 @@ class TransactionNative extends TransactionNativeBase {
 // Safari fake multistore transaction
 // create the transaction when objectStore is called
 class FakeMultiStoreTransactionNative extends TransactionNativeBase {
-
   FakeMultiStoreTransactionNative(super.database, this.mode);
   //List<_NativeTransaction> transactions = [];
   // We sequencialize the transactions

@@ -13,7 +13,6 @@ import 'package:web/web.dart';
 idb.IdbFactory? idbFactory;
 
 class TodoList {
-
   TodoList() {
     _todoItems = document.querySelector('#todo-items')!;
     _input = document.querySelector('#todo') as HTMLInputElement;

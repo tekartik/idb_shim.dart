@@ -5,7 +5,6 @@ import 'package:idb_shim/idb.dart';
 abstract class IdbTransactionBase
     with IdbTransactionMixin
     implements Transaction {
-
   IdbTransactionBase(this.database);
   @override
   Database database;

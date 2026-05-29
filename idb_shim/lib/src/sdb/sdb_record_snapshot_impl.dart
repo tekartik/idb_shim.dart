@@ -5,7 +5,6 @@ import 'import_idb.dart';
 /// Record snapshot implementation.
 class SdbRecordSnapshotImpl<K extends SdbKey, V extends SdbValue>
     implements SdbRecordSnapshot<K, V> {
-
   /// Record snapshot implementation.
   SdbRecordSnapshotImpl(this.ref, this.value);
   @override
@@ -28,7 +27,6 @@ class SdbRecordSnapshotImpl<K extends SdbKey, V extends SdbValue>
 /// Record key implementation.
 class SdbRecordKeyImpl<K extends SdbKey, V extends SdbValue>
     implements SdbRecordKey<K, V> {
-
   /// Record key implementation.
   SdbRecordKeyImpl(this.ref);
   @override

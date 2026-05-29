@@ -16,7 +16,6 @@ var _debug = false; // devWarning(true); // false
 
 /// In memory database.
 class JdbDatabaseIdb implements jdb.JdbDatabase {
-
   /// New in memory database.
   JdbDatabaseIdb(
     this._factory,

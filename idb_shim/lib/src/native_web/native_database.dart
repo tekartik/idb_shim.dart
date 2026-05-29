@@ -13,7 +13,6 @@ import 'native_object_store.dart';
 import 'native_transaction.dart';
 
 class VersionChangeEventNative extends IdbVersionChangeEventBase {
-
   VersionChangeEventNative(this.factory, this.idbVersionChangeEvent);
   final IdbFactory factory;
   final idb.IDBVersionChangeEvent idbVersionChangeEvent;

@@ -7,7 +7,6 @@ import 'package:idb_shim/idb.dart';
 
 /// Read only error.
 class DatabaseReadOnlyError extends DatabaseError {
-
   /// Read only error.
   DatabaseReadOnlyError() : super(_errorMessage);
   static const _errorMessage = 'ReadOnlyError: The transaction is read-only.';
@@ -15,7 +14,6 @@ class DatabaseReadOnlyError extends DatabaseError {
 
 /// Store not found error.
 class DatabaseStoreNotFoundError extends DatabaseError {
-
   /// Store not found error.
   DatabaseStoreNotFoundError([super.message = _errorMessage]);
   static const String _errorMessage =
@@ -28,9 +26,9 @@ class DatabaseStoreNotFoundError extends DatabaseError {
 
 /// Index not found.
 class DatabaseIndexNotFoundError extends DatabaseError {
-
   /// Index not found.
   DatabaseIndexNotFoundError(String indexName) : super(indexMessage(indexName));
+
   /// Message helper.
   static String indexMessage(String indexName) =>
       "NotFoundError: The specified index '$indexName' was not found.";
@@ -45,7 +43,6 @@ class DatabaseTransactionStoreNotFoundError extends DatabaseError {
 
 /// no key error.
 class DatabaseNoKeyError extends DatabaseError {
-
   /// no key error.
   DatabaseNoKeyError() : super(_errorMessage);
   static const String _errorMessage =

@@ -12,7 +12,6 @@ var _debug = false; // devWarning(true); // false
 
 /// In memory jdb.
 class JdbFactoryIdb implements jdb.JdbFactory {
-
   /// Idb factory
   JdbFactoryIdb(this.idbFactory);
   var _lastId = 0;
