@@ -13,17 +13,17 @@ import 'package:web/web.dart';
 idb.IdbFactory? idbFactory;
 
 class TodoList {
-  late HTMLInputElement _input;
-  late Element _todoItems;
 
   TodoList() {
     _todoItems = document.querySelector('#todo-items')!;
     _input = document.querySelector('#todo') as HTMLInputElement;
     document.querySelector('input#submit')!.onClick.listen((e) => _onAddTodo());
   }
+  late HTMLInputElement _input;
+  late Element _todoItems;
 
-  static final String _todosDb = 'com.tekartik.idb.todo';
-  static final String _todosStore = 'todos';
+  static const String _todosDb = 'com.tekartik.idb.todo';
+  static const String _todosStore = 'todos';
 
   late idb.Database _db;
   final _version = 2;

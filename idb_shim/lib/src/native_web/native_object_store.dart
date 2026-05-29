@@ -12,9 +12,9 @@ import 'native_index.dart';
 import 'native_key_range.dart';
 
 class ObjectStoreNative extends ObjectStore {
-  idb.IDBObjectStore idbObjectStore;
 
   ObjectStoreNative(this.idbObjectStore);
+  idb.IDBObjectStore idbObjectStore;
 
   @override
   Index createIndex(

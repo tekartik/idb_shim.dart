@@ -7,33 +7,33 @@ import 'package:idb_shim/idb.dart';
 
 /// Read only error.
 class DatabaseReadOnlyError extends DatabaseError {
-  static final _errorMessage = 'ReadOnlyError: The transaction is read-only.';
 
   /// Read only error.
   DatabaseReadOnlyError() : super(_errorMessage);
+  static const _errorMessage = 'ReadOnlyError: The transaction is read-only.';
 }
 
 /// Store not found error.
 class DatabaseStoreNotFoundError extends DatabaseError {
+
+  /// Store not found error.
+  DatabaseStoreNotFoundError([super.message = _errorMessage]);
   static const String _errorMessage =
       'NotFoundError: One of the specified object stores was not found.';
 
   /// Store not found message.
   static String storeMessage(Object storeOrStores) =>
       "NotFoundError: One of the specified object stores '$storeOrStores' was not found.";
-
-  /// Store not found error.
-  DatabaseStoreNotFoundError([super.message = _errorMessage]);
 }
 
 /// Index not found.
 class DatabaseIndexNotFoundError extends DatabaseError {
-  /// Message helper.
-  static String indexMessage(String indexName) =>
-      "NotFoundError: The specified index '$indexName' was not found.";
 
   /// Index not found.
   DatabaseIndexNotFoundError(String indexName) : super(indexMessage(indexName));
+  /// Message helper.
+  static String indexMessage(String indexName) =>
+      "NotFoundError: The specified index '$indexName' was not found.";
 }
 
 /// Store not found.
@@ -45,11 +45,11 @@ class DatabaseTransactionStoreNotFoundError extends DatabaseError {
 
 /// no key error.
 class DatabaseNoKeyError extends DatabaseError {
-  static final String _errorMessage =
-      'DataError: The data provided does not meet requirements. No key or key range specified.';
 
   /// no key error.
   DatabaseNoKeyError() : super(_errorMessage);
+  static const String _errorMessage =
+      'DataError: The data provided does not meet requirements. No key or key range specified.';
 }
 
 /// invalid key error.

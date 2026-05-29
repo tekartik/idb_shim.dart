@@ -29,8 +29,6 @@ class SdbIndexOpenCursorImpl<
 >
     extends SdbRawOpenBursorBase
     implements SdbIndexCursor<K, V, I> {
-  /// The handler for each row.
-  final SdbIndexCursorRowHandler<K, V, I> handler;
 
   /// Create an open cursor implementation.
   SdbIndexOpenCursorImpl({
@@ -83,6 +81,8 @@ class SdbIndexOpenCursorImpl<
               },
             );
   }
+  /// The handler for each row.
+  final SdbIndexCursorRowHandler<K, V, I> handler;
 }
 
 /// SimpleDb cursor row.
@@ -119,6 +119,9 @@ class SdbIndexCursorRowImpl<
   I extends SdbIndexKey
 >
     implements SdbIndexCursorRow<K, V, I> {
+
+  /// Create a cursor row implementation.
+  SdbIndexCursorRowImpl({required this.cwv});
   /// The underlying idb cursor with value.
   final idb.IdbCursorWithValue cwv;
 
@@ -126,9 +129,6 @@ class SdbIndexCursorRowImpl<
   Future<void> update(Object data) async {
     await cwv.update(data);
   }
-
-  /// Create a cursor row implementation.
-  SdbIndexCursorRowImpl({required this.cwv});
 
   @override
   String toString() => 'SdbCursorRow(${logTruncateAny(cwv.key)})';

@@ -14,6 +14,16 @@ import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:sembast/sembast.dart' as sembast;
 
 class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
+
+  ObjectStoreSembast(this.transaction, this.meta) {
+    // Don't compute sembastStore yet we don't have the transaction
+    /*
+    // If we are not in a transaction that's likely during open
+    sembastStore = transaction.sembastTransaction == null
+        ? sembastDatabase.getStore(name)
+        : transaction.sembastTransaction.getStore(name);
+        */
+  }
   @override
   final IdbObjectStoreMeta? meta;
 
@@ -37,16 +47,6 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   // If we are not in a transaction that's likely during open
   sembast.DatabaseClient get sembastClient =>
       (_sembastClient ??= (sembastTransaction ?? sembastDatabase))!;
-
-  ObjectStoreSembast(this.transaction, this.meta) {
-    // Don't compute sembastStore yet we don't have the transaction
-    /*
-    // If we are not in a transaction that's likely during open
-    sembastStore = transaction.sembastTransaction == null
-        ? sembastDatabase.getStore(name)
-        : transaction.sembastTransaction.getStore(name);
-        */
-  }
 
   Future<T> _inWritableTransaction<T>(FutureOr<T> Function() computation) {
     if (transaction!.meta!.mode != idbModeReadWrite) {

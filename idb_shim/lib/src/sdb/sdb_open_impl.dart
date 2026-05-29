@@ -20,6 +20,11 @@ extension SdbOpenDatabaseInternalExtension on SdbOpenDatabase {
 
 /// Open database implementation.
 class SdbOpenDatabaseImpl implements SdbOpenDatabase {
+
+  /// Open database implementation.
+  SdbOpenDatabaseImpl(this.db, idb.Transaction idbTransaction) {
+    _sdbOpenTransaction = SdbOpenTransactionImpl(this, idbTransaction);
+  }
   /// Database implementation.
   final SdbDatabaseImpl db;
 
@@ -29,11 +34,6 @@ class SdbOpenDatabaseImpl implements SdbOpenDatabase {
 
   /// Stores.
   final stores = <SdbOpenStoreRefIdb>[];
-
-  /// Open database implementation.
-  SdbOpenDatabaseImpl(this.db, idb.Transaction idbTransaction) {
-    _sdbOpenTransaction = SdbOpenTransactionImpl(this, idbTransaction);
-  }
 
   /// Create a store.
   /// auto increment is set to true if not set for int keys
@@ -99,6 +99,9 @@ class SdbOpenDatabaseImpl implements SdbOpenDatabase {
 /// Open transaction internal extension.
 class SdbOpenTransactionImpl extends SdbTransactionImpl
     implements SdbOpenTransaction, SdbClientInterface {
+
+  /// Open transaction implementation.
+  SdbOpenTransactionImpl(this.openDatabase, this.idbTransaction);
   /// Database implementation.
   @override
   final SdbOpenDatabaseImpl openDatabase;
@@ -106,9 +109,6 @@ class SdbOpenTransactionImpl extends SdbTransactionImpl
   /// IDB transaction.
   @override
   final idb.Transaction idbTransaction;
-
-  /// Open transaction implementation.
-  SdbOpenTransactionImpl(this.openDatabase, this.idbTransaction);
 
   @override
   Iterable<String> get storeNames => idbTransaction.objectStoreNames;
@@ -156,6 +156,9 @@ extension SdbOpenStoreRefInternalExtension<K extends SdbKey, V extends SdbValue>
 class SdbOpenStoreRefIdb<K extends SdbKey, V extends SdbValue>
     with SdbTransactionStoreRefImplMixin<K, V>
     implements SdbOpenStoreRef<K, V> {
+
+  /// Open store reference implementation.
+  SdbOpenStoreRefIdb(this.transaction, this.store, this.idbObjectStore);
   /// The open database.
   @override
   final SdbOpenTransaction transaction;
@@ -170,9 +173,6 @@ class SdbOpenStoreRefIdb<K extends SdbKey, V extends SdbValue>
 
   /// The indexes.
   final indexes = <SdbOpenIndexRefImpl>[];
-
-  /// Open store reference implementation.
-  SdbOpenStoreRefIdb(this.transaction, this.store, this.idbObjectStore);
 
   /// The name of the store.
   String get name => store.name;
@@ -225,6 +225,9 @@ class SdbOpenIndexRefImpl<
 >
     with SdbTransactionIndexRefIdbMixin<K, V, I>
     implements SdbOpenIndexRef<K, V, I> {
+
+  /// Open index reference implementation.
+  SdbOpenIndexRefImpl(this.store, this.ref, this.idbIndex);
   /// The IDB index.
   @override
   final idb.Index idbIndex;
@@ -236,9 +239,6 @@ class SdbOpenIndexRefImpl<
   /// Index reference.
   @override
   final SdbIndexRef<K, V, I> ref;
-
-  /// Open index reference implementation.
-  SdbOpenIndexRefImpl(this.store, this.ref, this.idbIndex);
 
   @override
   SdbOpenTransaction get transaction => store.transaction;

@@ -45,12 +45,11 @@ class IdbFactoryWebWorkerWrapperImpl extends IdbFactoryNativeWrapperImpl {
 
 /// Wrapper for window.indexedDB and worker self.indexedDB
 class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
+  IdbFactoryNativeWrapperImpl(this.nativeFactory);
   final native.IDBFactory nativeFactory;
 
   @override
   bool get persistent => true;
-
-  IdbFactoryNativeWrapperImpl(this.nativeFactory);
 
   @override
   String get name => idbFactoryNameNative;
@@ -103,6 +102,7 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
     var idbDatabase = openRequest.result as idb.IDBDatabase;
     if (onUpdateNeededException != null) {
       idbDatabase.close();
+      // ignore: only_throw_errors
       throw onUpdateNeededException!;
     }
 

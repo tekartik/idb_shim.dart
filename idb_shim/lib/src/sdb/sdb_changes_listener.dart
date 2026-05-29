@@ -7,14 +7,14 @@ import 'package:idb_shim/src/utils/async_utils.dart';
 /// Transaction record change implementation
 class SdbTransactionRecordChange<K extends SdbKey, V extends SdbValue>
     implements SdbRecordChange<K, V> {
+
+  /// Transaction record change implementation.
+  SdbTransactionRecordChange(this.oldSnapshot, this.newSnapshot);
   @override
   final SdbRecordSnapshot<K, V>? oldSnapshot;
 
   @override
   final SdbRecordSnapshot<K, V>? newSnapshot;
-
-  /// Transaction record change implementation.
-  SdbTransactionRecordChange(this.oldSnapshot, this.newSnapshot);
 
   @override
   SdbRecordChange<RK, RV> cast<RK extends SdbKey, RV extends SdbValue>() {
@@ -35,17 +35,17 @@ class SdbTransactionRecordChange<K extends SdbKey, V extends SdbValue>
 
 /// Store change listener.
 class _SdbStoreChangesListener<K extends SdbKey, V extends SdbValue> {
-  /// The listener
-  final SdbTransactionRecordChangeListener<K, V> onChangeListener;
-
-  /// Extra store names to use in readWrite mode
-  final List<String>? extraStoreNames;
 
   /// Store change listener.
   _SdbStoreChangesListener(
     this.onChangeListener, {
     required this.extraStoreNames,
   });
+  /// The listener
+  final SdbTransactionRecordChangeListener<K, V> onChangeListener;
+
+  /// Extra store names to use in readWrite mode
+  final List<String>? extraStoreNames;
 
   /// Call on change
   FutureOr<void> onChange(
@@ -118,6 +118,9 @@ class SdbStoreTransactionChanges with SdbStoreTransactionChangesMixin {
 
 /// All transaction
 class SdbDatabaseTransactionChanges {
+
+  // ignore: public_member_api_docs
+  SdbDatabaseTransactionChanges();
   final _stores = <SdbStoreRef, SdbStoreTransactionChanges>{};
 
   /// Get store changes
@@ -128,9 +131,6 @@ class SdbDatabaseTransactionChanges {
   void clearChanges() {
     _stores.clear();
   }
-
-  // ignore: public_member_api_docs
-  SdbDatabaseTransactionChanges();
 
   /// true if it has any changes
   bool get hasChanges => _stores.isNotEmpty;
@@ -157,27 +157,28 @@ class SdbDatabaseTransactionChanges {
 
 /// Store changes listeners.
 class SdbStoreChangesListeners {
+
+  /// Store changes listeners.
+  SdbStoreChangesListeners({this.extraStoreNames});
   /// List of change listeners.
   final onChanges = <_SdbStoreChangesListener?>[];
 
   /// Extra store names to use in readWrite mode
   final List<String>? extraStoreNames;
-
-  /// Store changes listeners.
-  SdbStoreChangesListeners({this.extraStoreNames});
 }
 
 class _StoreTransactionChanges with SdbStoreTransactionChangesMixin {
-  final SdbTransactionRecordChangeListener onChanges;
-  final Set<String> excludedStoreNames;
 
   _StoreTransactionChanges({
     required this.onChanges,
     required this.excludedStoreNames,
   });
+  final SdbTransactionRecordChangeListener onChanges;
+  final Set<String> excludedStoreNames;
 }
 
 class _AllStoresChangesListeners {
+  _AllStoresChangesListeners();
   final _all = <SdbTransactionRecordChangeListener, _StoreTransactionChanges>{};
 
   void addChange(
@@ -204,7 +205,6 @@ class _AllStoresChangesListeners {
   }
 
   Iterable<_StoreTransactionChanges> get all => _all.values;
-  _AllStoresChangesListeners();
 
   void removeListener(SdbTransactionRecordChangeListener onChanges) {
     _all.remove(onChanges);

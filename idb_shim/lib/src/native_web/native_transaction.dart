@@ -17,9 +17,9 @@ abstract class TransactionNativeBase extends IdbTransactionBase {
 }
 
 class TransactionNative extends TransactionNativeBase {
-  idb.IDBTransaction idbTransaction;
 
   TransactionNative(super.database, this.idbTransaction);
+  idb.IDBTransaction idbTransaction;
 
   late final Completer _completer = () {
     var completer = Completer<JSAny?>.sync();
@@ -77,6 +77,8 @@ class TransactionNative extends TransactionNativeBase {
 // Safari fake multistore transaction
 // create the transaction when objectStore is called
 class FakeMultiStoreTransactionNative extends TransactionNativeBase {
+
+  FakeMultiStoreTransactionNative(super.database, this.mode);
   //List<_NativeTransaction> transactions = [];
   // We sequencialize the transactions
   DatabaseNative get _nativeDatabase => (database as DatabaseNative);
@@ -85,8 +87,6 @@ class FakeMultiStoreTransactionNative extends TransactionNativeBase {
 
   idb.IDBDatabase get idbDatabase => _nativeDatabase.idbDatabase;
   String mode;
-
-  FakeMultiStoreTransactionNative(super.database, this.mode);
 
   @override
   ObjectStore objectStore(String name) {

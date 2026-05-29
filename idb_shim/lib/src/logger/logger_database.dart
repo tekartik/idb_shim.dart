@@ -10,16 +10,16 @@ import 'package:idb_shim/src/logger/logger_transaction.dart';
 import 'logger_utils.dart';
 
 class DatabaseLogger extends IdbDatabaseBase {
-  final int id;
-  Database idbDatabase;
-
-  IdbFactoryLogger get logger => factory as IdbFactoryLogger;
 
   DatabaseLogger({
     required IdbFactoryLogger factory,
     required this.idbDatabase,
     required this.id,
   }) : super(factory);
+  final int id;
+  Database idbDatabase;
+
+  IdbFactoryLogger get logger => factory as IdbFactoryLogger;
 
   @override
   int get version => idbDatabase.version;

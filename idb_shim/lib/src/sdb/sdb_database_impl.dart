@@ -32,6 +32,17 @@ extension SdbDatabaseIdbExt on SdbDatabase {
 class SdbDatabaseImpl
     with SdbClientInterfaceDefaultMixin, SdbDatabaseDefaultMixin
     implements SdbDatabase, SdbClientInterface, SdbClientIdbInterface {
+
+  /// SimpleDb implementation.
+  SdbDatabaseImpl(this.factory, this.name, {required this.openOptions})
+    : codec = openOptions?.codec ?? SdbCodec.defaultCodec;
+
+  /// SimpleDb implementation.
+  SdbDatabaseImpl.idbDatabase(this.factory, this.idbDatabase, {SdbCodec? codec})
+    : openOptions = null,
+      codec = codec ?? SdbCodec.defaultCodec {
+    name = idbDatabase.name;
+  }
   /// Open options
   final SdbOpenDatabaseOptions? openOptions;
 
@@ -56,17 +67,6 @@ class SdbDatabaseImpl
 
   /// Optional schema.
   SdbDatabaseSchema? get schema => openOptions?.schema;
-
-  /// SimpleDb implementation.
-  SdbDatabaseImpl(this.factory, this.name, {required this.openOptions})
-    : codec = openOptions?.codec ?? SdbCodec.defaultCodec;
-
-  /// SimpleDb implementation.
-  SdbDatabaseImpl.idbDatabase(this.factory, this.idbDatabase, {SdbCodec? codec})
-    : openOptions = null,
-      codec = codec ?? SdbCodec.defaultCodec {
-    name = idbDatabase.name;
-  }
 
   @override
   Iterable<String> get storeNames => idbDatabase.objectStoreNames;

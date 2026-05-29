@@ -11,9 +11,9 @@ import 'native_helpers.dart';
 import 'native_key_range.dart';
 
 class IndexNative extends Index {
-  idb.IDBIndex idbIndex;
 
   IndexNative(this.idbIndex);
+  idb.IDBIndex idbIndex;
 
   @override
   Future<Object?> get(Object? key) {

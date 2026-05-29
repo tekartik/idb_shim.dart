@@ -226,7 +226,7 @@ extension IdbValueMapExt on Map {
       }
       return keys;
     }
-    throw 'keyPath $keyPath not supported';
+    throw ArgumentError('keyPath $keyPath not supported');
   }
 
   /// return a list if keyPath is an array
@@ -265,7 +265,7 @@ extension IdbValueMapExt on Map {
         setFieldValue(keyList[i] as String, valueList[i]!);
       }
     } else {
-      throw 'keyPath $keyPath not supported';
+      throw ArgumentError('keyPath $keyPath not supported');
     }
   }
 

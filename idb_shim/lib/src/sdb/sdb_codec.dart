@@ -93,6 +93,8 @@ class _SdbCodecDefault extends _SdbCodecWithAdapters {
 }
 
 abstract class _SdbCodecWithAdapters implements SdbCodec, SdbCodecInterface {
+
+  _SdbCodecWithAdapters({required this.adapters});
   final List<SembastTypeAdapter<Object, String>> adapters;
   late final _adapterMap = () {
     var map = <String, SembastTypeAdapter<Object, String>>{
@@ -120,8 +122,6 @@ abstract class _SdbCodecWithAdapters implements SdbCodec, SdbCodecInterface {
   SembastTypeAdapter<T, Object>? getAdapterForType<T>() {
     return _adapterTypeMap[T] as SembastTypeAdapter<T, Object>?;
   }
-
-  _SdbCodecWithAdapters({required this.adapters});
 
   /// Sdb to idb value with type adapter support
   Object? sdbToIdbSimpleKeyValueOrNull(Object? value) {

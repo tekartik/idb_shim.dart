@@ -10,6 +10,18 @@ import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:sembast/sembast.dart' as sembast;
 
 class _SembastVersionChangeEvent extends IdbVersionChangeEventBase {
+  _SembastVersionChangeEvent(
+    DatabaseSembast database,
+    int? oldVersion,
+    this.newVersion,
+  ) //
+  : oldVersion = oldVersion ?? 0 {
+    // handle = too to catch programatical errors
+    if (this.oldVersion >= newVersion) {
+      throw StateError('cannot downgrade from $oldVersion to $newVersion');
+    }
+    request = OpenDBRequest(database, database.versionChangeTransaction!);
+  }
   @override
   final int oldVersion;
   @override
@@ -27,19 +39,6 @@ class _SembastVersionChangeEvent extends IdbVersionChangeEventBase {
   TransactionSembast get transaction =>
       request.transaction as TransactionSembast;
 
-  _SembastVersionChangeEvent(
-    DatabaseSembast database,
-    int? oldVersion,
-    this.newVersion,
-  ) //
-  : oldVersion = oldVersion ?? 0 {
-    // handle = too to catch programatical errors
-    if (this.oldVersion >= newVersion) {
-      throw StateError('cannot downgrade from $oldVersion to $newVersion');
-    }
-    request = OpenDBRequest(database, database.versionChangeTransaction!);
-  }
-
   @override
   String toString() {
     return '$oldVersion => $newVersion';
@@ -53,6 +52,11 @@ class _SembastVersionChangeEvent extends IdbVersionChangeEventBase {
 /// {'key':'store_test_store','value':{'name':'test_store','keyPath':'my_key','autoIncrement':true}}
 
 class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
+  DatabaseSembast(super.factory, String name) {
+    meta.name = name;
+  }
+
+  DatabaseSembast._(super.factory);
   TransactionSembast? versionChangeTransaction;
   @override
   final IdbDatabaseMeta meta = IdbDatabaseMeta();
@@ -62,8 +66,6 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
   IdbFactorySembast get factory => super.factory as IdbFactorySembast;
 
   sembast.DatabaseFactory get sembastFactory => factory.sembastFactory;
-
-  DatabaseSembast._(super.factory);
 
   final mainStore = sembast.StoreRef<String, Object>.main();
 
@@ -79,10 +81,6 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
     // devPrint('fromDatabase version $version meta ${idbDb.meta.version}');
     idbDb.meta.version = version;
     return idbDb;
-  }
-
-  DatabaseSembast(super.factory, String name) {
-    meta.name = name;
   }
 
   Future<List<IdbObjectStoreMeta>> _loadStoresMeta(List<String> storeNames) {
@@ -243,7 +241,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
 
   @override
   Stream<VersionChangeEvent> get onVersionChange {
-    throw 'not implemented yet';
+    throw UnimplementedError('not implemented yet');
   }
 
   @override

@@ -14,11 +14,11 @@ typedef KeyCursorRow = IdbKeyCursorRow;
 
 /// Cursor row.
 abstract class IdbCursorRow extends KeyCursorRow {
-  /// Cursor row value.
-  final Object value;
 
   /// Create a cursor row with a [key], [primaryKey] and [value].
   IdbCursorRow(super.key, super.primaryKey, this.value);
+  /// Cursor row value.
+  final Object value;
 
   @override
   String toString() {
@@ -28,6 +28,9 @@ abstract class IdbCursorRow extends KeyCursorRow {
 
 /// Key cursor row.
 class IdbKeyCursorRow {
+
+  /// Create a cursor row with a [key], and [primaryKey].
+  IdbKeyCursorRow(this.key, this.primaryKey);
   /// Cursor row key.
   ///
   /// This is the index key if the cursor is open on an index. Otherwise, it is
@@ -41,9 +44,6 @@ class IdbKeyCursorRow {
   String toString() {
     return '$key $primaryKey';
   }
-
-  /// Create a cursor row with a [key], and [primaryKey].
-  IdbKeyCursorRow(this.key, this.primaryKey);
 }
 
 /// Helper extension

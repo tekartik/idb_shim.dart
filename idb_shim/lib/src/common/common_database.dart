@@ -2,10 +2,10 @@ import 'package:idb_shim/idb.dart';
 
 /// IndexedDB base database.
 abstract class IdbDatabaseBase implements Database {
-  final IdbFactory _factory;
 
   /// IndexedDB database.
   IdbDatabaseBase(this._factory);
+  final IdbFactory _factory;
 
   ///
   /// factory for this type of database

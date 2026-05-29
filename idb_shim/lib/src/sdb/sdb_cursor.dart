@@ -15,6 +15,15 @@ abstract class SdbCursor<K extends SdbKey, V extends SdbValue> {}
 
 /// Base for SdbOpenCursorImpl and SdbIndexOpenCursorImpl
 abstract class SdbRawOpenBursorBase {
+
+  /// Create an open cursor implementation.
+  SdbRawOpenBursorBase({
+    required this.offset,
+    required this.limit,
+    required this.idbStream,
+    required this.codec,
+    required this.filter,
+  });
   /// Limit
   final int? offset;
 
@@ -46,23 +55,12 @@ abstract class SdbRawOpenBursorBase {
       doneCompleter.complete();
     }
   }
-
-  /// Create an open cursor implementation.
-  SdbRawOpenBursorBase({
-    required this.offset,
-    required this.limit,
-    required this.idbStream,
-    required this.codec,
-    required this.filter,
-  });
 }
 
 /// SimpleDb open cursor implementation.
 class SdbOpenCursorImpl<K extends SdbKey, V extends SdbValue>
     extends SdbRawOpenBursorBase
     implements SdbCursor<K, V> {
-  /// The handler for each row.
-  final SdbCursorRowHandler<K, V> handler;
 
   /// Create an open cursor implementation.
   SdbOpenCursorImpl({
@@ -115,6 +113,8 @@ class SdbOpenCursorImpl<K extends SdbKey, V extends SdbValue>
               },
             );
   }
+  /// The handler for each row.
+  final SdbCursorRowHandler<K, V> handler;
 }
 
 /// SimpleDb cursor row.
@@ -138,6 +138,9 @@ extension SdbCursorRowInternalExt<K extends SdbKey, V extends SdbValue>
 /// SimpleDb cursor row internal implementation.
 class SdbCursorRowImpl<K extends SdbKey, V extends SdbValue>
     implements SdbCursorRow<K, V> {
+
+  /// Create a cursor row implementation.
+  SdbCursorRowImpl({required this.cwv});
   /// The underlying idb cursor with value.
   final idb.IdbCursorWithValue cwv;
 
@@ -145,9 +148,6 @@ class SdbCursorRowImpl<K extends SdbKey, V extends SdbValue>
   Future<void> update(Object data) async {
     await cwv.update(data);
   }
-
-  /// Create a cursor row implementation.
-  SdbCursorRowImpl({required this.cwv});
 
   @override
   String toString() => 'SdbCursorRow(${logTruncateAny(cwv.key)})';

@@ -5,9 +5,9 @@ import 'package:idb_shim/idb.dart';
 import 'indexed_db_web.dart' as idb;
 
 class EventNative extends Event {
-  final idb.Event _idbEvent;
 
   EventNative(this._idbEvent);
+  final idb.Event _idbEvent;
 
   @override
   String toString() {

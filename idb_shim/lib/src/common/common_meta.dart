@@ -18,10 +18,10 @@ abstract mixin class TransactionWithMetaMixin implements Transaction {
 }
 
 class IdbTransactionMeta {
-  String mode;
-  List<String> storeNames;
 
   IdbTransactionMeta(this.storeNames, this.mode);
+  String mode;
+  List<String> storeNames;
 
   void checkObjectStore(String storeName) {
     if (!storeNames.contains(storeName)) {
@@ -38,6 +38,8 @@ class IdbTransactionMeta {
 }
 
 class IdbVersionChangeTransactionMeta extends IdbTransactionMeta {
+
+  IdbVersionChangeTransactionMeta() : super([], idbModeReadWrite);
   // index deleted during onUpgradeNeeded
   final createdIndexes = <String, List<IdbIndexMeta>>{};
 
@@ -55,8 +57,6 @@ class IdbVersionChangeTransactionMeta extends IdbTransactionMeta {
   // stores modified during onUpgradeNeeded
   // ignore: prefer_collection_literals
   final updatedStores = Set<IdbObjectStoreMeta>();
-
-  IdbVersionChangeTransactionMeta() : super([], idbModeReadWrite);
 
   // don't check for versionChangeTransaction
   @override
@@ -91,10 +91,10 @@ abstract mixin class DatabaseWithMetaMixin implements Database {
 }
 
 class IdbDatabaseMeta {
-  late String name;
-  int? version;
 
   IdbDatabaseMeta([this.version]);
+  late String name;
+  int? version;
 
   IdbVersionChangeTransactionMeta? _versionChangeTransaction;
   final _stores = <String, IdbObjectStoreMeta>{};
@@ -234,6 +234,31 @@ abstract mixin class ObjectStoreWithMetaMixin {
 
 /// IndexedDB object store meta data is loaded only once
 class IdbObjectStoreMeta {
+
+  IdbObjectStoreMeta(
+    this.name,
+    this.keyPath,
+    bool? autoIncrement, [
+    List<IdbIndexMeta>? indecies,
+  ]) : autoIncrement = (autoIncrement == true) {
+    if (indecies != null) {
+      for (var indexMeta in indecies) {
+        putIndex(indexMeta);
+      }
+    }
+  }
+
+  IdbObjectStoreMeta.fromObjectStore(ObjectStore objectStore)
+    : this(objectStore.name, objectStore.keyPath, objectStore.autoIncrement);
+
+  IdbObjectStoreMeta.fromMap(Map<String, Object?> map) //
+    : this(
+        //
+        map[nameKey] as String, //
+        _keyPathAsStringOrList(map[keyPathKey]),
+        map[autoIncrementKey] as bool?,
+        IdbIndexMeta.fromMapList(((map[indeciesKey]) as List?)?.cast<Map>()),
+      );
   /// Name key.
   static const String nameKey = 'name';
   static const String keyPathKey = 'keyPath';
@@ -290,22 +315,6 @@ class IdbObjectStoreMeta {
     removeIndex(indexMeta);
   }
 
-  IdbObjectStoreMeta.fromObjectStore(ObjectStore objectStore)
-    : this(objectStore.name, objectStore.keyPath, objectStore.autoIncrement);
-
-  IdbObjectStoreMeta(
-    this.name,
-    this.keyPath,
-    bool? autoIncrement, [
-    List<IdbIndexMeta>? indecies,
-  ]) : autoIncrement = (autoIncrement == true) {
-    if (indecies != null) {
-      for (var indexMeta in indecies) {
-        putIndex(indexMeta);
-      }
-    }
-  }
-
   static Object? _keyPathAsStringOrList(Object? keyPath) {
     if (keyPath is Iterable) {
       return keyPath.cast<String>().toList();
@@ -313,15 +322,6 @@ class IdbObjectStoreMeta {
       return keyPath?.toString();
     }
   }
-
-  IdbObjectStoreMeta.fromMap(Map<String, Object?> map) //
-    : this(
-        //
-        map[nameKey] as String, //
-        _keyPathAsStringOrList(map[keyPathKey]),
-        map[autoIncrementKey] as bool?,
-        IdbIndexMeta.fromMapList(((map[indeciesKey]) as List?)?.cast<Map>()),
-      );
 
   IdbObjectStoreMeta clone() {
     return IdbObjectStoreMeta(name, keyPath, autoIncrement);
@@ -378,15 +378,6 @@ class IdbObjectStoreMeta {
 }
 
 class IdbCursorMeta {
-  dynamic key;
-
-  bool get ascending => _ascending;
-  final bool autoAdvance;
-
-  KeyRange? range;
-  late bool _ascending;
-
-  String get direction => _ascending ? idbDirectionNext : idbDirectionPrev;
 
   IdbCursorMeta(this.key, this.range, String? direction, bool? autoAdvance)
     : autoAdvance = autoAdvance ?? false {
@@ -411,6 +402,15 @@ class IdbCursorMeta {
       );
     }
   }
+  dynamic key;
+
+  bool get ascending => _ascending;
+  final bool autoAdvance;
+
+  KeyRange? range;
+  late bool _ascending;
+
+  String get direction => _ascending ? idbDirectionNext : idbDirectionPrev;
 
   Map<String, Object?> toDebugMap() {
     final map = <String, Object?>{'direction': direction};
@@ -454,25 +454,10 @@ abstract mixin class IndexWithMetaMixin {
 }
 
 class IdbIndexMeta {
-  final String? name;
-  final Object keyPath;
-  final bool unique;
-  final bool multiEntry;
 
   IdbIndexMeta(this.name, this.keyPath, bool? unique, bool? multiEntry)
     : multiEntry = (multiEntry == true),
       unique = (unique == true);
-
-  static List<IdbIndexMeta>? fromMapList(List<Map>? list) {
-    if (list == null) {
-      return null;
-    }
-    var metas = <IdbIndexMeta>[];
-    for (var map in list) {
-      metas.add(IdbIndexMeta.fromMap(map.cast<String, Object?>()));
-    }
-    return metas;
-  }
 
   factory IdbIndexMeta.fromMap(Map<String, Object?> map) {
     var meta = IdbIndexMeta(
@@ -486,6 +471,21 @@ class IdbIndexMeta {
 
   IdbIndexMeta.fromIndex(Index index)
     : this(index.name, index.keyPath, index.unique, index.multiEntry);
+  final String? name;
+  final Object keyPath;
+  final bool unique;
+  final bool multiEntry;
+
+  static List<IdbIndexMeta>? fromMapList(List<Map>? list) {
+    if (list == null) {
+      return null;
+    }
+    var metas = <IdbIndexMeta>[];
+    for (var map in list) {
+      metas.add(IdbIndexMeta.fromMap(map.cast<String, Object?>()));
+    }
+    return metas;
+  }
 
   Map toDebugMap() {
     return toMap();

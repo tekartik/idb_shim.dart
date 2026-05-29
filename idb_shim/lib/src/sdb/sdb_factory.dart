@@ -39,18 +39,6 @@ mixin SdbFactoryDefaultMixin implements SdbFactory {
 
 /// Options for opening a Sdb database.
 abstract class SdbOpenDatabaseOptions {
-  /// The version of the database.
-  int? get version;
-
-  /// The schema of the database.
-  SdbDatabaseSchema? get schema;
-
-  /// provide onVersionChange to handle schema changes or initialization
-  /// manually, this is called after automatic schema change
-  SdbOnVersionChangeCallback? get onVersionChange;
-
-  /// Codec used
-  SdbCodec? get codec;
 
   /// Options for opening a Sdb database.
   factory SdbOpenDatabaseOptions({
@@ -64,6 +52,18 @@ abstract class SdbOpenDatabaseOptions {
     onVersionChange: onVersionChange,
     codec: codec,
   );
+  /// The version of the database.
+  int? get version;
+
+  /// The schema of the database.
+  SdbDatabaseSchema? get schema;
+
+  /// provide onVersionChange to handle schema changes or initialization
+  /// manually, this is called after automatic schema change
+  SdbOnVersionChangeCallback? get onVersionChange;
+
+  /// Codec used
+  SdbCodec? get codec;
 
   /// Copy with new values.
   SdbOpenDatabaseOptions copyWith({
@@ -76,6 +76,14 @@ abstract class SdbOpenDatabaseOptions {
 
 /// Options for opening a Sdb database.
 class _SdbOpenDatabaseOptions implements SdbOpenDatabaseOptions {
+
+  /// Options for opening a Sdb database.
+  _SdbOpenDatabaseOptions({
+    this.version,
+    this.schema,
+    this.onVersionChange,
+    this.codec,
+  });
   @override
   SdbOpenDatabaseOptions copyWith({
     int? version,
@@ -106,14 +114,6 @@ class _SdbOpenDatabaseOptions implements SdbOpenDatabaseOptions {
   /// Codec used, default to SdbCodec.defaultCodec
   @override
   final SdbCodec? codec;
-
-  /// Options for opening a Sdb database.
-  _SdbOpenDatabaseOptions({
-    this.version,
-    this.schema,
-    this.onVersionChange,
-    this.codec,
-  });
 }
 
 /// Sdb Factory interface.

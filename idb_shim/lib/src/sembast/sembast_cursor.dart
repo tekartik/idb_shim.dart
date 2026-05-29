@@ -124,14 +124,13 @@ abstract mixin class CursorWithValueSembastMixin implements CursorWithValue {
 class IndexKeyCursorSembast extends Object
     with KeyCursorSembastMixin, IndexCursorSembastMixin
     implements Cursor {
-  @override
-  IndexKeyCursorControllerSembast get indexCtlr =>
-      ctlr as IndexKeyCursorControllerSembast;
-
   IndexKeyCursorSembast(IndexKeyCursorControllerSembast ctlr, int index) {
     this.ctlr = ctlr;
     recordIndex = index;
   }
+  @override
+  IndexKeyCursorControllerSembast get indexCtlr =>
+      ctlr as IndexKeyCursorControllerSembast;
 
   @override
   String toString() =>
@@ -140,9 +139,6 @@ class IndexKeyCursorSembast extends Object
 
 class IndexCursorWithValueSembast extends Object
     with KeyCursorSembastMixin, CursorWithValueSembastMixin {
-  IndexCursorWithValueControllerSembast get indexCtlr =>
-      ctlr as IndexCursorWithValueControllerSembast;
-
   IndexCursorWithValueSembast(
     BaseCursorControllerSembastMixin ctlr,
     int index,
@@ -150,6 +146,8 @@ class IndexCursorWithValueSembast extends Object
     this.ctlr = ctlr;
     recordIndex = index;
   }
+  IndexCursorWithValueControllerSembast get indexCtlr =>
+      ctlr as IndexCursorWithValueControllerSembast;
 
   @override
   String toString() =>
@@ -196,6 +194,7 @@ abstract class _ICursorSembast {
 }
 
 class RecordSnapshotSembast {
+  RecordSnapshotSembast(this.idbStore, this.snapshot);
   final ObjectStoreSembast idbStore;
   final sembast.RecordSnapshot<Object, Object> snapshot;
 
@@ -206,21 +205,18 @@ class RecordSnapshotSembast {
 
   Object get key => primaryKey;
 
-  RecordSnapshotSembast(this.idbStore, this.snapshot);
-
   @override
   String toString() => '$snapshot';
 }
 
 class IndexRecordSnapshotSembast extends RecordSnapshotSembast {
-  @override
-  final Object key;
-
   IndexRecordSnapshotSembast(
     ObjectStoreSembast idbStore,
     this.key,
     sembast.RecordSnapshot<Object, Object> snapshot,
   ) : super(idbStore, snapshot);
+  @override
+  final Object key;
 
   @override
   String toString() => '$key $snapshot';
@@ -395,14 +391,13 @@ class IndexKeyCursorControllerSembast extends Object
         KeyCursorControllerSembastMixin,
         BaseCursorControllerSembastMixin<Cursor>,
         IndexCursorControllerSembastMixin {
-  @override
-  ObjectStoreSembast get store => index.store;
-
   IndexKeyCursorControllerSembast(IndexSembast index, IdbCursorMeta meta) {
     this.meta = meta;
     this.index = index;
     init();
   }
+  @override
+  ObjectStoreSembast get store => index.store;
 
   @override
   Cursor nextEvent(int index) {
@@ -416,9 +411,6 @@ class IndexCursorWithValueControllerSembast extends Object
         CursorWithValueControllerSembastMixin,
         BaseCursorControllerSembastMixin<CursorWithValue>,
         IndexCursorControllerSembastMixin {
-  @override
-  ObjectStoreSembast get store => index.store;
-
   IndexCursorWithValueControllerSembast(
     IndexSembast index,
     IdbCursorMeta meta,
@@ -427,6 +419,8 @@ class IndexCursorWithValueControllerSembast extends Object
     this.index = index;
     init();
   }
+  @override
+  ObjectStoreSembast get store => index.store;
 
   @override
   CursorWithValue nextEvent(int index) {
@@ -440,13 +434,12 @@ class StoreKeyCursorControllerSembast extends Object
         KeyCursorControllerSembastMixin,
         BaseCursorControllerSembastMixin<Cursor>,
         StoreCursorControllerSembastMixin {
-  @override
-  ObjectStoreSembast store;
-
   StoreKeyCursorControllerSembast(this.store, IdbCursorMeta meta) {
     this.meta = meta;
     init();
   }
+  @override
+  ObjectStoreSembast store;
 
   @override
   Cursor nextEvent(int index) {
@@ -460,13 +453,12 @@ class StoreCursorWithValueControllerSembast extends Object
         CursorWithValueControllerSembastMixin,
         BaseCursorControllerSembastMixin<CursorWithValue>,
         StoreCursorControllerSembastMixin {
-  @override
-  ObjectStoreSembast store;
-
   StoreCursorWithValueControllerSembast(this.store, IdbCursorMeta meta) {
     this.meta = meta;
     init();
   }
+  @override
+  ObjectStoreSembast store;
 
   @override
   CursorWithValue nextEvent(int index) {
@@ -486,5 +478,5 @@ List<sembast.SortOrder> keyPathSortOrders(dynamic keyPath, bool ascending) {
       (i) => sembast.SortOrder(keyList[i] as String, ascending),
     );
   }
-  throw 'invalid keyPath $keyPath';
+  throw ArgumentError('invalid keyPath $keyPath');
 }

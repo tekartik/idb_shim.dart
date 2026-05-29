@@ -13,6 +13,8 @@ import 'native_object_store.dart';
 import 'native_transaction.dart';
 
 class VersionChangeEventNative extends IdbVersionChangeEventBase {
+
+  VersionChangeEventNative(this.factory, this.idbVersionChangeEvent);
   final IdbFactory factory;
   final idb.IDBVersionChangeEvent idbVersionChangeEvent;
   idb.IDBOpenDBRequest get _idbRequest =>
@@ -39,15 +41,13 @@ class VersionChangeEventNative extends IdbVersionChangeEventBase {
     factory,
     _idbRequest.result as idb.IDBDatabase,
   );
-
-  VersionChangeEventNative(this.factory, this.idbVersionChangeEvent);
 }
 
 class DatabaseNative extends IdbDatabaseBase {
+  DatabaseNative(super.factory, this.idbDatabase);
   idb.IDBDatabase idbDatabase;
   StreamController<VersionChangeEvent>? onVersionChangeController;
   Stream<VersionChangeEvent>? onVersionChangeStream;
-  DatabaseNative(super.factory, this.idbDatabase);
 
   @override
   int get version => catchNativeError((() => idbDatabase.version));

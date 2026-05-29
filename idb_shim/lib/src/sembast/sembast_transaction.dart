@@ -16,11 +16,10 @@ bool _debugTransaction = false;
 typedef Action<T> = FutureOr<T> Function();
 
 class _TransactionAction<T> {
+  _TransactionAction(this.action, {required this.doNotAbortOnError});
   final Action<T> action;
   final completer = Completer<T>();
   final bool doNotAbortOnError;
-
-  _TransactionAction(this.action, {required this.doNotAbortOnError});
 }
 
 Future<void> _delayedInit() async {
@@ -74,6 +73,39 @@ class _LazyCompleter<T> {
 /// Transaction wrapper around a sembast transaction.
 class TransactionSembast extends IdbTransactionBase
     with TransactionWithMetaMixin {
+  ///
+  /// Constructor.
+  TransactionSembast(DatabaseSembast super.database, this.meta) {
+    if (_debugTransaction) {
+      _debugId = ++_debugAllIds;
+    }
+    () async {
+      if (_debugTransaction) {
+        _log('sembast new transaction constructor');
+      }
+      if (_completerCompleter.isCompleted) {
+        return;
+      }
+      await _delayedInit();
+      if (_completerCompleter.isCompleted) {
+        return;
+      }
+      if (_sembastTransaction == null) {
+        if (_debugTransaction) {
+          _log('still no action?');
+        }
+        await _delayedInit();
+        if (_completerCompleter.isCompleted) {
+          return;
+        }
+        if (_debugTransaction) {
+          _log('Not started, exiting');
+        }
+        _inactive = true;
+        _complete();
+      }
+    }();
+  }
   @override
   DatabaseSembast get database => super.database as DatabaseSembast;
 
@@ -111,8 +143,8 @@ class TransactionSembast extends IdbTransactionBase
   /// Transaction is active until the sembast transaction is running
   var _inactive = false;
 
-  Object _newAbortException() => newAbortException();
-  Object _newDatabaseInactiveError() =>
+  DatabaseException _newAbortException() => newAbortException();
+  DatabaseError _newDatabaseInactiveError() =>
       DatabaseError('DatabaseInactiveError: transaction database closed');
 
   ///
@@ -235,40 +267,6 @@ class TransactionSembast extends IdbTransactionBase
 
   @override
   final IdbTransactionMeta? meta;
-
-  ///
-  /// Constructor.
-  TransactionSembast(DatabaseSembast super.database, this.meta) {
-    if (_debugTransaction) {
-      _debugId = ++_debugAllIds;
-    }
-    () async {
-      if (_debugTransaction) {
-        _log('sembast new transaction constructor');
-      }
-      if (_completerCompleter.isCompleted) {
-        return;
-      }
-      await _delayedInit();
-      if (_completerCompleter.isCompleted) {
-        return;
-      }
-      if (_sembastTransaction == null) {
-        if (_debugTransaction) {
-          _log('still no action?');
-        }
-        await _delayedInit();
-        if (_completerCompleter.isCompleted) {
-          return;
-        }
-        if (_debugTransaction) {
-          _log('Not started, exiting');
-        }
-        _inactive = true;
-        _complete();
-      }
-    }();
-  }
 
   @override
   Future<Database> get completed async {

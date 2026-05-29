@@ -33,6 +33,9 @@ IdbFactory newIdbFactorySembastMemoryImpl() =>
 /// Idb factory on top of Sembast
 class IdbFactorySembastImpl extends IdbFactoryBase
     implements IdbFactorySembast {
+
+  /// Create a sembast-based factory on a given top path.
+  IdbFactorySembastImpl(this._databaseFactory, [this._path]);
   final sembast.DatabaseFactory _databaseFactory;
   final String? _path;
 
@@ -48,9 +51,6 @@ class IdbFactorySembastImpl extends IdbFactoryBase
   sembast.DatabaseFactory get sdbFactory => sembastFactory;
   @override
   bool get persistent => _databaseFactory.hasStorage;
-
-  /// Create a sembast-based factory on a given top path.
-  IdbFactorySembastImpl(this._databaseFactory, [this._path]);
 
   @override
   String get name => idbFactoryNameSembast;

@@ -11,11 +11,11 @@ import 'sdb_store_impl.dart';
 /// A store can be created using [SdbDatabase.inTransaction] and
 /// [SdbTransactionExtension.store].
 abstract class SdbStoreRef<K extends SdbKey, V extends SdbValue> {
-  /// Store name.
-  String get name;
 
   /// Store definition.
   factory SdbStoreRef(String name) => SdbStoreRefImpl(name);
+  /// Store name.
+  String get name;
 
   /// Cast if needed
   SdbStoreRef<RK, RV> cast<RK extends SdbKey, RV extends SdbValue>();

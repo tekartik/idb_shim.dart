@@ -57,13 +57,13 @@ Future<T> catchAsyncNativeError<T>(Future<T> Function() action) async {
 }
 
 class DatabaseErrorNative extends DatabaseError {
-  final String name;
 
   DatabaseErrorNative(this.name, String message) : super(message);
 
   DatabaseErrorNative.domException(idb.DOMException exception)
     : name = exception.name,
       super(exception.message);
+  final String name;
 
   @override
   StackTrace? get stackTrace => null;

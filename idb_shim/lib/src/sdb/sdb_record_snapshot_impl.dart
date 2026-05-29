@@ -5,13 +5,13 @@ import 'import_idb.dart';
 /// Record snapshot implementation.
 class SdbRecordSnapshotImpl<K extends SdbKey, V extends SdbValue>
     implements SdbRecordSnapshot<K, V> {
+
+  /// Record snapshot implementation.
+  SdbRecordSnapshotImpl(this.ref, this.value);
   @override
   final SdbRecordRef<K, V> ref;
   @override
   final V value;
-
-  /// Record snapshot implementation.
-  SdbRecordSnapshotImpl(this.ref, this.value);
 
   @override
   String toString() => 'Record($ref, ${logTruncateAny(value)}';
@@ -28,11 +28,11 @@ class SdbRecordSnapshotImpl<K extends SdbKey, V extends SdbValue>
 /// Record key implementation.
 class SdbRecordKeyImpl<K extends SdbKey, V extends SdbValue>
     implements SdbRecordKey<K, V> {
-  @override
-  final SdbRecordRef<K, V> ref;
 
   /// Record key implementation.
   SdbRecordKeyImpl(this.ref);
+  @override
+  final SdbRecordRef<K, V> ref;
 
   @override
   String toString() => 'RecordKey($ref)';

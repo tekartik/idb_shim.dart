@@ -8,6 +8,15 @@ import 'sdb_database_impl.dart';
 
 /// Store schema definition
 class SdbStoreSchemaDef {
+
+  /// Store schema definition
+  SdbStoreSchemaDef({
+    required this.name,
+    this.keyPath,
+    this.autoIncrement = false,
+    List<SdbIndexSchemaDef> indexes = const [],
+  }) : indexes = List.of(indexes)
+         ..sort((index1, index2) => index1.name.compareTo(index2.name));
   /// Store name
   final String name;
 
@@ -19,15 +28,6 @@ class SdbStoreSchemaDef {
 
   /// Indexes - sorted by name
   final List<SdbIndexSchemaDef> indexes;
-
-  /// Store schema definition
-  SdbStoreSchemaDef({
-    required this.name,
-    this.keyPath,
-    this.autoIncrement = false,
-    List<SdbIndexSchemaDef> indexes = const [],
-  }) : indexes = List.of(indexes)
-         ..sort((index1, index2) => index1.name.compareTo(index2.name));
 
   @override
   int get hashCode => name.hashCode;
@@ -75,6 +75,13 @@ class SdbStoreSchemaDef {
 
 /// Index schema definition
 class SdbIndexSchemaDef {
+
+  /// Index schema definition
+  SdbIndexSchemaDef({
+    required this.name,
+    required Object keyPath,
+    required this.unique,
+  }) : keyPath = sdbKeyPathFromAny(keyPath);
   /// Index name
   final String name;
 
@@ -83,13 +90,6 @@ class SdbIndexSchemaDef {
 
   /// Unique
   final bool unique;
-
-  /// Index schema definition
-  SdbIndexSchemaDef({
-    required this.name,
-    required Object keyPath,
-    required this.unique,
-  }) : keyPath = sdbKeyPathFromAny(keyPath);
 
   /// Debug map
   Map<String, Object?> toDebugMap({bool noName = false}) {
@@ -116,13 +116,13 @@ class SdbIndexSchemaDef {
 
 /// Database schema definition
 class SdbDatabaseSchemaDef {
-  /// Stores
-  final List<SdbStoreSchemaDef> stores;
 
   /// Database schema definition
   SdbDatabaseSchemaDef({List<SdbStoreSchemaDef> stores = const []})
     : stores = List.of(stores)
         ..sort((store1, store2) => store1.name.compareTo(store2.name));
+  /// Stores
+  final List<SdbStoreSchemaDef> stores;
 
   @override
   int get hashCode => stores.firstOrNull?.hashCode ?? 0;
@@ -171,6 +171,14 @@ extension SdbDatabaseSchemaExtensionPrv on SdbDatabaseSchema {
 
 /// Store schema
 class SdbStoreSchema {
+
+  /// Store schema
+  SdbStoreSchema(
+    this.ref, {
+    this.keyPath,
+    this.autoIncrement = false,
+    this.indexes = const [],
+  });
   /// Store reference
   final SdbStoreRef ref;
 
@@ -182,14 +190,6 @@ class SdbStoreSchema {
 
   /// Indexes
   final List<SdbIndexSchema> indexes;
-
-  /// Store schema
-  SdbStoreSchema(
-    this.ref, {
-    this.keyPath,
-    this.autoIncrement = false,
-    this.indexes = const [],
-  });
 
   @override
   String toString() => def.toString();
@@ -229,16 +229,16 @@ extension SdbStoreSchemaExtension on SdbStoreSchema {
 }
 
 /// Key path abstraction
-abstract class SdbKeyPath {
-  /// Key paths (1 or more, never empty)
-  List<String> get keyPaths; // Never empty
-  /// Single key path
-  String get keyPath; // Only for single key path, throws if multi
+abstract class SdbKeyPath { // Only for single key path, throws if multi
   /// Create single key path
   factory SdbKeyPath.single(String keyPath) => _SdbKeySinglePath(keyPath);
 
   /// Create multi key path
   factory SdbKeyPath.multi(List<String> keyPaths) => _SdbKeyMultiPath(keyPaths);
+  /// Key paths (1 or more, never empty)
+  List<String> get keyPaths; // Never empty
+  /// Single key path
+  String get keyPath;
 }
 
 abstract class _SdbKeyPathBase implements SdbKeyPath {
@@ -272,21 +272,21 @@ extension SdbKeyPathExtension on SdbKeyPath {
 }
 
 class _SdbKeySinglePath extends _SdbKeyPathBase {
-  @override
-  final String keyPath;
 
   _SdbKeySinglePath(this.keyPath);
+  @override
+  final String keyPath;
 
   @override
   List<String> get keyPaths => [keyPath];
 }
 
 class _SdbKeyMultiPath extends _SdbKeyPathBase {
-  @override
-  final List<String> keyPaths;
   _SdbKeyMultiPath(this.keyPaths) {
     assert(keyPaths.length >= 2);
   }
+  @override
+  final List<String> keyPaths;
 
   @override
   String get keyPath => throw StateError(
@@ -423,6 +423,9 @@ extension SdbIndex4RefSchemaExtension<
 
 /// Index schema
 class SdbIndexSchema {
+
+  /// Index schema
+  SdbIndexSchema(this.ref, this.keyPath, {this.unique = false});
   /// Index reference
   final SdbIndexRef ref;
 
@@ -431,9 +434,6 @@ class SdbIndexSchema {
 
   /// Unique
   final bool unique;
-
-  /// Index schema
-  SdbIndexSchema(this.ref, this.keyPath, {this.unique = false});
 
   /// Index schema definition
   SdbIndexSchemaDef get def {
@@ -458,11 +458,11 @@ extension SdbIndexSchemaExtension on SdbIndexSchema {
 /// - Index schema changes (key path) are not supported, an error is thrown
 /// - Indexes not in schema are deleted
 class SdbDatabaseSchema {
-  /// Stores schemas
-  final List<SdbStoreSchema> stores;
 
   /// Database schema
   SdbDatabaseSchema({required this.stores});
+  /// Stores schemas
+  final List<SdbStoreSchema> stores;
 }
 
 /// Database schema extension

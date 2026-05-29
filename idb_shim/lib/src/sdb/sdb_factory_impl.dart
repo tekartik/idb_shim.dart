@@ -13,14 +13,14 @@ typedef SdbFactoryImpl = SdbFactoryIdb;
 
 /// Sdb Factory implementation.
 class SdbFactoryIdb with SdbFactoryDefaultMixin implements SdbFactory {
+
+  /// Sdb Factory implementation.
+  SdbFactoryIdb(this.idbFactory);
   @override
   String get name => 'idb-${idbFactory.name}';
 
   /// IndexedDB factory.
   final idb.IdbFactory idbFactory;
-
-  /// Sdb Factory implementation.
-  SdbFactoryIdb(this.idbFactory);
 
   /// Delete the database.
   @override

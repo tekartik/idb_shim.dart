@@ -16,6 +16,15 @@ var _debug = false; // devWarning(true); // false
 
 /// In memory database.
 class JdbDatabaseIdb implements jdb.JdbDatabase {
+
+  /// New in memory database.
+  JdbDatabaseIdb(
+    this._factory,
+    this._idbDatabase,
+    this._id,
+    this._path,
+    this._options,
+  );
   final idb.Database _idbDatabase;
   final int _id;
   final String _path;
@@ -63,15 +72,6 @@ class JdbDatabaseIdb implements jdb.JdbDatabase {
 
   @override
   Stream<jdb.JdbEntry> get entries => _entries();
-
-  /// New in memory database.
-  JdbDatabaseIdb(
-    this._factory,
-    this._idbDatabase,
-    this._id,
-    this._path,
-    this._options,
-  );
 
   var _closed = false;
 

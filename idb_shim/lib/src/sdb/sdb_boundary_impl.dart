@@ -6,13 +6,13 @@ import 'sdb_key_utils.dart';
 /// Lower or upper boundary implementation.
 class DbBoundaryImpl<T extends Object>
     implements SdbLowerBoundary<T>, SdbUpperBoundary<T> {
+
+  /// Lower or upper boundary implementation.
+  DbBoundaryImpl(this.value, this.include);
   @override
   final T value;
   @override
   final bool include;
-
-  /// Lower or upper boundary implementation.
-  DbBoundaryImpl(this.value, this.include);
 
   @override
   int get hashCode => value.hashCode;
@@ -71,11 +71,11 @@ mixin _SdbBoundariesMixin<T extends Object> implements SdbBoundaries<T> {
 class SdbSingleKeyBoundaries<T extends Object>
     with _SdbBoundariesMixin<T>
     implements SdbBoundaries<T> {
-  /// The single key.
-  final T key;
 
   /// Single key boundaries implementation.
   SdbSingleKeyBoundaries(this.key);
+  /// The single key.
+  final T key;
 
   @override
   late final lower = SdbLowerBoundary(key, include: true);
@@ -88,13 +88,13 @@ class SdbSingleKeyBoundaries<T extends Object>
 class SdbBoundariesImpl<T extends Object>
     with _SdbBoundariesMixin<T>
     implements SdbBoundaries<T> {
+
+  /// Lower and upper boundaries implementation.
+  SdbBoundariesImpl(this.lower, this.upper);
   @override
   final SdbBoundary<T>? lower;
   @override
   final SdbBoundary<T>? upper;
-
-  /// Lower and upper boundaries implementation.
-  SdbBoundariesImpl(this.lower, this.upper);
 }
 
 /// Convert boundaries to idb.KeyRange.

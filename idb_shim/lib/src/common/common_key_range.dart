@@ -9,6 +9,35 @@ class IdbKeyRange implements KeyRange {
   @Deprecated('Use other constructors')
   IdbKeyRange();
 
+  /// Creates a new upper-bound key range.
+  IdbKeyRange.upperBound(Object? upperBound, [bool open = false]) {
+    _upperBound = upperBound;
+    _upperBoundOpen = open;
+    _checkUpperBoundDef();
+  }
+
+  /// Creates a new key range with upper and lower bounds.
+  IdbKeyRange.bound(
+    this._lowerBound,
+    this._upperBound, [
+    bool lowerOpen = false,
+    bool upperOpen = false,
+  ]) {
+    _lowerBoundOpen = lowerOpen;
+    _upperBoundOpen = upperOpen;
+    _checkLowerBoundDef();
+    _checkUpperBoundDef();
+
+    if (lowerOpen || upperOpen) {
+      // Extra compare value not keys as it might not be bounded
+      if (compareValue(_lowerBound, _upperBound) == 0) {
+        throw StateError(
+          'DataError: The lower key and upper key are equal and one of the bounds is open ($this)',
+        );
+      }
+    }
+  }
+
   /// Creates a new key range containing a single value.
   IdbKeyRange.only(Object value) : this.bound(value, value);
 
@@ -39,35 +68,6 @@ class IdbKeyRange implements KeyRange {
       }
     }
     return bound == null;
-  }
-
-  /// Creates a new upper-bound key range.
-  IdbKeyRange.upperBound(Object? upperBound, [bool open = false]) {
-    _upperBound = upperBound;
-    _upperBoundOpen = open;
-    _checkUpperBoundDef();
-  }
-
-  /// Creates a new key range with upper and lower bounds.
-  IdbKeyRange.bound(
-    this._lowerBound,
-    this._upperBound, [
-    bool lowerOpen = false,
-    bool upperOpen = false,
-  ]) {
-    _lowerBoundOpen = lowerOpen;
-    _upperBoundOpen = upperOpen;
-    _checkLowerBoundDef();
-    _checkUpperBoundDef();
-
-    if (lowerOpen || upperOpen) {
-      // Extra compare value not keys as it might not be bounded
-      if (compareValue(_lowerBound, _upperBound) == 0) {
-        throw StateError(
-          'DataError: The lower key and upper key are equal and one of the bounds is open ($this)',
-        );
-      }
-    }
   }
 
   Object? _lowerBound;

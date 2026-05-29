@@ -9,9 +9,9 @@ import 'package:idb_shim/src/native_web/js_utils.dart';
 import 'indexed_db_web.dart' as idb;
 
 class CursorNative extends Cursor {
-  final idb.IDBCursor _cursor;
 
   CursorNative(this._cursor);
+  final idb.IDBCursor _cursor;
 
   @override
   Object get key => _cursor.key!.dartifyValue();
@@ -45,11 +45,11 @@ class CursorNative extends Cursor {
 
 // native idb cursor with value
 class CursorWithValueNative extends CursorWithValue {
-  final idb.IDBCursorWithValue _cwv;
 
   //  Object _value;
   //  Object _key;
   CursorWithValueNative(this._cwv);
+  final idb.IDBCursorWithValue _cwv;
 
   //    _value = _cwv.value;
   //    _key = _cwv.key;

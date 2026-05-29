@@ -46,6 +46,8 @@ bool get _incrementAndShouldLog {
 }
 
 class _VersionChangeEventLogger implements VersionChangeEvent {
+
+  _VersionChangeEventLogger(this.factory, this.delegate, this.id);
   final IdbFactoryLogger factory;
   final int id;
   @override
@@ -63,8 +65,6 @@ class _VersionChangeEventLogger implements VersionChangeEvent {
 
   final VersionChangeEvent delegate;
 
-  _VersionChangeEventLogger(this.factory, this.delegate, this.id);
-
   @override
   int get newVersion => delegate.newVersion;
 
@@ -80,6 +80,10 @@ class _VersionChangeEventLogger implements VersionChangeEvent {
 
 /// Wrapper for window.indexedDB and worker self.indexedDB
 class IdbFactoryLoggerImpl extends IdbFactoryBase implements IdbFactoryLogger {
+
+  IdbFactoryLoggerImpl(this.nativeFactory) {
+    assert(nativeFactory is! IdbFactoryLoggerImpl);
+  }
   final IdbFactory nativeFactory;
   static int _id = 0;
 
@@ -100,10 +104,6 @@ class IdbFactoryLoggerImpl extends IdbFactoryBase implements IdbFactoryLogger {
 
   @override
   bool get persistent => true;
-
-  IdbFactoryLoggerImpl(this.nativeFactory) {
-    assert(nativeFactory is! IdbFactoryLoggerImpl);
-  }
 
   @override
   String get name => idbFactoryNameNative;

@@ -280,7 +280,7 @@ sembast.Filter keyRangeFilter(
       return true;
     });
   } else {
-    throw 'keyPath $keyPath not supported';
+    throw ArgumentError('keyPath $keyPath not supported');
   }
 }
 
@@ -304,8 +304,8 @@ sembast.Filter _debugSingleFieldNotNullFilter(String keyPath) =>
 sembast.Filter _debugSingleFieldKeyEqualsFilter(String keyPath, dynamic key) =>
     sembast.Filter.equals(keyPath, key);
 
-final singleFieldKeyEqualsFilter = _singleFieldKeyEqualsFilter;
-final singleFieldKeyNotNullFilter = _singleFieldKeyNotNullFilter;
+const singleFieldKeyEqualsFilter = _singleFieldKeyEqualsFilter;
+const singleFieldKeyNotNullFilter = _singleFieldKeyNotNullFilter;
 // final singleFieldKeyEqualsFilter = _debugSingleFieldKeyEqualsFilter;
 // final singleFieldKeyNotNullFilter = _debugSingleFieldNotNullFilter;
 
@@ -374,7 +374,7 @@ sembast.Filter keyFilter(
       }
     }
   }
-  throw 'keyPath $keyPath not supported';
+  throw ArgumentError('keyPath $keyPath not supported');
 }
 
 sembast.Filter keyOrRangeFilter(
@@ -401,5 +401,5 @@ sembast.Filter keyNotNullFilter(dynamic keyPath) {
       ),
     );
   }
-  throw 'keyPath $keyPath not supported';
+  throw ArgumentError('keyPath $keyPath not supported');
 }

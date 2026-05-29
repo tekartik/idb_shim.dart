@@ -6,14 +6,14 @@ import 'package:idb_shim/utils/idb_cursor_utils.dart' as idb;
 
 /// Internal implementation of [idb.CursorRow].
 class IdbCursorRowImpl implements idb.CursorRow {
-  /// The underlying cursor with value.
-  final idb.IdbCursorWithValue cwv;
 
   /// Create a cursor row from an idb cursor with value.
   IdbCursorRowImpl(this.cwv)
     : key = cwv.key,
       primaryKey = cwv.primaryKey,
       value = idbCloneValue(cwv.value);
+  /// The underlying cursor with value.
+  final idb.IdbCursorWithValue cwv;
 
   @override
   final Object key;
@@ -67,6 +67,9 @@ Stream<T> cursorApplyFilterLimitOffset<C extends idb.IdbCursor, T>(
 
 /// Controller to handle limit and offset on a cursor stream.
 class LimitOffsetControllerImpl<C extends idb.IdbCursor, T> {
+
+  /// Create a limit/offset controller.
+  LimitOffsetControllerImpl({this.offset, this.limit});
   /// Offset to skip.
   final int? offset;
 
@@ -81,9 +84,6 @@ class LimitOffsetControllerImpl<C extends idb.IdbCursor, T> {
 
   /// Underlying cursor controller.
   final ctlr = CursorControllerImpl<C, T>();
-
-  /// Create a limit/offset controller.
-  LimitOffsetControllerImpl({this.offset, this.limit});
 
   /// Process the next row.
   void next(C cursor, T? row) {

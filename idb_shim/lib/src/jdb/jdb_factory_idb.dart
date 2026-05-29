@@ -12,13 +12,13 @@ var _debug = false; // devWarning(true); // false
 
 /// In memory jdb.
 class JdbFactoryIdb implements jdb.JdbFactory {
+
+  /// Idb factory
+  JdbFactoryIdb(this.idbFactory);
   var _lastId = 0;
 
   /// The idb factory used
   final IdbFactory idbFactory;
-
-  /// Idb factory
-  JdbFactoryIdb(this.idbFactory);
 
   /// Keep track of open databases.
   final databases = <String, List<JdbDatabaseIdb>>{};

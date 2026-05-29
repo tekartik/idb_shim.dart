@@ -16,13 +16,13 @@ extension SdbRecordRefInternalExtension<K extends SdbKey, V extends SdbValue>
 /// Record reference implementation.
 class SdbRecordRefImpl<K extends SdbKey, V extends SdbValue>
     implements SdbRecordRef<K, V> {
+
+  /// Record reference implementation.
+  SdbRecordRefImpl(this.store, this.key);
   @override
   final SdbStoreRefImpl<K, V> store;
   @override
   final K key;
-
-  /// Record reference implementation.
-  SdbRecordRefImpl(this.store, this.key);
 
   @override
   String toString() => 'Record(${store.name}, $key)';

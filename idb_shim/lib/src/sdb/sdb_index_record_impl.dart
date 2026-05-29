@@ -29,13 +29,13 @@ class SdbIndexRecordRefImpl<
   I extends SdbIndexKey
 >
     implements SdbIndexRecordRef<K, V, I> {
+
+  /// Index record reference implementation.
+  SdbIndexRecordRefImpl(this.index, this.indexKey);
   @override
   final SdbIndexRefImpl<K, V, I> index;
   @override
   final I indexKey;
-
-  /// Index record reference implementation.
-  SdbIndexRecordRefImpl(this.index, this.indexKey);
 
   @override
   SdbStoreRefImpl<K, V> get store => index.store;

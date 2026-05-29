@@ -15,11 +15,6 @@ abstract class SdbTransactionIndexRef<
   V extends SdbValue,
   I extends SdbIndexKey
 > {
-  /// transaction store reference.
-  SdbTransactionStoreRef<K, V> get store;
-
-  /// Store reference.
-  SdbIndexRef<K, V, I> get ref;
 
   /// Create transaction index reference.
   @protected
@@ -29,6 +24,11 @@ abstract class SdbTransactionIndexRef<
   }) {
     return _SdbTransactionIndexRefIdb<K, V, I>(ref: index, store: txnStore);
   }
+  /// transaction store reference.
+  SdbTransactionStoreRef<K, V> get store;
+
+  /// Store reference.
+  SdbIndexRef<K, V, I> get ref;
 
   /// Index name.
   String get name;
@@ -75,6 +75,9 @@ class _SdbTransactionIndexRefIdb<
 >
     with SdbTransactionIndexRefIdbMixin<K, V, I>
     implements SdbTransactionIndexRef<K, V, I> {
+  _SdbTransactionIndexRefIdb({required this.ref, required this.store}) {
+    idbIndex = storeImpl.idbObjectStore.index(ref.name);
+  }
   @override
   late final idb.Index idbIndex;
   @override
@@ -86,7 +89,4 @@ class _SdbTransactionIndexRefIdb<
 
   SdbTransactionStoreRefImpl<K, V> get storeImpl =>
       store as SdbTransactionStoreRefImpl<K, V>;
-  _SdbTransactionIndexRefIdb({required this.ref, required this.store}) {
-    idbIndex = storeImpl.idbObjectStore.index(ref.name);
-  }
 }

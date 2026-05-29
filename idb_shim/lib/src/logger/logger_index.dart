@@ -6,11 +6,11 @@ import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/logger/logger_object_store.dart';
 
 class IndexLogger extends Index {
+
+  IndexLogger(this.idbObjectStoreLogger, this.idbIndex);
   Index idbIndex;
 
   final ObjectStoreLogger idbObjectStoreLogger;
-
-  IndexLogger(this.idbObjectStoreLogger, this.idbIndex);
 
   @override
   Future get(Object key) => idbIndex.get(key);

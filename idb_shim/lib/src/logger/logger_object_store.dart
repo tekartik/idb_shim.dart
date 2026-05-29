@@ -10,18 +10,18 @@ import 'logger_index.dart';
 import 'logger_utils.dart';
 
 class ObjectStoreLogger extends ObjectStore {
-  /// Specified during open.
-  final DatabaseLogger? idbDatabaseLogger;
-
-  /// Specified in a transaction.
-  final TransactionLogger? idbTransactionLogger;
-  ObjectStore idbObjectStore;
 
   ObjectStoreLogger(
     this.idbDatabaseLogger,
     this.idbTransactionLogger,
     this.idbObjectStore,
   );
+  /// Specified during open.
+  final DatabaseLogger? idbDatabaseLogger;
+
+  /// Specified in a transaction.
+  final TransactionLogger? idbTransactionLogger;
+  ObjectStore idbObjectStore;
   String _storeMessage(String message) => "'${idbObjectStore.name}' $message";
   void log(String message) {
     if (idbTransactionLogger != null) {

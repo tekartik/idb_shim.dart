@@ -32,8 +32,6 @@ extension SdbSingleStoreTransactionInternalExtension<
 class SdbSingleStoreTransactionImpl<K extends SdbKey, V extends SdbValue>
     extends SdbDatabaseTransactionImpl
     implements SdbSingleStoreTransaction<K, V> {
-  @override
-  final SdbTransactionStoreRefImpl<K, V> txnStore;
 
   /// Single store transaction implementation.
   SdbSingleStoreTransactionImpl(
@@ -50,6 +48,8 @@ class SdbSingleStoreTransactionImpl<K extends SdbKey, V extends SdbValue>
       idbTransactionMode(mode),
     );
   }
+  @override
+  final SdbTransactionStoreRefImpl<K, V> txnStore;
 
   /// Get a single record.
   Future<SdbRecordSnapshotImpl<K, V>?> getRecordImpl(K key) =>
@@ -169,17 +169,17 @@ extension on idb.ObjectStore {
 class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
     with SdbTransactionStoreRefImplMixin<K, V>
     implements SdbTransactionStoreRef<K, V> {
+
+  /// Transaction reference implementation.
+  SdbTransactionStoreRefImpl(this.store);
+
+  /// Transaction reference implementation.
+  SdbTransactionStoreRefImpl.txn(this.transaction, this.store);
   // Set later
   @override
   late SdbTransactionImpl transaction;
   @override
   final SdbStoreRefImpl<K, V> store;
-
-  /// Transaction reference implementation.
-  SdbTransactionStoreRefImpl.txn(this.transaction, this.store);
-
-  /// Transaction reference implementation.
-  SdbTransactionStoreRefImpl(this.store);
 
   idb.ObjectStore? _idbObjectStore;
 
@@ -453,11 +453,6 @@ extension SdbMultiStoreTransactionInternalExtension
 /// Multi store transaction implementation.
 class SdbMultiStoreTransactionImpl extends SdbDatabaseTransactionImpl
     implements SdbMultiStoreTransaction {
-  /// Stores.
-  late List<String> _stores;
-
-  /// Filled when requested.
-  final _txnStoreMap = <SdbStoreRef, SdbTransactionStoreRefImpl>{};
 
   /// Multi store transaction implementation.
   SdbMultiStoreTransactionImpl(
@@ -476,6 +471,11 @@ class SdbMultiStoreTransactionImpl extends SdbDatabaseTransactionImpl
       idbTransactionMode(mode),
     );
   }
+  /// Stores.
+  late List<String> _stores;
+
+  /// Filled when requested.
+  final _txnStoreMap = <SdbStoreRef, SdbTransactionStoreRefImpl>{};
 
   /// Get a transaction store.
   SdbTransactionStoreRef<K, V>

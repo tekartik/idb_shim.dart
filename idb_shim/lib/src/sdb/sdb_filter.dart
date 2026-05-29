@@ -8,6 +8,9 @@ import 'sdb_codec.dart';
 
 /// Private record snapshot for filter
 class SdbFilterRecordSnapshotPrv implements SdbFilterRecordSnapshot {
+
+  /// Private record snapshot for filter
+  SdbFilterRecordSnapshotPrv(this._cwv, this._codec);
   final SdbCodec _codec;
 
   /// Cursor with value
@@ -18,9 +21,6 @@ class SdbFilterRecordSnapshotPrv implements SdbFilterRecordSnapshot {
 
   /// Index key if any
   Object? get indexKey => _cwv.key;
-
-  /// Private record snapshot for filter
-  SdbFilterRecordSnapshotPrv(this._cwv, this._codec);
   @override
   Object? operator [](String field) {
     var data = value;

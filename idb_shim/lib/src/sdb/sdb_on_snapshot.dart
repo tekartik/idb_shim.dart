@@ -12,6 +12,7 @@ extension SdbStoreRefExtensionOnSnapshots<K extends SdbKey, V extends SdbValue>
     SdbDatabase db, {
     SdbFindOptions<K>? options,
   }) {
+    // ignore: close_sinks
     late StreamController<List<SdbRecordSnapshot<K, V>>> controller;
     StreamSubscription<List<String>>? externalSub;
     void addSnapshots() {
@@ -60,6 +61,7 @@ extension SdbIndexRefExtensionOnSnapshots<
     SdbDatabase db, {
     SdbFindOptions<IK>? options,
   }) {
+    // ignore: close_sinks
     late StreamController<List<SdbIndexRecordSnapshot<K, V, IK>>> controller;
     StreamSubscription<List<String>>? externalSub;
     void addSnapshots() {
@@ -101,6 +103,7 @@ extension SdbRecordRefExtensionOnSnapshot<K extends SdbKey, V extends SdbValue>
   /// Reads the data and set a listener to redo the query on changes,
   /// including changes made in other browser tabs.
   Stream<SdbRecordSnapshot<K, V>?> onSnapshot(SdbDatabase db) {
+    // ignore: close_sinks
     late StreamController<SdbRecordSnapshot<K, V>?> controller;
     StreamSubscription<List<String>>? externalSub;
     void addSnapshot() {
@@ -152,6 +155,7 @@ extension SdbIndexRecordRefExtensionOnSnapshot<
   /// Reads the data and set a listener to redo the query on changes,
   /// including changes made in other browser tabs.
   Stream<SdbIndexRecordSnapshot<K, V, IK>?> onSnapshot(SdbDatabase db) {
+    // ignore: close_sinks
     late StreamController<SdbIndexRecordSnapshot<K, V, IK>?> controller;
     StreamSubscription<List<String>>? externalSub;
     void addSnapshot() {
@@ -192,6 +196,7 @@ extension SdbIndexRecordRefExtensionOnSnapshot<
     SdbDatabase db, {
     SdbFindOptions<IK>? options,
   }) {
+    // ignore: close_sinks
     late StreamController<List<SdbIndexRecordSnapshot<K, V, IK>>> controller;
     StreamSubscription<List<String>>? externalSub;
     void addSnapshots() {

@@ -6,7 +6,7 @@ void main() async {
   final idbFactory = getIdbFactoryPersistent('test/tmp/out');
 
   // define the store name
-  final storeName = 'records';
+  const storeName = 'records';
 
   // open the database
   final db = await idbFactory.open(
