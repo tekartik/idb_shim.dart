@@ -171,6 +171,7 @@ class StoreKeyCursorSembast extends Object with KeyCursorSembastMixin {
     recordIndex = index;
   }
 }
+
 /*
 class _SembastCursorWithValue extends Object
     with _SembastKeyCursorMixin, _SembastCursorWithValueMixin {
