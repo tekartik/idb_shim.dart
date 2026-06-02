@@ -1,3 +1,7 @@
+## 2.9.3
+
+* Requires dart 3.12
+
 ## 2.9.2
 
 * sdb: Add `iterate` on Store and Cursor.
