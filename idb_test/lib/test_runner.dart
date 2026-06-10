@@ -2,6 +2,7 @@ library;
 
 import 'package:idb_test/sdb_changes_listener_persistent_test.dart';
 import 'package:idb_test/sdb_format_test.dart';
+import 'package:idb_test/sdb_on_snapshot_test.dart';
 import 'package:idb_test/sdb_open_test.dart';
 import 'package:idb_test/sdb_schema_test.dart';
 import 'package:idb_test/sdb_test.dart';
@@ -33,6 +34,7 @@ import 'utils_test.dart' as utils_test;
 void defineAllSdbTests(TestContext ctx) {
   idbSimpleSdbTest(ctx);
   defineIdbSdbChangesListenerTests(ctx);
+  defineIdbSdbOnSnapshotTests(ctx);
   sdbIndexTests(ctx);
   idbSdbTypeTest(ctx);
   idbSdbOpenTests(ctx);

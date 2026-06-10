@@ -46,6 +46,44 @@ extension SdbStoreRefExtensionOnSnapshots<K extends SdbKey, V extends SdbValue>
     );
     return controller.stream;
   }
+
+  /// Reads the count and set a listener to redo the count on changes,
+  /// including changes made in other browser tabs.
+  Stream<int> onCount(SdbDatabase db, {SdbFindOptions<K>? options}) {
+    // ignore: close_sinks
+    late StreamController<int> controller;
+    StreamSubscription<List<String>>? externalSub;
+    void addCount() {
+      count(db, options: options).then((count) {
+        if (!controller.isClosed) {
+          controller.add(count);
+        }
+      });
+    }
+
+    FutureOr<void> onChange(
+      SdbTransaction transaction,
+      List<SdbRecordChange<K, V>> changes,
+    ) {
+      addCount();
+    }
+
+    controller = StreamController<int>(
+      onListen: () {
+        addCount();
+        addOnChangesListener(db, onChange);
+        externalSub = db.impl.externalStoreChanges
+            .where((storeNames) => storeNames.contains(name))
+            .listen((_) => addCount());
+        controller.onCancel = () {
+          externalSub?.cancel();
+          externalSub = null;
+          removeOnChangesListener(db, onChange);
+        };
+      },
+    );
+    return controller.stream;
+  }
 }
 
 /// Snapshots extension on index.
@@ -86,6 +124,44 @@ extension SdbIndexRefExtensionOnSnapshots<
         externalSub = db.impl.externalStoreChanges
             .where((storeNames) => storeNames.contains(store.name))
             .listen((_) => addSnapshots());
+        controller.onCancel = () {
+          externalSub?.cancel();
+          externalSub = null;
+          store.removeOnChangesListener(db, onChange);
+        };
+      },
+    );
+    return controller.stream;
+  }
+
+  /// Reads the count and set a listener to redo the count on changes,
+  /// including changes made in other browser tabs.
+  Stream<int> onCount(SdbDatabase db, {SdbFindOptions<IK>? options}) {
+    // ignore: close_sinks
+    late StreamController<int> controller;
+    StreamSubscription<List<String>>? externalSub;
+    void addCount() {
+      count(db, options: options).then((count) {
+        if (!controller.isClosed) {
+          controller.add(count);
+        }
+      });
+    }
+
+    FutureOr<void> onChange(
+      SdbTransaction transaction,
+      List<SdbRecordChange<K, V>> changes,
+    ) {
+      addCount();
+    }
+
+    controller = StreamController<int>(
+      onListen: () {
+        addCount();
+        store.addOnChangesListener(db, onChange);
+        externalSub = db.impl.externalStoreChanges
+            .where((storeNames) => storeNames.contains(store.name))
+            .listen((_) => addCount());
         controller.onCancel = () {
           externalSub?.cancel();
           externalSub = null;

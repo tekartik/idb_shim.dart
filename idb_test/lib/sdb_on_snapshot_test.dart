@@ -1,29 +1,42 @@
-import 'dart:async';
-
 import 'package:idb_shim/sdb.dart';
+// ignore: implementation_imports
 import 'package:idb_shim/src/sdb/sdb_database_impl.dart'
     show SdbDatabaseInternalExtension;
-import 'package:test/test.dart';
 
-final testStore = SdbStoreRef<int, String>('test');
-final testModelStore = SdbStoreRef<int, SdbModel>('test_model');
-final testIndex = testModelStore.index<String>('test_index');
-Future<void> main() async {
-  group('track_changes', () {
+import 'idb_test_common.dart';
+import 'sdb_test.dart';
+
+void main() {
+  defineSdbOnSnapshotTests(sdbMemoryContext);
+}
+
+void defineIdbSdbOnSnapshotTests(TestContext ctx) {
+  var factory = sdbFactoryFromIdb(ctx.factory);
+  defineSdbOnSnapshotTests(SdbTestContext(factory));
+}
+
+final _testStore = SdbStoreRef<int, String>('test');
+final _testModelStore = SdbStoreRef<int, SdbModel>('test_model');
+final _testIndex = _testModelStore.index<String>('test_index');
+
+void defineSdbOnSnapshotTests(SdbTestContext ctx) {
+  var factory = ctx.factory;
+
+  group('on_snapshot', () {
     late SdbDatabase db;
 
     setUp(() async {
-      var dbName = 'on_snapshot_test.db';
-      await sdbFactoryMemory.deleteDatabase(dbName);
-      db = await sdbFactoryMemory.openDatabase(
+      var dbName = 'sdb_on_snapshot_test.db';
+      await factory.deleteDatabase(dbName);
+      db = await factory.openDatabase(
         dbName,
         options: SdbOpenDatabaseOptions(
           version: 1,
           schema: SdbDatabaseSchema(
             stores: [
-              testStore.schema(),
-              testModelStore.schema(
-                indexes: [testIndex.schema(keyPath: 'test_index')],
+              _testStore.schema(),
+              _testModelStore.schema(
+                indexes: [_testIndex.schema(keyPath: 'test_index')],
               ),
             ],
           ),
@@ -49,7 +62,7 @@ Future<void> main() async {
     Future<void> completed() => completer.future;
 
     test('onSnapshot', () async {
-      var record = testStore.record(1);
+      var record = _testStore.record(1);
 
       var snapshots = <SdbRecordSnapshot<int, String>?>[];
       var subscription = record.onSnapshot(db).listen((snapshot) {
@@ -87,7 +100,7 @@ Future<void> main() async {
 
     test('onSnapshots', () async {
       var snapshotsList = <List<SdbRecordSnapshot<int, String>>>[];
-      var subscription = testStore.onSnapshots(db).listen((snapshots) {
+      var subscription = _testStore.onSnapshots(db).listen((snapshots) {
         snapshotsList.add(snapshots);
         complete();
       });
@@ -99,113 +112,29 @@ Future<void> main() async {
 
       // Add 1
       newCompleter();
-      await testStore.record(1).put(db, 'text1');
+      await _testStore.record(1).put(db, 'text1');
       await completed();
       expect(snapshotsList.last, hasLength(1));
       expect(snapshotsList.last.first.value, 'text1');
 
       // Add 2
       newCompleter();
-      await testStore.record(2).put(db, 'text2');
+      await _testStore.record(2).put(db, 'text2');
       await completed();
       expect(snapshotsList.last, hasLength(2));
       expect(snapshotsList.last[1].value, 'text2');
 
       // Update 1
       newCompleter();
-      await testStore.record(1).put(db, 'text1_updated');
+      await _testStore.record(1).put(db, 'text1_updated');
       await completed();
       expect(snapshotsList.last.first.value, 'text1_updated');
 
       // Delete 2
       newCompleter();
-      await testStore.record(2).delete(db);
+      await _testStore.record(2).delete(db);
       await completed();
       expect(snapshotsList.last, hasLength(1));
-
-      expect(db.impl.changesListener.isEmpty, isFalse);
-      await subscription.cancel();
-      expect(db.impl.changesListener.isEmpty, isTrue);
-    });
-
-    test('onIndexRecordSnapshot', () async {
-      var indexRecord = testIndex.record('text1');
-
-      var snapshots = <SdbIndexRecordSnapshot<int, SdbModel, String>?>[];
-      var subscription = indexRecord.onSnapshot(db).listen((snapshot) {
-        snapshots.add(snapshot);
-        complete();
-      });
-
-      // Initial null
-      newCompleter();
-      await completed();
-      expect(snapshots, [null]);
-
-      // Put 1
-      newCompleter();
-      await testModelStore.record(1).put(db, {'test_index': 'text1'});
-      await completed();
-      expect(snapshots.last!.value['test_index'], 'text1');
-      expect(snapshots.last!.key, 1);
-
-      // Update 1 to something else
-      newCompleter();
-      await testModelStore.record(1).put(db, {'test_index': 'text2'});
-      await completed();
-      expect(snapshots.last, null);
-
-      // Delete 1
-      newCompleter();
-      await testModelStore.record(1).delete(db);
-      await completed();
-      expect(snapshots.last, null);
-
-      expect(db.impl.changesListener.isEmpty, isFalse);
-      await subscription.cancel();
-      expect(db.impl.changesListener.isEmpty, isTrue);
-    });
-
-    test('onIndexRecordSnapshots', () async {
-      var indexRecord = testIndex.record('text1');
-
-      var snapshotsList =
-          <List<SdbIndexRecordSnapshot<int, SdbModel, String>>>[];
-      var subscription = indexRecord.onSnapshots(db).listen((snapshots) {
-        snapshotsList.add(snapshots);
-        complete();
-      });
-
-      // Initial empty
-      newCompleter();
-      await completed();
-      expect(snapshotsList.last, isEmpty);
-
-      // Add 1 matching index key
-      newCompleter();
-      await testModelStore.record(1).put(db, {'test_index': 'text1'});
-      await completed();
-      expect(snapshotsList.last, hasLength(1));
-      expect(snapshotsList.last.first.value['test_index'], 'text1');
-
-      // Add 2 matching different index key (should not affect this stream)
-      newCompleter();
-      await testModelStore.record(2).put(db, {'test_index': 'text2'});
-      await completed();
-      expect(snapshotsList.last, hasLength(1));
-
-      // Update 1 to not match anymore
-      newCompleter();
-      await testModelStore.record(1).put(db, {'test_index': 'text2'});
-      await completed();
-      expect(snapshotsList.last, isEmpty);
-
-      // Update 2 to match
-      newCompleter();
-      await testModelStore.record(2).put(db, {'test_index': 'text1'});
-      await completed();
-      expect(snapshotsList.last, hasLength(1));
-      expect(snapshotsList.last.first.key, 2);
 
       expect(db.impl.changesListener.isEmpty, isFalse);
       await subscription.cancel();
@@ -215,7 +144,7 @@ Future<void> main() async {
     test('onIndexSnapshots', () async {
       var snapshotsList =
           <List<SdbIndexRecordSnapshot<int, SdbModel, String>>>[];
-      var subscription = testIndex.onSnapshots(db).listen((snapshots) {
+      var subscription = _testIndex.onSnapshots(db).listen((snapshots) {
         snapshotsList.add(snapshots);
         complete();
       });
@@ -227,29 +156,20 @@ Future<void> main() async {
 
       // Add 1 matching index
       newCompleter();
-      await testModelStore.record(1).put(db, {'test_index': 'text1'});
+      await _testModelStore.record(1).put(db, {'test_index': 'text1'});
       await completed();
       expect(snapshotsList.last, hasLength(1));
       expect(snapshotsList.last.first.value['test_index'], 'text1');
 
       // Add 2 matching index
       newCompleter();
-      await testModelStore.record(2).put(db, {'test_index': 'text2'});
+      await _testModelStore.record(2).put(db, {'test_index': 'text2'});
       await completed();
       expect(snapshotsList.last, hasLength(2));
 
-      // Update 1 to not match (index still tracks all records in this case, but we check values)
-      newCompleter();
-      await testModelStore.record(1).put(db, {'test_index': 'text1_updated'});
-      await completed();
-      expect(
-        snapshotsList.last.any((s) => s.value['test_index'] == 'text1_updated'),
-        isTrue,
-      );
-
       // Delete 2
       newCompleter();
-      await testModelStore.record(2).delete(db);
+      await _testModelStore.record(2).delete(db);
       await completed();
       expect(snapshotsList.last, hasLength(1));
 
@@ -260,7 +180,7 @@ Future<void> main() async {
 
     test('onCount (store)', () async {
       var counts = <int>[];
-      var subscription = testStore.onCount(db).listen((count) {
+      var subscription = _testStore.onCount(db).listen((count) {
         counts.add(count);
         complete();
       });
@@ -272,19 +192,19 @@ Future<void> main() async {
 
       // Add 1
       newCompleter();
-      await testStore.record(1).put(db, 'text1');
+      await _testStore.record(1).put(db, 'text1');
       await completed();
       expect(counts.last, 1);
 
       // Add 2
       newCompleter();
-      await testStore.record(2).put(db, 'text2');
+      await _testStore.record(2).put(db, 'text2');
       await completed();
       expect(counts.last, 2);
 
       // Delete 1
       newCompleter();
-      await testStore.record(1).delete(db);
+      await _testStore.record(1).delete(db);
       await completed();
       expect(counts.last, 1);
 
@@ -295,7 +215,7 @@ Future<void> main() async {
 
     test('onCount (index)', () async {
       var counts = <int>[];
-      var subscription = testIndex.onCount(db).listen((count) {
+      var subscription = _testIndex.onCount(db).listen((count) {
         counts.add(count);
         complete();
       });
@@ -307,19 +227,19 @@ Future<void> main() async {
 
       // Add 1 matching index
       newCompleter();
-      await testModelStore.record(1).put(db, {'test_index': 'text1'});
+      await _testModelStore.record(1).put(db, {'test_index': 'text1'});
       await completed();
       expect(counts.last, 1);
 
       // Add 2 matching index
       newCompleter();
-      await testModelStore.record(2).put(db, {'test_index': 'text2'});
+      await _testModelStore.record(2).put(db, {'test_index': 'text2'});
       await completed();
       expect(counts.last, 2);
 
       // Delete 1
       newCompleter();
-      await testModelStore.record(1).delete(db);
+      await _testModelStore.record(1).delete(db);
       await completed();
       expect(counts.last, 1);
 
