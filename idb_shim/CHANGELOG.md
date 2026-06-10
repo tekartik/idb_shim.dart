@@ -1,6 +1,7 @@
-## 2.9.3
+## 2.9.3+1
 
 * Requires dart 3.12
+* Add `onCount` for stores and indexes
 
 ## 2.9.2
 
