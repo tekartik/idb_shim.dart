@@ -1,3 +1,8 @@
+## 2.9.4
+
+* Add `sandbox()` extension method on `IdbFactory` and `SdbFactory` to create
+  a factory where every database is located below a given path.
+
 ## 2.9.3+1
 
 * Requires dart 3.12
