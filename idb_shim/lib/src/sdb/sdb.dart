@@ -15,6 +15,7 @@ export 'sdb_factory.dart'
     show SdbFactory, SdbFactoryExtension, SdbOpenDatabaseOptions;
 export 'sdb_factory_logger.dart'
     show SdbFactoryLoggerExtension, SdbFactoryLoggerType;
+export 'sdb_factory_sandbox.dart' show SdbFactorySandboxExtension;
 export 'sdb_filter.dart'
     show SdbFilter, SdbFilterRecordSnapshot, SdbFilterRecordSnapshotExt;
 export 'sdb_find_options.dart' show SdbFindOptions, sdbFindOptionsMerge;
