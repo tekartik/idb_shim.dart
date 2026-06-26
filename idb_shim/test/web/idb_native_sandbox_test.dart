@@ -10,6 +10,7 @@ void main() {
       var idbFactory = idbFactoryNative;
       var sandboxed = idbFactory.sandbox(path: 'sandbox_test');
       var dbName = 'sandbox_native.db';
+      expect(sandboxed.fullPath(dbName), 'sandbox_test/$dbName');
       await sandboxed.deleteDatabase(dbName);
       var db = await sandboxed.open(
         dbName,

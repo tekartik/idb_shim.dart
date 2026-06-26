@@ -2,6 +2,8 @@ library;
 
 import 'dart:typed_data';
 
+import 'package:path/path.dart';
+
 import 'idb_test_common.dart';
 
 // so that this can be run directly
@@ -23,6 +25,12 @@ void defineTests(TestContext ctx) {
     test('delete database', () async {
       await setupDeleteDb();
       await idbFactory.deleteDatabase(dbName!);
+    });
+
+    test('sandbox', () async {
+      var sandbox = idbFactory.sandbox(path: 's1');
+      var sandbox2 = sandbox.sandbox(path: 's2');
+      expect(sandbox2.fullPath('test'), sandbox.fullPath(join('s2', 'test')));
     });
 
     test('cmp', () {

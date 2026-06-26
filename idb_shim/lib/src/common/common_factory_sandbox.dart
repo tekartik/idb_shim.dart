@@ -23,6 +23,14 @@ extension IdbFactorySandboxExtension on IdbFactory {
     }
     return _IdbFactorySandbox(delegate: this, rootPath: path);
   }
+
+  /// full path of a database path
+  String fullPath(String path) {
+    if (this is _IdbFactorySandbox) {
+      return (this as _IdbFactorySandbox).delegatePath(path);
+    }
+    return path;
+  }
 }
 
 class _IdbFactorySandbox extends IdbFactoryBase {

@@ -13,4 +13,7 @@ extension SdbFactorySandboxExtension on SdbFactory {
   /// Works with any [SdbFactory] implementation (io, memory, web).
   SdbFactory sandbox({required String path}) =>
       sdbFactoryFromIdb(idbFactory.sandbox(path: path));
+
+  /// full path of a database path
+  String fullPath(String path) => idbFactory.fullPath(path);
 }

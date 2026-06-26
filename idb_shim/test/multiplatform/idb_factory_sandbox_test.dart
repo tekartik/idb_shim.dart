@@ -73,6 +73,12 @@ void main() {
         ),
       );
       var sandboxed = factory.sandbox(path: 'sandbox');
+      var sandboxed2 = sandboxed.sandbox(path: 'subsandbox');
+      expect(sandboxed.fullPath('test'), join('sandbox', 'test'));
+      expect(
+        sandboxed2.fullPath('test'),
+        join('sandbox', 'subsandbox', 'test'),
+      );
       var db = await sandboxed.openDatabase('test.db', options: options);
       var key = await testStore.add(db, {'value': 1});
       await db.close();
