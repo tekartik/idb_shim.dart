@@ -1,3 +1,8 @@
+## 2.9.5-1
+
+* Add `fullPath()` extension method on `IdbFactory` and `SdbFactory` to get the full
+  path of a database
+
 ## 2.9.4
 
 * Add `sandbox()` extension method on `IdbFactory` and `SdbFactory` to create
