@@ -1,4 +1,4 @@
-## 2.9.5-2
+## 2.9.5
 
 * Add `fullPath()` extension method on `IdbFactory` and `SdbFactory` to get the full
   path of a database. 
