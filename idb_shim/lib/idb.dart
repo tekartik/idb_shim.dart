@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:idb_shim/src/common/common_factory.dart';
 import 'package:idb_shim/src/common/common_key_range.dart';
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as p;
 
 import 'src/cursor.dart';
 export 'package:idb_shim/src/common/common_factory.dart' show IdbFactoryExt;
@@ -620,6 +621,9 @@ abstract class IdbFactory {
 
   /// whether the changes are persistent (i.e. not in memory)
   bool get persistent;
+
+  /// Path context
+  p.Context get pathContext;
 }
 
 ///

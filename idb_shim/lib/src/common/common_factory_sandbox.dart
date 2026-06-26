@@ -35,7 +35,7 @@ extension IdbFactorySandboxExtension on IdbFactory {
 
 class _IdbFactorySandbox extends IdbFactoryBase {
   _IdbFactorySandbox({required this.delegate, required String rootPath})
-    : rootPath = p.normalize(rootPath);
+    : rootPath = delegate.pathContext.normalize(rootPath);
 
   /// The wrapped factory.
   final IdbFactory delegate;
@@ -43,15 +43,20 @@ class _IdbFactorySandbox extends IdbFactoryBase {
   /// The root path of the sandbox in the delegate factory.
   final String rootPath;
 
+  @override
+  p.Context get pathContext => delegate.pathContext;
+
   /// Converts a name/path in the sandboxed factory to a name/path in the
   /// delegate factory. Throws an [ArgumentError] if the path escapes the
   /// sandbox.
   String delegatePath(String path) {
-    var relativePath = p.isAbsolute(path)
-        ? p.relative(path, from: p.rootPrefix(path))
+    var relativePath = pathContext.isAbsolute(path)
+        ? pathContext.relative(path, from: pathContext.rootPrefix(path))
         : path;
-    var fullPath = p.normalize(p.join(rootPath, relativePath));
-    if (!p.isWithin(rootPath, fullPath)) {
+    var fullPath = pathContext.normalize(
+      pathContext.join(rootPath, relativePath),
+    );
+    if (!pathContext.isWithin(rootPath, fullPath)) {
       throw ArgumentError.value(
         path,
         'path',
@@ -97,8 +102,8 @@ class _IdbFactorySandbox extends IdbFactoryBase {
     // ignore: deprecated_member_use_from_same_package
     var names = await delegate.getDatabaseNames();
     return names
-        .where((name) => p.isWithin(rootPath, name))
-        .map((name) => p.relative(name, from: rootPath))
+        .where((name) => pathContext.isWithin(rootPath, name))
+        .map((name) => pathContext.relative(name, from: rootPath))
         .toList();
   }
 

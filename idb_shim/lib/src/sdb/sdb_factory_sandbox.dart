@@ -1,4 +1,5 @@
 import 'package:idb_shim/idb_sdb.dart';
+import 'package:path/path.dart' as p;
 
 /// Sdb Factory sandbox extension.
 extension SdbFactorySandboxExtension on SdbFactory {
@@ -16,4 +17,7 @@ extension SdbFactorySandboxExtension on SdbFactory {
 
   /// full path of a database path
   String fullPath(String path) => idbFactory.fullPath(path);
+
+  /// Path context
+  p.Context get pathContext => idbFactory.pathContext;
 }

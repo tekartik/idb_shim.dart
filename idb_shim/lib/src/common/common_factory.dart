@@ -2,6 +2,7 @@
 
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/common/common_value.dart';
+import 'package:path/path.dart' as p;
 
 abstract class IdbFactoryBase implements IdbFactory {
   ///
@@ -10,6 +11,9 @@ abstract class IdbFactoryBase implements IdbFactory {
   IdbFactoryBase() {
     IdbFactoryBase.supported = true;
   }
+
+  @override
+  p.Context get pathContext => p.context;
 
   static bool supported = false;
 

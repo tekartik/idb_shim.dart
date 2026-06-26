@@ -5,7 +5,7 @@ import 'package:idb_shim/idb_client_sembast.dart';
 import 'package:idb_shim/src/common/common_factory.dart';
 import 'package:idb_shim/src/sembast/sembast_database.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
-import 'package:path/path.dart';
+import 'package:path/path.dart' as p;
 import 'package:sembast/sembast_memory.dart' as sembast;
 
 /// Debug sembast implementation
@@ -39,8 +39,11 @@ class IdbFactorySembastImpl extends IdbFactoryBase
   final String? _path;
 
   @override
+  p.Context get pathContext => _databaseFactory.pathContext;
+
+  @override
   String getDbPath(String dbName) =>
-      _path == null ? dbName : join(_path, dbName);
+      _path == null ? dbName : pathContext.join(_path, dbName);
 
   @override
   sembast.DatabaseFactory get sembastFactory => _databaseFactory;

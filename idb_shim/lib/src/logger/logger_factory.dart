@@ -6,6 +6,7 @@ import 'package:idb_shim/idb_client.dart';
 import 'package:idb_shim/src/common/common_factory.dart';
 import 'package:idb_shim/src/logger/logger_database.dart';
 import 'package:idb_shim/src/logger/logger_transaction.dart';
+import 'package:path/path.dart' as p;
 
 enum IdbFactoryLoggerType { all }
 
@@ -77,12 +78,15 @@ class _VersionChangeEventLogger implements VersionChangeEvent {
   Object get currentTarget => delegate.currentTarget;
 }
 
-/// Wrapper for window.indexedDB and worker self.indexedDB
+/// Logger Wrapper
 class IdbFactoryLoggerImpl extends IdbFactoryBase implements IdbFactoryLogger {
-  IdbFactoryLoggerImpl(this.nativeFactory) {
-    assert(nativeFactory is! IdbFactoryLoggerImpl);
+  IdbFactoryLoggerImpl(this.implFactory) {
+    assert(implFactory is! IdbFactoryLoggerImpl);
   }
-  final IdbFactory nativeFactory;
+  final IdbFactory implFactory;
+
+  @override
+  p.Context get pathContext => implFactory.pathContext;
   static int _id = 0;
 
   @override
@@ -124,7 +128,7 @@ class IdbFactoryLoggerImpl extends IdbFactoryBase implements IdbFactoryLogger {
     }
 
     try {
-      var db = await nativeFactory.open(
+      var db = await implFactory.open(
         dbName,
         version: version,
         onUpgradeNeeded: onUpgradeNeeded != null ? onUpgradeNeededLogger : null,
@@ -145,7 +149,7 @@ class IdbFactoryLoggerImpl extends IdbFactoryBase implements IdbFactoryLogger {
   }) async {
     log('deleting $dbName');
     try {
-      var result = await nativeFactory.deleteDatabase(
+      var result = await implFactory.deleteDatabase(
         dbName,
         onBlocked: onBlocked,
       );
@@ -160,25 +164,25 @@ class IdbFactoryLoggerImpl extends IdbFactoryBase implements IdbFactoryLogger {
   @override
   bool get supportsDatabaseNames {
     // ignore: deprecated_member_use_from_same_package
-    return nativeFactory.supportsDatabaseNames;
+    return implFactory.supportsDatabaseNames;
   }
 
   @override
   // ignore: deprecated_member_use_from_same_package
-  Future<List<String>> getDatabaseNames() => nativeFactory.getDatabaseNames();
+  Future<List<String>> getDatabaseNames() => implFactory.getDatabaseNames();
 
   @override
-  int cmp(Object first, Object second) => nativeFactory.cmp(first, second);
+  int cmp(Object first, Object second) => implFactory.cmp(first, second);
 
   @override
   bool get supportsDoubleKey =>
-      (nativeFactory as IdbFactoryBase).supportsDoubleKey;
+      (implFactory as IdbFactoryBase).supportsDoubleKey;
 
   @override
   IdbFactoryLoggerType? type;
 
   @override
-  IdbFactory get factory => nativeFactory;
+  IdbFactory get factory => implFactory;
 
   @override
   String toString() => 'Logger($factory)';
