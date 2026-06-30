@@ -146,6 +146,12 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
 
   @override
   bool get supportsDoubleKey => false;
+
+  // For now just the name
+  @override
+  Future<String> getDatabaseFullPath(String name) async {
+    return name;
+  }
 }
 
 /// WebWorker factory

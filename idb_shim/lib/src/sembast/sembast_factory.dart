@@ -125,9 +125,14 @@ class IdbFactorySembastImpl extends IdbFactoryBase
 
   @override
   String toString() => 'IdbFactorySembast($_databaseFactory)';
+
+  @override
+  Future<String> getDatabaseFullPath(String name) async {
+    return getDbPath(name);
+  }
 }
 
-/// Idb factory on sembast etension
+/// Idb factory on sembast extension
 extension IdbFactorySembastExtension on IdbFactory {
   /// Cast to Sembast factory
   sembast.DatabaseFactory? get underlyingSembastFactoryOrNull {

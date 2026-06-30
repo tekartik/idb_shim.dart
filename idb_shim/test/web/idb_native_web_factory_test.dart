@@ -2,6 +2,7 @@
 library;
 
 import 'package:idb_shim/idb_client_native.dart';
+import 'package:path/path.dart';
 import 'package:test/test.dart';
 import 'package:web/web.dart';
 
@@ -24,7 +25,7 @@ void main() {
       db = await factory2.open(dbName);
       expect(db.version, version);
       db.close();
-    }, skip: !idbFactoryNativeSupported);
+    });
     test('idbFactoryWeb', () async {
       var factory = idbFactoryWeb;
       var dbName = 'idb_factory_web.db';
@@ -41,6 +42,14 @@ void main() {
       db = await factory.open(dbName);
       expect(db.version, version);
       db.close();
-    }, skip: !idbFactoryWebSupported);
-  });
+    });
+    test('getDatabaseFullPath()', () async {
+      var factory = idbFactoryWeb;
+      expect(await factory.getDatabaseFullPath('test.db'), 'test.db');
+      expect(
+        await factory.sandbox(path: 'sub').getDatabaseFullPath('test.db'),
+        join('sub', 'test.db'),
+      );
+    });
+  }, skip: !idbFactoryNativeSupported);
 }

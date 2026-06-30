@@ -34,6 +34,13 @@ abstract class IdbFactoryBase implements IdbFactory {
 
   /// Whether key as double are supported
   bool get supportsDoubleKey;
+
+  /// Default implementation should be overriden
+  /// Mainly use for debugging purpose
+  @override
+  Future<String> getDatabaseFullPath(String name) async {
+    return name;
+  }
 }
 
 /// Helper extension

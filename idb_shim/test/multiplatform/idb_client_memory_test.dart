@@ -1,7 +1,17 @@
+import 'package:path/path.dart';
+
 import '../idb_test_common.dart';
 
 void main() {
   group('inMemory', () {
+    test('getDatabaseFullPath()', () async {
+      var factory = newIdbFactoryMemory();
+      expect(await factory.getDatabaseFullPath('test.db'), 'test.db');
+      expect(
+        await factory.sandbox(path: 'sub').getDatabaseFullPath('test.db'),
+        join('sub', 'test.db'),
+      );
+    });
     test('new', () async {
       var factory1 = newIdbFactoryMemory();
       var db1 = await factory1.open(

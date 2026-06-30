@@ -30,7 +30,10 @@ void defineTests(TestContext ctx) {
     test('sandbox', () async {
       var sandbox = idbFactory.sandbox(path: 's1');
       var sandbox2 = sandbox.sandbox(path: 's2');
-      expect(sandbox2.fullPath('test'), sandbox.fullPath(join('s2', 'test')));
+      expect(
+        await sandbox2.getDatabaseFullPath('test'),
+        await sandbox.getDatabaseFullPath(join('s2', 'test')),
+      );
     });
 
     test('cmp', () {

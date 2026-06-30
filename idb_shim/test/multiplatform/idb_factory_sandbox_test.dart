@@ -74,9 +74,12 @@ void main() {
       );
       var sandboxed = factory.sandbox(path: 'sandbox');
       var sandboxed2 = sandboxed.sandbox(path: 'subsandbox');
-      expect(sandboxed.fullPath('test'), join('sandbox', 'test'));
       expect(
-        sandboxed2.fullPath('test'),
+        await sandboxed.getDatabaseFullPath('test'),
+        join('sandbox', 'test'),
+      );
+      expect(
+        await sandboxed2.getDatabaseFullPath('test'),
         join('sandbox', 'subsandbox', 'test'),
       );
       var db = await sandboxed.openDatabase('test.db', options: options);

@@ -12,7 +12,10 @@ void main() {
       var sdbFactory = sdbFactoryWeb;
       var sandboxed = sdbFactory.sandbox(path: 'sandbox_test');
       var dbName = 'sandbox_web.db';
-      expect(sandboxed.fullPath(dbName), 'sandbox_test/$dbName');
+      expect(
+        await sandboxed.getDatabaseFullPath(dbName),
+        'sandbox_test/$dbName',
+      );
       await sandboxed.deleteDatabase(dbName);
       var db = await sandboxed.openDatabase(
         dbName,

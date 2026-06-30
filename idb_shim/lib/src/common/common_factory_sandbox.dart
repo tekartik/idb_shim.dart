@@ -24,6 +24,7 @@ extension IdbFactorySandboxExtension on IdbFactory {
     return _IdbFactorySandbox(delegate: this, rootPath: path);
   }
 
+  @Deprecated('Use getDatabaseFullPath() instead')
   /// full path of a database path
   String fullPath(String path) {
     if (this is _IdbFactorySandbox) {
@@ -121,4 +122,8 @@ class _IdbFactorySandbox extends IdbFactoryBase {
 
   @override
   String toString() => name;
+
+  @override
+  Future<String> getDatabaseFullPath(String name) =>
+      delegate.getDatabaseFullPath(delegatePath(name));
 }

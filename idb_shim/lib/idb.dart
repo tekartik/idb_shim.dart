@@ -617,7 +617,12 @@ abstract class IdbFactory {
   ///
   /// idb_shim specific
   ///
+
+  /// factory name
   String get name;
+
+  /// Mainly use for debugging purpose
+  Future<String> getDatabaseFullPath(String name);
 
   /// whether the changes are persistent (i.e. not in memory)
   bool get persistent;

@@ -187,6 +187,11 @@ extension SdbFactoryExtension on SdbFactory {
   /// Get the underlying idbFactory.
   IdbFactory get idbFactory => _factoryIdb.idbFactory;
 
+  /// For debugging purpose
+  Future<String> getDatabaseFullPath(String name) async {
+    return idbFactory.getDatabaseFullPath(name);
+  }
+
   /// Open a database, deleting it on downgrade.
   ///
   /// This is a convenient helper for development to handle hot-restart.

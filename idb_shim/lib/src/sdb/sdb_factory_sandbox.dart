@@ -15,6 +15,7 @@ extension SdbFactorySandboxExtension on SdbFactory {
   SdbFactory sandbox({required String path}) =>
       sdbFactoryFromIdb(idbFactory.sandbox(path: path));
 
+  @Deprecated('Use getDatabaseFullPath() instead')
   /// full path of a database path
   String fullPath(String path) => idbFactory.fullPath(path);
 

@@ -186,6 +186,11 @@ class IdbFactoryLoggerImpl extends IdbFactoryBase implements IdbFactoryLogger {
 
   @override
   String toString() => 'Logger($factory)';
+
+  @override
+  Future<String> getDatabaseFullPath(String name) {
+    return implFactory.getDatabaseFullPath(name);
+  }
 }
 
 /// Debug extension for Logger.

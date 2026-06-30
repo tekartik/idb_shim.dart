@@ -1,3 +1,8 @@
+## 2.9.6-1
+
+* Add `getDatabaseFullPath()` extension method on `IdbFactory` and `SdbFactory`
+* Deprecate `fullPath`
+
 ## 2.9.5
 
 * Add `fullPath()` extension method on `IdbFactory` and `SdbFactory` to get the full
