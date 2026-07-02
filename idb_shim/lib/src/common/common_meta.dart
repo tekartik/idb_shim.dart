@@ -398,7 +398,7 @@ class IdbCursorMeta {
       );
     }
   }
-  dynamic key;
+  Object? key;
 
   bool get ascending => _ascending;
   final bool autoAdvance;
@@ -487,7 +487,7 @@ class IdbIndexMeta {
   }
 
   Map<String, Object?> toMap() {
-    dynamic keyPath;
+    Object? keyPath;
     if (this.keyPath is Iterable) {
       keyPath = (this.keyPath as Iterable).cast<String>().toList();
     } else {

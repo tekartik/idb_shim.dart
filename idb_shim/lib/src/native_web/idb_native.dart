@@ -10,5 +10,5 @@ export 'idb_native_stub.dart'
 ///
 /// [nativeIdbFactory] can be html.window.indexedDB for browser app, for
 /// service worker you can use self.indexedDB
-IdbFactory idbFactoryFromIndexedDB(dynamic nativeIdbFactory) =>
+IdbFactory idbFactoryFromIndexedDB(Object? nativeIdbFactory) =>
     idbFactoryFromIndexedDBImpl(nativeIdbFactory);

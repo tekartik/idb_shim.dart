@@ -7,7 +7,7 @@ import 'package:idb_shim/src/sembast/sembast_import.dart' as sembast;
 
 /// keyPath must have been escaped before
 sembast.Filter keyCursorFilter(
-  dynamic keyPath,
+  Object? keyPath,
   Object? key,
   KeyRange? range,
   bool multiEntry,
@@ -25,7 +25,7 @@ sembast.Filter keyCursorFilter(
 
 // return <0 if value1 < value2 or >0 if greater
 // returns 0 if cannot be compared or equals
-int compareValue(dynamic value1, dynamic value2) {
+int compareValue(Object? value1, Object? value2) {
   try {
     if (value1 is Comparable && value2 is Comparable) {
       return Comparable.compare(value1, value2);
@@ -48,7 +48,7 @@ int compareValue(dynamic value1, dynamic value2) {
 }
 
 // Matches if <0
-int lowerCompareSingleValue(dynamic lower, dynamic value) {
+int lowerCompareSingleValue(Object? lower, Object? value) {
   if (value == null) {
     // failure for matches
     return 1;
@@ -57,7 +57,7 @@ int lowerCompareSingleValue(dynamic lower, dynamic value) {
 }
 
 // Matches if <0
-int? lowerCompareValue(dynamic lower, dynamic value, bool multiEntry) {
+int? lowerCompareValue(Object? lower, Object? value, bool multiEntry) {
   int? bestCmp;
   if (multiEntry && value is List) {
     for (var item in value) {
@@ -78,7 +78,7 @@ int? lowerCompareValue(dynamic lower, dynamic value, bool multiEntry) {
 }
 
 // True if simple value matches lower bound
-bool lowerMatchesSingleValue(dynamic lower, bool lowerOpen, dynamic value) {
+bool lowerMatchesSingleValue(Object? lower, bool lowerOpen, Object? value) {
   if (value != null) {
     final cmp = lowerCompareSingleValue(lower, value);
     if (cmp < 0) {
@@ -91,7 +91,7 @@ bool lowerMatchesSingleValue(dynamic lower, bool lowerOpen, dynamic value) {
 }
 
 // Matches if >0
-int upperCompareSingleValue(dynamic upper, dynamic value) {
+int upperCompareSingleValue(Object? upper, Object? value) {
   if (value == null) {
     // failure for matches
     return -1;
@@ -100,7 +100,7 @@ int upperCompareSingleValue(dynamic upper, dynamic value) {
 }
 
 // Matches if >0
-int? upperCompareValue(dynamic lower, dynamic value, bool multiEntry) {
+int? upperCompareValue(Object? lower, Object? value, bool multiEntry) {
   int? bestCmp;
   if (multiEntry && value is List) {
     for (var item in value) {
@@ -121,7 +121,7 @@ int? upperCompareValue(dynamic lower, dynamic value, bool multiEntry) {
 }
 
 // True if simple value matches lower bound
-bool upperMatchesSingleValue(dynamic upper, bool upperOpen, dynamic value) {
+bool upperMatchesSingleValue(Object? upper, bool upperOpen, Object? value) {
   if (value != null) {
     final cmp = upperCompareSingleValue(upper, value);
     if (cmp > 0) {
@@ -134,9 +134,9 @@ bool upperMatchesSingleValue(dynamic upper, bool upperOpen, dynamic value) {
 }
 
 bool lowerMatchesValue(
-  dynamic lower,
+  Object? lower,
   bool lowerOpen,
-  dynamic value,
+  Object? value,
   bool multiEntry,
 ) {
   if (multiEntry && value is List) {
@@ -151,9 +151,9 @@ bool lowerMatchesValue(
 }
 
 bool upperMatchesValue(
-  dynamic upper,
+  Object? upper,
   bool upperOpen,
-  dynamic value,
+  Object? value,
   bool multiEntry,
 ) {
   if (multiEntry && value is List) {
@@ -287,7 +287,7 @@ sembast.Filter keyRangeFilter(
 sembast.Filter _singleFieldKeyNotNullFilter(String keyPath) =>
     sembast.Filter.notEquals(keyPath, null);
 
-sembast.Filter _singleFieldKeyEqualsFilter(String keyPath, dynamic key) =>
+sembast.Filter _singleFieldKeyEqualsFilter(String keyPath, Object? key) =>
     sembast.Filter.equals(keyPath, key);
 
 @Deprecated('Dev only')
@@ -301,7 +301,7 @@ sembast.Filter _debugSingleFieldNotNullFilter(String keyPath) =>
 
 @Deprecated('Dev only')
 // ignore: unused_element
-sembast.Filter _debugSingleFieldKeyEqualsFilter(String keyPath, dynamic key) =>
+sembast.Filter _debugSingleFieldKeyEqualsFilter(String keyPath, Object? key) =>
     sembast.Filter.equals(keyPath, key);
 
 const singleFieldKeyEqualsFilter = _singleFieldKeyEqualsFilter;
@@ -317,7 +317,7 @@ sembast.Filter storeKeyFilter(Object? keyPath, Object key) {
 /// The null value for the key actually means any but null...
 /// Key path must have been escaped before
 sembast.Filter keyFilter(
-  dynamic keyPath,
+  Object? keyPath,
   Object? key, [
   bool multiEntry = false,
 ]) {
@@ -378,8 +378,8 @@ sembast.Filter keyFilter(
 }
 
 sembast.Filter keyOrRangeFilter(
-  dynamic keyPath,
-  dynamic keyOrRange,
+  Object? keyPath,
+  Object? keyOrRange,
   bool multiEntry,
 ) {
   if (keyOrRange is KeyRange) {
@@ -389,7 +389,7 @@ sembast.Filter keyOrRangeFilter(
   }
 }
 
-sembast.Filter keyNotNullFilter(dynamic keyPath) {
+sembast.Filter keyNotNullFilter(Object? keyPath) {
   if (keyPath is String) {
     return sembast.Filter.notEquals(keyPath, null);
   } else if (keyPath is List) {

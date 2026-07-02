@@ -83,7 +83,7 @@ Stream<Cursor> storeOpenKeyCursor(
   String? direction,
   bool? autoAdvance,
 }) {
-  dynamic keyOrRange;
+  Object? keyOrRange;
   if (key != null) {
     if (range != null) {
       throw ArgumentError('Cannot specify both key and range.');
@@ -107,7 +107,7 @@ Stream<Cursor> storeOpenKeyCursor(
 ///
 Future<List<Object>> storeGetAll(
   idb.IDBObjectStore objectStore, [
-  dynamic query,
+  Object? query,
   int? count,
 ]) async {
   return catchAsyncNativeError(() {

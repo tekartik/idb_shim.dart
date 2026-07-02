@@ -6,7 +6,7 @@ import 'package:idb_shim/src/common/common_import.dart';
 /// something todo later
 /// idbDevWarning;
 @Deprecated('Dev only')
-dynamic get idbDevWarning => null;
+Object? get idbDevWarning => null;
 
 /// Dev print (deprecated on purpose)
 @Deprecated('Dev only')

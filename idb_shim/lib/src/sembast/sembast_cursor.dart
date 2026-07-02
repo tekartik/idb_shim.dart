@@ -469,7 +469,7 @@ class StoreCursorWithValueControllerSembast extends Object
 }
 
 /// Key path must have been escaped before
-List<sembast.SortOrder> keyPathSortOrders(dynamic keyPath, bool ascending) {
+List<sembast.SortOrder> keyPathSortOrders(Object? keyPath, bool ascending) {
   if (keyPath is String) {
     return [sembast.SortOrder(keyPath, ascending)];
   } else if (keyPath is List) {

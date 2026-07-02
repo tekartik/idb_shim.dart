@@ -91,7 +91,7 @@ void defineTests(TestContext ctx) {
   final cyclicList = <Object>[1, 2, 3];
   cyclicList[1] = cyclicList;
 
-  dynamic skipGo(name, data) => null;
+  Object? skipGo(name, data) => null;
   void go(String name, Object data) =>
       test(name, () => testReadWrite(idbFactory, 123, data, verifyGraph));
 

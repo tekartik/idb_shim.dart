@@ -380,7 +380,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
   }
 
   /// Get the keyPath or default sembast key
-  dynamic get keyField => keyPath ?? sembast.Field.key;
+  Object? get keyField => keyPath ?? sembast.Field.key;
 
   @override
   Stream<CursorWithValue> openCursor({

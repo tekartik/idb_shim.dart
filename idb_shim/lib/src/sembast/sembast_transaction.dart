@@ -191,7 +191,7 @@ class TransactionSembast extends IdbTransactionBase
                     txnAction.completer.completeError(_newAbortException());
                   }
                   try {
-                    dynamic result = txnAction.action();
+                    Object? result = txnAction.action();
                     if (result is Future) {
                       result = await result;
                     }

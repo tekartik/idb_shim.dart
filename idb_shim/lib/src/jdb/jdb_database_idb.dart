@@ -368,7 +368,7 @@ class JdbDatabaseIdb implements jdb.JdbDatabase {
     var list = <Map<String, Object?>>[];
     var store = txn.objectStore(name);
     await store.openCursor(autoAdvance: true).listen((cwv) {
-      dynamic value = cwv.value;
+      Object? value = cwv.value;
 
       if (value is Map) {
         Map? newMap;

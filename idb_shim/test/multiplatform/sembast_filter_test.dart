@@ -10,13 +10,13 @@ import '../idb_test_common.dart';
 var _record = sdb.StoreRef<int, Object>.main().record(1);
 
 sdb.Filter keyRangeFilter(
-  dynamic keyPath,
+  Object? keyPath,
   KeyRange range, [
   bool multiEntry = false,
 ]) => sembast_filter.keyRangeFilter(keyPath, range, multiEntry);
 
 /// key can be null
-sdb.Filter keyFilter(dynamic keyPath, Object? key, [bool multiEntry = false]) =>
+sdb.Filter keyFilter(Object? keyPath, Object? key, [bool multiEntry = false]) =>
     sembast_filter.keyFilter(keyPath, key, multiEntry);
 
 bool _fieldMatch(sdb.Filter filter, Object value) {

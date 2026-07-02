@@ -153,7 +153,7 @@ class ObjectStoreLogger extends ObjectStore {
   );
 
   @override
-  Future<int> count([dynamic keyOrRange]) => idbObjectStore.count(keyOrRange);
+  Future<int> count([Object? keyOrRange]) => idbObjectStore.count(keyOrRange);
 
   @override
   Future<List<Object>> getAll([Object? query, int? count]) =>
@@ -164,7 +164,7 @@ class ObjectStoreLogger extends ObjectStore {
       idbObjectStore.getAllKeys(query, count);
 
   @override
-  dynamic get keyPath => idbObjectStore.keyPath;
+  Object? get keyPath => idbObjectStore.keyPath;
 
   @override
   bool get autoIncrement => idbObjectStore.autoIncrement;

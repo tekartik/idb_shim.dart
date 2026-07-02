@@ -1,19 +1,19 @@
 import 'dart:math';
 
 /// true if [value1] is less than [value2]
-bool lessThan(dynamic value1, dynamic value2) {
+bool lessThan(Object? value1, Object? value2) {
   var cmp = compareValue(value1, value2);
   return cmp != null && cmp < 0;
 }
 
 /// true if [value1] is greater then [value2]
-bool greaterThan(dynamic value1, dynamic value2) {
+bool greaterThan(Object? value1, Object? value2) {
   var cmp = compareValue(value1, value2);
   return cmp != null && cmp > 0;
 }
 
 /// true if [value1] equals [value2]
-bool equals(dynamic value1, dynamic value2) {
+bool equals(Object? value1, Object? value2) {
   var cmp = compareValue(value1, value2);
   return cmp == 0;
 }
@@ -22,7 +22,7 @@ bool equals(dynamic value1, dynamic value2) {
 ///
 /// return `&lt; 0` if value1 is before value2 or `&gt; 0` if greater
 /// returns null if cannot be compared
-int? compareValue(dynamic value1, dynamic value2) {
+int? compareValue(Object? value1, Object? value2) {
   try {
     if (value1 is Comparable && value2 is Comparable) {
       return Comparable.compare(value1, value2);

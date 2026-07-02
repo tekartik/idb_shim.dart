@@ -147,7 +147,7 @@ class ObjectStoreNative extends ObjectStore {
   }
 
   @override
-  Future<int> count([dynamic keyOrRange]) {
+  Future<int> count([Object? keyOrRange]) {
     return catchAsyncNativeError(() {
       Future<int> countFuture;
       if (keyOrRange == null) {
@@ -170,7 +170,7 @@ class ObjectStoreNative extends ObjectStore {
   }
 
   @override
-  Future<List<Object>> getAllKeys([dynamic query, int? count]) {
+  Future<List<Object>> getAllKeys([Object? query, int? count]) {
     return catchAsyncNativeError(() {
       var results = storeGetAllKeys(idbObjectStore, query, count);
       return results;

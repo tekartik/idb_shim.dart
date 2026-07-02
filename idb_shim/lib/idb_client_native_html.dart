@@ -19,5 +19,5 @@ bool get idbFactoryNativeSupported => interop.idbFactoryNativeSupported;
 
 /// Deprecated implementation
 @Deprecated('Use idbFactoryFromIndexedDB from idb_client_native_interop')
-IdbFactory idbFactoryFromIndexedDB(dynamic nativeIdbFactory) =>
+IdbFactory idbFactoryFromIndexedDB(Object? nativeIdbFactory) =>
     idbUnimplementedStub('idbFactoryFromIndexedDB');

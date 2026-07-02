@@ -23,7 +23,7 @@ Object rawValueCompatMigrate1To2(SdbCodec codec, Object value) {
 }
 
 /// If 2 values are equals, entering nested list/map if any.
-bool migrateValuesAreEqual(dynamic v1, dynamic v2) {
+bool migrateValuesAreEqual(Object? v1, Object? v2) {
   try {
     return const DeepCollectionEquality().equals(v1, v2);
   } catch (_) {

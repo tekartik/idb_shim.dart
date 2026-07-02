@@ -6,7 +6,7 @@ import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/utils/env_utils.dart';
 
 /// encode a value using JSON.
-dynamic encodeValue(dynamic value) {
+Object? encodeValue(Object? value) {
   if (value == null) {
     return null;
   }
@@ -87,7 +87,7 @@ int fixCompareValue(int value, {bool asc = true}) {
 }
 
 /// Compare keys, handle single object and array!
-int compareKeys(dynamic first, dynamic second) {
+int compareKeys(Object? first, Object? second) {
   if (first is num && second is num) {
     return first < second ? -1 : (first == second ? 0 : 1);
   } else if (first is String && second is String) {
@@ -137,7 +137,7 @@ Object? mapValueAtKeyPath(Map? map, Object? keyPath) {
 }
 
 /// Convert a single value or an iterable to a list
-Set<Object?>? valueAsSet(dynamic value) {
+Set<Object?>? valueAsSet(Object? value) {
   if (value == null) {
     return null;
   }
@@ -149,10 +149,10 @@ Set<Object?>? valueAsSet(dynamic value) {
 
 @Deprecated('Use valueAsSet')
 /// Deprecated: Use valueAsSet
-Set? valueAsKeySet(dynamic value) => valueAsSet(value);
+Set? valueAsKeySet(Object? value) => valueAsSet(value);
 
 /// Convert a single value or an iterable to a list
-List? valueAsList(dynamic value) {
+List? valueAsList(Object? value) {
   if (value == null) {
     return null;
   }
@@ -175,7 +175,7 @@ T? getMapFieldValue<T>(Map? map, String field) {
 
 /// Get deep map member value.
 T? getPartsMapValue<T>(Map? map, Iterable<String> parts) {
-  dynamic value = map;
+  Object? value = map;
   for (final part in parts) {
     if (value is Map) {
       value = value[part];
@@ -195,7 +195,7 @@ void setMapFieldValue(Map map, String field, Object? value) {
 void setPartsMapValue(Map map, List<String> parts, Object? value) {
   for (var i = 0; i < parts.length - 1; i++) {
     final part = parts[i];
-    dynamic sub = map[part];
+    Object? sub = map[part];
     if (sub is! Map) {
       sub = <String, Object?>{};
       map[part] = sub;

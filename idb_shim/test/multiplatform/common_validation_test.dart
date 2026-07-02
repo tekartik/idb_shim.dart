@@ -33,8 +33,8 @@ void defineTests() {
 
     void checkKeyValueParamFail({
       Object? keyPath,
-      dynamic key,
-      dynamic value,
+      Object? key,
+      Object? value,
       bool? autoIncrement,
     }) {
       try {

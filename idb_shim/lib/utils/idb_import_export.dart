@@ -85,12 +85,6 @@ Future<Database> idbImportDatabase(
   }
 }
 
-/// Compat
-@Deprecated('Use idbExportDatabaseLines')
-Future<List<Object>> sdbExportDatabaseLines(Database db) async {
-  return idbExportDatabaseLines(db);
-}
-
 ///
 /// export a database in a sdb export format
 ///

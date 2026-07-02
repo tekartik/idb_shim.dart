@@ -240,7 +240,7 @@ bool isTestFailure(Object e) {
 void dbGroup(
   TestContext ctx,
   String description,
-  dynamic Function() body, [
+  void Function() body, [
   void Function(String description, void Function() body) group = group,
 ]) {
   group(description, () {
@@ -256,7 +256,7 @@ void dbTest(
   // void Function(String name, Function() body, {bool? solo})? test,
   @Deprecated('Dev only') bool? solo,
 }) {
-  //test ??= test_pkg.test as void Function(String, dynamic Function(), {bool? solo})?;
+  //test ??= test_pkg.test as void Function(String, Object? Function(), {bool? solo})?;
   // We save it for later
   // only valid during definition
   final ctx = _dbTestContext;

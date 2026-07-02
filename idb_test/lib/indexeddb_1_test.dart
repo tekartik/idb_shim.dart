@@ -41,14 +41,14 @@ Future<void> testUpgrade(idb.IdbFactory idbFactory) async {
   db.close();
 }
 
-typedef BodyFunc = dynamic Function();
+typedef BodyFunc = FutureOr<Object?> Function();
 
 typedef TestFunc =
     BodyFunc Function(
       idb.IdbFactory? idbFactory,
       Object key,
       Object value,
-      dynamic matcher, [
+      Object? matcher, [
       String? dbName,
       String storeName,
       int? version,
