@@ -48,5 +48,5 @@ IdbFactory get idbFactoryWebWorker => idbFactoryWebWorkerWrapperImpl;
 ///
 /// [nativeIdbFactory] can be html.window.indexedDB for browser app, for
 /// service worker you can use self.indexedDB
-IdbFactory idbFactoryFromIndexedDBImpl(idb.IDBFactory nativeIdbFactory) =>
-    IdbFactoryNativeWrapperImpl(nativeIdbFactory);
+IdbFactory idbFactoryFromIndexedDBImpl(Object? nativeIdbFactory) =>
+    IdbFactoryNativeWrapperImpl(nativeIdbFactory as idb.IDBFactory);

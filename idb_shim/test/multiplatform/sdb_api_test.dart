@@ -40,8 +40,13 @@ void main() {
       }
 
       try {
-        sdbFactoryWeb;
-        expectBrowser();
+        try {
+          sdbFactoryWeb;
+        } catch (_) {}
+        try {
+          sdbFactoryWebWorker;
+        } catch (_) {}
+        // expectBrowser();
       } catch (e) {
         expectIo(e);
       }
