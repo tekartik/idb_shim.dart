@@ -19,8 +19,17 @@ void sdbOpenTests(SdbTestContext ctx) {
   var factory = ctx.factory;
 
   group('sdb_open', () {
+    test('open/close non existing', () async {
+      var dbName = 'sdb_non_existing_test.db';
+      await factory.deleteDatabase(dbName);
+      var db = await factory.openDatabase(dbName);
+      await db.close();
+      expect(db.version, 1);
+      expect(db.openDatabaseOptions?.version, null);
+    });
     test('open/close', () async {
-      var db = await factory.openDatabase('sdb_open_test.db');
+      var dbName = 'sdb_open_test.db';
+      var db = await factory.openDatabase(dbName);
       await db.close();
     });
     test('openDatabaseOnDowngradeDelete downgrade', () async {
@@ -40,6 +49,8 @@ void sdbOpenTests(SdbTestContext ctx) {
         ),
       );
       expect(db.version, 2);
+      expect(db.openDatabaseOptions?.version, 2);
+
       await testStore.record(2).put(db, {'test': 2});
       expect((await testStore.findRecords(db)).keys, [2]);
 
@@ -58,6 +69,7 @@ void sdbOpenTests(SdbTestContext ctx) {
         ),
       );
       expect(db.version, 1);
+      expect(db.openDatabaseOptions?.version, 1);
       await testStore.record(1).put(db, {'test': 1});
       // First item (key 2) has been removed!
       expect((await testStore.findRecords(db)).keys, [1]);

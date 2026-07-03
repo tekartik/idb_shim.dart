@@ -1,4 +1,5 @@
 import 'package:idb_shim/sdb.dart';
+import 'package:idb_shim/src/sdb/sdb_database_impl.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 
 import 'sdb_client.dart';
@@ -61,7 +62,14 @@ abstract class SdbDatabase implements SdbClient {
 }
 
 /// SimpleDb methods.
-extension SdbDatabaseExtension on SdbDatabase {}
+extension SdbDatabaseExtension on SdbDatabase {
+  /// Get the openDatabaseOptions used to open the database
+  /// Could be null, if an existing database is opened without open options
+  /// without schema information
+  SdbOpenDatabaseOptions? get openDatabaseOptions {
+    return impl.openOptions;
+  }
+}
 
 /// Default mixin
 mixin SdbDatabaseDefaultMixin implements SdbDatabase, SdbClientInterface {
