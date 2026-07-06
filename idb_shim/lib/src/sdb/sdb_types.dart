@@ -2,7 +2,7 @@
 library;
 
 import 'package:sembast/blob.dart';
-import 'package:sembast/timestamp.dart';
+export 'sdb_timestamp.dart';
 
 //typedef V = Map<String, Object?>;
 //typedef K = int;
@@ -20,9 +20,6 @@ typedef SdbKey = Object;
 
 /// Value type
 typedef SdbValue = Object;
-
-/// Timestamp
-typedef SdbTimestamp = Timestamp;
 
 /// Blob
 typedef SdbBlob = Blob;

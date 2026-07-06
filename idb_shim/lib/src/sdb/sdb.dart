@@ -94,6 +94,7 @@ export 'sdb_schema.dart'
 export 'sdb_store.dart'
     show SdbStoreRef, SdbStoreRefExtension, SdbStoreRefListExtension;
 export 'sdb_store_impl.dart' show SdbStoreRefDbExtension;
+export 'sdb_timestamp.dart' show SdbTimestamp, TekartikSembastTimestampExt;
 export 'sdb_transaction.dart'
     show SdbTransaction, SdbTransactionMode, SdbTransactionExtension;
 export 'sdb_transaction.dart' show SdbTransaction;
@@ -106,8 +107,7 @@ export 'sdb_transaction_store.dart'
         SdbSingleStoreTransactionExtension,
         SdbMultiStoreTransaction,
         SdbMultiStoreTransactionExtension;
-export 'sdb_types.dart'
-    show SdbModel, SdbKey, SdbValue, SdbIndexKey, SdbBlob, SdbTimestamp;
+export 'sdb_types.dart' show SdbModel, SdbKey, SdbValue, SdbIndexKey, SdbBlob;
 export 'sdb_version.dart'
     show SdbOnVersionChangeCallback, SdbVersionChangeEvent;
 

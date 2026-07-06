@@ -1,4 +1,5 @@
 import 'package:idb_shim/idb_sdb.dart';
+
 import 'package:idb_shim/src/utils/env_utils.dart';
 import 'package:test/test.dart';
 
@@ -28,6 +29,9 @@ void main() {
       // ignore_for_file: unnecessary_statements
       sdbFactoryMemory;
       newIdbFactoryMemory;
+      SdbTimestamp;
+      // Check extension presence
+      (null as SdbTimestamp?)?.difference(SdbTimestamp.zero);
 
       SdbDatabase? db;
       // ignore: dead_code

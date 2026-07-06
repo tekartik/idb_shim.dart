@@ -1,8 +1,9 @@
-## 2.9.6+1
+## 2.9.6+2
 
 * Add `getDatabaseFullPath()` extension method on `IdbFactory` and `SdbFactory`
 * Deprecate `fullPath`
 * export `SdbDatabase.openDatabaseOptions`
+* export `SdbTimestamp` helpers (`difference`, `addDuration`, `substractDuration`)
 
 ## 2.9.5
 
