@@ -10,7 +10,7 @@ import 'package:path/path.dart' as p;
 import 'src/cursor.dart';
 export 'package:idb_shim/src/common/common_factory.dart' show IdbFactoryExt;
 export 'package:idb_shim/src/common/common_factory_sandbox.dart'
-    show IdbFactorySandboxExtension;
+    show IdbFactorySandboxExtension, IdbFactorySandbox;
 export 'src/client/error.dart';
 export 'src/constant.dart'
     show

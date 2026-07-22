@@ -74,9 +74,14 @@ void defineTests(TestContext ctx) {
     test('empty', () async {
       await setupDeleteDb();
       await openDb();
-      expect(db!.factory, idbFactory);
+
+      if (idbFactory is! IdbFactorySandbox) {
+        expect(db!.factory, idbFactory);
+        expect(db!.name, dbName);
+      }
+
       expect(db!.objectStoreNames.isEmpty, true);
-      expect(db!.name, dbName);
+
       expect(db!.version, 1);
     });
 

@@ -136,4 +136,10 @@ class SdbFactoryIdb with SdbFactoryDefaultMixin implements SdbFactory {
     }
     return db;
   }
+
+  /// For debugging purpose
+  @override
+  Future<String> getDatabaseFullPath(String name) async {
+    return idbFactory.getDatabaseFullPath(name);
+  }
 }

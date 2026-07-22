@@ -1,3 +1,7 @@
+## 2.9.7-1
+
+* Expose `IdbFactorySandbox` and `SdbFactorySandbox`
+
 ## 2.9.6+2
 
 * Add `getDatabaseFullPath()` extension method on `IdbFactory` and `SdbFactory`

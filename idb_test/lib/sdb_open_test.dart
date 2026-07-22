@@ -1,5 +1,6 @@
 import 'package:idb_shim/sdb.dart';
 import 'package:idb_test/sdb_test.dart';
+import 'package:path/path.dart';
 
 import 'idb_test_common.dart';
 
@@ -118,6 +119,12 @@ void sdbOpenTests(SdbTestContext ctx) {
       await testStore.record(1).put(db, {'test': 1});
       // First item (key 2) has been removed!
       expect((await testStore.findRecords(db)).keys, [1]);
+      await db.close();
+    });
+    test('missing dir and absolute', () async {
+      var dbName = join('missing_dir', 'sub', 'missing_dir.db');
+      var path = await factory.getDatabaseFullPath(dbName);
+      var db = await factory.openDatabase(path, options: testStoreOpenOptions);
       await db.close();
     });
   });

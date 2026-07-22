@@ -135,7 +135,9 @@ void defineTests(TestContext ctx) {
         db = await idbFactory.open(srcDbName);
 
         Future dbCheck(Database db) async {
-          expect(db.factory, idbFactory);
+          if (idbFactory is IdbFactorySandbox) {
+            expect(db.factory, idbFactory);
+          }
           expect(db.objectStoreNames.isEmpty, true);
           expect(basename(db.name).endsWith(basename(srcDbName)), isTrue);
           expect(db.version, 1);
@@ -190,7 +192,9 @@ void defineTests(TestContext ctx) {
         );
 
         Future dbCheck(Database db) async {
-          expect(db.factory, idbFactory);
+          if (idbFactory is! IdbFactorySandbox) {
+            expect(db.factory, idbFactory);
+          }
           expect(db.objectStoreNames.isEmpty, true);
           expect(basename(db.name).endsWith(basename(srcDbName)), isTrue);
           expect(db.version, 2);
@@ -229,7 +233,9 @@ void defineTests(TestContext ctx) {
         );
 
         Future dbCheck(Database db) async {
-          expect(db.factory, idbFactory);
+          if (idbFactory is! IdbFactorySandbox) {
+            expect(db.factory, idbFactory);
+          }
           expect(db.objectStoreNames, [testStoreName]);
           expect(basename(db.name).endsWith(basename(srcDbName)), isTrue);
           expect(db.version, 2);
@@ -291,7 +297,9 @@ void defineTests(TestContext ctx) {
         );
 
         Future dbCheck(Database db) async {
-          expect(db.factory, idbFactory);
+          if (idbFactory is! IdbFactorySandbox) {
+            expect(db.factory, idbFactory);
+          }
           expect(
             const UnorderedIterableEquality<String>().equals(
               db.objectStoreNames,

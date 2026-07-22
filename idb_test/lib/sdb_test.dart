@@ -8,7 +8,10 @@ void main() {
 
 var testStore = SdbStoreRef<int, SdbModel>('test');
 var testStoreSchema = testStore.schema(autoIncrement: true);
-
+var testStoreOpenOptions = SdbOpenDatabaseOptions(
+  version: 1,
+  schema: SdbDatabaseSchema(stores: [testStoreSchema]),
+);
 var testStore2 = SdbStoreRef<String, SdbModel>('test2');
 
 class SdbTestContext {

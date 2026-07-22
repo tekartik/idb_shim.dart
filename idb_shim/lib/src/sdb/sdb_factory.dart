@@ -13,6 +13,9 @@ import 'sdb.dart';
 abstract class SdbFactory implements SdbFactoryInterface {
   /// Debugging purpose
   String get name;
+
+  /// Mainly use for debugging purpose
+  Future<String> getDatabaseFullPath(String name);
 }
 
 /// Mixin helper for default implementation.
@@ -25,12 +28,12 @@ mixin SdbFactoryDefaultMixin implements SdbFactory {
     SdbOnVersionChangeCallback? onVersionChange,
     SdbDatabaseSchema? schema,
   }) {
-    throw UnsupportedError('openDatabase');
+    throw UnsupportedError('$runtimeType.openDatabase');
   }
 
   @override
   Future<void> deleteDatabase(String name) async {
-    throw UnsupportedError('deleteDatabase');
+    throw UnsupportedError('$runtimeType.deleteDatabase');
   }
 
   @override
@@ -180,17 +183,18 @@ abstract class SdbFactoryInterface {
   Future<void> deleteDatabase(String name);
 }
 
+/// Sdb Factory private extension.
+extension SdbFactoryPrvExtension on SdbFactory {
+  /// Internal impl
+  SdbFactoryIdb get factoryIdb => this as SdbFactoryIdb;
+}
+
 /// Sdb Factory extension.
 extension SdbFactoryExtension on SdbFactory {
-  SdbFactoryIdb get _factoryIdb => this as SdbFactoryIdb;
+  SdbFactoryIdb get _factoryIdb => factoryIdb;
 
   /// Get the underlying idbFactory.
   IdbFactory get idbFactory => _factoryIdb.idbFactory;
-
-  /// For debugging purpose
-  Future<String> getDatabaseFullPath(String name) async {
-    return idbFactory.getDatabaseFullPath(name);
-  }
 
   /// Open a database, deleting it on downgrade.
   ///

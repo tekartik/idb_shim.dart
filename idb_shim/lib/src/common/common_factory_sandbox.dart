@@ -34,7 +34,10 @@ extension IdbFactorySandboxExtension on IdbFactory {
   }
 }
 
-class _IdbFactorySandbox extends IdbFactoryBase {
+/// Sandboxed
+abstract class IdbFactorySandbox implements IdbFactory {}
+
+class _IdbFactorySandbox extends IdbFactoryBase implements IdbFactorySandbox {
   _IdbFactorySandbox({required this.delegate, required String rootPath})
     : rootPath = delegate.pathContext.normalize(rootPath);
 
