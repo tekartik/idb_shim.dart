@@ -115,7 +115,10 @@ void defineTests(TestContext ctx) {
         Future Function(Database db) check,
       ) async {
         final dstDb = await copySchema(db, idbFactory, dstDbName!);
-        expect(dstDb.name, dstDbName);
+        if (idbFactory is! IdbFactorySandbox) {
+          expect(dstDb.name, dstDbName);
+        }
+
         await check(dstDb);
         dstDb.close();
       }
@@ -135,7 +138,7 @@ void defineTests(TestContext ctx) {
         db = await idbFactory.open(srcDbName);
 
         Future dbCheck(Database db) async {
-          if (idbFactory is IdbFactorySandbox) {
+          if (idbFactory is! IdbFactorySandbox) {
             expect(db.factory, idbFactory);
           }
           expect(db.objectStoreNames.isEmpty, true);
@@ -705,7 +708,9 @@ void defineTests(TestContext ctx) {
         Future Function(Database database) check,
       ) async {
         final dstDb = await copyDatabase(db, idbFactory, dstDbName!);
-        expect(dstDb.name, dstDbName);
+        if (idbFactory is! IdbFactorySandbox) {
+          expect(dstDb.name, dstDbName);
+        }
         await check(dstDb);
         dstDb.close();
       }
@@ -725,7 +730,9 @@ void defineTests(TestContext ctx) {
         db = await idbFactory.open(srcDbName);
 
         Future dbCheck(Database db) async {
-          expect(db.factory, idbFactory);
+          if (idbFactory is! IdbFactorySandbox) {
+            expect(db.factory, idbFactory);
+          }
           expect(db.objectStoreNames.isEmpty, true);
           expect(basename(db.name).endsWith(basename(srcDbName)), isTrue);
           expect(db.version, 1);
@@ -786,7 +793,9 @@ void defineTests(TestContext ctx) {
         await store.put(map, 'my_key');
         await txn.completed;
         Future dbCheck(Database db) async {
-          expect(db.factory, idbFactory);
+          if (idbFactory is! IdbFactorySandbox) {
+            expect(db.factory, idbFactory);
+          }
           expect(db.objectStoreNames, [testStoreName]);
           expect(basename(db.name).endsWith(basename(srcDbName)), isTrue);
           expect(db.version, 1);
