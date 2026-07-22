@@ -4,6 +4,7 @@ import 'package:idb_shim/idb.dart';
 
 import 'indexed_db_web.dart' as idb;
 
+/// EventNative representation.
 class EventNative extends Event {
   EventNative(this._idbEvent);
   final idb.Event _idbEvent;

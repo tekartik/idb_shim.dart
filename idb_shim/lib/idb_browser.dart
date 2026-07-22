@@ -31,10 +31,8 @@ IdbFactory? getIdbFactory([String? name]) {
   }
 }
 
-///
 /// this uses indexeddb is supported.
 /// defaulting to memory
-///
 IdbFactory get idbFactoryBrowser {
   try {
     return idbFactoryNative;

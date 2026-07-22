@@ -18,9 +18,7 @@ Future<Map<String, Object?>> sdbExportDatabase(Database db) async {
   return idbExportDatabase(db);
 }
 
-///
 /// export a database in a sdb export format
-///
 Future<Map<String, Object?>> idbExportDatabase(Database db) async {
   var srcIdbFactory = db.factory;
 
@@ -51,11 +49,9 @@ Future<Database> sdbImportDatabase(
   return idbImportDatabase(data, dstFactory, dstDbName);
 }
 
-///
 /// Copy a database export (lines or map sembast export) to another
 ///
 /// return the opened database
-///
 Future<Database> idbImportDatabase(
   Object data,
   IdbFactory dstFactory,
@@ -85,9 +81,7 @@ Future<Database> idbImportDatabase(
   }
 }
 
-///
 /// export a database in a sdb export format
-///
 Future<List<Object>> idbExportDatabaseLines(Database db) async {
   var srcIdbFactory = db.factory;
 

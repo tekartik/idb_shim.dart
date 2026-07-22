@@ -115,9 +115,7 @@ class IdbKeyRange implements KeyRange {
     }
   }
 
-  ///
   /// Added method for memory implementation
-  ///
   bool _checkLowerBound(Object key) {
     if (_lowerBound != null) {
       final exclude = _lowerBoundOpen;

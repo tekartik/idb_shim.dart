@@ -9,6 +9,7 @@ import 'package:idb_shim/src/sembast/sembast_object_store.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:sembast/sembast.dart' as sembast;
 
+/// IndexSembast representation.
 class IndexSembast extends Index with IndexWithMetaMixin {
   IndexSembast(this.store, this.meta);
   final ObjectStoreSembast store;

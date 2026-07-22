@@ -10,6 +10,7 @@ import 'native_error.dart';
 import 'native_helpers.dart';
 import 'native_key_range.dart';
 
+/// IndexNative representation.
 class IndexNative extends Index {
   IndexNative(this.idbIndex);
   idb.IDBIndex idbIndex;

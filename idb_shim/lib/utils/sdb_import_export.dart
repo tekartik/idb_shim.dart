@@ -11,9 +11,7 @@ import 'idb_import_export.dart';
 
 export 'package:idb_shim/idb_shim.dart';
 
-///
 /// export a database in a sembast db export format
-///
 Future<List<Object>> sdbExportDatabaseLines(SdbDatabase db) async {
   var srcIdb = db.impl.idbDatabase;
   return idb.idbExportDatabaseLines(srcIdb);

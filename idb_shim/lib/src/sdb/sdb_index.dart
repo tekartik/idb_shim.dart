@@ -217,7 +217,6 @@ extension SdbIndexRefExtension<
     SdbBoundaries<I>? boundaries,
 
     /// New api supersede other param
-    ///
     SdbFindOptions<I>? options,
   }) => impl.countImpl(
     client,

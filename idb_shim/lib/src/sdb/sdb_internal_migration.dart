@@ -33,6 +33,7 @@ bool migrateValuesAreEqual(Object? v1, Object? v2) {
 
 /// Migration extension
 @experimental
+/// Extension representing [SdbClientMigrationExtension].
 extension SdbClientMigrationExtension on SdbClient {
   /// Null means all stores
   /// Need to convert SdbTimestamp format if you created before v2

@@ -66,7 +66,6 @@ extension SdbStoreRefExtension<K extends SdbKey, V extends SdbValue>
   SdbRecordRef<K, V> record(K key) => SdbRecordRefImpl<K, V>(impl, key);
 
   /// Create a reference to multiple records
-  ///
   List<SdbRecordRef<K, V>> records(Iterable<K> keys) =>
       keys.map((key) => record(key)).toList();
 }

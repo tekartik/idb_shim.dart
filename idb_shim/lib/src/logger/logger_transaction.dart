@@ -8,6 +8,7 @@ import 'package:idb_shim/src/logger/logger_database.dart';
 import 'package:idb_shim/src/logger/logger_object_store.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 
+/// TransactionLogger representation.
 class TransactionLogger extends IdbTransactionBase {
   TransactionLogger(DatabaseLogger super.database, this.idbTransaction)
     : id = ++_id;

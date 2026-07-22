@@ -9,6 +9,7 @@ import 'package:idb_shim/src/logger/logger_transaction.dart';
 
 import 'logger_utils.dart';
 
+/// DatabaseLogger representation.
 class DatabaseLogger extends IdbDatabaseBase {
   DatabaseLogger({
     required IdbFactoryLogger factory,

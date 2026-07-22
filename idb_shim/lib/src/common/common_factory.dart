@@ -4,10 +4,9 @@ import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/common/common_value.dart';
 import 'package:path/path.dart' as p;
 
+/// IdbFactoryBase representation.
 abstract class IdbFactoryBase implements IdbFactory {
-  ///
   /// When a factory is created, mark it as supported
-  ///
   IdbFactoryBase() {
     IdbFactoryBase.supported = true;
   }

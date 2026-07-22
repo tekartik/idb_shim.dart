@@ -56,6 +56,7 @@ Future<T> catchAsyncNativeError<T>(Future<T> Function() action) async {
   }
 }
 
+/// DatabaseErrorNative representation.
 class DatabaseErrorNative extends DatabaseError {
   DatabaseErrorNative(this.name, String message) : super(message);
 

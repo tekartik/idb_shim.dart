@@ -32,6 +32,7 @@ extension JSObjectKeysExtension on JSAny {
 
 /// JavaScript Date
 @JS('Date')
+/// Extension type representing [JSDate].
 extension type JSDate._(JSObject _) implements JSObject {
   /// Create a JavaScript date object
   external JSDate(int value);

@@ -6,9 +6,7 @@ abstract class IdbDatabaseBase implements Database {
   IdbDatabaseBase(this._factory);
   final IdbFactory _factory;
 
-  ///
   /// factory for this type of database
-  ///
   @override
   IdbFactory get factory => _factory;
 }

@@ -17,6 +17,7 @@ abstract mixin class TransactionWithMetaMixin implements Transaction {
   }
 }
 
+/// IdbTransactionMeta representation.
 class IdbTransactionMeta {
   IdbTransactionMeta(this.storeNames, this.mode);
   String mode;
@@ -36,6 +37,7 @@ class IdbTransactionMeta {
   String toString() => '$mode $storeNames';
 }
 
+/// IdbVersionChangeTransactionMeta representation.
 class IdbVersionChangeTransactionMeta extends IdbTransactionMeta {
   IdbVersionChangeTransactionMeta() : super([], idbModeReadWrite);
   // index deleted during onUpgradeNeeded
@@ -88,6 +90,7 @@ abstract mixin class DatabaseWithMetaMixin implements Database {
   }
 }
 
+/// IdbDatabaseMeta representation.
 class IdbDatabaseMeta {
   IdbDatabaseMeta([this.version]);
   late String name;
@@ -374,6 +377,7 @@ class IdbObjectStoreMeta {
   }
 }
 
+/// IdbCursorMeta representation.
 class IdbCursorMeta {
   IdbCursorMeta(this.key, this.range, String? direction, bool? autoAdvance)
     : autoAdvance = autoAdvance ?? false {
@@ -449,6 +453,7 @@ abstract mixin class IndexWithMetaMixin {
   }
 }
 
+/// IdbIndexMeta representation.
 class IdbIndexMeta {
   IdbIndexMeta(this.name, this.keyPath, bool? unique, bool? multiEntry)
     : multiEntry = (multiEntry == true),

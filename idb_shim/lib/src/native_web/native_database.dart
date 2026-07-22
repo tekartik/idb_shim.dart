@@ -12,6 +12,7 @@ import 'native_error.dart';
 import 'native_object_store.dart';
 import 'native_transaction.dart';
 
+/// VersionChangeEventNative representation.
 class VersionChangeEventNative extends IdbVersionChangeEventBase {
   VersionChangeEventNative(this.factory, this.idbVersionChangeEvent);
   final IdbFactory factory;
@@ -42,6 +43,7 @@ class VersionChangeEventNative extends IdbVersionChangeEventBase {
   );
 }
 
+/// DatabaseNative representation.
 class DatabaseNative extends IdbDatabaseBase {
   DatabaseNative(super.factory, this.idbDatabase);
   idb.IDBDatabase idbDatabase;

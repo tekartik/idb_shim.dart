@@ -121,6 +121,7 @@ abstract mixin class CursorWithValueSembastMixin implements CursorWithValue {
   Object get value => store.recordToValue(record.snapshot)!;
 }
 
+/// IndexKeyCursorSembast representation.
 class IndexKeyCursorSembast extends Object
     with KeyCursorSembastMixin, IndexCursorSembastMixin
     implements Cursor {
@@ -137,6 +138,7 @@ class IndexKeyCursorSembast extends Object
       'KeyCursor(${logTruncateAny(primaryKey)}, ${logTruncateAny(key)})';
 }
 
+/// IndexCursorWithValueSembast representation.
 class IndexCursorWithValueSembast extends Object
     with KeyCursorSembastMixin, CursorWithValueSembastMixin {
   IndexCursorWithValueSembast(
@@ -154,6 +156,7 @@ class IndexCursorWithValueSembast extends Object
       'KeyWithValueCursor(${logTruncateAny(primaryKey)}, ${logTruncateAny(key)}): ${logTruncateAny(value)}';
 }
 
+/// StoreCursorWithValueSembast representation.
 class StoreCursorWithValueSembast extends Object
     with KeyCursorSembastMixin, CursorWithValueSembastMixin {
   StoreCursorWithValueSembast(
@@ -165,6 +168,7 @@ class StoreCursorWithValueSembast extends Object
   }
 }
 
+/// StoreKeyCursorSembast representation.
 class StoreKeyCursorSembast extends Object with KeyCursorSembastMixin {
   StoreKeyCursorSembast(BaseCursorControllerSembastMixin ctlr, int index) {
     this.ctlr = ctlr;
@@ -194,6 +198,7 @@ abstract class _ICursorSembast {
   void setRecords(List<sembast.RecordSnapshot<Object, Object>> records);
 }
 
+/// RecordSnapshotSembast representation.
 class RecordSnapshotSembast {
   RecordSnapshotSembast(this.idbStore, this.snapshot);
   final ObjectStoreSembast idbStore;
@@ -210,6 +215,7 @@ class RecordSnapshotSembast {
   String toString() => '$snapshot';
 }
 
+/// IndexRecordSnapshotSembast representation.
 class IndexRecordSnapshotSembast extends RecordSnapshotSembast {
   IndexRecordSnapshotSembast(
     ObjectStoreSembast idbStore,
@@ -387,6 +393,7 @@ class _SembastStoreKeyCursorController extends Object
 }
 */
 
+/// IndexKeyCursorControllerSembast representation.
 class IndexKeyCursorControllerSembast extends Object
     with
         KeyCursorControllerSembastMixin,
@@ -407,6 +414,7 @@ class IndexKeyCursorControllerSembast extends Object
   }
 }
 
+/// IndexCursorWithValueControllerSembast representation.
 class IndexCursorWithValueControllerSembast extends Object
     with
         CursorWithValueControllerSembastMixin,
@@ -430,6 +438,7 @@ class IndexCursorWithValueControllerSembast extends Object
   }
 }
 
+/// StoreKeyCursorControllerSembast representation.
 class StoreKeyCursorControllerSembast extends Object
     with
         KeyCursorControllerSembastMixin,
@@ -449,6 +458,7 @@ class StoreKeyCursorControllerSembast extends Object
   }
 }
 
+/// StoreCursorWithValueControllerSembast representation.
 class StoreCursorWithValueControllerSembast extends Object
     with
         CursorWithValueControllerSembastMixin,

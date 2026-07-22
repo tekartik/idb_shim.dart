@@ -18,9 +18,7 @@ IdbFactory get idbFactorySembastIo =>
 IdbFactory getIdbFactorySembastIo(String path) =>
     IdbFactorySembast(databaseFactoryIo, path);
 
-///
 /// Only sembast io is persistent
-///
 IdbFactory getIdbFactoryPersistent(String path) {
   return getIdbFactorySembastIo(path);
 }

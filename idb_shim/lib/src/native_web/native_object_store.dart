@@ -11,6 +11,7 @@ import 'native_helpers.dart';
 import 'native_index.dart';
 import 'native_key_range.dart';
 
+/// ObjectStoreNative representation.
 class ObjectStoreNative extends ObjectStore {
   ObjectStoreNative(this.idbObjectStore);
   idb.IDBObjectStore idbObjectStore;

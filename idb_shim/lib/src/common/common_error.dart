@@ -3,6 +3,7 @@
 
 import 'package:idb_shim/idb_client.dart';
 
+/// DatabaseNoKeyExpectedError representation.
 class DatabaseNoKeyExpectedError extends DatabaseError {
   DatabaseNoKeyExpectedError()
     : super(
@@ -10,6 +11,7 @@ class DatabaseNoKeyExpectedError extends DatabaseError {
       );
 }
 
+/// DatabaseMissingInlineKeyError representation.
 class DatabaseMissingInlineKeyError extends DatabaseError {
   DatabaseMissingInlineKeyError()
     : super(
@@ -17,6 +19,7 @@ class DatabaseMissingInlineKeyError extends DatabaseError {
       );
 }
 
+/// DatabaseMissingKeyError representation.
 class DatabaseMissingKeyError extends DatabaseError {
   DatabaseMissingKeyError()
     : super(

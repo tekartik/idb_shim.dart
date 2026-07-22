@@ -9,6 +9,7 @@ import 'package:idb_shim/src/logger/logger_transaction.dart';
 import 'logger_index.dart';
 import 'logger_utils.dart';
 
+/// ObjectStoreLogger representation.
 class ObjectStoreLogger extends ObjectStore {
   ObjectStoreLogger(
     this.idbDatabaseLogger,

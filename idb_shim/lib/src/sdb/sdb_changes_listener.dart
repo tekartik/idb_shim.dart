@@ -106,6 +106,7 @@ mixin SdbStoreTransactionChangesMixin {
 }
 
 // ignore: public_member_api_docs
+/// Class representing [SdbStoreTransactionChanges].
 class SdbStoreTransactionChanges with SdbStoreTransactionChangesMixin {
   // ignore: public_member_api_docs
   SdbStoreTransactionChanges();

@@ -78,7 +78,7 @@ extension IDBRequestExt on IDBRequest {
   }
 
   /*
-  /// Handle on abort
+/// Handle on abort
   void handleOnAbort(Completer<JSAny?> completer) {
     onabort = (Event event) {
       if (!completer.isCompleted) {

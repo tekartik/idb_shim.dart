@@ -113,9 +113,7 @@ class TodoList {
   }
 }
 
-///
 /// Typically the argument is window.location.search
-///
 Map<String, String> getArguments(String? search) {
   final params = <String, String>{};
   if (search != null) {

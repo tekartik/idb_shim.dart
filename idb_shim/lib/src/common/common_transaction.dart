@@ -2,6 +2,7 @@
 
 import 'package:idb_shim/idb.dart';
 
+/// IdbTransactionBase representation.
 abstract class IdbTransactionBase
     with IdbTransactionMixin
     implements Transaction {

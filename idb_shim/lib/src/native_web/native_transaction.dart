@@ -12,10 +12,12 @@ import 'native_database.dart';
 import 'native_error.dart';
 import 'native_object_store.dart';
 
+/// TransactionNativeBase representation.
 abstract class TransactionNativeBase extends IdbTransactionBase {
   TransactionNativeBase(super.database);
 }
 
+/// TransactionNative representation.
 class TransactionNative extends TransactionNativeBase {
   TransactionNative(super.database, this.idbTransaction);
   idb.IDBTransaction idbTransaction;
@@ -75,6 +77,7 @@ class TransactionNative extends TransactionNativeBase {
 //
 // Safari fake multistore transaction
 // create the transaction when objectStore is called
+/// FakeMultiStoreTransactionNative representation.
 class FakeMultiStoreTransactionNative extends TransactionNativeBase {
   FakeMultiStoreTransactionNative(super.database, this.mode);
   //List<_NativeTransaction> transactions = [];

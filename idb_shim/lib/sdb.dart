@@ -5,7 +5,6 @@
 /// desktop implementation using `idb_sqflite`
 ///
 /// In memory available (mainly for testing) and io implementation using sembast
-///
 library;
 
 export 'package:idb_shim/src/sdb.dart';

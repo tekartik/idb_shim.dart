@@ -13,6 +13,7 @@ import 'package:sembast/sembast.dart' as sembast;
 // bool _debugTransaction = devWarning(true);
 bool _debugTransaction = false;
 
+/// Callback or function signature for [Action].
 typedef Action<T> = FutureOr<T> Function();
 
 class _TransactionAction<T> {
@@ -73,7 +74,6 @@ class _LazyCompleter<T> {
 /// Transaction wrapper around a sembast transaction.
 class TransactionSembast extends IdbTransactionBase
     with TransactionWithMetaMixin {
-  ///
   /// Constructor.
   TransactionSembast(DatabaseSembast super.database, this.meta) {
     if (_debugTransaction) {
@@ -147,13 +147,11 @@ class TransactionSembast extends IdbTransactionBase
   DatabaseError _newDatabaseInactiveError() =>
       DatabaseError('DatabaseInactiveError: transaction database closed');
 
-  ///
   /// Create or execute the transaction.
   ///
   /// leaving a time to breath
   /// Since it must run everything in a single call, let all the actions
   /// in the first callback enqueue before running
-  ///
   Future<T> execute<T>(
     FutureOr<T> Function() action, {
     bool? doNotAbordOnError,

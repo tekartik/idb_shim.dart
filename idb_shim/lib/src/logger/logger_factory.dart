@@ -8,6 +8,7 @@ import 'package:idb_shim/src/logger/logger_database.dart';
 import 'package:idb_shim/src/logger/logger_transaction.dart';
 import 'package:path/path.dart' as p;
 
+/// IdbFactoryLoggerType enumeration.
 enum IdbFactoryLoggerType { all }
 
 /// Logger wrapper

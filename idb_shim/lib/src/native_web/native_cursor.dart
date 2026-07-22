@@ -8,6 +8,7 @@ import 'package:idb_shim/src/native_web/js_utils.dart';
 
 import 'indexed_db_web.dart' as idb;
 
+/// CursorNative representation.
 class CursorNative extends Cursor {
   CursorNative(this._cursor);
   final idb.IDBCursor _cursor;
@@ -43,6 +44,7 @@ class CursorNative extends Cursor {
 }
 
 // native idb cursor with value
+/// CursorWithValueNative representation.
 class CursorWithValueNative extends CursorWithValue {
   //  Object _value;
   //  Object _key;

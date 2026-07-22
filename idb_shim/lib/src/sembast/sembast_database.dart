@@ -45,12 +45,12 @@ class _SembastVersionChangeEvent extends IdbVersionChangeEventBase {
   }
 }
 
-///
 /// meta format
 /// {'key':'version','value':1}
 /// {'key':'stores','value':['test_store']}
 /// {'key':'store_test_store','value':{'name':'test_store','keyPath':'my_key','autoIncrement':true}}
 
+/// DatabaseSembast representation.
 class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
   DatabaseSembast(super.factory, String name) {
     meta.name = name;

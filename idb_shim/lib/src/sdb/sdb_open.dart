@@ -21,9 +21,7 @@ abstract class SdbOpenDatabase {
     SdbStoreRef<K, V> store,
   );
 
-  ///
   /// list of the names of the object stores currently in the connected database
-  ///
   Iterable<String> get objectStoreNames;
 
   /// Delete a store.

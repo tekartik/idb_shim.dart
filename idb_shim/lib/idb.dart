@@ -36,20 +36,15 @@ export 'src/database_exception.dart' show DatabaseException;
 export 'src/logger/logger_factory.dart' show IdbFactoryLoggerDebugExt;
 export 'src/utils/env_utils.dart' show kIdbDartIsWeb;
 
-///
 /// static, asynchronous transaction on a database using event handler
 /// attributes. All reading and writing of data is done within transactions. You
 /// actually use [Database] to start transactions and [Transaction] to set the
 /// mode of the transaction (e.g. is it readonly or readwrite), and access an
 /// [ObjectStore] to make a request. You can also use it to abort transactions.
-///
 abstract class Transaction {
-  ///
   /// returns the database connection with which this transaction is associated.
-  ///
   Database get database;
 
-  ///
   /// returns an object store that has already been added to the scope of this
   /// transaction.
   ///
@@ -57,12 +52,9 @@ abstract class Transaction {
   /// name, returns the same IDBObjectStore instance. If this method is called
   /// on a different transaction object, a different [ObjectStore] instance
   /// is returned.
-  ///
   ObjectStore objectStore(String name);
 
-  ///
   /// complete when the transaction is done
-  ///
   Future<Database> get completed;
 
   /// list of the names of object stores in the scope of this transaction.
@@ -73,28 +65,22 @@ abstract class Transaction {
   void abort();
 }
 
-///
 /// represents an object store in a database. Records within an object store are
 /// sorted according to their keys. This sorting enables fast insertion,
 /// look-up, and ordered retrieval.
-///
 abstract class ObjectStore {
-  ///
   /// Destroys the index with the specified name in the connected database, used
   /// during a version upgrade.
   ///
   /// Note that this method must be called only from a VersionChange transaction
   /// mode callback. Note that this method synchronously modifies the
   /// [ObjectStore.indexNames] property.
-  ///
   void deleteIndex(String name);
 
-  ///
   /// Creates and returns a new Index object in the connected database.
   ///
   /// Note that this method must be called only from a VersionChange transaction
   /// mode callback.
-  ///
   Index createIndex(
     String name,
     Object keyPath, {
@@ -102,7 +88,6 @@ abstract class ObjectStore {
     bool? multiEntry,
   });
 
-  ///
   /// Creates a structured clone of the value, and stores the cloned value in
   /// the object store. This is for adding new records to an object store.
   ///
@@ -116,7 +101,6 @@ abstract class ObjectStore {
   /// null value are no longer allowed.
   Future<Object> add(Object value, [Object? key]);
 
-  ///
   /// creates a structured clone of the value and stores the cloned value in the
   /// object store. This is for adding new records, or updating existing records
   /// in an object store when the transaction's mode is readwrite.
@@ -132,44 +116,32 @@ abstract class ObjectStore {
   /// null value are no longer allowed.
   Future<Object> put(Object value, [Object? key]);
 
-  ///
   /// returns the object selected by the specified key. This is for
   /// retrieving specific records from an object store.
   ///
   /// If a value is successfully found, then a structured clone of it is created
   /// and set as the result of the request object.
-  ///
   Future<Object?> getObject(Object key);
 
-  ///
   /// returns the key selected by the specified key, null if not found.
-  ///
   Future<Object?> getKey(Object key);
 
-  ///
   /// deletes the object store records by key or key range.
-  ///
   Future<void> delete(Object keyOrRange);
 
-  ///
   /// clears this object store in a separate thread.
   /// This is for deleting all the current data out of an object store.
   ///
   /// Clearing an object store consists of removing all records from the object
   /// store and removing all records in indexes that reference the object store.
-  ///
   Future<void> clear();
 
-  ///
   /// opens a named index in the current object store, after which it can be
   /// used to, for example, return a series of records sorted by that index
   /// using a cursor.
-  ///
   Index index(String name);
 
-  ///
   /// Used for iterating through an object store with a cursor.
-  ///
   Stream<CursorWithValue> openCursor({
     Object? key,
     KeyRange? range,
@@ -177,9 +149,7 @@ abstract class ObjectStore {
     bool? autoAdvance,
   });
 
-  ///
   /// Used for iterating through an object store with a key cursor.
-  ///
   Stream<Cursor> openKeyCursor({
     Object? key,
     KeyRange? range,
@@ -187,63 +157,46 @@ abstract class ObjectStore {
     bool? autoAdvance,
   });
 
-  ///
   /// returns the total number of records that match the provided key or
   /// IDBKeyRange. If no arguments are provided, it returns the total number of
   /// records in the store.
-  ///
   Future<int> count([Object? keyOrRange]);
 
-  ///
   /// returns all objects in the object store matching the specified parameter
   /// or all objects in the store if no parameters are given.
-  ///
   Future<List<Object>> getAll([Object? query, int? count]);
 
-  ///
   /// returns record keys for all objects in the object store matching the
   /// specified parameter or all objects in the store if no parameters are given.
-  ///
   Future<List<Object>> getAllKeys([Object? query, int? count]);
 
-  ///
   /// Returns the key path of this object store.
   ///
   /// If this property is null, the application must provide a key for each
   /// modification operation.
-  ///
   Object? get keyPath;
 
-  ///
   /// returns the value of the auto increment flag for this object store.
-  ///
   bool get autoIncrement;
 
-  ///
   /// The name of this object store.
-  ///
   String get name;
 
-  ///
   /// returns a list of the names of indexes on objects in this object store.
-  ///
   List<String> get indexNames;
 
   @override
   String toString() => '$name (key $keyPath auto $autoIncrement)';
 }
 
-///
 /// provides a connection to a database; you can use an [Database] object to
 /// open a transaction on your database then create, manipulate, and delete
 /// objects (data) in that database. The interface provides the only way to get
 /// and manage versions of the database.
-///
 abstract class Database {
   /// ctor
   Database(this._factory);
 
-  ///
   ///  creates and returns a new object store or index.
   ///
   /// The method takes the name of the store as well as a parameter object that
@@ -253,33 +206,25 @@ abstract class Database {
   /// have that property.
   ///
   /// This method can be called only within a versionchange transaction.
-  ///
   ObjectStore createObjectStore(
     String name, {
     Object? keyPath,
     bool? autoIncrement,
   });
 
-  ///
   /// returns a transaction object (Transaction) containing the
   /// [Transaction.objectStore] method, which you can use to access your object
   /// store.
   ///
   /// [mode] can be readonly (idbModeReadOnly), the default or readwrite (idbModeReadWrite)
-  ///
   Transaction transaction(Object storeNameOrStoreNames, String mode);
 
-  ///
   /// helper for transaction on list of object stores
-  ///
   Transaction transactionList(List<String> storeNames, String mode);
 
-  ///
   /// list of the names of the object stores currently in the connected database
-  ///
   Iterable<String> get objectStoreNames;
 
-  ///
   /// destroys the object store with the given name in the connected database,
   /// along with any indexes that reference it.
   ///
@@ -287,48 +232,36 @@ abstract class Database {
   /// versionchange transaction.
   ///
   /// raise exception if not found
-  ///
   void deleteObjectStore(String name);
 
-  ///
   /// returns immediately and closes the connection in a separate thread.
   ///
   /// The connection is not actually closed until all transactions created using
   /// this connection are complete. No new transactions can be created for this
   /// connection once this method is called. Methods that create transactions
   /// throw an exception if a closing operation is pending.
-  ///
   void close();
 
-  ///
   /// A 64-bit integer that contains the version of the connected database.
   ///
   /// When a database is first created, this attribute is 0.
-  ///
   int get version;
 
-  ///
   /// listen for onVersionChange event
   ///
   ///  best behavior would be to simply close the database and eventually
   ///  reload the page assuming the same page is updating the database
   ///  in a new version
-  ///
   Stream<VersionChangeEvent> get onVersionChange;
 
-  ///
   ///  name of the connected database.
-  ///
   String get name;
 
-  ///
   /// factory for this type of database
-  ///
   IdbFactory get factory => _factory;
   final IdbFactory _factory;
 }
 
-///
 /// provides asynchronous access to an index in a database. An index is a kind
 /// of object store for looking up records in another object store, called the
 /// referenced object store. You use this interface to retrieve data.
@@ -346,27 +279,20 @@ abstract class Database {
 /// but several indexes can reference the same object store. When the object
 /// store changes, all indexes that refers to the object store are automatically
 /// updated.
-///
 abstract class Index {
-  ///
   /// returns the number of records within a key range.
-  ///
   Future<int> count([Object? keyOrRange]);
 
-  ///
   /// finds either the value in the referenced object store that corresponds to
   /// the given key or the first corresponding value, if key is set to
   /// a [KeyRange]
-  ///
   Future<Object?> get(Object key);
 
-  ///
   /// finds either the given key or the primary key, if key is set to a
   /// [KeyRange].
   ///
   /// this returns the primary key of the record the key is associated with, not
   /// the whole record as [Index.get] does.
-  ///
   Future<Object?> getKey(Object key);
 
   /// Creates a cursor over the specified key range.
@@ -385,47 +311,35 @@ abstract class Index {
     bool? autoAdvance,
   });
 
-  ///
   /// returns all objects in the index matching the specified parameter
   /// or all objects in the index if no parameters are given.
-  ///
   Future<List<Object>> getAll([Object? query, int? count]);
 
-  ///
   /// returns record primary keys for all objects in the index store matching the
   /// specified parameter or all objects in the index if no parameters are given.
-  ///
   Future<List<Object>> getAllKeys([Object? query, int? count]);
 
-  ///
   /// returns the key path of the current index. If null, this index is not
   /// auto-populated.
-  ///
   Object get keyPath;
 
-  ///
   /// states whether the index allows duplicate keys or not.
   ///
   /// This is decided when the index is created, using the
   /// [ObjectStore.createIndex] method. This method takes an optional
   /// parameter, unique, which if set to true means that the index will
   /// not be able to accept duplicate entries.
-  ///
   bool get unique;
 
-  ///
   /// returns a boolean value that affects how the index behaves when the result
   /// of evaluating the index's key path yields an array.
   ///
   /// This is decided when the index is created, using the
   /// [ObjectStore.createIndex] method. This method takes an optional parameter,
   /// multientry, which is set to true/false.
-  ///
   bool get multiEntry;
 
-  ///
   /// returns the name of the current index.
-  ///
   String get name;
 
   @override
@@ -434,11 +348,9 @@ abstract class Index {
   }
 }
 
-///
 /// provides access to results of asynchronous requests to databases and
 /// database objects using event handler attributes. Each reading and writing
 /// operation on a database is done using a request.
-///
 abstract class Request {
   /// Create a request on a given database and transaction.
   Request(this.result, this.transaction);
@@ -450,18 +362,14 @@ abstract class Request {
   Transaction transaction;
 }
 
-///
 /// provides access to the results of requests to open or delete databases
-///
 class OpenDBRequest extends Request {
   /// Create an open request on a given database and transaction.
   OpenDBRequest(super.database, super.transaction);
 }
 
-///
 /// indicates that the version of the database has changed, as the result
 /// of an onupgradeneeded event handler function.
-///
 abstract class VersionChangeEvent {
   /// returns the old version number of the database. 0 if created
   int get oldVersion;
@@ -478,16 +386,12 @@ abstract class VersionChangeEvent {
   /// Event current target.
   Object get currentTarget;
 
-  ///
   /// idb_shim specific
   /// added for convenience
-  ///
   Database get database;
 }
 
-///
 /// Event abstraction for onBlockedFunction
-///
 abstract class Event {}
 
 /// OnUpgrade function.
@@ -497,7 +401,6 @@ typedef OnUpgradeNeededFunction =
 /// OnBlocked function.
 typedef OnBlockedFunction = void Function(Event event);
 
-///
 /// represents a continuous interval over some data type that is used for keys.
 ///
 /// Records can be retrieved from [ObjectStore] and [Index] objects using keys
@@ -509,7 +412,6 @@ typedef OnBlockedFunction = void Function(Event event);
 /// bounded; if it has no bounds, it is unbounded. A bounded key range can
 /// either be open (the endpoints are excluded) or closed (the endpoints are
 /// included)
-///
 abstract class KeyRange {
   /// Should not be used.
   @Deprecated('User other constructors.')
@@ -554,11 +456,8 @@ abstract class KeyRange {
   bool contains(Object key);
 }
 
-///
 /// Out factory for opening a database instead of using window.indexedDB
-///
 abstract class IdbFactory {
-  ///
   /// requests opening a connection to a database.
   ///
   /// performs he open operation asynchronously. If the operation is successful,
@@ -569,7 +468,6 @@ abstract class IdbFactory {
   /// method.
   ///
   /// May trigger upgradeneeded, blocked or versionchange events.
-  ///
   Future<Database> open(
     String dbName, {
     int? version,
@@ -577,31 +475,25 @@ abstract class IdbFactory {
     OnBlockedFunction? onBlocked,
   });
 
-  ///
   /// compares two values as keys to determine equality and ordering for
   /// IndexedDB operations, such as storing and iterating.
-  ///
   int cmp(Object first, Object second);
 
-  ///
   /// performs the deletion operation asynchronously.
   ///
   ///  Will trigger an upgradedneeded event and, if any other tabs have open
   ///  connections to the database, a blocked event.
-  ///
   Future<IdbFactory> deleteDatabase(
     String name, {
     OnBlockedFunction? onBlocked,
   });
 
-  ///
   /// if getDatabaseNames can be called
   ///
   /// No longer supported on modern browsers. Always returns false
   @Deprecated('No longer supported, always returns false')
   bool get supportsDatabaseNames;
 
-  ///
   /// list of database names (only available if supportsDatabaseNames returns
   /// true).
   ///
@@ -614,9 +506,7 @@ abstract class IdbFactory {
   /// Changed to true when a factory is created
   static bool get supported => IdbFactoryBase.supported;
 
-  ///
   /// idb_shim specific
-  ///
 
   /// factory name
   String get name;
@@ -631,9 +521,7 @@ abstract class IdbFactory {
   p.Context get pathContext;
 }
 
-///
 /// Generic database error.
-///
 class DatabaseError extends Error {
   /// Create a database error with a message.
   DatabaseError(this._message);
