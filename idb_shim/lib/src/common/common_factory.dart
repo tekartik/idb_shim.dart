@@ -40,6 +40,9 @@ abstract class IdbFactoryBase implements IdbFactory {
   Future<String> getDatabaseFullPath(String name) async {
     return name;
   }
+
+  /// Allow overriding (for sqflite for example)
+  bool isImmutableDatabaseName(String name) => false;
 }
 
 /// Helper extension

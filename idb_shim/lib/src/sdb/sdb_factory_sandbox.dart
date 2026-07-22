@@ -1,4 +1,5 @@
 import 'package:idb_shim/idb_sdb.dart';
+import 'package:idb_shim/src/common/common_factory.dart';
 import 'package:idb_shim/src/sdb/sdb_factory.dart';
 import 'package:path/path.dart' as p;
 
@@ -38,7 +39,12 @@ extension SdbFactorySandboxExtension on SdbFactory {
 }
 
 /// Sandboxed
-abstract class SdbFactorySandbox implements SdbFactory {}
+abstract class SdbFactorySandbox implements SdbFactory {
+  /// Converts a name/path in the sandboxed factory to a name/path in the
+  /// delegate factory. Throws an [ArgumentError] if the path escapes the
+  /// sandbox.
+  String delegatePath(String path);
+}
 
 /// Private helpers
 extension SdbFactorySandboxPrvExtension on SdbFactory {}
@@ -58,7 +64,11 @@ class _SdbFactorySandbox
   /// Converts a name/path in the sandboxed factory to a name/path in the
   /// delegate factory. Throws an [ArgumentError] if the path escapes the
   /// sandbox.
+  @override
   String delegatePath(String path) {
+    if (_isImmutableName(path)) {
+      return path;
+    }
     var relativePath = pathContext.isAbsolute(path)
         ? pathContext.relative(path, from: pathContext.rootPrefix(path))
         : path;
@@ -75,10 +85,13 @@ class _SdbFactorySandbox
     return fullPath;
   }
 
+  bool _isImmutableName(String name) =>
+      (delegate.idbFactory as IdbFactoryBase).isImmutableDatabaseName(name);
+
   /// For debugging purpose
   @override
   Future<String> getDatabaseFullPath(String name) async {
-    return idbFactory.getDatabaseFullPath(delegatePath(name));
+    return delegate.getDatabaseFullPath(delegatePath(name));
   }
 
   @override

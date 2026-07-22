@@ -35,7 +35,12 @@ extension IdbFactorySandboxExtension on IdbFactory {
 }
 
 /// Sandboxed
-abstract class IdbFactorySandbox implements IdbFactory {}
+abstract class IdbFactorySandbox implements IdbFactory {
+  /// Converts a name/path in the sandboxed factory to a name/path in the
+  /// delegate factory. Throws an [ArgumentError] if the path escapes the
+  /// sandbox.
+  String delegatePath(String path);
+}
 
 class _IdbFactorySandbox extends IdbFactoryBase implements IdbFactorySandbox {
   _IdbFactorySandbox({required this.delegate, required String rootPath})
@@ -50,10 +55,17 @@ class _IdbFactorySandbox extends IdbFactoryBase implements IdbFactorySandbox {
   @override
   p.Context get pathContext => delegate.pathContext;
 
+  bool _isImmutableDatabaseName(String name) =>
+      (delegate as IdbFactoryBase).isImmutableDatabaseName(name);
+
   /// Converts a name/path in the sandboxed factory to a name/path in the
   /// delegate factory. Throws an [ArgumentError] if the path escapes the
   /// sandbox.
+  @override
   String delegatePath(String path) {
+    if (_isImmutableDatabaseName(path)) {
+      return path;
+    }
     var relativePath = pathContext.isAbsolute(path)
         ? pathContext.relative(path, from: pathContext.rootPrefix(path))
         : path;

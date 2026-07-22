@@ -50,5 +50,10 @@ void main() {
       var mock = _IdbFactoryMock();
       expect(mock.pathContext, p.context);
     });
+    test('isImmutableDatabaseName()', () {
+      var mock = _IdbFactoryMock();
+      expect(mock.isImmutableDatabaseName('test'), isFalse);
+      expect(mock.isImmutableDatabaseName(':memory:'), isFalse);
+    });
   });
 }
