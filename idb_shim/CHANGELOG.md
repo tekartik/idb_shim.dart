@@ -1,4 +1,4 @@
-## 2.9.7-2
+## 2.9.7
 
 * Expose `IdbFactorySandbox` and `SdbFactorySandbox`
 
