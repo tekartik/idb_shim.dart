@@ -928,7 +928,7 @@ void defineTests(TestContext ctx) {
         try {
           await objectStore.add(value);
           fail('should fail');
-        } catch (e, _) {
+        } catch (e) {
           expect(e, isNot(const TypeMatcher<TestFailure>()));
         }
         allowTransactionAborted = true;
