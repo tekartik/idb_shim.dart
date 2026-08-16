@@ -293,13 +293,9 @@ void sdbStressAddListNotesGroup(
 
   for (var count in [10, ...?addedCount]) {
     final testCount = count;
-    test(
-      'create and list $testCount',
-      () async {
-        await sdbCreateNAndList(count: testCount);
-      },
-      timeout: Timeout(Duration(minutes: testCount > 500 ? 5 : 1)),
-    );
+    test('create and list $testCount', () async {
+      await sdbCreateNAndList(count: testCount);
+    }, timeout: Timeout(Duration(minutes: testCount > 500 ? 5 : 1)));
   }
 
   // Solo?
