@@ -1,3 +1,15 @@
+## 2.9.8-1
+
+* sdb: Apply the offset and the limit natively (sql `LIMIT`/`OFFSET`) instead of
+  walking a cursor, when the implementation supports it, for `findRecords`,
+  `findRecordKeys`, `streamRecords`, `iterate` and `delete` on stores and indexes.
+  An implementation reading its rows in one go would otherwise read the whole
+  store on every paged query.
+* sdb fix: `iterate` was ignoring the offset, the skipped rows were handed to the
+  handler.
+* Internal (not part of the public idb API): `IdbPagedQuerySupport`, implemented
+  by an `ObjectStore`/`Index` implementation able to page natively.
+
 ## 2.9.7+1
 
 * fix: correct count logic in sdb_index and sdb_transaction_store
