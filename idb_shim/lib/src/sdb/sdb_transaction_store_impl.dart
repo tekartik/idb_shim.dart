@@ -7,6 +7,7 @@ import 'package:idb_shim/src/sdb/sdb_boundary_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_codec.dart';
 import 'package:idb_shim/src/sdb/sdb_cursor.dart';
 import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
+import 'package:idb_shim/src/sdb/sdb_paged_iterate.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_utils.dart';
 import 'package:idb_shim/src/utils/cursor_utils.dart';
@@ -277,10 +278,25 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
     var limit = options.limit;
     var descending = options.descending;
     var boundaries = options.boundaries;
-    var cursor = idbObjectStore.openCursor(
-      direction: descendingToIdbDirection(descending),
-      range: idbKeyRangeFromBoundaries(codec, boundaries),
-    );
+    var range = idbKeyRangeFromBoundaries(codec, boundaries);
+    var direction = descendingToIdbDirection(descending);
+
+    var paged = filter == null
+        ? idbPagedQuerySupportOrNull(idbObjectStore)
+        : null;
+    if (paged != null) {
+      // The implementation can page natively (sql LIMIT/OFFSET), read the
+      // rows chunk by chunk instead of walking the cursor.
+      return sdbPagedRowStream(
+        paged: paged,
+        range: range,
+        direction: direction,
+        offset: offset,
+        limit: limit,
+      ).map(_sdbRecordSnapshot);
+    }
+
+    var cursor = idbObjectStore.openCursor(direction: direction, range: range);
 
     return cursor
         .limitOffsetStream(
@@ -304,10 +320,32 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
     var descending = options.descending;
     var boundaries = options.boundaries;
     var codec = transaction.codec;
-    var cursor = idbObjectStore.openCursor(
-      direction: descendingToIdbDirection(descending),
-      range: idbKeyRangeFromBoundaries(codec, boundaries),
-    );
+    var range = idbKeyRangeFromBoundaries(codec, boundaries);
+    var direction = descendingToIdbDirection(descending);
+
+    var paged = filter == null
+        ? idbPagedQuerySupportOrNull(idbObjectStore)
+        : null;
+    if (paged != null) {
+      // The implementation can page natively (sql LIMIT/OFFSET), read the
+      // rows chunk by chunk instead of walking the cursor.
+      return sdbPagedIterate(
+        paged: paged,
+        range: range,
+        direction: direction,
+        offset: offset,
+        limit: limit,
+        handleRow: (row) => handler(
+          SdbCursorRowImpl<K, V>.paged(
+            key: row.key,
+            rawValue: row.value,
+            onUpdate: (data) => paged.pagedRowUpdate(row.primaryKey, data),
+          ),
+        ),
+      );
+    }
+
+    var cursor = idbObjectStore.openCursor(direction: direction, range: range);
     var openCursor = SdbOpenCursorImpl<K, V>(
       idbStream: cursor,
       handler: handler,
@@ -451,9 +489,24 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
       }
       transaction.rawImpl.noteWriteToStore(store.name);
     } else {
+      var direction = descendingToIdbDirection(descending);
+      var paged = idbPagedQuerySupportOrNull(idbObjectStore);
+      if (paged != null) {
+        // The implementation can page natively (sql LIMIT/OFFSET), the
+        // cursor would read every row, values included, to delete a few.
+        await sdbPagedDelete(
+          paged: paged,
+          range: keyRange,
+          direction: direction,
+          offset: offset,
+          limit: limit,
+          deleteKey: (primaryKey) => deleteImpl(primaryKey as K),
+        );
+        return;
+      }
       var cursor = idbObjectStore.openCursor(
         autoAdvance: true,
-        direction: descendingToIdbDirection(descending),
+        direction: direction,
         range: keyRange,
       );
       await streamWithOffsetAndLimit(cursor, offset, limit).listen((cursor) {

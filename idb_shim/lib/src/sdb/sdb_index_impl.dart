@@ -6,6 +6,7 @@ import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_codec.dart';
 import 'package:idb_shim/src/sdb/sdb_filter_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
+import 'package:idb_shim/src/sdb/sdb_paged_iterate.dart';
 import 'package:idb_shim/src/sdb/sdb_utils.dart';
 import 'package:idb_shim/src/utils/cursor_utils.dart';
 import 'package:idb_shim/src/utils/idb_utils.dart';
@@ -268,22 +269,43 @@ abstract class SdbIndexRefImpl<
     return SdbIndexRecordSnapshotImpl<K, V, I>(this, key, value, indexKey);
   }
 
-  /// stream records.
-  Stream<IdbCursorWithValue> txnStreamCursorImpl(
+  /// Stream the rows of the query, filter, offset and limit applied.
+  ///
+  /// Read natively page by page when the implementation supports it (sql
+  /// LIMIT/OFFSET), else by walking a cursor. Was returning the raw idb
+  /// cursors (txnStreamCursorImpl), which a cursor-less paged read cannot
+  /// produce, so it hands out rows instead.
+  Stream<IdbCursorRow> txnStreamRowsImpl(
     SdbTransactionImpl txn, {
-
     required SdbFindOptions<I> options,
   }) {
-    var descending = options.descending;
+    var filter = options.filter;
+    var offset = options.offset;
+    var limit = options.limit;
+    var range = idbKeyRangeFromBoundaries(txn.codec, options.boundaries);
+    var direction = descendingToIdbDirection(options.descending);
+    var idbIndex = txn.idbTransaction.objectStore(store.name).index(name);
 
-    var boundaries = options.boundaries;
-    var idbObjectStore = txn.idbTransaction.objectStore(store.name);
-    var idbIndex = idbObjectStore.index(name);
-    var cursor = idbIndex.openCursor(
-      direction: descendingToIdbDirection(descending),
-      range: idbKeyRangeFromBoundaries(txn.codec, boundaries),
-    );
-    return cursor;
+    var paged = filter == null ? idbPagedQuerySupportOrNull(idbIndex) : null;
+    if (paged != null) {
+      return sdbPagedRowStream(
+        paged: paged,
+        range: range,
+        direction: direction,
+        offset: offset,
+        limit: limit,
+      );
+    }
+
+    return idbIndex
+        .openCursor(direction: direction, range: range)
+        .limitOffsetStream(
+          offset: offset,
+          limit: limit,
+          matcher: filter != null
+              ? (cwv) => sdbCursorWithValueMatchesFilter(cwv, filter, txn.codec)
+              : null,
+        );
   }
 
   /// Find records.
@@ -292,20 +314,10 @@ abstract class SdbIndexRefImpl<
 
     required SdbFindOptions<I> options,
   }) {
-    var offset = options.offset;
-    var limit = options.limit;
-    var filter = options.filter;
-
-    var cursor = txnStreamCursorImpl(txn, options: options);
-    return cursor
-        .limitOffsetStream(
-          limit: limit,
-          offset: offset,
-          matcher: filter != null
-              ? (cwv) => sdbCursorWithValueMatchesFilter(cwv, filter, txn.codec)
-              : null,
-        )
-        .map((row) => _sdbIndexRecordSnapshot(txn.codec, row));
+    return txnStreamRowsImpl(
+      txn,
+      options: options,
+    ).map((row) => _sdbIndexRecordSnapshot(txn.codec, row));
   }
 
   /// Find records.
@@ -314,8 +326,6 @@ abstract class SdbIndexRefImpl<
 
     required SdbFindOptions<I> options,
   }) async {
-    var offset = options.offset;
-    var limit = options.limit;
     var filter = options.filter;
 
     if (filter == null) {
@@ -324,12 +334,14 @@ abstract class SdbIndexRefImpl<
       );
       if (paged != null) {
         // The implementation can page natively (sql LIMIT/OFFSET), walking
-        // the cursor would read every row before the offset.
+        // the cursor would read every row before the offset. One query here
+        // rather than the chunks of txnStreamRowsImpl: the whole result is
+        // materialised anyway.
         var rows = await paged.pagedRowList(
           range: idbKeyRangeFromBoundaries(txn.codec, options.boundaries),
           direction: descendingToIdbDirection(options.descending),
-          offset: offset,
-          limit: limit,
+          offset: options.offset,
+          limit: options.limit,
         );
         return rows
             .map((row) => _sdbIndexRecordSnapshot(txn.codec, row))
@@ -337,15 +349,7 @@ abstract class SdbIndexRefImpl<
       }
     }
 
-    var cursor = txnStreamCursorImpl(txn, options: options);
-    var rows = await cursor.toRowList(
-      limit: limit,
-      offset: offset,
-      matcher: filter != null
-          ? (cwv) => sdbCursorWithValueMatchesFilter(cwv, filter, txn.codec)
-          : null,
-    );
-
+    var rows = await txnStreamRowsImpl(txn, options: options).toList();
     return rows.map((row) => _sdbIndexRecordSnapshot(txn.codec, row)).toList();
   }
 
@@ -483,11 +487,26 @@ abstract class SdbIndexRefImpl<
     var boundaries = options.boundaries;
     var idbObjectStore = txn.idbTransaction.objectStore(store.name);
     var idbIndex = idbObjectStore.index(name);
+    var range = idbKeyRangeFromBoundaries(txn.codec, boundaries);
+    var direction = descendingToIdbDirection(descending);
+
+    var paged = idbPagedQuerySupportOrNull(idbIndex);
+    if (paged != null) {
+      return sdbPagedDelete(
+        paged: paged,
+        range: range,
+        direction: direction,
+        offset: offset,
+        limit: limit,
+        deleteKey: (primaryKey) => store.record(primaryKey as K).delete(txn),
+      );
+    }
+
     // Need full cursor for delete
     var stream = idbIndex.openCursor(
       autoAdvance: true,
-      direction: descendingToIdbDirection(descending),
-      range: idbKeyRangeFromBoundaries(txn.codec, boundaries),
+      direction: direction,
+      range: range,
     );
     await streamWithOffsetAndLimit(stream, offset, limit).listen((cursor) {
       cursor.delete();
@@ -509,11 +528,30 @@ abstract class SdbIndexRefImpl<
     var codec = txn.codec;
     var idbObjectStore = txn.idbTransaction.objectStore(store.name);
     var idbIndex = idbObjectStore.index(name);
-    // Need full cursor for delete
-    var cursor = idbIndex.openCursor(
-      direction: descendingToIdbDirection(descending),
-      range: idbKeyRangeFromBoundaries(codec, boundaries),
-    );
+    var range = idbKeyRangeFromBoundaries(codec, boundaries);
+    var direction = descendingToIdbDirection(descending);
+
+    var paged = filter == null ? idbPagedQuerySupportOrNull(idbIndex) : null;
+    if (paged != null) {
+      // The implementation can page natively (sql LIMIT/OFFSET), read the
+      // rows chunk by chunk instead of walking the cursor.
+      return sdbPagedIterate(
+        paged: paged,
+        range: range,
+        direction: direction,
+        offset: offset,
+        limit: limit,
+        handleRow: (row) => handler(
+          SdbIndexCursorRowImpl<K, V, I>.paged(
+            key: row.key,
+            rawValue: row.value,
+            onUpdate: (data) => paged.pagedRowUpdate(row.primaryKey, data),
+          ),
+        ),
+      );
+    }
+
+    var cursor = idbIndex.openCursor(direction: direction, range: range);
     var openCursor = SdbIndexOpenCursorImpl<K, V, I>(
       idbStream: cursor,
       handler: handler,

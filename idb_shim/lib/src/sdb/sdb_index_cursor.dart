@@ -54,6 +54,9 @@ class SdbIndexOpenCursorImpl<
                     return null;
                   }
                 }
+                if (skipForOffset()) {
+                  return null;
+                }
                 final row = SdbIndexCursorRowImpl<K, V, I>(cwv: cursor);
                 var result = handler(row);
                 bool doContinue;
@@ -67,7 +70,7 @@ class SdbIndexOpenCursorImpl<
                 }
                 return row;
               },
-              offset: offset,
+              // The offset is applied above, before the handler is called.
               limit: limit,
             )
             .listen(
@@ -106,7 +109,7 @@ extension SdbIndexCursorRowInternalExt<
       this as SdbIndexCursorRowImpl<K, V, I>;
 
   /// Raw idb value
-  Object get rawValue => _impl.cwv.value;
+  Object get rawValue => _impl.rawValue;
 
   /// Update raw idb value
   Future<void> updateRaw(Object data) => _impl.update(data);
@@ -120,16 +123,33 @@ class SdbIndexCursorRowImpl<
 >
     implements SdbIndexCursorRow<K, V, I> {
   /// Create a cursor row implementation.
-  SdbIndexCursorRowImpl({required this.cwv});
+  SdbIndexCursorRowImpl({required idb.IdbCursorWithValue cwv})
+    : key = cwv.key,
+      rawValue = cwv.value,
+      onUpdate = cwv.update;
 
-  /// The underlying idb cursor with value.
-  final idb.IdbCursorWithValue cwv;
+  /// Create a row read without a cursor (native paged query), [update]
+  /// writing [rawValue] back at its primary key.
+  SdbIndexCursorRowImpl.paged({
+    required this.key,
+    required this.rawValue,
+    required this.onUpdate,
+  });
+
+  /// The row key (the index key for an index cursor).
+  final Object key;
+
+  /// The raw idb value.
+  final Object rawValue;
+
+  /// Writes a new raw value at this row position.
+  final Future<void> Function(Object data) onUpdate;
 
   @override
   Future<void> update(Object data) async {
-    await cwv.update(data);
+    await onUpdate(data);
   }
 
   @override
-  String toString() => 'SdbCursorRow(${logTruncateAny(cwv.key)})';
+  String toString() => 'SdbCursorRow(${logTruncateAny(key)})';
 }

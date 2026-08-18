@@ -36,6 +36,13 @@ abstract class IdbPagedQuerySupport {
     int? offset,
     int? limit,
   });
+
+  /// Write [value] at [primaryKey], what updating the row at the current
+  /// position of a cursor does.
+  ///
+  /// Needed to iterate through [pagedRowList]: the rows are read without a
+  /// cursor, so there is no cursor to update.
+  Future<void> pagedRowUpdate(Object primaryKey, Object value);
 }
 
 /// Cursor row built without a cursor, for [IdbPagedQuerySupport]

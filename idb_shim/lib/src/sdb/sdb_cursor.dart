@@ -48,6 +48,22 @@ abstract class SdbRawOpenBursorBase {
   /// Done future
   late final done = doneCompleter.future;
 
+  /// Rows already skipped to honour [offset].
+  var offsetApplied = 0;
+
+  /// True while [offset] rows still have to be skipped.
+  ///
+  /// The offset must be applied before the row is handed to the handler
+  /// (which is a side effect), and after the filter, so it cannot be left to
+  /// the cursor stream helper.
+  bool skipForOffset() {
+    if ((offset ?? 0) > offsetApplied) {
+      offsetApplied++;
+      return true;
+    }
+    return false;
+  }
+
   /// Close the subscription
   void clean() {
     cursorSubscription?.cancel();
@@ -86,6 +102,9 @@ class SdbOpenCursorImpl<K extends SdbKey, V extends SdbValue>
                     return null;
                   }
                 }
+                if (skipForOffset()) {
+                  return null;
+                }
                 final row = SdbCursorRowImpl<K, V>(cwv: cursor);
                 var result = handler(row);
                 bool doContinue;
@@ -99,7 +118,7 @@ class SdbOpenCursorImpl<K extends SdbKey, V extends SdbValue>
                 }
                 return row;
               },
-              offset: offset,
+              // The offset is applied above, before the handler is called.
               limit: limit,
             )
             .listen(
@@ -129,7 +148,7 @@ extension SdbCursorRowInternalExt<K extends SdbKey, V extends SdbValue>
   SdbCursorRowImpl<K, V> get _impl => this as SdbCursorRowImpl<K, V>;
 
   /// Raw idb value
-  Object get rawValue => _impl.cwv.value;
+  Object get rawValue => _impl.rawValue;
 
   /// Update raw idb value
   Future<void> updateRaw(Object data) => _impl.update(data);
@@ -139,16 +158,33 @@ extension SdbCursorRowInternalExt<K extends SdbKey, V extends SdbValue>
 class SdbCursorRowImpl<K extends SdbKey, V extends SdbValue>
     implements SdbCursorRow<K, V> {
   /// Create a cursor row implementation.
-  SdbCursorRowImpl({required this.cwv});
+  SdbCursorRowImpl({required idb.IdbCursorWithValue cwv})
+    : key = cwv.key,
+      rawValue = cwv.value,
+      onUpdate = cwv.update;
 
-  /// The underlying idb cursor with value.
-  final idb.IdbCursorWithValue cwv;
+  /// Create a row read without a cursor (native paged query), [update]
+  /// writing [rawValue] back at its primary key.
+  SdbCursorRowImpl.paged({
+    required this.key,
+    required this.rawValue,
+    required this.onUpdate,
+  });
+
+  /// The row key (the index key for an index cursor).
+  final Object key;
+
+  /// The raw idb value.
+  final Object rawValue;
+
+  /// Writes a new raw value at this row position.
+  final Future<void> Function(Object data) onUpdate;
 
   @override
   Future<void> update(Object data) async {
-    await cwv.update(data);
+    await onUpdate(data);
   }
 
   @override
-  String toString() => 'SdbCursorRow(${logTruncateAny(cwv.key)})';
+  String toString() => 'SdbCursorRow(${logTruncateAny(key)})';
 }
