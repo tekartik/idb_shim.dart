@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:idb_shim/src/common/common_paged_query.dart';
 import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_codec.dart';
 import 'package:idb_shim/src/sdb/sdb_filter_impl.dart';
@@ -317,6 +318,25 @@ abstract class SdbIndexRefImpl<
     var limit = options.limit;
     var filter = options.filter;
 
+    if (filter == null) {
+      var paged = idbPagedQuerySupportOrNull(
+        txn.idbTransaction.objectStore(store.name).index(name),
+      );
+      if (paged != null) {
+        // The implementation can page natively (sql LIMIT/OFFSET), walking
+        // the cursor would read every row before the offset.
+        var rows = await paged.pagedRowList(
+          range: idbKeyRangeFromBoundaries(txn.codec, options.boundaries),
+          direction: descendingToIdbDirection(options.descending),
+          offset: offset,
+          limit: limit,
+        );
+        return rows
+            .map((row) => _sdbIndexRecordSnapshot(txn.codec, row))
+            .toList();
+      }
+    }
+
     var cursor = txnStreamCursorImpl(txn, options: options);
     var rows = await cursor.toRowList(
       limit: limit,
@@ -345,11 +365,19 @@ abstract class SdbIndexRefImpl<
     var boundaries = options.boundaries;
     var idbObjectStore = txn.idbTransaction.objectStore(store.name);
     var idbIndex = idbObjectStore.index(name);
-    var cursor = idbIndex.openKeyCursor(
-      direction: descendingToIdbDirection(descending),
-      range: idbKeyRangeFromBoundaries(txn.codec, boundaries),
-    );
-    var rows = await cursor.toKeyRowList(limit: limit, offset: offset);
+    var range = idbKeyRangeFromBoundaries(txn.codec, boundaries);
+    var direction = descendingToIdbDirection(descending);
+    var paged = idbPagedQuerySupportOrNull(idbIndex);
+    var rows = paged != null
+        ? await paged.pagedKeyRowList(
+            range: range,
+            direction: direction,
+            offset: offset,
+            limit: limit,
+          )
+        : await idbIndex
+              .openKeyCursor(direction: direction, range: range)
+              .toKeyRowList(limit: limit, offset: offset);
     return rows.map((row) {
       var key = row.primaryKey as K;
       var indexKey = indexIdbToSdbKeyValue(txn.codec, row.key);

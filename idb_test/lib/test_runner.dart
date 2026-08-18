@@ -5,6 +5,7 @@ import 'package:idb_test/sdb_count_test.dart';
 import 'package:idb_test/sdb_format_test.dart';
 import 'package:idb_test/sdb_on_snapshot_test.dart';
 import 'package:idb_test/sdb_open_test.dart';
+import 'package:idb_test/sdb_paging_test.dart';
 import 'package:idb_test/sdb_schema_test.dart';
 import 'package:idb_test/sdb_test.dart';
 import 'package:idb_test/sdb_type_test.dart';
@@ -35,6 +36,7 @@ import 'utils_test.dart' as utils_test;
 void defineAllSdbTests(TestContext ctx) {
   idbSimpleSdbTest(ctx);
   idbSdbCountTests(ctx);
+  idbSdbPagingTests(ctx);
   defineIdbSdbChangesListenerTests(ctx);
   defineIdbSdbOnSnapshotTests(ctx);
   sdbIndexTests(ctx);

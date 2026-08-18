@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:idb_shim/sdb.dart';
+import 'package:idb_shim/src/common/common_paged_query.dart';
 import 'package:idb_shim/src/sdb/sdb_boundary_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_codec.dart';
 import 'package:idb_shim/src/sdb/sdb_cursor.dart';
@@ -328,10 +329,25 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
     var descending = options.descending;
     var boundaries = options.boundaries;
     var codec = transaction.codec;
-    var cursor = idbObjectStore.openCursor(
-      direction: descendingToIdbDirection(descending),
-      range: idbKeyRangeFromBoundaries(codec, boundaries),
-    );
+    var range = idbKeyRangeFromBoundaries(codec, boundaries);
+    var direction = descendingToIdbDirection(descending);
+
+    var paged = filter == null
+        ? idbPagedQuerySupportOrNull(idbObjectStore)
+        : null;
+    if (paged != null) {
+      // The implementation can page natively (sql LIMIT/OFFSET), walking the
+      // cursor would read every row before the offset.
+      var rows = await paged.pagedRowList(
+        range: range,
+        direction: direction,
+        offset: offset,
+        limit: limit,
+      );
+      return rows.map(_sdbRecordSnapshot).toList();
+    }
+
+    var cursor = idbObjectStore.openCursor(direction: direction, range: range);
 
     var rows = await cursor.toRowList(
       offset: offset,
@@ -360,10 +376,24 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
     var limit = options.limit;
     var boundaries = options.boundaries;
     var codec = transaction.codec;
+    var range = idbKeyRangeFromBoundaries(codec, boundaries);
+    var direction = descendingToIdbDirection(descending);
+
+    var paged = idbPagedQuerySupportOrNull(idbObjectStore);
+    if (paged != null) {
+      var rows = await paged.pagedKeyRowList(
+        range: range,
+        direction: direction,
+        offset: offset,
+        limit: limit,
+      );
+      return rows.map(_sdbRecordKey).toList();
+    }
+
     var cursor = idbObjectStore.openKeyCursor(
       autoAdvance: true,
-      direction: descendingToIdbDirection(descending),
-      range: idbKeyRangeFromBoundaries(codec, boundaries),
+      direction: direction,
+      range: range,
     );
     var rows = await idb.keyCursorToList(cursor, offset, limit);
     return rows.map(_sdbRecordKey).toList();
