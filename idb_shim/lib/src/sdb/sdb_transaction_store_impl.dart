@@ -386,7 +386,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
       count = max(0, count - offset!);
     }
     if ((limit ?? -1) > 0) {
-      count = max(count, limit!);
+      count = min(count, limit!);
     }
     return count;
   }

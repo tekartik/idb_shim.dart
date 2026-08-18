@@ -411,7 +411,7 @@ abstract class SdbIndexRefImpl<
       count = max(0, count - offset!);
     }
     if ((limit ?? -1) > 0) {
-      count = max(count, limit!);
+      count = min(count, limit!);
     }
 
     return count;
