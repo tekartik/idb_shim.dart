@@ -1,3 +1,7 @@
+## 2.9.7+1
+
+* fix: correct count logic in sdb_index and sdb_transaction_store
+
 ## 2.9.7
 
 * Expose `IdbFactorySandbox` and `SdbFactorySandbox`
