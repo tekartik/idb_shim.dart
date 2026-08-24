@@ -1,4 +1,4 @@
-## 2.9.8-1
+## 2.9.8
 
 * sdb: Apply the offset and the limit natively (sql `LIMIT`/`OFFSET`) instead of
   walking a cursor, when the implementation supports it, for `findRecords`,
