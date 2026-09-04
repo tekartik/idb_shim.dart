@@ -474,7 +474,11 @@ abstract class SdbIndexRefImpl<
     SdbTransactionImpl txn, {
     required SdbFindOptions<I> options,
   }) async {
-    if (options.filter != null) {
+    // A raw cursor delete is not seen by the store change listeners: when
+    // there are some, delete record by record so that they are notified.
+    var hasChangeListener =
+        txn.changesListener?.storeHasChangeListener(store) ?? false;
+    if (options.filter != null || hasChangeListener) {
       var records = await txnFindRecordKeysImpl(txn, options: options);
       for (var record in records) {
         await store.record(record.key).delete(txn);

@@ -207,6 +207,12 @@ Future<void> main() async {
       expect(snapshotsList.last, hasLength(1));
       expect(snapshotsList.last.first.key, 2);
 
+      // Delete through the index record: the listeners must see it too.
+      newCompleter();
+      await indexRecord.delete(db);
+      await completed();
+      expect(snapshotsList.last, isEmpty);
+
       expect(db.impl.changesListener.isEmpty, isFalse);
       await subscription.cancel();
       expect(db.impl.changesListener.isEmpty, isTrue);
