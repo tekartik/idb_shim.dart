@@ -1,3 +1,7 @@
+## 2.9.9
+
+* Add `idb-shim-database` and `idb-shim-sdb` agent skills in `skills/`, installable with `dart run skills@ get`
+
 ## 2.9.8
 
 * sdb: Apply the offset and the limit natively (sql `LIMIT`/`OFFSET`) instead of
