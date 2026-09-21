@@ -524,16 +524,35 @@ abstract class SdbIndexRefImpl<
     required SdbFindOptions<K> options,
     required SdbIndexCursorRowHandler<K, V, I> handler,
   }) {
-    var filter = options.filter;
-    var offset = options.offset;
-    var limit = options.limit;
-    var descending = options.descending;
-    var boundaries = options.boundaries;
+    var codec = txn.codec;
+    return txnIterateRawImpl(
+      txn,
+      range: idbKeyRangeFromBoundaries(codec, options.boundaries),
+      direction: descendingToIdbDirection(options.descending),
+      offset: options.offset,
+      limit: options.limit,
+      filter: options.filter,
+      handler: handler,
+    );
+  }
+
+  /// Iterate records of an already resolved range.
+  ///
+  /// The boundaries of an index apply to the index key, which the typed
+  /// options of [txnIterateImpl] do not carry, so a caller with index key
+  /// boundaries resolves the range itself and comes here.
+  Future<void> txnIterateRawImpl(
+    SdbTransactionImpl txn, {
+    required idb.KeyRange? range,
+    required String? direction,
+    int? offset,
+    int? limit,
+    SdbFilter? filter,
+    required SdbIndexCursorRowHandler<K, V, I> handler,
+  }) {
     var codec = txn.codec;
     var idbObjectStore = txn.idbTransaction.objectStore(store.name);
     var idbIndex = idbObjectStore.index(name);
-    var range = idbKeyRangeFromBoundaries(codec, boundaries);
-    var direction = descendingToIdbDirection(descending);
 
     var paged = filter == null ? idbPagedQuerySupportOrNull(idbIndex) : null;
     if (paged != null) {
@@ -548,6 +567,7 @@ abstract class SdbIndexRefImpl<
         handleRow: (row) => handler(
           SdbIndexCursorRowImpl<K, V, I>.paged(
             key: row.key,
+            primaryKey: row.primaryKey,
             rawValue: row.value,
             onUpdate: (data) => paged.pagedRowUpdate(row.primaryKey, data),
           ),

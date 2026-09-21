@@ -8,7 +8,9 @@ description: >-
   openDatabase with onVersionChange, SdbRecordRef get/put/delete,
   findRecords/findRecord/count with SdbBoundaries and SdbFilter,
   SdbIndexRef/index2 composite indexes, inStoreTransaction/inStoresTransaction,
-  iterate, onSnapshot/onSnapshots, SdbTimestamp and SdbBlob.
+  iterate, joins between two stores (joinIterate/findJoinRows/findJoinRecords/
+  findJoinedRecords/joinCount, SdbJoinTarget, SdbJoinFindOptions),
+  onSnapshot/onSnapshots, SdbTimestamp and SdbBlob.
 ---
 
 # idb_shim SDB: schema-first typed database
@@ -190,6 +192,39 @@ Every store/record/index method takes a `SdbClient` first: pass the
   `removeOnChangesListener(db, sameCallback)`. Costly: use for derived data,
   not for UI.
 
+### Joining two stores
+
+* `store.joinIterate(client, {required target, joinKeyPath, mode, options,
+  joinOptions, onRow})` walks the records of `store` together with the records
+  they reference, the equivalent of an sql `LEFT JOIN`. `index.joinIterate`
+  does the same from an index, in index key order. Both read the joined
+  records once per distinct join key, not once per row.
+* The join key is the value at `joinKeyPath` in the source value (dot
+  separated for a nested field), the source primary key when `joinKeyPath` is
+  null, or the index key when joining from an index.
+* `target` is one required `SdbJoinTarget`: `otherStore.asJoinTarget` matches
+  the key against a primary key (at most one record),
+  `otherIndex.asJoinTarget` against an index key (any number, a source record
+  then giving one row per match). Exactly one of the two, by construction.
+* `options` is the usual `SdbFindOptions` on the iterated side;
+  `joinOptions` is a separate `SdbJoinFindOptions` (`distinct`, `inner`,
+  `chunkSize`). `offset`/`limit` apply to what is handed out, i.e. **after**
+  `inner` and `distinct` dropped any row, like an sql `LIMIT`.
+* Pick the shape by what you need, each one only reads that:
+  `joinIterate`/`findJoinRows` for both sides (`SdbJoinRow.record` is never
+  null, `joinedRecord` is null on a left join);
+  `joinIterateRecords`/`findJoinRecords` for the source records, one per
+  source record (with `inner: true`, a semi join);
+  `joinIterateJoinedRecords`/`findJoinedRecords` for the referenced records,
+  always inner so never null; `joinCount` for the row count.
+* **Index the join key path and join from that index**: the index key is then
+  the join key, so an implementation able to join natively (`idb_sqflite`
+  turns a join into one sql `LEFT JOIN` per chunk) reads it straight from the
+  index instead of parsing every stored value.
+* The iteration runs in one transaction covering both stores; pass a
+  transaction instead of the database to join inside an existing one. Same
+  rule as any transaction: no lengthy async work in the callback.
+
 ## Examples
 
 ### App database class with schema and index
@@ -356,6 +391,83 @@ Future<void> markAllRead(SdbDatabase db) {
 }
 ```
 
+### Joining books with their author
+
+```dart
+import 'package:idb_shim/sdb.dart';
+
+final authorStore = SdbStoreRef<int, SdbModel>('author');
+final bookStore = SdbStoreRef<int, SdbModel>('book');
+// A book value looks like {'title': 't1', 'authorId': 1}.
+// Index the join key path: the join then reads the key from the index.
+final bookAuthorIndex = bookStore.index<int>('authorId');
+
+final schema = SdbDatabaseSchema(
+  stores: [
+    authorStore.schema(),
+    bookStore.schema(
+      indexes: [bookAuthorIndex.schema(keyPath: 'authorId')],
+    ),
+  ],
+);
+
+/// Every book with its author, `null` when it has none (left join).
+Future<void> listBooks(SdbDatabase db) async {
+  await bookStore.joinIterate<int, SdbModel>(
+    db,
+    target: authorStore.asJoinTarget,
+    joinKeyPath: 'authorId',
+    onRow: (row) {
+      // row.record is never null, row.joinedRecord is on a left join.
+      print('${row.record.value['title']} by '
+          '${row.joinedRecord?.value['name'] ?? 'unknown'}');
+      return true; // false stops early
+    },
+  );
+}
+
+/// The same, from the index: same pairing, the join key read off the index.
+/// Books with no `authorId` are not in the index, so they do not show up.
+Future<List<SdbJoinRow<int, SdbModel, int, SdbModel>>> booksWithAuthor(
+  SdbDatabase db,
+) => bookAuthorIndex.findJoinRows<int, SdbModel>(
+  db,
+  target: authorStore.asJoinTarget,
+  joinOptions: const SdbJoinFindOptions(inner: true),
+);
+
+/// One side only, never null, the other side not even read.
+Future<void> oneSided(SdbDatabase db) async {
+  // The books that do have an existing author (a semi join).
+  final withAuthor = await bookStore.findJoinRecords<int, SdbModel>(
+    db,
+    target: authorStore.asJoinTarget,
+    joinKeyPath: 'authorId',
+    joinOptions: const SdbJoinFindOptions(inner: true),
+  );
+  // The authors actually referenced by a book, each one once.
+  final authors = await bookStore.findJoinedRecords<int, SdbModel>(
+    db,
+    target: authorStore.asJoinTarget,
+    joinKeyPath: 'authorId',
+    joinOptions: const SdbJoinFindOptions(distinct: true),
+  );
+  print('${withAuthor.length} books, ${authors.length} authors');
+}
+
+/// One to many, from the parent side: each author with each of their books.
+/// An author with three books gives three rows, one with none gives one row
+/// with a null joinedRecord.
+Future<void> authorsWithBooks(SdbDatabase db) async {
+  await authorStore.joinIterate<int, SdbModel>(
+    db,
+    target: bookAuthorIndex.asJoinTarget,
+    // No joinKeyPath: the author primary key is the join key.
+    onRow: (row) => true,
+  );
+}
+```
+
 ### Live updates in the UI
 
 ```dart
@@ -415,8 +527,20 @@ void main() {
 * Catching the unique-constraint error inside a transaction instead of
   checking existence first.
 * Using `sdbFactoryIo` in a Flutter app instead of `sdbFactorySqflite`.
+* Joining on a field of the **target** store that is neither its primary key
+  nor an index: there is no such option, because it would mean a full scan of
+  the target per join key. Index that field and use `index.asJoinTarget`.
+* Expecting `offset`/`limit` on a join to count source records: they count
+  what is handed out, after `inner` and `distinct`.
+* Reaching for the rows when you only need one side: prefer
+  `findJoinRecords`/`findJoinedRecords`, which hand out plain records and do
+  not read the other side.
 
 ## More
+
+The full join documentation, including the native (sql) path and how the join
+key is read, is in
+[doc/sdb_join.md](https://github.com/tekartik/idb_shim.dart/blob/master/idb_shim/doc/sdb_join.md).
 
 See [references/advanced.md](references/advanced.md) for `SdbOpenDatabase`
 manual migrations, `SdbCodec`, `SdbTimestamp`/`SdbBlob` details, sandboxing

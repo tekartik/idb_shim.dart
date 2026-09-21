@@ -1,3 +1,28 @@
+## 2.9.10-1
+
+* sdb: Add join support, walking the records of a store (or of an index)
+  together with the records they reference in another store, the equivalent of
+  an sql `LEFT JOIN`. On `SdbStoreRef` and `SdbIndexRef`:
+  * `joinIterate`/`findJoinRows` hand out `SdbJoinRow` (both sides),
+  * `joinIterateRecords`/`findJoinRecords` the source records only, one per
+    source record,
+  * `joinIterateJoinedRecords`/`findJoinedRecords` the referenced records only
+    (always inner, so never null),
+  * `joinCount` the number of rows.
+* sdb: `SdbJoinTarget` says what the join key is matched against, a store (on
+  its primary key) or an index (on its index key), exactly one of the two:
+  `authorStore.asJoinTarget`, `authorEmailIndex.asJoinTarget`.
+* sdb: `SdbJoinFindOptions` (`distinct`, `inner`, `chunkSize`) holds the join
+  specific options, next to the usual `SdbFindOptions` on the iterated side;
+  every join method takes both.
+* sdb: A join is resolved natively when the implementation supports it
+  (`idb_sqflite` turns it into a single sql `LEFT JOIN`/`INNER JOIN` per
+  chunk, with the key range, `inner`, offset and limit pushed down), and by
+  walking a cursor otherwise; both hand out the same rows in the same order.
+* Internal (not part of the public idb API): `IdbJoinQuerySupport`,
+  implemented by an `ObjectStore`/`Index` implementation able to join natively.
+* Internal: `SdbIndexCursorRow` now exposes `indexKey` and `primaryKey`.
+
 ## 2.9.9
 
 * Add `idb-shim-database` and `idb-shim-sdb` agent skills in `skills/`, installable with `dart run skills@ get`

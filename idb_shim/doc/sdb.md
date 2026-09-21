@@ -286,6 +286,10 @@ var filteredBooks = await bookSerialIndex.findRecords(
 
 For cursor-based iteration — useful for large datasets or in-place updates — see [sdb_iterate.md](sdb_iterate.md).
 
+### Joining two stores
+
+To walk the records of a store together with the records they reference in another store — the equivalent of an sql `LEFT JOIN` — see [sdb_join.md](sdb_join.md).
+
 ### Supported types
 
 - All idb types:

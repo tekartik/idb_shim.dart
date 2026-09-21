@@ -41,6 +41,26 @@ export 'sdb_index_record_snapshot.dart'
         SdbIndexRecordKey,
         SdbIndexRecordKeyListExt;
 export 'sdb_internal_migration.dart' show SdbClientMigrationExtension;
+export 'sdb_join.dart'
+    show
+        SdbJoinRow,
+        SdbJoinRowHandler,
+        SdbJoinRecordHandler,
+        SdbStoreRefJoinExtension,
+        SdbIndexRefJoinExtension,
+        SdbJoinSourceExtension;
+export 'sdb_join_find_options.dart'
+    show SdbJoinFindOptions, sdbJoinFindOptionsDefault, sdbJoinIterateChunkSize;
+export 'sdb_join_source.dart'
+    show
+        SdbJoinSource,
+        SdbStoreRefJoinSourceExtension,
+        SdbIndexRefJoinSourceExtension;
+export 'sdb_join_target.dart'
+    show
+        SdbJoinTarget,
+        SdbStoreRefJoinTargetExtension,
+        SdbIndexRefJoinTargetExtension;
 export 'sdb_on_snapshot.dart'
     show
         SdbIndexRecordRefExtensionOnSnapshot,

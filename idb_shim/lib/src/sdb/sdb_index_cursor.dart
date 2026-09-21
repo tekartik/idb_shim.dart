@@ -108,6 +108,12 @@ extension SdbIndexCursorRowInternalExt<
   SdbIndexCursorRowImpl<K, V, I> get _impl =>
       this as SdbIndexCursorRowImpl<K, V, I>;
 
+  /// Index key of the row.
+  Object get indexKey => _impl.key;
+
+  /// Primary key of the record the row points at.
+  Object get primaryKey => _impl.primaryKey;
+
   /// Raw idb value
   Object get rawValue => _impl.rawValue;
 
@@ -125,6 +131,7 @@ class SdbIndexCursorRowImpl<
   /// Create a cursor row implementation.
   SdbIndexCursorRowImpl({required idb.IdbCursorWithValue cwv})
     : key = cwv.key,
+      primaryKey = cwv.primaryKey,
       rawValue = cwv.value,
       onUpdate = cwv.update;
 
@@ -132,12 +139,16 @@ class SdbIndexCursorRowImpl<
   /// writing [rawValue] back at its primary key.
   SdbIndexCursorRowImpl.paged({
     required this.key,
+    required this.primaryKey,
     required this.rawValue,
     required this.onUpdate,
   });
 
   /// The row key (the index key for an index cursor).
   final Object key;
+
+  /// The primary key of the record the row points at.
+  final Object primaryKey;
 
   /// The raw idb value.
   final Object rawValue;
