@@ -111,7 +111,8 @@ extension SdbStoreRefJoinSourceExtension<K extends SdbKey, V extends SdbValue>
   ///
   /// That is what a one to many join from the parent side needs; use
   /// [asJoinSourceAt] to read the join key from a field instead.
-  SdbJoinSource<K, V, K> get asJoinSource => _SdbJoinStoreSource<K, V>(this, null);
+  SdbJoinSource<K, V, K> get asJoinSource =>
+      _SdbJoinStoreSource<K, V>(this, null);
 
   /// This store as a join source, walked in primary key order, the join key
   /// being the value at [joinKeyPath].
