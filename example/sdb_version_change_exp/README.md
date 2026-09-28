@@ -18,6 +18,12 @@ option read when opening.
   new version). Also the way to start over from version 1: a version lower
   than the database's cannot be opened (`VersionError`).
 
+Two more options, read when opening too: "On version change" (log only,
+alert, or reload the page, the reloaded page notes why) and "When blocked"
+(the banner, or an alert). Both alert and reload are deferred to after the
+callback: the database closes itself when the callback returns, and an alert
+inside it would keep the other app waiting while it shows.
+
 Run it:
 
 ```sh

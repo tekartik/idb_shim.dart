@@ -13,6 +13,21 @@
     <input type="checkbox" id="close_on_version_change" checked>
     Close on version change (read when opening)
   </label>
+  <label class="option">
+    On version change:
+    <select id="on_version_change">
+      <option value="log">log only</option>
+      <option value="alert">alert</option>
+      <option value="reload">reload the page</option>
+    </select>
+  </label>
+  <label class="option">
+    When blocked:
+    <select id="on_blocked">
+      <option value="banner">banner</option>
+      <option value="alert">alert</option>
+    </select>
+  </label>
   <div id="status"></div>
   <div id="input"></div>
   <pre id="output"></pre>

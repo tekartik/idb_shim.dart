@@ -27,6 +27,13 @@ final _output = web.document.querySelector('#output')!;
 final _closeOnVersionChangeCheckbox =
     web.document.querySelector('#close_on_version_change')
         as web.HTMLInputElement;
+final _onVersionChangeSelect =
+    web.document.querySelector('#on_version_change') as web.HTMLSelectElement;
+final _onBlockedSelect =
+    web.document.querySelector('#on_blocked') as web.HTMLSelectElement;
+
+/// The note left for the page reloaded on a version change.
+const _reloadedKey = 'sdb_version_change_exp_reloaded';
 
 var _lines = <String>[];
 
@@ -73,9 +80,14 @@ Future<void> openVersion(int version) async {
   await closeDb();
   setStatus(null);
   var closeOnVersionChange = _closeOnVersionChangeCheckbox.checked;
+  // What to do on top of the log, read when opening like the checkbox.
+  var onVersionChangeMode = _onVersionChangeSelect.value;
+  var onBlockedMode = _onBlockedSelect.value;
   write(
     'open version $version'
-    '${closeOnVersionChange ? '' : ' (no close on version change)'}…',
+    '${closeOnVersionChange ? '' : ' (no close on version change)'}'
+    '${onVersionChangeMode == 'log' ? '' : ', $onVersionChangeMode on version change'}'
+    '${onBlockedMode == 'banner' ? '' : ', $onBlockedMode when blocked'}…',
   );
   var blocked = false;
   try {
@@ -102,15 +114,41 @@ Future<void> openVersion(int version) async {
               'not closing: the other app waits until Close is pressed here',
             );
           }
+          var message = newVersion == null
+              ? 'Another app deleted the database.'
+              : 'Another app opened version $newVersion of the database.';
+          // Deferred: the database closes itself when this callback returns,
+          // an alert here would keep the other app waiting while it shows,
+          // and a reload must not happen before the close either.
+          switch (onVersionChangeMode) {
+            case 'alert':
+              scheduleMicrotask(() {
+                web.window.alert(
+                  '$message'
+                  '${closeOnVersionChange ? ' This app closed its database, reload to use the new version.' : ''}',
+                );
+              });
+            case 'reload':
+              scheduleMicrotask(() {
+                web.window.sessionStorage.setItem(_reloadedKey, message);
+                web.window.location.reload();
+              });
+          }
         },
         onBlocked: (event) {
           blocked = true;
-          setStatus(
-            'Blocked: another app (frame or tab) keeps ${event.name} open at'
-            ' an older version and does not close on version change. Press'
-            ' Close there.',
-          );
+          var message =
+              'Blocked: another app (frame or tab) keeps ${event.name} open'
+              ' at an older version and does not close on version change.'
+              ' Press Close there.';
           write('blocked by another app, waiting…');
+          if (onBlockedMode == 'alert') {
+            // The open goes on behind the alert and completes once the other
+            // app closes (and the alert is dismissed).
+            web.window.alert(message);
+          } else {
+            setStatus(message);
+          }
         },
       ),
     );
@@ -178,5 +216,10 @@ void main() {
   addButton('Show version and count', showState);
   addButton('Close', closeDb);
   addButton('Delete the database', deleteDb);
+  var reloaded = web.window.sessionStorage.getItem(_reloadedKey);
+  if (reloaded != null) {
+    web.window.sessionStorage.removeItem(_reloadedKey);
+    write('reloaded: $reloaded');
+  }
   write('ready: open a version');
 }
