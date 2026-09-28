@@ -62,7 +62,7 @@ abstract class SdbDatabase implements SdbClient {
 
   /// True once closed, by [close] or on its own when another connection
   /// opened a newer version or deleted the database
-  /// ([SdbOpenDatabaseOptions.closeOnVersionChange]).
+  /// ([SdbOpenDatabaseOptions.versionChangeAction]).
   bool get isClosed;
 }
 

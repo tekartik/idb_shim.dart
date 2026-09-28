@@ -24,13 +24,11 @@ final _title = web.document.querySelector('#title')!;
 final _status = web.document.querySelector('#status')!;
 final _input = web.document.querySelector('#input')!;
 final _output = web.document.querySelector('#output')!;
-final _closeOnVersionChangeCheckbox =
-    web.document.querySelector('#close_on_version_change')
-        as web.HTMLInputElement;
-final _onVersionChangeSelect =
-    web.document.querySelector('#on_version_change') as web.HTMLSelectElement;
-final _onBlockedSelect =
-    web.document.querySelector('#on_blocked') as web.HTMLSelectElement;
+final _versionChangeActionSelect =
+    web.document.querySelector('#version_change_action')
+        as web.HTMLSelectElement;
+final _blockedActionSelect =
+    web.document.querySelector('#blocked_action') as web.HTMLSelectElement;
 
 /// The note left for the page reloaded on a version change.
 const _reloadedKey = 'sdb_version_change_exp_reloaded';
@@ -79,15 +77,16 @@ Future<void> closeDb() async {
 Future<void> openVersion(int version) async {
   await closeDb();
   setStatus(null);
-  var closeOnVersionChange = _closeOnVersionChangeCheckbox.checked;
-  // What to do on top of the log, read when opening like the checkbox.
-  var onVersionChangeMode = _onVersionChangeSelect.value;
-  var onBlockedMode = _onBlockedSelect.value;
+  // What the database does on its own, read when opening.
+  var versionChangeAction = SdbVersionChangeAction.values.byName(
+    _versionChangeActionSelect.value,
+  );
+  var blockedAction = SdbBlockedAction.values.byName(
+    _blockedActionSelect.value,
+  );
   write(
-    'open version $version'
-    '${closeOnVersionChange ? '' : ' (no close on version change)'}'
-    '${onVersionChangeMode == 'log' ? '' : ', $onVersionChangeMode on version change'}'
-    '${onBlockedMode == 'banner' ? '' : ', $onBlockedMode when blocked'}…',
+    'open version $version (${versionChangeAction.name} on version change,'
+    ' ${blockedAction.name} when blocked)…',
   );
   var blocked = false;
   try {
@@ -96,7 +95,7 @@ Future<void> openVersion(int version) async {
       options: SdbOpenDatabaseOptions(
         version: version,
         schema: schema,
-        closeOnVersionChange: closeOnVersionChange,
+        versionChangeAction: versionChangeAction,
         onVersionChangeRequest: (event) {
           var newVersion = event.newVersion;
           write(
@@ -105,49 +104,38 @@ Future<void> openVersion(int version) async {
                 : 'another app opens version $newVersion'
                       ' (this one has ${event.oldVersion})',
           );
-          if (closeOnVersionChange) {
-            // The database closes itself right after this callback.
-            db = null;
-            write('closing: reload (or open again) to use the new version');
-          } else {
-            write(
-              'not closing: the other app waits until Close is pressed here',
-            );
-          }
-          var message = newVersion == null
-              ? 'Another app deleted the database.'
-              : 'Another app opened version $newVersion of the database.';
-          // Deferred: the database closes itself when this callback returns,
-          // an alert here would keep the other app waiting while it shows,
-          // and a reload must not happen before the close either.
-          switch (onVersionChangeMode) {
-            case 'alert':
-              scheduleMicrotask(() {
-                web.window.alert(
-                  '$message'
-                  '${closeOnVersionChange ? ' This app closed its database, reload to use the new version.' : ''}',
-                );
-              });
-            case 'reload':
-              scheduleMicrotask(() {
-                web.window.sessionStorage.setItem(_reloadedKey, message);
-                web.window.location.reload();
-              });
+          // The action happens right after this callback.
+          switch (versionChangeAction) {
+            case SdbVersionChangeAction.none:
+              write(
+                'not closing: the other app waits until Close is pressed here',
+              );
+            case SdbVersionChangeAction.close:
+              db = null;
+              write('closing: reload (or open again) to use the new version');
+            case SdbVersionChangeAction.closeAndReload:
+            case SdbVersionChangeAction.closeAlertAndReload:
+              // The page reloads: leave a note for the reloaded one.
+              web.window.sessionStorage.setItem(
+                _reloadedKey,
+                newVersion == null
+                    ? 'another app deleted the database'
+                    : 'another app opened version $newVersion',
+              );
+              write('closing and reloading…');
           }
         },
+        blockedAction: blockedAction,
         onBlocked: (event) {
           blocked = true;
-          var message =
+          write('blocked by another app, waiting…');
+          // With the alert action, the library shows its message right after.
+          if (blockedAction == SdbBlockedAction.none) {
+            setStatus(
               'Blocked: another app (frame or tab) keeps ${event.name} open'
               ' at an older version and does not close on version change.'
-              ' Press Close there.';
-          write('blocked by another app, waiting…');
-          if (onBlockedMode == 'alert') {
-            // The open goes on behind the alert and completes once the other
-            // app closes (and the alert is dismissed).
-            web.window.alert(message);
-          } else {
-            setStatus(message);
+              ' Press Close there.',
+            );
           }
         },
       ),

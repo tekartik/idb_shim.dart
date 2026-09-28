@@ -6,8 +6,8 @@ description: >-
   (sdbFactoryMemory, sdbFactoryIo, sdbFactoryWeb, sdbFactorySqflite),
   SdbStoreRef, SdbModel, SdbDatabaseSchema/SdbOpenDatabaseOptions,
   openDatabase with onVersionChange, other tabs and versions
-  (closeOnVersionChange, onVersionChangeRequest, onBlocked, isClosed),
-  SdbRecordRef get/put/delete,
+  (versionChangeAction, blockedAction, onVersionChangeRequest, onBlocked,
+  isClosed), SdbRecordRef get/put/delete,
   findRecords/findRecord/count with SdbBoundaries and SdbFilter,
   SdbIndexRef/index2 composite indexes, inStoreTransaction/inStoresTransaction,
   iterate, joins between two stores (joinIterate/findJoinRows/findJoinRecords/
@@ -79,10 +79,10 @@ Future<void> run(SdbFactory factory) async {
 ### Opening and schema
 
 * `factory.openDatabase(name, options: SdbOpenDatabaseOptions(version:,
-  schema:, onVersionChange:, codec:, closeOnVersionChange:,
-  onVersionChangeRequest:, onBlocked:))`. The `version`, `schema` and
-  `onVersionChange` named parameters directly on `openDatabase` are
-  deprecated; use `options`.
+  schema:, onVersionChange:, codec:, versionChangeAction:,
+  onVersionChangeRequest:, blockedAction:, onBlocked:))`. The `version`,
+  `schema` and `onVersionChange` named parameters directly on `openDatabase`
+  are deprecated; use `options`.
 * Prefer `schema`: `SdbDatabaseSchema(stores: [store.schema(autoIncrement:
   true, keyPath: SdbKeyPath.single('id'), indexes: [index.schema(keyPath:
   'field', unique: false)])])`. On version increase the schema is diffed:
@@ -104,16 +104,22 @@ Future<void> run(SdbFactory factory) async {
   `db.version`, `db.name`, `db.storeNames`, `await db.close()`.
 * Other tabs and versions (browser only, `sdbFactoryWeb`): when another
   connection (another tab, an iframe, or the same page) opens the database
-  at a higher version or deletes it, the database closes itself
-  (`closeOnVersionChange`, true by default; `db.isClosed` then, operations
-  throw) after calling `onVersionChangeRequest(event)` (`event.oldVersion`,
-  `event.newVersion`, null on a delete): tell the user to reload. The other
-  way round, when a tab of an older app keeps the database open and does
-  not close on `versionchange`, the open of the newer version waits, and
-  `onBlocked(event)` (`event.name`, `event.version`) fires: tell the user to
-  close the other tabs, the open completes on its own once they do. Never
-  set a timeout that abandons the open, an IndexedDB open request cannot
-  be cancelled. Memory and io databases fire neither.
+  at a higher version or deletes it, `onVersionChangeRequest(event)`
+  (`event.oldVersion`, `event.newVersion`, null on a delete) is called,
+  then the database acts on its own, `versionChangeAction`:
+  `SdbVersionChangeAction.close` (default; `db.isClosed`, operations throw,
+  tell the user to reload), `closeAndReload` or `closeAlertAndReload` (the
+  page reloads on the new app, the alert text is
+  `sdbVersionChangeReloadMessage`, `sdbVersionChangeDeleteReloadMessage` on
+  a delete), or `none` (stay open, the other
+  connection waits until you close). The other way round, when a tab of an
+  older app keeps the database open and does not close on `versionchange`,
+  the open of the newer version waits: `onBlocked(event)` (`event.name`,
+  `event.version`) then `blockedAction`, `SdbBlockedAction.alert` (default,
+  `sdbBlockedMessage`: close the other tabs) or `none` (your own message in
+  `onBlocked`). The open completes on its own once the other tab closes.
+  Never set a timeout that abandons the open, an IndexedDB open request
+  cannot be cancelled. Memory and io databases fire neither.
 
 ### Reading and writing
 
@@ -542,8 +548,12 @@ void main() {
 * Catching the unique-constraint error inside a transaction instead of
   checking existence first.
 * Using `sdbFactoryIo` in a Flutter app instead of `sdbFactorySqflite`.
-* Bumping the database version of a web app without an `onBlocked` message:
-  a user with an older tab open sees the new tab wait forever, silently.
+* Setting `blockedAction: SdbBlockedAction.none` without a message in
+  `onBlocked`: a user with an older tab open sees the new tab wait forever,
+  silently.
+* Reaching for `SdbVersionChangeAction.closeAndReload` when the user may
+  have unsaved input: reload from `onVersionChangeRequest` yourself, after
+  saving.
 * Joining on a field of the **target** store that is neither its primary key
   nor an index: there is no such option, because it would mean a full scan of
   the target per join key. Index that field and use `index.asJoinTarget`.

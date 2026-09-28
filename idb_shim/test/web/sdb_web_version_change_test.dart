@@ -18,17 +18,21 @@ void main() {
     var requests = <SdbVersionChangeRequestEvent>[];
     var blocked = <SdbBlockedEvent>[];
 
-    Future<SdbDatabase> open(int version, {bool? closeOnVersionChange}) =>
-        factory.openDatabase(
-          _dbName,
-          options: SdbOpenDatabaseOptions(
-            version: version,
-            schema: _schema,
-            closeOnVersionChange: closeOnVersionChange,
-            onVersionChangeRequest: requests.add,
-            onBlocked: blocked.add,
-          ),
-        );
+    // No alert (the default) when blocked: it would stop the test page.
+    Future<SdbDatabase> open(
+      int version, {
+      SdbVersionChangeAction? versionChangeAction,
+    }) => factory.openDatabase(
+      _dbName,
+      options: SdbOpenDatabaseOptions(
+        version: version,
+        schema: _schema,
+        versionChangeAction: versionChangeAction,
+        onVersionChangeRequest: requests.add,
+        blockedAction: SdbBlockedAction.none,
+        onBlocked: blocked.add,
+      ),
+    );
 
     setUp(() async {
       requests.clear();
@@ -57,7 +61,7 @@ void main() {
     });
 
     test('blocked until the other connection closes', () async {
-      var db1 = await open(1, closeOnVersionChange: false);
+      var db1 = await open(1, versionChangeAction: SdbVersionChangeAction.none);
 
       var blockedCompleter = Completer<SdbBlockedEvent>();
       var openFuture = factory.openDatabase(
@@ -65,6 +69,7 @@ void main() {
         options: SdbOpenDatabaseOptions(
           version: 2,
           schema: _schema,
+          blockedAction: SdbBlockedAction.none,
           onBlocked: blockedCompleter.complete,
         ),
       );
@@ -99,7 +104,7 @@ void main() {
 
     test('raw version change event', () async {
       // The raw idb stream tells a delete apart too.
-      var db1 = await open(1, closeOnVersionChange: false);
+      var db1 = await open(1, versionChangeAction: SdbVersionChangeAction.none);
       var events = <int?>[];
       db1.rawIdb.onVersionChange.listen((event) {
         events.add(event.newVersionOrNull);

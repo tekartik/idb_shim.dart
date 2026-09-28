@@ -3,15 +3,20 @@
 * sdb: the version change requests of the other connections (another tab,
   an iframe, the same page), the IndexedDB `versionchange` and `blocked`
   events, on `SdbOpenDatabaseOptions`:
-  * `closeOnVersionChange` (true by default): the database closes itself when
-    another connection opens it at a higher version or deletes it, so that
-    the other open completes instead of staying blocked forever;
-    `SdbDatabase.isClosed` tells;
+  * `versionChangeAction` (`SdbVersionChangeAction`, `close` by default):
+    what the database does on its own when another connection opens it at a
+    higher version or deletes it: `none` (stay open, the other waits),
+    `close` (the other open completes instead of staying blocked forever,
+    `SdbDatabase.isClosed` tells), `closeAndReload` and
+    `closeAlertAndReload` (web: the page reloads on the new version);
   * `onVersionChangeRequest`: called first, with the current and the
-    requested version (null on a delete), to tell the user to reload;
-  * `onBlocked`: the open waits for a connection that keeps the database open
-    at a lower version (a tab of an older app); tell the user to close it, the
-    open completes once it does.
+    requested version (null on a delete), to save what must be or tell the
+    user your own way;
+  * `blockedAction` (`SdbBlockedAction`, `alert` by default): what the open
+    does on its own while a connection that keeps the database open at a
+    lower version (a tab of an older app) blocks it: a "close the other
+    tabs" alert on the web, or `none`; `onBlocked` is called first. The open
+    completes once that connection closes.
 * `VersionChangeEvent.newVersionOrNull` (null on a delete); the native
   `Database.onVersionChange` stream delivers synchronously, so a close in the
   handler happens inside the browser event; the sembast one is an empty

@@ -47,6 +47,62 @@ abstract class SdbVersionChangeRequestEvent {
 typedef SdbOnVersionChangeRequestCallback =
     void Function(SdbVersionChangeRequestEvent event);
 
+/// What a database does on its own when another connection (another tab, an
+/// iframe, or this page) opens it at a higher version or deletes it, the
+/// IndexedDB `versionchange` event, right after
+/// [SdbOpenDatabaseOptions.onVersionChangeRequest].
+///
+/// Only the browser fires the event: io and memory databases never act.
+enum SdbVersionChangeAction {
+  /// Nothing: the database stays open and the other connection waits,
+  /// blocked, until this one is closed by the app.
+  none,
+
+  /// Close the database (the default): the other connection proceeds, this
+  /// one is unusable ([SdbDatabase.isClosed]), the app should reload or open
+  /// again.
+  close,
+
+  /// Close the database then reload the page (web; close only elsewhere): the
+  /// page comes back on the new version of the app.
+  closeAndReload,
+
+  /// Close the database, tell the user ([sdbVersionChangeReloadMessage], or
+  /// [sdbVersionChangeDeleteReloadMessage] on a delete, a blocking alert)
+  /// then reload the page (web; close only elsewhere).
+  closeAlertAndReload,
+}
+
+/// What an open does on its own while blocked by another connection that
+/// keeps the database open at a lower version, right after
+/// [SdbOpenDatabaseOptions.onBlocked]. The open waits and completes once
+/// that connection closes whatever the action.
+enum SdbBlockedAction {
+  /// Nothing, the open waits silently (the app tells the user in
+  /// [SdbOpenDatabaseOptions.onBlocked]).
+  none,
+
+  /// Tell the user to close the other tabs ([sdbBlockedMessage], a blocking
+  /// alert on the web, nothing elsewhere), the default.
+  alert,
+}
+
+/// The message of [SdbVersionChangeAction.closeAlertAndReload] on a newer
+/// version.
+const sdbVersionChangeReloadMessage =
+    'A newer version of this app opened in another tab or window.'
+    ' This page reloads.';
+
+/// The message of [SdbVersionChangeAction.closeAlertAndReload] on a delete.
+const sdbVersionChangeDeleteReloadMessage =
+    'The data of this app was reset from another tab or window.'
+    ' This page reloads.';
+
+/// The message of [SdbBlockedAction.alert].
+const sdbBlockedMessage =
+    'Another tab or window of this app keeps its data open at an older'
+    ' version. Close it to continue.';
+
 /// An open blocked by another connection that keeps the database open at a
 /// lower version, see [SdbOpenDatabaseOptions.onBlocked].
 abstract class SdbBlockedEvent {

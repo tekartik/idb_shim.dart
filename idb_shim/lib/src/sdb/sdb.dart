@@ -134,8 +134,13 @@ export 'sdb_version.dart'
         SdbVersionChangeEvent,
         SdbVersionChangeRequestEvent,
         SdbOnVersionChangeRequestCallback,
+        SdbVersionChangeAction,
         SdbBlockedEvent,
-        SdbOnBlockedCallback;
+        SdbOnBlockedCallback,
+        SdbBlockedAction,
+        sdbVersionChangeReloadMessage,
+        sdbVersionChangeDeleteReloadMessage,
+        sdbBlockedMessage;
 
 /// Factory from idb factory.
 SdbFactory sdbFactoryFromIdb(idb.IdbFactory idbFactory) {

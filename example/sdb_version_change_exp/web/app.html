@@ -10,22 +10,19 @@
 <body>
   <h2 id="title">App</h2>
   <label class="option">
-    <input type="checkbox" id="close_on_version_change" checked>
-    Close on version change (read when opening)
-  </label>
-  <label class="option">
-    On version change:
-    <select id="on_version_change">
-      <option value="log">log only</option>
-      <option value="alert">alert</option>
-      <option value="reload">reload the page</option>
+    On version change (read when opening):
+    <select id="version_change_action">
+      <option value="close">close (default)</option>
+      <option value="none">none: keep open, the other app waits</option>
+      <option value="closeAndReload">close and reload</option>
+      <option value="closeAlertAndReload">close, alert and reload</option>
     </select>
   </label>
   <label class="option">
     When blocked:
-    <select id="on_blocked">
-      <option value="banner">banner</option>
-      <option value="alert">alert</option>
+    <select id="blocked_action">
+      <option value="alert">alert (default)</option>
+      <option value="none">none: a banner from the callback</option>
     </select>
   </label>
   <div id="status"></div>

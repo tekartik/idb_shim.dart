@@ -14,6 +14,7 @@ import 'sdb_factory_impl.dart';
 import 'sdb_store_impl.dart';
 import 'sdb_transaction_store_impl.dart';
 import 'sdb_version.dart';
+import 'sdb_web_action.dart';
 import 'sdb_web_notification.dart';
 
 /// SimpleDb database internal extension.
@@ -194,10 +195,10 @@ class SdbDatabaseImpl
 
   /// Listens to the version change requests of the other connections, once
   /// [idbDatabase] is set: [SdbOpenDatabaseOptions.onVersionChangeRequest],
-  /// then the close when [SdbOpenDatabaseOptions.closeOnVersionChange].
+  /// then [SdbOpenDatabaseOptions.versionChangeAction].
   void listenVersionChange() {
     var options = openOptions;
-    var closeOnVersionChange = options?.closeOnVersionChange ?? true;
+    var action = options?.versionChangeAction ?? SdbVersionChangeAction.close;
     var onVersionChangeRequest = options?.onVersionChangeRequest;
     Stream<idb.VersionChangeEvent> stream;
     try {
@@ -220,9 +221,25 @@ class SdbDatabaseImpl
         );
       } finally {
         // Inside the browser's event, so that the other connection proceeds.
-        if (closeOnVersionChange) {
+        if (action != SdbVersionChangeAction.none) {
           _closeSync();
         }
+      }
+      // Once closed, the page can go: the other connection is not waiting
+      // for it any more.
+      switch (action) {
+        case SdbVersionChangeAction.closeAlertAndReload:
+          sdbWebAlert(
+            event.newVersionOrNull == null
+                ? sdbVersionChangeDeleteReloadMessage
+                : sdbVersionChangeReloadMessage,
+          );
+          sdbWebReload();
+        case SdbVersionChangeAction.closeAndReload:
+          sdbWebReload();
+        case SdbVersionChangeAction.none:
+        case SdbVersionChangeAction.close:
+          break;
       }
     });
   }

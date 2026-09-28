@@ -7,6 +7,7 @@ import 'sdb_database_impl.dart';
 import 'sdb_open_impl.dart';
 import 'sdb_schema.dart';
 import 'sdb_version.dart';
+import 'sdb_web_action.dart';
 
 /// Compat
 typedef SdbFactoryImpl = SdbFactoryIdb;
@@ -121,13 +122,21 @@ class SdbFactoryIdb with SdbFactoryDefaultMixin implements SdbFactory {
           }
         : null;
     var onBlocked = options.onBlocked;
+    var blockedAction = options.blockedAction ?? SdbBlockedAction.alert;
     var idbDatabase = await idbFactory.open(
       name,
       version: version,
       onUpgradeNeeded: onUpgradeNeeded,
-      onBlocked: onBlocked == null
+      onBlocked: (onBlocked == null && blockedAction == SdbBlockedAction.none)
           ? null
-          : (_) => onBlocked(SdbBlockedEventImpl(name: name, version: version)),
+          : (_) {
+              onBlocked?.call(
+                SdbBlockedEventImpl(name: name, version: version),
+              );
+              if (blockedAction == SdbBlockedAction.alert) {
+                sdbWebAlert(sdbBlockedMessage);
+              }
+            },
     );
     db.idbDatabase = idbDatabase;
     db.listenVersionChange();

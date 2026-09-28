@@ -48,16 +48,18 @@ abstract class SdbOpenDatabaseOptions {
     SdbDatabaseSchema? schema,
     SdbOnVersionChangeCallback? onVersionChange,
     SdbCodec? codec,
-    bool? closeOnVersionChange,
+    SdbVersionChangeAction? versionChangeAction,
     SdbOnVersionChangeRequestCallback? onVersionChangeRequest,
+    SdbBlockedAction? blockedAction,
     SdbOnBlockedCallback? onBlocked,
   }) => _SdbOpenDatabaseOptions(
     version: version,
     schema: schema,
     onVersionChange: onVersionChange,
     codec: codec,
-    closeOnVersionChange: closeOnVersionChange,
+    versionChangeAction: versionChangeAction,
     onVersionChangeRequest: onVersionChangeRequest,
+    blockedAction: blockedAction,
     onBlocked: onBlocked,
   );
 
@@ -74,28 +76,31 @@ abstract class SdbOpenDatabaseOptions {
   /// Codec used
   SdbCodec? get codec;
 
-  /// Whether the database closes itself when another connection (another
+  /// What the database does on its own when another connection (another
   /// tab, an iframe, or this page) opens it at a higher version or deletes
-  /// it, the IndexedDB `versionchange` event. `true` when null.
-  ///
-  /// Closing lets the other open complete instead of staying blocked, the
-  /// spec behaviour; this database is then no longer usable
-  /// ([SdbDatabase.isClosed], its operations throw), the app should reload.
-  /// [onVersionChangeRequest] is called first. Only the browser fires the
-  /// event; io and memory databases never see it.
-  bool? get closeOnVersionChange;
+  /// it, the IndexedDB `versionchange` event: [SdbVersionChangeAction.close]
+  /// when null. It happens right after [onVersionChangeRequest], inside the
+  /// browser event, so that the other connection proceeds instead of staying
+  /// blocked. Only the browser fires the event; io and memory databases
+  /// never see it.
+  SdbVersionChangeAction? get versionChangeAction;
 
   /// Called when another connection opens the database at a higher version
-  /// or deletes it, before the close of [closeOnVersionChange]. Tell the
-  /// user a newer version runs elsewhere and to reload. Synchronous, do not
-  /// await anything to delay the close.
+  /// or deletes it, before [versionChangeAction] (save what must be, tell
+  /// the user a newer version runs elsewhere). Synchronous, do not await
+  /// anything to delay the close.
   SdbOnVersionChangeRequestCallback? get onVersionChangeRequest;
 
-  /// Called when the open waits for another connection that keeps the
-  /// database open at a lower version and does not close on `versionchange`
-  /// (a tab of an older version of the app). The open keeps waiting and
-  /// completes once that connection closes: use it to tell the user to close
-  /// the other tabs. Never called for io and memory databases.
+  /// What the open does on its own while blocked by another connection that
+  /// keeps the database open at a lower version and does not close on
+  /// `versionchange` (a tab of an older version of the app):
+  /// [SdbBlockedAction.alert] when null. It happens right after [onBlocked].
+  /// The open keeps waiting and completes once that connection closes. Never
+  /// for io and memory databases.
+  SdbBlockedAction? get blockedAction;
+
+  /// Called when the open is blocked, before [blockedAction]: tell the user
+  /// to close the other tabs your own way (with [SdbBlockedAction.none]).
   SdbOnBlockedCallback? get onBlocked;
 
   /// Copy with new values.
@@ -104,8 +109,9 @@ abstract class SdbOpenDatabaseOptions {
     SdbDatabaseSchema? schema,
     SdbOnVersionChangeCallback? onVersionChange,
     SdbCodec? codec,
-    bool? closeOnVersionChange,
+    SdbVersionChangeAction? versionChangeAction,
     SdbOnVersionChangeRequestCallback? onVersionChangeRequest,
+    SdbBlockedAction? blockedAction,
     SdbOnBlockedCallback? onBlocked,
   });
 }
@@ -118,8 +124,9 @@ class _SdbOpenDatabaseOptions implements SdbOpenDatabaseOptions {
     this.schema,
     this.onVersionChange,
     this.codec,
-    this.closeOnVersionChange,
+    this.versionChangeAction,
     this.onVersionChangeRequest,
+    this.blockedAction,
     this.onBlocked,
   });
   @override
@@ -128,8 +135,9 @@ class _SdbOpenDatabaseOptions implements SdbOpenDatabaseOptions {
     SdbDatabaseSchema? schema,
     SdbOnVersionChangeCallback? onVersionChange,
     SdbCodec? codec,
-    bool? closeOnVersionChange,
+    SdbVersionChangeAction? versionChangeAction,
     SdbOnVersionChangeRequestCallback? onVersionChangeRequest,
+    SdbBlockedAction? blockedAction,
     SdbOnBlockedCallback? onBlocked,
   }) {
     return _SdbOpenDatabaseOptions(
@@ -137,9 +145,10 @@ class _SdbOpenDatabaseOptions implements SdbOpenDatabaseOptions {
       schema: schema ?? this.schema,
       onVersionChange: onVersionChange ?? this.onVersionChange,
       codec: codec ?? this.codec,
-      closeOnVersionChange: closeOnVersionChange ?? this.closeOnVersionChange,
+      versionChangeAction: versionChangeAction ?? this.versionChangeAction,
       onVersionChangeRequest:
           onVersionChangeRequest ?? this.onVersionChangeRequest,
+      blockedAction: blockedAction ?? this.blockedAction,
       onBlocked: onBlocked ?? this.onBlocked,
     );
   }
@@ -161,10 +170,13 @@ class _SdbOpenDatabaseOptions implements SdbOpenDatabaseOptions {
   final SdbCodec? codec;
 
   @override
-  final bool? closeOnVersionChange;
+  final SdbVersionChangeAction? versionChangeAction;
 
   @override
   final SdbOnVersionChangeRequestCallback? onVersionChangeRequest;
+
+  @override
+  final SdbBlockedAction? blockedAction;
 
   @override
   final SdbOnBlockedCallback? onBlocked;

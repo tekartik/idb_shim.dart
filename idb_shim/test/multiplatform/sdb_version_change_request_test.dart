@@ -10,24 +10,32 @@ void main() {
   group('version_change_request', () {
     test('options', () {
       var options = SdbOpenDatabaseOptions(version: 1);
-      expect(options.closeOnVersionChange, isNull);
+      // Null: close, and alert, at open time.
+      expect(options.versionChangeAction, isNull);
       expect(options.onVersionChangeRequest, isNull);
+      expect(options.blockedAction, isNull);
       expect(options.onBlocked, isNull);
       void onRequest(SdbVersionChangeRequestEvent event) {}
       void onBlocked(SdbBlockedEvent event) {}
       var copy = options.copyWith(
-        closeOnVersionChange: false,
+        versionChangeAction: SdbVersionChangeAction.none,
         onVersionChangeRequest: onRequest,
+        blockedAction: SdbBlockedAction.none,
         onBlocked: onBlocked,
       );
       expect(copy.version, 1);
-      expect(copy.closeOnVersionChange, isFalse);
+      expect(copy.versionChangeAction, SdbVersionChangeAction.none);
       expect(copy.onVersionChangeRequest, onRequest);
+      expect(copy.blockedAction, SdbBlockedAction.none);
       expect(copy.onBlocked, onBlocked);
-      var copy2 = copy.copyWith(version: 2);
+      var copy2 = copy.copyWith(
+        version: 2,
+        versionChangeAction: SdbVersionChangeAction.closeAndReload,
+      );
       expect(copy2.version, 2);
-      expect(copy2.closeOnVersionChange, isFalse);
+      expect(copy2.versionChangeAction, SdbVersionChangeAction.closeAndReload);
       expect(copy2.onVersionChangeRequest, onRequest);
+      expect(copy2.blockedAction, SdbBlockedAction.none);
       expect(copy2.onBlocked, onBlocked);
     });
 
