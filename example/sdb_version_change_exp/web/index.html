@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SDB version change example</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="host">
+  <h1>SDB: several apps, several versions</h1>
+  <p>
+    Two copies of the same app run below, each in its own frame: two
+    connections of one origin to one database, exactly like two tabs.
+    Open version 1 in A, add a record, then open version 2 in B: A closes
+    itself (its log says why) and B opens at once. Untick "Close on version
+    change" in A and open version 2 there, then version 3 in B: B stays
+    <em>blocked</em> until you press Close in A. Delete the database from
+    one app and the other closes too; that is also how to start over from
+    version 1, a version lower than the database's cannot be opened.
+    <a href="app.html?app=C" target="_blank">The app in a new tab</a> joins in
+    the same way.
+  </p>
+  <div class="frames">
+    <iframe src="app.html?app=A" title="App A"></iframe>
+    <iframe src="app.html?app=B" title="App B"></iframe>
+  </div>
+</body>
+</html>

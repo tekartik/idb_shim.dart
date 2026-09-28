@@ -8,6 +8,8 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 
 import 'src/cursor.dart';
+export 'package:idb_shim/src/common/common_database.dart'
+    show VersionChangeEventExtension;
 export 'package:idb_shim/src/common/common_factory.dart' show IdbFactoryExt;
 export 'package:idb_shim/src/common/common_factory_sandbox.dart'
     show IdbFactorySandboxExtension, IdbFactorySandbox;

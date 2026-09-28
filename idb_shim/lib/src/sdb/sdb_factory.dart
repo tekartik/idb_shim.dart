@@ -48,11 +48,17 @@ abstract class SdbOpenDatabaseOptions {
     SdbDatabaseSchema? schema,
     SdbOnVersionChangeCallback? onVersionChange,
     SdbCodec? codec,
+    bool? closeOnVersionChange,
+    SdbOnVersionChangeRequestCallback? onVersionChangeRequest,
+    SdbOnBlockedCallback? onBlocked,
   }) => _SdbOpenDatabaseOptions(
     version: version,
     schema: schema,
     onVersionChange: onVersionChange,
     codec: codec,
+    closeOnVersionChange: closeOnVersionChange,
+    onVersionChangeRequest: onVersionChangeRequest,
+    onBlocked: onBlocked,
   );
 
   /// The version of the database.
@@ -68,12 +74,39 @@ abstract class SdbOpenDatabaseOptions {
   /// Codec used
   SdbCodec? get codec;
 
+  /// Whether the database closes itself when another connection (another
+  /// tab, an iframe, or this page) opens it at a higher version or deletes
+  /// it, the IndexedDB `versionchange` event. `true` when null.
+  ///
+  /// Closing lets the other open complete instead of staying blocked, the
+  /// spec behaviour; this database is then no longer usable
+  /// ([SdbDatabase.isClosed], its operations throw), the app should reload.
+  /// [onVersionChangeRequest] is called first. Only the browser fires the
+  /// event; io and memory databases never see it.
+  bool? get closeOnVersionChange;
+
+  /// Called when another connection opens the database at a higher version
+  /// or deletes it, before the close of [closeOnVersionChange]. Tell the
+  /// user a newer version runs elsewhere and to reload. Synchronous, do not
+  /// await anything to delay the close.
+  SdbOnVersionChangeRequestCallback? get onVersionChangeRequest;
+
+  /// Called when the open waits for another connection that keeps the
+  /// database open at a lower version and does not close on `versionchange`
+  /// (a tab of an older version of the app). The open keeps waiting and
+  /// completes once that connection closes: use it to tell the user to close
+  /// the other tabs. Never called for io and memory databases.
+  SdbOnBlockedCallback? get onBlocked;
+
   /// Copy with new values.
   SdbOpenDatabaseOptions copyWith({
     int? version,
     SdbDatabaseSchema? schema,
     SdbOnVersionChangeCallback? onVersionChange,
     SdbCodec? codec,
+    bool? closeOnVersionChange,
+    SdbOnVersionChangeRequestCallback? onVersionChangeRequest,
+    SdbOnBlockedCallback? onBlocked,
   });
 }
 
@@ -85,6 +118,9 @@ class _SdbOpenDatabaseOptions implements SdbOpenDatabaseOptions {
     this.schema,
     this.onVersionChange,
     this.codec,
+    this.closeOnVersionChange,
+    this.onVersionChangeRequest,
+    this.onBlocked,
   });
   @override
   SdbOpenDatabaseOptions copyWith({
@@ -92,12 +128,19 @@ class _SdbOpenDatabaseOptions implements SdbOpenDatabaseOptions {
     SdbDatabaseSchema? schema,
     SdbOnVersionChangeCallback? onVersionChange,
     SdbCodec? codec,
+    bool? closeOnVersionChange,
+    SdbOnVersionChangeRequestCallback? onVersionChangeRequest,
+    SdbOnBlockedCallback? onBlocked,
   }) {
     return _SdbOpenDatabaseOptions(
       version: version ?? this.version,
       schema: schema ?? this.schema,
       onVersionChange: onVersionChange ?? this.onVersionChange,
       codec: codec ?? this.codec,
+      closeOnVersionChange: closeOnVersionChange ?? this.closeOnVersionChange,
+      onVersionChangeRequest:
+          onVersionChangeRequest ?? this.onVersionChangeRequest,
+      onBlocked: onBlocked ?? this.onBlocked,
     );
   }
 
@@ -116,6 +159,15 @@ class _SdbOpenDatabaseOptions implements SdbOpenDatabaseOptions {
   /// Codec used, default to SdbCodec.defaultCodec
   @override
   final SdbCodec? codec;
+
+  @override
+  final bool? closeOnVersionChange;
+
+  @override
+  final SdbOnVersionChangeRequestCallback? onVersionChangeRequest;
+
+  @override
+  final SdbOnBlockedCallback? onBlocked;
 }
 
 /// Sdb Factory interface.

@@ -59,6 +59,11 @@ abstract class SdbDatabase implements SdbClient {
 
   /// Close the database.
   Future<void> close();
+
+  /// True once closed, by [close] or on its own when another connection
+  /// opened a newer version or deleted the database
+  /// ([SdbOpenDatabaseOptions.closeOnVersionChange]).
+  bool get isClosed;
 }
 
 /// SimpleDb methods.
@@ -106,4 +111,7 @@ mixin SdbDatabaseDefaultMixin implements SdbDatabase, SdbClientInterface {
 
   @override
   int get version => throw UnimplementedError('version');
+
+  @override
+  bool get isClosed => throw UnimplementedError('isClosed');
 }

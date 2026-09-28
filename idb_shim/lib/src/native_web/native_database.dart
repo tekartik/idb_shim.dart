@@ -25,6 +25,9 @@ class VersionChangeEventNative extends IdbVersionChangeEventBase {
 
   @override
   int get newVersion => idbVersionChangeEvent.newVersion!;
+
+  @override
+  int? get newVersionOrNull => idbVersionChangeEvent.newVersion;
   late Request request = OpenDBRequest(database, transaction);
 
   @override
@@ -159,7 +162,12 @@ class DatabaseNative extends IdbDatabaseBase {
   @override
   Stream<VersionChangeEvent> get onVersionChange {
     if (onVersionChangeController == null) {
-      onVersionChangeController = StreamController<VersionChangeEvent>();
+      // Synchronous: a listener closing the database does it inside the
+      // browser's `versionchange` event, so the requesting connection is not
+      // blocked.
+      onVersionChangeController = StreamController<VersionChangeEvent>(
+        sync: true,
+      );
       idbDatabase.onversionchange =
           (idb.IDBVersionChangeEvent idbVersionChangeEvent) {
             onVersionChangeController!.add(

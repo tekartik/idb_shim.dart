@@ -1,0 +1,11 @@
+targets:
+  $default:
+    builders:
+      build_web_compilers:entrypoint:
+        generate_for:
+          - web/**.dart
+        options:
+          compiler: dart2js
+      build_web_compilers|dart_source_cleanup:
+        release_options:
+          enabled: false

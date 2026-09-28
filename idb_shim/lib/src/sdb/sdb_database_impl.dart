@@ -13,6 +13,7 @@ import 'sdb_database.dart';
 import 'sdb_factory_impl.dart';
 import 'sdb_store_impl.dart';
 import 'sdb_transaction_store_impl.dart';
+import 'sdb_version.dart';
 import 'sdb_web_notification.dart';
 
 /// SimpleDb database internal extension.
@@ -184,10 +185,62 @@ class SdbDatabaseImpl
     return dbFn(this);
   }
 
+  bool _closed = false;
+
+  @override
+  bool get isClosed => _closed;
+
+  StreamSubscription<idb.VersionChangeEvent>? _versionChangeSubscription;
+
+  /// Listens to the version change requests of the other connections, once
+  /// [idbDatabase] is set: [SdbOpenDatabaseOptions.onVersionChangeRequest],
+  /// then the close when [SdbOpenDatabaseOptions.closeOnVersionChange].
+  void listenVersionChange() {
+    var options = openOptions;
+    var closeOnVersionChange = options?.closeOnVersionChange ?? true;
+    var onVersionChangeRequest = options?.onVersionChangeRequest;
+    Stream<idb.VersionChangeEvent> stream;
+    try {
+      stream = idbDatabase.onVersionChange;
+    } catch (_) {
+      // Not supported by this idb implementation.
+      return;
+    }
+    _versionChangeSubscription = stream.listen((event) {
+      if (_closed) {
+        return;
+      }
+      try {
+        onVersionChangeRequest?.call(
+          SdbVersionChangeRequestEventImpl(
+            db: this,
+            oldVersion: event.oldVersion,
+            newVersion: event.newVersionOrNull,
+          ),
+        );
+      } finally {
+        // Inside the browser's event, so that the other connection proceeds.
+        if (closeOnVersionChange) {
+          _closeSync();
+        }
+      }
+    });
+  }
+
+  void _closeSync() {
+    if (_closed) {
+      return;
+    }
+    _closed = true;
+    unawaited(_versionChangeSubscription?.cancel());
+    _versionChangeSubscription = null;
+    idbDatabase.close();
+  }
+
   /// Close the database.
   @override
   Future<void> close() async {
-    idbDatabase.close();
+    _closeSync();
   }
 
   @override

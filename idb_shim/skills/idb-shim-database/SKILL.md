@@ -96,8 +96,12 @@ Future<void> run(IdbFactory factory) async {
   restarts use the `IdbFactoryExt.openOnDowngradeDelete(...)` extension
   (same parameters as `open`), which deletes and re-creates the database on
   downgrade. Never ship it for user data.
-* `Database.onVersionChange` fires when another tab/connection upgrades the
-  database: close the database in the handler. `close()` is synchronous.
+* `Database.onVersionChange` fires when another tab/connection upgrades or
+  deletes the database (`event.newVersionOrNull` is null on a delete): close
+  the database in the handler. `close()` is synchronous and the native
+  stream delivers synchronously, so the close happens inside the browser
+  event and the other connection is not blocked. The stream never fires on
+  sembast/memory databases.
 * `factory.deleteDatabase(name)` removes a database; close open connections
   first or other tabs get blocked.
 

@@ -129,7 +129,13 @@ export 'sdb_transaction_store.dart'
         SdbMultiStoreTransactionExtension;
 export 'sdb_types.dart' show SdbModel, SdbKey, SdbValue, SdbIndexKey, SdbBlob;
 export 'sdb_version.dart'
-    show SdbOnVersionChangeCallback, SdbVersionChangeEvent;
+    show
+        SdbOnVersionChangeCallback,
+        SdbVersionChangeEvent,
+        SdbVersionChangeRequestEvent,
+        SdbOnVersionChangeRequestCallback,
+        SdbBlockedEvent,
+        SdbOnBlockedCallback;
 
 /// Factory from idb factory.
 SdbFactory sdbFactoryFromIdb(idb.IdbFactory idbFactory) {

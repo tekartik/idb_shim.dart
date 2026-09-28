@@ -15,4 +15,22 @@ abstract class IdbDatabaseBase implements Database {
 abstract class IdbVersionChangeEventBase implements VersionChangeEvent {
   @override
   Object get currentTarget => target;
+
+  /// The new version, `null` when the database is being deleted (an event of
+  /// [Database.onVersionChange] only, never in `onUpgradeNeeded`).
+  int? get newVersionOrNull => newVersion;
+}
+
+/// Version change event helpers.
+extension VersionChangeEventExtension on VersionChangeEvent {
+  /// The new version, `null` when the database is being deleted (an event of
+  /// [Database.onVersionChange] only, never in `onUpgradeNeeded`, where
+  /// [VersionChangeEvent.newVersion] is always set).
+  int? get newVersionOrNull {
+    var self = this;
+    if (self is IdbVersionChangeEventBase) {
+      return self.newVersionOrNull;
+    }
+    return newVersion;
+  }
 }

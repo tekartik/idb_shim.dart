@@ -1,3 +1,24 @@
+## 2.9.10-2
+
+* sdb: the version change requests of the other connections (another tab,
+  an iframe, the same page), the IndexedDB `versionchange` and `blocked`
+  events, on `SdbOpenDatabaseOptions`:
+  * `closeOnVersionChange` (true by default): the database closes itself when
+    another connection opens it at a higher version or deletes it, so that
+    the other open completes instead of staying blocked forever;
+    `SdbDatabase.isClosed` tells;
+  * `onVersionChangeRequest`: called first, with the current and the
+    requested version (null on a delete), to tell the user to reload;
+  * `onBlocked`: the open waits for a connection that keeps the database open
+    at a lower version (a tab of an older app); tell the user to close it, the
+    open completes once it does.
+* `VersionChangeEvent.newVersionOrNull` (null on a delete); the native
+  `Database.onVersionChange` stream delivers synchronously, so a close in the
+  handler happens inside the browser event; the sembast one is an empty
+  stream instead of throwing.
+* Example `example/sdb_version_change_exp`: two frames of one app opening the
+  same database at different versions.
+
 ## 2.9.10-1
 
 * sdb: Add join support, walking the records of a store (or of an index)

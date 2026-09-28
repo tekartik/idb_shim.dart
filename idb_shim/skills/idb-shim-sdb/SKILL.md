@@ -5,7 +5,9 @@ description: >-
   package:idb_shim (import package:idb_shim/sdb.dart): SdbFactory
   (sdbFactoryMemory, sdbFactoryIo, sdbFactoryWeb, sdbFactorySqflite),
   SdbStoreRef, SdbModel, SdbDatabaseSchema/SdbOpenDatabaseOptions,
-  openDatabase with onVersionChange, SdbRecordRef get/put/delete,
+  openDatabase with onVersionChange, other tabs and versions
+  (closeOnVersionChange, onVersionChangeRequest, onBlocked, isClosed),
+  SdbRecordRef get/put/delete,
   findRecords/findRecord/count with SdbBoundaries and SdbFilter,
   SdbIndexRef/index2 composite indexes, inStoreTransaction/inStoresTransaction,
   iterate, joins between two stores (joinIterate/findJoinRows/findJoinRecords/
@@ -77,7 +79,8 @@ Future<void> run(SdbFactory factory) async {
 ### Opening and schema
 
 * `factory.openDatabase(name, options: SdbOpenDatabaseOptions(version:,
-  schema:, onVersionChange:, codec:))`. The `version`, `schema` and
+  schema:, onVersionChange:, codec:, closeOnVersionChange:,
+  onVersionChangeRequest:, onBlocked:))`. The `version`, `schema` and
   `onVersionChange` named parameters directly on `openDatabase` are
   deprecated; use `options`.
 * Prefer `schema`: `SdbDatabaseSchema(stores: [store.schema(autoIncrement:
@@ -99,6 +102,18 @@ Future<void> run(SdbFactory factory) async {
   lower version is requested: dev/hot-restart convenience only.
 * `db.readSchemaDef()` returns the live `SdbDatabaseSchemaDef` (debugging);
   `db.version`, `db.name`, `db.storeNames`, `await db.close()`.
+* Other tabs and versions (browser only, `sdbFactoryWeb`): when another
+  connection (another tab, an iframe, or the same page) opens the database
+  at a higher version or deletes it, the database closes itself
+  (`closeOnVersionChange`, true by default; `db.isClosed` then, operations
+  throw) after calling `onVersionChangeRequest(event)` (`event.oldVersion`,
+  `event.newVersion`, null on a delete): tell the user to reload. The other
+  way round, when a tab of an older app keeps the database open and does
+  not close on `versionchange`, the open of the newer version waits, and
+  `onBlocked(event)` (`event.name`, `event.version`) fires: tell the user to
+  close the other tabs, the open completes on its own once they do. Never
+  set a timeout that abandons the open, an IndexedDB open request cannot
+  be cancelled. Memory and io databases fire neither.
 
 ### Reading and writing
 
@@ -527,6 +542,8 @@ void main() {
 * Catching the unique-constraint error inside a transaction instead of
   checking existence first.
 * Using `sdbFactoryIo` in a Flutter app instead of `sdbFactorySqflite`.
+* Bumping the database version of a web app without an `onBlocked` message:
+  a user with an older tab open sees the new tab wait forever, silently.
 * Joining on a field of the **target** store that is neither its primary key
   nor an index: there is no such option, because it would mean a full scan of
   the target per join key. Index that field and use `index.asJoinTarget`.

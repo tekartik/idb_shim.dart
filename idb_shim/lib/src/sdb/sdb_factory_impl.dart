@@ -120,12 +120,17 @@ class SdbFactoryIdb with SdbFactoryDefaultMixin implements SdbFactory {
             }
           }
         : null;
+    var onBlocked = options.onBlocked;
     var idbDatabase = await idbFactory.open(
       name,
       version: version,
       onUpgradeNeeded: onUpgradeNeeded,
+      onBlocked: onBlocked == null
+          ? null
+          : (_) => onBlocked(SdbBlockedEventImpl(name: name, version: version)),
     );
     db.idbDatabase = idbDatabase;
+    db.listenVersionChange();
     if (isDebug && schema != null && !onUpgradeNeededCalled) {
       try {
         await db.checkSchema(schema);

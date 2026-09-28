@@ -239,10 +239,10 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
     meta.deleteObjectStore(name);
   }
 
+  /// Never fires: a sembast database has no other connection to request a
+  /// version change.
   @override
-  Stream<VersionChangeEvent> get onVersionChange {
-    throw UnimplementedError('not implemented yet');
-  }
+  Stream<VersionChangeEvent> get onVersionChange => const Stream.empty();
 
   @override
   Transaction transaction(storeNameOrStoreNames, String mode) {
