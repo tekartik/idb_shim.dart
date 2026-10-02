@@ -1,4 +1,4 @@
-## 2.9.10-2
+## 2.9.10
 
 * sdb: the version change requests of the other connections (another tab,
   an iframe, the same page), the IndexedDB `versionchange` and `blocked`
