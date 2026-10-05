@@ -1,4 +1,4 @@
-## 2.9.11-1
+## 2.9.11
 
 * sdb: the implementation is pluggable. A backend that is not IndexedDB
   implements the internal interfaces (`SdbDatabaseInterface`,
