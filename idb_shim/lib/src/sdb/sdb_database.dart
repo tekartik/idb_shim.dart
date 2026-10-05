@@ -1,8 +1,10 @@
 import 'package:idb_shim/sdb.dart';
-import 'package:idb_shim/src/sdb/sdb_database_impl.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
+import 'package:meta/meta.dart';
 
+import 'sdb_changes_listener.dart';
 import 'sdb_client.dart';
+import 'sdb_web_notification.dart';
 
 /// SimpleDb database.
 ///
@@ -72,12 +74,61 @@ extension SdbDatabaseExtension on SdbDatabase {
   /// Could be null, if an existing database is opened without open options
   /// without schema information
   SdbOpenDatabaseOptions? get openDatabaseOptions {
-    return impl.openOptions;
+    return (this as SdbDatabaseInterface).openOptions;
   }
 }
 
+/// Internal interface implemented by every database, idb based or not.
+abstract class SdbDatabaseInterface implements SdbDatabase, SdbClientInterface {
+  /// The options used to open the database, null if opened without.
+  SdbOpenDatabaseOptions? get openOptions;
+
+  /// The change listeners of the stores, see
+  /// [SdbStoreRefDbExtension.addOnChangesListener].
+  SdbDatabaseChangesListener get changesListener;
+
+  /// The names of the stores changed by another connection (another browser
+  /// tab), what the onSnapshot streams redo their query on.
+  Stream<List<String>> get externalStoreChanges;
+}
+
+/// Internal extension.
+extension SdbDatabaseExtensionPrv on SdbDatabase {
+  /// Internal interface.
+  SdbDatabaseInterface get dbInterface => this as SdbDatabaseInterface;
+}
+
 /// Default mixin
-mixin SdbDatabaseDefaultMixin implements SdbDatabase, SdbClientInterface {
+mixin SdbDatabaseDefaultMixin implements SdbDatabaseInterface {
+  @override
+  final changesListener = SdbDatabaseChangesListener();
+
+  StreamController<List<String>>? _externalChangesController;
+  StreamSubscription<(String, List<String>)>? _externalChangesSubscription;
+
+  /// Simulate a cross-tab notification for [storeNames]. For testing only.
+  @visibleForTesting
+  void simulateExternalStoreChanges(List<String> storeNames) {
+    _externalChangesController?.add(storeNames);
+  }
+
+  /// Lazily starts the BroadcastChannel listener when first subscribed to.
+  @override
+  Stream<List<String>> get externalStoreChanges {
+    _externalChangesController ??= StreamController<List<String>>.broadcast(
+      onListen: () {
+        _externalChangesSubscription = sdbExternalStoreChangesStream
+            .where((event) => event.$1 == name)
+            .listen((event) => _externalChangesController?.add(event.$2));
+      },
+      onCancel: () {
+        _externalChangesSubscription?.cancel();
+        _externalChangesSubscription = null;
+      },
+    );
+    return _externalChangesController!.stream;
+  }
+
   @override
   Future<void> close() {
     throw UnimplementedError('close');

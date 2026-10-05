@@ -1,5 +1,5 @@
 import 'import_idb.dart';
-import 'sdb_index_impl.dart';
+import 'sdb_index.dart';
 import 'sdb_index_record_snapshot.dart';
 import 'sdb_store.dart';
 import 'sdb_types.dart';
@@ -42,7 +42,7 @@ class SdbIndexRecordKeyImpl<
 
   /// Index reference.
   @override
-  final SdbIndexRefImpl<K, V, I> index;
+  final SdbIndexRef<K, V, I> index;
 
   @override
   final K key;

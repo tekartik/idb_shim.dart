@@ -1,6 +1,6 @@
 import 'package:idb_shim/sdb.dart';
 // ignore: implementation_imports
-import 'package:idb_shim/src/sdb/sdb_database_impl.dart' show SdbDatabaseImpl;
+import 'package:idb_shim/src/sdb/sdb_mixin.dart' show SdbDatabaseExtensionPrv;
 
 import 'idb_test_common.dart';
 import 'sdb_test.dart';
@@ -18,13 +18,10 @@ final _testStore = SdbStoreRef<int, String>('test');
 final _testModelStore = SdbStoreRef<int, SdbModel>('test_model');
 final _testIndex = _testModelStore.index<String>('test_index');
 
-/// Internal check, idb implementation only: the listener must be registered
-/// while subscribed and gone once cancelled. Other implementations are free to
-/// track their listeners differently.
+/// Internal check: the listener must be registered while subscribed and gone
+/// once cancelled.
 void _expectChangesListenerIsEmpty(SdbDatabase db, bool isEmpty) {
-  if (db is SdbDatabaseImpl) {
-    expect(db.changesListener.isEmpty, isEmpty);
-  }
+  expect(db.dbInterface.changesListener.isEmpty, isEmpty);
 }
 
 void defineSdbOnSnapshotTests(SdbTestContext ctx) {

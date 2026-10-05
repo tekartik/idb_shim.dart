@@ -4,6 +4,7 @@ import 'package:idb_shim/src/sdb/sdb_store_impl.dart';
 import 'sdb_client.dart';
 import 'sdb_index_impl.dart';
 import 'sdb_index_record.dart';
+import 'sdb_index_record_snapshot.dart';
 import 'sdb_index_record_snapshot_impl.dart';
 import 'sdb_key_utils.dart';
 import 'sdb_transaction.dart';
@@ -48,18 +49,18 @@ extension SdbIndexRecordRefImplExtension<
 >
     on SdbIndexRecordRef<K, V, I> {
   /// Get a single record.
-  Future<SdbIndexRecordSnapshotImpl<K, V, I>?> getImpl(SdbClient client) =>
+  Future<SdbIndexRecordSnapshot<K, V, I>?> getImpl(SdbClient client) =>
       impl.store.clientAutoTxnImpl(
         client,
         SdbTransactionMode.readOnly,
-        (txn) => txnGetImpl(txn.rawImpl),
+        (txn) => index.impl.txnIndexInterface(txn).getRecordImpl(indexKey),
       );
 
   /// Get a single record key.
   Future<K?> getKeyImpl(SdbClient client) => impl.store.clientAutoTxnImpl(
     client,
     SdbTransactionMode.readOnly,
-    (txn) => txnGetKeyImpl(txn.rawImpl),
+    (txn) => index.impl.txnIndexInterface(txn).getKeyImpl(indexKey),
   );
 
   /// Get a single record.

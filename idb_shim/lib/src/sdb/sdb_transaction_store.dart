@@ -1,7 +1,5 @@
 import 'package:idb_shim/sdb.dart';
 
-import 'sdb_transaction_store_impl.dart';
-
 /// Transaction store reference.
 abstract class SdbTransactionStoreRef<K extends SdbKey, V extends SdbValue> {
   /// Store reference.
@@ -25,11 +23,65 @@ abstract class SdbTransactionStoreRef<K extends SdbKey, V extends SdbValue> {
   );
 }
 
+/// Internal interface implemented by every transaction store, idb based or
+/// not. The public [SdbTransactionStoreRefExtension] goes through it.
+abstract class SdbTransactionStoreRefInterface<
+  K extends SdbKey,
+  V extends SdbValue
+>
+    implements SdbTransactionStoreRef<K, V> {
+  /// Get a single record.
+  Future<SdbRecordSnapshot<K, V>?> getRecordImpl(K key);
+
+  /// True if the record exists.
+  Future<bool> existsImpl(K key);
+
+  /// Add a record, the key is generated.
+  Future<K> addImpl(V value);
+
+  /// Put a record, [key] is null for inline keys (keyPath).
+  Future<void> putImpl(K? key, V value);
+
+  /// Put an already encoded (raw) value at [key], as read by a cursor row,
+  /// for import and migration. The change listeners are not told about it.
+  Future<void> putRawImpl(K key, Object rawValue);
+
+  /// Delete a record.
+  Future<void> deleteImpl(K key);
+
+  /// Stream records.
+  Stream<SdbRecordSnapshot<K, V>> streamRecordsImpl({
+    required SdbFindOptions<K> options,
+  });
+
+  /// Iterate on records, the handler returns false to stop.
+  Future<void> iterateImpl({
+    required SdbFindOptions<K> options,
+    required SdbCursorRowHandler<K, V> handler,
+  });
+
+  /// Find records.
+  Future<List<SdbRecordSnapshot<K, V>>> findRecordsImpl({
+    required SdbFindOptions<K> options,
+  });
+
+  /// Find record keys.
+  Future<List<SdbRecordKey<K, V>>> findRecordKeysImpl({
+    required SdbFindOptions<K> options,
+  });
+
+  /// Count records.
+  Future<int> countImpl({required SdbFindOptions<K> options});
+
+  /// Delete records.
+  Future<void> deleteRecordsImpl({required SdbFindOptions<K> options});
+}
+
 /// Transaction store actions.
 extension SdbTransactionStoreRefExtension<K extends SdbKey, V extends SdbValue>
     on SdbTransactionStoreRef<K, V> {
-  SdbTransactionStoreRefImpl<K, V> get _impl =>
-      this as SdbTransactionStoreRefImpl<K, V>;
+  SdbTransactionStoreRefInterface<K, V> get _impl =>
+      this as SdbTransactionStoreRefInterface<K, V>;
 
   /// Get a single record.
   Future<SdbRecordSnapshot<K, V>?> getRecord(K key) => _impl.getRecordImpl(key);
@@ -138,12 +190,6 @@ extension SdbTransactionStoreRefExtension<K extends SdbKey, V extends SdbValue>
 
   /// store name.
   String get name => store.name;
-
-  /// Key Path.
-  Object? get keyPath => _impl.idbObjectStore.keyPath;
-
-  /// Auto increment.
-  bool get autoIncrement => _impl.idbObjectStore.autoIncrement;
 }
 
 /// Single store transaction.
@@ -160,16 +206,16 @@ extension SdbSingleStoreTransactionExtension<
 >
     on SdbSingleStoreTransaction<K, V> {
   /// Get a single record.
-  Future<SdbRecordSnapshot<K, V>?> getRecord(K key) => impl.getRecordImpl(key);
+  Future<SdbRecordSnapshot<K, V>?> getRecord(K key) => txnStore.getRecord(key);
 
   /// Add a record
-  Future<K> add(V value) => impl.addImpl(value);
+  Future<K> add(V value) => txnStore.add(value);
 
   /// Put a record
-  Future<void> put(K key, V value) => impl.putImpl(key, value);
+  Future<void> put(K key, V value) => txnStore.put(key, value);
 
   /// Delete a record
-  Future<void> delete(K key) => impl.deleteImpl(key);
+  Future<void> delete(K key) => txnStore.delete(key);
 
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> findRecords({
@@ -185,7 +231,7 @@ extension SdbSingleStoreTransactionExtension<
 
     /// New API, supercedes the other parameters
     SdbFindOptions<K>? options,
-  }) => impl.findRecordsImpl(
+  }) => txnStore.findRecords(
     options: sdbFindOptionsMerge(
       options,
       boundaries: boundaries,
@@ -198,7 +244,7 @@ extension SdbSingleStoreTransactionExtension<
 
   /// Find records.
   Stream<SdbRecordSnapshot<K, V>> streamRecords({SdbFindOptions<K>? options}) =>
-      impl.streamRecordsImpl(options: sdbFindOptionsMerge(options));
+      txnStore.streamRecords(options: sdbFindOptionsMerge(options));
 
   /// Find record keys.
   Future<List<SdbRecordKey<K, V>>> findRecordKeys({
@@ -212,7 +258,7 @@ extension SdbSingleStoreTransactionExtension<
 
     /// New API, supercedes the other parameters
     SdbFindOptions<K>? options,
-  }) => impl.findRecordKeysImpl(
+  }) => txnStore.findRecordKeys(
     options: sdbFindOptionsMerge(
       options,
       boundaries: boundaries,
@@ -233,5 +279,5 @@ extension SdbMultiStoreTransactionExtension on SdbMultiStoreTransaction {
   @Deprecated('Use txn.store(store) instead')
   SdbTransactionStoreRef<K, V> txnStore<K extends SdbKey, V extends SdbValue>(
     SdbStoreRef<K, V> store,
-  ) => impl.store<K, V>(store);
+  ) => this.store<K, V>(store);
 }

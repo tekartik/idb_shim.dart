@@ -4,7 +4,6 @@ import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 
 import 'sdb.dart';
-import 'sdb_database_impl.dart';
 
 /// Store schema definition
 class SdbStoreSchemaDef {
@@ -491,11 +490,9 @@ extension SdbFactorySchemaExtensionPrv on SdbFactory {}
 
 /// Database schema extension on database
 extension SchemaSdbDatabaseExtension on SdbDatabase {
-  SdbDatabaseImpl get _impl => this as SdbDatabaseImpl;
-
   /// Read the database schema definition
   Future<SdbDatabaseSchemaDef> readSchemaDef() {
-    var schema = _impl.schema;
+    var schema = openDatabaseOptions?.schema;
     if (schema == null) {
       throw StateError('Database was not opened with a schema');
     }
@@ -604,7 +601,7 @@ extension SchemaSdbDatabasePrvExtension on SdbDatabase {
 
   /// Read the database schema definition
   SdbDatabaseSchemaDef txnReadSchemaDef(SdbTransaction txn) {
-    var schema = _impl.schema!;
+    var schema = openDatabaseOptions!.schema!;
     var storeNames = txn.storeNames;
 
     var storesDefs = storeNames.map((storeName) {

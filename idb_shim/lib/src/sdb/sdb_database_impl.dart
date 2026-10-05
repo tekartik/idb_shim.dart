@@ -8,14 +8,12 @@ import 'package:idb_shim/src/sdb/sdb_database_impl.dart';
 import 'package:meta/meta.dart';
 
 import 'sdb.dart';
-import 'sdb_changes_listener.dart';
 import 'sdb_database.dart';
 import 'sdb_factory_impl.dart';
 import 'sdb_store_impl.dart';
 import 'sdb_transaction_store_impl.dart';
 import 'sdb_version.dart';
 import 'sdb_web_action.dart';
-import 'sdb_web_notification.dart';
 
 /// SimpleDb database internal extension.
 extension SdbDatabaseInternalExtension on SdbDatabase {
@@ -46,6 +44,7 @@ class SdbDatabaseImpl
   }
 
   /// Open options
+  @override
   final SdbOpenDatabaseOptions? openOptions;
 
   /// Factory.
@@ -72,35 +71,6 @@ class SdbDatabaseImpl
 
   @override
   Iterable<String> get storeNames => idbDatabase.objectStoreNames;
-
-  /// Store change listeners
-  final changesListener = SdbDatabaseChangesListener();
-
-  /// Simulate a cross-tab notification for [storeNames]. For testing only.
-  @visibleForTesting
-  void simulateExternalStoreChanges(List<String> storeNames) {
-    _externalChangesController?.add(storeNames);
-  }
-
-  StreamController<List<String>>? _externalChangesController;
-  StreamSubscription<(String, List<String>)>? _externalChangesSubscription;
-
-  /// Stream of store names changed by another tab. Lazily starts the
-  /// BroadcastChannel listener when first subscribed to.
-  Stream<List<String>> get externalStoreChanges {
-    _externalChangesController ??= StreamController<List<String>>.broadcast(
-      onListen: () {
-        _externalChangesSubscription = sdbExternalStoreChangesStream
-            .where((event) => event.$1 == name)
-            .listen((event) => _externalChangesController?.add(event.$2));
-      },
-      onCancel: () {
-        _externalChangesSubscription?.cancel();
-        _externalChangesSubscription = null;
-      },
-    );
-    return _externalChangesController!.stream;
-  }
 
   /// Transaction.
   @override

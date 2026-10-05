@@ -1,8 +1,13 @@
 import 'dart:async';
 
 import 'package:idb_shim/sdb.dart';
-import 'package:idb_shim/src/sdb/sdb_transaction_impl.dart';
+import 'package:idb_shim/src/common/common_import.dart';
+import 'package:idb_shim/src/sdb/sdb_database.dart';
+import 'package:idb_shim/src/sdb/sdb_transaction.dart';
 import 'package:idb_shim/src/utils/async_utils.dart';
+import 'package:idb_shim/src/utils/env_utils.dart';
+
+import 'sdb_web_notification.dart';
 
 /// Transaction record change implementation
 class SdbTransactionRecordChange<K extends SdbKey, V extends SdbValue>
@@ -350,7 +355,7 @@ class SdbDatabaseChangesListener {
       return;
     }
 
-    var changes = transaction.rawImpl.changes;
+    var changes = transaction.txnInterface.changes;
     if (changes != null && (oldSnapshot != null || newSnapshot != null)) {
       changes.addChange(oldSnapshot, newSnapshot);
     }
@@ -393,5 +398,78 @@ class SdbDatabaseChangesListener {
     }
 
     return allExtraStoreNames.isEmpty ? null : allExtraStoreNames.toList();
+  }
+}
+
+/// Default change tracking of a transaction, for any implementation: the
+/// changes are collected while a store is listened to, handed to the listeners
+/// once the callback is done (as long as they make changes), and the stores
+/// written are remembered for the cross tab notification.
+mixin SdbTransactionChangesDefaultMixin implements SdbTransactionInterface {
+  @override
+  SdbDatabaseTransactionChanges? changes;
+
+  Set<String>? _writtenStoreNames;
+
+  @override
+  SdbDatabaseChangesListener? get changesListener =>
+      db.dbInterface.changesListener;
+
+  @override
+  void noteWriteToStore(String storeName) {
+    (_writtenStoreNames ??= {}).add(storeName);
+  }
+
+  /// Run [callback] then the change listeners, as long as they make changes.
+  Future<T> runWithChangesListener<T>(FutureOr<T> Function() callback) async {
+    var changesListener = this.changesListener;
+    if (changesListener != null && changesListener.hasListeners) {
+      changes = SdbDatabaseTransactionChanges();
+    }
+    var result = await callback();
+
+    var txnChanges = changes;
+    if (txnChanges != null && changesListener != null) {
+      while (txnChanges.hasChanges) {
+        try {
+          var storeChangesList = txnChanges.getAllStoreChanges().toList();
+          if (storeChangesList.isEmpty) {
+            break;
+          }
+          txnChanges.clearChanges();
+          var handled = runSequentially(
+            storeChangesList.map((item) {
+              return () {
+                var store = item.$1;
+                var recordChanges = item.$2.getChanges();
+                return changesListener.handleStoreChanges(
+                  this,
+                  store,
+                  recordChanges,
+                );
+              };
+            }).toList(),
+          );
+          if (handled is Future) {
+            await handled;
+          }
+        } catch (e) {
+          if (isDebug) {
+            idbLog('Error handling changes listener: $e');
+          }
+          rethrow;
+        }
+      }
+    }
+    return result;
+  }
+
+  /// Notify the other connections of the stores written, once the transaction
+  /// completed.
+  void broadcastWrittenStores() {
+    var names = _writtenStoreNames;
+    if (names != null && names.isNotEmpty) {
+      sdbBroadcastStoreChanges(db.name, names.toList());
+    }
   }
 }

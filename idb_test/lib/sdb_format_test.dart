@@ -1,5 +1,7 @@
 library;
 
+import 'dart:typed_data';
+
 import 'package:collection/collection.dart';
 import 'package:idb_shim/sdb.dart';
 import 'package:idb_shim/utils/sdb_import_export.dart';
@@ -381,6 +383,52 @@ void sdbUtilsTests(SdbTestContext ctx) {
 
         await checkAll(db!, expectedExport, (_) async {});
         await dbCheckImport1To2(exportV1, expectedExport);
+        await dbCheckImport1To2(expectedExport, expectedExport);
+      });
+      test('one_datetime_uint8list_record', () async {
+        await setupDeleteDb();
+
+        db = await sdbFactory.openDatabase(
+          srcDbName,
+          options: _openDatabaseOptions,
+        );
+
+        var dateTime = DateTime.utc(1970, 1, 1, 0, 0, 1);
+        var bytes = Uint8List.fromList([1, 2, 3]);
+        await testStore.add(db!, {'dateTime': dateTime, 'bytes': bytes});
+
+        // The idb native types are exported as the sembast ones.
+        final expectedExport = [
+          {'sembast_export': 1, 'version': 1},
+          {'store': '_main'},
+          [
+            'store_test_store',
+            {'name': 'test_store', 'keyPath': 'name', 'autoIncrement': true},
+          ],
+          [
+            'stores',
+            ['test_store'],
+          ],
+          ['version', 1],
+          {'store': 'test_store'},
+          [
+            1,
+            {
+              'dateTime': {'@Timestamp': '1970-01-01T00:00:01.000Z'},
+              'bytes': {'@Blob': 'AQID'},
+              'name': 1,
+            },
+          ],
+        ];
+
+        Future dbCheck(SdbDatabase db) async {
+          var value = (await testStore.record(1).getValue(db))!;
+          expect(value['dateTime'], dateTime);
+          expect(value['bytes'], bytes);
+          expect(value['bytes'], isA<Uint8List>());
+        }
+
+        await checkAll(db!, expectedExport, dbCheck);
         await dbCheckImport1To2(expectedExport, expectedExport);
       });
       test('one_record', () async {

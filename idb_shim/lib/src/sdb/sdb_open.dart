@@ -1,8 +1,4 @@
 import 'sdb.dart';
-import 'sdb_index_impl.dart';
-import 'sdb_open_impl.dart';
-// ignore: unused_import
-import 'sdb_store_impl.dart';
 
 /// Database during open.
 abstract class SdbOpenDatabase {
@@ -60,9 +56,21 @@ abstract class SdbOpenStoreRef<K extends SdbKey, V extends SdbValue>
   void deleteIndex(String indexName);
 }
 
+/// Internal interface implemented by every open store, idb based or not.
+abstract class SdbOpenStoreRefInterface<K extends SdbKey, V extends SdbValue>
+    implements SdbOpenStoreRef<K, V> {
+  /// Create an index, [indexKeyPath] is a String, a `List<String>` or a
+  /// [SdbKeyPath].
+  SdbOpenIndexRef<K, V, I> createIndexImpl<I extends SdbIndexKey>(
+    SdbIndexRef<K, V, I> index,
+    Object indexKeyPath, {
+    required bool? unique,
+  });
+}
+
 /// Default open store ref mixin.
 mixin SdbOpenStoreRefDefaultMixin<K extends SdbKey, V extends SdbValue>
-    implements SdbOpenStoreRef<K, V> {}
+    implements SdbOpenStoreRefInterface<K, V> {}
 
 /// Index during open.
 abstract class SdbOpenIndexRef<
@@ -78,6 +86,9 @@ extension SdbOpenDatabaseExtension on SdbOpenDatabase {}
 /// Store action during open.
 extension SdbOpenStoreRefExtension<K extends SdbKey, V extends SdbValue>
     on SdbOpenStoreRef<K, V> {
+  SdbOpenStoreRefInterface<K, V> get _interface =>
+      this as SdbOpenStoreRefInterface<K, V>;
+
   /// Create an index.
   SdbOpenIndexRef<K, V, I> createIndex<I extends SdbIndexKey>(
     SdbIndexRef<K, V, I> index,
@@ -87,7 +98,7 @@ extension SdbOpenStoreRefExtension<K extends SdbKey, V extends SdbValue>
 
     /// Unique
     bool? unique,
-  }) => impl.createIndexImpl<I>(index.impl, indexKeyPath, unique: unique);
+  }) => _interface.createIndexImpl<I>(index, indexKeyPath, unique: unique);
 
   /// Create an index.
   SdbOpenIndexRef<K, V, I> createIndex1<I extends SdbIndexKey>(
@@ -96,7 +107,7 @@ extension SdbOpenStoreRefExtension<K extends SdbKey, V extends SdbValue>
 
     /// Unique
     bool? unique,
-  }) => impl.createIndexImpl<I>(index.impl, indexKeyPath, unique: unique);
+  }) => _interface.createIndexImpl<I>(index, indexKeyPath, unique: unique);
 
   /// Create an index on 2 fields.
   SdbOpenIndexRef<K, V, (I1, I2)>
@@ -107,7 +118,7 @@ extension SdbOpenStoreRefExtension<K extends SdbKey, V extends SdbValue>
 
     /// Unique
     bool? unique,
-  }) => impl.createIndexImpl<(I1, I2)>(index.impl, [
+  }) => _interface.createIndexImpl<(I1, I2)>(index, [
     indexKeyPath1,
     indexKeyPath2,
   ], unique: unique);
@@ -123,7 +134,7 @@ extension SdbOpenStoreRefExtension<K extends SdbKey, V extends SdbValue>
     String indexKeyPath2,
     String indexKeyPath3, {
     bool? unique,
-  }) => impl.createIndexImpl<(I1, I2, I3)>(index.impl, [
+  }) => _interface.createIndexImpl<(I1, I2, I3)>(index, [
     indexKeyPath1,
     indexKeyPath2,
     indexKeyPath3,
@@ -142,7 +153,7 @@ extension SdbOpenStoreRefExtension<K extends SdbKey, V extends SdbValue>
     String indexKeyPath3,
     String indexKeyPath4, {
     bool? unique,
-  }) => impl.createIndexImpl<(I1, I2, I3, I4)>(index.impl, [
+  }) => _interface.createIndexImpl<(I1, I2, I3, I4)>(index, [
     indexKeyPath1,
     indexKeyPath2,
     indexKeyPath3,

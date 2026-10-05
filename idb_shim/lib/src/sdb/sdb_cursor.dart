@@ -147,6 +147,9 @@ extension SdbCursorRowInternalExt<K extends SdbKey, V extends SdbValue>
     on SdbCursorRow<K, V> {
   SdbCursorRowImpl<K, V> get _impl => this as SdbCursorRowImpl<K, V>;
 
+  /// The row key (the primary key for a store cursor).
+  Object get key => _impl.key;
+
   /// Raw idb value
   Object get rawValue => _impl.rawValue;
 

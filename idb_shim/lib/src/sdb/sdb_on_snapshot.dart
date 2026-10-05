@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:idb_shim/sdb.dart';
-import 'package:idb_shim/src/sdb/sdb_database_impl.dart';
+import 'package:idb_shim/src/sdb/sdb_database.dart';
 
 /// Snapshots extension on store.
 extension SdbStoreRefExtensionOnSnapshots<K extends SdbKey, V extends SdbValue>
@@ -34,7 +34,7 @@ extension SdbStoreRefExtensionOnSnapshots<K extends SdbKey, V extends SdbValue>
       onListen: () {
         addSnapshots();
         addOnChangesListener(db, onChange);
-        externalSub = db.impl.externalStoreChanges
+        externalSub = db.dbInterface.externalStoreChanges
             .where((storeNames) => storeNames.contains(name))
             .listen((_) => addSnapshots());
         controller.onCancel = () {
@@ -72,7 +72,7 @@ extension SdbStoreRefExtensionOnSnapshots<K extends SdbKey, V extends SdbValue>
       onListen: () {
         addCount();
         addOnChangesListener(db, onChange);
-        externalSub = db.impl.externalStoreChanges
+        externalSub = db.dbInterface.externalStoreChanges
             .where((storeNames) => storeNames.contains(name))
             .listen((_) => addCount());
         controller.onCancel = () {
@@ -121,7 +121,7 @@ extension SdbIndexRefExtensionOnSnapshots<
       onListen: () {
         addSnapshots();
         store.addOnChangesListener(db, onChange);
-        externalSub = db.impl.externalStoreChanges
+        externalSub = db.dbInterface.externalStoreChanges
             .where((storeNames) => storeNames.contains(store.name))
             .listen((_) => addSnapshots());
         controller.onCancel = () {
@@ -159,7 +159,7 @@ extension SdbIndexRefExtensionOnSnapshots<
       onListen: () {
         addCount();
         store.addOnChangesListener(db, onChange);
-        externalSub = db.impl.externalStoreChanges
+        externalSub = db.dbInterface.externalStoreChanges
             .where((storeNames) => storeNames.contains(store.name))
             .listen((_) => addCount());
         controller.onCancel = () {
@@ -207,7 +207,7 @@ extension SdbRecordRefExtensionOnSnapshot<K extends SdbKey, V extends SdbValue>
         store.addOnChangesListener(db, onChange);
         // Cross-tab: re-fetch the record when any change in this store arrives
         // from another tab. We cannot filter by key at this level.
-        externalSub = db.impl.externalStoreChanges
+        externalSub = db.dbInterface.externalStoreChanges
             .where((storeNames) => storeNames.contains(store.name))
             .listen((_) => addSnapshot());
         controller.onCancel = () {
@@ -253,7 +253,7 @@ extension SdbIndexRecordRefExtensionOnSnapshot<
       onListen: () {
         addSnapshot();
         index.store.addOnChangesListener(db, onChange);
-        externalSub = db.impl.externalStoreChanges
+        externalSub = db.dbInterface.externalStoreChanges
             .where((storeNames) => storeNames.contains(index.store.name))
             .listen((_) => addSnapshot());
         controller.onCancel = () {
@@ -294,7 +294,7 @@ extension SdbIndexRecordRefExtensionOnSnapshot<
       onListen: () {
         addSnapshots();
         store.addOnChangesListener(db, onChange);
-        externalSub = db.impl.externalStoreChanges
+        externalSub = db.dbInterface.externalStoreChanges
             .where((storeNames) => storeNames.contains(store.name))
             .listen((_) => addSnapshots());
         controller.onCancel = () {

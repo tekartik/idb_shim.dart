@@ -1,10 +1,7 @@
 import 'package:idb_shim/src/sdb/sdb.dart';
 
-// ignore: unused_import
-import 'sdb_database_impl.dart';
-import 'sdb_record_snapshot_impl.dart';
 import 'sdb_store_impl.dart';
-import 'sdb_transaction_impl.dart';
+import 'sdb_transaction.dart';
 
 /// Record reference internal extension.
 extension SdbRecordRefInternalExtension<K extends SdbKey, V extends SdbValue>
@@ -27,40 +24,40 @@ class SdbRecordRefImpl<K extends SdbKey, V extends SdbValue>
   String toString() => 'Record(${store.name}, $key)';
 
   /// Get a single record.
-  Future<SdbRecordSnapshotImpl<K, V>?> getImpl(SdbClient client) =>
+  Future<SdbRecordSnapshot<K, V>?> getImpl(SdbClient client) =>
       impl.store.clientAutoTxnImpl(
         client,
         SdbTransactionMode.readOnly,
-        (txn) => txnGetImpl(txn.rawImpl),
+        (txn) => txnGetImpl(txn.txnInterface),
       );
 
   /// Get a single record.
-  Future<SdbRecordSnapshotImpl<K, V>?> txnGetImpl(SdbTransactionImpl txn) {
-    return txn.storeImpl(store).getRecordImpl(key);
+  Future<SdbRecordSnapshot<K, V>?> txnGetImpl(SdbTransactionInterface txn) {
+    return txn.txnStoreInterface(store).getRecordImpl(key);
   }
 
   /// Get a single record.
   Future<bool> existsImpl(SdbClient client) => impl.store.clientAutoTxnImpl(
     client,
     SdbTransactionMode.readOnly,
-    (txn) => txnExistsImpl(txn.rawImpl),
+    (txn) => txnExistsImpl(txn.txnInterface),
   );
 
   /// Get a single record.
-  Future<bool> txnExistsImpl(SdbTransactionImpl txn) {
-    return txn.storeImpl(store).existsImpl(key);
+  Future<bool> txnExistsImpl(SdbTransactionInterface txn) {
+    return txn.txnStoreInterface(store).existsImpl(key);
   }
 
   /// Delete a single record.
   Future<void> deleteImpl(SdbClient client) => impl.store.clientAutoTxnImpl(
     client,
     SdbTransactionMode.readWrite,
-    (txn) => txnDeleteImpl(txn.rawImpl),
+    (txn) => txnDeleteImpl(txn.txnInterface),
   );
 
   /// Delete a single record.
-  Future<void> txnDeleteImpl(SdbTransactionImpl txn) {
-    return txn.storeImpl(store).deleteImpl(key);
+  Future<void> txnDeleteImpl(SdbTransactionInterface txn) {
+    return txn.txnStoreInterface(store).deleteImpl(key);
   }
 
   /// Put a single record.
@@ -68,12 +65,12 @@ class SdbRecordRefImpl<K extends SdbKey, V extends SdbValue>
       impl.store.clientAutoTxnImpl(
         client,
         SdbTransactionMode.readWrite,
-        (txn) => txnPutImpl(txn.rawImpl, value),
+        (txn) => txnPutImpl(txn.txnInterface, value),
       );
 
   /// Put a single record.
-  Future<void> txnPutImpl(SdbTransactionImpl txn, V value) {
-    return txn.storeImpl(store).putImpl(key, value);
+  Future<void> txnPutImpl(SdbTransactionInterface txn, V value) {
+    return txn.txnStoreInterface(store).putImpl(key, value);
   }
 
   @override

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:idb_shim/src/common/common_paged_query.dart';
-import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_codec.dart';
 import 'package:idb_shim/src/sdb/sdb_filter_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
@@ -14,12 +13,13 @@ import 'package:idb_shim/src/utils/idb_utils.dart';
 import 'import_idb.dart' as idb;
 import 'sdb.dart';
 import 'sdb_boundary_impl.dart';
-import 'sdb_database_impl.dart';
 import 'sdb_index_cursor.dart';
 import 'sdb_index_record_snapshot_impl.dart';
 import 'sdb_key_utils.dart';
 import 'sdb_store_impl.dart';
+import 'sdb_transaction.dart';
 import 'sdb_transaction_impl.dart';
+import 'sdb_transaction_index.dart';
 
 /// Index reference internal extension.
 extension SdbIndexRefInternalExtension<
@@ -212,6 +212,13 @@ abstract class SdbIndexRefImpl<
   @override
   String toString() => 'Index(${store.name}, $name)';
 
+  /// The transaction index of this index in [txn], idb based or not.
+  SdbTransactionIndexRefInterface<K, V, I> txnIndexInterface(
+    SdbTransaction txn,
+  ) =>
+      txn.txnInterface.txnStoreInterface(store).index(this)
+          as SdbTransactionIndexRefInterface<K, V, I>;
+
   /// Find records.
   Future<List<SdbIndexRecordSnapshot<K, V, I>>> findRecordsImpl(
     SdbClient client, {
@@ -221,7 +228,7 @@ abstract class SdbIndexRefImpl<
     client,
     SdbTransactionMode.readOnly,
 
-    (txn) => txnFindRecordsImpl(txn.rawImpl, options: options),
+    (txn) => txnIndexInterface(txn).findRecordsImpl(options: options),
   );
 
   /// Find records.
@@ -229,10 +236,12 @@ abstract class SdbIndexRefImpl<
     SdbClient client, {
 
     required SdbFindOptions<I> options,
-  }) => client.handleDbOrTxn(
-    (db) => dbStreamRecordsImpl(db, options: options),
-    (txn) => txnStreamRecordsImpl(txn, options: options),
-  );
+  }) {
+    if (client is SdbTransaction) {
+      return txnIndexInterface(client).streamRecordsImpl(options: options);
+    }
+    return dbStreamRecordsImpl(client as SdbDatabase, options: options);
+  }
 
   /// Find records.
   Future<List<SdbIndexRecordKey<K, V, I>>> findRecordKeysImpl(
@@ -242,18 +251,18 @@ abstract class SdbIndexRefImpl<
   }) => impl.store.clientAutoTxnImpl(
     client,
     SdbTransactionMode.readOnly,
-    (txn) => txnFindRecordKeysImpl(txn.rawImpl, options: options),
+    (txn) => txnIndexInterface(txn).findRecordKeysImpl(options: options),
   );
 
   /// Find records.
   Stream<SdbIndexRecordSnapshot<K, V, I>> dbStreamRecordsImpl(
-    SdbDatabaseImpl db, {
+    SdbDatabase db, {
 
     required SdbFindOptions<I> options,
   }) {
     var ctlr = SdbTxnStreamController<SdbIndexRecordSnapshot<K, V, I>>();
     db.inStoreTransaction(store, SdbTransactionMode.readOnly, (txn) async {
-      var stream = txnStreamRecordsImpl(txn.rawImpl, options: options);
+      var stream = txnIndexInterface(txn).streamRecordsImpl(options: options);
       await ctlr.addStream(stream);
     });
     return ctlr.stream;
@@ -396,7 +405,7 @@ abstract class SdbIndexRefImpl<
   }) => clientAutoTxnImpl(
     client,
     SdbTransactionMode.readOnly,
-    (txn) => txnCountImpl(txn.rawImpl, options: options),
+    (txn) => txnIndexInterface(txn).countImpl(options: options),
   );
 
   /// Count records.
@@ -456,7 +465,7 @@ abstract class SdbIndexRefImpl<
   }) => impl.store.clientAutoTxnImpl(
     client,
     SdbTransactionMode.readWrite,
-    (txn) => txnDeleteImpl(txn.rawImpl, options: options),
+    (txn) => txnIndexInterface(txn).deleteRecordsImpl(options: options),
   );
 
   /// Find records.
@@ -465,7 +474,7 @@ abstract class SdbIndexRefImpl<
     required SdbFindOptions<I> options,
   }) {
     return db.inStoreTransaction(store, SdbTransactionMode.readWrite, (txn) {
-      return txnDeleteImpl(txn.rawImpl, options: options);
+      return txnIndexInterface(txn).deleteRecordsImpl(options: options);
     });
   }
 
@@ -521,7 +530,7 @@ abstract class SdbIndexRefImpl<
   ///
   Future<void> txnIterateImpl(
     SdbTransactionImpl txn, {
-    required SdbFindOptions<K> options,
+    required SdbFindOptions<SdbKey> options,
     required SdbIndexCursorRowHandler<K, V, I> handler,
   }) {
     var codec = txn.codec;
@@ -596,6 +605,7 @@ abstract class SdbIndexRefImpl<
   }) => clientAutoTxnImpl(
     client,
     mode,
-    (txn) => txnIterateImpl(txn.rawImpl, options: options, handler: handler),
+    (txn) =>
+        txnIndexInterface(txn).iterateImpl(options: options, handler: handler),
   );
 }

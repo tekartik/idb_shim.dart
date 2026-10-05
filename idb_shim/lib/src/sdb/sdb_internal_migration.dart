@@ -2,7 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:idb_shim/src/sdb/sdb_client.dart';
 import 'package:idb_shim/src/sdb/sdb_codec.dart';
 import 'package:idb_shim/src/sdb/sdb_cursor.dart';
-import 'package:idb_shim/src/sdb/sdb_database_impl.dart';
 import 'package:meta/meta.dart';
 
 import 'sdb.dart';
@@ -45,14 +44,16 @@ extension SdbClientMigrationExtension on SdbClient {
       await store.iterate(
         this,
         mode: SdbTransactionMode.readWrite,
-        onRow: (row) {
+        onRow: (row) async {
           var initial = row.rawValue;
           var migrated = rawValueCompatMigrate1To2(
-            interface.db.impl.codec,
+            interface.codec,
             row.rawValue,
           );
           if (!migrateValuesAreEqual(migrated, initial)) {
-            row.update(migrated);
+            // Awaited: an implementation serializing its transactions
+            // (sembast) completes the transaction once the iteration is done.
+            await row.update(migrated);
           }
           return true;
         },

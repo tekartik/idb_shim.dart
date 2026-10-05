@@ -1,13 +1,13 @@
 import 'package:idb_shim/src/common/common_value.dart';
-import 'package:idb_shim/src/sdb/sdb_client_impl.dart';
+import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
 import 'package:idb_shim/src/sdb/sdb_key_utils.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 import 'package:meta/meta.dart';
 
 import 'sdb.dart';
 import 'sdb_client.dart';
-import 'sdb_database_impl.dart';
-import 'sdb_transaction_impl.dart';
+import 'sdb_database.dart';
+import 'sdb_transaction.dart';
 
 /// Store reference internal extension.
 extension SdbStoreRefInternalExtension<K extends SdbKey, V extends SdbValue>
@@ -222,7 +222,7 @@ extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
     SdbTransactionRecordChangeListener<K, V> onChanges, {
     List<String>? extraStoreNames,
   }) {
-    database.impl.changesListener.addStoreChangesListener(
+    database.dbInterface.changesListener.addStoreChangesListener(
       name,
       onChanges,
       extraStoreNames: extraStoreNames,
@@ -236,7 +236,10 @@ extension SdbStoreRefDbExtension<K extends SdbKey, V extends SdbValue>
     SdbDatabase database,
     SdbTransactionRecordChangeListener<K, V> onChanges,
   ) {
-    database.impl.changesListener.removeStoreChangesListener(this, onChanges);
+    database.dbInterface.changesListener.removeStoreChangesListener(
+      this,
+      onChanges,
+    );
   }
 }
 
@@ -271,27 +274,32 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
   Future<K> addImpl(SdbClient client, V value) => clientAutoTxnImpl(
     client,
     SdbTransactionMode.readWrite,
-    (txn) => txnAddImpl(txn.rawImpl, value),
+    (txn) => txnAddImpl(txn.txnInterface, value),
   );
 
   /// Add a single record.
-  Future<K> txnAddImpl(SdbTransactionImpl txn, V value) {
-    return txn.storeImpl(this).add(value);
+  Future<K> txnAddImpl(SdbTransactionInterface txn, V value) {
+    return txn.txnStoreInterface(this).addImpl(value);
   }
 
   /// Put a single record (inline keys)
   Future<K> putImpl(SdbClient client, V value) => clientAutoTxnImpl(
     client,
     SdbTransactionMode.readWrite,
-    (txn) => txnPutImpl(txn.rawImpl, value),
+    (txn) => txnPutImpl(txn.txnInterface, value),
   );
 
   /// Put a single record (inline keys)
-  Future<K> txnPutImpl(SdbTransactionImpl txn, V value) {
-    return txn.storeImpl(this).put(null, value).then((_) {
-      var keyPath = txn.storeImpl(this).idbObjectStore.keyPath;
+  Future<K> txnPutImpl(SdbTransactionInterface txn, V value) {
+    var txnStore = txn.txnStoreInterface(this);
+    return txnStore.putImpl(null, value).then((_) {
+      var keyPath = txnStore.keyPath;
       // Get the key from the value
-      return mapValueAtKeyPath(value as Map, keyPath) as K;
+      return mapValueAtKeyPath(
+            value as Map,
+            keyPath == null ? null : sdbKeyPathToIdbKeyPath(keyPath),
+          )
+          as K;
     });
   }
 
@@ -303,7 +311,7 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
   }) => clientAutoTxnImpl(
     client,
     SdbTransactionMode.readOnly,
-    (txn) => txnFindRecordsImpl(txn.rawImpl, options: options),
+    (txn) => txnFindRecordsImpl(txn.txnInterface, options: options),
   );
 
   /// Find records.
@@ -315,7 +323,8 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
   }) => clientAutoTxnImpl(
     client,
     mode,
-    (txn) => txnIterateImpl(txn.rawImpl, options: options, handler: handler),
+    (txn) =>
+        txnIterateImpl(txn.txnInterface, options: options, handler: handler),
   );
 
   /// Find records.
@@ -323,21 +332,22 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
     SdbClient client, {
 
     required SdbFindOptions<K> options,
-  }) => client.handleDbOrTxn(
-    (db) => dbStreamRecordsImpl(db, options: options),
-    (txn) => txnStreamRecordsImpl(txn, options: options),
-  );
+  }) {
+    if (client is SdbTransaction) {
+      return txnStreamRecordsImpl(client.txnInterface, options: options);
+    }
+    return dbStreamRecordsImpl(client as SdbDatabase, options: options);
+  }
 
   /// Find records.
   Stream<SdbRecordSnapshot<K, V>> dbStreamRecordsImpl(
-    SdbDatabaseImpl db, {
-
+    SdbDatabase db, {
     required SdbFindOptions<K> options,
   }) {
     var ctlr = SdbTxnStreamController<SdbRecordSnapshot<K, V>>();
 
     db.inStoreTransaction(this, SdbTransactionMode.readOnly, (txn) async {
-      var stream = txnStreamRecordsImpl(txn.rawImpl, options: options);
+      var stream = txnStreamRecordsImpl(txn.txnInterface, options: options);
       await ctlr.addStream(stream);
     });
     return ctlr.stream;
@@ -345,28 +355,30 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
 
   /// Find records.
   Future<List<SdbRecordSnapshot<K, V>>> txnFindRecordsImpl(
-    SdbTransactionImpl txn, {
+    SdbTransactionInterface txn, {
 
     required SdbFindOptions<K> options,
   }) {
-    return txn.storeImpl(this).findRecords(options: options);
+    return txn.txnStoreInterface(this).findRecordsImpl(options: options);
   }
 
   /// Find records.
   Future<void> txnIterateImpl(
-    SdbTransactionImpl txn, {
+    SdbTransactionInterface txn, {
     required SdbCursorRowHandler<K, V> handler,
     required SdbFindOptions<K> options,
   }) {
-    return txn.storeImpl(this).iterateImpl(options: options, handler: handler);
+    return txn
+        .txnStoreInterface(this)
+        .iterateImpl(options: options, handler: handler);
   }
 
   /// Find records.
   Stream<SdbRecordSnapshot<K, V>> txnStreamRecordsImpl(
-    SdbTransactionImpl txn, {
+    SdbTransactionInterface txn, {
     required SdbFindOptions<K> options,
   }) {
-    return txn.storeImpl(this).streamRecords(options: options);
+    return txn.txnStoreInterface(this).streamRecordsImpl(options: options);
   }
 
   /// Find records keys.
@@ -376,15 +388,15 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
   }) => clientAutoTxnImpl(
     client,
     SdbTransactionMode.readOnly,
-    (txn) => txnFindRecordKeysImpl(txn.rawImpl, options: options),
+    (txn) => txnFindRecordKeysImpl(txn.txnInterface, options: options),
   );
 
   /// Find record keys.
   Future<List<SdbRecordKey<K, V>>> txnFindRecordKeysImpl(
-    SdbTransactionImpl txn, {
+    SdbTransactionInterface txn, {
     required SdbFindOptions<K> options,
   }) {
-    return txn.storeImpl(this).findRecordKeys(options: options);
+    return txn.txnStoreInterface(this).findRecordKeysImpl(options: options);
   }
 
   /// Count records.
@@ -392,15 +404,17 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
       clientAutoTxnImpl(
         client,
         SdbTransactionMode.readOnly,
-        (txn) => txnCountImpl(txn.rawImpl, options: options),
+        (txn) => txnCountImpl(txn.txnInterface, options: options),
       );
 
   /// Count records.
   Future<int> txnCountImpl(
-    SdbTransactionImpl txn, {
+    SdbTransactionInterface txn, {
     SdbFindOptions<K>? options,
   }) {
-    return txn.storeImpl(this).count(options: options);
+    return txn
+        .txnStoreInterface(this)
+        .countImpl(options: options ?? SdbFindOptions<K>());
   }
 
   /// Delete records.
@@ -410,7 +424,7 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
   }) => clientAutoTxnImpl(
     client,
     SdbTransactionMode.readWrite,
-    (txn) => txnDeleteImpl(txn.rawImpl, options: options),
+    (txn) => txnDeleteImpl(txn.txnInterface, options: options),
   );
 
   /// Find records.
@@ -419,18 +433,20 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
     required SdbFindOptions<K> options,
   }) {
     return db.inStoreTransaction(this, SdbTransactionMode.readWrite, (txn) {
-      return txnDeleteImpl(txn.rawImpl, options: options);
+      return txnDeleteImpl(txn.txnInterface, options: options);
     });
   }
 
   /// Find records.
   Future<void> txnDeleteImpl(
-    SdbTransactionImpl txn, {
+    SdbTransactionInterface txn, {
 
     /// New API, supersedes the other parameters
     SdbFindOptions<K>? options,
   }) {
-    return txn.storeImpl(this).deleteRecords(options: options);
+    return txn
+        .txnStoreInterface(this)
+        .deleteRecordsImpl(options: options ?? SdbFindOptions<K>());
   }
 
   /// Count records.
@@ -440,7 +456,7 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
     Future<T> Function(SdbTransaction txn) fn,
   ) {
     return db.inStoreTransaction(this, mode, (txn) {
-      return fn(txn.rawImpl);
+      return fn(txn);
     });
   }
 
@@ -479,12 +495,25 @@ class SdbStoreRefImpl<K extends SdbKey, V extends SdbValue>
 }
 
 /// Controller for streaming transaction results.
+///
+/// [addStream] completes when the source is done or when the consumer cancels,
+/// so that the transaction it runs in can complete: an implementation
+/// serializing its transactions (sembast) would otherwise stay locked.
 class SdbTxnStreamController<T> {
   void _onCancel() {
     _subscription?.cancel();
     _ctlr.close();
+    _complete();
   }
 
+  void _complete() {
+    var completer = _completer;
+    if (completer != null && !completer.isCompleted) {
+      completer.complete();
+    }
+  }
+
+  Completer<void>? _completer;
   StreamSubscription? _subscription;
   late final _ctlr = StreamController<T>(sync: true, onCancel: _onCancel);
 
@@ -493,7 +522,7 @@ class SdbTxnStreamController<T> {
 
   /// Added stream.
   Future<void> addStream(Stream<T> source) async {
-    var completer = Completer<void>();
+    var completer = _completer = Completer<void>();
     _subscription = source.listen(
       (event) {
         _ctlr.add(event);
@@ -501,9 +530,7 @@ class SdbTxnStreamController<T> {
       //cancelOnError: true,
       onDone: () {
         _ctlr.close();
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
+        _complete();
       },
       onError: (Object e, StackTrace s) {
         _ctlr.addError(e, s);

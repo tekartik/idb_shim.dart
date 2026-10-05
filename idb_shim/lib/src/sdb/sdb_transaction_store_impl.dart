@@ -9,6 +9,7 @@ import 'package:idb_shim/src/sdb/sdb_cursor.dart';
 import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
 import 'package:idb_shim/src/sdb/sdb_paged_iterate.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_impl.dart';
+import 'package:idb_shim/src/sdb/sdb_transaction_store.dart';
 import 'package:idb_shim/src/sdb/sdb_utils.dart';
 import 'package:idb_shim/src/utils/cursor_utils.dart';
 import 'package:idb_shim/src/utils/idb_utils.dart';
@@ -169,7 +170,7 @@ extension on idb.ObjectStore {
 /// Transaction store reference implementation.
 class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
     with SdbTransactionStoreRefImplMixin<K, V>
-    implements SdbTransactionStoreRef<K, V> {
+    implements SdbTransactionStoreRefInterface<K, V> {
   /// Transaction reference implementation.
   SdbTransactionStoreRefImpl(this.store);
 
@@ -189,18 +190,21 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
       _idbObjectStore ??= transaction.idbTransaction.objectStore(store.name);
 
   /// Get a single record.
+  @override
   Future<SdbRecordSnapshotImpl<K, V>?> getRecordImpl(K key) {
     var codec = transaction.codec;
     return idbObjectStore.getSdbRecordSnapshot<K, V>(store, key, codec);
   }
 
   /// Check if a record exists.
+  @override
   Future<bool> existsImpl(K key) async {
     var value = await idbObjectStore.getObject(key);
     return value != null;
   }
 
   /// Add a record.
+  @override
   Future<K> addImpl(V value) async {
     var hasChangeListener =
         transaction.changesListener?.storeHasChangeListener(store) ?? false;
@@ -240,7 +244,20 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
     }
   }
 
+  /// Put a raw value.
+  @override
+  Future<void> putRawImpl(K key, Object rawValue) async {
+    if (idbObjectStore.keyPath != null) {
+      // Inline key, the key is in the value.
+      await idbObjectStore.put(rawValue);
+    } else {
+      await idbObjectStore.put(rawValue, key);
+    }
+    transaction.rawImpl.noteWriteToStore(store.name);
+  }
+
   /// Delete a record.
+  @override
   Future<void> deleteImpl(K key) async {
     var changesListener = transaction.changesListener;
     var hasChangeListener =
@@ -269,6 +286,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
   }
 
   /// Stream records
+  @override
   Stream<SdbRecordSnapshot<K, V>> streamRecordsImpl({
     required SdbFindOptions<K> options,
   }) {
@@ -310,6 +328,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
   }
 
   /// Handle records
+  @override
   Future<void> iterateImpl({
     required SdbFindOptions<K> options,
     required SdbCursorRowHandler<K, V> handler,
@@ -358,6 +377,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
   }
 
   /// Find records.
+  @override
   Future<List<SdbRecordSnapshot<K, V>>> findRecordsImpl({
     required SdbFindOptions<K> options,
   }) async {
@@ -403,6 +423,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
   }
 
   /// Find record keys.
+  @override
   Future<List<SdbRecordKey<K, V>>> findRecordKeysImpl({
     required SdbFindOptions<K> options,
   }) async {
@@ -438,6 +459,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
   }
 
   /// Count records.
+  @override
   Future<int> countImpl({required SdbFindOptions<K> options}) async {
     if (options.filter != null) {
       // Slow
@@ -460,6 +482,7 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
   }
 
   /// Delete records.
+  @override
   Future<void> deleteRecordsImpl({required SdbFindOptions<K> options}) async {
     var changesListener = transaction.changesListener;
     var hasChangeListener =

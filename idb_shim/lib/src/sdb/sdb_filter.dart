@@ -8,18 +8,36 @@ import 'sdb_codec.dart';
 
 /// Private record snapshot for filter
 class SdbFilterRecordSnapshotPrv implements SdbFilterRecordSnapshot {
-  /// Private record snapshot for filter
-  SdbFilterRecordSnapshotPrv(this._cwv, this._codec);
-  final SdbCodec _codec;
+  /// From an idb cursor, the value is decoded lazily.
+  SdbFilterRecordSnapshotPrv(idb.CursorWithValue cwv, SdbCodec codec)
+    : primaryKey = cwv.primaryKey,
+      indexKey = cwv.key,
+      _rawValue = cwv.value,
+      _codec = codec;
 
-  /// Cursor with value
-  final idb.CursorWithValue _cwv;
+  /// From an already decoded [value], for non idb implementations.
+  /// [indexKey] defaults to [primaryKey] (store query).
+  SdbFilterRecordSnapshotPrv.decoded({
+    required this.primaryKey,
+    Object? indexKey,
+    required Object? value,
+  }) : indexKey = indexKey ?? primaryKey,
+       _rawValue = null,
+       _codec = null,
+       _valueDecoded = true {
+    _value = value;
+  }
+
+  final SdbCodec? _codec;
+  final Object? _rawValue;
+  Object? _value;
+  bool _valueDecoded = false;
 
   /// Primary key
-  Object? get primaryKey => _cwv.primaryKey;
+  final Object? primaryKey;
 
   /// Index key if any
-  Object? get indexKey => _cwv.key;
+  final Object? indexKey;
   @override
   Object? operator [](String field) {
     var data = value;
@@ -43,7 +61,14 @@ class SdbFilterRecordSnapshotPrv implements SdbFilterRecordSnapshot {
 
   /// Can be null for cursor without values
   @override
-  late final Object? value = _codec.decode<Object>(_cwv.value);
+  Object? get value {
+    if (!_valueDecoded) {
+      _valueDecoded = true;
+      var rawValue = _rawValue;
+      _value = rawValue == null ? null : _codec!.decode<Object>(rawValue);
+    }
+    return _value;
+  }
 
   @override
   String toString() =>

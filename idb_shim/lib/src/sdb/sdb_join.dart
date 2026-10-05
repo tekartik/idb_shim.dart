@@ -832,7 +832,7 @@ class SdbJoinRunner<
         _reset();
       }
 
-      await _runGeneric(txn, codec: codec, range: range, direction: direction);
+      await _runGeneric(txn, codec: codec);
     });
   }
 
@@ -845,10 +845,13 @@ class SdbJoinRunner<
     _skippingSource = false;
   }
 
-  /// The idb object store or index the join is iterated from.
+  /// The idb object store or index the join is iterated from, null when the
+  /// implementation is not idb based (no native join then).
   Object? _idbSourceOf(SdbTransaction txn) {
-    var txnStore =
-        txn.store<K, V>(sourceStore) as SdbTransactionStoreRefImpl<K, V>;
+    var txnStore = txn.store<K, V>(sourceStore);
+    if (txnStore is! SdbTransactionStoreRefImpl<K, V>) {
+      return null;
+    }
     var idbObjectStore = txnStore.idbObjectStore;
     var sourceIndex = this.sourceIndex;
     if (sourceIndex == null) {
@@ -926,8 +929,6 @@ class SdbJoinRunner<
   Future<void> _runGeneric(
     SdbTransaction txn, {
     required SdbCodec codec,
-    required idb.KeyRange? range,
-    required String? direction,
   }) async {
     // [inner] and [distinct] drop rows, and a join through an index adds
     // some, so the offset and the limit can only be pushed down to the scan
@@ -946,7 +947,7 @@ class SdbJoinRunner<
     /// Matches already read, by join key: a join key is very often shared by
     /// several source records.
     var cache = <Object, _SdbJoinMatches<JK, JV>>{};
-    var lookup = _lookupOf(txn, codec);
+    var lookup = _lookupOf(txn);
     // Joining on a store matches at most one record, so when neither the
     // caller nor `inner` needs it the row count is the same either way and
     // nothing has to be read. Joining on an index can match any number of
@@ -973,24 +974,27 @@ class SdbJoinRunner<
 
     var sourceIndex = this.sourceIndex;
     if (sourceIndex != null) {
-      await sourceIndex.impl.txnIterateRawImpl(
-        txn.rawImpl,
-        range: range,
-        direction: direction,
-        offset: scanOffset,
-        limit: scanLimit,
-        filter: filter,
-        handler: (row) async {
-          var rowImpl = row as SdbIndexCursorRowImpl<K, V, SdbIndexKey>;
-          return handleSource(
-            rowImpl.primaryKey as K,
-            codec.decode<V>(rowImpl.rawValue),
-            // The index key is the join key, as stored: a join key is a
-            // plain key, looked up as is on the joined side.
-            rowImpl.key,
+      // The boundaries apply to the index key.
+      await sourceIndex.impl
+          .txnIndexInterface(txn)
+          .iterateImpl(
+            options: SdbFindOptions<SdbKey>(
+              boundaries: options.boundaries,
+              filter: filter,
+              offset: scanOffset,
+              limit: scanLimit,
+              descending: descending,
+            ),
+            handler: (row) async {
+              return handleSource(
+                row.primaryKey as K,
+                codec.decode<V>(row.rawValue),
+                // The index key is the join key, as stored: a join key is a
+                // plain key, looked up as is on the joined side.
+                row.indexKey,
+              );
+            },
           );
-        },
-      );
       return;
     }
 
@@ -1022,39 +1026,34 @@ class SdbJoinRunner<
   ///
   /// Only the count is read when the caller does not want the joined side.
   ///
-  /// An index lookup goes through `getAllKeys` rather than through a cursor:
-  /// this runs inside the handler of the cursor walking the source, and an
+  /// An index lookup goes through the cursor-less reads of the transaction
+  /// index (`getAllKeys` on idb) rather than through a cursor: this runs
+  /// inside the handler of the cursor walking the source, and an
   /// implementation serialising its operations (sembast does) deadlocks on a
   /// second cursor opened while the first one is being advanced.
   Future<_SdbJoinMatches<JK, JV>> Function(Object joinKey) _lookupOf(
     SdbTransaction txn,
-    SdbCodec codec,
   ) {
     var joinedStore = _joinedStore;
     var targetIndex = this.targetIndex;
     if (targetIndex != null) {
-      var idbObjectStore = txn.rawImpl.idbTransaction.objectStore(
-        joinedStore.name,
-      );
-      var idbIndex = idbObjectStore.index(targetIndex.name);
-      return (joinKey) async {
-        var keys = await idbIndex.getAllKeys(idb.KeyRange.only(joinKey));
-        if (!withJoined) {
+      var txnIndex = targetIndex.impl.txnIndexInterface(txn);
+      if (!withJoined) {
+        return (joinKey) async {
+          var keys = await txnIndex.getKeysImpl(joinKey);
           return _SdbJoinMatches<JK, JV>(keys.length, null);
-        }
-        var records = <SdbRecordSnapshot<JK, JV>>[];
-        for (var key in keys) {
-          var rawValue = await idbObjectStore.getObject(key);
-          if (rawValue == null) {
-            continue;
-          }
-          records.add(
-            SdbRecordSnapshotImpl<JK, JV>(
-              joinedStore.record(key as JK),
-              codec.decode<JV>(rawValue),
-            ),
-          );
-        }
+        };
+      }
+      return (joinKey) async {
+        var snapshots = await txnIndex.getRecordsImpl(joinKey);
+        var records = snapshots
+            .map(
+              (snapshot) => SdbRecordSnapshotImpl<JK, JV>(
+                joinedStore.record(snapshot.key),
+                snapshot.value,
+              ),
+            )
+            .toList();
         return _SdbJoinMatches<JK, JV>(records.length, records);
       };
     }

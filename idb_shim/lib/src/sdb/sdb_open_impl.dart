@@ -10,6 +10,7 @@ import 'package:idb_shim/src/sdb/sdb_transaction_store_impl.dart';
 
 import 'sdb_database_impl.dart';
 import 'sdb_index_impl.dart';
+import 'sdb_open.dart';
 import 'sdb_store_impl.dart';
 
 /// Open database internal extension.
@@ -155,7 +156,7 @@ extension SdbOpenStoreRefInternalExtension<K extends SdbKey, V extends SdbValue>
 /// Open store reference implementation.
 class SdbOpenStoreRefIdb<K extends SdbKey, V extends SdbValue>
     with SdbTransactionStoreRefImplMixin<K, V>
-    implements SdbOpenStoreRef<K, V> {
+    implements SdbOpenStoreRefInterface<K, V> {
   /// Open store reference implementation.
   SdbOpenStoreRefIdb(this.transaction, this.store, this.idbObjectStore);
 
@@ -178,8 +179,9 @@ class SdbOpenStoreRefIdb<K extends SdbKey, V extends SdbValue>
   String get name => store.name;
 
   /// Create an index.
+  @override
   SdbOpenIndexRef<K, V, I> createIndexImpl<I extends SdbIndexKey>(
-    SdbIndexRefImpl<K, V, I> index,
+    SdbIndexRef<K, V, I> index,
     Object indexKeyPath, {
     required bool? unique,
   }) {

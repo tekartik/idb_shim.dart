@@ -1,3 +1,19 @@
+## 2.9.11-1
+
+* sdb: the implementation is pluggable. A backend that is not IndexedDB
+  implements the internal interfaces (`SdbDatabaseInterface`,
+  `SdbTransactionInterface`, `SdbTransactionStoreRefInterface`,
+  `SdbTransactionIndexRefInterface`, `SdbOpenStoreRefInterface`) and the
+  default mixins exported by `src/sdb/sdb_mixin.dart`; the public API, joins,
+  change listeners, `onSnapshot` and the schema helpers dispatch through them.
+  The idb implementation is unchanged.
+* sdb: `sdbExportDatabaseLines` and `sdbImportDatabase` work with any sdb
+  factory, same lines format (DateTime and Uint8List exported as `@Timestamp`
+  and `@Blob`).
+* sdb: `compatMigrate1To2` awaits its row updates.
+* idb_test: `sdbDefineAllTests(SdbTestContext)` runs the whole sdb suite on any
+  `SdbFactory`.
+
 ## 2.9.10
 
 * sdb: the version change requests of the other connections (another tab,
