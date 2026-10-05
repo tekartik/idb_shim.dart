@@ -1,6 +1,7 @@
 import 'package:idb_shim/sdb.dart';
 
 import 'idb_test_common.dart';
+import 'sdb_test.dart';
 
 void main() {
   idbSdbJoinTests(idbMemoryContext);
@@ -25,11 +26,16 @@ var joinChildParentIndex = joinIndexedChildStore.index<int>('parentId');
 /// same join with and without this filter must give the exact same rows.
 final _matchAllFilter = SdbFilter.custom((snapshot) => true);
 
+/// Join tests on an idb factory.
+void idbSdbJoinTests(TestContext ctx) {
+  sdbJoinTests(SdbTestContext(sdbFactoryFromIdb(ctx.factory)));
+}
+
 /// Join tests: a join must give the same rows whether the implementation
 /// resolves it natively (from an index or from the stored value) or by reading
 /// the joined records one by one.
-void idbSdbJoinTests(TestContext ctx) {
-  var factory = sdbFactoryFromIdb(ctx.factory);
+void sdbJoinTests(SdbTestContext ctx) {
+  var factory = ctx.factory;
 
   group('sdb_join', () {
     late SdbDatabase db;

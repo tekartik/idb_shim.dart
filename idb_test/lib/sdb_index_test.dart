@@ -1,17 +1,24 @@
 import 'package:idb_shim/sdb.dart';
 
 import 'idb_test_common.dart';
+import 'sdb_test.dart' show SdbTestContext;
 
 void main() {
-  sdbIndexTests(idbMemoryContext);
+  idbSdbIndexTests(idbMemoryContext);
 }
 
 var testStore = SdbStoreRef<int, SdbModel>('test');
 var testIndex = testStore.index<int>('myindex');
 var testStore2 = SdbStoreRef<String, SdbModel>('test2');
 
-void sdbIndexTests(TestContext ctx) {
-  var factory = sdbFactoryFromIdb(ctx.factory); //.debugWrapInLogger();
+/// Index tests on an idb factory.
+void idbSdbIndexTests(TestContext ctx) {
+  sdbIndexTests(SdbTestContext(sdbFactoryFromIdb(ctx.factory)));
+}
+
+/// Index tests.
+void sdbIndexTests(SdbTestContext ctx) {
+  var factory = ctx.factory; //.debugWrapInLogger();
 
   group('sdb_index', () {
     test('basic', () async {

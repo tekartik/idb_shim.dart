@@ -1,5 +1,6 @@
 library;
 
+import 'package:idb_shim/sdb.dart';
 import 'package:idb_test/sdb_changes_listener_persistent_test.dart';
 import 'package:idb_test/sdb_count_test.dart';
 import 'package:idb_test/sdb_format_test.dart';
@@ -34,18 +35,24 @@ import 'transaction_test.dart' as transaction_test;
 import 'type_test.dart' as type_test;
 import 'utils_test.dart' as utils_test;
 
+/// All sdb tests on an idb factory.
 void defineAllSdbTests(TestContext ctx) {
-  idbSimpleSdbTest(ctx);
-  idbSdbCountTests(ctx);
-  idbSdbPagingTests(ctx);
-  idbSdbJoinTests(ctx);
-  defineIdbSdbChangesListenerTests(ctx);
-  defineIdbSdbOnSnapshotTests(ctx);
+  sdbDefineAllTests(SdbTestContext(sdbFactoryFromIdb(ctx.factory)));
+}
+
+/// All sdb tests on any sdb factory, idb based or not.
+void sdbDefineAllTests(SdbTestContext ctx) {
+  simpleSdbTest(ctx);
+  sdbCountTests(ctx);
+  sdbPagingTests(ctx);
+  sdbJoinTests(ctx);
+  defineSdbChangesListenerTests(ctx);
+  defineSdbOnSnapshotTests(ctx);
   sdbIndexTests(ctx);
-  idbSdbTypeTest(ctx);
-  idbSdbOpenTests(ctx);
-  idbSdbFormatTests(ctx);
-  idbSchemaSdbTest(ctx);
+  sdbTypeTest(ctx);
+  sdbOpenTests(ctx);
+  sdbUtilsTests(ctx);
+  schemaSdbTest(ctx);
 }
 
 void defineAllTests(TestContext ctx) {

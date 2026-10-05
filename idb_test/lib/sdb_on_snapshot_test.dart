@@ -1,7 +1,6 @@
 import 'package:idb_shim/sdb.dart';
 // ignore: implementation_imports
-import 'package:idb_shim/src/sdb/sdb_database_impl.dart'
-    show SdbDatabaseInternalExtension;
+import 'package:idb_shim/src/sdb/sdb_database_impl.dart' show SdbDatabaseImpl;
 
 import 'idb_test_common.dart';
 import 'sdb_test.dart';
@@ -18,6 +17,15 @@ void defineIdbSdbOnSnapshotTests(TestContext ctx) {
 final _testStore = SdbStoreRef<int, String>('test');
 final _testModelStore = SdbStoreRef<int, SdbModel>('test_model');
 final _testIndex = _testModelStore.index<String>('test_index');
+
+/// Internal check, idb implementation only: the listener must be registered
+/// while subscribed and gone once cancelled. Other implementations are free to
+/// track their listeners differently.
+void _expectChangesListenerIsEmpty(SdbDatabase db, bool isEmpty) {
+  if (db is SdbDatabaseImpl) {
+    expect(db.changesListener.isEmpty, isEmpty);
+  }
+}
 
 void defineSdbOnSnapshotTests(SdbTestContext ctx) {
   var factory = ctx.factory;
@@ -93,9 +101,9 @@ void defineSdbOnSnapshotTests(SdbTestContext ctx) {
       await completed();
       expect(snapshots.last, null);
 
-      expect(db.impl.changesListener.isEmpty, isFalse);
+      _expectChangesListenerIsEmpty(db, false);
       await subscription.cancel();
-      expect(db.impl.changesListener.isEmpty, isTrue);
+      _expectChangesListenerIsEmpty(db, true);
     });
 
     test('onSnapshots', () async {
@@ -136,9 +144,9 @@ void defineSdbOnSnapshotTests(SdbTestContext ctx) {
       await completed();
       expect(snapshotsList.last, hasLength(1));
 
-      expect(db.impl.changesListener.isEmpty, isFalse);
+      _expectChangesListenerIsEmpty(db, false);
       await subscription.cancel();
-      expect(db.impl.changesListener.isEmpty, isTrue);
+      _expectChangesListenerIsEmpty(db, true);
     });
 
     test('onIndexSnapshots', () async {
@@ -173,9 +181,9 @@ void defineSdbOnSnapshotTests(SdbTestContext ctx) {
       await completed();
       expect(snapshotsList.last, hasLength(1));
 
-      expect(db.impl.changesListener.isEmpty, isFalse);
+      _expectChangesListenerIsEmpty(db, false);
       await subscription.cancel();
-      expect(db.impl.changesListener.isEmpty, isTrue);
+      _expectChangesListenerIsEmpty(db, true);
     });
 
     test('onCount (store)', () async {
@@ -208,9 +216,9 @@ void defineSdbOnSnapshotTests(SdbTestContext ctx) {
       await completed();
       expect(counts.last, 1);
 
-      expect(db.impl.changesListener.isEmpty, isFalse);
+      _expectChangesListenerIsEmpty(db, false);
       await subscription.cancel();
-      expect(db.impl.changesListener.isEmpty, isTrue);
+      _expectChangesListenerIsEmpty(db, true);
     });
 
     test('onCount (index)', () async {
@@ -243,9 +251,9 @@ void defineSdbOnSnapshotTests(SdbTestContext ctx) {
       await completed();
       expect(counts.last, 1);
 
-      expect(db.impl.changesListener.isEmpty, isFalse);
+      _expectChangesListenerIsEmpty(db, false);
       await subscription.cancel();
-      expect(db.impl.changesListener.isEmpty, isTrue);
+      _expectChangesListenerIsEmpty(db, true);
     });
   });
 }

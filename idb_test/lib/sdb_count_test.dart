@@ -1,6 +1,7 @@
 import 'package:idb_shim/sdb.dart';
 
 import 'idb_test_common.dart';
+import 'sdb_test.dart';
 
 void main() {
   idbSdbCountTests(idbMemoryContext);
@@ -9,10 +10,15 @@ void main() {
 var countTestStore = SdbStoreRef<int, SdbModel>('count_test');
 var countTestIndex = countTestStore.index<String>('name');
 
+/// Count tests on an idb factory.
+void idbSdbCountTests(TestContext ctx) {
+  sdbCountTests(SdbTestContext(sdbFactoryFromIdb(ctx.factory)));
+}
+
 /// Count tests, the count must always agree with the number of records a
 /// findRecords with the same options returns, offset and limit included.
-void idbSdbCountTests(TestContext ctx) {
-  var factory = sdbFactoryFromIdb(ctx.factory);
+void sdbCountTests(SdbTestContext ctx) {
+  var factory = ctx.factory;
 
   group('sdb_count', () {
     late SdbDatabase db;

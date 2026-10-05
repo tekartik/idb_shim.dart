@@ -1,6 +1,7 @@
 import 'package:idb_shim/sdb.dart';
 
 import 'idb_test_common.dart';
+import 'sdb_test.dart';
 
 void main() {
   idbSdbPagingTests(idbMemoryContext);
@@ -15,10 +16,15 @@ var pagingTestIndex = pagingTestStore.index<String>('name');
 /// filter must give the exact same records.
 final _matchAllFilter = SdbFilter.custom((snapshot) => true);
 
+/// Paging tests on an idb factory.
+void idbSdbPagingTests(TestContext ctx) {
+  sdbPagingTests(SdbTestContext(sdbFactoryFromIdb(ctx.factory)));
+}
+
 /// Paging tests: offset and limit must give the same records whether the
 /// implementation applies them natively or by walking a cursor.
-void idbSdbPagingTests(TestContext ctx) {
-  var factory = sdbFactoryFromIdb(ctx.factory);
+void sdbPagingTests(SdbTestContext ctx) {
+  var factory = ctx.factory;
 
   group('sdb_paging', () {
     late SdbDatabase db;
