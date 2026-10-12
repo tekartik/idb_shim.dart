@@ -247,6 +247,9 @@ void sdbPagingTests(SdbTestContext ctx) {
 
   // More records than one read chunk, so that an implementation reading them
   // chunk by chunk has to cross a chunk boundary.
+  //
+  // Slow on the web on stacked sembast implementations (up to 24s per test on
+  // ubuntu chrome), hence the longer timeout.
   group('sdb_paging_iterate', () {
     late SdbDatabase db;
     var dbName = 'sdb_paging_iterate.db';
@@ -562,5 +565,5 @@ void sdbPagingTests(SdbTestContext ctx) {
       var records = await pagingTestStore.findRecords(db);
       expect(records.where((r) => r.value['marked'] == true).length, count);
     });
-  });
+  }, timeout: const Timeout.factor(4));
 }
