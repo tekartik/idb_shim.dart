@@ -436,3 +436,8 @@ bool valueListEquals<T>(List<T>? a, List<T>? b) {
   }
   return true;
 }
+
+/// The count of an idb getAll/getAllKeys, null (unlimited) for null or 0 as
+/// in the IndexedDB spec.
+int? idbGetAllCountOrNull(int? count) =>
+    (count == null || count <= 0) ? null : count;

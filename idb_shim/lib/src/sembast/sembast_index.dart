@@ -66,6 +66,7 @@ class IndexSembast extends Index with IndexWithMetaMixin {
     int? count,
   ]) async {
     var entries = await txnEntries(keyOrRange);
+    count = idbGetAllCountOrNull(count);
     return count == null ? entries : entries.take(count);
   }
 

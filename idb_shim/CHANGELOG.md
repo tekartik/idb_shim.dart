@@ -34,6 +34,12 @@
   * `prev` direction on an index: equal keys are ordered by descending
     primary key.
   * `Index.get` and `Index.getKey` accept a `KeyRange` (native too).
+  * `cursor.update()` in a readonly transaction throws a `ReadOnlyError`
+    (it wrote the value), and in a store with in-line keys a value without
+    the cursor primary key throws a `DataError` (it wrote another record).
+  * `getAll`/`getAllKeys` with a count of 0 return every record, as in the
+    IndexedDB spec (store: 1 record, index: none). sdb is unchanged (a
+    `limit` of 0 returns nothing).
 
 ## 2.9.11
 

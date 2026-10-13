@@ -250,7 +250,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     return inTransaction(() async {
       return (await txnGetAllSnapshots(
         query,
-        count,
+        idbGetAllCountOrNull(count),
       )).map((r) => recordToValue(r)!).toList(growable: false);
     });
   }
@@ -301,6 +301,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   @override
   Future<List<Object>> getAllKeys([Object? query, int? count]) {
+    count = idbGetAllCountOrNull(count);
     return inTransaction(() async {
       if (hasCompositeKey) {
         var keys = (await txnGetAllSnapshots(

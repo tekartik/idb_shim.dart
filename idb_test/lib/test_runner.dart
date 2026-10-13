@@ -33,6 +33,7 @@ import 'scenario_test.dart' as scenario_test;
 import 'sdb_index_test.dart';
 import 'sdb_iterate_test.dart';
 import 'simple_provider_test.dart' as simple_provider_test;
+import 'store_behavior_test.dart' as store_behavior_test;
 import 'transaction_test.dart' as transaction_test;
 import 'type_test.dart' as type_test;
 import 'utils_test.dart' as utils_test;
@@ -69,6 +70,7 @@ void defineAllTests(TestContext ctx) {
   object_store_test.defineTests(ctx);
   key_range_test.defineTests(ctx);
   key_order_test.defineTests(ctx);
+  store_behavior_test.defineTests(ctx);
   factory_test.defineTests(ctx);
   index_test.defineTests(ctx);
   simple_provider_test.defineTests(ctx);

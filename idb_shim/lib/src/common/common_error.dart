@@ -19,6 +19,15 @@ class DatabaseMissingInlineKeyError extends DatabaseError {
       );
 }
 
+/// The value of a cursor update in a store with in-line keys does not have
+/// the cursor primary key (native DataError).
+class DatabaseCursorUpdateKeyError extends DatabaseError {
+  DatabaseCursorUpdateKeyError()
+    : super(
+        'DataError: The effective object store of this cursor uses in-line keys and evaluating the key path of the value parameter results in a different value than the cursor\'s effective key.',
+      );
+}
+
 /// DatabaseMissingKeyError representation.
 class DatabaseMissingKeyError extends DatabaseError {
   DatabaseMissingKeyError()

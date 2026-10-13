@@ -1,7 +1,9 @@
 // ignore_for_file: public_member_api_docs
 
 import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/src/common/common_error.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
+import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/logger/logger_utils.dart';
 import 'package:idb_shim/src/sembast/sembast_import.dart' as sembast;
 import 'package:idb_shim/src/sembast/sembast_index.dart';
@@ -70,10 +72,22 @@ abstract mixin class KeyCursorSembastMixin implements Cursor {
 
   @override
   Future<void> update(Object value) async {
+    // Like native: no write in a readonly transaction, and with in-line keys
+    // the value must keep the cursor primary key.
+    if (store.transaction!.meta!.mode != idbModeReadWrite) {
+      throw DatabaseReadOnlyError();
+    }
+    var primaryKey = this.primaryKey;
+    var keyPath = store.keyPath;
+    if (keyPath != null) {
+      var inlineKey = value is Map ? value.getKeyValue(keyPath) : null;
+      if (inlineKey == null || compareKeys(inlineKey, primaryKey) != 0) {
+        throw DatabaseCursorUpdateKeyError();
+      }
+    }
     // Keep the transaction alive
     // value is converted in put
     var records = ctlr.records!;
-    var primaryKey = this.primaryKey;
     var updateKey = store.getUpdateKeyIfNeeded(value, primaryKey);
 
     await store.transaction!.execute(() async {
