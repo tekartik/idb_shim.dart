@@ -1,3 +1,40 @@
+## 2.10.0
+
+* sdb fixes:
+  * `iterate` (store and index): an error thrown by `onRow` stops the
+    iteration and completes `iterate` with that error (it used to never
+    complete, the error escaping as an uncaught zone error).
+  * `row.update()` during an `iterate` encodes the value like `put`
+    (`SdbTimestamp`, `SdbBlob`) and notifies the change listeners
+    (`onSnapshot`, `onSnapshots`...) and the other tabs.
+  * A `limit` of 0 returns nothing everywhere (find, stream, keys, count,
+    iterate, delete, store and index): it gave 0, 1 or all the records
+    depending on the method, `delete(limit: 0)` deleted the whole store.
+  * A nested map that is not a `Map<String, Object?>` (i.e. a
+    `Map<dynamic, dynamic>`) is stored with its entries (it was stored as
+    `{}`).
+  * Index `iterate` options are `SdbFindOptions<SdbKey>`: their boundaries
+    apply to the index key, so they can be typed with the index key type
+    (source compatible, options typed with the store key are accepted).
+  * A delete through an index notifies the other tabs.
+  * `onSnapshot`/`onSnapshots`/`onCount`: a query error is added to the
+    stream (it was uncaught).
+* memory/io (sembast) implementation, the results now match IndexedDB:
+  * key comparison (`IdbFactory.cmp`, key ranges, sort): number < string <
+    binary < array, arrays compared item by item then by length
+    (`cmp([1], [1, 2])` is -1, mixed types no longer compare equal or throw).
+    `KeyRange.contains` works on arrays.
+  * multiEntry indexes: a key range applies per entry, `count`, `getAll`
+    and `getAllKeys` count the entries (not the records), entries with equal
+    keys are ordered by primary key, `unique` is enforced.
+  * stores with an array `keyPath`: `getAllKeys`, `getKey` and the index
+    `getKey`/`getAllKeys` return the keys (not internal ids), `count` and
+    `getAll` by key or range work, `getAll` follows the key order, a `put`
+    keeping the same value of a unique index no longer fails.
+  * `prev` direction on an index: equal keys are ordered by descending
+    primary key.
+  * `Index.get` and `Index.getKey` accept a `KeyRange` (native too).
+
 ## 2.9.11
 
 * sdb: the implementation is pluggable. A backend that is not IndexedDB

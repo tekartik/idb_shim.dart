@@ -236,69 +236,7 @@ void main() {
           isTrue,
         );
       });
-
-      test('keyArrayRangeFilter', () {
-        var filter = keyRangeFilter(
-          ['year', 'name'],
-          KeyRange.lowerBound([2018, 'John']),
-          true,
-        );
-        expect(
-          _fieldMatch(filter, {
-            'year': [2019],
-            'name': 'Jack',
-          }),
-          isTrue,
-        );
-        expect(
-          _fieldMatch(filter, {
-            'year': [2018, 2016],
-            'name': 'John',
-          }),
-          isTrue,
-        );
-        expect(
-          _fieldMatch(filter, {
-            'year': [2017, 2016],
-            'name': 'Jack',
-          }),
-          isFalse,
-        );
-
-        filter = keyRangeFilter(
-          ['year', 'name'],
-          KeyRange.upperBound([2018, 'John']),
-          true,
-        );
-        expect(
-          _fieldMatch(filter, {
-            'year': [2018],
-            'name': 'Jack',
-          }),
-          isTrue,
-        );
-        expect(
-          _fieldMatch(filter, {
-            'year': [2018, 2019],
-            'name': 'John',
-          }),
-          isFalse,
-        );
-        expect(
-          _fieldMatch(filter, {
-            'year': [2019],
-            'name': 'John',
-          }),
-          isFalse,
-        );
-        expect(
-          _fieldMatch(filter, {
-            'year': [2018],
-            'name': 'JohnX',
-          }),
-          isFalse,
-        );
-      });
+      // An array key path cannot be multiEntry (createIndex throws).
     });
   });
 }

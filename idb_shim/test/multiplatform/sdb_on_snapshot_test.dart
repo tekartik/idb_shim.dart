@@ -9,7 +9,7 @@ final testStore = SdbStoreRef<int, String>('test');
 final testModelStore = SdbStoreRef<int, SdbModel>('test_model');
 final testIndex = testModelStore.index<String>('test_index');
 Future<void> main() async {
-  group('track_changes', () {
+  group('sdb_on_snapshot', () {
     late SdbDatabase db;
 
     setUp(() async {

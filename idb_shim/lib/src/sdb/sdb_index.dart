@@ -130,6 +130,8 @@ extension SdbIndexRefExtension<
     /// Optional filter, performed in memory
     SdbFilter? filter,
     int? offset,
+
+    /// Ignored, a single record is found.
     int? limit,
 
     /// Optional descending order
@@ -167,7 +169,8 @@ extension SdbIndexRefExtension<
     /// Optional descending order
     bool? descending,
 
-    /// New api - filter is not support for key search
+    /// New api, takes precedence over the other parameters. With a filter,
+    /// the whole records are read (the filter is applied in memory).
     SdbFindOptions<I>? options,
   }) async {
     options = sdbFindOptionsMerge(
@@ -178,8 +181,6 @@ extension SdbIndexRefExtension<
       offset: offset,
       descending: descending,
     );
-
-    /// If filter is used, needs to use findRecords instead
 
     return impl.findRecordKeysImpl(client, options: options);
   }
@@ -251,10 +252,13 @@ extension SdbIndexRefExtension<
   /// return true to continue iteration.
   ///
   /// in [onRow] Like for transaction, no lengthy operation but access to database.
+  ///
+  /// The boundaries of [options] apply to the index key (typed with the
+  /// index key or the store key, any key type is accepted).
   Future<void> iterate(
     SdbClient client, {
     SdbTransactionMode? mode,
-    SdbFindOptions<K>? options,
+    SdbFindOptions<SdbKey>? options,
     required SdbIndexCursorRowHandler<K, V, I> onRow,
   }) async {
     await impl.clientIterateImpl(

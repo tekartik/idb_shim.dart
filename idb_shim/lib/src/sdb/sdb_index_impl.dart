@@ -20,6 +20,7 @@ import 'sdb_store_impl.dart';
 import 'sdb_transaction.dart';
 import 'sdb_transaction_impl.dart';
 import 'sdb_transaction_index.dart';
+import 'sdb_transaction_store_impl.dart';
 
 /// Index reference internal extension.
 extension SdbIndexRefInternalExtension<
@@ -288,6 +289,9 @@ abstract class SdbIndexRefImpl<
     SdbTransactionImpl txn, {
     required SdbFindOptions<I> options,
   }) {
+    if (options.limit == 0) {
+      return const Stream<IdbCursorRow>.empty();
+    }
     var filter = options.filter;
     var offset = options.offset;
     var limit = options.limit;
@@ -335,6 +339,9 @@ abstract class SdbIndexRefImpl<
 
     required SdbFindOptions<I> options,
   }) async {
+    if (options.limit == 0) {
+      return <SdbIndexRecordSnapshot<K, V, I>>[];
+    }
     var filter = options.filter;
 
     if (filter == null) {
@@ -368,6 +375,9 @@ abstract class SdbIndexRefImpl<
     SdbTransactionImpl txn, {
     required SdbFindOptions<I> options,
   }) async {
+    if (options.limit == 0) {
+      return <SdbIndexRecordKey<K, V, I>>[];
+    }
     var filter = options.filter;
     if (filter != null) {
       return await txnFindRecordsImpl(txn, options: options);
@@ -441,6 +451,9 @@ abstract class SdbIndexRefImpl<
     var boundaries = options.boundaries;
     var limit = options.limit;
     var offset = options.offset;
+    if (limit == 0) {
+      return 0;
+    }
     if (filter != null) {
       var records = await txnFindRecordsImpl(txn, options: options);
       return records.length;
@@ -483,6 +496,9 @@ abstract class SdbIndexRefImpl<
     SdbTransactionImpl txn, {
     required SdbFindOptions<I> options,
   }) async {
+    if (options.limit == 0) {
+      return;
+    }
     // A raw cursor delete is not seen by the store change listeners: when
     // there are some, delete record by record so that they are notified.
     var hasChangeListener =
@@ -524,6 +540,7 @@ abstract class SdbIndexRefImpl<
     await streamWithOffsetAndLimit(stream, offset, limit).listen((cursor) {
       cursor.delete();
     }).asFuture<void>();
+    txn.rawImpl.noteWriteToStore(store.name);
   }
 
   /// Iterate records
@@ -559,6 +576,9 @@ abstract class SdbIndexRefImpl<
     SdbFilter? filter,
     required SdbIndexCursorRowHandler<K, V, I> handler,
   }) {
+    if (limit == 0) {
+      return Future<void>.value();
+    }
     var codec = txn.codec;
     var idbObjectStore = txn.idbTransaction.objectStore(store.name);
     var idbIndex = idbObjectStore.index(name);
@@ -573,14 +593,25 @@ abstract class SdbIndexRefImpl<
         direction: direction,
         offset: offset,
         limit: limit,
-        handleRow: (row) => handler(
-          SdbIndexCursorRowImpl<K, V, I>.paged(
-            key: row.key,
-            primaryKey: row.primaryKey,
-            rawValue: row.value,
-            onUpdate: (data) => paged.pagedRowUpdate(row.primaryKey, data),
-          ),
-        ),
+        handleRow: (row) {
+          Future<void> writeRaw(Object data) =>
+              paged.pagedRowUpdate(row.primaryKey, data);
+          return handler(
+            SdbIndexCursorRowImpl<K, V, I>.paged(
+              key: row.key,
+              primaryKey: row.primaryKey,
+              rawValue: row.value,
+              onUpdate: writeRaw,
+              onUpdateValue: (value) => txn.rowUpdateValue(
+                store,
+                primaryKey: row.primaryKey,
+                oldRawValue: row.value,
+                value: value,
+                writeRaw: writeRaw,
+              ),
+            ),
+          );
+        },
       );
     }
 
@@ -592,6 +623,13 @@ abstract class SdbIndexRefImpl<
       limit: limit,
       filter: filter,
       codec: codec,
+      updateValue: (cwv, value) => txn.rowUpdateValue(
+        store,
+        primaryKey: cwv.primaryKey,
+        oldRawValue: cwv.value,
+        value: value,
+        writeRaw: cwv.update,
+      ),
     );
     return openCursor.done;
   }
@@ -600,7 +638,7 @@ abstract class SdbIndexRefImpl<
   Future<void> clientIterateImpl(
     SdbClient client, {
     required SdbTransactionMode mode,
-    required SdbFindOptions<K> options,
+    required SdbFindOptions<SdbKey> options,
     required SdbIndexCursorRowHandler<K, V, I> handler,
   }) => clientAutoTxnImpl(
     client,

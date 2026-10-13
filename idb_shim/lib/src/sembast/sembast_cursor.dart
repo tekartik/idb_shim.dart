@@ -2,7 +2,6 @@
 
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
-import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/logger/logger_utils.dart';
 import 'package:idb_shim/src/sembast/sembast_import.dart' as sembast;
 import 'package:idb_shim/src/sembast/sembast_index.dart';
@@ -194,8 +193,8 @@ abstract class _ICursorSembast {
   /// The list of snapshot
   List<RecordSnapshotSembast>? records;
 
-  /// Set the resulting records, special handling needed for multiEntry index
-  void setRecords(List<sembast.RecordSnapshot<Object, Object>> records);
+  /// Find the records of the cursor, in order.
+  Future<List<RecordSnapshotSembast>> txnFindRecords();
 }
 
 /// RecordSnapshotSembast representation.
@@ -247,39 +246,11 @@ abstract mixin class IndexCursorControllerSembastMixin
     return index.cursorFilter(meta.key, meta.range);
   }
 
-  /// To override for index
+  /// The index entries (an entry per array item for a multiEntry index) in
+  /// the IndexedDB order: by key then by primary key.
   @override
-  void setRecords(List<sembast.RecordSnapshot<Object, Object>> records) {
-    if (index.multiEntry) {
-      /// Duplicate some records
-      var list = <IndexRecordSnapshotSembast>[];
-      for (var record in records) {
-        var keys = valueAsSet((record.value as Map).getKeyValue(index.keyPath));
-        if (keys != null) {
-          for (var key in keys) {
-            list.add(
-              IndexRecordSnapshotSembast(idbStore, decodeKey(key!), record),
-            );
-          }
-        }
-      }
-      list.sort(
-        (a, b) =>
-            fixCompareValue(compareKeys(a.key, b.key), asc: meta.ascending),
-      );
-      this.records = list;
-    } else {
-      this.records = records
-          .map(
-            (snapshot) => IndexRecordSnapshotSembast(
-              idbStore,
-              (snapshot.value as Map).getKeyValue(index.keyPath)!,
-              snapshot,
-            ),
-          )
-          .toList(growable: false);
-    }
-  }
+  Future<List<RecordSnapshotSembast>> txnFindRecords() =>
+      index.txnEntries(meta.range ?? meta.key, ascending: meta.ascending);
 }
 
 abstract mixin class StoreCursorControllerSembastMixin
@@ -341,22 +312,20 @@ abstract mixin class BaseCursorControllerSembastMixin<T extends Cursor>
   }
 
   Future openCursor() async {
-    final filter = this.filter;
-    final sortOrders = this.sortOrders;
-    final finder = sembast.Finder(filter: filter, sortOrders: sortOrders);
-    var records = await store.sembastStore.find(
-      store.sembastClient,
-      finder: finder,
-    );
-    setRecords(records);
+    records = await txnFindRecords();
 
     // Handle first
     return autoNext();
   }
 
   @override
-  void setRecords(List<sembast.RecordSnapshot<Object, Object>> records) {
-    this.records = records
+  Future<List<RecordSnapshotSembast>> txnFindRecords() async {
+    final finder = sembast.Finder(filter: filter, sortOrders: sortOrders);
+    var records = await store.sembastStore.find(
+      store.sembastClient,
+      finder: finder,
+    );
+    return records
         .map((snapshot) => RecordSnapshotSembast(store, snapshot))
         .toList(growable: false);
   }

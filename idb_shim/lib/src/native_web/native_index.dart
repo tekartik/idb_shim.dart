@@ -18,14 +18,16 @@ class IndexNative extends Index {
   @override
   Future<Object?> get(Object? key) {
     return catchAsyncNativeError(() {
-      return idbIndex.get(key?.jsifyValue()).dartFutureNullable<Object?>();
+      // A key or a key range
+      return idbIndex.get(toNativeQuery(key)).dartFutureNullable<Object?>();
     });
   }
 
   @override
   Future<Object?> getKey(Object? key) {
     return catchAsyncNativeError(() {
-      return idbIndex.getKey(key?.jsifyValue()).dartFutureNullable<Object?>();
+      // A key or a key range
+      return idbIndex.getKey(toNativeQuery(key)).dartFutureNullable<Object?>();
     });
   }
 

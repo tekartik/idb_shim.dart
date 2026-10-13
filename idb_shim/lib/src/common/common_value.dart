@@ -1,9 +1,12 @@
 library;
 
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/utils/env_utils.dart';
+import 'package:sembast/blob.dart';
+import 'package:sembast/timestamp.dart';
 
 /// encode a value using JSON.
 Object? encodeValue(Object? value) {
@@ -86,24 +89,140 @@ int fixCompareValue(int value, {bool asc = true}) {
   }
 }
 
-/// Compare keys, handle single object and array!
-int compareKeys(Object? first, Object? second) {
-  if (first is num && second is num) {
-    return first < second ? -1 : (first == second ? 0 : 1);
-  } else if (first is String && second is String) {
-    final compare = first.compareTo(second);
-    return compare < 0 ? -1 : (compare == 0 ? 0 : 1);
-  } else if (first is List && second is List) {
-    for (var i = 0; i < first.length; i++) {
-      final compare = compareKeys(first[i], second[i]);
-      if (compare != 0) {
-        return compare;
+/// Rank of a key type in the IndexedDB key order (number < date < string <
+/// binary < array), null if not a key type (array items are not checked).
+///
+/// DateTime keys are not supported (rejected by the key validation), a date
+/// is only found as a stored value (sembast timestamp, like blob for binary).
+int? _keyTypeRank(Object? key) {
+  if (key is num) {
+    return key.isNaN ? null : 0;
+  } else if (key is Timestamp) {
+    return 1;
+  } else if (key is String) {
+    return 2;
+  } else if (key is Uint8List || key is ByteBuffer || key is Blob) {
+    // Before List, an Uint8List is a List.
+    return 3;
+  } else if (key is List) {
+    return 4;
+  }
+  return null;
+}
+
+/// True if [key] is a valid key for the comparison (number, stored date,
+/// string, binary or an array of valid keys), for stored values that can be
+/// anything.
+bool isValidKey(Object? key) {
+  var rank = _keyTypeRank(key);
+  if (rank == 4) {
+    for (var item in key as List) {
+      if (!isValidKey(item)) {
+        return false;
       }
     }
-    return 0;
   }
-  //print(first.runtimeType);
-  throw DatabaseInvalidKeyError([first, second]);
+  return rank != null;
+}
+
+List<int> _keyBytes(Object key) {
+  if (key is Blob) {
+    return key.bytes;
+  } else if (key is ByteBuffer) {
+    return key.asUint8List();
+  }
+  return key as Uint8List;
+}
+
+int _sign(int value) => value < 0 ? -1 : (value == 0 ? 0 : 1);
+
+/// Compare 2 lists item by item, then by length.
+int _compareLists<T>(List<T> first, List<T> second, int Function(T, T) cmp) {
+  var length = first.length < second.length ? first.length : second.length;
+  for (var i = 0; i < length; i++) {
+    final compare = cmp(first[i], second[i]);
+    if (compare != 0) {
+      return compare;
+    }
+  }
+  return _sign(first.length - second.length);
+}
+
+/// Compare keys in the IndexedDB order: number < date < string < binary <
+/// array, arrays (and binaries) compared item by item, then by length.
+///
+/// Keys are assumed valid (checked before), throws a [DatabaseInvalidKeyError]
+/// on a type that is not a key.
+int compareKeys(Object? first, Object? second) {
+  var firstRank = _keyTypeRank(first);
+  var secondRank = _keyTypeRank(second);
+  if (firstRank == null || secondRank == null) {
+    throw DatabaseInvalidKeyError([first, second]);
+  }
+  if (firstRank != secondRank) {
+    return firstRank < secondRank ? -1 : 1;
+  }
+  switch (firstRank) {
+    case 0:
+      var firstNum = first as num;
+      var secondNum = second as num;
+      return firstNum < secondNum ? -1 : (firstNum == secondNum ? 0 : 1);
+    case 1:
+      return _sign((first as Timestamp).compareTo(second as Timestamp));
+    case 2:
+      return _sign((first as String).compareTo(second as String));
+    case 3:
+      return _compareLists<int>(
+        _keyBytes(first!),
+        _keyBytes(second!),
+        (a, b) => _sign(a - b),
+      );
+    default:
+      return _compareLists<Object?>(first as List, second as List, compareKeys);
+  }
+}
+
+/// Like [compareKeys] but null if a key is not valid (stored values).
+int? compareKeysOrNull(Object? first, Object? second) {
+  if (!isValidKey(first) || !isValidKey(second)) {
+    return null;
+  }
+  return compareKeys(first, second);
+}
+
+/// True if [key] is in [range] (IndexedDB key order), false for an invalid
+/// key. The range bounds are assumed valid.
+bool keyRangeContainsKey(KeyRange range, Object? key) {
+  if (!isValidKey(key)) {
+    return false;
+  }
+  var lower = range.lower;
+  if (lower != null) {
+    var cmp = compareKeys(key, lower);
+    if (cmp < 0 || (cmp == 0 && range.lowerOpen)) {
+      return false;
+    }
+  }
+  var upper = range.upper;
+  if (upper != null) {
+    var cmp = compareKeys(key, upper);
+    if (cmp > 0 || (cmp == 0 && range.upperOpen)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/// True if [key] matches [keyOrRange]: in the range, equal to the key, or any
+/// valid key when null.
+bool keyMatchesKeyOrRange(Object? key, Object? keyOrRange) {
+  if (keyOrRange is KeyRange) {
+    return keyRangeContainsKey(keyOrRange, key);
+  } else if (keyOrRange == null) {
+    return isValidKey(key);
+  }
+  // keyOrRange is assumed valid
+  return isValidKey(key) && compareKeys(key, keyOrRange) == 0;
 }
 
 /// when keyPath is an array

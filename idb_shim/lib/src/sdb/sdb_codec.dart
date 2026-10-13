@@ -159,7 +159,8 @@ abstract class _SdbCodecWithAdapters implements SdbCodec, SdbCodecInterface {
       var map = value;
       Map? clone;
       if (value is! SdbModel) {
-        clone = SdbModel();
+        // Typed copy, with all the entries.
+        clone = Map<String, Object?>.from(map);
       }
       map.forEach((key, item) {
         var converted = sdbToIdbValueOrNull(item);

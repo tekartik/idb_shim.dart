@@ -1,7 +1,5 @@
-import 'package:idb_shim/src/common/common_cursor.dart';
 import 'package:idb_shim/src/logger/logger_utils.dart';
 import 'package:idb_shim/src/sdb/sdb_cursor.dart';
-import 'package:idb_shim/src/sdb/sdb_filter_impl.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
 
 import 'import_idb.dart' as idb;
@@ -37,51 +35,17 @@ class SdbIndexOpenCursorImpl<
     super.limit,
     super.filter,
     required super.codec,
+    SdbCursorRowUpdateValue? updateValue,
   }) {
-    cursorSubscription =
-        cursorApplyFilterLimitOffset<
-              idb.IdbCursorWithValue,
-              SdbIndexCursorRow<K, V, I>
-            >(
-              idbStream,
-              (cursor) async {
-                if (filter != null) {
-                  if (!sdbCursorWithValueMatchesFilter(
-                    cursor,
-                    filter!,
-                    codec,
-                  )) {
-                    return null;
-                  }
-                }
-                if (skipForOffset()) {
-                  return null;
-                }
-                final row = SdbIndexCursorRowImpl<K, V, I>(cwv: cursor);
-                var result = handler(row);
-                bool doContinue;
-                if (result is Future) {
-                  doContinue = await result;
-                } else {
-                  doContinue = result;
-                }
-                if (!doContinue) {
-                  clean();
-                }
-                return row;
-              },
-              // The offset is applied above, before the handler is called.
-              limit: limit,
-            )
-            .listen(
-              (_) {},
-              onError: (Object e, StackTrace st) {
-                clean();
-              },
-              onDone: () {
-                clean();
-              },
-            );
+    walk<SdbIndexCursorRowImpl<K, V, I>>(
+      newRow: (cursor) => SdbIndexCursorRowImpl<K, V, I>(
+        cwv: cursor,
+        onUpdateValue: updateValue == null
+            ? null
+            : (value) => updateValue(cursor, value),
+      ),
+      handleRow: handler,
+    );
   }
 
   /// The handler for each row.
@@ -118,7 +82,7 @@ extension SdbIndexCursorRowInternalExt<
   Object get rawValue => _impl.rawValue;
 
   /// Update raw idb value
-  Future<void> updateRaw(Object data) => _impl.update(data);
+  Future<void> updateRaw(Object data) => _impl.onUpdate(data);
 }
 
 /// SimpleDb cursor row internal implementation.
@@ -129,11 +93,13 @@ class SdbIndexCursorRowImpl<
 >
     implements SdbIndexCursorRow<K, V, I> {
   /// Create a cursor row implementation.
-  SdbIndexCursorRowImpl({required idb.IdbCursorWithValue cwv})
-    : key = cwv.key,
-      primaryKey = cwv.primaryKey,
-      rawValue = cwv.value,
-      onUpdate = cwv.update;
+  SdbIndexCursorRowImpl({
+    required idb.IdbCursorWithValue cwv,
+    this.onUpdateValue,
+  }) : key = cwv.key,
+       primaryKey = cwv.primaryKey,
+       rawValue = cwv.value,
+       onUpdate = cwv.update;
 
   /// Create a row read without a cursor (native paged query), [update]
   /// writing [rawValue] back at its primary key.
@@ -142,6 +108,7 @@ class SdbIndexCursorRowImpl<
     required this.primaryKey,
     required this.rawValue,
     required this.onUpdate,
+    this.onUpdateValue,
   });
 
   /// The row key (the index key for an index cursor).
@@ -156,9 +123,18 @@ class SdbIndexCursorRowImpl<
   /// Writes a new raw value at this row position.
   final Future<void> Function(Object data) onUpdate;
 
+  /// Writes a new value (encoded, notified) at this row position, [onUpdate]
+  /// is used if null.
+  final Future<void> Function(Object value)? onUpdateValue;
+
   @override
   Future<void> update(Object data) async {
-    await onUpdate(data);
+    var onUpdateValue = this.onUpdateValue;
+    if (onUpdateValue != null) {
+      await onUpdateValue(data);
+    } else {
+      await onUpdate(data);
+    }
   }
 
   @override

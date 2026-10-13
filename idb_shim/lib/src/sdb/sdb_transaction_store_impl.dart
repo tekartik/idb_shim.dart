@@ -95,6 +95,31 @@ class SdbSingleStoreTransactionImpl<K extends SdbKey, V extends SdbValue>
   }) => txnStore.findRecordKeys(options: options);
 }
 
+/// Cursor row update.
+extension SdbTransactionImplRowUpdateExtension on SdbTransactionImpl {
+  /// Write [value] at a cursor row of [store] through [writeRaw]: encoded,
+  /// the write and the change noted like a put.
+  Future<void> rowUpdateValue<K extends SdbKey, V extends SdbValue>(
+    SdbStoreRef<K, V> store, {
+    required Object primaryKey,
+    required Object oldRawValue,
+    required Object value,
+    required Future<void> Function(Object rawValue) writeRaw,
+  }) async {
+    await writeRaw(codec.encode(value));
+    rawImpl.noteWriteToStore(store.name);
+    var changesListener = this.changesListener;
+    if (changesListener?.storeHasChangeListener(store) ?? false) {
+      var record = store.record(primaryKey as K);
+      changesListener!.addChange(
+        this,
+        SdbRecordSnapshotImpl<K, V>(record, codec.decode<V>(oldRawValue)),
+        SdbRecordSnapshotImpl<K, V>(record, value as V),
+      );
+    }
+  }
+}
+
 /// Transaction store reference internal extension.
 extension SdbTransactionStoreRefInternalExtension<
   K extends SdbKey,
@@ -290,6 +315,9 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
   Stream<SdbRecordSnapshot<K, V>> streamRecordsImpl({
     required SdbFindOptions<K> options,
   }) {
+    if (options.limit == 0) {
+      return const Stream.empty();
+    }
     var codec = transaction.codec;
     var filter = options.filter;
     var offset = options.offset;
@@ -333,6 +361,9 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
     required SdbFindOptions<K> options,
     required SdbCursorRowHandler<K, V> handler,
   }) {
+    if (options.limit == 0) {
+      return Future<void>.value();
+    }
     var filter = options.filter;
     var offset = options.offset;
     var limit = options.limit;
@@ -354,13 +385,24 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
         direction: direction,
         offset: offset,
         limit: limit,
-        handleRow: (row) => handler(
-          SdbCursorRowImpl<K, V>.paged(
-            key: row.key,
-            rawValue: row.value,
-            onUpdate: (data) => paged.pagedRowUpdate(row.primaryKey, data),
-          ),
-        ),
+        handleRow: (row) {
+          Future<void> writeRaw(Object data) =>
+              paged.pagedRowUpdate(row.primaryKey, data);
+          return handler(
+            SdbCursorRowImpl<K, V>.paged(
+              key: row.key,
+              rawValue: row.value,
+              onUpdate: writeRaw,
+              onUpdateValue: (value) => transaction.rowUpdateValue(
+                store,
+                primaryKey: row.primaryKey,
+                oldRawValue: row.value,
+                value: value,
+                writeRaw: writeRaw,
+              ),
+            ),
+          );
+        },
       );
     }
 
@@ -372,6 +414,13 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
       limit: limit,
       filter: filter,
       codec: codec,
+      updateValue: (cwv, value) => transaction.rowUpdateValue(
+        store,
+        primaryKey: cwv.primaryKey,
+        oldRawValue: cwv.value,
+        value: value,
+        writeRaw: cwv.update,
+      ),
     );
     return openCursor.done;
   }
@@ -381,6 +430,9 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
   Future<List<SdbRecordSnapshot<K, V>>> findRecordsImpl({
     required SdbFindOptions<K> options,
   }) async {
+    if (options.limit == 0) {
+      return <SdbRecordSnapshot<K, V>>[];
+    }
     var filter = options.filter;
     var offset = options.offset;
     var limit = options.limit;
@@ -427,6 +479,9 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
   Future<List<SdbRecordKey<K, V>>> findRecordKeysImpl({
     required SdbFindOptions<K> options,
   }) async {
+    if (options.limit == 0) {
+      return <SdbRecordKey<K, V>>[];
+    }
     if (options.filter != null) {
       return (await findRecordsImpl(options: options));
     }
@@ -461,6 +516,9 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
   /// Count records.
   @override
   Future<int> countImpl({required SdbFindOptions<K> options}) async {
+    if (options.limit == 0) {
+      return 0;
+    }
     if (options.filter != null) {
       // Slow
       return (await findRecordsImpl(options: options)).length;
@@ -484,6 +542,9 @@ class SdbTransactionStoreRefImpl<K extends SdbKey, V extends SdbValue>
   /// Delete records.
   @override
   Future<void> deleteRecordsImpl({required SdbFindOptions<K> options}) async {
+    if (options.limit == 0) {
+      return;
+    }
     var changesListener = transaction.changesListener;
     var hasChangeListener =
         changesListener?.storeHasChangeListener(store) ?? false;

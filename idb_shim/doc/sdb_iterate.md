@@ -82,7 +82,7 @@ await db.inStoreTransaction(bookStore, SdbTransactionMode.readWrite, (txn) async
 
 ## Index iterate
 
-Index `iterate` works the same way but uses `SdbIndexCursorRow`, which carries the index key type information. The `options` parameter uses the store's primary key type `K` (not the index key type).
+Index `iterate` works the same way but uses `SdbIndexCursorRow`, which carries the index key type information. The boundaries of the `options` apply to the index key, so type them with the index key type (`SdbFindOptions<String>` below); options typed with the store key type are still accepted.
 
 ```dart
 var bookStore = SdbStoreRef<int, SdbModel>('books');
@@ -107,6 +107,22 @@ await authorIndex.iterate(
 );
 ```
 
+### Index boundaries
+
+```dart
+// Authors from 'A' (included) to 'M' (excluded)
+await authorIndex.iterate(
+  db,
+  options: SdbFindOptions<String>(
+    boundaries: SdbBoundaries(SdbLowerBoundary('A'), SdbUpperBoundary('M')),
+  ),
+  onRow: (row) {
+    // ...
+    return true;
+  },
+);
+```
+
 ### Limiting index iteration
 
 ```dart
@@ -123,7 +139,8 @@ await authorIndex.iterate(
 
 ## Key points
 
-- Return `true` to continue, `false` to stop early.
+- Return `true` to continue, `false` to stop early. If `onRow` throws, the iteration stops and `iterate` completes with that error.
+- `row.update()` encodes the value like `put` (timestamps, blobs) and the change listeners (`onSnapshot`, `onSnapshots`...) are notified.
 - The default transaction mode is `readOnly`. Use `mode: SdbTransactionMode.readWrite` when calling `row.update()`.
 - **Do not perform non-database async operations** inside the callback — the same rules as for transactions apply.
 - For simple read-only queries that fit in memory, prefer `findRecords`. Use `iterate` when you need to update records in place or want to avoid loading all results at once.

@@ -103,35 +103,60 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     return null;
   }
 
-  Future<Object> putImpl(Object? value, Object? key) {
-    // Check all indexes
-    final futures = <Future>[];
-    if (value is Map) {
-      for (var indexMeta in meta!.indecies) {
-        var fieldValue = value.getKeyValue(indexMeta.keyPath);
-        if (fieldValue != null) {
-          final finder = sembast.Finder(
-            filter: keyFilter(indexMeta.keyPath, fieldValue, false),
-            limit: 1,
-          );
-          futures.add(
-            sembastStore.findFirst(sembastClient, finder: finder).then((
-              record,
-            ) {
-              // not ourself
-              if ((record != null) &&
-                  (record.key != key) //
-                  &&
-                  ((!indexMeta.multiEntry) && indexMeta.unique)) {
-                throw DatabaseError(
-                  "key '$fieldValue' already exists in $record for index $indexMeta",
-                );
-              }
-            }),
-          );
-        }
+  /// The primary key of a record: its sembast key, or the key path value
+  /// for an array key path.
+  Object recordPrimaryKey(sembast.RecordSnapshot record) =>
+      hasCompositeKey ? getKeyImpl(record.value as Object)! : record.key!;
+
+  /// Throws if [value] has a key (an entry for a multiEntry index) of a unique
+  /// index already used by another record than the one at [key] (null for a
+  /// new record).
+  Future<void> _txnCheckUniqueIndexes(Map value, Object? key) async {
+    for (var indexMeta in meta!.indecies) {
+      if (!indexMeta.unique) {
+        continue;
+      }
+      var keys = keyPathKeys(
+        (field) => value.getFieldValue<Object?>(field),
+        indexMeta.keyPath,
+        indexMeta.multiEntry,
+      ).toList();
+      if (keys.isEmpty) {
+        continue;
+      }
+      var record = await sembastStore.findFirst(
+        sembastClient,
+        finder: sembast.Finder(
+          filter: sembast.Filter.custom((snapshot) {
+            // not ourself
+            if (key != null &&
+                compareKeysOrNull(recordPrimaryKey(snapshot), key) == 0) {
+              return false;
+            }
+            return recordKeyPathKeys(
+              snapshot,
+              indexMeta.keyPath,
+              indexMeta.multiEntry,
+            ).any(
+              (recordKey) =>
+                  keys.any((key) => compareKeysOrNull(recordKey, key) == 0),
+            );
+          }),
+        ),
+      );
+      if (record != null) {
+        throw DatabaseError(
+          "key '${value.getKeyValue(indexMeta.keyPath)}' already exists in $record for index $indexMeta",
+        );
       }
     }
+  }
+
+  Future<Object> putImpl(Object? value, Object? key) {
+    // Check unique indexes
+    final futures = <Future>[
+      if (value is Map) _txnCheckUniqueIndexes(value, key),
+    ];
     return Future.wait(futures).then((_) async {
       if (key == null) {
         // Handle the case where a generated key is added
@@ -203,8 +228,11 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     });
   }
 
+  /// The primary key path, the sembast key unless an array key path.
+  Object get _primaryKeyPath => hasCompositeKey ? keyPath! : sembast.Field.key;
+
   sembast.Filter _storeKeyOrRangeFilter([Object? keyOrRange]) {
-    return keyOrRangeFilter(sembast.Field.key, keyOrRange, false);
+    return keyOrRangeFilter(_primaryKeyPath, keyOrRange, false);
   }
 
   @override
@@ -231,6 +259,17 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     Object? query,
     int? count,
   ]) async {
+    if (hasCompositeKey) {
+      // The sembast key is not the primary key, sort by primary key.
+      var records = (await sembastStore.find(
+        sembastClient,
+        finder: sembast.Finder(filter: _storeKeyOrRangeFilter(query)),
+      )).toList();
+      records.sort(
+        (a, b) => compareKeys(recordPrimaryKey(a), recordPrimaryKey(b)),
+      );
+      return count == null ? records : records.take(count).toList();
+    }
     return (await sembastStore.find(
       sembastClient,
       finder: sembast.Finder(
@@ -267,7 +306,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
         var keys = (await txnGetAllSnapshots(
           query,
           count,
-        )).map((r) => (r as Map).getKeyValue(keyPath)!).toList(growable: false);
+        )).map(recordPrimaryKey).toList(growable: false);
         return keys;
       }
       return await txnGetAllIds(query, count);
@@ -357,7 +396,7 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     checkKeyParam(key);
     return inTransaction(() async {
       var record = await txnGetSnapshot(key);
-      return record?.key;
+      return record == null ? null : recordPrimaryKey(record);
     });
   }
 

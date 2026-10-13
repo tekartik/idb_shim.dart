@@ -44,13 +44,20 @@ Stream<T> cursorApplyFilterLimitOffset<C extends idb.IdbCursor, T>(
   );
   stream.listen(
     (C cursor) async {
-      /// Convert first
-      var row = convert(cursor);
       T? rowValue;
-      if (row is Future) {
-        rowValue = await row;
-      } else {
-        rowValue = row;
+      try {
+        /// Convert first
+        var row = convert(cursor);
+        if (row is Future) {
+          rowValue = await row;
+        } else {
+          rowValue = row;
+        }
+      } catch (e, st) {
+        // Report the error and stop the cursor (it would never advance).
+        controller.addError(e, st);
+        controller.terminate(cursor);
+        return;
       }
       controller.next(cursor, rowValue);
     },
@@ -91,6 +98,11 @@ class LimitOffsetControllerImpl<C extends idb.IdbCursor, T> {
       cursor.advance(1);
       return;
     }
+    // limit 0, nothing to add
+    if (limit == 0) {
+      ctlr.terminate(cursor);
+      return;
+    }
     // Apply offset and skip first if needed
     if ((offset ?? 0) > offsetApplied) {
       offsetApplied++;
@@ -125,6 +137,11 @@ class LimitOffsetControllerImpl<C extends idb.IdbCursor, T> {
   /// Add an error to the stream.
   void addError(Object e, StackTrace st) {
     ctlr.addError(e, st);
+  }
+
+  /// Terminate the cursor.
+  void terminate(C cursor) {
+    ctlr.terminate(cursor);
   }
 }
 

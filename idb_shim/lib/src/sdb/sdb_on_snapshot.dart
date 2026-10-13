@@ -16,11 +16,7 @@ extension SdbStoreRefExtensionOnSnapshots<K extends SdbKey, V extends SdbValue>
     late StreamController<List<SdbRecordSnapshot<K, V>>> controller;
     StreamSubscription<List<String>>? externalSub;
     void addSnapshots() {
-      findRecords(db, options: options).then((snapshots) {
-        if (!controller.isClosed) {
-          controller.add(snapshots);
-        }
-      });
+      _addQueryResult(controller, findRecords(db, options: options));
     }
 
     FutureOr<void> onChange(
@@ -54,11 +50,7 @@ extension SdbStoreRefExtensionOnSnapshots<K extends SdbKey, V extends SdbValue>
     late StreamController<int> controller;
     StreamSubscription<List<String>>? externalSub;
     void addCount() {
-      count(db, options: options).then((count) {
-        if (!controller.isClosed) {
-          controller.add(count);
-        }
-      });
+      _addQueryResult(controller, count(db, options: options));
     }
 
     FutureOr<void> onChange(
@@ -103,11 +95,7 @@ extension SdbIndexRefExtensionOnSnapshots<
     late StreamController<List<SdbIndexRecordSnapshot<K, V, IK>>> controller;
     StreamSubscription<List<String>>? externalSub;
     void addSnapshots() {
-      findRecords(db, options: options).then((snapshots) {
-        if (!controller.isClosed) {
-          controller.add(snapshots);
-        }
-      });
+      _addQueryResult(controller, findRecords(db, options: options));
     }
 
     FutureOr<void> onChange(
@@ -141,11 +129,7 @@ extension SdbIndexRefExtensionOnSnapshots<
     late StreamController<int> controller;
     StreamSubscription<List<String>>? externalSub;
     void addCount() {
-      count(db, options: options).then((count) {
-        if (!controller.isClosed) {
-          controller.add(count);
-        }
-      });
+      _addQueryResult(controller, count(db, options: options));
     }
 
     FutureOr<void> onChange(
@@ -183,11 +167,7 @@ extension SdbRecordRefExtensionOnSnapshot<K extends SdbKey, V extends SdbValue>
     late StreamController<SdbRecordSnapshot<K, V>?> controller;
     StreamSubscription<List<String>>? externalSub;
     void addSnapshot() {
-      get(db).then((snapshot) {
-        if (!controller.isClosed) {
-          controller.add(snapshot);
-        }
-      });
+      _addQueryResult(controller, get(db));
     }
 
     FutureOr<void> onChange(
@@ -235,11 +215,7 @@ extension SdbIndexRecordRefExtensionOnSnapshot<
     late StreamController<SdbIndexRecordSnapshot<K, V, IK>?> controller;
     StreamSubscription<List<String>>? externalSub;
     void addSnapshot() {
-      get(db).then((snapshot) {
-        if (!controller.isClosed) {
-          controller.add(snapshot);
-        }
-      });
+      _addQueryResult(controller, get(db));
     }
 
     FutureOr<void> onChange(
@@ -276,11 +252,7 @@ extension SdbIndexRecordRefExtensionOnSnapshot<
     late StreamController<List<SdbIndexRecordSnapshot<K, V, IK>>> controller;
     StreamSubscription<List<String>>? externalSub;
     void addSnapshots() {
-      findRecords(db, options: options).then((snapshots) {
-        if (!controller.isClosed) {
-          controller.add(snapshots);
-        }
-      });
+      _addQueryResult(controller, findRecords(db, options: options));
     }
 
     FutureOr<void> onChange(
@@ -306,4 +278,21 @@ extension SdbIndexRecordRefExtensionOnSnapshot<
     );
     return controller.stream;
   }
+}
+
+/// Add the result of the query [future] (or its error) to [controller], unless
+/// closed.
+void _addQueryResult<T>(StreamController<T> controller, Future<T> future) {
+  future.then(
+    (result) {
+      if (!controller.isClosed) {
+        controller.add(result);
+      }
+    },
+    onError: (Object error, StackTrace stackTrace) {
+      if (!controller.isClosed) {
+        controller.addError(error, stackTrace);
+      }
+    },
+  );
 }

@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:idb_shim/idb.dart';
-import 'package:idb_shim/src/utils/value_utils.dart';
+import 'package:idb_shim/src/common/common_value.dart';
 
 /// See [KeyRange] for information
 class IdbKeyRange implements KeyRange {
@@ -30,7 +30,7 @@ class IdbKeyRange implements KeyRange {
 
     if (lowerOpen || upperOpen) {
       // Extra compare value not keys as it might not be bounded
-      if (compareValue(_lowerBound, _upperBound) == 0) {
+      if (compareKeysOrNull(_lowerBound, _upperBound) == 0) {
         throw StateError(
           'DataError: The lower key and upper key are equal and one of the bounds is open ($this)',
         );
@@ -91,66 +91,9 @@ class IdbKeyRange implements KeyRange {
   @override
   bool get upperOpen => _upperBoundOpen;
 
-  num _compareValue(Object value1, Object value2) {
-    if (value1 is num) {
-      return value1 - (value2 as num);
-    } else if (value1 is String) {
-      return value1.compareTo(value2 as String);
-    } else if (value1 is List) {
-      final list = value1;
-      for (var i = 0; i < list.length; i++) {
-        var diff = _compareValue(
-          list[i] as Object,
-          (value2 as List)[i] as Object,
-        );
-        if (diff != 0) {
-          return diff;
-        }
-      }
-      return 0;
-    } else {
-      throw UnsupportedError(
-        "key '$value1' of type ${value1.runtimeType} not supported",
-      );
-    }
-  }
-
-  /// Added method for memory implementation
-  bool _checkLowerBound(Object key) {
-    if (_lowerBound != null) {
-      final exclude = _lowerBoundOpen;
-      final cmp = _compareValue(key, _lowerBound!);
-      if (cmp == 0 && exclude) {
-        return false;
-      } else {
-        return cmp >= 0;
-      }
-    }
-    return true;
-  }
-
-  bool _checkUpperBound(Object key) {
-    if (_upperBound != null) {
-      final exclude = _upperBoundOpen;
-      final cmp = _compareValue(key, _upperBound!);
-      if (cmp == 0 && exclude) {
-        return false;
-      } else {
-        return cmp <= 0;
-      }
-    }
-    return true;
-  }
-
-  /// Return true if a key range contains a given key
+  /// Return true if a key range contains a given key (IndexedDB key order)
   @override
-  bool contains(Object key) {
-    if (!_checkLowerBound(key)) {
-      return false;
-    } else {
-      return _checkUpperBound(key);
-    }
-  }
+  bool contains(Object key) => keyRangeContainsKey(this, key);
 
   @override
   String toString() {

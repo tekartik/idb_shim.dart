@@ -24,12 +24,14 @@ import 'indexeddb_2_test.dart' as indexeddb_2_test;
 import 'indexeddb_3_test.dart' as indexeddb_3_test;
 import 'indexeddb_4_test.dart' as indexeddb_4_test;
 import 'indexeddb_5_test.dart' as indexeddb_5_test;
+import 'key_order_test.dart' as key_order_test;
 import 'key_range_test.dart' as key_range_test;
 import 'object_store_test.dart' as object_store_test;
 import 'open_test.dart' as open_test;
 import 'quick_standalone_test.dart' as quick_standalone_test;
 import 'scenario_test.dart' as scenario_test;
 import 'sdb_index_test.dart';
+import 'sdb_iterate_test.dart';
 import 'simple_provider_test.dart' as simple_provider_test;
 import 'transaction_test.dart' as transaction_test;
 import 'type_test.dart' as type_test;
@@ -37,7 +39,10 @@ import 'utils_test.dart' as utils_test;
 
 /// All sdb tests on an idb factory.
 void defineAllSdbTests(TestContext ctx) {
-  sdbDefineAllTests(SdbTestContext(sdbFactoryFromIdb(ctx.factory)));
+  var sdbCtx = SdbTestContext(sdbFactoryFromIdb(ctx.factory));
+  sdbDefineAllTests(sdbCtx);
+  // idb based only (iterate errors, row update, limit 0, codec)
+  sdbIterateTests(sdbCtx);
 }
 
 /// All sdb tests on any sdb factory, idb based or not.
@@ -63,6 +68,7 @@ void defineAllTests(TestContext ctx) {
   open_test.defineTests(ctx);
   object_store_test.defineTests(ctx);
   key_range_test.defineTests(ctx);
+  key_order_test.defineTests(ctx);
   factory_test.defineTests(ctx);
   index_test.defineTests(ctx);
   simple_provider_test.defineTests(ctx);

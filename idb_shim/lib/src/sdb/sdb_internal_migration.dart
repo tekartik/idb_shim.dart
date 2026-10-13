@@ -53,7 +53,8 @@ extension SdbClientMigrationExtension on SdbClient {
           if (!migrateValuesAreEqual(migrated, initial)) {
             // Awaited: an implementation serializing its transactions
             // (sembast) completes the transaction once the iteration is done.
-            await row.update(migrated);
+            // Raw, the value is already encoded.
+            await row.updateRaw(migrated);
           }
           return true;
         },

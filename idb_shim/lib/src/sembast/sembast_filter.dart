@@ -3,6 +3,7 @@
 import 'dart:math';
 
 import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/sembast/sembast_import.dart' as sembast;
 
 /// keyPath must have been escaped before
@@ -23,29 +24,10 @@ sembast.Filter keyCursorFilter(
   // return null;
 }
 
-// return <0 if value1 < value2 or >0 if greater
+// return <0 if value1 < value2 or >0 if greater (IndexedDB key order)
 // returns 0 if cannot be compared or equals
-int compareValue(Object? value1, Object? value2) {
-  try {
-    if (value1 is Comparable && value2 is Comparable) {
-      return Comparable.compare(value1, value2);
-    } else if (value1 is List && value2 is List) {
-      final list1 = value1;
-      final list2 = value2;
-
-      for (var i = 0; i < min(value1.length, value2.length); i++) {
-        final cmp = compareValue(list1[i], list2[i]);
-        if (cmp == 0) {
-          continue;
-        }
-        return cmp;
-      }
-      // Same ? return the length diff if any
-      return compareValue(list1.length, list2.length);
-    }
-  } catch (_) {}
-  return 0;
-}
+int compareValue(Object? value1, Object? value2) =>
+    compareKeysOrNull(value1, value2) ?? 0;
 
 // Matches if <0
 int lowerCompareSingleValue(Object? lower, Object? value) {
@@ -162,126 +144,71 @@ bool upperMatchesValue(
         return true;
       }
     }
+    return false;
   }
   return upperMatchesSingleValue(upper, upperOpen, value);
 }
 
+/// The valid keys of a record value for [keyPath], [getField] reading a field
+/// value: the value at the key path, the list of the values at each key path
+/// for an array key path, or each distinct item for a [multiEntry] array value
+/// (an entry per key).
+///
+/// keyPath must have been escaped before.
+Iterable<Object> keyPathKeys(
+  Object? Function(String field) getField,
+  Object keyPath,
+  bool multiEntry,
+) sync* {
+  if (keyPath is String) {
+    var value = getField(keyPath);
+    if (multiEntry && value is List) {
+      var keys = <Object>[];
+      for (var item in value) {
+        if (isValidKey(item) &&
+            !keys.any((key) => compareKeysOrNull(key, item) == 0)) {
+          keys.add(item as Object);
+        }
+      }
+      yield* keys;
+    } else if (isValidKey(value)) {
+      yield value!;
+    }
+  } else if (keyPath is List) {
+    final values = List<Object?>.generate(
+      keyPath.length,
+      (i) => getField(keyPath[i] as String),
+    );
+    if (isValidKey(values)) {
+      yield values;
+    }
+  } else {
+    throw ArgumentError('keyPath $keyPath not supported');
+  }
+}
+
+/// The valid keys of a record for [keyPath], see [keyPathKeys].
+Iterable<Object> recordKeyPathKeys(
+  sembast.RecordSnapshot snapshot,
+  Object keyPath,
+  bool multiEntry,
+) => keyPathKeys((field) => snapshot[field], keyPath, multiEntry);
+
+/// Matches records having a key (an entry for a [multiEntry] index) in
+/// [range], in the IndexedDB key order.
 sembast.Filter keyRangeFilter(
   Object? keyPath,
   KeyRange range,
   bool multiEntry,
 ) {
   keyPath ??= sembast.Field.key;
-
-  if (keyPath is String) {
-    return sembast.Filter.custom((snapshot) {
-      var value = snapshot[keyPath as String];
-      if (range.lower != null) {
-        if (!lowerMatchesValue(
-          range.lower,
-          range.lowerOpen,
-          value,
-          multiEntry,
-        )) {
-          return false;
-        }
-      }
-      if (range.upper != null) {
-        if (!upperMatchesValue(
-          range.upper,
-          range.upperOpen,
-          value,
-          multiEntry,
-        )) {
-          return false;
-        }
-      }
-      return true;
-    });
-  } else if (keyPath is List) {
-    var keyPathList = keyPath;
-    var lowerList = range.lower as List?;
-    var upperList = range.upper as List?;
-    if (lowerList != null) {
-      assert(
-        lowerList.length == keyPathList.length,
-        'keyPath and lower bound length must match',
-      );
-    }
-    if (upperList != null) {
-      assert(
-        upperList.length == keyPathList.length,
-        'keyPath and upper bound length must match',
-      );
-    }
-    return sembast.Filter.custom((snapshot) {
-      final values = List.generate(
-        keyPathList.length,
-        (i) => snapshot[keyPathList[i] as String],
-      );
-
-      // no null accepted
-      for (var value in values) {
-        if (value == null) {
-          return false;
-        }
-      }
-
-      final lowerOpen = range.lowerOpen;
-
-      if (lowerList != null) {
-        int? cmp;
-        for (var i = 0; i < keyPathList.length; i++) {
-          var value = values[i];
-          var lower = lowerList[i];
-          if (lower == null) {
-            // matches!
-            continue;
-          } else {
-            cmp = lowerCompareValue(lower, value, multiEntry);
-            if (cmp! > 0) {
-              return false;
-            } else if (cmp < 0) {
-              break;
-            }
-          }
-        }
-        // all matches
-        if (cmp == 0 && lowerOpen) {
-          return false;
-        }
-      }
-
-      final upperOpen = range.upperOpen;
-
-      if (upperList != null) {
-        int? cmp;
-        for (var i = 0; i < keyPathList.length; i++) {
-          var value = values[i];
-          var upper = upperList[i];
-          if (upper == null) {
-            // matches!
-            continue;
-          } else {
-            cmp = upperCompareValue(upper, value, multiEntry);
-            if (cmp! < 0) {
-              return false;
-            } else if (cmp > 0) {
-              break;
-            }
-          }
-        }
-        // all matches
-        if (cmp == 0 && upperOpen) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-  } else {
-    throw ArgumentError('keyPath $keyPath not supported');
-  }
+  return sembast.Filter.custom(
+    (snapshot) => recordKeyPathKeys(
+      snapshot,
+      keyPath!,
+      multiEntry,
+    ).any((key) => keyRangeContainsKey(range, key)),
+  );
 }
 
 sembast.Filter _singleFieldKeyNotNullFilter(String keyPath) =>
@@ -314,67 +241,23 @@ sembast.Filter storeKeyFilter(Object? keyPath, Object key) {
   return keyFilter(keyPath, key);
 }
 
-/// The null value for the key actually means any but null...
+/// The null value for the key actually means any valid key.
 /// Key path must have been escaped before
 sembast.Filter keyFilter(
   Object? keyPath,
   Object? key, [
   bool multiEntry = false,
 ]) {
-  if (keyPath is String) {
-    if (multiEntry) {
-      return sembast.Filter.custom((snapshot) {
-        // We support array too!
-        var value = snapshot[keyPath];
-        if (value is List) {
-          if (key == null) {
-            return value.isNotEmpty;
-          } else {
-            return value.contains(key);
-          }
-        } else {
-          if (key == null) {
-            return value != null;
-          } else {
-            return value == key;
-          }
-        }
-      });
-    } else {
-      if (key == null) {
-        // key must not be nulled
-        return singleFieldKeyNotNullFilter(keyPath);
-      }
-      return singleFieldKeyEqualsFilter(keyPath, key);
-    }
-  } else if (keyPath is List) {
-    final keyList = keyPath;
-    // No constraint on the key it just needs to exist
-    // so every field must be non-null
-    if (key == null) {
-      return sembast.Filter.and(
-        List.generate(
-          keyList.length,
-          (i) => keyFilter(keyList[i], null, multiEntry),
-        ),
-      );
-    } else {
-      // The key must be a list too...
-      if (key is List) {
-        final valueList = key;
-        return sembast.Filter.and(
-          List.generate(
-            keyList.length,
-            (i) => keyFilter(keyList[i], valueList[i], multiEntry),
-          ),
-        );
-      } else {
-        // Always false
-        return sembast.Filter.custom((record) => false);
-      }
-    }
+  if (keyPath is! String && keyPath is! List) {
+    throw ArgumentError('keyPath $keyPath not supported');
   }
-  throw ArgumentError('keyPath $keyPath not supported');
+  return sembast.Filter.custom(
+    (snapshot) => recordKeyPathKeys(
+      snapshot,
+      keyPath!,
+      multiEntry,
+    ).any((recordKey) => keyMatchesKeyOrRange(recordKey, key)),
+  );
 }
 
 sembast.Filter keyOrRangeFilter(

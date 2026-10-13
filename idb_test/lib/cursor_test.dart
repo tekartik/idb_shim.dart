@@ -332,7 +332,6 @@ void defineTests(TestContext ctx) {
         final store1 = t1.objectStore('store1');
         unawaited(store1.put(obj));
 
-        // ignore: unused_local_variable
         Object? cursorException;
 
         try {
@@ -354,11 +353,15 @@ void defineTests(TestContext ctx) {
         } catch (e) {
           // print(e);
           expect(e, isNot(isA<TestFailure>()));
+          cursorException ??= e;
         }
+        // A key cursor cannot delete
+        expect(cursorException, isNotNull);
+        db.close();
       }); // Remove if it hangs on Chrome
 
-      test('key_path_auto_cursor_update', () async {
-        var dbName = 'key_path_auto_cursor_update.db';
+      test('key_path_auto_cursor_delete', () async {
+        var dbName = 'key_path_auto_cursor_delete_value.db';
         await idbFactory.deleteDatabase(dbName);
 
         final db = await idbFactory.open(
@@ -373,52 +376,32 @@ void defineTests(TestContext ctx) {
           },
         );
         try {
-          final obj = <String, Object?>{'key': 1, 'someval': 'lorem'};
-          final obj2 = <String, Object?>{'key': 1, 'someval': 'ipsem'};
+          final obj1 = <String, Object?>{'key': 1, 'someval': 'lorem'};
+          final obj2 = <String, Object?>{'key': 2, 'someval': 'ipsem'};
           final t1 = db.transaction('store1', idbModeReadWrite);
           final store1 = t1.objectStore('store1');
-          unawaited(store1.put(obj));
+          unawaited(store1.put(obj1));
+          unawaited(store1.put(obj2));
           await t1.completed;
 
           final t2 = db.transaction('store1', idbModeReadWrite);
           final store2 = t2.objectStore('store1');
-          unawaited(
-            store2.openCursor().forEach((cv) {
-              expect(cv.key, 1);
-              expect(cv.primaryKey, 1);
-              expect(cv.value, obj);
-
-              cv.update(obj2);
-            }),
-          );
+          var keys = <Object>[];
+          await store2.openCursor(autoAdvance: true).forEach((cv) {
+            keys.add(cv.primaryKey);
+            if (cv.primaryKey == 1) {
+              cv.delete();
+            }
+          });
           await t2.completed;
+          expect(keys, [1, 2]);
 
           final t3 = db.transaction('store1', idbModeReadOnly);
           final store3 = t3.objectStore('store1');
-          final ret = await store3.getObject(1);
-
-          expect(ret, equals(obj2));
-
-          // Key cursor
-          {
-            final t = db.transaction('store1', idbModeReadWrite);
-            var store = t.objectStore('store1');
-            await store.openKeyCursor().forEach((cursor) async {
-              expect(cursor.key, 1);
-              expect(cursor.primaryKey, 1);
-
-              /*
-              try {
-                await cursor.update(obj3);
-                fail('should fail - update not supported on key cursor');
-              } catch (e) {
-                expect(e, isNot(const TypeMatcher<TestFailure>()));
-                devPrint('${e.runtimeType}');
-              }
-               */
-              cursor.next();
-            });
-          }
+          expect(await store3.getObject(1), isNull);
+          expect(await store3.getObject(2), equals(obj2));
+          expect(await store3.count(), 1);
+          await t3.completed;
         } finally {
           db.close();
         }

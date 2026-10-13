@@ -3,6 +3,7 @@
 import 'package:idb_shim/idb.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
 import 'package:idb_shim/src/common/common_validation.dart';
+import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/sembast/sembast_cursor.dart';
 import 'package:idb_shim/src/sembast/sembast_filter.dart';
 import 'package:idb_shim/src/sembast/sembast_object_store.dart';
@@ -28,49 +29,76 @@ class IndexSembast extends Index with IndexWithMetaMixin {
     return keyOrRangeFilter(meta.keyPath, keyOrRange, multiEntry);
   }
 
+  /// The entries of the index matching [keyOrRange] (any key when null): one
+  /// per record, one per distinct array item for a multiEntry index, sorted
+  /// like IndexedDB by key then by primary key, in reverse if not
+  /// [ascending].
+  Future<List<IndexRecordSnapshotSembast>> txnEntries(
+    Object? keyOrRange, {
+    bool ascending = true,
+  }) async {
+    var records = await store.sembastStore.find(
+      store.sembastClient,
+      finder: sembast.Finder(filter: _indexKeyOrRangeFilter(keyOrRange)),
+    );
+    var entries = <IndexRecordSnapshotSembast>[];
+    for (var record in records) {
+      for (var key in recordKeyPathKeys(record, keyPath, multiEntry)) {
+        if (keyMatchesKeyOrRange(key, keyOrRange)) {
+          // The key is kept as stored (like the record values).
+          entries.add(IndexRecordSnapshotSembast(store, key, record));
+        }
+      }
+    }
+    entries.sort((a, b) {
+      var cmp = compareKeys(a.key, b.key);
+      if (cmp == 0) {
+        cmp = compareKeys(a.primaryKey, b.primaryKey);
+      }
+      return ascending ? cmp : -cmp;
+    });
+    return entries;
+  }
+
+  /// The entries matching [keyOrRange], at most [count].
+  Future<Iterable<IndexRecordSnapshotSembast>> _txnEntries(
+    Object? keyOrRange, [
+    int? count,
+  ]) async {
+    var entries = await txnEntries(keyOrRange);
+    return count == null ? entries : entries.take(count);
+  }
+
+  void _checkKeyOrRangeParam(Object key) {
+    if (key is! KeyRange) {
+      checkKeyParam(key);
+    }
+  }
+
   @override
   Future<int> count([keyOrRange]) {
-    return inTransaction(() {
-      return store.sembastStore.count(
-        store.sembastClient,
-        filter: _indexKeyOrRangeFilter(keyOrRange),
-      );
+    return inTransaction(() async {
+      return (await txnEntries(keyOrRange)).length;
     });
   }
 
   @override
   Future get(Object key) {
-    checkKeyParam(key);
-    return inTransaction(() {
-      final finder = sembast.Finder(
-        filter: _indexKeyOrRangeFilter(key),
-        limit: 1,
-      );
-      return store.sembastStore.find(store.sembastClient, finder: finder).then((
-        records,
-      ) {
-        if (records.isNotEmpty) {
-          return store.recordToValue(records.first);
-        }
-      });
+    _checkKeyOrRangeParam(key);
+    return inTransaction(() async {
+      var entries = await _txnEntries(key, 1);
+      return entries.isEmpty
+          ? null
+          : store.recordToValue(entries.first.snapshot);
     });
   }
 
   @override
   Future getKey(Object key) {
-    checkKeyParam(key);
-    return inTransaction(() {
-      final finder = sembast.Finder(
-        filter: _indexKeyOrRangeFilter(key),
-        limit: 1,
-      );
-      return store.sembastStore.find(store.sembastClient, finder: finder).then((
-        records,
-      ) {
-        if (records.isNotEmpty) {
-          return records.first.key;
-        }
-      });
+    _checkKeyOrRangeParam(key);
+    return inTransaction(() async {
+      var entries = await _txnEntries(key, 1);
+      return entries.isEmpty ? null : entries.first.primaryKey;
     });
   }
 
@@ -118,27 +146,19 @@ class IndexSembast extends Index with IndexWithMetaMixin {
   @override
   Future<List<Object>> getAll([query, int? count]) {
     return inTransaction(() async {
-      final finder = sembast.Finder(
-        filter: _indexKeyOrRangeFilter(query),
-        limit: count,
-        sortOrders: sortOrders(true),
-      );
-      return (await store.sembastStore.find(
-        store.sembastClient,
-        finder: finder,
-      )).map((r) => store.recordToValue(r)!).toList(growable: false);
+      return (await _txnEntries(query, count))
+          .map((entry) => store.recordToValue(entry.snapshot)!)
+          .toList(growable: false);
     });
   }
 
   @override
   Future<List<Object>> getAllKeys([query, int? count]) {
     return inTransaction(() async {
-      final finder = sembast.Finder(
-        filter: _indexKeyOrRangeFilter(query),
-        limit: count,
-        sortOrders: sortOrders(true),
-      );
-      return store.sembastStore.findKeys(store.sembastClient, finder: finder);
+      return (await _txnEntries(
+        query,
+        count,
+      )).map((entry) => entry.primaryKey).toList(growable: false);
     });
   }
 }
