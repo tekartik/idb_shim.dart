@@ -88,6 +88,10 @@ bool _looksLikeCustomType(Map map) {
   return false;
 }
 
+/// Escape key of a map that would otherwise be read as a custom type,
+/// i.e. `{'$': {'$Timestamp': 'text'}}`.
+const _escapeKey = r'$';
+
 class _SdbCodecDefault extends _SdbCodecWithAdapters {
   _SdbCodecDefault() : super(adapters: sembastDefaultTypeAdapters);
 }
@@ -120,6 +124,19 @@ abstract class _SdbCodecWithAdapters implements SdbCodec, SdbCodecInterface {
   /// Get adapter for type
   SembastTypeAdapter<T, Object>? getAdapterForType<T>() {
     return _adapterTypeMap[T] as SembastTypeAdapter<T, Object>?;
+  }
+
+  /// True if a user map would be read back as a custom type or as an escaped
+  /// map (`{'$': x}`, `{'$Timestamp': x}`...): it must be escaped.
+  ///
+  /// Other single `$`/`@` keys (unknown types) are read back as is and kept
+  /// unescaped so that key paths and indexes still find their fields.
+  bool _mapNeedsEscape(Map map) {
+    if (_looksLikeCustomType(map)) {
+      var type = (map.keys.first as String).substring(1);
+      return type.isEmpty || _adapterMap.containsKey(type);
+    }
+    return false;
   }
 
   /// Sdb to idb value with type adapter support
@@ -169,7 +186,11 @@ abstract class _SdbCodecWithAdapters implements SdbCodec, SdbCodecInterface {
           clone![key] = converted;
         }
       });
-      return clone ?? map;
+      var encoded = clone ?? map;
+      if (_mapNeedsEscape(map)) {
+        return <String, Object?>{_escapeKey: encoded};
+      }
+      return encoded;
     } else if (value is List) {
       var list = value;
       List? clone;
@@ -202,7 +223,14 @@ abstract class _SdbCodecWithAdapters implements SdbCodec, SdbCodecInterface {
         // Works for $Type and @Type (compat)
         var type = (map.keys.first as String).substring(1);
         if (type == '') {
-          return map.values.first as Object;
+          var escaped = map.values.first;
+          // Escaped map, its own entries are decoded but not the map itself.
+          // A non map value was not written by the codec (raw data): the map
+          // is kept as is.
+          if (escaped is Map) {
+            return _idbToSdbMapEntries(escaped);
+          }
+          return _idbToSdbMapEntries(map);
         }
         var adapter = _adapterMap[type];
         if (adapter != null) {
@@ -217,15 +245,7 @@ abstract class _SdbCodecWithAdapters implements SdbCodec, SdbCodecInterface {
           }
         }
       }
-      Map? clone;
-      map.forEach((key, item) {
-        var converted = idbToSdbValueOrNull(item);
-        if (!identical(converted, item)) {
-          clone ??= Map<String, Object?>.from(map);
-          clone![key] = converted;
-        }
-      });
-      return clone ?? map;
+      return _idbToSdbMapEntries(map);
     } else if (value is List) {
       var list = value;
       List? clone;
@@ -240,6 +260,19 @@ abstract class _SdbCodecWithAdapters implements SdbCodec, SdbCodecInterface {
       return clone ?? list;
     }
     throw ArgumentError.value(value);
+  }
+
+  /// Decode the map entries (the map itself is not a custom type).
+  Map _idbToSdbMapEntries(Map map) {
+    Map? clone;
+    map.forEach((key, item) {
+      var converted = idbToSdbValueOrNull(item);
+      if (!identical(converted, item)) {
+        clone ??= Map<String, Object?>.from(map);
+        clone![key] = converted;
+      }
+    });
+    return clone ?? map;
   }
 
   @override

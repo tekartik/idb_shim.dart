@@ -1,3 +1,13 @@
+## 2.10.1
+
+* sdb default codec: a map that looks like an encoded value (a single key
+  `$`, `@`, `$Timestamp`, `$Blob`, `@Timestamp`, `@Blob`) is escaped when
+  written (`{'$': map}`) and read back unchanged. `{'$': 'raw'}` used to be
+  read back as `'raw'` and `{'$Timestamp': text}` as an `SdbTimestamp`.
+  Other single `$`/`@` keys are stored as before (key paths and indexes
+  unchanged). Already stored `{'$': value}` with a non map value is now read
+  back as the map.
+
 ## 2.10.0+1
 
 * sdb fixes:

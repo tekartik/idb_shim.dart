@@ -173,6 +173,15 @@ void sdbTypeTest(SdbTestContext ctx) {
     test('blob', () async {
       await testType('blob', SdbBlob.fromList([1, 2, 3]));
     });
+    test('map looking like a custom type', () async {
+      await testType<Map<String, Object?>>('escape', {r'$': 'raw'});
+      await testType<Map<String, Object?>>('escape_timestamp', {
+        r'$Timestamp': '1970-01-01T00:00:01.000002Z',
+      });
+      await testType<Map<String, Object?>>('escape_nested', {
+        r'$': {r'$Blob': 'AQID'},
+      });
+    });
   });
   group('type codec none', () {
     var dbName = 'type_test_codec_none.db';
