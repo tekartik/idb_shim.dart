@@ -1,4 +1,4 @@
-## 2.10.1
+## 2.10.1+1
 
 * sdb default codec: a map that looks like an encoded value (a single key
   `$`, `@`, `$Timestamp`, `$Blob`, `@Timestamp`, `@Blob`) is escaped when

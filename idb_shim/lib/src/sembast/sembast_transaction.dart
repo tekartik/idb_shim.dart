@@ -140,6 +140,43 @@ class TransactionSembast extends IdbTransactionBase
   /// Only create when action is added
   Future? _sembastTransaction;
 
+  /// While the action loop is idle: completed with true by the next action,
+  /// with false by [_idleTimer].
+  Completer<bool>? _idleCompleter;
+
+  /// While the action loop is idle: the zero timer ending the current task.
+  Timer? _idleTimer;
+
+  /// Waits for the next action (true) or for the next event loop task, with
+  /// no action queued (false): the transaction then commits, like an
+  /// IndexedDB transaction once control returns to the event loop with no
+  /// pending request.
+  ///
+  /// Called as soon as the queue is empty, before the callers resume (their
+  /// completers only complete in microtasks), so that a request made after
+  /// a task of their own (`await Future.delayed(Duration.zero)`) finds the
+  /// transaction committed.
+  Future<bool> _waitActionOrNextTask() {
+    var completer = _idleCompleter = Completer<bool>();
+    _idleTimer = Timer(Duration.zero, () {
+      _idleCompleter = null;
+      _idleTimer = null;
+      completer.complete(false);
+    });
+    return completer.future;
+  }
+
+  /// Wakes the idle action loop up: an action was queued.
+  void _wakeUp() {
+    var completer = _idleCompleter;
+    if (completer != null) {
+      _idleCompleter = null;
+      _idleTimer?.cancel();
+      _idleTimer = null;
+      completer.complete(true);
+    }
+  }
+
   /// Transaction is active until the sembast transaction is running
   var _inactive = false;
 
@@ -169,6 +206,7 @@ class TransactionSembast extends IdbTransactionBase
       );
 
       _txnActions.add(txnAction);
+      _wakeUp();
       return txnAction.completer.future;
     } finally {
       _sembastTransaction ??= () async {
@@ -217,7 +255,7 @@ class TransactionSembast extends IdbTransactionBase
                     _log('no action 1 left');
                   }
 
-                  await _delayedInit();
+                  await _waitActionOrNextTask();
                   if (_txnActions.isEmpty) {
                     if (_debugTransaction) {
                       _log('no action 2 left, exiting');
