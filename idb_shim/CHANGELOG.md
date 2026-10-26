@@ -1,4 +1,4 @@
-## 2.11.0-1
+## 2.11.0
 
 * Native factory: browser objects (`FileSystemFileHandle`,
   `FileSystemDirectoryHandle`, JS `Blob`, `File`...) can be stored as is by
