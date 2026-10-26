@@ -1,4 +1,6 @@
 import 'package:idb_shim/sdb.dart';
+// ignore: implementation_imports
+import 'package:idb_shim/src/sdb/sdb_factory_impl.dart' show SdbFactoryIdb;
 
 import 'idb_test_common.dart';
 
@@ -18,6 +20,14 @@ class SdbTestContext {
   final SdbFactory factory;
 
   SdbTestContext(this.factory);
+
+  /// true if an [SdbNativeValue] can be stored (idb native and memory
+  /// factories).
+  bool get supportsNativeValue {
+    var factory = this.factory;
+    return factory is SdbFactoryIdb &&
+        idbFactorySupportsNativeValue(factory.idbFactory);
+  }
 }
 
 /// Simple SDB test context using memory IdbFactory

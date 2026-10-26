@@ -163,8 +163,13 @@ Future<Database> copyDatabase(
   String dstDbName,
 ) async {
   final dstDatabase = await copySchema(srcDatabase, dstFactory, dstDbName);
-  for (final storeName in srcDatabase.objectStoreNames) {
-    await copyStore(srcDatabase, storeName, dstDatabase, storeName);
+  try {
+    for (final storeName in srcDatabase.objectStoreNames) {
+      await copyStore(srcDatabase, storeName, dstDatabase, storeName);
+    }
+  } catch (_) {
+    dstDatabase.close();
+    rethrow;
   }
   return dstDatabase;
 }

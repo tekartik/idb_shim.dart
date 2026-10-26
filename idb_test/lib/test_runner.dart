@@ -5,6 +5,7 @@ import 'package:idb_test/sdb_changes_listener_persistent_test.dart';
 import 'package:idb_test/sdb_count_test.dart';
 import 'package:idb_test/sdb_format_test.dart';
 import 'package:idb_test/sdb_join_test.dart';
+import 'package:idb_test/sdb_native_value_test.dart';
 import 'package:idb_test/sdb_on_snapshot_test.dart';
 import 'package:idb_test/sdb_open_test.dart';
 import 'package:idb_test/sdb_paging_test.dart';
@@ -26,6 +27,7 @@ import 'indexeddb_4_test.dart' as indexeddb_4_test;
 import 'indexeddb_5_test.dart' as indexeddb_5_test;
 import 'key_order_test.dart' as key_order_test;
 import 'key_range_test.dart' as key_range_test;
+import 'native_value_test.dart' as native_value_test;
 import 'object_store_test.dart' as object_store_test;
 import 'open_test.dart' as open_test;
 import 'quick_standalone_test.dart' as quick_standalone_test;
@@ -59,6 +61,7 @@ void sdbDefineAllTests(SdbTestContext ctx) {
   sdbOpenTests(ctx);
   sdbUtilsTests(ctx);
   schemaSdbTest(ctx);
+  sdbNativeValueTests(ctx);
 }
 
 void defineAllTests(TestContext ctx) {
@@ -79,6 +82,7 @@ void defineAllTests(TestContext ctx) {
   utils_test.defineTests(ctx);
   exception_test.defineTests(ctx);
   type_test.defineTests(ctx);
+  native_value_test.defineTests(ctx);
   defineAllSdbTests(ctx);
 
   group('indexeddb_1', () {

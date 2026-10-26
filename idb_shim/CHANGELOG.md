@@ -22,7 +22,8 @@
   line is sorted, like the idb export (it was in creation order).
 * `copyDatabase`/`copyStore`: a failing put is reported (it used to be an
   uncaught error, the copy failing with `DatabaseException: Aborted` or
-  `Bad state: Future already completed`).
+  `Bad state: Future already completed`). `copyDatabase` closes the
+  destination database when the copy fails.
 * Memory/io transactions: after an abort, the queued requests fail with the
   abort error and are not run anymore (they ran and failed with
   `Bad state: Future already completed`).

@@ -75,6 +75,9 @@ class TestContext {
   /// true if double can be used as key
   bool get supportsDoubleKey => (factory as IdbFactoryBase).supportsDoubleKey;
 
+  /// true if an [IdbNativeValue] can be stored (native and memory factories).
+  bool get supportsNativeValue => idbFactorySupportsNativeValue(factory);
+
   void wrapInLogger({IdbFactoryLoggerType type = IdbFactoryLoggerType.all}) {
     factory = getIdbFactoryLogger(factory, type: type);
   }
@@ -90,6 +93,18 @@ class TestContext {
     }
     throw 'no factory of type $T found';
   }
+}
+
+/// True if [factory] stores an [IdbNativeValue]: the native one and the
+/// sembast ones without storage (memory).
+bool idbFactorySupportsNativeValue(IdbFactory factory) {
+  if (factory is IdbFactoryLogger) {
+    factory = factory.factory;
+  }
+  if (factory is IdbFactorySembast) {
+    return !factory.persistent;
+  }
+  return factory.name == idbFactoryNameNative;
 }
 
 /// Sembast based implementation, set inMemory if a db is not available after close
