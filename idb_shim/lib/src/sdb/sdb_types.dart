@@ -1,6 +1,7 @@
 /// Internal model types for Simple DB.
 library;
 
+import 'package:idb_shim/src/native_value.dart';
 import 'package:sembast/blob.dart';
 export 'sdb_timestamp.dart';
 
@@ -23,3 +24,7 @@ typedef SdbValue = Object;
 
 /// Blob
 typedef SdbBlob = Blob;
+
+/// Browser object stored as is (`FileSystemHandle`, JS `Blob`...), only
+/// supported by the native (browser) factory, see [IdbNativeValue].
+typedef SdbNativeValue = IdbNativeValue;

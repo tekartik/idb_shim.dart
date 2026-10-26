@@ -36,6 +36,7 @@ export 'src/cursor.dart'
         IdbCursorWithValueMatcherFunction;
 export 'src/database_exception.dart' show DatabaseException;
 export 'src/logger/logger_factory.dart' show IdbFactoryLoggerDebugExt;
+export 'src/native_value.dart' show IdbNativeValue;
 export 'src/utils/env_utils.dart' show kIdbDartIsWeb;
 
 /// static, asynchronous transaction on a database using event handler

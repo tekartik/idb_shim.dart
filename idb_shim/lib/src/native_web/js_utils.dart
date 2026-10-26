@@ -2,6 +2,7 @@ import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
+import 'package:idb_shim/src/native_value.dart';
 import 'package:idb_shim/src/utils/env_utils.dart';
 
 /// Get object keys
@@ -16,6 +17,12 @@ external JSArray<JSString> _jsObjectKeys(JSAny object);
 /// for those which use Symbol) found directly in a given object.
 @JS('Object.getOwnPropertyNames')
 external JSArray<JSString> _jsGetOwnPropertyNames(JSAny object);
+
+@JS('Object.getPrototypeOf')
+external JSAny? _jsGetPrototypeOf(JSAny object);
+
+@JS('Object.prototype')
+external JSObject get _jsObjectPrototype;
 
 /// JavaScript Object extension
 extension JSObjectKeysExtension on JSAny {
@@ -89,6 +96,15 @@ extension JSAnyExtension on JSAny {
     return typeofEquals('object');
   }
 
+  /// True if it is a plain Javascript object (`{}`, prototype being
+  /// `Object.prototype` or null), false for arrays and browser objects
+  /// (`Blob`, `FileSystemHandle`...).
+  bool get isJSPlainObject {
+    var prototype = _jsGetPrototypeOf(this);
+    return prototype == null ||
+        prototype.strictEquals(_jsObjectPrototype).toDart;
+  }
+
   /// True if it is a Javascript string object
   bool get isJSString {
     return typeofEquals('string');
@@ -105,7 +121,7 @@ extension JSAnyExtension on JSAny {
   }
 }
 
-/// jsify helper for Dart objects (handle Uint8List, DateTime, Map, List, String, num, bool)
+/// jsify helper for Dart objects (handle Uint8List, DateTime, Map, List, String, num, bool, IdbNativeValue)
 extension IDBJsifyExtension on Object {
   /// Convert Dart object to JavaScript object
   JSAny jsifyValue() {
@@ -145,6 +161,8 @@ extension IDBJsifyExtension on Object {
       return JSDate((this as DateTime).millisecondsSinceEpoch);
     } else if (value is bool) {
       return value.toJS;
+    } else if (value is IdbNativeValue) {
+      return value.jsObject as JSAny;
     }
     throw UnsupportedError(
       'Unsupported value: $value (type: ${value.runtimeType})',
@@ -172,7 +190,7 @@ extension IdbJSNumberExt on JSNumber {
       idbIsRunningAsJavascript ? jsDartifyNum(this) : wasmDartifyNum(this);
 }
 
-/// dartify helper for JavaScript objects (handle Uint8List, DateTime, Map, List, String, num, bool)
+/// dartify helper for JavaScript objects (handle Uint8List, DateTime, Map, List, String, num, bool, IdbNativeValue)
 extension IDBDartifyExtension on JSAny {
   /// Convert JavaScript object to Dart object
   Object dartifyValue() {
@@ -234,7 +252,13 @@ extension IDBDartifyExtension on JSAny {
         return (value as JSUint8Array).toDart;
       }
       try {
+        // Throws for a Dart object (dart2js), see below.
         var jsObject = value as JSObject;
+        if (!jsObject.isJSPlainObject) {
+          // Browser object (FileSystemHandle, Blob...), its properties are
+          // not own properties, it would be read as an empty map.
+          return IdbNativeValue(jsObject);
+        }
         var object = <String, Object?>{};
         var keys = jsObjectKeys(jsObject).toDart;
         for (var key in keys) {

@@ -1,3 +1,14 @@
+## 2.11.0-1
+
+* Native factory: browser objects (`FileSystemFileHandle`,
+  `FileSystemDirectoryHandle`, JS `Blob`, `File`...) can be stored as is by
+  wrapping them in an `IdbNativeValue` (`SdbNativeValue` in sdb), alone or
+  inside a map or a list. The other factories (memory, io) reject them.
+* Native factory: a stored JS object that is not a plain object, an array, a
+  date or a binary buffer is read back as an `IdbNativeValue`. It used to be
+  read as a map of its own properties (an empty map for a `FileSystemHandle`
+  or a `Blob`).
+
 ## 2.10.1+1
 
 * sdb default codec: a map that looks like an encoded value (a single key

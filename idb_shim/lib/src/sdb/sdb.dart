@@ -127,7 +127,8 @@ export 'sdb_transaction_store.dart'
         SdbSingleStoreTransactionExtension,
         SdbMultiStoreTransaction,
         SdbMultiStoreTransactionExtension;
-export 'sdb_types.dart' show SdbModel, SdbKey, SdbValue, SdbIndexKey, SdbBlob;
+export 'sdb_types.dart'
+    show SdbModel, SdbKey, SdbValue, SdbIndexKey, SdbBlob, SdbNativeValue;
 export 'sdb_version.dart'
     show
         SdbOnVersionChangeCallback,

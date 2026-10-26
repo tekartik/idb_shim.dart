@@ -1,3 +1,4 @@
+import 'package:idb_shim/src/native_value.dart';
 import 'package:idb_shim/src/sdb/sdb_utils.dart';
 import 'package:idb_shim/src/utils/env_utils.dart';
 import 'package:sembast/utils/type_adapter.dart';
@@ -204,6 +205,9 @@ abstract class _SdbCodecWithAdapters implements SdbCodec, SdbCodecInterface {
         }
       }
       return clone ?? list;
+    } else if (value is IdbNativeValue) {
+      // Stored as is (native factory only).
+      return value;
     }
     for (var adapter in adapters) {
       if (adapter.isType(value)) {
@@ -258,6 +262,8 @@ abstract class _SdbCodecWithAdapters implements SdbCodec, SdbCodecInterface {
         }
       }
       return clone ?? list;
+    } else if (value is IdbNativeValue) {
+      return value;
     }
     throw ArgumentError.value(value);
   }

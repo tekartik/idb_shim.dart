@@ -1,4 +1,5 @@
 import 'package:idb_shim/sdb.dart';
+import 'package:idb_shim/src/sdb/sdb_codec.dart' show SdbCodecPrvExt;
 import 'package:test/test.dart';
 
 //import '../idb_test_common.dart';
@@ -27,6 +28,25 @@ void main() {
       }),
       SdbTimestamp(1, 2000),
     );
+  });
+  test('SdbNativeValue', () {
+    var nativeValue = SdbNativeValue(Object());
+    for (var codec in <SdbCodec>[SdbCodec.none, SdbCodec.defaultCodec]) {
+      // Stored as is.
+      expect(codec.encode(nativeValue), same(nativeValue));
+      expect(codec.decode<Object>(nativeValue), same(nativeValue));
+      var encoded =
+          codec.encode({
+                'value': nativeValue,
+                'list': [nativeValue],
+              })
+              as Map;
+      expect(encoded['value'], same(nativeValue));
+      expect((encoded['list'] as List).first, same(nativeValue));
+      var decoded = codec.decode<Map>(encoded);
+      expect(decoded['value'], same(nativeValue));
+      expect((decoded['list'] as List).first, same(nativeValue));
+    }
   });
   group('SdbCodec.defaultCodec escape', () {
     var codec = SdbCodec.defaultCodec;
