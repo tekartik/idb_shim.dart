@@ -4,6 +4,7 @@ import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
 import 'package:idb_shim/sdb.dart';
+import 'package:idb_shim/utils/sdb_import_export.dart';
 import 'package:tekartik_test_menu_browser/test_menu_web.dart';
 import 'package:web/web.dart' as web;
 
@@ -306,17 +307,40 @@ Future<void> main() async {
         );
       }
     });
+    item('export (Blob bytes, handle names, others dropped)', () async {
+      var lines = await _withDb(
+        (db) => sdbExportDatabaseLines(
+          db,
+          nativeValueEncoder: (context) async {
+            var jsObject = context.value.jsObject as JSObject;
+            if (jsObject.instanceOfString('Blob')) {
+              // File too.
+              var buffer = await (jsObject as web.Blob).arrayBuffer().toDart;
+              return buffer.toDart.asUint8List();
+            } else if (jsObject.instanceOfString('FileSystemHandle')) {
+              return {'handle': (jsObject as web.FileSystemHandle).name};
+            }
+            return SdbExportNativeValue.drop;
+          },
+        ),
+      );
+      for (var line in lines) {
+        write(_short(jsonEncode(line)));
+      }
+    });
     item('delete database', () async {
       await sdbFactoryWeb.deleteDatabase(_dbName);
       write('deleted $_dbName');
     });
-    item('memory factory rejects native values', () async {
+    item('memory factory keeps native values', () async {
       var db = await _openDb(newSdbFactoryMemory());
       try {
-        await _store.record('blob').put(db, SdbNativeValue(web.Blob()));
-        write('stored?');
-      } catch (e) {
-        write('rejected: $e');
+        var blob = web.Blob();
+        await _store.record('blob').put(db, SdbNativeValue(blob));
+        var value = await _store.record('blob').getValue(db);
+        write(
+          'same blob: ${identical((value as SdbNativeValue).jsObject, blob)}',
+        );
       } finally {
         await db.close();
       }

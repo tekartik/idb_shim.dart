@@ -203,7 +203,10 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   @override
   Future<Object> add(Object value, [Object? key]) {
-    value = toSembastValue(value);
+    value = toSembastValue(
+      value,
+      allowNativeValue: database.supportsNativeValue,
+    );
     return _inWritableTransaction(() async {
       var fixedKey = getKeyImpl(value, key);
 
@@ -466,7 +469,10 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
 
   /// Assume in transaction.
   Future<Object> txnPut(Object value, [Object? key]) {
-    value = toSembastValue(value);
+    value = toSembastValue(
+      value,
+      allowNativeValue: database.supportsNativeValue,
+    );
     var fixedKey = getKeyImpl(value, key);
     return putImpl(value, fixedKey);
   }

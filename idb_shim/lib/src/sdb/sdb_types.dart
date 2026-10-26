@@ -26,5 +26,6 @@ typedef SdbValue = Object;
 typedef SdbBlob = Blob;
 
 /// Browser object stored as is (`FileSystemHandle`, JS `Blob`...), only
-/// supported by the native (browser) factory, see [IdbNativeValue].
+/// supported by the native (browser) and memory factories, see
+/// [IdbNativeValue].
 typedef SdbNativeValue = IdbNativeValue;

@@ -4,6 +4,7 @@ import 'package:idb_shim/idb_client_sembast.dart';
 import 'package:idb_shim/src/common/common_database.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
 import 'package:idb_shim/src/sembast/sembast_factory.dart';
+import 'package:idb_shim/src/sembast/sembast_native_value.dart';
 import 'package:idb_shim/src/sembast/sembast_object_store.dart';
 import 'package:idb_shim/src/sembast/sembast_transaction.dart';
 import 'package:idb_shim/src/utils/core_imports.dart';
@@ -66,6 +67,10 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
   IdbFactorySembast get factory => super.factory as IdbFactorySembast;
 
   sembast.DatabaseFactory get sembastFactory => factory.sembastFactory;
+
+  /// A memory database (no storage) holds the [IdbNativeValue] as is, like
+  /// the native factory.
+  bool get supportsNativeValue => !factory.persistent;
 
   final mainStore = sembast.StoreRef<String, Object>.main();
 
@@ -142,6 +147,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
     db = await sembastFactory.openDatabase(
       factory.getDbPath(name),
       version: 1,
+      codec: supportsNativeValue ? sembastCodecWithIdbNativeValue : null,
       onVersionChanged: (db, oldVersion, newVersion) {
         if (sembastDebug) {
           idbLog('changing ${db.path} $oldVersion -> $newVersion');

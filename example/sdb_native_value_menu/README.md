@@ -15,7 +15,11 @@ permission after a reload in Chromium: `query permission of the handles`
 shows `prompt`, `request read permission of the handles` asks again (a user
 gesture is needed). Firefox and Safari have no permission API (OPFS handles
 only, always accessible). The memory factory (`newSdbFactoryMemory()`)
-rejects native values.
+keeps native values as is (the same object, no copy).
+
+`export` exports the database with a `nativeValueEncoder`: the bytes of a
+`Blob`/`File`, the name of a handle, the other native values (`CryptoKey`)
+dropped.
 
 Run it:
 

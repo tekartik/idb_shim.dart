@@ -11,14 +11,32 @@ import 'idb_import_export.dart' as idb;
 import 'idb_import_export.dart';
 
 export 'package:idb_shim/idb_shim.dart';
+export 'package:idb_shim/src/sdb/sdb_import_export.dart'
+    show
+        SdbExportNativeValue,
+        SdbExportNativeValueContext,
+        SdbExportNativeValueEncoder;
 
 /// export a database in a sembast db export format
-Future<List<Object>> sdbExportDatabaseLines(SdbDatabase db) async {
+///
+/// A native value (`SdbNativeValue`) cannot be exported as is: the export
+/// throws an `ArgumentError` unless [nativeValueEncoder] converts or drops
+/// it.
+Future<List<Object>> sdbExportDatabaseLines(
+  SdbDatabase db, {
+  SdbExportNativeValueEncoder? nativeValueEncoder,
+}) async {
   if (db is SdbDatabaseImpl) {
     // idb based, export the underlying database.
-    return idb.idbExportDatabaseLines(db.idbDatabase);
+    return idb.idbExportDatabaseLines(
+      db.idbDatabase,
+      nativeValueEncoder: nativeValueEncoder,
+    );
   }
-  return sdbExportDatabaseLinesGeneric(db);
+  return sdbExportDatabaseLinesGeneric(
+    db,
+    nativeValueEncoder: nativeValueEncoder,
+  );
 }
 
 /// Import a database from sdb export lines

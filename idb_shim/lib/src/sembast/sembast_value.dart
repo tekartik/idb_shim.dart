@@ -2,6 +2,7 @@
 
 import 'dart:typed_data';
 
+import 'package:idb_shim/src/native_value.dart';
 import 'package:sembast/blob.dart';
 import 'package:sembast/timestamp.dart';
 
@@ -15,14 +16,14 @@ bool isBasicTypeOrNull(Object? value) {
   return false;
 }
 
-Object? _toSembastValue(Object? value) {
+Object? _toSembastValue(Object? value, bool allowNativeValue) {
   if (isBasicTypeOrNull(value)) {
     return value;
   } else if (value is Map) {
     var map = value;
     Map? clone;
     map.forEach((key, item) {
-      var converted = _toSembastValue(item);
+      var converted = _toSembastValue(item, allowNativeValue);
       if (!identical(converted, item)) {
         clone ??= Map<String, Object?>.from(map);
         clone![key] = converted;
@@ -36,7 +37,7 @@ Object? _toSembastValue(Object? value) {
     List? clone;
     for (var i = 0; i < list.length; i++) {
       var item = list[i];
-      var converted = _toSembastValue(item);
+      var converted = _toSembastValue(item, allowNativeValue);
       if (!identical(converted, item)) {
         clone ??= List.from(list);
         clone[i] = converted;
@@ -45,16 +46,21 @@ Object? _toSembastValue(Object? value) {
     return clone ?? list;
   } else if (value is DateTime) {
     return Timestamp.fromDateTime(value);
+  } else if (allowNativeValue && value is IdbNativeValue) {
+    return value;
   } else {
     throw ArgumentError.value(value);
   }
 }
 
 /// Convert a value to a sembast compatible value
-Object toSembastValue(Object value) {
+///
+/// [allowNativeValue] keeps the [IdbNativeValue] as is (memory database
+/// only), they are rejected otherwise.
+Object toSembastValue(Object value, {bool allowNativeValue = false}) {
   Object converted;
   try {
-    converted = _toSembastValue(value)!;
+    converted = _toSembastValue(value, allowNativeValue)!;
   } on ArgumentError catch (e) {
     throw ArgumentError.value(
       e.invalidValue,
@@ -100,6 +106,8 @@ Object? _fromSembastValue(Object? value) {
     return value.toDateTime(isUtc: true);
   } else if (value is Blob) {
     return value.bytes;
+  } else if (value is IdbNativeValue) {
+    return value;
   } else {
     throw ArgumentError.value(value);
   }

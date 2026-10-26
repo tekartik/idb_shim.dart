@@ -225,6 +225,7 @@ class TransactionSembast extends IdbTransactionBase
                     }
 
                     txnAction.completer.completeError(_newAbortException());
+                    continue;
                   }
                   try {
                     Object? result = txnAction.action();

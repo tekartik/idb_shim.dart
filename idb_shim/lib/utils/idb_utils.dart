@@ -127,25 +127,33 @@ Future copyStore(
   store = dstTransaction.objectStore(dstStoreName);
   // clear the existing records
   await store.clear();
+  // Not awaited one by one, all the puts are queued at once.
+  final puts = <Future<Object>>[];
   try {
     for (final record in records) {
       /// If key is set don't store the key
       if (store.keyPath != null) {
-        // ignore: unawaited_futures
-        store.put(record.value);
+        puts.add(store.put(record.value));
       } else {
-        // ignore: unawaited_futures
-        store.put(record.value, record.key);
+        puts.add(store.put(record.value, record.key));
       }
     }
+    await Future.wait(puts);
   } catch (e) {
     if (isDebug) {
       idbLog(e);
     }
+    // The other put errors (the abort ones) are not reported.
+    for (final put in puts) {
+      put.ignore();
+    }
+    // The transaction abort error would hide the put error.
+    try {
+      await dstTransaction.completed;
+    } catch (_) {}
     rethrow;
-  } finally {
-    await dstTransaction.completed;
   }
+  await dstTransaction.completed;
 }
 
 /// Copy a database content to a new database.

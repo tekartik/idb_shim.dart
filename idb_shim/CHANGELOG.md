@@ -1,3 +1,32 @@
+## 2.11.1
+
+* Memory factories (`idbFactoryMemory`, `newIdbFactoryMemory()`,
+  `newSdbFactoryMemory()`): an `IdbNativeValue` (`SdbNativeValue`) is stored
+  as is (the same object is read back, no copy), like in the native factory.
+  The factories with a storage (io, sqflite, `idbFactoryMemoryFs`) still
+  reject it, so does an export (`ArgumentError`).
+* `idbExportDatabase`, `idbExportDatabaseLines` and `sdbExportDatabaseLines`
+  get a `nativeValueEncoder` converting each native value met
+  (`IdbExportNativeValueContext`/`SdbExportNativeValueContext`: store, key,
+  path, value). The encoder returns the value to export in its place (`null`
+  included, it drops the record when the native value is the record value),
+  `IdbExportNativeValue.drop`/`SdbExportNativeValue.drop` (map entry, list
+  item, or record when the native value is the record value) or
+  `.dropRecord`, or throws to stop the export. It can be asynchronous (it
+  runs on a memory copy, once the records are read). Without it, an export
+  of a native value throws an `ArgumentError`.
+* `idbExportDatabase`, `idbExportDatabaseLines` and `idbImportDatabase`: the
+  temporary memory database (copy of a non sembast database) is deleted, it
+  used to stay in memory.
+* sdb export through the sdb api (non idb implementations): the store names
+  line is sorted, like the idb export (it was in creation order).
+* `copyDatabase`/`copyStore`: a failing put is reported (it used to be an
+  uncaught error, the copy failing with `DatabaseException: Aborted` or
+  `Bad state: Future already completed`).
+* Memory/io transactions: after an abort, the queued requests fail with the
+  abort error and are not run anymore (they ran and failed with
+  `Bad state: Future already completed`).
+
 ## 2.11.0
 
 * Native factory: browser objects (`FileSystemFileHandle`,

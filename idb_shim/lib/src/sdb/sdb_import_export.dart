@@ -13,6 +13,7 @@
 library;
 
 import 'package:idb_shim/sdb.dart';
+import 'package:idb_shim/src/native_value_export.dart';
 import 'package:idb_shim/src/sdb/sdb_cursor.dart';
 import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_store.dart';
@@ -57,8 +58,24 @@ const _metaIndeciesKey = 'indecies';
 const _metaUniqueKey = 'unique';
 const _metaMultiEntryKey = 'multiEntry';
 
+/// Sentinel values returned by a [SdbExportNativeValueEncoder].
+typedef SdbExportNativeValue = IdbExportNativeValue;
+
+/// A native value met by an export.
+typedef SdbExportNativeValueContext = IdbExportNativeValueContext;
+
+/// Converts a native value met by an export, see
+/// [IdbExportNativeValueEncoder].
+typedef SdbExportNativeValueEncoder = IdbExportNativeValueEncoder;
+
 /// Export a database in the sembast export lines format, through the sdb api.
-Future<List<Object>> sdbExportDatabaseLinesGeneric(SdbDatabase db) async {
+///
+/// The native values are converted by [nativeValueEncoder], the export fails
+/// on the first one without it.
+Future<List<Object>> sdbExportDatabaseLinesGeneric(
+  SdbDatabase db, {
+  SdbExportNativeValueEncoder? nativeValueEncoder,
+}) async {
   var storeNames = db.storeNames.toList();
   var lines = <Object>[
     {_exportSignatureKey: _exportSignatureVersion, _exportVersionKey: 1},
@@ -72,30 +89,51 @@ Future<List<Object>> sdbExportDatabaseLinesGeneric(SdbDatabase db) async {
       .map((name) => SdbStoreRef<Object, Object>(name))
       .toList();
   var metas = <String, Map<String, Object?>>{};
-  var records = <String, List<Object>>{};
+  var rawRecords = <String, List<(Object, Object)>>{};
   await db.inStoresTransaction(storeRefs, SdbTransactionMode.readOnly, (
     txn,
   ) async {
     for (var storeRef in storeRefs) {
       var txnStore = txn.store(storeRef);
       metas[storeRef.name] = _storeMetaMap(txnStore);
-      var storeRecords = <Object>[];
+      var storeRecords = <(Object, Object)>[];
       await storeRef.iterate(
         txn,
         onRow: (row) {
-          storeRecords.add([row.key, _exportValue(row.rawValue)]);
+          storeRecords.add((row.key, row.rawValue));
           return true;
         },
       );
-      records[storeRef.name] = storeRecords;
+      rawRecords[storeRef.name] = storeRecords;
     }
   });
+  // Converted once the transaction is done, the encoder can be asynchronous.
+  var records = <String, List<Object>>{};
+  for (var name in storeNames) {
+    var storeRecords = <Object>[];
+    for (var (key, rawValue) in rawRecords[name]!) {
+      Object? value = rawValue;
+      if (IdbNativeValueExportConverter.hasNativeValue(rawValue)) {
+        value = await IdbNativeValueExportConverter(
+          name,
+          key,
+          nativeValueEncoder,
+        ).convertRecordValue(rawValue);
+        if (value == null) {
+          continue;
+        }
+      }
+      storeRecords.add([key, _exportValue(value)]);
+    }
+    records[name] = storeRecords;
+  }
   // Like sembast, the records of the main store are in key order.
   var sortedNames = List.of(storeNames)..sort();
   for (var name in sortedNames) {
     lines.add(['$_mainStorePrefix$name', metas[name]]);
   }
-  lines.add([_mainStoresKey, storeNames]);
+  // Sorted like the idb implementation stores them.
+  lines.add([_mainStoresKey, sortedNames]);
   lines.add([_mainVersionKey, db.version]);
   // Stores in name order, the empty ones left out.
   for (var name in sortedNames) {

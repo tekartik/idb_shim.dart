@@ -14,10 +14,14 @@
 /// var handle = value.jsObject as FileSystemFileHandle;
 /// ```
 ///
-/// Only supported by the native (browser) factory, the other factories
-/// (memory, io) reject such values. The browser throws a `DataCloneError` for
-/// an object it cannot serialize (e.g. a `FileSystemHandle` in browsers that
-/// do not support storing it).
+/// Only supported by the native (browser) factory and the memory factories
+/// (`idbFactoryMemory`, `newIdbFactoryMemory()`), the memory ones keeping the
+/// value itself (no copy). The factories with a storage (io, sqflite,
+/// `idbFactoryMemoryFs`) reject such values, so does an export unless a
+/// `nativeValueEncoder` converts them (`idbExportDatabase`,
+/// `idbExportDatabaseLines`, `sdbExportDatabaseLines`). The browser
+/// throws a `DataCloneError` for an object it cannot serialize (e.g. a
+/// `FileSystemHandle` in browsers that do not support storing it).
 class IdbNativeValue {
   /// Wraps [jsObject], a JS object (any interop binding works,
   /// `package:web`, raw `dart:js_interop`...).
