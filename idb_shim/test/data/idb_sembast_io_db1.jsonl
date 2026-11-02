@@ -1,0 +1,10 @@
+{"version":1,"sembast":1}
+{"key":"store_note","value":{"autoIncrement":true,"indecies":[{"keyPath":"title","name":"title"}],"keyPath":"id","name":"note"}}
+{"key":"store_setting","value":{"name":"setting"}}
+{"key":"stores","value":["note","setting"]}
+{"key":"version","value":2}
+{"key":1,"store":"note","value":{"id":1,"tags":["a","b"],"title":"hello"}}
+{"key":2,"store":"note","value":{"bigInt":9007199254740991,"bytes":{"@Blob":"AQID"},"date":{"@Timestamp":"2026-11-02T12:30:00.000Z"},"double":4.5,"false":false,"id":2,"int":-3,"list":[1,[2,"three"],{},[]],"nested":{"done":true,"empty":{}},"null":null,"text":"été ✓","title":"world","true":true}}
+{"key":"escaped_at","store":"setting","value":{"$":{"@":{"@Timestamp":"not a timestamp"}}}}
+{"key":"escaped_dollar","store":"setting","value":{"$blob":"not a blob"}}
+{"key":"theme","store":"setting","value":"dark"}
