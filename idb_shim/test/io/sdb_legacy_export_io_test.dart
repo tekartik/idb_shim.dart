@@ -33,6 +33,11 @@ List<Object> _withoutSdbExportKey(List<Object> lines) => [
   ...lines.skip(1),
 ];
 
+/// The content of a test data file with \n line endings (a Windows checkout
+/// can turn them into \r\n).
+Future<String> _readData(String path) async =>
+    (await File(path).readAsString()).replaceAll('\r\n', '\n');
+
 Future<String> _idbExportJsonl(Database db) async =>
     exportLinesToJsonlString(await idbExportDatabaseLines(db));
 
@@ -40,8 +45,8 @@ void main() {
   late String legacyExport1;
   late String idbSembastIoDb1;
   setUpAll(() async {
-    legacyExport1 = await File(_legacyExport1Path).readAsString();
-    idbSembastIoDb1 = await File(_idbSembastIoDb1Path).readAsString();
+    legacyExport1 = await _readData(_legacyExport1Path);
+    idbSembastIoDb1 = await _readData(_idbSembastIoDb1Path);
   });
 
   group('sdb_legacy_export_io', () {
@@ -108,8 +113,8 @@ void main() {
       idbDb.close();
       expect(await File(path).readAsString(), idbSembastIoDb1);
 
-      // Opened (copied, a database file can be rewritten when opened).
-      await File(_idbSembastIoDb1Path).copy(path);
+      // Opened (written, a database file can be rewritten when opened).
+      await File(path).writeAsString(idbSembastIoDb1);
       var db = await sdbFactoryIo.openDatabase(path);
       try {
         await sdbCheckExample1(db, checkAutoIncrement: false);
