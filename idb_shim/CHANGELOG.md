@@ -1,3 +1,24 @@
+## 2.11.2-1
+
+* A database opened through a sandbox (`IdbFactory.sandbox`,
+  `SdbFactory.sandbox`) has the name opened in the sandbox and the sandbox as
+  factory, in the upgrade event and its transactions too. It is still the
+  database of the implementation (it can be cast to its class).
+  `sdbImportDatabase` into a sandboxed factory imports in the sandbox (it
+  used to write the database outside of it).
+* Export and import options: `IdbExportOptions`/`SdbExportOptions`
+  (`nativeValueEncoder`, overriding the argument kept as is, and
+  `typeEncoding`), `IdbImportOptions`/`SdbImportOptions`
+  (`allowedTypeEncodings`). The `$` type encoding exports
+  `{"$Timestamp": ...}`, `{"$Blob": ...}` with `"type_prefix": "$"` in the
+  header; the import reads the encoding from the header. An export without
+  options is unchanged.
+* `sdbExportDatabaseLines` writes `"sdb_export": 1` in the header (still a
+  sembast export) and accepts an `SdbClient`: a transaction exports its
+  stores in it, its changes included. `sdbImportDatabase` accepts a
+  json/jsonl string and rejects a newer `sdb_export`.
+* Requires sembast 3.10.0-1.
+
 ## 2.11.1
 
 * Memory factories (`idbFactoryMemory`, `newIdbFactoryMemory()`,
