@@ -3,6 +3,7 @@ library;
 import 'package:idb_shim/sdb.dart';
 import 'package:idb_test/sdb_changes_listener_persistent_test.dart';
 import 'package:idb_test/sdb_count_test.dart';
+import 'package:idb_test/sdb_export_format_test.dart';
 import 'package:idb_test/sdb_format_test.dart';
 import 'package:idb_test/sdb_join_test.dart';
 import 'package:idb_test/sdb_native_value_test.dart';
@@ -63,6 +64,7 @@ void sdbDefineAllTests(SdbTestContext ctx) {
   sdbUtilsTests(ctx);
   schemaSdbTest(ctx);
   sdbNativeValueTests(ctx);
+  sdbExportFormatTests(ctx);
 }
 
 void defineAllTests(TestContext ctx) {

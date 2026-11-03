@@ -1,0 +1,11 @@
+{"sdb_export":1,"sembast_export":1,"type_prefix":"$","version":1}
+{"store":"_main"}
+["store_type",{"name":"type"}]
+["stores",["type"]]
+["version",1]
+{"store":"type"}
+["blob",{"$":{"$Blob":"AQID"}}]
+["escaped_at",{"$":{"$":{"@Blob":"not a blob"}}}]
+["escaped_dollar",{"$":{"$":{"$Timestamp":"not a timestamp"}}}]
+["map",{"blob":{"$":{"$Blob":"/w=="}},"bytes":{"$Blob":"BAU="},"dateTime":{"$Timestamp":"2026-11-02T12:30:00.000Z"},"list":[{"$":{"$Timestamp":"1970-01-01T00:00:00.000Z"}},{"$":{"$Blob":""}},1],"timestamp":{"$":{"$Timestamp":"2026-11-02T12:30:00.000Z"}}}]
+["timestamp",{"$":{"$Timestamp":"2026-11-02T12:30:00.123456Z"}}]

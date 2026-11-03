@@ -2,7 +2,7 @@
 /// implementation, in the format of the sembast based idb implementation:
 ///
 /// ```
-/// {'sembast_export': 1, 'version': 1}
+/// {'sembast_export': 1, 'version': 1, 'sdb_export': 1}
 /// {'store': '_main'}
 /// ['store_<name>', {'name': ..., 'keyPath': ..., 'autoIncrement': true, 'indecies': [...]}]
 /// ['stores', [<names>]]
@@ -10,31 +10,60 @@
 /// {'store': '<name>'}
 /// [<key>, <raw value>]
 /// ```
+///
+/// `sdb_export` tells the export can be imported by sdb and idb (its `_main`
+/// store holds the idb schema). It stays a sembast export, sembast ignores
+/// the key. The idb exports and the sdb ones before it have no marker, they
+/// are imported the same way.
 library;
 
 import 'package:idb_shim/sdb.dart';
+import 'package:idb_shim/src/import_export_options.dart';
 import 'package:idb_shim/src/native_value_export.dart';
 import 'package:idb_shim/src/sdb/sdb_cursor.dart';
 import 'package:idb_shim/src/sdb/sdb_key_path_utils.dart';
 import 'package:idb_shim/src/sdb/sdb_transaction_store.dart';
 import 'package:idb_shim/src/sembast/sembast_value.dart';
+import 'package:sembast/src/api/protected/import_export.dart'; // ignore: implementation_imports
 import 'package:sembast/utils/type_adapter.dart';
+
+/// How the custom types (DateTime, Uint8List) are encoded in an export, see
+/// [IdbExportTypeEncoding].
+typedef SdbExportTypeEncoding = IdbExportTypeEncoding;
+
+/// Options of an sdb export, see [IdbExportOptions].
+typedef SdbExportOptions = IdbExportOptions;
+
+/// Options of an sdb import, see [IdbImportOptions].
+typedef SdbImportOptions = IdbImportOptions;
 
 /// The sembast export format encodes the values it cannot write as json
 /// (Timestamp, Blob) and escapes the maps looking like them, through this
-/// codec.
-final _jsonEncodableCodec = sembastDefaultJsonEncodableCodec;
+/// codec, legacy (`@Timestamp`, `@Blob`, `@` escape) when [typeEncoding] is
+/// null or [SdbExportTypeEncoding.at], like the sembast based idb
+/// implementation.
+JsonEncodableCodec _exportCodec(SdbExportTypeEncoding? typeEncoding) =>
+    typeEncoding == null || typeEncoding == SdbExportTypeEncoding.at
+    ? sembastDefaultJsonEncodableCodec
+    : sembastExportTypeEncodingCodec(typeEncoding, sembastDefaultTypeAdapters);
+
+/// The codec decoding the values of an export in [typeEncoding] (from its
+/// header, null for a legacy export).
+JsonEncodableCodec _importCodec(SdbExportTypeEncoding? typeEncoding) =>
+    typeEncoding == null
+    ? sembastDefaultJsonEncodableCodec
+    : sembastExportTypeEncodingCodec(typeEncoding, sembastDefaultTypeAdapters);
 
 /// A raw (codec encoded) value as written in the export: the idb native types
 /// (DateTime, Uint8List) become sembast ones (Timestamp, Blob), like in the
-/// sembast based idb implementation, then the sembast json encoding is
-/// applied (`@Timestamp`, `@Blob`, `@` escape).
-Object _exportValue(Object rawValue) =>
-    _jsonEncodableCodec.encode(toSembastValue(rawValue));
+/// sembast based idb implementation, then the sembast json encoding of
+/// [codec] is applied.
+Object _exportValue(Object rawValue, JsonEncodableCodec codec) =>
+    codec.encode(toSembastValue(rawValue));
 
 /// The raw (codec encoded) value of an exported value, see [_exportValue].
-Object _importValue(Object exportedValue) =>
-    fromSembastValue(_jsonEncodableCodec.decode(exportedValue));
+Object _importValue(Object exportedValue, JsonEncodableCodec codec) =>
+    fromSembastValue(codec.decode(exportedValue));
 
 const _exportSignatureKey = 'sembast_export';
 const _exportSignatureVersion = 1;
@@ -44,6 +73,43 @@ const _exportStoresKey = 'stores';
 const _exportKeysKey = 'keys';
 const _exportValuesKey = 'values';
 const _exportNameKey = 'name';
+
+/// Header key of an export written by sdb, see the library doc.
+const _sdbExportSignatureKey = 'sdb_export';
+const _sdbExportSignatureVersion = 1;
+
+/// The header line of an sdb export, with the `type_prefix` of a non legacy
+/// [typeEncoding] (like the sembast export).
+Map<String, Object?> _sdbExportHeader(SdbExportTypeEncoding? typeEncoding) => {
+  _exportSignatureKey: _exportSignatureVersion,
+  _exportVersionKey: 1,
+  if (typeEncoding != null && typeEncoding != SdbExportTypeEncoding.at)
+    sembastExportTypePrefixKey: typeEncoding.prefix,
+  _sdbExportSignatureKey: _sdbExportSignatureVersion,
+};
+
+/// [idbLines] (an idb export) with the sdb export header.
+List<Object> sdbExportLinesFromIdbExportLines(List<Object> idbLines) => [
+  {
+    ...idbLines.first as Map,
+    _sdbExportSignatureKey: _sdbExportSignatureVersion,
+  },
+  ...idbLines.skip(1),
+];
+
+/// Throws a [FormatException] when [data] (decoded export lines or map) is a
+/// newer sdb export than supported. An export without `sdb_export` (idb or
+/// older sdb export) is accepted.
+void sdbCheckExportHeader(Object data) {
+  var header = data is List ? data.firstOrNull : data;
+  if (header is Map) {
+    var version = header[_sdbExportSignatureKey];
+    if (version != null &&
+        (version is! int || version > _sdbExportSignatureVersion)) {
+      throw FormatException('Unsupported sdb export version $version');
+    }
+  }
+}
 
 /// The sembast store holding the schema in the idb implementation.
 const _mainStoreName = '_main';
@@ -70,15 +136,27 @@ typedef SdbExportNativeValueEncoder = IdbExportNativeValueEncoder;
 
 /// Export a database in the sembast export lines format, through the sdb api.
 ///
-/// The native values are converted by [nativeValueEncoder], the export fails
-/// on the first one without it.
+/// The native values are converted by [nativeValueEncoder] (or the one of
+/// [options], that overrides it), the export fails on the first one without
+/// it.
+///
+/// [options] can give the encoding of the custom types (DateTime, Uint8List),
+/// the legacy `@` one by default.
+///
+/// [client] is a database or a transaction, a transaction exports its stores
+/// in it, its changes included.
 Future<List<Object>> sdbExportDatabaseLinesGeneric(
-  SdbDatabase db, {
+  SdbClient client, {
   SdbExportNativeValueEncoder? nativeValueEncoder,
+  SdbExportOptions? options,
 }) async {
-  var storeNames = db.storeNames.toList();
+  var typeEncoding = options?.typeEncoding;
+  nativeValueEncoder = options?.nativeValueEncoder ?? nativeValueEncoder;
+  var exportCodec = _exportCodec(typeEncoding);
+  var db = client is SdbTransaction ? client.db : client as SdbDatabase;
+  var storeNames = client.storeNames.toList();
   var lines = <Object>[
-    {_exportSignatureKey: _exportSignatureVersion, _exportVersionKey: 1},
+    _sdbExportHeader(typeEncoding),
     {_exportStoreKey: _mainStoreName},
   ];
   if (storeNames.isEmpty) {
@@ -90,9 +168,7 @@ Future<List<Object>> sdbExportDatabaseLinesGeneric(
       .toList();
   var metas = <String, Map<String, Object?>>{};
   var rawRecords = <String, List<(Object, Object)>>{};
-  await db.inStoresTransaction(storeRefs, SdbTransactionMode.readOnly, (
-    txn,
-  ) async {
+  Future<void> readStores(SdbTransaction txn) async {
     for (var storeRef in storeRefs) {
       var txnStore = txn.store(storeRef);
       metas[storeRef.name] = _storeMetaMap(txnStore);
@@ -106,8 +182,19 @@ Future<List<Object>> sdbExportDatabaseLinesGeneric(
       );
       rawRecords[storeRef.name] = storeRecords;
     }
-  });
-  // Converted once the transaction is done, the encoder can be asynchronous.
+  }
+
+  if (client is SdbTransaction) {
+    await readStores(client);
+  } else {
+    await db.inStoresTransaction(
+      storeRefs,
+      SdbTransactionMode.readOnly,
+      readStores,
+    );
+  }
+  // Converted once read (once the transaction is done for a database), the
+  // encoder can be asynchronous.
   var records = <String, List<Object>>{};
   for (var name in storeNames) {
     var storeRecords = <Object>[];
@@ -123,7 +210,7 @@ Future<List<Object>> sdbExportDatabaseLinesGeneric(
           continue;
         }
       }
-      storeRecords.add([key, _exportValue(value)]);
+      storeRecords.add([key, _exportValue(value, exportCodec)]);
     }
     records[name] = storeRecords;
   }
@@ -182,13 +269,23 @@ Map<String, Object?> _storeMetaMap(
 /// Import a database export (lines or map), through the sdb api: the
 /// destination is deleted, created with the exported schema and version, and
 /// the raw values written as they were.
+///
+/// The values are decoded in the encoding given by the export header
+/// (`type_prefix`), the legacy `@` one without it. [options] can restrict the
+/// accepted encodings (all by default), another one throws a
+/// [FormatException].
 Future<SdbDatabase> sdbImportDatabaseGeneric(
   Object data,
   SdbFactory dstFactory,
   String dstDbName, {
   SdbCodec? codec,
+  SdbImportOptions? options,
 }) async {
-  var export = _SdbExportData.parse(data);
+  var export = _SdbExportData.parse(
+    data,
+    allowedTypeEncodings: options?.allowedTypeEncodings,
+  );
+  var importCodec = _importCodec(export.typeEncoding);
   var storeNames = export.storeNames;
   var storeRefs = <String, SdbStoreRef<Object, Object>>{
     for (var name in storeNames) name: SdbStoreRef<Object, Object>(name),
@@ -237,7 +334,10 @@ Future<SdbDatabase> sdbImportDatabaseGeneric(
               txn.store(storeRefs[name]!)
                   as SdbTransactionStoreRefInterface<Object, Object>;
           for (var record in export.records[name]!) {
-            await txnStore.putRawImpl(record.$1, _importValue(record.$2));
+            await txnStore.putRawImpl(
+              record.$1,
+              _importValue(record.$2, importCodec),
+            );
           }
         }
       },
@@ -248,11 +348,14 @@ Future<SdbDatabase> sdbImportDatabaseGeneric(
 
 /// A parsed export.
 class _SdbExportData {
-  _SdbExportData._();
+  _SdbExportData._(this._allowedTypeEncodings);
 
   /// Parse the lines or the map export.
-  factory _SdbExportData.parse(Object data) {
-    var export = _SdbExportData._();
+  factory _SdbExportData.parse(
+    Object data, {
+    Iterable<SdbExportTypeEncoding>? allowedTypeEncodings,
+  }) {
+    var export = _SdbExportData._(allowedTypeEncodings);
     if (data is Map) {
       export._parseMap(data);
     } else if (data is List) {
@@ -263,6 +366,11 @@ class _SdbExportData {
     export._fixStoreNames();
     return export;
   }
+
+  final Iterable<SdbExportTypeEncoding>? _allowedTypeEncodings;
+
+  /// The type encoding given by the header, null for a legacy export.
+  SdbExportTypeEncoding? typeEncoding;
 
   /// Database version, null when not exported.
   int? version;
@@ -280,6 +388,11 @@ class _SdbExportData {
     if (header[_exportSignatureKey] != _exportSignatureVersion) {
       throw FormatException('Invalid export header $header');
     }
+    sdbCheckExportHeader(header);
+    typeEncoding = sembastExportHeaderTypeEncoding(
+      header,
+      allowed: _allowedTypeEncodings,
+    );
   }
 
   void _parseLines(List lines) {

@@ -1,0 +1,13 @@
+{"sdb_export":1,"sembast_export":1,"version":1}
+{"store":"_main"}
+["store_note",{"autoIncrement":true,"indecies":[{"keyPath":"title","name":"title"}],"keyPath":"id","name":"note"}]
+["store_setting",{"name":"setting"}]
+["stores",["note","setting"]]
+["version",2]
+{"store":"note"}
+[1,{"id":1,"tags":["a","b"],"title":"hello"}]
+[2,{"bigInt":9007199254740991,"bytes":{"@Blob":"AQID"},"date":{"@Timestamp":"2026-11-02T12:30:00.000Z"},"double":4.5,"false":false,"id":2,"int":-3,"list":[1,[2,"three"],{},[]],"nested":{"done":true,"empty":{}},"null":null,"text":"été ✓","title":"world","true":true}]
+{"store":"setting"}
+["escaped_at",{"$":{"@":{"@Timestamp":"not a timestamp"}}}]
+["escaped_dollar",{"$blob":"not a blob"}]
+["theme","dark"]

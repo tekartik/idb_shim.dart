@@ -1,0 +1,9 @@
+{"version":1,"sembast":1}
+{"key":"store_type","value":{"name":"type"}}
+{"key":"stores","value":["type"]}
+{"key":"version","value":1}
+{"key":"blob","store":"type","value":{"$Blob":"AQID"}}
+{"key":"escaped_at","store":"type","value":{"$":{"@":{"@Blob":"not a blob"}}}}
+{"key":"escaped_dollar","store":"type","value":{"$":{"$Timestamp":"not a timestamp"}}}
+{"key":"map","store":"type","value":{"blob":{"$Blob":"/w=="},"bytes":{"@Blob":"BAU="},"dateTime":{"@Timestamp":"2026-11-02T12:30:00.000Z"},"list":[{"$Timestamp":"1970-01-01T00:00:00.000Z"},{"$Blob":""},1],"timestamp":{"$Timestamp":"2026-11-02T12:30:00.000Z"}}}
+{"key":"timestamp","store":"type","value":{"$Timestamp":"2026-11-02T12:30:00.123456Z"}}

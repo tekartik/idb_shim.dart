@@ -136,7 +136,7 @@ void sdbUtilsTests(SdbTestContext ctx) {
         }
 
         await checkAll(db!, [
-          {'sembast_export': 1, 'version': 1},
+          {'sembast_export': 1, 'version': 1, 'sdb_export': 1},
           {'store': '_main'},
           ['version', 1],
         ], dbCheck);
@@ -183,7 +183,7 @@ void sdbUtilsTests(SdbTestContext ctx) {
         }
 
         final expectedExport = [
-          {'sembast_export': 1, 'version': 1},
+          {'sembast_export': 1, 'version': 1, 'sdb_export': 1},
           {'store': '_main'},
           [
             'store_test_store',
@@ -219,7 +219,7 @@ void sdbUtilsTests(SdbTestContext ctx) {
         }
 
         await checkAll(db!, [
-          {'sembast_export': 1, 'version': 1},
+          {'sembast_export': 1, 'version': 1, 'sdb_export': 1},
           {'store': '_main'},
           ['version', 1],
         ], dbCheck);
@@ -265,7 +265,7 @@ void sdbUtilsTests(SdbTestContext ctx) {
         }
 
         await checkAll(db!, [
-          {'sembast_export': 1, 'version': 1},
+          {'sembast_export': 1, 'version': 1, 'sdb_export': 1},
           {'store': '_main'},
           ['version', 2],
         ], dbCheck);
@@ -310,7 +310,7 @@ void sdbUtilsTests(SdbTestContext ctx) {
         }
 
         final expectedExport = [
-          {'sembast_export': 1, 'version': 1},
+          {'sembast_export': 1, 'version': 1, 'sdb_export': 1},
           {'store': '_main'},
           [
             'store_test_store',
@@ -360,7 +360,7 @@ void sdbUtilsTests(SdbTestContext ctx) {
           ],
         ];
         final expectedExport = [
-          {'sembast_export': 1, 'version': 1},
+          {'sembast_export': 1, 'version': 1, 'sdb_export': 1},
           {'store': '_main'},
           [
             'store_test_store',
@@ -399,7 +399,7 @@ void sdbUtilsTests(SdbTestContext ctx) {
 
         // The idb native types are exported as the sembast ones.
         final expectedExport = [
-          {'sembast_export': 1, 'version': 1},
+          {'sembast_export': 1, 'version': 1, 'sdb_export': 1},
           {'store': '_main'},
           [
             'store_test_store',
@@ -472,7 +472,7 @@ void sdbUtilsTests(SdbTestContext ctx) {
         }
 
         final expectedExport = [
-          {'sembast_export': 1, 'version': 1},
+          {'sembast_export': 1, 'version': 1, 'sdb_export': 1},
           {'store': '_main'},
           [
             'store_test_store',
@@ -531,7 +531,7 @@ void sdbUtilsTests(SdbTestContext ctx) {
         }
 
         final expectedExport = [
-          {'sembast_export': 1, 'version': 1},
+          {'sembast_export': 1, 'version': 1, 'sdb_export': 1},
           {'store': '_main'},
           [
             'store_store1',
@@ -603,7 +603,7 @@ void sdbUtilsTests(SdbTestContext ctx) {
         }
 
         final expectedExport = [
-          {'sembast_export': 1, 'version': 1},
+          {'sembast_export': 1, 'version': 1, 'sdb_export': 1},
           {'store': '_main'},
           [
             'store_test_store',

@@ -3,15 +3,20 @@ library;
 import 'dart:async';
 
 import 'package:sembast/sembast_memory.dart' as sembast;
+import 'package:sembast/utils/sembast_import_export.dart'
+    show SembastExportOptions, SembastImportOptions;
 import 'package:sembast/utils/sembast_import_export.dart' as sembast;
 
 import '../idb_client_sembast.dart';
 import '../src/common/common_database.dart' show IdbDatabaseBase;
 import '../src/common/common_factory_sandbox.dart'
     show idbFactorySandboxDatabase, idbFactorySandboxDelegate;
+import '../src/import_export_options.dart';
 import '../src/native_value_export.dart';
 import 'idb_utils.dart';
 export 'package:idb_shim/idb_shim.dart';
+export 'package:idb_shim/src/import_export_options.dart'
+    show IdbExportOptions, IdbExportTypeEncoding, IdbImportOptions;
 export 'package:idb_shim/src/native_value_export.dart'
     show
         IdbExportNativeValue,
@@ -32,10 +37,23 @@ Future<Map<String, Object?>> sdbExportDatabase(Database db) async {
 /// A native value ([IdbNativeValue]) cannot be exported as is: the export
 /// throws an `ArgumentError` unless [nativeValueEncoder] converts or drops
 /// it.
+///
+/// [options] can give the encoding of the custom types (the legacy `@` one by
+/// default, see [IdbExportTypeEncoding]) and a native value encoder
+/// (overriding [nativeValueEncoder]).
 Future<Map<String, Object?>> idbExportDatabase(
   Database db, {
   IdbExportNativeValueEncoder? nativeValueEncoder,
-}) => _idbExportDatabase(db, nativeValueEncoder, sembast.exportDatabase);
+  IdbExportOptions? options,
+}) => _idbExportDatabase(
+  db,
+  options?.nativeValueEncoder ?? nativeValueEncoder,
+  (db) => sembast.exportDatabase(db, options: _sembastExportOptions(options)),
+);
+
+/// The sembast export options of [options].
+SembastExportOptions _sembastExportOptions(IdbExportOptions? options) =>
+    SembastExportOptions(typeEncoding: options?.typeEncoding);
 
 /// Export through sembast, copying [db] to a memory database when it is not
 /// a sembast one or when its native values must be converted.
@@ -130,11 +148,17 @@ Future<Database> sdbImportDatabase(
 /// Copy a database export (lines or map sembast export) to another
 ///
 /// return the opened database
+///
+/// The custom types are decoded in the encoding given by the export header
+/// (`type_prefix`), the legacy `@` one without it. [options] can restrict the
+/// accepted encodings (all by default), another one throws a
+/// `FormatException`.
 Future<Database> idbImportDatabase(
   Object data,
   IdbFactory dstFactory,
-  String dstDbName,
-) async {
+  String dstDbName, {
+  IdbImportOptions? options,
+}) async {
   // In a sandbox, imported in its delegate factory (sembast is imported
   // directly).
   if (dstFactory is IdbFactorySandbox) {
@@ -142,9 +166,13 @@ Future<Database> idbImportDatabase(
       data,
       idbFactorySandboxDelegate(dstFactory),
       dstFactory.delegatePath(dstDbName),
+      options: options,
     );
     return idbFactorySandboxDatabase(dstFactory, db, dstDbName);
   }
+  var sembastOptions = SembastImportOptions(
+    allowedTypeEncodings: options?.allowedTypeEncodings,
+  );
   // if it is a sembast factory use it!
   // if (false) {
   if (dstFactory is IdbFactorySembast) {
@@ -152,6 +180,7 @@ Future<Database> idbImportDatabase(
       data,
       dstFactory.sdbFactory,
       dstFactory.getDbPath(dstDbName),
+      options: sembastOptions,
     );
     return dstFactory.openFromSdbDatabase(sdbDb);
   } else {
@@ -161,6 +190,7 @@ Future<Database> idbImportDatabase(
       data,
       sembast.databaseFactoryMemory,
       tmpPath,
+      options: sembastOptions,
     );
     final tmpDb = await (idbFactoryMemory as IdbFactorySembast)
         .openFromSdbDatabase(sdbDb);
@@ -175,8 +205,14 @@ Future<Database> idbImportDatabase(
 
 /// export a database in a sdb export format
 ///
-/// See [idbExportDatabase] for [nativeValueEncoder].
+/// See [idbExportDatabase] for [nativeValueEncoder] and [options].
 Future<List<Object>> idbExportDatabaseLines(
   Database db, {
   IdbExportNativeValueEncoder? nativeValueEncoder,
-}) => _idbExportDatabase(db, nativeValueEncoder, sembast.exportDatabaseLines);
+  IdbExportOptions? options,
+}) => _idbExportDatabase(
+  db,
+  options?.nativeValueEncoder ?? nativeValueEncoder,
+  (db) =>
+      sembast.exportDatabaseLines(db, options: _sembastExportOptions(options)),
+);
