@@ -27,9 +27,10 @@ void defineTests(TestContext ctx) {
 
   group('store_behavior', () {
     late Database db;
+    late String dbName;
 
     Future<void> openDb(void Function(Database db) onUpgrade) async {
-      var dbName = ctx.dbName;
+      dbName = ctx.dbName;
       await idbFactory.deleteDatabase(dbName);
       db = await idbFactory.open(
         dbName,
@@ -106,6 +107,73 @@ void defineTests(TestContext ctx) {
         }
       });
     });
+
+    test('generated key in the value on every read', () async {
+      // keyPath + autoIncrement: the generated key is set in the value.
+      await openDb((db) {
+        db
+            .createObjectStore('s', keyPath: 'id', autoIncrement: true)
+            .createIndex('title', 'title');
+      });
+      await inTxn(idbModeReadWrite, (store) async {
+        expect(await store.add({'title': 'a'}), 1);
+        expect(await store.add({'title': 'b'}), 2);
+      });
+      var a = {'title': 'a', 'id': 1};
+      var b = {'title': 'b', 'id': 2};
+      await inTxn(idbModeReadOnly, (store) async {
+        expect(await store.getObject(1), a);
+        expect(await store.getAll(), [a, b]);
+        expect(
+          await store
+              .openCursor(autoAdvance: true)
+              .map((cwv) => cwv.value)
+              .toList(),
+          [a, b],
+        );
+        var index = store.index('title');
+        expect(await index.get('b'), b);
+        expect(await index.getAll(), [a, b]);
+        expect(
+          await index
+              .openCursor(autoAdvance: true)
+              .map((cwv) => cwv.value)
+              .toList(),
+          [a, b],
+        );
+      });
+    });
+
+    test(
+      'index created later on the generated key',
+      () async {
+        await openDb((db) {
+          db.createObjectStore('s', keyPath: 'id', autoIncrement: true);
+        });
+        await inTxn(idbModeReadWrite, (store) async {
+          await store.add({'title': 'a'});
+          await store.add({'title': 'b'});
+        });
+        // The name opened (ctx.dbName is a new name on each call, db.name is
+        // the full path in a sandbox).
+        db.close();
+        db = await idbFactory.open(
+          dbName,
+          version: 2,
+          onUpgradeNeeded: (e) {
+            e.transaction.objectStore('s').createIndex('byId', 'id');
+          },
+        );
+        await inTxn(idbModeReadOnly, (store) async {
+          var index = store.index('byId');
+          expect(await index.count(), 2);
+          expect(await index.get(2), {'title': 'b', 'id': 2});
+          expect(await index.getAllKeys(), [1, 2]);
+        });
+      },
+      // A memory database is not kept when closed.
+      skip: ctx.isInMemory ? 'memory: not persistent across a reopen' : null,
+    );
 
     test('string keys never match number keys (autoIncrement)', () async {
       await openDb((db) {

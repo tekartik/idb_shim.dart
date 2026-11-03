@@ -966,4 +966,66 @@ void sdbJoinTests(SdbTestContext ctx) {
       });
     }
   });
+
+  group('sdb_join_generated_key', () {
+    // keyPath + autoIncrement stores: the generated key is in the values of
+    // both sides of a join, like in a get.
+    var parentStore = SdbStoreRef<int, SdbModel>('gk_parent');
+    var childStore = SdbStoreRef<int, SdbModel>('gk_child');
+    var childParentIndex = childStore.index<int>('parentId');
+    var dbName = 'sdb_join_generated_key.db';
+    late SdbDatabase db;
+
+    setUp(() async {
+      await factory.deleteDatabase(dbName);
+      db = await factory.openDatabase(
+        dbName,
+        options: SdbOpenDatabaseOptions(
+          version: 1,
+          schema: SdbDatabaseSchema(
+            stores: [
+              parentStore.schema(
+                keyPath: SdbKeyPath.single('id'),
+                autoIncrement: true,
+              ),
+              childStore.schema(
+                keyPath: SdbKeyPath.single('id'),
+                autoIncrement: true,
+                indexes: [
+                  childParentIndex.schema(
+                    keyPath: SdbKeyPath.single('parentId'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(await parentStore.add(db, {'label': 'p1'}), 1);
+      expect(await childStore.add(db, {'name': 'c1', 'parentId': 1}), 1);
+    });
+
+    tearDown(() async {
+      await db.close();
+    });
+
+    test('store join', () async {
+      var rows = await childStore.findJoinRows<int, SdbModel>(
+        db,
+        target: parentStore.asJoinTarget,
+        joinKeyPath: 'parentId',
+      );
+      expect(rows.single.record.value, {'name': 'c1', 'parentId': 1, 'id': 1});
+      expect(rows.single.joinedRecord!.value, {'label': 'p1', 'id': 1});
+    });
+
+    test('index join', () async {
+      var rows = await childParentIndex.findJoinRows<int, SdbModel>(
+        db,
+        target: parentStore.asJoinTarget,
+      );
+      expect(rows.single.record.value, {'name': 'c1', 'parentId': 1, 'id': 1});
+      expect(rows.single.joinedRecord!.value, {'label': 'p1', 'id': 1});
+    });
+  });
 }
