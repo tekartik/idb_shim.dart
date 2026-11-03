@@ -1,4 +1,4 @@
-## 2.11.2-1
+## 2.11.2
 
 * A database opened through a sandbox (`IdbFactory.sandbox`,
   `SdbFactory.sandbox`) has the name opened in the sandbox and the sandbox as
@@ -17,7 +17,7 @@
   sembast export) and accepts an `SdbClient`: a transaction exports its
   stores in it, its changes included. `sdbImportDatabase` accepts a
   json/jsonl string and rejects a newer `sdb_export`.
-* Requires sembast 3.10.0-1.
+* Requires sembast 3.10.0.
 
 ## 2.11.1
 
