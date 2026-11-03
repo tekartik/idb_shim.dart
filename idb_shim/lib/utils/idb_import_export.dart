@@ -6,6 +6,9 @@ import 'package:sembast/sembast_memory.dart' as sembast;
 import 'package:sembast/utils/sembast_import_export.dart' as sembast;
 
 import '../idb_client_sembast.dart';
+import '../src/common/common_database.dart' show IdbDatabaseBase;
+import '../src/common/common_factory_sandbox.dart'
+    show idbFactorySandboxDatabase, idbFactorySandboxDelegate;
 import '../src/native_value_export.dart';
 import 'idb_utils.dart';
 export 'package:idb_shim/idb_shim.dart';
@@ -41,7 +44,9 @@ Future<T> _idbExportDatabase<T>(
   IdbExportNativeValueEncoder? nativeValueEncoder,
   Future<T> Function(sembast.Database db) export,
 ) async {
-  var srcIdbFactory = db.factory;
+  // The factory of the implementation (not the sandbox of a database opened
+  // through a sandbox).
+  var srcIdbFactory = db is IdbDatabaseBase ? db.implFactory : db.factory;
 
   // if already a sembast database use it, a sembast database with a storage
   // has no native value.
@@ -130,6 +135,16 @@ Future<Database> idbImportDatabase(
   IdbFactory dstFactory,
   String dstDbName,
 ) async {
+  // In a sandbox, imported in its delegate factory (sembast is imported
+  // directly).
+  if (dstFactory is IdbFactorySandbox) {
+    var db = await idbImportDatabase(
+      data,
+      idbFactorySandboxDelegate(dstFactory),
+      dstFactory.delegatePath(dstDbName),
+    );
+    return idbFactorySandboxDatabase(dstFactory, db, dstDbName);
+  }
   // if it is a sembast factory use it!
   // if (false) {
   if (dstFactory is IdbFactorySembast) {

@@ -1,4 +1,5 @@
 import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/src/common/common_database.dart';
 import 'package:idb_shim/src/common/common_factory.dart';
 import 'package:path/path.dart' as p;
 
@@ -35,6 +36,10 @@ extension IdbFactorySandboxExtension on IdbFactory {
 }
 
 /// Sandboxed
+///
+/// A database opened through a sandbox is the database of the wrapped
+/// factory (it can be cast to its implementation class), its name is the
+/// name opened in the sandbox and its factory the sandbox.
 abstract class IdbFactorySandbox implements IdbFactory {
   /// Converts a name/path in the sandboxed factory to a name/path in the
   /// delegate factory. Throws an [ArgumentError] if the path escapes the
@@ -88,12 +93,22 @@ class _IdbFactorySandbox extends IdbFactoryBase implements IdbFactorySandbox {
     int? version,
     OnUpgradeNeededFunction? onUpgradeNeeded,
     OnBlockedFunction? onBlocked,
-  }) => delegate.open(
-    delegatePath(dbName),
-    version: version,
-    onUpgradeNeeded: onUpgradeNeeded,
-    onBlocked: onBlocked,
-  );
+  }) async {
+    // The database reports the sandbox name and factory, already in the
+    // upgrade event.
+    var db = await delegate.open(
+      delegatePath(dbName),
+      version: version,
+      onUpgradeNeeded: onUpgradeNeeded == null
+          ? null
+          : (event) {
+              idbFactorySandboxDatabase(this, event.database, dbName);
+              return onUpgradeNeeded(event);
+            },
+      onBlocked: onBlocked,
+    );
+    return idbFactorySandboxDatabase(this, db, dbName);
+  }
 
   @override
   Future<IdbFactory> deleteDatabase(
@@ -141,4 +156,23 @@ class _IdbFactorySandbox extends IdbFactoryBase implements IdbFactorySandbox {
   @override
   Future<String> getDatabaseFullPath(String name) =>
       delegate.getDatabaseFullPath(delegatePath(name));
+}
+
+/// Internal: the factory wrapped by [factory].
+IdbFactory idbFactorySandboxDelegate(IdbFactorySandbox factory) =>
+    (factory as _IdbFactorySandbox).delegate;
+
+/// Internal: [db], opened in the factory wrapped by [factory] for [name],
+/// reports [factory] and [name] as its factory and name (when it is an
+/// [IdbDatabaseBase], i.e. any idb_shim implementation). It stays the
+/// database of the implementation (it can be cast to its class).
+Database idbFactorySandboxDatabase(
+  IdbFactorySandbox factory,
+  Database db,
+  String name,
+) {
+  if (db is IdbDatabaseBase) {
+    idbDatabaseSetSandbox(db, factory, name);
+  }
+  return db;
 }

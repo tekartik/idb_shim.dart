@@ -31,6 +31,7 @@ import 'native_value_test.dart' as native_value_test;
 import 'object_store_test.dart' as object_store_test;
 import 'open_test.dart' as open_test;
 import 'quick_standalone_test.dart' as quick_standalone_test;
+import 'sandbox_test.dart';
 import 'scenario_test.dart' as scenario_test;
 import 'sdb_index_test.dart';
 import 'sdb_iterate_test.dart';
@@ -83,6 +84,7 @@ void defineAllTests(TestContext ctx) {
   exception_test.defineTests(ctx);
   type_test.defineTests(ctx);
   native_value_test.defineTests(ctx);
+  idbSandboxTests(ctx);
   defineAllSdbTests(ctx);
 
   group('indexeddb_1', () {

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:idb_shim/idb_shim.dart' as idb;
 import 'package:idb_shim/sdb.dart';
+import 'package:idb_shim/src/common/common_database.dart';
 import 'package:idb_shim/src/logger/logger_utils.dart';
 import 'package:idb_shim/src/sdb/sdb_client.dart';
 import 'package:idb_shim/src/sdb/sdb_database_impl.dart';
@@ -61,6 +62,16 @@ class SdbDatabaseImpl
 
   /// Set after open.
   late idb.Database idbDatabase;
+
+  /// The name of the idb database in its implementation (the full path of a
+  /// database opened through a sandbox).
+  @override
+  String get crossTabName {
+    var idbDatabase = this.idbDatabase;
+    return idbDatabase is IdbDatabaseBase
+        ? idbDatabase.implName
+        : idbDatabase.name;
+  }
 
   /// Codec used
   @override

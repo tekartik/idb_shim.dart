@@ -64,5 +64,34 @@ void main() {
       );
       expect(sandboxed.delegatePath('my.db'), endsWith(join('root', 'my.db')));
     });
+
+    test('database name and factory', () async {
+      var sandboxed = newSdbFactoryMemory().sandbox(path: 'sandbox');
+      var db = await sandboxed.openDatabase(
+        'test.db',
+        options: SdbOpenDatabaseOptions(
+          version: 1,
+          schema: SdbDatabaseSchema(stores: [_nameStore.schema()]),
+        ),
+      );
+      // The name opened in the sandbox.
+      expect(db.name, 'test.db');
+      expect(db.factory, sandboxed);
+      await _nameStore.record(1).put(db, 'value');
+      await db.close();
+
+      // Reopened with its name.
+      db = await sandboxed.openDatabase(db.name);
+      expect(db.version, 1);
+      expect(await _nameStore.record(1).get(db), isNotNull);
+      await db.close();
+      expect(
+        await sandboxed.getDatabaseFullPath('test.db'),
+        join('sandbox', 'test.db'),
+      );
+      await sandboxed.deleteDatabase('test.db');
+    });
   });
 }
+
+final _nameStore = SdbStoreRef<int, String>('name');

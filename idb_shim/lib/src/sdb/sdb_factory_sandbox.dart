@@ -1,6 +1,4 @@
 import 'package:idb_shim/idb_sdb.dart';
-import 'package:idb_shim/src/common/common_factory.dart';
-import 'package:idb_shim/src/sdb/sdb_factory.dart';
 import 'package:path/path.dart' as p;
 
 import 'sdb_factory_impl.dart';
@@ -39,6 +37,9 @@ extension SdbFactorySandboxExtension on SdbFactory {
 }
 
 /// Sandboxed
+///
+/// A database opened through a sandbox has the name opened in the sandbox
+/// and the sandbox as factory.
 abstract class SdbFactorySandbox implements SdbFactory {
   /// Converts a name/path in the sandboxed factory to a name/path in the
   /// delegate factory. Throws an [ArgumentError] if the path escapes the
@@ -49,11 +50,13 @@ abstract class SdbFactorySandbox implements SdbFactory {
 /// Private helpers
 extension SdbFactorySandboxPrvExtension on SdbFactory {}
 
-class _SdbFactorySandbox
-    with SdbFactoryDefaultMixin
-    implements SdbFactorySandbox, SdbFactoryIdb {
+/// An sdb factory on the idb sandbox of the idb factory of [delegate]: the
+/// idb sandbox maps the names (and gives the name opened in the sandbox to
+/// the databases).
+class _SdbFactorySandbox extends SdbFactoryIdb implements SdbFactorySandbox {
   _SdbFactorySandbox({required this.delegate, required String rootPath})
-    : rootPath = delegate.pathContext.normalize(rootPath);
+    : rootPath = delegate.pathContext.normalize(rootPath),
+      super(delegate.idbFactory.sandbox(path: rootPath));
 
   /// The wrapped factory.
   final SdbFactoryIdb delegate;
@@ -61,76 +64,17 @@ class _SdbFactorySandbox
   /// The root path of the sandbox in the delegate factory.
   final String rootPath;
 
+  IdbFactorySandbox get _idbFactorySandbox => idbFactory as IdbFactorySandbox;
+
   /// Converts a name/path in the sandboxed factory to a name/path in the
   /// delegate factory. Throws an [ArgumentError] if the path escapes the
   /// sandbox.
   @override
-  String delegatePath(String path) {
-    if (_isImmutableName(path)) {
-      return path;
-    }
-    var relativePath = pathContext.isAbsolute(path)
-        ? pathContext.relative(path, from: pathContext.rootPrefix(path))
-        : path;
-    var fullPath = pathContext.normalize(
-      pathContext.join(rootPath, relativePath),
-    );
-    if (!pathContext.isWithin(rootPath, fullPath)) {
-      throw ArgumentError.value(
-        path,
-        'path',
-        'Path is outside of the sandbox root $rootPath',
-      );
-    }
-    return fullPath;
-  }
-
-  bool _isImmutableName(String name) =>
-      (delegate.idbFactory as IdbFactoryBase).isImmutableDatabaseName(name);
-
-  /// For debugging purpose
-  @override
-  Future<String> getDatabaseFullPath(String name) async {
-    return delegate.getDatabaseFullPath(delegatePath(name));
-  }
+  String delegatePath(String path) => _idbFactorySandbox.delegatePath(path);
 
   @override
   String get name => 'sandbox(${delegate.name}, $rootPath)';
 
   @override
   String toString() => name;
-
-  @override
-  IdbFactory get idbFactory => delegate.factoryIdb.idbFactory;
-
-  @override
-  Future<SdbDatabase> openDatabaseImpl(
-    String name,
-    SdbOpenDatabaseOptions options,
-  ) {
-    return delegate.openDatabaseImpl(delegatePath(name), options);
-  }
-
-  @override
-  Future<SdbDatabase> openDatabase(
-    String name, {
-    SdbOpenDatabaseOptions? options,
-    int? version,
-    SdbOnVersionChangeCallback? onVersionChange,
-    SdbDatabaseSchema? schema,
-  }) {
-    return delegate.openDatabase(
-      delegatePath(name),
-      options: options,
-      // deprecated
-      // version: version,
-      // onVersionChange: onVersionChange,
-      // schema: schema,
-    );
-  }
-
-  @override
-  Future<void> deleteDatabase(String name) {
-    return delegate.deleteDatabase(delegatePath(name));
-  }
 }

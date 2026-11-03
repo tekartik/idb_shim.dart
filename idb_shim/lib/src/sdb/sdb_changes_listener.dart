@@ -469,7 +469,7 @@ mixin SdbTransactionChangesDefaultMixin implements SdbTransactionInterface {
   void broadcastWrittenStores() {
     var names = _writtenStoreNames;
     if (names != null && names.isNotEmpty) {
-      sdbBroadcastStoreChanges(db.name, names.toList());
+      sdbBroadcastStoreChanges(db.dbInterface.crossTabName, names.toList());
     }
   }
 }

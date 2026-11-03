@@ -19,7 +19,9 @@ class DatabaseLogger extends IdbDatabaseBase {
   final int id;
   Database idbDatabase;
 
-  IdbFactoryLogger get logger => factory as IdbFactoryLogger;
+  /// The logger factory, never a sandbox ([factory] is the sandbox of a
+  /// database opened through a sandbox).
+  IdbFactoryLogger get logger => implFactory as IdbFactoryLogger;
 
   @override
   int get version => idbDatabase.version;
@@ -85,7 +87,7 @@ class DatabaseLogger extends IdbDatabaseBase {
   Iterable<String> get objectStoreNames => idbDatabase.objectStoreNames;
 
   @override
-  String get name => idbDatabase.name;
+  String get name => sandboxName ?? idbDatabase.name;
 
   @override
   Stream<VersionChangeEvent> get onVersionChange => idbDatabase.onVersionChange;

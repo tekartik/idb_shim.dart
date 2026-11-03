@@ -4,6 +4,8 @@ import 'package:dev_test/test.dart';
 import 'package:idb_shim/idb_client_logger.dart';
 import 'package:idb_shim/idb_client_sembast.dart';
 import 'package:idb_shim/src/common/common_factory.dart'; // ignore: implementation_imports
+import 'package:idb_shim/src/common/common_factory_sandbox.dart' // ignore: implementation_imports
+    show idbFactorySandboxDelegate;
 import 'package:idb_shim/src/common/common_meta.dart'; // ignore: implementation_imports
 // ignore: implementation_imports
 import 'package:idb_shim/src/utils/env_utils.dart';
@@ -98,8 +100,15 @@ class TestContext {
 /// True if [factory] stores an [IdbNativeValue]: the native one and the
 /// sembast ones without storage (memory).
 bool idbFactorySupportsNativeValue(IdbFactory factory) {
-  if (factory is IdbFactoryLogger) {
-    factory = factory.factory;
+  // A logger or a sandbox stores like the factory it wraps.
+  while (true) {
+    if (factory is IdbFactoryLogger) {
+      factory = factory.factory;
+    } else if (factory is IdbFactorySandbox) {
+      factory = idbFactorySandboxDelegate(factory);
+    } else {
+      break;
+    }
   }
   if (factory is IdbFactorySembast) {
     return !factory.persistent;

@@ -87,6 +87,10 @@ abstract class SdbDatabaseInterface implements SdbDatabase, SdbClientInterface {
   /// [SdbStoreRefDbExtension.addOnChangesListener].
   SdbDatabaseChangesListener get changesListener;
 
+  /// The name identifying the database across browser tabs: its name in the
+  /// implementation (the full path of a database opened through a sandbox).
+  String get crossTabName;
+
   /// The names of the stores changed by another connection (another browser
   /// tab), what the onSnapshot streams redo their query on.
   Stream<List<String>> get externalStoreChanges;
@@ -100,6 +104,9 @@ extension SdbDatabaseExtensionPrv on SdbDatabase {
 
 /// Default mixin
 mixin SdbDatabaseDefaultMixin implements SdbDatabaseInterface {
+  @override
+  String get crossTabName => name;
+
   @override
   final changesListener = SdbDatabaseChangesListener();
 
@@ -118,7 +125,7 @@ mixin SdbDatabaseDefaultMixin implements SdbDatabaseInterface {
     _externalChangesController ??= StreamController<List<String>>.broadcast(
       onListen: () {
         _externalChangesSubscription = sdbExternalStoreChangesStream
-            .where((event) => event.$1 == name)
+            .where((event) => event.$1 == crossTabName)
             .listen((event) => _externalChangesController?.add(event.$2));
       },
       onCancel: () {

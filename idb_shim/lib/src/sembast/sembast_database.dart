@@ -63,14 +63,16 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
   final IdbDatabaseMeta meta = IdbDatabaseMeta();
   sembast.Database? db;
 
-  @override
-  IdbFactorySembast get factory => super.factory as IdbFactorySembast;
+  /// The sembast idb factory, never a sandbox ([factory] is the sandbox of a
+  /// database opened through a sandbox).
+  IdbFactorySembast get sembastIdbFactory => implFactory as IdbFactorySembast;
 
-  sembast.DatabaseFactory get sembastFactory => factory.sembastFactory;
+  sembast.DatabaseFactory get sembastFactory =>
+      sembastIdbFactory.sembastFactory;
 
   /// A memory database (no storage) holds the [IdbNativeValue] as is, like
   /// the native factory.
-  bool get supportsNativeValue => !factory.persistent;
+  bool get supportsNativeValue => !sembastIdbFactory.persistent;
 
   final mainStore = sembast.StoreRef<String, Object>.main();
 
@@ -145,7 +147,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
     }
     // Open the sembast database
     db = await sembastFactory.openDatabase(
-      factory.getDbPath(name),
+      sembastIdbFactory.getDbPath(meta.name),
       version: 1,
       codec: supportsNativeValue ? sembastCodecWithIdbNativeValue : null,
       onVersionChanged: (db, oldVersion, newVersion) {

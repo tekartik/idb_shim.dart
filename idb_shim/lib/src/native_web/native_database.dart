@@ -157,7 +157,7 @@ class DatabaseNative extends IdbDatabaseBase {
   }
 
   @override
-  String get name => catchNativeError(() => idbDatabase.name)!;
+  String get name => sandboxName ?? catchNativeError(() => idbDatabase.name)!;
 
   @override
   Stream<VersionChangeEvent> get onVersionChange {
