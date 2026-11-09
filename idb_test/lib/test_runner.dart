@@ -33,6 +33,7 @@ import 'native_value_test.dart' as native_value_test;
 import 'object_store_test.dart' as object_store_test;
 import 'open_test.dart' as open_test;
 import 'quick_standalone_test.dart' as quick_standalone_test;
+import 'review_regression_level3_test.dart' as review_regression_level3_test;
 import 'review_regression_test.dart' as review_regression_test;
 import 'sandbox_test.dart';
 import 'scenario_test.dart' as scenario_test;
@@ -91,6 +92,7 @@ void defineAllTests(TestContext ctx) {
   type_test.defineTests(ctx);
   native_value_test.defineTests(ctx);
   review_regression_test.defineTests(ctx);
+  review_regression_level3_test.defineTests(ctx);
   idbSandboxTests(ctx);
   defineAllSdbTests(ctx);
 
