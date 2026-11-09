@@ -4,7 +4,9 @@ description: >-
   Use when validating an IdbFactory implementation (native web, sembast io/
   memory, sqflite, a custom shim) against the shared idb_test conformance
   suite, or when writing idb_shim tests with its helpers: defineAllTests /
-  defineAllSdbTests from test_runner.dart, TestContext /
+  defineAllSdbTests / sdbDefineAllTests (SdbTestContext, any SdbFactory) from
+  test_runner.dart, the review regression suites, adding a shared test or
+  skipping one for a single implementation (with its reason), TestContext /
   SembastTestContext / SembastFsTestContext / idbMemoryContext /
   idbMemoryFsContext, dbGroup / dbTest / dbTestName / setUpSimpleStore, the
   testStoreName / testNameIndex / testNameField constants, isDatabaseError and
@@ -41,10 +43,12 @@ common toolbox (`idb_test_common.dart`) used to write new idb tests.
   * `TestContext()..factory = myIdbFactory` for a plain factory, or
     `TestContext(factory: myIdbFactory)`.
   * `ctx.dbName` returns a *new* unique name on every read - never cache it.
-  * Declare platform quirks so the suite skips what cannot work:
-    `isIdbIe`, `isIdbEdge`, `isIdbSafari` (browser), `isIdbSembast`,
-    `isInMemory` (data gone after `close`), `isIdbNoLazy`, `supportsDoubleKey`
-    (read from the factory), `isWebWasm`.
+  * Declare platform quirks so the suite skips what cannot work. Fields set
+    by the runner: `isIdbIe`, `isIdbEdge`, `isIdbSafari` (browser),
+    `isIdbHtmlCompat` (the dart:html factory of `idb_shim_html_compat`: no
+    sdb), `isIdbSembast`. Computed getters (override them in a subclass):
+    `isInMemory` (data gone after `close`), `isIdbNoLazy`, `isWebWasm`,
+    `supportsDoubleKey` and `supportsNativeValue` (read from the factory).
   * `ctx.wrapInLogger()` replaces `ctx.factory` with a logging factory
     (`IdbFactoryLoggerType.all` by default) to debug a failing suite;
     `ctx.getFactory<T>()` unwraps it again.
@@ -54,9 +58,14 @@ common toolbox (`idb_test_common.dart`) used to write new idb tests.
   any sembast `DatabaseFactory` (io, jdb, web), `SembastMemoryTestContext` /
   `SembastMemoryFsTestContext` as subclasses to extend.
 * Entry points from `package:idb_test/test_runner.dart`:
-  `defineAllTests(TestContext ctx)` (everything, including the SDB suite) and
+  `defineAllTests(TestContext ctx)` (everything, including the review
+  regression suites and the SDB suite) and
   `defineAllSdbTests(TestContext ctx)` (`package:idb_shim/sdb.dart` layer
-  only, via `sdbFactoryFromIdb`). Individual suites are one library each -
+  only, via `sdbFactoryFromIdb`). An `SdbFactory` that is not idb based (such
+  as `tekartik_sdb_sembast`) runs `sdbDefineAllTests(SdbTestContext(factory))`
+  plus `sdbIterateTests` (`sdb_iterate_test.dart`) and
+  `sdbReviewRegressionTests` (`sdb_review_regression_test.dart`), as the idb
+  based sdb does. Individual suites are one library each -
   `package:idb_test/database_test.dart`, `open_test.dart`, `cursor_test.dart`,
   `index_test.dart`, `transaction_test.dart`, `key_range_test.dart`,
   `factory_test.dart`, `object_store_test.dart`, `exception_test.dart`,
@@ -86,6 +95,24 @@ common toolbox (`idb_test_common.dart`) used to write new idb tests.
   (`sdbStressNotesGroup`, `sdbStressAddListNotesGroup`) live in
   `package:idb_test/src/stress_notes_db_test.dart` and are slow: keep them in
   a dedicated test file.
+* Who runs the suite: idb_shim sembast memory / memory fs / jdb / logger and
+  io, native IndexedDB (dart2js and dart2wasm) in this package's `test/`;
+  idb_sqflite in `idb_sqflite_common_test`; `tekartik_sdb_sembast` (sdb suites,
+  memory, io and web) and `idb_shim_html_compat` (object store and review
+  regression suites only: dart:html needs a version and `onUpgradeNeeded`
+  together and reads values as `Map<dynamic, dynamic>`) in `idb_shim_more`.
+  A behaviour shared by the implementations gets its test here, not in one
+  implementation's package.
+* Writing a shared test:
+  * It must be able to fail: never put expectations in a catch all (it catches
+    the `TestFailure` of `fail()` and `expect`); catch the expected error type,
+    or `expect(e, isNot(isA<TestFailure>()))` in the catch.
+  * A broken implementation must fail fast: bounded loops and cursor walks, a
+    `timeout:` on a slow test, wait for the event (completer + `timeout`)
+    rather than a fixed delay that a 2-core CI runner may not meet.
+  * An implementation that does not have the behaviour yet skips the test
+    with the reason (`skip: ctx.isIdbHtmlCompat ? '<reason>' : null`, or a
+    detection like `_isIdbSqflite(ctx)` in `review_regression_level3_test.dart`).
 * Anti-patterns: reusing one database name across tests (use `ctx.dbName` or
   `dbTest`), forgetting `db.close()` / `await transaction.completed`, running
   the full suite on a real browser database without deleting it first, putting

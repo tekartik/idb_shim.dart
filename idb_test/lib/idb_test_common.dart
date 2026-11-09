@@ -67,6 +67,10 @@ class TestContext {
   bool isIdbSafari = false;
   bool isIdbSembast = false;
 
+  /// The dart:html factory of idb_shim_html_compat: values are read as
+  /// `Map<dynamic, dynamic>`, which the sdb API does not support.
+  bool isIdbHtmlCompat = false;
+
   bool get isWebWasm => kIdbDartIsWeb && !idbIsRunningAsJavascript;
 
   // ie don't except any pause between 2 calls

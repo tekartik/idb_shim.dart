@@ -185,7 +185,8 @@ void defineTests(TestContext ctx) {
         fail('should not open');
       } catch (e) {
         // error Error: Failed to execute 'open' on 'IDBFactory': The version provided must not be 0.
-        // cannot check type here...
+        // cannot check type here, but it must not be the failure above.
+        expect(e, isNot(isA<TestFailure>()));
         expect(initCalled, isFalse);
       }
     });
