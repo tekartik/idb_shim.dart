@@ -127,5 +127,43 @@ void sdbOpenTests(SdbTestContext ctx) {
       var db = await factory.openDatabase(path, options: testStoreOpenOptions);
       await db.close();
     });
+    test('store deleted and created again in a version change', () async {
+      // As idb, the records of the deleted store are gone (sdb_sembast kept
+      // them, review of 2026-11-09).
+      var dbName = 'sdb_open_delete_create_store.db';
+      await factory.deleteDatabase(dbName);
+      var db = await factory.openDatabase(
+        dbName,
+        options: SdbOpenDatabaseOptions(
+          version: 1,
+          onVersionChange: (event) {
+            event.db.createStore(testStore);
+          },
+        ),
+      );
+      await testStore.add(db, {'v': 'old'});
+      await db.close();
+      int? countInVersionChange;
+      db = await factory.openDatabase(
+        dbName,
+        options: SdbOpenDatabaseOptions(
+          version: 2,
+          onVersionChange: (event) async {
+            event.db.deleteStore(testStore.name);
+            event.db.createStore(testStore);
+            countInVersionChange = await testStore.count(event.transaction);
+            await testStore.add(event.transaction, {'v': 'new'});
+          },
+        ),
+      );
+      try {
+        expect(countInVersionChange, 0);
+        expect((await testStore.findRecords(db)).map((r) => r.value['v']), [
+          'new',
+        ]);
+      } finally {
+        await db.close();
+      }
+    });
   });
 }
