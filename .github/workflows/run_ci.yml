@@ -2,6 +2,8 @@ name: Run CI
 on:
   workflow_dispatch:
   push:
+    branches: ['**'] # Not on tag pushes
+    paths-ignore: ['**.md'] # Not on doc only changes
   schedule:
     - cron: '0 0 * * 0'  # every sunday at midnight
 
