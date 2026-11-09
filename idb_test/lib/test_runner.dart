@@ -10,6 +10,7 @@ import 'package:idb_test/sdb_native_value_test.dart';
 import 'package:idb_test/sdb_on_snapshot_test.dart';
 import 'package:idb_test/sdb_open_test.dart';
 import 'package:idb_test/sdb_paging_test.dart';
+import 'package:idb_test/sdb_review_regression_test.dart';
 import 'package:idb_test/sdb_schema_test.dart';
 import 'package:idb_test/sdb_test.dart';
 import 'package:idb_test/sdb_type_test.dart';
@@ -32,6 +33,7 @@ import 'native_value_test.dart' as native_value_test;
 import 'object_store_test.dart' as object_store_test;
 import 'open_test.dart' as open_test;
 import 'quick_standalone_test.dart' as quick_standalone_test;
+import 'review_regression_test.dart' as review_regression_test;
 import 'sandbox_test.dart';
 import 'scenario_test.dart' as scenario_test;
 import 'sdb_index_test.dart';
@@ -48,6 +50,8 @@ void defineAllSdbTests(TestContext ctx) {
   sdbDefineAllTests(sdbCtx);
   // idb based only (iterate errors, row update, limit 0, codec)
   sdbIterateTests(sdbCtx);
+  // idb based only (idb errors)
+  sdbReviewRegressionTests(sdbCtx);
 }
 
 /// All sdb tests on any sdb factory, idb based or not.
@@ -86,6 +90,7 @@ void defineAllTests(TestContext ctx) {
   exception_test.defineTests(ctx);
   type_test.defineTests(ctx);
   native_value_test.defineTests(ctx);
+  review_regression_test.defineTests(ctx);
   idbSandboxTests(ctx);
   defineAllSdbTests(ctx);
 

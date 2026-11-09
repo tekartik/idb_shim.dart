@@ -5,6 +5,7 @@ import 'package:idb_shim/src/common/common_error.dart';
 import 'package:idb_shim/src/common/common_meta.dart';
 import 'package:idb_shim/src/common/common_value.dart';
 import 'package:idb_shim/src/logger/logger_utils.dart';
+import 'package:idb_shim/src/sembast/sembast_filter.dart';
 import 'package:idb_shim/src/sembast/sembast_import.dart' as sembast;
 import 'package:idb_shim/src/sembast/sembast_index.dart';
 import 'package:idb_shim/src/sembast/sembast_object_store.dart';
@@ -49,6 +50,10 @@ abstract mixin class KeyCursorSembastMixin implements Cursor {
       }, doNotAbordOnError: true);
     }
 
+    // Like native: no write in a readonly transaction.
+    if (store.transaction!.meta!.mode != idbModeReadWrite) {
+      throw DatabaseReadOnlyError();
+    }
     var records = ctlr.records!;
     var primaryKey = record.primaryKey;
     var recordIndex = this.recordIndex;
@@ -56,7 +61,8 @@ abstract mixin class KeyCursorSembastMixin implements Cursor {
       await store.txnDelete(primaryKey);
       var i = records.length - 1;
       while (i > recordIndex) {
-        if (records[i].primaryKey == record.primaryKey) {
+        // Keys compared as keys (an array key is a new list each time).
+        if (compareKeys(records[i].primaryKey, primaryKey) == 0) {
           ctlr.records!.removeAt(i);
         }
         i--;
@@ -92,13 +98,13 @@ abstract mixin class KeyCursorSembastMixin implements Cursor {
 
     await store.transaction!.execute(() async {
       await store.txnPut(value, updateKey);
-      var sembastSnapshot = await store.sembastStore
-          .record(primaryKey)
-          .getSnapshot(store.sembastClient);
+      // By primary key (the sembast key of an array key path store is not
+      // the primary key).
+      var sembastSnapshot = await store.txnGetSnapshot(primaryKey);
       // Also update all records in the current list...
       var i = recordIndex + 1;
       while (i < ctlr.records!.length) {
-        if (records[i].primaryKey == primaryKey) {
+        if (compareKeys(records[i].primaryKey, primaryKey) == 0) {
           if (sembastSnapshot == null) {
             records.removeAt(i);
           } else {
@@ -307,10 +313,11 @@ abstract mixin class BaseCursorControllerSembastMixin<T extends Cursor>
   }
 
   void autoNext() {
-    _advance(1);
-    if (meta.autoAdvance && (!done)) {
-      return autoNext();
-    }
+    // A loop, not a recursion: one stack level per record overflows on big
+    // stores.
+    do {
+      _advance(1);
+    } while (meta.autoAdvance && !done);
   }
 
   void _advance(int count) {
@@ -461,15 +468,20 @@ class StoreCursorWithValueControllerSembast extends Object
   }
 }
 
-/// Key path must have been escaped before
+/// The sort orders of [keyPath], a null [keyPath] meaning the record key.
 List<sembast.SortOrder> keyPathSortOrders(Object? keyPath, bool ascending) {
-  if (keyPath is String) {
-    return [sembast.SortOrder(keyPath, ascending)];
+  if (keyPath == null) {
+    return [sembast.SortOrder(sembast.Field.key, ascending)];
+  } else if (keyPath is String) {
+    return [sembast.SortOrder(sembastKeyPathField(keyPath), ascending)];
   } else if (keyPath is List) {
     final keyList = keyPath;
     return List.generate(
       keyList.length,
-      (i) => sembast.SortOrder(keyList[i] as String, ascending),
+      (i) => sembast.SortOrder(
+        sembastKeyPathField(keyList[i] as String),
+        ascending,
+      ),
     );
   }
   throw ArgumentError('invalid keyPath $keyPath');

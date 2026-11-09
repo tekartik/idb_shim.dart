@@ -328,6 +328,11 @@ the `json_extract` path only — when sqlite has no json1 functions (compiled in
 by default only since sqlite 3.38, so an older android system sqlite can be
 missing them). Neither indexed path needs json1 at all.
 
+Known issue: in the generic path, a join through a target index on several
+fields (`index2`...) or on an `SdbTimestamp` field throws a `TypeError` (the
+raw index key is looked up instead of the typed one); join on a single field
+index of `String` or `int` keys meanwhile.
+
 Two records can share an index key, and the order of such a tie is not
 specified: an index cursor sorts on the index key alone, so iterating an index
 backwards keeps the tie ascending on some implementations and reverses it on

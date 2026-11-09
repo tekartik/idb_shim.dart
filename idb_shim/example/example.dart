@@ -1,8 +1,17 @@
 // ignore_for_file: avoid_print
 
+/// idb_shim example on the Dart VM.
+///
+/// Only the factory depends on the platform: `idbFactoryWeb` on the web
+/// (`package:idb_shim/idb_browser.dart`), `getIdbFactorySqflite(...)` from
+/// `idb_sqflite` on Flutter mobile and desktop, `newIdbFactoryMemory()` in
+/// tests.
+library;
+
 import 'package:idb_shim/idb_io.dart';
 
 void main() async {
+  // The databases are stored below test/tmp/out (sembast files).
   final idbFactory = getIdbFactoryPersistent('test/tmp/out');
 
   // define the store name

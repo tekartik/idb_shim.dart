@@ -75,21 +75,53 @@ class IdbFactoryNativeWrapperImpl extends IdbFactoryBase {
     }
     FutureOr? onUpdateNeededFutureOr;
     Object? onUpdateNeededException;
+    StackTrace? onUpdateNeededStackTrace;
     if (onUpgradeNeeded != null) {
       EventStreamProviders.upgradeNeededEvent.forTarget(openRequest).listen((
         idb.IDBVersionChangeEvent event,
       ) {
+        var upgradeTransaction = openRequest.transaction;
+        // The error is caught here, so the browser does not abort the
+        // version change transaction: abort it (best effort, it may have
+        // committed already) so that a failed upgrade is not kept.
+        void onError(Object e, StackTrace st) {
+          if (onUpdateNeededException == null) {
+            onUpdateNeededException = e;
+            onUpdateNeededStackTrace = st;
+          }
+          try {
+            upgradeTransaction?.abort();
+          } catch (_) {
+            // Already committed.
+          }
+        }
+
         try {
-          onUpdateNeededFutureOr = onUpgradeNeeded(
-            VersionChangeEventNative(this, event),
-          );
-        } catch (e) {
-          onUpdateNeededException = e;
+          var result = onUpgradeNeeded(VersionChangeEventNative(this, event));
+          onUpdateNeededFutureOr = result;
+          if (result is Future) {
+            // Right away, while its requests keep the transaction active.
+            result.then<void>((_) {}, onError: onError).ignore();
+          }
+        } catch (e, st) {
+          onError(e, st);
         }
       });
     }
     openRequest.handleOnSuccessAndError(completer);
-    await completer.future;
+    try {
+      await completer.future;
+    } catch (_) {
+      // The open request fails (AbortError) when the upgrade was aborted:
+      // report the error of the upgrade.
+      if (onUpdateNeededException != null) {
+        Error.throwWithStackTrace(
+          onUpdateNeededException!,
+          onUpdateNeededStackTrace ?? StackTrace.current,
+        );
+      }
+      rethrow;
+    }
 
     /// Wait on onUpgradeNeeded to complete.
     if (onUpdateNeededFutureOr is Future && onUpdateNeededException == null) {

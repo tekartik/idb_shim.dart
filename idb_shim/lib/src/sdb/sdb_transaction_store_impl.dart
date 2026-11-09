@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:idb_shim/sdb.dart';
 import 'package:idb_shim/src/common/common_paged_query.dart';
+import 'package:idb_shim/src/common/common_value.dart' show IdbValueMapExt;
 import 'package:idb_shim/src/sdb/sdb_boundary_impl.dart';
 import 'package:idb_shim/src/sdb/sdb_codec.dart';
 import 'package:idb_shim/src/sdb/sdb_cursor.dart';
@@ -145,12 +146,16 @@ mixin SdbTransactionStoreRefImplMixin<K extends SdbKey, V extends SdbValue>
     SdbRecordSnapshot<K, V>? oldSnapshot;
     SdbRecordSnapshot<K, V>? newSnapshot;
     var codec = transaction.codec;
-    if (hasChangeListener && key != null) {
-      oldSnapshot = await idbObjectStore.getSdbRecordSnapshot(
-        store,
-        key,
-        codec,
-      );
+    if (hasChangeListener) {
+      // An inline key is in the value: the record replaced is an update.
+      var oldKey = key ?? _inlineKeyOrNull(value);
+      if (oldKey != null) {
+        oldSnapshot = await idbObjectStore.getSdbRecordSnapshot(
+          store,
+          oldKey,
+          codec,
+        );
+      }
     }
 
     /// If the record is successfully stored, then a success event is fired on the
@@ -162,6 +167,18 @@ mixin SdbTransactionStoreRefImplMixin<K extends SdbKey, V extends SdbValue>
       newSnapshot = SdbRecordSnapshotImpl<K, V>(store.record(recordKey), value);
       changesListener?.addChange(transaction, oldSnapshot, newSnapshot);
     }
+  }
+
+  /// The key found in [value] at the inline key path of the store, if any.
+  K? _inlineKeyOrNull(V value) {
+    var keyPath = idbObjectStore.keyPath;
+    if (keyPath != null && value is Map) {
+      var key = value.getKeyValue(keyPath);
+      if (key is K) {
+        return key;
+      }
+    }
+    return null;
   }
 
   @override

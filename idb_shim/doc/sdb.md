@@ -224,7 +224,10 @@ await db.inStoreTransaction(bookStore, SdbTransactionMode.readWrite, (txn) async
 - **Keep them short:** Transactions should be as short-lived as possible to avoid blocking other operations.
 - **Avoid non-database async operations:** Do not perform any async operations inside a transaction that are not related  
   to the database (e.g., network requests) as the inner transaction may be completed before.
-- **Let exceptions propagate:** Do not catch exceptions within a transaction. Any unhandled exception will automatically abort the transaction and roll back any changes.
+- **Let exceptions propagate:** Do not catch exceptions within a transaction. A failed request (a missing key, a
+  unique index violation...) aborts the transaction and rolls back its changes, and its error is rethrown. An exception
+  thrown by your own code in the callback is rethrown too, but it does not abort the transaction: the writes done
+  before it are committed. Check the data before writing rather than throwing in the middle.
 - **Avoid exceptions**: Instead of relying for unique constraint, read the db first.
 
 ### Working with Indexes

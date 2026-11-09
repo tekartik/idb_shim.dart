@@ -187,25 +187,57 @@ Iterable<Object> keyPathKeys(
   }
 }
 
-/// The valid keys of a record for [keyPath], see [keyPathKeys].
+/// The value of the key path [field] in the record value.
+///
+/// sembast reads `_key` and `_value` as the record key and value, for idb
+/// they are fields of the value like any other.
+Object? recordKeyPathFieldValue(sembast.RecordSnapshot snapshot, String field) {
+  if (field == sembast.Field.key || field == sembast.Field.value) {
+    var value = snapshot.value;
+    return value is Map ? value[field] : null;
+  }
+  return snapshot[field];
+}
+
+/// The sembast field (for a sort order) of the key path [field].
+String sembastKeyPathField(String field) {
+  if (field == sembast.Field.key || field == sembast.Field.value) {
+    // Backtick enclosed: the field of the value, not the record key/value.
+    return '`$field`';
+  }
+  return field;
+}
+
+/// The valid keys of a record for [keyPath], see [keyPathKeys], a null
+/// [keyPath] meaning the record key.
 Iterable<Object> recordKeyPathKeys(
   sembast.RecordSnapshot snapshot,
-  Object keyPath,
+  Object? keyPath,
   bool multiEntry,
-) => keyPathKeys((field) => snapshot[field], keyPath, multiEntry);
+) {
+  if (keyPath == null) {
+    var key = snapshot.key;
+    return isValidKey(key) ? [key as Object] : const <Object>[];
+  }
+  return keyPathKeys(
+    (field) => recordKeyPathFieldValue(snapshot, field),
+    keyPath,
+    multiEntry,
+  );
+}
 
 /// Matches records having a key (an entry for a [multiEntry] index) in
-/// [range], in the IndexedDB key order.
+/// [range], in the IndexedDB key order, a null [keyPath] meaning the record
+/// key.
 sembast.Filter keyRangeFilter(
   Object? keyPath,
   KeyRange range,
   bool multiEntry,
 ) {
-  keyPath ??= sembast.Field.key;
   return sembast.Filter.custom(
     (snapshot) => recordKeyPathKeys(
       snapshot,
-      keyPath!,
+      keyPath,
       multiEntry,
     ).any((key) => keyRangeContainsKey(range, key)),
   );
@@ -241,20 +273,20 @@ sembast.Filter storeKeyFilter(Object? keyPath, Object key) {
   return keyFilter(keyPath, key);
 }
 
-/// The null value for the key actually means any valid key.
-/// Key path must have been escaped before
+/// The null value for the key actually means any valid key, a null [keyPath]
+/// the record key.
 sembast.Filter keyFilter(
   Object? keyPath,
   Object? key, [
   bool multiEntry = false,
 ]) {
-  if (keyPath is! String && keyPath is! List) {
+  if (keyPath != null && keyPath is! String && keyPath is! List) {
     throw ArgumentError('keyPath $keyPath not supported');
   }
   return sembast.Filter.custom(
     (snapshot) => recordKeyPathKeys(
       snapshot,
-      keyPath!,
+      keyPath,
       multiEntry,
     ).any((recordKey) => keyMatchesKeyOrRange(recordKey, key)),
   );
@@ -274,13 +306,16 @@ sembast.Filter keyOrRangeFilter(
 
 sembast.Filter keyNotNullFilter(Object? keyPath) {
   if (keyPath is String) {
-    return sembast.Filter.notEquals(keyPath, null);
+    return sembast.Filter.notEquals(sembastKeyPathField(keyPath), null);
   } else if (keyPath is List) {
     final keyList = keyPath;
     return sembast.Filter.and(
       List.generate(
         keyList.length,
-        (i) => sembast.Filter.notEquals(keyList[i] as String, null),
+        (i) => sembast.Filter.notEquals(
+          sembastKeyPathField(keyList[i] as String),
+          null,
+        ),
       ),
     );
   }

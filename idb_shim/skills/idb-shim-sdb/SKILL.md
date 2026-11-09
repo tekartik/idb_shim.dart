@@ -184,8 +184,10 @@ Every store/record/index method takes a `SdbClient` first: pass the
   `findRecordKeys`, `count`, `deleteRecords`, `index(ref)`.
   `db.inTransaction(stores: [...], mode: ..., run: (txn) ...)` is the generic
   form (mode defaults to read-only).
-* The callback's return value is the transaction's result. Any thrown error
-  aborts and rolls back. Do not catch inside; let it propagate.
+* The callback's return value is the transaction's result. A failed request
+  aborts and rolls back, its error is rethrown. An error thrown by your own
+  code is rethrown but does not roll back the writes already done: validate
+  before writing. Do not catch inside; let it propagate.
 * Do not await anything but SDB calls inside the callback (no network, no
   `Future.delayed`, no lock): the underlying IndexedDB transaction commits as
   soon as no request is pending and later calls fail. Prepare data first.

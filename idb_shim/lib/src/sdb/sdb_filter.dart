@@ -3,6 +3,8 @@ import 'package:idb_shim/utils/idb_utils.dart' as idb;
 import 'package:sembast/sembast.dart' as sembast;
 // ignore: implementation_imports
 import 'package:sembast/src/api/protected/filter.dart' as sembast;
+// ignore: implementation_imports
+import 'package:sembast/src/utils.dart' as sembast_utils;
 
 import 'sdb_codec.dart';
 
@@ -38,11 +40,19 @@ class SdbFilterRecordSnapshotPrv implements SdbFilterRecordSnapshot {
 
   /// Index key if any
   final Object? indexKey;
+
+  /// Like a sembast record snapshot: `_value`, `_key` (the primary key) and
+  /// dotted fields (`a.b`), which the sembast filters read.
   @override
   Object? operator [](String field) {
+    if (field == sembast.Field.value) {
+      return value;
+    } else if (field == sembast.Field.key) {
+      return primaryKey;
+    }
     var data = value;
     if (data is Map) {
-      return data[field];
+      return sembast_utils.getMapFieldValue<Object?>(data, field);
     }
     return null;
   }

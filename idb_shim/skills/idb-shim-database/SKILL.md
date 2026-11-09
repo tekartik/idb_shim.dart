@@ -43,7 +43,7 @@ Future<void> run(IdbFactory factory) async {
 * `package:idb_shim/idb_shim.dart` (alias `idb_client.dart`) gives the whole
   API plus `idbFactoryMemory`, `newIdbFactoryMemory()`, `idbFactoryWeb`,
   `idbFactoryNative`, `idbFactoryWebWorker` and `idbFactoryWebSupported`. It
-  compiles on every platform; the web getters throw `UnsupportedError` when
+  compiles on every platform; the web getters throw `UnimplementedError` when
   called on the VM. `package:idb_shim/idb.dart` is the interface only.
 * Web: `idbFactoryWeb` (same object as `idbFactoryNative`) is the browser
   IndexedDB. `idbFactoryWebWorker` is the one to use inside a web/service
@@ -90,9 +90,12 @@ Future<void> run(IdbFactory factory) async {
   `add`/`put`. Do not pass a key to `add`/`put` when the store has a
   `keyPath`.
 * `store.createIndex(name, keyPath, {unique, multiEntry})`: `keyPath` is a
-  `String` or a `List<String>` (composite index). Do not index boolean fields
-  (IndexedDB rejects it; sembast tolerates it).
-* Opening with a lower `version` than the stored one fails. For dev-time hot
+  `String` or a `List<String>` (composite index). Do not index boolean fields:
+  a boolean is not a valid key, the record is left out of the index (on every
+  backend).
+* Opening with a lower `version` than the stored one fails (on the sembast
+  backends only when `onUpgradeNeeded` is given: without it the stored
+  version is lowered). For dev-time hot
   restarts use the `IdbFactoryExt.openOnDowngradeDelete(...)` extension
   (same parameters as `open`), which deletes and re-creates the database on
   downgrade. Never ship it for user data.
@@ -391,6 +394,9 @@ void main() {
 * Using `idb_shim/idb_io.dart` in code that is also compiled for the web.
 * Sharing `idbFactoryMemory` across tests and being surprised by leftover
   databases; use `newIdbFactoryMemory()` or `deleteDatabase` in `setUp`.
+* Opening the same database twice on the sembast backends (io, memory): both
+  `Database` objects share one sembast database, closing one closes the
+  other. Open it once and keep it.
 
 ## More
 

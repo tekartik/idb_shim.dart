@@ -104,10 +104,16 @@ class SdbDatabaseTransactionImpl extends SdbTransactionImpl
     T result;
     try {
       result = await runWithChangesListener(callback);
-    } finally {
-      // wait for completion
-      await completed;
+    } catch (_) {
+      // Wait for the completion, but report the error of the callback, not
+      // the abort error of the transaction it caused.
+      try {
+        await completed;
+      } catch (_) {}
+      rethrow;
     }
+    // wait for completion
+    await completed;
     broadcastWrittenStores();
     return result;
   }

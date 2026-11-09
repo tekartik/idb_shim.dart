@@ -795,6 +795,11 @@ class SdbJoinRunner<
   /// Run the join with [client], a database or a transaction covering both
   /// stores.
   Future<void> run(SdbClient client) async {
+    // Like the store and index paths: no row for a zero limit (the dart
+    // limit check comes after a row is handed out).
+    if (limit == 0) {
+      return;
+    }
     var stores = <SdbStoreRef>[sourceStore, _joinedStore];
     await _autoJoinTxn(client, stores, mode, (txn) async {
       _reset();

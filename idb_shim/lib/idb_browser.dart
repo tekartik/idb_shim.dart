@@ -1,3 +1,5 @@
+/// The browser factory: [idbFactoryBrowser] is the browser IndexedDB, with
+/// an in memory fallback when IndexedDB is not available.
 library;
 
 import 'package:idb_shim/idb_client.dart';

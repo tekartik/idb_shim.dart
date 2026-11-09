@@ -190,8 +190,14 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
         await db!.transaction((txn) async {
           await mainStore.record('version').put(txn, newVersion!);
 
-          // First delete everything from deleted stores
+          // First delete everything from deleted stores, unless created again
+          // in the upgrade: their old records were dropped in the version
+          // change transaction, before the new ones were written.
           for (final storeMeta in deletedStores) {
+            if (_recreatedStoreNames.contains(storeMeta.name) &&
+                meta.getObjectStore(storeMeta.name) != null) {
+              continue;
+            }
             await sembast.intMapStoreFactory.store(storeMeta.name).drop(txn);
           }
 
@@ -211,6 +217,7 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
                 .put(txn, storeMeta.toMap());
           }
         });
+        _recreatedStoreNames.clear();
         // considered as opened
         meta.version = newVersion;
       } else {
@@ -231,15 +238,38 @@ class DatabaseSembast extends IdbDatabaseBase with DatabaseWithMetaMixin {
     db!.close();
   }
 
+  /// Stores deleted then created again during the current upgrade, whose old
+  /// records are dropped in the version change transaction.
+  final _recreatedStoreNames = <String>{};
+
   @override
   ObjectStore createObjectStore(
     String name, {
     Object? keyPath,
     bool? autoIncrement,
   }) {
+    var recreated =
+        meta.versionChangeTransaction?.deletedStores.any(
+          (storeMeta) => storeMeta.name == name,
+        ) ??
+        false;
     final storeMeta = IdbObjectStoreMeta(name, keyPath, autoIncrement);
     meta.createObjectStore(storeMeta);
-    return ObjectStoreSembast(versionChangeTransaction, storeMeta);
+    var store = ObjectStoreSembast(versionChangeTransaction, storeMeta);
+    if (recreated) {
+      // Like native, the store created again is empty: drop the records of
+      // the deleted one before the writes that follow (queued in order).
+      try {
+        versionChangeTransaction!
+            .execute(() => store.sembastStore.drop(store.sembastClient))
+            .ignore();
+        _recreatedStoreNames.add(name);
+      } catch (_) {
+        // Transaction no longer active: nothing can be written to the new
+        // store, the deleted store is dropped after the upgrade.
+      }
+    }
+    return store;
   }
 
   @override

@@ -1,3 +1,28 @@
+## 2.11.3
+
+* Requires sembast 3.10.1: `getAll` / `getAllKeys` with a count in a transaction that changed
+  records return the first records by key
+* An autoAdvance cursor no longer overflows the stack on big stores (sembast backend, from about
+  30000 records)
+* `cursor.delete()` throws a read-only error in a read-only transaction instead of deleting
+  (sembast backend)
+* A store deleted and created again in the same upgrade is empty and keeps the records written in
+  that upgrade (they were lost)
+* Cursor `delete` / `update` on an index of a store with an array key path skip or refresh the
+  other entries of the record
+* Indexes and array key paths on fields named `_key` or `_value` work (sembast backend)
+* `event.database` of a `Database.onVersionChange` event no longer throws on the web
+* On the web, an `onUpgradeNeeded` that throws no longer leaves the database upgraded (best effort
+  when the error comes after the transaction committed)
+* A failing sdb write reports its own error (a `DatabaseError`) instead of
+  `DatabaseException: Aborted`
+* `findJoinRows` / join count with `limit: 0` return no row with `inner` or `distinct`
+* sdb filters (`greaterThan`, `isNull`, `notNull`, `inList`, `arrayContains`...) work on dotted
+  fields
+* Replacing a record of an inline key store is reported as an update to the changes listeners
+* Documentation: getting started, factory per platform (idb and sdb), pitfalls, known limitations
+  page; README snippets fixed (they did not compile)
+
 ## 2.11.2
 
 * A database opened through a sandbox (`IdbFactory.sandbox`,

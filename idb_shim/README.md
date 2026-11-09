@@ -1,464 +1,251 @@
-# idb shim
+# idb_shim
 
-Cross-platform IndexedDB implementation for Dart and Flutter.
+[![pub package](https://img.shields.io/pub/v/idb_shim.svg)](https://pub.dev/packages/idb_shim)
+[![Run CI](https://github.com/tekartik/idb_shim.dart/actions/workflows/run_ci.yml/badge.svg)](https://github.com/tekartik/idb_shim.dart/actions/workflows/run_ci.yml)
 
-idb_shim provides a browser-compatible IndexedDB API that works on:
+The IndexedDB API for Dart and Flutter, on every platform: the real browser
+IndexedDB on the web (`dart:js_interop`, wasm ready), a sembast based
+implementation on the Dart VM and in memory (tests), and SQLite through
+[`idb_sqflite`](https://pub.dev/packages/idb_sqflite) on Flutter mobile and
+desktop. The same code runs everywhere, only the factory changes.
 
-- 🌐 Web (real IndexedDB)
-- 🖥 Dart VM (IO)
-- 🧪 Tests (in-memory)
+It comes with two APIs:
 
-It exposes the standard IndexedDB concepts:
+| API | Import | Use it for |
+|---|---|---|
+| **idb**, the IndexedDB API (`IdbFactory`, `Database`, `Transaction`, `ObjectStore`, `Index`, `KeyRange`, cursors) | `package:idb_shim/idb_shim.dart` | Code that follows IndexedDB, existing IndexedDB code, full control |
+| **sdb** (Simple DB), a typed API on top of idb (schema, typed stores and indexes, boundaries, filters, joins, change listeners) | `package:idb_shim/sdb.dart` | New apps: less code, typed keys, schema driven upgrades. See [doc/sdb.md](https://github.com/tekartik/idb_shim.dart/blob/master/idb_shim/doc/sdb.md) |
 
-* Database
-* Transaction
-* ObjectStore
-* Index
-* KeyRange
+## Getting started
 
-All operations are asynchronous and return Future.
-
-## SDB (simple db)
-
-Opinionated strong typed api based on idb database, which is currently
-the main available options for local storage on web with an easy support on desktop
-using sqlite. Basically the lowest common denominator between indexed db and sqlite. idb_shim for io only include a sembast based implementation
-(which is ok for testing).
-
-Include [`idb_sqlite`](https://pub.dev/packages/idb_sqflite) for a solid cross-process safe io implementation.
-
-SDB (Simple DB) is a lightweight database abstraction layer for Dart that provides a unified API over IndexedDB (for web) and SQLite (for mobile and desktop). It is designed to be a simple, efficient, and cross-platform solution for data persistence.
-
-The API is inspired by `sembast` but with a stronger emphasis on schema definition and type safety. Key features include:
-
-- **Schema-First:** You must define your database schema, including stores and indexes, before using it. This ensures data consistency and helps prevent common errors.
-- **Type-Safe:** The API is designed to be type-safe, allowing you to specify the key and value types for your stores.
-- **Cross-Platform:** SDB works seamlessly on the web, mobile (iOS, Android), and desktop (Windows, Linux, macOS).
-- **Efficient Queries:** Supports efficient queries using key ranges (boundaries) and indexes. In-memory filtering is also available for more complex queries.
-- **Pay-as-you-go:** Data is not preloaded into memory, making it efficient for large datasets.
-
-More information here: [sdb](https://github.com/tekartik/idb_shim.dart/blob/master/idb_shim/doc/sdb.md)
-
-* [notepad_sdb](https://github.com/alextekartik/flutter_app_example/tree/master/notepad_sdb): Simple flutter notepad
-  working on all platforms (web/mobile/desktop)
-  ([online demo](https://notepad_sdb.surge.sh))
-* [demo_sdb](https://github.com/alextekartik/flutter_app_example/tree/master/demo_sdb): Simplest counter persistent app
-  working on all platforms (web/mobile/desktop)
-  ([online demo](https://demo_sdb.surge.sh))
-
-## IndexedDB Shim
-
-* On the web (Wasm compatible, using `dart:js_interop`) it is a thin layer on top of indexed_db Web API.
-* On IO (and in memory), a sembast implementation (useful for testing) is provided but prefer `idb_sqflite` for a solid
-  cross-process safe io implementation. The `sembast` dependency is only present to provide a default IO implementation. On the web, the database is not loaded
-  in memory and sembast is not used.
-
-Its goal is to support the initial indexed_db api with very few changes as well as setting the base
-for other implementation (idb_sqflite on top of sqflite for example).
-
-It also allows testing your database schema and access in vm unit tests.
-
-* Project [home page](https://tekartik.github.io/idb_shim.dart/)
-* Project [source code](https://github.com/tekartik/idb_shim.dart)
-* [Samples](https://tekartik.github.io/idb_shim_samples.dart) (code and live demo)
-
-Usage example:
-
-* [notepad_idb](https://github.com/alextekartik/flutter_app_example/tree/master/notepad_idb): Simple flutter notepad
-  working on all platforms (web/mobile/desktop)
-  ([online demo](https://alextekartik.github.io/flutter_app_example/notepad_idb/))
-* [demo_idb](https://github.com/alextekartik/flutter_app_example/tree/master/demo_idb): Simplest counter persistent app
-  working on all platforms (web/mobile/desktop)
-  ([online demo](https://alextekartik.github.io/flutter_app_example/demo_idb/))
-
-### Why idb_shim
-
-Use idb_shim when you need:
-
-* Structured, transactional storage
-* Indexed queries
-* Cross-platform persistence
-* IndexedDB-compatible semantics outside the browser
-
-### Installation
-
-Add the following dependency to your `pubspec.yaml`:
-
-```yaml
-dependencies:
-  idb_shim: ^<latest>
+```sh
+# Dart
+dart pub add idb_shim
+# Flutter (sqflite gives the SQLite implementation on mobile and desktop)
+flutter pub add idb_shim idb_sqflite sqflite
 ```
 
-""" Quick Start (Canonical Pattern)
+### Pick the factory for your platform
+
+| Platform | Import | idb factory | sdb factory |
+|---|---|---|---|
+| Web, Flutter web (browser IndexedDB) | `package:idb_shim/idb_browser.dart` | `idbFactoryWeb` (`idbFactoryBrowser` falls back to memory when IndexedDB is missing) | `sdbFactoryWeb` |
+| Web worker | `package:idb_shim/idb_shim.dart` | `idbFactoryWebWorker` | `sdbFactoryWebWorker` |
+| Flutter Android, iOS, macOS, Windows, Linux (SQLite, cross process safe) | [`idb_sqflite`](https://pub.dev/packages/idb_sqflite) | `getIdbFactorySqflite(sqflite.databaseFactory)` | `sdbFactoryFromSqflite(sqflite.databaseFactory)` (`package:idb_sqflite/sdb_sqflite.dart`) |
+| Dart VM (CLI, server), single process | `package:idb_shim/idb_io.dart` | `idbFactorySembastIo`, or `getIdbFactorySembastIo(rootPath)` | `sdbFactoryIo` |
+| Unit tests, any platform (in memory, nothing saved) | `package:idb_shim/idb_shim.dart` | `newIdbFactoryMemory()` (a new empty one) or `idbFactoryMemory` | `newSdbFactoryMemory()` or `sdbFactoryMemory` |
+
+`idb_io.dart` imports `dart:io`: do not import it in web code (use conditional
+imports to pick the factory, see
+[doc/usage_in_flutter.md](https://github.com/tekartik/idb_shim.dart/blob/master/idb_shim/doc/usage_in_flutter.md)).
+On the VM the web factories exist but throw when used.
+
+### Minimal example (idb)
 
 ```dart
-import 'package:idb_shim/idb.dart';
-import 'package:idb_shim/idb_browser.dart'; // web
-// import 'package:idb_shim/idb_io.dart';   // io
+import 'package:idb_shim/idb_shim.dart';
 
 Future<void> main() async {
-  final factory = getIdbFactory(); // browser
-  // final factory = getIdbFactoryIo(); // io
+  // In memory here, take the factory of your platform from the table above.
+  var factory = newIdbFactoryMemory();
 
-  final db = await factory.open(
-    'my_database',
+  // Open the database once, keep it open while the app runs.
+  var db = await factory.open(
+    'my_app.db',
     version: 1,
-    onUpgradeNeeded: (VersionChangeEvent e) {
-      final db = e.database;
-      if (!db.objectStoreNames.contains('users')) {
-        db.createObjectStore(
-          'users',
-          autoIncrement: true,
-        );
+    onUpgradeNeeded: (VersionChangeEvent event) {
+      // Called on creation (oldVersion 0) and when the version increases:
+      // the only place where stores and indexes are created or deleted.
+      var db = event.database;
+      if (event.oldVersion < 1) {
+        var store = db.createObjectStore('users', autoIncrement: true);
+        store.createIndex('by_email', 'email', unique: true);
       }
     },
   );
 
-  final txn = db.transaction('users', idbModeReadWrite);
-  final store = txn.objectStore('users');
-
-  final key = await store.add({'name': 'Alice'});
-  final user = await store.getObject(key);
-
+  // Write in a read-write transaction.
+  var txn = db.transaction('users', idbModeReadWrite);
+  var store = txn.objectStore('users');
+  var key = await store.add({'name': 'Alice', 'email': 'alice@example.com'});
   await txn.completed;
 
-  print(user); // {name: Alice}
+  // Read in a read-only transaction.
+  txn = db.transaction('users', idbModeReadOnly);
+  store = txn.objectStore('users');
+  print(await store.getObject(key)); // {name: Alice, email: alice@example.com}
+  print(await store.index('by_email').get('alice@example.com'));
+  await txn.completed;
+
+  db.close();
 }
 ```
 
-### Critical Rules (Important for Correct Usage)
-
-These rules prevent most errors:
-
-* Object stores must be created inside onUpgradeNeeded.
-* Always await txn.completed.
-* Transactions cannot be reused after completion.
-* Use idbModeReadOnly for reads.
-* Use idbModeReadWrite for mutations.
-* All APIs return Future.
-
-If you violate these constraints, operations may fail silently or throw.
-
-## Usage
-
-### Core Concepts
-
-#### Opening a Database
+### Minimal example (sdb)
 
 ```dart
-final db = await factory.open(
-  'db_name',
+import 'package:idb_shim/sdb.dart';
+
+// A store with int keys and map values.
+var bookStore = SdbStoreRef<int, SdbModel>('book');
+
+Future<void> main() async {
+  var factory = newSdbFactoryMemory();
+  var db = await factory.openDatabase(
+    'books.db',
+    options: SdbOpenDatabaseOptions(
+      version: 1,
+      // The schema creates and upgrades the stores and indexes.
+      schema: SdbDatabaseSchema(stores: [bookStore.schema(autoIncrement: true)]),
+    ),
+  );
+  var key = await bookStore.add(db, {'title': 'Dune'});
+  print(await bookStore.record(key).getValue(db)); // {title: Dune}
+  await db.close();
+}
+```
+
+More in [doc/sdb.md](https://github.com/tekartik/idb_shim.dart/blob/master/idb_shim/doc/sdb.md),
+[doc/sdb_iterate.md](https://github.com/tekartik/idb_shim.dart/blob/master/idb_shim/doc/sdb_iterate.md)
+and [doc/sdb_join.md](https://github.com/tekartik/idb_shim.dart/blob/master/idb_shim/doc/sdb_join.md).
+
+## idb API
+
+### Open and upgrade
+
+`open` takes a version: when it is higher than the stored one,
+`onUpgradeNeeded` runs inside a version change transaction. Test
+`event.oldVersion` to apply each step once:
+
+```dart
+var db = await factory.open(
+  'my_app.db',
   version: 2,
-  onUpgradeNeeded: (e) {
-    final db = e.database;
-    if (e.oldVersion < 2) {
-      db.createObjectStore('items', keyPath: 'id');
+  onUpgradeNeeded: (VersionChangeEvent event) {
+    var db = event.database;
+    if (event.oldVersion < 1) {
+      db.createObjectStore('users', autoIncrement: true);
+    }
+    if (event.oldVersion < 2) {
+      db.createObjectStore('orders', keyPath: 'id');
     }
   },
 );
 ```
 
-Important:
-
-* onUpgradeNeeded is triggered when version increases.
-* You cannot create object stores outside this callback.
+Opening without a version opens the current one. Do not open with a version
+lower than the stored one: it fails on the web (VersionError) and, with an
+`onUpgradeNeeded`, on the sembast implementation (without one, sembast lowers
+the version). `IdbFactory.openOnDowngradeDelete` deletes the database
+instead.
 
 ### Transactions
 
-Transactions are scoped to store names.
+A transaction covers one store or a list of stores, read-only
+(`idbModeReadOnly`) or read-write (`idbModeReadWrite`). It commits by itself
+once no request is pending: do not await anything else than its own requests
+(no network, no timer) or it is already committed. Wait for
+`await txn.completed` to know the writes are saved; `txn.abort()` cancels them.
+A request that fails aborts the transaction.
 
 ```dart
-
-final txn = db.transaction('items', idbModeReadOnly);
-final store = txn.objectStore('items');
-```
-
-After operations:
-
-```dart
+var txn = db.transactionList(['users', 'orders'], idbModeReadWrite);
+await txn.objectStore('users').put({'name': 'Bob'}, 2);
+await txn.objectStore('orders').put({'id': 'o1', 'user': 2});
 await txn.completed;
 ```
 
-Transactions auto-commit when all requests complete.
+### Store operations
 
-### Adding Data
+| Method | Does |
+|---|---|
+| `add(value, [key])` | Inserts, fails if the key exists |
+| `put(value, [key])` | Inserts or replaces |
+| `getObject(key)` | The value, or null |
+| `getAll([keyOrRange, count])`, `getAllKeys(...)` | Values or keys in key order |
+| `count([keyOrRange])` | Number of records |
+| `delete(keyOrRange)`, `clear()` | Removes records |
+| `openCursor(...)`, `openKeyCursor(...)` | Walks the records, see below |
+
+The key is given (`put(value, key)`) for a store without key path, or read
+from the value for a store with a `keyPath` (`'id'`, `'a.b'` or an array of
+key paths). `autoIncrement: true` generates int keys.
+
+### Indexes, key ranges and cursors
 
 ```dart
+var txn = db.transaction('users', idbModeReadOnly);
+var index = txn.objectStore('users').index('by_email');
+var user = await index.get('alice@example.com'); // first match, or null
+var keys = await index.getAllKeys(KeyRange.bound('a', 'b', false, true));
 
-final txn = db.transaction('items', idbModeReadWrite);
-final store = txn.objectStore('items');
-
-await store.add({'id': 1, 'name': 'Item 1'});
+// autoAdvance walks every record, cursorToList (idb_utils.dart) collects them.
+var rows = await cursorToList(
+  txn.objectStore('users').openCursor(direction: idbDirectionPrev, autoAdvance: true),
+);
 await txn.completed;
 ```
 
-### Reading Data
-
-Get by key
-
-```dart
-final item = await store.getObject(1);
-```
-
-Get all
-
-```dart
-
-final items = await store.getAll();
-```
-
-### Updating Data
-
-```dart   
-await store.put({'id': 1, 'name': 'Updated Item'});
-```
-
-### Deleting Data
-
-```   
-await store.delete(1);
-```
-
-### Using Indexes
-
-Create during upgrade:
-
-```dart
-var store = db.createObjectStore(
-  'users',
-  keyPath: 'id');
-var index = store.createIndex('by_email', 'email', unique: true);
-```
-
-Query via index:
-
-```dart
-
-final index = store.index('by_email');
-final user = await index.getObject('test@example.com');
-```
-
-### Platform Usage
-
-#### Web
-
-```dart
-import 'package:idb_shim/idb_browser.dart';
-
-final factory = idbFactoryBrowser;
-```
-
-Uses real browser IndexedDB.
-
-#### Dart VM / Flutter Desktop
-
-```dart
-import 'package:idb_shim/idb_io.dart';
-
-final factory = idbFactorySembastIo;
-```
-
-Uses a file-backed implementation.
-
-Prefer [`idb_sqflite`](https://pub.dev/packages/idb_sqflite) for a solid cross-process safe io implementation.
-
-```dart
-import 'package:idb_sqflite/idb_sqflite.dart';
-import 'package:sqflite/sqflite.dart';
-
-// The sqflite flutter factory
-var factory = getIdbFactorySqflite(databaseFactory);
-```
-
-#### In-Memory (Testing)
-
-```dart
-import 'package:idb_shim/idb_memory.dart';
-
-final factory = newMemoryIdbFactory();
-```
-
-No persistence.
-
-#### Task-Oriented Examples
-
-Repository Pattern Example
-
-```dart
-class UserRepository {
-  final IdbFactory factory;
-
-  UserRepository(this.factory);
-
-  Future<Database> _open() {
-    return factory.open(
-        'app_db',
-        version: 1,
-        onUpgradeNeeded: (e) {
-          e.database.createObjectStore(
-              'users',
-              keyPath: 'id');
-        });
-  }
-
-  Future<void> insert(Map<String, Object?> user) async {
-    final db = await _open();
-    final txn = db.transaction('users', idbModeReadWrite);
-    await txn.objectStore('users').put(user);
-    await txn.completed;
-  }
-
-  Future<Map?> findById(Object id) async {
-    final db = await _open();
-    final txn = db.transaction('users', idbModeReadOnly);
-    final user = await txn.objectStore('users').getObject(id);
-    await txn.completed;
-    return user;
-  }
-}
-```
-
-#### Common Mistakes
-
-* ❌ Creating object store outside onUpgradeNeeded
-* ❌ Forgetting await txn.completed
-* ❌ Using transaction after completion
-* ❌ Mutating data in read-only transaction
-* ❌ Forgetting to increase version for schema changes
-
-#### Versioning & Migrations
-
-Use version numbers to evolve schema.
-
-```dart
-onUpgradeNeeded: (e) {
-  final db = e.database;
-  if (e.oldVersion < 1) {
-    db.createObjectStore('users');
-  }
-  if (e.oldVersion < 2) {
-    db.createObjectStore('orders');
-  }
-}
-```
-
-Migration code must be idempotent.
-
-#### Migration from `dart:indexed_db`
-
-IndexedDB Mapping (Browser → idb_shim)
-
-| Browser API       | idb_shim         |
-|-------------------|------------------|
-| indexedDB.open()  | factory.open()   |
-| db.transaction()  | db.transaction() |
-| objectStore.add() | store.add()      |
-| objectStore.put() | store.put()      |
-| IDBKeyRange       | KeyRange         |
-
-The API closely mirrors IndexedDB semantics.
-
-Assume you have the existing (old dart:indexed_db now removed) code:
-
-```dart
-import 'dart:indexed_db';
-
-window.indexedDB.open(dbName, version: xxx, onUpgradeNeeded: yyy);
-```
-
-This can be replaced by:
-
-```dart
-import 'package:idb_shim/idb_browser.dart'
-
-IdbFactory idbFactory = getIdbFactory();
-idbFactory.open(dbName, version: xxx, onUpgradeNeeded: yyy);
-```
-
-All other existing code remains unchanged.
-
-### Examples
-
-Simple notepad available [here](https://github.com/alextekartik/flutter_app_example/tree/master/notepad) running on
-Flutter (iOS/Android/Web).
-
-### Flutter support
-
-While idb_shim over sembast is a solution on Flutter, there is an
-implementation [idb_sqflite](https://pub.dev/packages/idb_sqflite) based on sqflite for mobile (iOS, MacOS and Android) and Desktop
-See [Usage in flutter](https://github.com/tekartik/idb_shim.dart/blob/master/idb_shim/doc/sdb.md) for more information.
-
-### Use the same web port when debugging
-
-The database is stored in the browser indexeddb. Like any other web storage, it is tied to the port. (i.e. localhost:
-8080 is different from localhost:8081).
-When debugging, you should use the same port to keep the same indexeddb database.
-
-### Service worker support.
-
-In web worker you should use `idbFactoryWebWorker` instead of `idbFactoryWeb` to access the indexedDB.
-
-### Known limitations/issues
-
-#### Memory/Io implementation
-
-* For autoincrement, if key is set, it cannot be set as a different type than int
-* Nextunique and prevunique not supported (for now)
-* No support for Cursor.source
-* No generic support for blocked. It is always possible to upgrade the database, however other tabs will get blocked in
-  their future calls
-* Index.get: only by key is supported (no range yet)
-
-#### Type of data
-
-Supported types:
-
-* Stuff that can be JSON serialized/deserialized (`num`, `String`, `bool`, `null`, `List` & `Map`)
-* `DateTime` is supported as of 1.11
-* `Uint8List` is supported as of 1.11
-* `null` is no longer supported as a document value (although map field can be null though).
-
-Limitations
-
-* Cyclic dependency are not supported (per JSON serialization)
-* Large float are not converted to int (native indexeddb implementation does this)
-* Don't create an index on boolean value. IndexedDB does not support that, however sembast implementation allows it (
-  this could change). This will only be prevented in debug.
-
-#### Type of key
-
-* String and num (int or double) are supported for keys
-
-#### Native exception
-
-* Native exception type have no match in dart so a custom DatabaseError object is created to wrap the exception
-
-#### Ie limitation
-
-IE 11, Edge 12 has the following limitations:
-
-* no support for reading objectStore.autoIncrement properties
-* ObjectStore.count() without argument throw a 'DataError' exception...better avoid count() on IE...
-* it seems ie close the transaction 'sooner' then chrome/firefox, i.e. calling an sync function that wrap an idb calls
-  makes the transaction terminate
-* IDBIndex.multiEntry not supported on ie
-
-##### Safari limitation
-
-Safari has the following limitations (as of v 9.0)
-
-* no support for transactions on multiple stores
-* very short transaction life cycle (no await on sdk 1.12)
-
-##### Wasm
-
-As of 2.4 the default implementation use `js_interop` which makes it wasm compatible if you import `idb_shim.dart`
-You can still use the legacy `dart:html` by importing `idb_shim_client_native_html.dart`.
-
-As of 2.5 legacy html support has been removed. If needed, use
-[`idb_shim_html_compat` git package](https://github.com/tekartik/idb_shim_more.dart/tree/main/packages/idb_shim_html_compat).
-
-Limitations:
-- DateTime is converted manually to support `DateTime` (although not supported in Firefox)
-- So for compatibility, data is jsified and dartified using custom encoder. To see if this could be removed in the
-  future.
+Without `autoAdvance`, call `cursor.next()` (or `advance(n)`) in the listener,
+and `cursor.update(value)` / `cursor.delete()` in a read-write transaction.
+`package:idb_shim/utils/idb_utils.dart` also has `copyDatabase`, and
+`package:idb_shim/utils/idb_import_export.dart` exports and imports a
+database (`idbExportDatabase`, `idbImportDatabase`).
+
+## Common pitfalls
+
+* Creating or deleting a store or an index outside `onUpgradeNeeded`, or
+  forgetting to increase the version for a schema change.
+* Awaiting something else (http, `Future.delayed`, a lock) inside a
+  transaction: it commits in between and the next request fails.
+* Writing in a read-only transaction.
+* Opening the database for each operation: open it once and keep it.
+* Using the sembast io factory from several processes (or isolates) on the
+  same file: use `idb_sqflite` then.
+* Values must be maps, lists, strings, numbers, booleans, `DateTime` or
+  `Uint8List` (no custom classes: convert them to maps first).
+
+## Platform notes
+
+* Web: the data is per origin, `localhost:8080` and `localhost:8081` are two
+  different databases; debug on a fixed port.
+* Web workers: use `idbFactoryWebWorker`.
+* Dart VM: `idbFactorySembastIo` stores each database in a single sembast
+  file (fine for tools and tests).
+* Flutter: see
+  [doc/usage_in_flutter.md](https://github.com/tekartik/idb_shim.dart/blob/master/idb_shim/doc/usage_in_flutter.md).
+* Migrating from the removed `dart:indexed_db`: replace
+  `window.indexedDB.open(...)` with `idbFactoryWeb.open(...)`
+  (`package:idb_shim/idb_browser.dart`), the rest of the code is the same.
+  The legacy `dart:html` implementation lives in the
+  [`idb_shim_html_compat`](https://github.com/tekartik/idb_shim_more.dart/tree/main/packages/idb_shim_html_compat)
+  git package.
+
+## Supported types
+
+* Values: `num`, `String`, `bool`, `null` (as a field), `List`, `Map`,
+  `DateTime` and `Uint8List`. A value itself cannot be null.
+* Keys: `String`, `num` and arrays of them (array key paths).
+* Booleans, null and maps are not keys: a record whose indexed field holds
+  one is not in that index.
+
+See [doc/known_limitations.md](https://github.com/tekartik/idb_shim.dart/blob/master/idb_shim/doc/known_limitations.md)
+for the limits of the sembast (io, memory) implementation and of older
+browsers.
+
+## Examples
+
+* [example/example.dart](https://github.com/tekartik/idb_shim.dart/blob/master/idb_shim/example/example.dart)
+  (idb, Dart VM) and
+  [example/sdb_example.dart](https://github.com/tekartik/idb_shim.dart/blob/master/idb_shim/example/sdb_example.dart)
+  (sdb).
+* [notepad_sdb](https://github.com/alextekartik/flutter_app_example/tree/master/notepad_sdb)
+  ([online demo](https://notepad_sdb.surge.sh)) and
+  [demo_sdb](https://github.com/alextekartik/flutter_app_example/tree/master/demo_sdb)
+  ([online demo](https://demo_sdb.surge.sh)): Flutter apps on sdb (web,
+  mobile, desktop).
+* [notepad_idb](https://github.com/alextekartik/flutter_app_example/tree/master/notepad_idb)
+  ([online demo](https://alextekartik.github.io/flutter_app_example/notepad_idb/))
+  and [demo_idb](https://github.com/alextekartik/flutter_app_example/tree/master/demo_idb)
+  ([online demo](https://alextekartik.github.io/flutter_app_example/demo_idb/)):
+  the same on idb.

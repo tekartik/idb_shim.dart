@@ -231,8 +231,9 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     });
   }
 
-  /// The primary key path, the sembast key unless an array key path.
-  Object get _primaryKeyPath => hasCompositeKey ? keyPath! : sembast.Field.key;
+  /// The primary key path for the filters: the array key path, null (the
+  /// sembast key) otherwise.
+  Object? get _primaryKeyPath => hasCompositeKey ? keyPath! : null;
 
   sembast.Filter _storeKeyOrRangeFilter([Object? keyOrRange]) {
     return keyOrRangeFilter(_primaryKeyPath, keyOrRange, false);
@@ -423,8 +424,8 @@ class ObjectStoreSembast extends ObjectStore with ObjectStoreWithMetaMixin {
     }
   }
 
-  /// Get the keyPath or default sembast key
-  Object? get keyField => keyPath ?? sembast.Field.key;
+  /// The key path of the cursors, null meaning the sembast key.
+  Object? get keyField => keyPath;
 
   @override
   Stream<CursorWithValue> openCursor({

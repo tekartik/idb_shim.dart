@@ -14,8 +14,19 @@ import 'native_transaction.dart';
 
 /// VersionChangeEventNative representation.
 class VersionChangeEventNative extends IdbVersionChangeEventBase {
-  VersionChangeEventNative(this.factory, this.idbVersionChangeEvent);
+  /// An `upgradeneeded` event of an open request, or with [connection] a
+  /// `versionchange` event of that open connection (whose target is the
+  /// database, not a request).
+  VersionChangeEventNative(
+    this.factory,
+    this.idbVersionChangeEvent, {
+    this.connection,
+  });
   final IdbFactory factory;
+
+  /// The open connection receiving a `versionchange` event, null for an
+  /// `upgradeneeded` event.
+  final DatabaseNative? connection;
   final idb.IDBVersionChangeEvent idbVersionChangeEvent;
   idb.IDBOpenDBRequest get _idbRequest =>
       idbVersionChangeEvent.target as idb.IDBOpenDBRequest;
@@ -40,10 +51,9 @@ class VersionChangeEventNative extends IdbVersionChangeEventBase {
   );
 
   @override
-  late Database database = DatabaseNative(
-    factory,
-    _idbRequest.result as idb.IDBDatabase,
-  );
+  late Database database =
+      connection ??
+      DatabaseNative(factory, _idbRequest.result as idb.IDBDatabase);
 }
 
 /// DatabaseNative representation.
@@ -171,7 +181,11 @@ class DatabaseNative extends IdbDatabaseBase {
       idbDatabase.onversionchange =
           (idb.IDBVersionChangeEvent idbVersionChangeEvent) {
             onVersionChangeController!.add(
-              VersionChangeEventNative(factory, idbVersionChangeEvent),
+              VersionChangeEventNative(
+                factory,
+                idbVersionChangeEvent,
+                connection: this,
+              ),
             );
           }.toJS;
       onVersionChangeStream = onVersionChangeController!.stream
