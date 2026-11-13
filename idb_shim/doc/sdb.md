@@ -18,6 +18,9 @@ This document provides a comprehensive guide to using SDB in your Dart and Flutt
 * [demo_sdb](https://github.com/alextekartik/flutter_app_example/tree/master/demo_sdb): Simplest counter persistent app
   working on all platforms (web/mobile/desktop)
   ([online demo](https://demo_sdb.surge.sh))
+* [DartPad counter](https://dartpad.dev/?id=2290b7c07983f9122c32ecf93391efba): Persistent counter
+  using `onSnapshot`, editable and runnable in the browser, nothing to install
+  ([gist](https://gist.github.com/alextekartik/2290b7c07983f9122c32ecf93391efba))
 
 ## Installation
 

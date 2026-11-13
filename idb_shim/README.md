@@ -105,6 +105,9 @@ Future<void> main() async {
 }
 ```
 
+Try sdb in your browser: a [persistent Flutter counter on DartPad](https://dartpad.dev/?id=2290b7c07983f9122c32ecf93391efba)
+(stored in IndexedDB, synced across tabs with `onSnapshot`).
+
 More in [doc/sdb.md](https://github.com/tekartik/idb_shim.dart/blob/master/idb_shim/doc/sdb.md),
 [doc/sdb_iterate.md](https://github.com/tekartik/idb_shim.dart/blob/master/idb_shim/doc/sdb_iterate.md)
 and [doc/sdb_join.md](https://github.com/tekartik/idb_shim.dart/blob/master/idb_shim/doc/sdb_join.md).
